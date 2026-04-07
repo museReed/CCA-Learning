@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 Adding Context Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Adding Context — 工程深度笔记</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D3 — Effective Claude Code Usage (30%), D5 — Performance Optimization (12%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 ★★★ (CLAUDE.md hierarchy), 5.1 ★★ (context preservation), 5.4 ★★ (large codebase context)</td>
+</tr>
+<tr>
+<td>考试场景</td>
+<td>S2 (Code Gen), S4 (Developer Productivity)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>claude-code-in-action / 02-getting-started / Lesson 07（视频 + 文字）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Claude Code 的 context 管理是三层系统：<code>/init</code> 生成 CLAUDE.md，CLAUDE.md hierarchy 在三个层级提供持久化项目指令，<code>@</code> file mention 按需注入特定文件内容。</p>
+<hr />
+<h2>/init 命令：引导 Context</h2>
+<p>首次在新项目中打开 Claude Code 时，执行 <code>/init</code>。此命令让 Claude：</p>
+<ol>
+<li><strong>分析整个代码库</strong> — 项目结构、架构、模式</li>
+<li><strong>生成 CLAUDE.md 文件</strong> — 摘要发现内容加上未来 session 的指令</li>
+<li><strong>请求许可</strong> — 你批准文件写入（Enter）或启用自动接受（Shift+Tab）</li>
+</ol>
+<pre class="highlight"><code>$ claude
+&gt; /init
+
+Claude 分析你的代码库...
+→ 识别项目目的、架构、关键文件
+→ 将 CLAUDE.md 写入项目根目录
+</code></pre>
+
+<blockquote>
+<p>🎬 <strong>讲师视频洞察</strong></p>
+<p>讲师演示在 uigen 项目上执行 <code>/init</code>。Claude 读取整个代码库，识别为使用 Prisma/SQLite 的 Node.js 应用，并生成 CLAUDE.md 摘要架构、重要命令（<code>npm run dev</code>、<code>npm run setup</code>）和编码模式。讲师强调 CLAUDE.md「被包含在每个请求中」— 使其成为持久化的 system prompt。</p>
+</blockquote>
+<hr />
+<h2>CLAUDE.md Hierarchy（Task 3.1 ★★★）</h2>
+<p><img alt="Claude Md Hierarchy Priority Stack" src="visuals/claude-md-hierarchy-priority-stack-zh-TW.svg" /><br />
+<em>圖：CLAUDE.md 階層 — local 覆蓋 project 覆蓋 global。</em></p>
+<p>这是本课最重要的考试概念。Claude Code 在三个层级识别 CLAUDE.md 文件：</p>
+<pre class="highlight"><code>优先级（最高 → 最低）：
+┌─────────────────────────────────────────────┐
+│ ~/.claude/CLAUDE.md          (Global)       │
+│  → 适用于此机器上的所有项目                    │
+│  → 个人偏好、全局规则                         │
+├─────────────────────────────────────────────┤
+│ ./CLAUDE.md                  (Project)      │
+│  → 由 /init 生成，commit 到 repo             │
+│  → 通过版本控制与团队共享                      │
+├─────────────────────────────────────────────┤
+│ ./CLAUDE.local.md            (Local)        │
+│  → 不 commit 到版本控制                       │
+│  → 此项目的个人覆盖设置                        │
+└─────────────────────────────────────────────┘
+</code></pre>
+
+<p><strong>关键考试规则：越 local = 越高优先级。</strong></p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>文件</th>
+<th>是否共享？</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Global</td>
+<td><code>~/.claude/CLAUDE.md</code></td>
+<td>否（机器专属）</td>
+<td>「永远用 TypeScript」、「除非复杂否则不加注释」</td>
+</tr>
+<tr>
+<td>Project</td>
+<td><code>./CLAUDE.md</code></td>
+<td>是（commit 到 repo）</td>
+<td>项目架构、命令、编码标准</td>
+</tr>
+<tr>
+<td>Local</td>
+<td><code>./CLAUDE.local.md</code></td>
+<td>否（gitignored）</td>
+<td>个人覆盖、实验性指令</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键洞察</strong></p>
+<p>CLAUDE.md hierarchy 遵循与 CSS specificity 或环境变量优先级相同的覆盖模式：最具体的（local）赢过最一般的（global）。如果你的项目 CLAUDE.md 说「用 tabs」但 CLAUDE.local.md 说「用 spaces」，spaces 胜出。</p>
+</blockquote>
+<hr />
+<h2># Memory 命令</h2>
+<p>要更新 CLAUDE.md 而不手动编辑文件，使用 <code>#</code> 命令：</p>
+<pre class="highlight"><code>&gt; # Use comments sparingly. Only comment complex code.
+</code></pre>
+
+<p>Claude 智能地合并此指令到你的 CLAUDE.md — 不是盲目追加。这称为「memory mode」因为它跨 session 持续有效。</p>
+<hr />
+<h2>@ File Mention：精确 Context 注入（Tasks 5.1, 5.4）</h2>
+<p>需要 Claude 聚焦特定文件时，使用 <code>@</code> 语法：</p>
+<pre class="highlight"><code>&gt; How does the auth system work? @auth
+</code></pre>
+
+<p>Claude 显示 auth 相关文件列表让你选择。选中文件的内容被包含在当前请求中。</p>
+<p><strong>两种使用模式：</strong></p>
+<h3>1. 交互式 @ mention（在聊天中）</h3>
+<p>输入 <code>@</code> 后跟部分文件名。Claude 提供自动完成建议。文件内容注入到该单一请求。</p>
+<h3>2. CLAUDE.md 中的 @ mention（持久化）</h3>
+<pre class="highlight"><code class="language-markdown"># CLAUDE.md
+The database schema is defined in @prisma/schema.prisma.
+Reference it when working with data models.
+</code></pre>
+
+<p>当 <code>@</code> 在 CLAUDE.md 中使用，被引用的文件会在<strong>每个请求</strong>中自动包含。强大但昂贵 — 每个 turn 都消耗 context window。</p>
+<blockquote>
+<p>⚠️ <strong>Context Window 警告</strong></p>
+<p>CLAUDE.md 中的每个 <code>@</code> 引用永久占用 context window 空间。只引用真正在大多数请求中需要的文件。偶尔需要的文件，改用交互式 <code>@</code> mention。</p>
+<p>🎬 <strong>讲师视频洞察</strong></p>
+<p>讲师将 <code>@prisma/schema.prisma</code> 加入 CLAUDE.md，让 Claude 始终知道数据结构。他解释这意味着「Claude 可以立即回答关于数据结构的问题，不需要每次都搜索和读取 schema 文件。」这是用 context window 空间换取响应速度。</p>
+</blockquote>
+<hr />
+<h2>大型代码库的 Context 管理策略（Task 5.4）</h2>
+<pre class="highlight"><code>Context 预算分配：
+┌────────────────────────────────────────────┐
+│  CLAUDE.md（始终加载）              ~5-10%  │
+│  CLAUDE.md 中的 @ 引用             ~5-15%  │
+│  每次请求的交互式 @ mention         ~10-20% │
+│  Claude 通过工具读取的文件          ~30-50% │
+│  对话历史                          ~20-30% │
+│  Claude 的响应                     ~10-20% │
+└────────────────────────────────────────────┘
+</code></pre>
+
+<p><strong>策略：</strong><br />
+- 只将关键的横切文件放在 CLAUDE.md <code>@</code> 引用中（schema、API 契约）<br />
+- 对任务特定的文件使用交互式 <code>@</code><br />
+- 让 Claude 通过工具（Read、Glob、Grep）探索发现文件<br />
+- 太多不相关的 context <strong>降低性能</strong> — 少即是多</p>
+<hr />
+<h2>熟悉的类比</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>类比</th>
+<th>为何合适</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLAUDE.md</td>
+<td><code>.bashrc</code> / <code>.zshrc</code> — 每次 session 启动时加载</td>
+<td>塑造所有行为的持久化设置</td>
+</tr>
+<tr>
+<td>CLAUDE.md hierarchy</td>
+<td>CSS specificity：inline &gt; ID &gt; class &gt; element</td>
+<td>更具体的（local）覆盖更一般的（global）</td>
+</tr>
+<tr>
+<td><code>/init</code></td>
+<td><code>git init</code> + README 生成</td>
+<td>用 metadata 引导项目</td>
+</tr>
+<tr>
+<td>CLAUDE.md 中的 <code>@</code></td>
+<td>文件顶部的 <code>import</code> 语句</td>
+<td>始终可用，始终加载</td>
+</tr>
+<tr>
+<td>交互式 <code>@</code></td>
+<td>动态 <code>import()</code></td>
+<td>按需加载，仅在需要时</td>
+</tr>
+<tr>
+<td><code>#</code> memory 命令</td>
+<td><code>git config --global</code></td>
+<td>持久化设置供未来使用</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>考试重点</h2>
+<table>
+<thead>
+<tr>
+<th>考试概念</th>
+<th>本课教了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CLAUDE.md hierarchy (3.1) ★★★</strong></td>
+<td>三个层级：global &gt; project &gt; local。越 local = 越高优先级。Project CLAUDE.md 通过版本控制共享。</td>
+</tr>
+<tr>
+<td><strong>Context preservation (5.1) ★★</strong></td>
+<td>CLAUDE.md 跨 session 持续有效。CLAUDE.md 中的 <code>@</code> 引用始终加载。<code>#</code> 命令更新记忆。</td>
+</tr>
+<tr>
+<td><strong>Large codebase context (5.4) ★★</strong></td>
+<td>太多 context 损害性能。只对关键文件在 CLAUDE.md 中使用 <code>@</code>。让 Claude 通过工具发现其余部分。</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>考试笔记</strong></p>
+<p>考试哲学是「Architecture &gt; Prompt」。CLAUDE.md 是 context 管理的架构方法 — 它是配置文件，不是 prompt。当考试问到「跨 session 提供一致 context」时，答案是 CLAUDE.md，不是「写更好的 prompt」。</p>
+</blockquote>
+<hr />
+<h2>练习题</h2>
+<h3>Q1：CLAUDE.md 优先级</h3>
+<p>你的项目 CLAUDE.md 说「用 2-space 缩进」。你的个人 CLAUDE.local.md 说「用 4-space 缩进」。你的全局 ~/.claude/CLAUDE.md 说「用 tabs」。Claude 遵循哪个风格？</p>
+<ul>
+<li>A. Tabs（global 有最高优先级）</li>
+<li>B. 2-space 缩进（项目 CLAUDE.md 是标准）</li>
+<li>C. 4-space 缩进（local 覆盖 project 和 global）</li>
+<li>D. Claude 问你要用哪一个</li>
+</ul>
+<details><summary>答案</summary>
+
+**C** — 在 CLAUDE.md hierarchy 中，越 local = 越高优先级。CLAUDE.local.md 覆盖 CLAUDE.md，而 CLAUDE.md 覆盖 ~/.claude/CLAUDE.md。
+
+考试哲学：**Architecture > Prompt** — hierarchy 是确定性的配置系统，不是协商。
+</details>
+
+<h3>Q2：Context Window 管理</h3>
+<p><img alt="Context Window Budget Allocation" src="visuals/context-window-budget-allocation-zh-TW.svg" /><br />
+<em>圖：Context Window 預算分配。</em></p>
+<p>一位开发者在大型 monorepo 中将 15 个 <code>@</code> 文件引用加入 CLAUDE.md。他们注意到 Claude 的响应变慢且不准确。最可能的原因和修复是什么？</p>
+<ul>
+<li>A. Claude Code 对多个 <code>@</code> 引用有 bug；更新到最新版本</li>
+<li>B. <code>@</code> 引用消耗了太多 context window，留给 Claude 推理的空间更少；移除非必要引用，改用交互式 <code>@</code> mention</li>
+<li>C. 文件太大；将它们拆分成更小的文件</li>
+<li>D. CLAUDE.md 最多只能有 10 个 <code>@</code> 引用；移除多余的</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 课程明确指出太多不相关的 context 降低 Claude 的性能。CLAUDE.md 中的每个 `@` 引用在每次请求中加载，消耗 context window 空间。修复方法是只保留关键的横切文件，对任务特定的文件使用交互式 `@`。
+
+考试哲学：**Proportionate response** — 让 context 匹配任务，而不是加载所有东西。
+</details>
+
+<h3>Q3：团队 Context 共享</h3>
+<p>你的团队想确保所有使用 Claude Code 的开发者遵循相同的编码标准。哪个方法正确？</p>
+<ul>
+<li>A. 每个开发者将标准加入他们的 ~/.claude/CLAUDE.md</li>
+<li>B. 将标准加入项目 CLAUDE.md 并 commit 到版本控制</li>
+<li>C. 将标准加入项目中的 CLAUDE.local.md</li>
+<li>D. 使用 <code>#</code> 命令在每个开发者的 session 中设置标准</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 项目 CLAUDE.md commit 到版本控制，与所有团队成员共享。这是团队级标准的正确位置。
+
+考试哲学：**Architecture > Prompt** — 使用内置的配置 hierarchy 而不是各开发者临时设置。
+</details>
+
+<hr />
+<h2>反模式</h2>
+<table>
+<thead>
+<tr>
+<th>反模式</th>
+<th>为何失败</th>
+<th>更好的方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>把所有东西都放在 CLAUDE.md <code>@</code> 引用中</td>
+<td>消耗 context window，降低性能</td>
+<td>只引用横切文件；其余用交互式 <code>@</code></td>
+</tr>
+<tr>
+<td>从不执行 <code>/init</code></td>
+<td>Claude 每次 session 都从零开始</td>
+<td>执行一次 <code>/init</code>，之后逐步维护 CLAUDE.md</td>
+</tr>
+<tr>
+<td>用 CLAUDE.local.md 放团队标准</td>
+<td>CLAUDE.local.md 是 gitignored；队友看不到</td>
+<td>用项目 CLAUDE.md 放共享标准</td>
+</tr>
+<tr>
+<td>每次手动编辑 CLAUDE.md</td>
+<td>容易出错且繁琐</td>
+<td>用 <code>#</code> 命令进行智能合并</td>
+</tr>
+<tr>
+<td>忽略全局 CLAUDE.md</td>
+<td>错失个人跨项目偏好的机会</td>
+<td>在 ~/.claude/CLAUDE.md 设置个人编码风格</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

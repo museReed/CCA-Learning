@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03 Sampling Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Sampling — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server capabilities), 2.4 (client-server communication patterns)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 01-sampling-and-notifications / Lesson 03</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Sampling lets an MCP server invoke Claude through the connected client, reversing the typical request flow so the server can leverage AI without managing its own API keys or LLM infrastructure.</p>
+<hr />
+<p><img alt="Sampling Flow" src="visuals/sampling-flow.svg" /></p>
+<h2>How Sampling Works</h2>
+<p>The standard MCP flow is <strong>Client -&gt; Server</strong> (client asks server to execute a tool). Sampling flips this:</p>
+<pre class="highlight"><code>Server                    Client                   Claude
+  |                         |                        |
+  |-- create_message() ----&gt;|                        |
+  |                         |-- API call -----------&gt;|
+  |                         |&lt;-- response -----------|
+  |&lt;-- SamplingResult ------|                        |
+</code></pre>
+
+<p>The server never talks to Claude directly. It asks the <strong>client</strong> to make the call on its behalf.</p>
+<hr />
+<h2>Server-Side Implementation</h2>
+<p>On the server, you use the context object's <code>session.create_message()</code> method:</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def summarize_research(ctx: Context, topic: str) -&gt; str:
+    # Gather data (server's own logic)
+    results = await fetch_research_data(topic)
+
+    # Ask the client to call Claude for summarization
+    response = await ctx.session.create_message(
+        messages=[
+            SamplingMessage(
+                role=&quot;user&quot;,
+                content=TextContent(
+                    type=&quot;text&quot;,
+                    text=f&quot;Summarize these research results:\n{results}&quot;
+                )
+            )
+        ],
+        max_tokens=1024
+    )
+
+    return response.content.text
+</code></pre>
+
+<p>Key points:<br />
+- <code>SamplingMessage</code> wraps the prompt sent to the client<br />
+- The server specifies <code>max_tokens</code> but the client controls model selection<br />
+- The server <strong>does not need an API key</strong> — the client handles authentication</p>
+<hr />
+<h2>Client-Side Implementation</h2>
+<p>The client must provide a <code>sampling_callback</code> when creating the <code>ClientSession</code>:</p>
+<pre class="highlight"><code class="language-python">async def handle_sampling(message: CreateMessageRequest) -&gt; CreateMessageResult:
+    # Client decides which model to use and makes the API call
+    response = await anthropic_client.messages.create(
+        model=&quot;claude-sonnet-4-20250514&quot;,
+        max_tokens=message.params.max_tokens,
+        messages=[
+            {&quot;role&quot;: m.role, &quot;content&quot;: m.content.text}
+            for m in message.params.messages
+        ]
+    )
+    return CreateMessageResult(
+        role=&quot;assistant&quot;,
+        content=TextContent(type=&quot;text&quot;, text=response.content[0].text),
+        model=&quot;claude-sonnet-4-20250514&quot;
+    )
+
+# Pass callback during session initialization
+async with ClientSession(read, write, sampling_callback=handle_sampling) as session:
+    await session.initialize()
+</code></pre>
+
+<p>The client has full control:<br />
+- Which model to call (can upgrade/downgrade)<br />
+- Rate limiting and cost management<br />
+- Request filtering (can reject sampling requests)</p>
+<hr />
+<h2>Architecture Benefits</h2>
+<table>
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>No API keys on server</strong></td>
+<td>Server never touches Claude's API directly</td>
+</tr>
+<tr>
+<td><strong>Cost shifts to client</strong></td>
+<td>The entity running the client pays for AI usage</td>
+</tr>
+<tr>
+<td><strong>Reduced server complexity</strong></td>
+<td>Server focuses on domain logic, not LLM orchestration</td>
+</tr>
+<tr>
+<td><strong>Perfect for public servers</strong></td>
+<td>Anyone can connect; each client uses their own credentials</td>
+</tr>
+<tr>
+<td><strong>Client-controlled model</strong></td>
+<td>Client picks the model, not the server</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>When to Use Sampling</h2>
+<p>Sampling is ideal when:<br />
+- You are building a <strong>public MCP server</strong> (e.g., a research tool) and don't want to pay for every user's AI calls<br />
+- The server needs AI capabilities but should remain <strong>stateless and keyless</strong><br />
+- You want the <strong>client to retain control</strong> over model selection and spending</p>
+<p>Sampling is NOT ideal when:<br />
+- The server needs guaranteed model behavior (client might swap models)<br />
+- Low-latency is critical (extra hop adds latency)<br />
+- The server needs to chain many LLM calls internally (use direct API instead)</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Sampling inverts the economic model of MCP: instead of the server paying for AI, the client absorbs the cost. This makes it viable to build open-source MCP servers that anyone can connect to without the author bearing API costs.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.3</strong>: Understanding MCP server capabilities — sampling is an advanced capability that servers can declare</li>
+<li><strong>D2 Task 2.4</strong>: Client-server communication patterns — sampling is the primary example of server-initiated communication</li>
+<li>Expect scenario questions about when to use sampling vs. direct API calls</li>
+<li>Key trade-off: convenience and cost-shifting vs. loss of model control on the server side</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does MCP sampling allow a server to do?</td>
+<td>Request the connected client to make an LLM call on its behalf, without needing its own API key</td>
+</tr>
+<tr>
+<td>Which method does the server call to initiate sampling?</td>
+<td><code>ctx.session.create_message()</code> with <code>SamplingMessage</code> objects</td>
+</tr>
+<tr>
+<td>Who pays for the AI usage in a sampling request?</td>
+<td>The client, since it makes the actual API call</td>
+</tr>
+<tr>
+<td>What callback must the client provide to support sampling?</td>
+<td><code>sampling_callback</code> passed to <code>ClientSession</code> during initialization</td>
+</tr>
+<tr>
+<td>Can the client reject a sampling request from the server?</td>
+<td>Yes — the client has full control and can filter or deny requests</td>
+</tr>
+<tr>
+<td>Why is sampling ideal for public MCP servers?</td>
+<td>Each connecting client uses their own API credentials and pays for their own usage</td>
+</tr>
+<tr>
+<td>What is the main latency trade-off of sampling?</td>
+<td>Extra network hop: Server -&gt; Client -&gt; Claude -&gt; Client -&gt; Server instead of Server -&gt; Claude directly</td>
+</tr>
+<tr>
+<td>What data structure wraps the prompt in a sampling request?</td>
+<td><code>SamplingMessage</code> with <code>role</code> and <code>content</code> (typically <code>TextContent</code>)</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

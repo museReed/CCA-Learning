@@ -1,0 +1,52 @@
+{
+  "unit": "08-making-changes",
+  "demos": [
+    {
+      "id": "demo-1",
+      "title": "Screenshot Paste — Centering a Placeholder",
+      "srt_range": [1, 13],
+      "key_frames": [
+        {"frame": "frame_003.jpg", "caption": "Running npm run dev and viewing the app at localhost:3000"},
+        {"frame": "frame_006.jpg", "caption": "Taking screenshot of placeholder text on left panel"},
+        {"frame": "frame_009.jpg", "caption": "Pasting screenshot with Ctrl+V into Claude Code"},
+        {"frame": "frame_012.jpg", "caption": "Placeholder successfully centered after Claude's fix"}
+      ],
+      "walkthrough_steps": [
+        "Instructor starts dev server with `npm run dev`, opens app at localhost:3000",
+        "Wants to move placeholder text to center of left panel",
+        "Takes screenshot of the target area",
+        "Pastes into Claude Code using Ctrl+V (not Cmd+V on macOS)",
+        "Asks Claude to center the placeholder",
+        "Claude searches codebase, makes styling update",
+        "Result: placeholder is now centered — looks great"
+      ]
+    },
+    {
+      "id": "demo-2",
+      "title": "Plan Mode + Thinking — Replacing Technical Tool Names with User-Friendly Text",
+      "srt_range": [14, 76],
+      "key_frames": [
+        {"frame": "frame_018.jpg", "caption": "String Replace Editor — technical tool name shown to users"},
+        {"frame": "frame_027.jpg", "caption": "Taking screenshot of the technical text for Claude"},
+        {"frame": "frame_035.jpg", "caption": "Enabling Plan Mode with Shift+Tab twice"},
+        {"frame": "frame_049.jpg", "caption": "Thinking trigger phrases — think, think more, ultrathink"},
+        {"frame": "frame_054.jpg", "caption": "Combining plan mode and ultrathink for complex task"},
+        {"frame": "frame_069.jpg", "caption": "Feature complete — 'Creating file' and 'Editing file' shown instead"},
+        {"frame": "frame_075.jpg", "caption": "Follow-up edit shows 'Editing app.jsx' — feature works"}
+      ],
+      "walkthrough_steps": [
+        "Instructor generates a card component — notices 'String Replace Editor' in chat UI",
+        "This technical tool name should show user-friendly text like 'Creating file: ...'",
+        "Takes screenshot and pastes into Claude Code",
+        "Enables Plan Mode (Shift+Tab twice) — Claude will do more research and create detailed plan",
+        "Explains Plan Mode: Claude reads more files, creates plan, waits for approval before implementing",
+        "Enables Thinking with 'ultrathink' — gives Claude maximum reasoning budget",
+        "Explains when to use each: Planning = breadth (multi-file), Thinking = depth (complex logic)",
+        "Both can be combined; both consume additional tokens (cost consideration)",
+        "After a couple minutes, feature is complete",
+        "Tests: 'Creating file' shows for new components, 'Editing app.jsx' shows for edits",
+        "Instructor mentions Claude Code is also a solid Git assistant for staging and committing changes"
+      ]
+    }
+  ]
+}

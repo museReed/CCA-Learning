@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 320" font-family="'SF Pro Display', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#94A3B8"/></marker>
+    <marker id="arrowRed" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#EF4444"/></marker>
+  </defs>
+  <rect width="500" height="320" fill="white" rx="12"/>
+  <text x="250" y="28" text-anchor="middle" font-size="15" font-weight="600" fill="#64748B" letter-spacing="0.5">TYPE-CHECK FEEDBACK LOOP</text>
+
+  <!-- Step 1: Claude edits -->
+  <g transform="translate(30, 50)">
+    <rect width="180" height="55" rx="14" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="28" y="33" font-size="18">🧠</text>
+    <text x="52" y="28" font-size="11" font-weight="600" fill="#1E40AF">Claude edits</text>
+    <text x="52" y="43" font-size="10" fill="#3B82F6" font-family="'SF Mono', monospace">schema.ts</text>
+  </g>
+
+  <!-- Arrow down -->
+  <line x1="120" y1="105" x2="120" y2="130" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 2: PostToolUse fires tsc -->
+  <g transform="translate(30, 135)">
+    <rect width="180" height="55" rx="14" fill="#EEF2FF" stroke="#818CF8" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="28" y="33" font-size="18">🛡️</text>
+    <text x="52" y="28" font-size="11" font-weight="600" fill="#4338CA">PostToolUse hook</text>
+    <text x="52" y="43" font-size="10" fill="#6366F1" font-family="'SF Mono', monospace">tsc --noEmit</text>
+  </g>
+
+  <!-- Arrow right -->
+  <line x1="210" y1="162" x2="280" y2="162" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 3: Error detected -->
+  <g transform="translate(285, 135)">
+    <rect width="185" height="55" rx="14" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="28" y="33" font-size="18">❌</text>
+    <text x="52" y="28" font-size="11" font-weight="600" fill="#991B1B">Type error in</text>
+    <text x="52" y="43" font-size="10" fill="#EF4444" font-family="'SF Mono', monospace">main.ts:42</text>
+  </g>
+
+  <!-- Arrow down from error -->
+  <line x1="377" y1="190" x2="377" y2="220" stroke="#EF4444" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <text x="405" y="210" font-size="9" fill="#EF4444">exit 2</text>
+
+  <!-- Step 4: Feedback to Claude -->
+  <g transform="translate(285, 225)">
+    <rect width="185" height="55" rx="14" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="28" y="33" font-size="18">📋</text>
+    <text x="52" y="28" font-size="11" font-weight="600" fill="#9A3412">stderr feedback</text>
+    <text x="52" y="43" font-size="10" fill="#FB923C">injected into context</text>
+  </g>
+
+  <!-- Arrow left back to Claude -->
+  <path d="M 285 252 Q 200 290 120 252" fill="none" stroke="#94A3B8" stroke-width="1.5"/>
+  <polygon points="120,252 128,258 125,248" fill="#94A3B8"/>
+
+  <!-- Step 5: Claude fixes -->
+  <g transform="translate(30, 225)">
+    <rect width="180" height="55" rx="14" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="28" y="33" font-size="18">💡</text>
+    <text x="52" y="28" font-size="11" font-weight="600" fill="#166534">Claude fixes</text>
+    <text x="52" y="43" font-size="10" fill="#22C55E" font-family="'SF Mono', monospace">main.ts:42</text>
+  </g>
+
+  <text x="250" y="308" text-anchor="middle" font-size="10" fill="#94A3B8">Compiler errors become automatic guardrails — Claude can't leave broken types behind.</text>
+</svg>

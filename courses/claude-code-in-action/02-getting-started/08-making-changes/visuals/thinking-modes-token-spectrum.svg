@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 300" font-family="'SF Pro Display', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/>
+    </filter>
+    <linearGradient id="spectrumGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#BFDBFE"/>
+      <stop offset="25%" stop-color="#A5B4FC"/>
+      <stop offset="50%" stop-color="#C4B5FD"/>
+      <stop offset="75%" stop-color="#A78BFA"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94A3B8"/>
+    </marker>
+  </defs>
+  <rect width="700" height="300" fill="white" rx="12"/>
+  <text x="350" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#64748B" letter-spacing="0.5">THINKING MODES — TOKEN SPECTRUM</text>
+
+  <!-- Gradient bar -->
+  <rect x="50" y="55" width="600" height="16" rx="8" fill="url(#spectrumGrad)"/>
+
+  <!-- Speed label left -->
+  <text x="50" y="88" font-size="10" font-weight="600" fill="#3B82F6">Fast</text>
+  <!-- Speed label right -->
+  <text x="650" y="88" text-anchor="end" font-size="10" font-weight="600" fill="#7C3AED">Slow</text>
+  <!-- Arrow for speed -->
+  <line x1="75" y1="85" x2="250" y2="85" stroke="#94A3B8" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="165" y="96" text-anchor="middle" font-size="8" fill="#94A3B8">Speed decreasing</text>
+  <!-- Arrow for tokens -->
+  <line x1="450" y1="85" x2="625" y2="85" stroke="#94A3B8" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="540" y="96" text-anchor="middle" font-size="8" fill="#94A3B8">Token cost increasing</text>
+
+  <!-- Level 1: Standard -->
+  <g transform="translate(30, 110)">
+    <rect width="116" height="100" rx="14" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="58" y="28" text-anchor="middle" font-size="16">💨</text>
+    <text x="58" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#3B82F6">Standard</text>
+    <text x="58" y="64" text-anchor="middle" font-size="9" fill="#64748B">No extra</text>
+    <text x="58" y="76" text-anchor="middle" font-size="9" fill="#64748B">thinking</text>
+    <text x="58" y="92" text-anchor="middle" font-size="8" font-weight="600" fill="#93C5FD">Fastest</text>
+  </g>
+
+  <!-- Level 2: Think -->
+  <g transform="translate(160, 110)">
+    <rect width="116" height="100" rx="14" fill="#EEF2FF" stroke="#A5B4FC" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="58" y="28" text-anchor="middle" font-size="16">🤔</text>
+    <text x="58" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#6366F1">Think</text>
+    <text x="58" y="64" text-anchor="middle" font-size="9" fill="#64748B">Basic extended</text>
+    <text x="58" y="76" text-anchor="middle" font-size="9" fill="#64748B">reasoning</text>
+    <text x="58" y="92" text-anchor="middle" font-size="8" font-weight="600" fill="#A5B4FC">~2x tokens</text>
+  </g>
+
+  <!-- Level 3: Think more -->
+  <g transform="translate(290, 110)">
+    <rect width="116" height="100" rx="14" fill="#F5F3FF" stroke="#C4B5FD" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="58" y="28" text-anchor="middle" font-size="16">💭</text>
+    <text x="58" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#7C3AED">Think more</text>
+    <text x="58" y="64" text-anchor="middle" font-size="9" fill="#64748B">Deeper chain</text>
+    <text x="58" y="76" text-anchor="middle" font-size="9" fill="#64748B">of thought</text>
+    <text x="58" y="92" text-anchor="middle" font-size="8" font-weight="600" fill="#C4B5FD">~4x tokens</text>
+  </g>
+
+  <!-- Level 4: Think a lot -->
+  <g transform="translate(420, 110)">
+    <rect width="116" height="100" rx="14" fill="#EDE9FE" stroke="#A78BFA" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="58" y="28" text-anchor="middle" font-size="16">🧠</text>
+    <text x="58" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#6D28D9">Think a lot</text>
+    <text x="58" y="64" text-anchor="middle" font-size="9" fill="#64748B">Thorough</text>
+    <text x="58" y="76" text-anchor="middle" font-size="9" fill="#64748B">analysis</text>
+    <text x="58" y="92" text-anchor="middle" font-size="8" font-weight="600" fill="#A78BFA">~8x tokens</text>
+  </g>
+
+  <!-- Level 5: Ultrathink -->
+  <g transform="translate(550, 110)">
+    <rect width="120" height="100" rx="14" fill="#DDD6FE" stroke="#7C3AED" stroke-width="2" filter="url(#shadow)"/>
+    <text x="60" y="28" text-anchor="middle" font-size="16">🔮</text>
+    <text x="60" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#5B21B6">Ultrathink</text>
+    <text x="60" y="64" text-anchor="middle" font-size="9" fill="#64748B">Maximum</text>
+    <text x="60" y="76" text-anchor="middle" font-size="9" fill="#64748B">reasoning</text>
+    <text x="60" y="92" text-anchor="middle" font-size="8" font-weight="600" fill="#7C3AED">~16x tokens</text>
+  </g>
+
+  <!-- Use case hints -->
+  <text x="88" y="240" text-anchor="middle" font-size="8" fill="#94A3B8">Simple edits</text>
+  <text x="218" y="240" text-anchor="middle" font-size="8" fill="#94A3B8">Bug fixes</text>
+  <text x="348" y="240" text-anchor="middle" font-size="8" fill="#94A3B8">Refactoring</text>
+  <text x="478" y="240" text-anchor="middle" font-size="8" fill="#94A3B8">Architecture</text>
+  <text x="610" y="240" text-anchor="middle" font-size="8" fill="#94A3B8">Complex design</text>
+
+  <text x="350" y="288" text-anchor="middle" font-size="10" fill="#94A3B8">Higher thinking = more tokens but better reasoning for complex tasks</text>
+</svg>

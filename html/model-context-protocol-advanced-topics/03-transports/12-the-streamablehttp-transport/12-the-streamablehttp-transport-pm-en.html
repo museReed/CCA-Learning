@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 The Streamablehttp Transport Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The StreamableHTTP Transport — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (MCP transport selection), 2.4 (remote server configuration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 03-transports / Lesson 12</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>StreamableHTTP puts your MCP server on the internet, but like moving from a private office to a public reception desk — you gain accessibility but lose the ability to walk over and tap someone on the shoulder.</p>
+<hr />
+<h2>The Reception Desk Analogy</h2>
+<ul>
+<li><strong>Stdio</strong> = Private office. You and your colleague sit across from each other. Either person can start a conversation at any time.</li>
+<li><strong>StreamableHTTP</strong> = Reception desk. Visitors (clients) can walk up and ask questions. But the receptionist (server) <strong>cannot leave the desk</strong> to find visitors — they must wait for someone to approach.</li>
+</ul>
+<p>This is the fundamental HTTP limitation: <strong>the server can only respond, never initiate</strong>.</p>
+<hr />
+<h2>What This Means for Your Product</h2>
+<h3>Features That Still Work (Client-Initiated)</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>User Experience</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool calls</td>
+<td>User asks AI, AI calls your server tools — works perfectly</td>
+</tr>
+<tr>
+<td>Resource reads</td>
+<td>AI fetches data from your server — works perfectly</td>
+</tr>
+<tr>
+<td>Prompt templates</td>
+<td>AI loads templates from server — works perfectly</td>
+</tr>
+</tbody>
+</table>
+<h3>Features At Risk (Server-Initiated)</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>What's Lost</th>
+<th>Product Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sampling (CreateMessage)</td>
+<td>Server can't ask the AI to generate text</td>
+<td>No server-side AI reasoning</td>
+</tr>
+<tr>
+<td>Progress notifications</td>
+<td>Server can't report "50% done..."</td>
+<td>Users see no progress on long tasks</td>
+</tr>
+<tr>
+<td>Logging</td>
+<td>Server can't push debug messages</td>
+<td>Harder to troubleshoot in production</td>
+</tr>
+<tr>
+<td>Root listing</td>
+<td>Server can't ask "what files are open?"</td>
+<td>No workspace-aware features</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+If your product roadmap includes features where the <strong>server needs to ask the client questions</strong> (like "approve this action?" or "which file should I use?"), StreamableHTTP with restrictive settings will block those features.</p>
+</blockquote>
+<hr />
+<h2>The Two Configuration Dials</h2>
+<p>Think of these as <strong>restriction levels</strong> your infrastructure team can set:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Off (Default)</th>
+<th>On</th>
+<th>Business Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stateless_http</code></td>
+<td>Server remembers each client session</td>
+<td>Server treats every request independently</td>
+<td>Easier to scale, but loses progress tracking and server-initiated features</td>
+</tr>
+<tr>
+<td><code>json_response</code></td>
+<td>Server can stream results gradually</td>
+<td>Server sends one big response at the end</td>
+<td>Simpler infrastructure, but users wait longer for results</td>
+</tr>
+</tbody>
+</table>
+<h3>The Restriction Spectrum</h3>
+<pre class="highlight"><code>Most Features ◄──────────────────────────────► Simplest Infrastructure
+
+Both OFF          stateless ON       json ON         Both ON
+(default)         or json ON         or stateless    (most restricted)
+</code></pre>
+
+<hr />
+<h2>PM Decision Matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Business Need</th>
+<th>Recommended Setting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"We need real-time progress bars"</td>
+<td>Both flags OFF (defaults)</td>
+</tr>
+<tr>
+<td>"We need to scale to 10K users"</td>
+<td><code>stateless_http=true</code> (accept feature loss)</td>
+</tr>
+<tr>
+<td>"Simple webhook-style integration"</td>
+<td>Both flags ON</td>
+</tr>
+<tr>
+<td>"Server needs to call AI models"</td>
+<td>Both flags OFF + SSE setup</td>
+</tr>
+<tr>
+<td>"We just need basic tool access"</td>
+<td>Either config works</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Core Trade-off for Stakeholders</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Stdio</th>
+<th>StreamableHTTP (defaults)</th>
+<th>StreamableHTTP (restricted)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Deployment</td>
+<td>Local only</td>
+<td>Remote/cloud</td>
+<td>Remote/cloud</td>
+</tr>
+<tr>
+<td>Scalability</td>
+<td>Single user</td>
+<td>Moderate</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Feature coverage</td>
+<td>100%</td>
+<td>~80% (with SSE workarounds)</td>
+<td>~50%</td>
+</tr>
+<tr>
+<td>Infrastructure complexity</td>
+<td>Minimal</td>
+<td>Moderate</td>
+<td>Low</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>Scenario questions</strong>: "Remote MCP server for a web app" → StreamableHTTP. Then check which features the scenario needs to determine flag settings.</li>
+<li><strong>Trade-off questions</strong>: Know the exact features lost at each restriction level.</li>
+<li><strong>Flag defaults</strong>: Both <code>false</code> — this is frequently tested. Enabling restricts, not enables.</li>
+<li><strong>Never confuse direction</strong>: Client→server always works. Only server→client is affected.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In business terms, what does StreamableHTTP enable?</td>
+<td>Remote MCP server hosting — your server can be in the cloud, serving users over the internet</td>
+</tr>
+<tr>
+<td>What is the fundamental limitation of HTTP for MCP?</td>
+<td>Server cannot initiate communication — it can only respond to client requests</td>
+</tr>
+<tr>
+<td>What product feature requires server-initiated requests?</td>
+<td>Progress bars, human-approval workflows, server-side AI reasoning (sampling)</td>
+</tr>
+<tr>
+<td>What do the two flags default to?</td>
+<td>Both <code>stateless_http</code> and <code>json_response</code> default to <code>false</code> (least restrictive)</td>
+</tr>
+<tr>
+<td>What happens when you turn on <code>stateless_http</code>?</td>
+<td>Server forgets sessions — easier to scale but loses progress tracking and server-initiated features</td>
+</tr>
+<tr>
+<td>What happens when you turn on <code>json_response</code>?</td>
+<td>No streaming — server sends one big response instead of gradual updates</td>
+</tr>
+<tr>
+<td>When should a PM accept the feature trade-offs?</td>
+<td>When scalability or infrastructure simplicity outweighs the need for server-initiated features</td>
+</tr>
+<tr>
+<td>What features always work regardless of flag settings?</td>
+<td>Client-initiated features: tool calls, resource reads, prompt template fetching</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

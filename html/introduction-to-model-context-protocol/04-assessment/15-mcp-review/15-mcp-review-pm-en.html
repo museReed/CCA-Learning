@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15 Mcp Review Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>MCP Review — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server primitives), 2.4-2.6 (resource/tool/prompt design), 1.1 (agentic architecture)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 04-assessment / Lesson 15</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP has three building blocks for AI products — Tools (the AI decides), Resources (the app decides), Prompts (the user decides) — and knowing which to use is the single most important architecture decision a PM influences.</p>
+<hr />
+<p><img alt="Three Primitives" src="visuals/three-primitives.svg" /></p>
+<h2>The Three Building Blocks: Business Analogy</h2>
+<p>Think of an MCP-powered product as a <strong>smart office</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Building Block</th>
+<th>Office Analogy</th>
+<th>Who Decides</th>
+<th>Product Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>The specialist consultant you hired — they decide what analysis to run and when</td>
+<td>Claude (AI)</td>
+<td>Claude runs a calculation behind the scenes</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>The research assistant who pre-gathers briefing materials for meetings</td>
+<td>Your app</td>
+<td>Google Drive document injected into chat context</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>The procedure manual employees follow — they choose when to use it</td>
+<td>The user</td>
+<td>User clicks "Summarize" workflow button</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Why This Matters for PMs</h2>
+<p>Every AI feature you spec falls into one of three categories based on <strong>who should control it</strong>:</p>
+<h3>1. Tools — "Let the AI Decide"</h3>
+<p><strong>When to use</strong>: The AI needs capabilities to accomplish tasks autonomously.</p>
+<table>
+<thead>
+<tr>
+<th>Product Scenario</th>
+<th>Why Tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI calculates shipping costs during chat</td>
+<td>AI decides when calculation is needed</td>
+</tr>
+<tr>
+<td>AI queries inventory database</td>
+<td>AI decides to check stock based on conversation</td>
+</tr>
+<tr>
+<td>AI sends a notification email</td>
+<td>AI decides the right moment to send</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM consideration</strong>: Tools are invisible to users. The user does not click a button; the AI decides on its own. This means you need to trust the AI's judgment — or add guardrails (hooks) for high-stakes decisions.</p>
+<h3>2. Resources — "Let the App Decide"</h3>
+<p><strong>When to use</strong>: Your application needs data for display or to pre-load context.</p>
+<table>
+<thead>
+<tr>
+<th>Product Scenario</th>
+<th>Why Resources</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Autocomplete dropdown shows available docs</td>
+<td>App fetches list for UI</td>
+</tr>
+<tr>
+<td>User types <code>@report.pdf</code> to reference a file</td>
+<td>App injects content into prompt</td>
+</tr>
+<tr>
+<td>Sidebar shows related documents</td>
+<td>App decides what context is relevant</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM consideration</strong>: Resources make the experience feel instant. Data is pre-loaded before the AI starts thinking. This is the <code>@mention</code> pattern users know from Slack and Notion.</p>
+<h3>3. Prompts — "Let the User Decide"</h3>
+<p><strong>When to use</strong>: You want predefined, repeatable workflows that users trigger explicitly.</p>
+<table>
+<thead>
+<tr>
+<th>Product Scenario</th>
+<th>Why Prompts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/format</code> slash command</td>
+<td>User decides to reformat</td>
+</tr>
+<tr>
+<td>"Generate Weekly Report" button</td>
+<td>User triggers on demand</td>
+</tr>
+<tr>
+<td>"Translate to Spanish" menu option</td>
+<td>User initiates the workflow</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM consideration</strong>: Prompts package expertise. Users get expert-level results without writing their own instructions. The slash command pattern is familiar and discoverable.</p>
+<hr />
+<h2>The PM Decision Framework</h2>
+<p>When writing a PRD for an AI feature, use this flowchart:</p>
+<p><strong>Question 1</strong>: "Who should decide when this happens?"<br />
+- <strong>The AI decides autonomously</strong> → Tool<br />
+- <strong>The app pre-loads data</strong> → Resource<br />
+- <strong>The user triggers explicitly</strong> → Prompt</p>
+<p><strong>Question 2</strong>: "Does this involve reading data or performing an action?"<br />
+- <strong>Reading data for display or context</strong> → Resource<br />
+- <strong>Performing an action with potential side effects</strong> → Tool<br />
+- <strong>Following a predefined workflow</strong> → Prompt</p>
+<p><strong>Question 3</strong>: "What happens if this goes wrong?"<br />
+- <strong>Serious consequences (financial, compliance)</strong> → Tool + guardrails (hooks)<br />
+- <strong>Minor UX issue</strong> → Any primitive, choose by control model<br />
+- <strong>Workflow inconsistency</strong> → Prompt (for repeatability)</p>
+<hr />
+<h2>Real-World Product Mapping</h2>
+<p>These examples from Claude's official interface show all three primitives:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Primitive</th>
+<th>Control Model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code execution behind the scenes</td>
+<td>Tool</td>
+<td>Claude decides when to run code</td>
+</tr>
+<tr>
+<td>"Add from Google Drive"</td>
+<td>Resource</td>
+<td>App fetches and injects document</td>
+</tr>
+<tr>
+<td>Workflow buttons below chat</td>
+<td>Prompt</td>
+<td>User clicks to start a workflow</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes in Primitive Selection</h2>
+<table>
+<thead>
+<tr>
+<th>Mistake</th>
+<th>Consequence</th>
+<th>Correct Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spec'ing a tool for read-only data display</td>
+<td>Slower UX (tool call overhead)</td>
+<td>Use a resource — instant context injection</td>
+</tr>
+<tr>
+<td>Spec'ing a tool for user-triggered workflows</td>
+<td>Inconsistent results (AI might not follow exactly)</td>
+<td>Use a prompt — tested template, consistent output</td>
+</tr>
+<tr>
+<td>Spec'ing a resource for actions with side effects</td>
+<td>Violates the read-only contract</td>
+<td>Use a tool — only tools should have side effects</td>
+</tr>
+<tr>
+<td>Spec'ing a prompt for autonomous AI behavior</td>
+<td>User has to manually trigger every time</td>
+<td>Use a tool — let the AI decide</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>How They Work Together: A Product Story</h2>
+<p>Imagine a document management AI assistant:</p>
+<ol>
+<li><strong>Resources</strong> power the <code>@mention</code> autocomplete — when the user types <code>@</code>, the app fetches available documents from the MCP server</li>
+<li><strong>Prompts</strong> power the <code>/format</code> command — the user selects a document and triggers the formatting workflow</li>
+<li><strong>Tools</strong> power the actual editing — Claude uses the <code>edit_document</code> tool to rewrite the content in markdown</li>
+</ol>
+<p>All three primitives are needed. Resources handle data, prompts handle workflows, tools handle actions.</p>
+<p><strong>PM takeaway</strong>: When writing acceptance criteria, specify which primitive each feature uses. This prevents engineering misunderstandings and ensures the right control model.</p>
+<hr />
+<h2>The Master Table: Exam-Ready Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Tools</th>
+<th>Resources</th>
+<th>Prompts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Controller</td>
+<td>AI (model)</td>
+<td>App code</td>
+<td>User</td>
+</tr>
+<tr>
+<td>Trigger</td>
+<td>AI reasoning</td>
+<td>App logic</td>
+<td><code>/</code> command or button</td>
+</tr>
+<tr>
+<td>Side effects?</td>
+<td>Yes</td>
+<td>No (read-only)</td>
+<td>No (just messages)</td>
+</tr>
+<tr>
+<td>UX pattern</td>
+<td>Invisible</td>
+<td><code>@mention</code></td>
+<td>Slash commands</td>
+</tr>
+<tr>
+<td>Product analogy</td>
+<td>Consultant</td>
+<td>Research assistant</td>
+<td>Procedure manual</td>
+</tr>
+<tr>
+<td>Exam keywords</td>
+<td>"autonomously," "Claude decides"</td>
+<td>"pre-loaded," "UI data"</td>
+<td>"workflow," "slash command"</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The three-way control model is the single most important concept for both product design and the CCA exam. Every "which primitive?" question resolves to: "Who should control this interaction?" Model = Tool, App = Resource, User = Prompt. Master this framework and you can answer any D2 scenario question.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: This is the capstone concept. Know the three primitives, their control models, and when to use each.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: The control model maps to architecture layers — model layer (tools), application layer (resources), user layer (prompts).</li>
+<li><strong>Exam strategy</strong>: Read the scenario, identify the controller (who decides when to act), select the matching primitive. This works for 90%+ of D2 questions.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three MCP server primitives and their controllers?</td>
+<td>Tools (model-controlled by Claude), Resources (app-controlled by your code), Prompts (user-controlled by end users)</td>
+</tr>
+<tr>
+<td>What is the single question that resolves most "which primitive?" decisions?</td>
+<td>"Who should control this interaction?" — Model = Tool, App = Resource, User = Prompt</td>
+</tr>
+<tr>
+<td>What is the office analogy for the three MCP primitives?</td>
+<td>Tools = specialist consultant (AI decides), Resources = research assistant (app pre-gathers), Prompts = procedure manual (user follows)</td>
+</tr>
+<tr>
+<td>When should a PM specify a Tool in a PRD?</td>
+<td>When the AI needs to autonomously decide to perform an action (calculations, API calls, side effects)</td>
+</tr>
+<tr>
+<td>When should a PM specify a Resource in a PRD?</td>
+<td>When the app needs read-only data for UI display or to pre-load context before AI reasoning</td>
+</tr>
+<tr>
+<td>When should a PM specify a Prompt in a PRD?</td>
+<td>When users should explicitly trigger a predefined, repeatable workflow (slash commands, buttons)</td>
+</tr>
+<tr>
+<td>What is the biggest PM mistake in primitive selection?</td>
+<td>Using a Tool when a Resource would suffice — adds latency and tool call overhead for read-only data</td>
+</tr>
+<tr>
+<td>How do all three primitives work together in a product?</td>
+<td>Resources feed data to UI, Prompts let users trigger workflows, Tools let Claude execute actions to fulfill those workflows</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

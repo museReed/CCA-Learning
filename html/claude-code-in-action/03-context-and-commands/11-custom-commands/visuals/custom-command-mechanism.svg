@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="440" viewBox="0 0 800 440">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#22C55E"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="440" rx="16" fill="#FAFBFC"/>
+
+  <!-- Title -->
+  <text x="400" y="40" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="20" font-weight="700" fill="#1E293B">Custom Commands: Prompt Templates as Slash Commands</text>
+
+  <!-- LEFT: File box (blue) -->
+  <rect x="30" y="80" width="220" height="200" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+  <!-- File icon header -->
+  <rect x="30" y="80" width="220" height="40" rx="12" fill="#3B82F6"/>
+  <rect x="30" y="100" width="220" height="20" fill="#3B82F6"/>
+  <text x="140" y="106" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="14" font-weight="700" fill="white">&#x1F4C4; .claude/commands/audit.md</text>
+
+  <!-- Markdown content preview -->
+  <text x="50" y="145" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#475569">---</text>
+  <text x="50" y="162" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#475569">description: Security audit</text>
+  <text x="50" y="179" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#475569">---</text>
+  <text x="50" y="200" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#475569">Review $ARGUMENTS for</text>
+  <text x="50" y="217" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#475569">security vulnerabilities.</text>
+  <text x="50" y="238" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#475569">Check: XSS, SQLi, CSRF</text>
+  <text x="50" y="258" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#94A3B8">...</text>
+
+  <!-- Arrow 1: filename to command -->
+  <line x1="250" y1="165" x2="310" y2="165" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <rect x="256" y="140" width="50" height="20" rx="4" fill="#FAFBFC"/>
+  <text x="280" y="154" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" font-weight="600" fill="#3B82F6">filename</text>
+  <text x="280" y="188" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="18" fill="#3B82F6">&#x2192;</text>
+  <text x="280" y="204" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" font-weight="600" fill="#3B82F6">/command</text>
+
+  <!-- CENTER: User typing -->
+  <rect x="315" y="110" width="170" height="110" rx="12" fill="white" stroke="#94A3B8" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="400" y="142" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="13" fill="#64748B">User types in Claude Code</text>
+  <!-- Terminal mockup -->
+  <rect x="335" y="155" width="130" height="44" rx="8" fill="#1E293B"/>
+  <text x="345" y="173" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#22C55E">$</text>
+  <text x="358" y="173" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#F8FAFC">/audit src/auth</text>
+  <text x="345" y="190" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#64748B">_</text>
+
+  <!-- Arrow 2: contents to prompt -->
+  <line x1="485" y1="165" x2="545" y2="165" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <rect x="491" y="140" width="50" height="20" rx="4" fill="#FAFBFC"/>
+  <text x="515" y="154" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" font-weight="600" fill="#22C55E">contents</text>
+  <text x="515" y="188" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="18" fill="#22C55E">&#x2192;</text>
+  <text x="515" y="204" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" font-weight="600" fill="#22C55E">prompt</text>
+
+  <!-- RIGHT: Claude receives prompt (green) -->
+  <rect x="550" y="80" width="220" height="200" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="550" y="80" width="220" height="40" rx="12" fill="#22C55E"/>
+  <rect x="550" y="100" width="220" height="20" fill="#22C55E"/>
+  <text x="660" y="106" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="14" font-weight="700" fill="white">&#x1F916; Claude Receives Prompt</text>
+
+  <text x="570" y="145" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="12" fill="#475569" font-weight="600">Resolved prompt:</text>
+  <text x="570" y="168" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#475569">Review src/auth for</text>
+  <text x="570" y="185" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#475569">security vulnerabilities.</text>
+  <text x="570" y="206" font-family="'SF Mono', 'Menlo', monospace" font-size="11" fill="#475569">Check: XSS, SQLi, CSRF</text>
+
+  <!-- $ARGUMENTS highlight -->
+  <rect x="570" y="222" width="180" height="28" rx="6" fill="#DCFCE7" stroke="#22C55E" stroke-width="1"/>
+  <text x="660" y="241" text-anchor="middle" font-family="'SF Mono', 'Menlo', monospace" font-size="11" font-weight="600" fill="#166534">$ARGUMENTS &#x2192; "src/auth"</text>
+
+  <!-- Divider line -->
+  <line x1="60" y1="320" x2="740" y2="320" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="6,4"/>
+
+  <!-- Bottom annotation: Scope info -->
+  <rect x="80" y="345" width="290" height="70" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="225" y="370" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="14" font-weight="700" fill="#1E40AF">&#x1F4C2; Project scope</text>
+  <text x="225" y="393" text-anchor="middle" font-family="'SF Mono', 'Menlo', monospace" font-size="12" fill="#475569">.claude/commands/</text>
+  <text x="225" y="408" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" fill="#94A3B8">Shared with team via git</text>
+
+  <rect x="430" y="345" width="290" height="70" rx="12" fill="#F5F3FF" stroke="#8B5CF6" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="575" y="370" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="14" font-weight="700" fill="#5B21B6">&#x1F464; User scope</text>
+  <text x="575" y="393" text-anchor="middle" font-family="'SF Mono', 'Menlo', monospace" font-size="12" fill="#475569">~/.claude/commands/</text>
+  <text x="575" y="408" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" fill="#94A3B8">Personal, available everywhere</text>
+</svg>

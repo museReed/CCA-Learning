@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 Roots Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Roots — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (MCP security model), 2.3 (MCP server capabilities)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / Lesson 07</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Roots are MCP's way of telling a server "you may look here, and only here" — solving both the usability problem of file discovery and the security problem of unrestricted access.</p>
+<hr />
+<p><img alt="Roots Access" src="visuals/roots-access.svg" /></p>
+<h2>Mental Model: Building Security Badges</h2>
+<p>Think of roots like security badges in an office building:</p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Office Analogy</th>
+<th>MCP Equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Root</td>
+<td>Badge grants access to Floor 3 and Floor 7</td>
+<td>Client says "you can access /projects and /data"</td>
+</tr>
+<tr>
+<td>Server with roots</td>
+<td>Employee with badge</td>
+<td>Server knows which directories to search</td>
+</tr>
+<tr>
+<td>Server without roots</td>
+<td>Visitor with no badge</td>
+<td>Must ask for exact room numbers (full file paths)</td>
+</tr>
+<tr>
+<td>Enforcement</td>
+<td>Turnstile at each floor</td>
+<td><code>is_path_allowed()</code> function (must be built)</td>
+</tr>
+</tbody>
+</table>
+<p>Key insight: <strong>the badge itself does not lock the doors</strong> — the turnstile does. Similarly, roots tell the server where it should go, but enforcement must be implemented separately.</p>
+<hr />
+<h2>The Two Problems Roots Solve</h2>
+<h3>Problem 1: Usability</h3>
+<p>Without roots, users must provide exact file paths:<br />
+- "Read <code>/Users/reed/Documents/projects/my-app/src/components/Header.tsx</code>"</p>
+<p>With roots, users just say:<br />
+- "Read Header.tsx"</p>
+<p>The server knows to search within the approved directories.</p>
+<h3>Problem 2: Security</h3>
+<p>Without roots, an MCP server could potentially access any file on the system:<br />
+- Personal documents, SSH keys, environment files with secrets</p>
+<p>With roots, the server's scope is limited to approved directories.</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Roots solve the same problem that "folder permissions" solve in Google Drive or Dropbox — they define the boundary of what a tool can see. As a PM, if your product handles files, roots are the mechanism for implementing least-privilege access.</p>
+</blockquote>
+<hr />
+<h2>How the Flow Works (No Code)</h2>
+<ol>
+<li><strong>Client declares roots</strong>: "This server can access my project folder and my data folder"</li>
+<li><strong>Server discovers roots</strong>: "I have access to two directories — let me search there"</li>
+<li><strong>User makes a request</strong>: "Find the config file"</li>
+<li><strong>Server searches within roots</strong>: Looks in project folder, then data folder</li>
+<li><strong>Server finds and uses file</strong>: Returns the config file contents</li>
+</ol>
+<p>The user never types a full path. The server never looks outside approved directories.</p>
+<hr />
+<h2>The Critical Security Gap</h2>
+<p>This is the most important detail for PMs to communicate to engineering:</p>
+<p><strong>The MCP SDK does NOT automatically enforce root boundaries.</strong></p>
+<p>The SDK provides the list of approved roots. But nothing technically prevents the server from ignoring that list and accessing other files. Your engineering team must build enforcement.</p>
+<table>
+<thead>
+<tr>
+<th>What SDK Provides</th>
+<th>What Your Team Must Build</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Root discovery mechanism</td>
+<td>Access control validation</td>
+</tr>
+<tr>
+<td>List of approved directories</td>
+<td>Path traversal prevention</td>
+</tr>
+<tr>
+<td>Standard URI format</td>
+<td>Symlink resolution</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM Action Item</strong>: In your PRD, explicitly require that file-accessing tools implement path validation. Do not assume the SDK handles it.</p>
+<hr />
+<h2>Product Scenarios</h2>
+<h3>Scenario 1: Code Review Tool</h3>
+<p>A code review MCP server needs to read source files. Without roots:<br />
+- User must paste full file paths for every file<br />
+- Server might accidentally read <code>.env</code> files with API keys</p>
+<p>With roots:<br />
+- Client points the server at the repository root<br />
+- Server searches naturally within the repo<br />
+- Files outside the repo are inaccessible (when enforced)</p>
+<h3>Scenario 2: Multi-Project Workspace</h3>
+<p>A developer works on three projects. The client configures three roots:<br />
+- <code>/projects/frontend</code> (React app)<br />
+- <code>/projects/backend</code> (Python API)<br />
+- <code>/projects/shared</code> (shared libraries)</p>
+<p>The server can search across all three without the user switching context.</p>
+<hr />
+<h2>Security Checklist for PMs</h2>
+<p>When reviewing MCP tool designs that access files, verify:</p>
+<ul>
+<li>[ ] Server calls <code>list_roots()</code> before accessing files</li>
+<li>[ ] Path validation function exists (<code>is_path_allowed()</code>)</li>
+<li>[ ] Path traversal attacks are handled (resolving <code>..</code> and symlinks)</li>
+<li>[ ] Rejected access attempts are logged</li>
+<li>[ ] Users can see and modify their root configuration</li>
+</ul>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.2</strong>: MCP security model — roots are the filesystem security mechanism</li>
+<li><strong>D2 Task 2.3</strong>: Server capabilities — understanding how <code>list_roots()</code> enables file discovery</li>
+<li>Expect scenario questions: "A server accesses files outside approved roots. What went wrong?" Answer: enforcement was not implemented</li>
+<li>Key exam philosophy: <strong>Validation &gt; Trust</strong> — the SDK trusts the server by default; your code must add validation</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What two problems do MCP roots solve?</td>
+<td>Usability (no need for full file paths) and Security (limits server access to approved directories)</td>
+</tr>
+<tr>
+<td>Does the MCP SDK automatically prevent servers from accessing files outside roots?</td>
+<td>No — the SDK provides the root list but does not enforce boundaries; developers must implement validation</td>
+</tr>
+<tr>
+<td>What is the PM's key action item regarding roots?</td>
+<td>Explicitly require path validation in the PRD — do not assume the SDK handles it</td>
+</tr>
+<tr>
+<td>What is the security analogy for roots?</td>
+<td>Building security badges — they tell you where you can go, but the turnstile (enforcement code) must be built separately</td>
+</tr>
+<tr>
+<td>How do roots improve user experience?</td>
+<td>Users say "find config file" instead of typing full paths — the server searches within approved directories</td>
+</tr>
+<tr>
+<td>Can a client configure multiple roots?</td>
+<td>Yes — for example, pointing at multiple project directories simultaneously</td>
+</tr>
+<tr>
+<td>What is the biggest security risk with roots?</td>
+<td>A server that receives roots but does not validate paths against them — path traversal attacks can escape the root boundary</td>
+</tr>
+<tr>
+<td>What exam philosophy applies to roots?</td>
+<td>Validation &gt; Trust — never assume the server will self-restrict; add programmatic enforcement</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

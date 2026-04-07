@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 380" font-family="'PingFang TC', 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrowUp" viewBox="0 0 10 7" refX="5" refY="0" markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0 7, 5 0, 10 7" fill="#3B82F6"/>
+    </marker>
+  </defs>
+  <rect width="520" height="380" fill="white" rx="12"/>
+  <text x="260" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#64748B" letter-spacing="1">CLAUDE.MD 層級架構</text>
+
+  <!-- Priority arrow on left -->
+  <line x1="45" y1="320" x2="45" y2="65" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowUp)"/>
+  <text x="45" y="195" text-anchor="middle" font-size="11" font-weight="600" fill="#3B82F6" transform="rotate(-90, 45, 195)">優先權</text>
+
+  <!-- Layer 1 (top): Local — highest priority -->
+  <g transform="translate(80, 55)">
+    <rect width="400" height="82" rx="14" fill="#DCFCE7" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+    <text x="22" y="30" font-size="22">🔒</text>
+    <text x="54" y="28" font-size="14" font-weight="700" fill="#166534">./CLAUDE.local.md</text>
+    <text x="54" y="48" font-size="11" fill="#22C55E">僅個人使用 · 不進 git</text>
+    <text x="54" y="66" font-size="10" fill="#64748B">個人偏好、本地路徑、API key</text>
+    <text x="365" y="35" text-anchor="middle" font-size="20">⬆️</text>
+    <text x="365" y="53" text-anchor="middle" font-size="9" font-weight="600" fill="#166534">最高</text>
+  </g>
+
+  <!-- Override arrow -->
+  <text x="280" y="150" text-anchor="middle" font-size="10" font-weight="600" fill="#94A3B8">覆蓋</text>
+
+  <!-- Layer 2 (middle): Project shared -->
+  <g transform="translate(100, 160)">
+    <rect width="360" height="82" rx="14" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="22" y="30" font-size="22">👥</text>
+    <text x="54" y="28" font-size="14" font-weight="700" fill="#1E40AF">./CLAUDE.md</text>
+    <text x="54" y="48" font-size="11" fill="#3B82F6">團隊共用 · 提交至 git</text>
+    <text x="54" y="66" font-size="10" fill="#64748B">專案慣例、程式碼規範、架構說明</text>
+  </g>
+
+  <!-- Override arrow -->
+  <text x="280" y="255" text-anchor="middle" font-size="10" font-weight="600" fill="#94A3B8">覆蓋</text>
+
+  <!-- Layer 3 (bottom): Global — lowest priority -->
+  <g transform="translate(120, 265)">
+    <rect width="320" height="82" rx="14" fill="#EDE9FE" stroke="#8B5CF6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="22" y="30" font-size="22">🌍</text>
+    <text x="54" y="28" font-size="14" font-weight="700" fill="#5B21B6">~/.claude/CLAUDE.md</text>
+    <text x="54" y="48" font-size="11" fill="#8B5CF6">全機器適用 · 個人偏好設定</text>
+    <text x="54" y="66" font-size="10" fill="#64748B">風格、語言、所有專案的預設行為</text>
+    <text x="285" y="35" text-anchor="middle" font-size="20">⬇️</text>
+    <text x="285" y="53" text-anchor="middle" font-size="9" font-weight="600" fill="#5B21B6">最低</text>
+  </g>
+
+  <text x="260" y="370" text-anchor="middle" font-size="10" fill="#94A3B8">越具體的檔案優先權越高，會覆蓋較通用的設定</text>
+</svg>

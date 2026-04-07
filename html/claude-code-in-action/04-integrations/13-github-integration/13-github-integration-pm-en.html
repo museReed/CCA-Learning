@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 Github Integration Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>GitHub Integration — PM Perspective</h1>
+<p><img alt="Github Workflows Two Actions" src="visuals/github-workflows-two-actions.svg" /><br />
+<em>Figure: GitHub workflows — @claude mention + PR review.</em></p>
+<p><img alt="Github Integration Workflows" src="visuals/github-integration-workflows.svg" /><br />
+<em>Figure: GitHub integration — two automated workflows.</em></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20% of exam)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.6 ★★★ (CI/CD integration), 2.4 ★★ (MCP integration), 1.1 ★ (agentic loops)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 04-integrations / Lesson 13</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>Claude Code's GitHub integration turns Claude into an automated team member that lives inside your GitHub workflow. Two capabilities: (1) <code>@claude</code> mention in issues/PRs for interactive task execution, (2) automatic PR review on every pull request. PMs need to understand this because it defines how AI fits into code review and CI/CD processes — and what governance is required around permissions.</p>
+<hr />
+<h2>Why PMs Need to Understand GitHub Integration</h2>
+<ol>
+<li><strong>Process automation decisions</strong> — knowing where Claude can replace manual work in code review and issue triage</li>
+<li><strong>Quality gate design</strong> — automated PR reviews create a structural quality layer</li>
+<li><strong>Permission governance</strong> — CI/CD requires explicit tool permissions (no blanket access)</li>
+<li><strong>Team workflow impact</strong> — <code>@claude</code> mentions change how developers interact with issues and PRs</li>
+</ol>
+<hr />
+<h2>Mental Model: Automated Team Member</h2>
+<p><img alt="Permission Model Local Vs Ci" src="visuals/permission-model-local-vs-ci.svg" /><br />
+<em>Figure: Permission model — local interactive vs CI non-interactive.</em></p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Human Equivalent</th>
+<th>Claude GitHub Integration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PR Reviewer</td>
+<td>Senior engineer reviewing code</td>
+<td>PR Review Action — automatic, consistent</td>
+</tr>
+<tr>
+<td>Issue Responder</td>
+<td>On-call engineer triaging bugs</td>
+<td><code>@claude</code> mention — instant, autonomous</td>
+</tr>
+<tr>
+<td>QA Tester</td>
+<td>Manual test before merge</td>
+<td>Claude + Playwright — automated visual testing</td>
+</tr>
+<tr>
+<td>Scribe</td>
+<td>Engineer documenting findings</td>
+<td>Claude posts detailed reports in issues/PRs</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>Core Exam Philosophy (PMs must remember)</strong></p>
+<ul>
+<li><strong>Automated code review catches issues structurally</strong> — it runs every time, not just when someone remembers</li>
+<li><strong><code>-p</code> flag = non-interactive mode</strong> — Claude runs without human approval, so permissions must be explicit</li>
+<li><strong>Architecture &gt; Prompt</strong> — structural CI integration over asking developers to remember to review</li>
+</ul>
+</blockquote>
+<hr />
+<h2>Two Workflows: What They Do</h2>
+<h3>1. <code>@claude</code> Mention — Interactive Task Execution</h3>
+<p>Anyone can mention <code>@claude</code> in an issue or PR comment to trigger Claude. Claude will:<br />
+- Analyze the request<br />
+- Create a step-by-step plan (visible in the comment)<br />
+- Execute the plan (run code, test the app, read files)<br />
+- Report results back in the issue/PR</p>
+<p><strong>PM Use Case</strong>: Bug triage — a QA engineer screenshots a bug, mentions <code>@claude</code>, and Claude investigates, tests, and reports findings without developer involvement.</p>
+<h3>2. PR Review — Automatic Code Review</h3>
+<p>Every PR automatically triggers Claude to review the changes. Claude:<br />
+- Analyzes the diff<br />
+- Checks for potential issues<br />
+- Posts a structured review</p>
+<p><strong>PM Use Case</strong>: Quality gate — every PR gets a baseline review regardless of team availability. This catches structural issues that humans might miss under time pressure.</p>
+<blockquote>
+<p>💡 <strong>PM Decision Framework</strong></p>
+<p>Think of these as two different product capabilities:<br />
+- <code>@claude</code> mention = <strong>on-demand AI agent</strong> (reactive, user-triggered)<br />
+- PR review = <strong>automated quality gate</strong> (proactive, always-on)</p>
+</blockquote>
+<hr />
+<h2>Configuration That PMs Should Understand</h2>
+<p>You do not need to write YAML, but you should understand what each configuration layer controls:</p>
+<table>
+<thead>
+<tr>
+<th>Config Layer</th>
+<th>What It Does</th>
+<th>PM's Concern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>custom_instructions</code></td>
+<td>Tells Claude about the CI environment</td>
+<td>Ensure Claude knows about your test infrastructure</td>
+</tr>
+<tr>
+<td><code>mcp_config</code></td>
+<td>Gives Claude access to tools (e.g., Playwright)</td>
+<td>Determines what Claude <strong>can</strong> do</td>
+</tr>
+<tr>
+<td><code>allowed_tools</code></td>
+<td>Controls which tools Claude may use</td>
+<td><strong>Security governance</strong> — each tool explicitly listed</td>
+</tr>
+<tr>
+<td>Setup steps</td>
+<td>Prepares the environment before Claude runs</td>
+<td>Ensure the app is running for Claude to test</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Takeaway</strong></p>
+<p>The <code>allowed_tools</code> configuration is the permission boundary. In CI/CD, every single tool must be individually listed — there is no "allow all" option. This is a deliberate security design. If your team adds new MCP tools, the <code>allowed_tools</code> list must be updated.</p>
+</blockquote>
+<hr />
+<h2>Business Impact</h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Before GitHub Integration</th>
+<th>After GitHub Integration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PR Review Coverage</td>
+<td>Depends on reviewer availability</td>
+<td>100% — every PR gets reviewed</td>
+</tr>
+<tr>
+<td>Bug Triage Response</td>
+<td>Hours (wait for dev to investigate)</td>
+<td>Minutes (Claude investigates immediately)</td>
+</tr>
+<tr>
+<td>Code Quality Consistency</td>
+<td>Varies by reviewer</td>
+<td>Standardized — Claude checks every PR the same way</td>
+</tr>
+<tr>
+<td>Developer Context Switching</td>
+<td>Frequent (review requests interrupt flow)</td>
+<td>Reduced — Claude handles first-pass review</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Instructor Insights (From the Video)</h2>
+<ol>
+<li><strong>Claude creates a visible plan before executing</strong> — When triggered via <code>@claude</code>, Claude posts a checklist of steps it will take. This transparency is important for team trust.</li>
+<li><strong>End-to-end testing in CI</strong> — The instructor configured Claude to start the app, open a browser via Playwright, and test UI functionality — all within a GitHub Action. This is a complete testing loop.</li>
+<li><strong>Explicit permissions are non-negotiable</strong> — The instructor emphasized that in GitHub Actions, every MCP tool must be individually listed. There is no shortcut. This is the most important configuration detail for CI/CD.</li>
+</ol>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Question 1: CI/CD Pipeline Scenario</h3>
+<p>Your team wants to add automated PR reviews using Claude Code in GitHub Actions. Engineers ask whether they can use the same permission configuration as local development (<code>mcp__playwright</code> in <code>.claude/settings.local.json</code>). What do you tell them?</p>
+<ul>
+<li>A. Yes, the same configuration works in CI</li>
+<li>B. No — in GitHub Actions, each tool must be individually listed in <code>allowed_tools</code>. The blanket server-level permission is not available in CI mode</li>
+<li>C. No — MCP servers cannot be used in GitHub Actions</li>
+<li>D. Yes, but they need to add <code>mcp__playwright</code> to <code>.claude/settings.json</code> (project shared) instead</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — In GitHub Actions (non-interactive mode with `-p` flag), each MCP tool must be individually listed in `allowed_tools`. The blanket `mcp__playwright` permission from local `.claude/settings.local.json` does not apply.
+
+- A incorrectly assumes CI and local use the same permission model
+- C is wrong — MCP servers work in CI, just with stricter permissions
+- D confuses settings file scope with CI permission requirements
+
+**PM Key Takeaway**: When planning CI/CD integration, factor in the explicit permission requirement. Each new MCP tool added to the workflow requires an update to `allowed_tools`.
+</details>
+
+<h3>Question 2: Developer Productivity Scenario</h3>
+<p>Your QA team reports bugs by creating GitHub issues with screenshots. Currently, a developer must manually investigate each bug. How can Claude Code's GitHub integration help?</p>
+<ul>
+<li>A. Add <code>@claude</code> mention support so QA can trigger Claude to investigate bugs directly from the issue, complete with browser testing via Playwright</li>
+<li>B. Set up automatic PR review to catch bugs before they reach QA</li>
+<li>C. Add Claude's findings to CLAUDE.md so developers know about common bugs</li>
+<li>D. Configure a PreToolUse hook to prevent bugs from being introduced</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**A** — The `@claude` mention workflow is designed exactly for this use case. QA can post a screenshot, mention `@claude`, and Claude will investigate — navigating to the app, testing functionality, and reporting findings directly in the issue.
+
+- B is preventive but does not address existing bug triage
+- C is documentation, not automation
+- D is a development-time control, not a QA workflow
+
+**PM Key Takeaway**: `@claude` mention transforms bug triage from a developer-blocking activity into an AI-automated workflow. QA gets faster responses, developers get fewer interruptions.
+</details>
+
+<h3>Question 3: Code Quality Scenario</h3>
+<p>Your team has set up Claude Code PR reviews in GitHub Actions. Engineers want Claude to also access Playwright to visually verify UI changes during review. What configuration changes are needed?</p>
+<ul>
+<li>A. Add Playwright to <code>mcp_config</code> — Claude will automatically have access</li>
+<li>B. Add Playwright to <code>mcp_config</code>, add a setup step to start the dev server, list each Playwright tool in <code>allowed_tools</code>, and add <code>custom_instructions</code> explaining the running environment</li>
+<li>C. Install Playwright MCP locally on the CI runner and add <code>mcp__playwright</code> to the allow list</li>
+<li>D. Add "please use Playwright to test UI changes" to <code>custom_instructions</code></li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — All four configuration layers are required: MCP config (server definition), setup steps (start the app), `allowed_tools` (explicit per-tool permissions), and `custom_instructions` (tell Claude what is available).
+
+- A is incomplete — tools must also be listed in `allowed_tools`
+- C mixes local installation with CI — wrong approach
+- D gives instructions without actual tool access
+
+**PM Key Takeaway**: CI/CD integration requires all four configuration layers working together. Missing any one will cause Claude to either lack access or waste tokens trying to discover what is available.
+</details>
+</body>
+</html>

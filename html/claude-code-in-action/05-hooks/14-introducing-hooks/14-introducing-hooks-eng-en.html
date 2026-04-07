@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>14 Introducing Hooks Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing Hooks — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks for tool call interception)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 05-hooks / Lesson 14</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Hooks are middleware for Claude Code's tool execution pipeline. PreToolUse intercepts before execution (can block). PostToolUse runs after execution (can't block, but can transform and provide feedback).</p>
+<hr />
+<h2>Tool Execution Pipeline</h2>
+<p>Here's what happens under the hood when you interact with Claude Code:</p>
+<p><img alt="Tool Execution Pipeline" src="visuals/tool-execution-pipeline.svg" /><br />
+<em>Figure: How Claude Code processes tool calls — the model proposes, the system intercepts via hooks, then executes.</em></p>
+<p>Key insight: Hooks wrap the <strong>tool execution</strong>, not Claude's reasoning.</p>
+<hr />
+<h2>Familiar Analogies</h2>
+<p>If you've worked with any of these, you already understand hooks:</p>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Corresponding Hook Concept</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Express <code>app.use()</code> middleware</td>
+<td>PreToolUse</td>
+<td>Validate before handler executes</td>
+</tr>
+<tr>
+<td>Git <code>pre-commit</code> hook</td>
+<td>PreToolUse</td>
+<td>Block commit if lint fails</td>
+</tr>
+<tr>
+<td>Git <code>post-commit</code> hook</td>
+<td>PostToolUse</td>
+<td>Trigger CI/notifications after commit</td>
+</tr>
+<tr>
+<td>Network request interceptor</td>
+<td>PreToolUse</td>
+<td>Inspect request, allow or deny</td>
+</tr>
+<tr>
+<td>Response transformer</td>
+<td>PostToolUse</td>
+<td>Normalize data after response</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Two Hook Types</h2>
+<h3>1. PreToolUse — The Gatekeeper</h3>
+<p>Runs <strong>before</strong> tool execution. <strong>Can block</strong> the operation.</p>
+<p><img alt="PreToolUse Flow" src="../../../16-implementing-a-hook/visuals/env-guard-flow.svg" /><br />
+<em>Figure: .env file guard data flow — PreToolUse intercepts Read calls and blocks access to sensitive files.</em></p>
+<p>Configuration:</p>
+<pre class="highlight"><code class="language-json">&quot;PreToolUse&quot;: [
+  {
+    &quot;matcher&quot;: &quot;Read&quot;,
+    &quot;hooks&quot;: [
+      {
+        &quot;type&quot;: &quot;command&quot;,
+        &quot;command&quot;: &quot;node /home/hooks/read_hook.ts&quot;
+      }
+    ]
+  }
+]
+</code></pre>
+
+<p>The <code>matcher</code> field specifies which tool to intercept — in this case, only <code>Read</code>.</p>
+<blockquote>
+<p>💡 <strong>When to use PreToolUse</strong></p>
+<p>When an action <strong>must never happen</strong>. Examples:<br />
+- Prevent Claude from reading <code>.env</code> or credential files<br />
+- Block modifications to <code>migrations/</code> directory<br />
+- Enforce refund limits before processing</p>
+</blockquote>
+<h3>2. PostToolUse — The Observer</h3>
+<p>Runs <strong>after</strong> tool execution. <strong>Cannot block</strong> (already happened), but can:</p>
+<p><img alt="PostToolUse Feedback Loop" src="../../../16-implementing-a-hook/visuals/self-correcting-loop.svg" /><br />
+<em>Figure: Self-correcting feedback loop — Claude tries, hook blocks with explanation, Claude adjusts automatically.</em></p>
+<p>Configuration:</p>
+<pre class="highlight"><code class="language-json">&quot;PostToolUse&quot;: [
+  {
+    &quot;matcher&quot;: &quot;Write|Edit|MultiEdit&quot;,
+    &quot;hooks&quot;: [
+      {
+        &quot;type&quot;: &quot;command&quot;,
+        &quot;command&quot;: &quot;node /home/hooks/edit_hook.ts&quot;
+      }
+    ]
+  }
+]
+</code></pre>
+
+<p>The <code>|</code> in matcher works like regex OR — matches Write, Edit, or MultiEdit.</p>
+<blockquote>
+<p>🎬 <strong>Instructor insight from the video</strong></p>
+<p>PostToolUse feedback goes <strong>directly into Claude's context</strong>. If your hook runs a linter and returns "Line 42: unused variable", Claude will fix it on the next turn automatically. This creates a <strong>self-correcting feedback loop</strong> with zero human intervention.</p>
+</blockquote>
+<hr />
+<h2>Settings Hierarchy</h2>
+<p>Hooks are defined in Claude settings files at three levels:</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Path</th>
+<th>Scope</th>
+<th>In Git?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Global</td>
+<td><code>~/.claude/settings.json</code></td>
+<td>All projects on this machine</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Project (shared)</td>
+<td><code>.claude/settings.json</code></td>
+<td>Whole team</td>
+<td><strong>Yes</strong></td>
+</tr>
+<tr>
+<td>Project (local)</td>
+<td><code>.claude/settings.local.json</code></td>
+<td>Just you</td>
+<td>No (gitignored)</td>
+</tr>
+</tbody>
+</table>
+<p>You can also use the <code>/hooks</code> command inside Claude Code to configure hooks interactively.</p>
+<blockquote>
+<p>🎯 <strong>Exam note</strong></p>
+<p>The settings hierarchy follows the same precedence logic as git config — more local = higher priority. This is a frequently tested concept in D3.</p>
+</blockquote>
+<hr />
+<h2>Practical Applications</h2>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Hook Type</th>
+<th>What It Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auto-format</td>
+<td>PostToolUse on Write/Edit</td>
+<td>Run <code>prettier</code> after every file change</td>
+</tr>
+<tr>
+<td>Auto-test</td>
+<td>PostToolUse on Write/Edit</td>
+<td>Run <code>npm test</code> after edits</td>
+</tr>
+<tr>
+<td>Access control</td>
+<td>PreToolUse on Read</td>
+<td>Block reading sensitive files</td>
+</tr>
+<tr>
+<td>Code quality</td>
+<td>PostToolUse on Write/Edit</td>
+<td>Run linter → feed results to Claude → auto-fix</td>
+</tr>
+<tr>
+<td>Audit logging</td>
+<td>PostToolUse on all</td>
+<td>Track which files Claude accessed or modified</td>
+</tr>
+<tr>
+<td>Naming conventions</td>
+<td>PostToolUse on Write</td>
+<td>Validate new files follow naming rules</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Exam Focus: Hook vs Prompt</h2>
+<p>This is the most commonly tested trade-off across D1 and D3:</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Hook</th>
+<th>Prompt</th>
+<th>Decision Factor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Refunds over $500 must escalate</td>
+<td>✅</td>
+<td>❌</td>
+<td>"must" = deterministic</td>
+</tr>
+<tr>
+<td>Friendly response tone</td>
+<td>❌</td>
+<td>✅</td>
+<td>Preference = probabilistic OK</td>
+</tr>
+<tr>
+<td>Identity verification before financial ops</td>
+<td>✅</td>
+<td>❌</td>
+<td>Compliance = no exceptions</td>
+</tr>
+<tr>
+<td>Prefer shorter responses</td>
+<td>❌</td>
+<td>✅</td>
+<td>"prefer" = best effort</td>
+</tr>
+<tr>
+<td>Auto-format after every edit</td>
+<td>✅</td>
+<td>❌</td>
+<td>Consistency = can't miss</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Decision rule</strong></p>
+<p>If the question says "must / always / guaranteed / compliance" → Hook. If it says "prefer / usually / best practice" → Prompt.</p>
+</blockquote>
+<p>Core exam philosophies at play:<br />
+- <strong>Architecture &gt; Prompt</strong> — structural solutions over instructional ones<br />
+- <strong>Deterministic &gt; Probabilistic</strong> — programmatic enforcement over AI self-regulation</p>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: CI/CD Pipeline Scenario</h3>
+<p>Your team uses Claude Code in CI for automated PR reviews. You need to ensure Claude <strong>never</strong> modifies files in the <code>migrations/</code> directory. What is the most reliable approach?</p>
+<ul>
+<li>A. Add instructions to the system prompt: "Never modify files in migrations/"</li>
+<li>B. Configure a PreToolUse hook that blocks Write/Edit operations targeting <code>migrations/</code> paths</li>
+<li>C. Set file permissions to read-only on the <code>migrations/</code> directory</li>
+<li>D. Configure a PostToolUse hook to revert any changes to <code>migrations/</code> files</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — PreToolUse hook deterministically blocks the operation before it occurs.
+
+- A is prompt-based with non-zero failure rate
+- C works at OS level but produces unclear errors for Claude and wastes tokens on failed attempts
+- D is reactive — the modification already happened, and reverting adds complexity
+
+Exam philosophies: **Deterministic > Probabilistic**, **Validation > Trust**
+</details>
+
+<h3>Q2: Developer Productivity Scenario</h3>
+<p>You want Claude Code to automatically run <code>prettier</code> on any file it creates or edits. Which configuration is correct?</p>
+<ul>
+<li>A. PreToolUse hook with matcher <code>Write|Edit</code>, running prettier</li>
+<li>B. PostToolUse hook with matcher <code>Write|Edit|MultiEdit</code>, running prettier</li>
+<li>C. PostToolUse hook with matcher <code>Read</code>, running prettier</li>
+<li>D. PreToolUse hook with matcher <code>Bash</code>, running prettier</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — Formatting must happen after the file is written/edited (PostToolUse), and should cover all edit-type operations including MultiEdit.
+
+- A runs before the file exists — nothing to format
+- C targets the wrong tool
+- D is unrelated to file editing
+</details>
+
+<h3>Q3: Customer Support Agent Scenario</h3>
+<p>An Agent SDK application processes customer refunds. Business policy requires refunds exceeding $500 to be escalated to a human agent. How should this be enforced?</p>
+<ul>
+<li>A. Include the $500 limit in the agent's system prompt</li>
+<li>B. Implement a PostToolUse hook to check refund amounts after processing</li>
+<li>C. Implement a tool call interception hook that blocks <code>process_refund</code> calls exceeding $500 and redirects to <code>escalate_to_human</code></li>
+<li>D. Add few-shot examples demonstrating the $500 threshold</li>
+</ul>
+<details><summary>Answer</summary>
+
+**C** — PreToolUse interception provides deterministic compliance.
+
+- A is probabilistic (prompts have non-zero failure rate)
+- B is too late (refund already processed)
+- D also cannot guarantee compliance
+
+Exam philosophies: **Deterministic > Probabilistic**, **Architecture > Prompt**
+</details>
+</body>
+</html>

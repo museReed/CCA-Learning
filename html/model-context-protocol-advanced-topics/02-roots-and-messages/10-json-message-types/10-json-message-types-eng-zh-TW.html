@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Json Message Types Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>JSON Message Types — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 (client-server communication patterns), 2.6 (MCP protocol specification)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / Lesson 10</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>所有 MCP 通訊使用 JSON 訊息，分為兩類：Request-Result 配對（雙向、期望回應）和 Notification（單向、fire-and-forget），形成 client 和 server 都能主動發起通訊的雙向協議。</p>
+<hr />
+<p><img alt="Message Types" src="visuals/message-types-zh-TW.svg" /></p>
+<h2>兩類訊息</h2>
+<p>MCP 中每個訊息都屬於兩類之一：</p>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>模式</th>
+<th>期望回應？</th>
+<th>範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Request-Result</strong></td>
+<td>發送者送出 request，接收者回傳 result</td>
+<td>是</td>
+<td>CallToolRequest/Result, ListPromptsRequest/Result</td>
+</tr>
+<tr>
+<td><strong>Notification</strong></td>
+<td>發送者送出，結束</td>
+<td>否</td>
+<td>ProgressNotification, LoggingNotification</td>
+</tr>
+</tbody>
+</table>
+<p>這個區別是根本性的 — 它決定了你如何設計錯誤處理、逾時和訊息排序。</p>
+<hr />
+<h2>Request-Result 配對</h2>
+<p>Request 總是配對一個 Result 類型。發送者 block（或 await）直到 result 到達。</p>
+<h3>常見 Request-Result 配對</h3>
+<table>
+<thead>
+<tr>
+<th>Request</th>
+<th>Result</th>
+<th>發起者</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CallToolRequest</code></td>
+<td><code>CallToolResult</code></td>
+<td>Client</td>
+<td>在 server 上執行 tool</td>
+</tr>
+<tr>
+<td><code>ListPromptsRequest</code></td>
+<td><code>ListPromptsResult</code></td>
+<td>Client</td>
+<td>探索可用 prompts</td>
+</tr>
+<tr>
+<td><code>ReadResourceRequest</code></td>
+<td><code>ReadResourceResult</code></td>
+<td>Client</td>
+<td>讀取 server resource</td>
+</tr>
+<tr>
+<td><code>InitializeRequest</code></td>
+<td><code>InitializeResult</code></td>
+<td>Client</td>
+<td>建立連線、協商 capabilities</td>
+</tr>
+<tr>
+<td><code>CreateMessageRequest</code></td>
+<td><code>CreateMessageResult</code></td>
+<td>Server</td>
+<td>Sampling — 請 client 呼叫 LLM</td>
+</tr>
+<tr>
+<td><code>ListRootsRequest</code></td>
+<td><code>ListRootsResult</code></td>
+<td>Server</td>
+<td>探索 client 的核准目錄</td>
+</tr>
+</tbody>
+</table>
+<pre class="highlight"><code class="language-json">// 範例：CallToolRequest
+{
+  &quot;jsonrpc&quot;: &quot;2.0&quot;,
+  &quot;id&quot;: 1,
+  &quot;method&quot;: &quot;tools/call&quot;,
+  &quot;params&quot;: {
+    &quot;name&quot;: &quot;search_files&quot;,
+    &quot;arguments&quot;: {
+      &quot;query&quot;: &quot;config.yaml&quot;
+    }
+  }
+}
+
+// 範例：CallToolResult
+{
+  &quot;jsonrpc&quot;: &quot;2.0&quot;,
+  &quot;id&quot;: 1,
+  &quot;result&quot;: {
+    &quot;content&quot;: [
+      {
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;text&quot;: &quot;Found config.yaml at /project/config.yaml&quot;
+      }
+    ]
+  }
+}
+</code></pre>
+
+<p>注意 <code>id</code> 欄位 — 它關聯 request 和對應的 result（JSON-RPC 2.0 標準）。</p>
+<hr />
+<h2>Notifications</h2>
+<p>Notification 是 fire-and-forget。沒有 <code>id</code> 欄位，不期望回應。</p>
+<h3>常見 Notifications</h3>
+<table>
+<thead>
+<tr>
+<th>Notification</th>
+<th>發送者</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ProgressNotification</code></td>
+<td>Server</td>
+<td>回報 tool 執行進度</td>
+</tr>
+<tr>
+<td><code>LoggingMessageNotification</code></td>
+<td>Server</td>
+<td>發送 log 訊息給 client</td>
+</tr>
+<tr>
+<td><code>ToolListChangedNotification</code></td>
+<td>Server</td>
+<td>通知 client 可用 tools 已變更</td>
+</tr>
+<tr>
+<td><code>ResourceUpdatedNotification</code></td>
+<td>Server</td>
+<td>通知 client resource 已修改</td>
+</tr>
+<tr>
+<td><code>RootsListChangedNotification</code></td>
+<td>Client</td>
+<td>通知 server roots 已更新</td>
+</tr>
+</tbody>
+</table>
+<pre class="highlight"><code class="language-json">// 範例：ProgressNotification（沒有 &quot;id&quot; 欄位）
+{
+  &quot;jsonrpc&quot;: &quot;2.0&quot;,
+  &quot;method&quot;: &quot;notifications/progress&quot;,
+  &quot;params&quot;: {
+    &quot;progressToken&quot;: &quot;task-123&quot;,
+    &quot;progress&quot;: 75,
+    &quot;total&quot;: 100
+  }
+}
+</code></pre>
+
+<p>與 request 的關鍵差異：<strong>沒有 <code>id</code> 欄位</strong> = notification。</p>
+<hr />
+<h2>雙向協議</h2>
+<p>MCP 是雙向的 — 兩端都能發起通訊：</p>
+<pre class="highlight"><code>Client                          Server
+  |                               |
+  |-- InitializeRequest ---------&gt;|  (Client 發起)
+  |&lt;-- InitializeResult ----------|
+  |                               |
+  |-- CallToolRequest -----------&gt;|  (Client 發起)
+  |&lt;-- ProgressNotification ------|  (Server 推送)
+  |&lt;-- LoggingNotification -------|  (Server 推送)
+  |&lt;-- CallToolResult ------------|
+  |                               |
+  |&lt;-- CreateMessageRequest ------|  (Server 發起 — sampling！)
+  |-- CreateMessageResult -------&gt;|
+  |                               |
+  |-- RootsListChanged ----------&gt;|  (Client 推送 notification)
+</code></pre>
+
+<p>這不同於簡單的 HTTP API（只有 client 發起）。MCP 中雙方都是 peer。</p>
+<hr />
+<h2>規格文件</h2>
+<p>MCP 規格在 GitHub 上以 <strong>TypeScript</strong> 撰寫。重要背景：</p>
+<ul>
+<li>TypeScript 用於 <strong>型別描述</strong>，非執行</li>
+<li>規格定義訊息結構，非實作語言</li>
+<li>Server 可用任何語言撰寫（Python, Go, Rust 等）</li>
+<li>TypeScript 型別作為所有實作的標準參考</li>
+</ul>
+<pre class="highlight"><code class="language-typescript">// 來自規格 — 定義結構，非執行期程式碼
+interface CallToolRequest {
+  method: &quot;tools/call&quot;;
+  params: {
+    name: string;
+    arguments?: Record&lt;string, unknown&gt;;
+  };
+}
+</code></pre>
+
+<hr />
+<h2>Client vs. Server 訊息</h2>
+<p>理解哪端發送什麼：</p>
+<table>
+<thead>
+<tr>
+<th>Client 發送（給 Server）</th>
+<th>Server 發送（給 Client）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>InitializeRequest</code></td>
+<td><code>InitializeResult</code></td>
+</tr>
+<tr>
+<td><code>CallToolRequest</code></td>
+<td><code>CallToolResult</code></td>
+</tr>
+<tr>
+<td><code>ListPromptsRequest</code></td>
+<td><code>ListPromptsResult</code></td>
+</tr>
+<tr>
+<td><code>ReadResourceRequest</code></td>
+<td><code>ReadResourceResult</code></td>
+</tr>
+<tr>
+<td><code>RootsListChangedNotification</code></td>
+<td><code>ProgressNotification</code></td>
+</tr>
+<tr>
+<td><code>CreateMessageResult</code>（回應）</td>
+<td><code>CreateMessageRequest</code>（sampling）</td>
+</tr>
+<tr>
+<td></td>
+<td><code>LoggingMessageNotification</code></td>
+</tr>
+<tr>
+<td></td>
+<td><code>ToolListChangedNotification</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>為什麼 Transport 選擇重要</h2>
+<p>理解訊息類型對選擇正確 transport 至關重要：</p>
+<table>
+<thead>
+<tr>
+<th>Transport</th>
+<th>支援雙向？</th>
+<th>支援 Notification？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>stdio</strong></td>
+<td>是（stdin/stdout）</td>
+<td>是</td>
+</tr>
+<tr>
+<td><strong>SSE</strong></td>
+<td>是（HTTP POST + SSE stream）</td>
+<td>是</td>
+</tr>
+<tr>
+<td><strong>Streamable HTTP</strong></td>
+<td>是</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<p>所有 MCP transport 都必須支援雙向通訊，因為協議本質就是雙向的。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+MCP 不是 REST API。它是在 transport 層之上的 peer-to-peer 協議。Client 和 server 都可以發送 request 和 notification。理解這個雙向本質對設計穩健的 MCP 整合至關重要 — 你必須處理兩個方向的傳入訊息。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.4</strong>：Client-server communication patterns — 兩類訊息定義了協議</li>
+<li><strong>D2 Task 2.6</strong>：MCP 協議規格 — 知道它用 TypeScript 做型別描述</li>
+<li>預期考題區分 Request（有 <code>id</code>，期望回應）和 Notification（無 <code>id</code>，fire-and-forget）</li>
+<li>知道每端可以發送哪些訊息 — sampling 翻轉了典型方向</li>
+<li>核心考試哲學：<strong>理解協議</strong> — 訊息類型決定錯誤處理、逾時和 transport 需求</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 訊息分為哪兩類？</td>
+<td>Request-Result 配對（雙向、期望回應）和 Notification（單向、fire-and-forget）</td>
+</tr>
+<tr>
+<td>JSON 中如何區分 Request 和 Notification？</td>
+<td>Request 有 <code>id</code> 欄位；Notification 沒有</td>
+</tr>
+<tr>
+<td>MCP 是單向還是雙向？</td>
+<td>雙向 — client 和 server 都能發起 request 和 notification</td>
+</tr>
+<tr>
+<td>MCP 規格用什麼語言撰寫？</td>
+<td>TypeScript — 用於型別描述，非執行</td>
+</tr>
+<tr>
+<td>舉一個 server 發起 request 的例子？</td>
+<td><code>CreateMessageRequest</code>（sampling）— server 請 client 呼叫 LLM</td>
+</tr>
+<tr>
+<td>Server 的 tool 清單變更時發送什麼 notification？</td>
+<td><code>ToolListChangedNotification</code></td>
+</tr>
+<tr>
+<td>MCP 使用哪個 JSON-RPC 版本？</td>
+<td>JSON-RPC 2.0</td>
+</tr>
+<tr>
+<td>為什麼 MCP transport 必須支援雙向通訊？</td>
+<td>因為 client 和 server 都能發起 request（如 client 呼叫 tool，server 請求 sampling）</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

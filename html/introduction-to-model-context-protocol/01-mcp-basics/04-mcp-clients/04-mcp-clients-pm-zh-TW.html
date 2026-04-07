@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04 Mcp Clients Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>MCP Clients — PM 策略概覽</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.2 實作 MCP client-server 通訊; T2.4 處理 tool discovery 和執行流程</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 01-mcp-basics / Lesson 04</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>MCP client 就像產品內建的萬用遙控器，能自動探索並操控任何相容的智慧裝置（MCP server），無需針對每個裝置個別設定。</p>
+<hr />
+<p><img alt="Mcp Message Flow" src="visuals/mcp-message-flow-zh-TW.svg" /></p>
+<h2>Client 就是萬用遙控器</h2>
+<p>把你的 AI 產品想像成智慧家庭中樞。MCP client 就是內建在中樞裡的萬用遙控器。當你接上新的智慧裝置（MCP server）時，遙控器會自動：</p>
+<ol>
+<li><strong>探索</strong>裝置能做什麼（開燈、調溫度、鎖門）</li>
+<li><strong>呈現選項</strong>給使用者（或在這裡是給 Claude）</li>
+<li><strong>發送指令</strong>當使用者想要完成某件事</li>
+<li><strong>回報結果</strong>給使用者</li>
+</ol>
+<p>這個遙控器的美妙之處在於，無論製造商是誰，它都能與任何相容裝置運作。不管是 Philips 燈泡還是 Nest 溫控器，同一個遙控器都能操控。</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+規劃產品的整合能力時，MCP client 是一次性的工程投資。一旦建好，新增服務整合就變成配置任務，而非開發專案。</p>
+</blockquote>
+<hr />
+<h2>請求-回應之舞</h2>
+<p>MCP 通訊遵循一個簡單的兩步之舞，映射了組織中委派工作的方式：</p>
+<h3>第一步：「你能做什麼？」（Discovery）</h3>
+<p>在你的產品能使用任何服務之前，MCP client 會問每個 MCP server：「你提供什麼 tools？」Server 回應一份能力菜單。</p>
+<p>這就像新員工到職第一天——他們跟每個部門主管坐下來問：「你的團隊提供什麼服務？你需要我提供什麼資訊才能辦事？」</p>
+<h3>第二步：「請做這件事」（Execution）</h3>
+<p>當 Claude 決定需要某個 tool 時，MCP client 發送具體請求：「用這些輸入執行這個 tool。」Server 執行並回傳結果。</p>
+<p>這就像發工作請求給那個部門：「請拉出亞太區 Q3 銷售報告。」部門做完工作，把報告送回來。</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+先探索再執行的模式意味著你的產品能動態適應可用的服務。如果明天加了一個新的 MCP server，Claude 會自動知道它的 tools，不需要改核心產品的任何程式碼。</p>
+</blockquote>
+<hr />
+<h2>完整的使用者旅程（12 步）</h2>
+<p>理解完整流程幫助 PM 識別瓶頸、錯誤或使用者體驗問題可能出現的位置：</p>
+<ol>
+<li><strong>使用者問問題</strong> — 「我有哪些 open pull requests？」</li>
+<li><strong>產品連接相關 MCP server</strong> — 在這個案例中是 GitHub MCP server</li>
+<li><strong>產品探索可用 tools</strong> — 得知 <code>get_pull_requests</code> 等 tools 存在</li>
+<li><strong>產品發送查詢 + tools 給 Claude</strong> — 「使用者想知道 PR 資訊，這些是你可以用的 tools」</li>
+<li><strong>Claude 分析並決定</strong> — 判斷 <code>get_pull_requests</code> 是正確的 tool</li>
+<li><strong>Claude 指定 tool 呼叫</strong> — 「呼叫 <code>get_pull_requests</code>，參數 <code>state=open</code>」</li>
+<li><strong>產品執行 tool</strong> — 發送請求到 GitHub MCP server</li>
+<li><strong>MCP server 回傳結果</strong> — 包含詳細資訊的 open PR 列表</li>
+<li><strong>產品把結果送給 Claude</strong> — 「這是 tool 回傳的內容」</li>
+<li><strong>Claude 組成回應</strong> — 格式化為有幫助的自然語言答案</li>
+<li><strong>使用者收到答案</strong> — 乾淨、對話式的回應</li>
+</ol>
+<p>兩個影響產品品質的關鍵交接點：</p>
+<ul>
+<li><strong>步驟 4-6</strong>：Claude 的 tool 選擇準確度取決於好的 tool 描述</li>
+<li><strong>步驟 8-10</strong>：Claude 的回應品質取決於結構化的 tool 輸出</li>
+</ul>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+這個流程中的每一步都是潛在的失敗或延遲點。當使用者回報回應緩慢或不正確時，這個流程給你一個框架來識別問題出在哪——是 tool discovery、Claude 的決策、tool 執行，還是回應生成？</p>
+</blockquote>
+<hr />
+<h2>傳輸選項：部署決策</h2>
+<p>MCP client 可以透過三個管道與 MCP server 溝通。這是你的工程團隊會做的部署決策：</p>
+<p><strong>stdio（本機）</strong> — 就像同事坐在你旁邊。快速、簡單，但只在所有東西在同一台機器上時才能用。適合開發和測試。</p>
+<p><strong>HTTP（遠端）</strong> — 就像用 email 溝通。跨距離運作、可靠，但每封訊息有些額外開銷。適合需要遠端服務的生產環境。</p>
+<p><strong>WebSockets（持久）</strong> — 就像保持電話線開著。始終連接、即時來回，但需要維護連線。適合即時、高頻互動。</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+傳輸選擇影響延遲、可靠性和基礎設施成本。大多數生產環境產品，HTTP 是務實的預設選擇。如果你的使用案例需要 WebSockets 的即時優勢，請與工程團隊討論。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯性</h2>
+<p><strong>Domain 2 (18%)</strong> 的重點領域：</p>
+<ul>
+<li>理解 MCP client 作為通訊橋樑的角色（不是 tool 的實作者）</li>
+<li>先探索再執行的兩階段流程</li>
+<li>傳輸層無關性作為架構原則</li>
+<li>Agentic 工作流中的雙重 Claude API 呼叫模式</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP client 簡單來說做什麼？</td>
+<td>它探索 MCP server 有哪些 tools 並路由執行請求——就像能與任何相容裝置運作的萬用遙控器。</td>
+</tr>
+<tr>
+<td>MCP 通訊的兩個階段是什麼？</td>
+<td>Discovery（問有哪些 tools）和 Execution（用特定輸入呼叫特定 tool）。</td>
+</tr>
+<tr>
+<td>為什麼 agentic 流程需要兩次 Claude 呼叫？</td>
+<td>第一次：Claude 收到查詢和 tool 選項，決定用哪個 tool。第二次：Claude 收到 tool 結果，生成最終回應。</td>
+</tr>
+<tr>
+<td>MCP 有哪三種傳輸選項？</td>
+<td>stdio（本機、快速）、HTTP（遠端、可靠）和 WebSockets（持久、即時）。</td>
+</tr>
+<tr>
+<td>MCP client 如何影響整合新服務的時間？</td>
+<td>Client 建好後，新增服務變成配置工作（連接新 MCP server），而非開發工作（寫客製化整合程式碼）。</td>
+</tr>
+<tr>
+<td>12 步流程中兩個關鍵交接點是什麼？</td>
+<td>Tool 選擇準確度（取決於好的 tool 描述）和回應品質（取決於結構化的 tool 輸出）。</td>
+</tr>
+<tr>
+<td>用商業語言描述「傳輸層無關性」是什麼？</td>
+<td>你的產品可以連接本機、遠端或持久連線的 MCP server——全用同一套 client 程式碼，降低工程開銷。</td>
+</tr>
+<tr>
+<td>MCP client 在產品架構中位於哪裡？</td>
+<td>在你的應用程式 server 內部，作為處理 MCP 協定通訊的特定元件。它不是整個應用程式。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

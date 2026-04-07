@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06 Project Setup Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Project Setup — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试涵盖</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%), D3 — Effective Claude Code Usage (30%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.5 (built-in tools — awareness), 3.5 (iterative refinement — intro)</td>
+</tr>
+<tr>
+<td>课程来源</td>
+<td>claude-code-in-action / 02-getting-started / Lesson 06（纯文字课程）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><img alt="Iterative Refinement Cycle" src="visuals/iterative-refinement-cycle-zh-TW.svg" /><br />
+<em>圖：迭代精煉循環 — 請求、建構、檢視、回饋。</em></p>
+<h2>TL;DR</h2>
+<p>课程使用一个小型 Node.js 应用，通过 Claude API 生成 UI 组件。PM 应理解：(1) 该项目展示 Claude Code 如何与真实代码库协作，(2) API key 是可选的 — 表示工具在没有外部 API 访问时也能运作，(3) 它引入的迭代式 generate-review-refine 工作流，是团队实际使用 Claude Code 的方式。</p>
+<hr />
+<h2>为什么 PM 该关注</h2>
+<ol>
+<li><strong>产品 demo 素养</strong> — 理解演示项目有助于跟上课程，并向利益相关方沟通 Claude Code 的功能</li>
+<li><strong>迭代工作流介绍</strong> — generate-review-refine 循环是工程团队采用 Claude Code 的方式；这是你会推销的生产力故事</li>
+<li><strong>API key 可选性</strong> — 展示优雅降级，一个值得注意的产品设计模式</li>
+</ol>
+<hr />
+<h2>商业类比</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>商业类比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>含可选 API 的演示项目</td>
+<td>像 freemium SaaS — 核心功能无需付费即可使用，高级功能需要 key</td>
+</tr>
+<tr>
+<td><code>npm run setup</code> 一次性初始化</td>
+<td>像企业工具的入职设置 — 执行一次，然后开始工作</td>
+</tr>
+<tr>
+<td>迭代式 UI 生成</td>
+<td>像设计冲刺 — 展示原型、获取反馈、改进、重复</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>场景演练：向利益相关方解释 Claude Code</h2>
+<p>你的工程副总问：「Claude Code 实际上对我们的代码做什么？」</p>
+<p>以演示项目为参考：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>发生什么</th>
+<th>商业影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 开发者请 Claude 构建功能</td>
+<td>Claude 读取项目结构和相关文件</td>
+<td>无需预索引；第一天就能在任何代码库上工作</td>
+</tr>
+<tr>
+<td>2. Claude 生成实现</td>
+<td>代码直接写入项目文件</td>
+<td>不需要从另一个聊天窗口复制粘贴</td>
+</tr>
+<tr>
+<td>3. 开发者在浏览器中查看</td>
+<td>应用程序立即反映变更</td>
+<td>反馈循环是秒级，不是小时级</td>
+</tr>
+<tr>
+<td>4. 开发者提供改进反馈</td>
+<td>Claude 迭代改进实现</td>
+<td>通过对话收敛到正确的解决方案</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>练习题</h2>
+<h3>场景：ROI 评估</h3>
+<p>你的 CFO 问团队是否需要为每个开发者准备 Anthropic API key 才能使用 Claude Code。根据本课内容，正确答案是什么？</p>
+<ul>
+<li>A. 是 — Claude Code 需要 API key 才能运作</li>
+<li>B. 否 — Claude Code 本身不需要 Anthropic API key；演示项目可选地使用一个来驱动自己的功能</li>
+<li>C. API key 只在首次设置时需要，之后可以移除</li>
+<li>D. 一个共享的 API key 对整个团队就够了</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — Claude Code 通过自己的机制进行认证（Lesson 05）。本课的 Anthropic API key 是给演示项目的 UI 生成功能用的，不是给 Claude Code 本身用的。演示项目在没有它的情况下使用静态备用数据正常运作。
+
+**PM 重点**：不要将演示项目的 API key 与 Claude Code 的认证混为一谈。这是两个不同的系统。Claude Code 的成本是通过自己的订阅/使用模式，而不是项目 `.env` 文件中的 API key。
+</details>
+</body>
+</html>

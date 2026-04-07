@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05 Log And Progress Notifications Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Log and Progress Notifications — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server capabilities), 2.5 (server-to-client communication)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 01-sampling-and-notifications / Lesson 05</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP server 使用 <code>ctx.info()</code> 記錄日誌、<code>ctx.report_progress()</code> 回報進度，在長時間操作中透過單向 notification 即時回饋給 client。</p>
+<hr />
+<h2>兩種 Notification 機制</h2>
+<p>MCP 提供兩種方式讓 server 即時推送資訊給 client：</p>
+<table>
+<thead>
+<tr>
+<th>機制</th>
+<th>方法</th>
+<th>用途</th>
+<th>方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Logging</td>
+<td><code>ctx.info()</code>, <code>ctx.debug()</code>, <code>ctx.warning()</code>, <code>ctx.error()</code></td>
+<td>狀態訊息、除錯資訊</td>
+<td>Server -&gt; Client（fire-and-forget）</td>
+</tr>
+<tr>
+<td>Progress</td>
+<td><code>ctx.report_progress(current, total)</code></td>
+<td>完成百分比</td>
+<td>Server -&gt; Client（fire-and-forget）</td>
+</tr>
+</tbody>
+</table>
+<p>兩者都是 <strong>notification</strong>，不是 request — server 不等待回應。</p>
+<hr />
+<h2>Logging：Server 端實作</h2>
+<p>Context 物件提供標準 log level 方法：</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def analyze_data(ctx: Context, dataset_url: str) -&gt; str:
+    ctx.info(&quot;Starting data analysis...&quot;)
+
+    ctx.debug(f&quot;Fetching dataset from {dataset_url}&quot;)
+    data = await fetch_dataset(dataset_url)
+
+    ctx.info(f&quot;Loaded {len(data)} records&quot;)
+
+    if len(data) &gt; 100000:
+        ctx.warning(&quot;Large dataset detected — analysis may take longer&quot;)
+
+    try:
+        result = process(data)
+    except Exception as e:
+        ctx.error(f&quot;Analysis failed: {e}&quot;)
+        raise
+
+    ctx.info(&quot;Analysis complete&quot;)
+    return result
+</code></pre>
+
+<p>Log level 遵循標準慣例：<code>debug</code> &lt; <code>info</code> &lt; <code>warning</code> &lt; <code>error</code>。</p>
+<hr />
+<h2>Progress：Server 端實作</h2>
+<p>在迴圈中使用 <code>report_progress()</code> 顯示完成度：</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def batch_process(ctx: Context, items: list[str]) -&gt; str:
+    total = len(items)
+    results = []
+
+    for i, item in enumerate(items):
+        ctx.report_progress(i, total)
+        result = await process_item(item)
+        results.append(result)
+
+    # 標示完成
+    ctx.report_progress(total, total)
+
+    return format_results(results)
+</code></pre>
+
+<p>重點：<br />
+- <code>current</code> 是目前步驟（從 0 開始）<br />
+- <code>total</code> 是總步驟數<br />
+- Client 計算百分比：<code>current / total * 100</code></p>
+<hr />
+<h2>Client 端：接收 Notification</h2>
+<p>Client 在初始化 <code>ClientSession</code> 時提供 callback：</p>
+<pre class="highlight"><code class="language-python">def handle_logging(message: LoggingMessageNotification) -&gt; None:
+    level = message.params.level    # &quot;info&quot;, &quot;debug&quot;, &quot;warning&quot;, &quot;error&quot;
+    data = message.params.data      # 日誌訊息內容
+    print(f&quot;[{level.upper()}] {data}&quot;)
+
+def handle_progress(
+    progress_token: str | int,
+    current: float,
+    total: float | None
+) -&gt; None:
+    if total:
+        pct = int(current / total * 100)
+        print(f&quot;Progress: {pct}% ({current}/{total})&quot;)
+
+# 在 session 建立時傳入 callback
+async with ClientSession(
+    read, write,
+    logging_callback=handle_logging,
+) as session:
+    await session.initialize()
+</code></pre>
+
+<p>重要區別：<br />
+- <code>logging_callback</code> 設定在 <strong>session level</strong>（<code>ClientSession</code> 初始化時）<br />
+- <code>progress_callback</code> 設定在 <strong>每次 tool call</strong>（呼叫特定 tool 時）</p>
+<hr />
+<h2>不同 Client 的呈現方式</h2>
+<p>同樣的 notification 在不同 client 上有不同呈現：</p>
+<table>
+<thead>
+<tr>
+<th>Client 類型</th>
+<th>Logging 呈現</th>
+<th>Progress 呈現</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI</td>
+<td>終端機 <code>print()</code></td>
+<td>文字進度條</td>
+</tr>
+<tr>
+<td>Web app</td>
+<td>WebSocket/SSE 推送到前端</td>
+<td>JavaScript 進度條</td>
+</tr>
+<tr>
+<td>Desktop app</td>
+<td>原生通知區域</td>
+<td>原生進度指示器</td>
+</tr>
+<tr>
+<td>IDE extension</td>
+<td>Output panel</td>
+<td>狀態列進度條</td>
+</tr>
+</tbody>
+</table>
+<p>Server 發送相同資料 — client 決定如何顯示。</p>
+<hr />
+<h2>Notification 是可選的</h2>
+<p>Logging 和 progress 都是 <strong>可選但強烈建議使用的</strong>：</p>
+<ul>
+<li>Server 可以直接發送，不需檢查 client 是否支援</li>
+<li>Client 可以忽略它們而不影響功能</li>
+<li>Fire-and-forget（不需要確認）</li>
+<li>對 tool 回傳值零影響</li>
+</ul>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Logging 和 progress notification 是 MCP 版的 UX 打磨。它們不改變 tool 的功能，但大幅改善使用者在長時間操作中的體驗。一個靜默處理 30 秒的 tool 感覺像壞了；加上進度更新的同一個 tool 感覺很靈敏。</p>
+</blockquote>
+<hr />
+<h2>常見模式</h2>
+<h3>模式 1：多步驟 Pipeline</h3>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def research(ctx: Context, query: str) -&gt; str:
+    ctx.info(&quot;Step 1/3: Searching databases...&quot;)
+    ctx.report_progress(0, 3)
+    results = await search(query)
+
+    ctx.info(&quot;Step 2/3: Filtering results...&quot;)
+    ctx.report_progress(1, 3)
+    filtered = await filter_results(results)
+
+    ctx.info(&quot;Step 3/3: Generating summary...&quot;)
+    ctx.report_progress(2, 3)
+    summary = await summarize(filtered)
+
+    ctx.report_progress(3, 3)
+    ctx.info(&quot;Research complete&quot;)
+    return summary
+</code></pre>
+
+<h3>模式 2：帶 Logging 的錯誤恢復</h3>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def fetch_with_retry(ctx: Context, url: str) -&gt; str:
+    for attempt in range(3):
+        try:
+            ctx.debug(f&quot;Attempt {attempt + 1}/3&quot;)
+            return await fetch(url)
+        except TimeoutError:
+            ctx.warning(f&quot;Attempt {attempt + 1} timed out, retrying...&quot;)
+    ctx.error(&quot;All attempts failed&quot;)
+    raise RuntimeError(&quot;Failed after 3 retries&quot;)
+</code></pre>
+
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.3</strong>：Server capabilities — notification 是可宣告的功能</li>
+<li><strong>D2 Task 2.5</strong>：Server-to-client communication — logging 和 progress 是主要範例</li>
+<li>考試會測試區分 notification（單向）和 request（雙向）的能力</li>
+<li>知道 notification 是可選的且不影響 tool 輸出</li>
+<li>核心考試哲學：<strong>好的 UX 不是可選項</strong> — 即使後端 tool 也應該溝通狀態</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 提供哪兩種即時回饋機制？</td>
+<td>Logging（<code>ctx.info()</code> 等）和 Progress（<code>ctx.report_progress()</code>）</td>
+</tr>
+<tr>
+<td>MCP notification 是單向還是雙向？</td>
+<td>單向（fire-and-forget）— server 發送，不期望回應</td>
+</tr>
+<tr>
+<td><code>logging_callback</code> 在 client 哪裡設定？</td>
+<td>Session level，在 <code>ClientSession</code> 初始化時傳入</td>
+</tr>
+<tr>
+<td><code>progress_callback</code> 在 client 哪裡設定？</td>
+<td>每次 tool call 時設定，不在 session level</td>
+</tr>
+<tr>
+<td><code>report_progress()</code> 接受什麼參數？</td>
+<td><code>current</code>（目前步驟）和 <code>total</code>（總步驟數）</td>
+</tr>
+<tr>
+<td>Notification 會影響 tool 的回傳值嗎？</td>
+<td>不會 — 純粹是資訊性的，且為可選的</td>
+</tr>
+<tr>
+<td>Context 物件提供哪四個 log level？</td>
+<td><code>debug</code>、<code>info</code>、<code>warning</code>、<code>error</code></td>
+</tr>
+<tr>
+<td>為什麼 progress notification 對 UX 很重要？</td>
+<td>靜默處理 30 秒的 tool 感覺壞了；有進度更新會感覺靈敏</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

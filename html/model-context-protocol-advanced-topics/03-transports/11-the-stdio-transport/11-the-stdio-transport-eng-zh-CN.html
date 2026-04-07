@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11 The Stdio Transport Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The STDIO Transport — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (MCP transport 选择), 2.3 (server 生命周期管理)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 03-transports / Lesson 11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Stdio transport 将 MCP server 作为本地 subprocess 执行，通过 stdin/stdout 进行完全双向的 JSON-RPC 消息交换，并使用三步 handshake 建立连接。</p>
+<hr />
+<p><img alt="Transport Comparison" src="visuals/transport-comparison-zh-TW.svg" /></p>
+<h2>什么是 Transport？</h2>
+<p>Transport 是 JSON-RPC 消息在 MCP client 和 server 之间流动的<strong>通信通道</strong>。Protocol 定义消息格式，transport 定义消息如何物理传输。</p>
+<p>Stdio 是 MCP 规范中<strong>最简单且功能最完整</strong>的 transport。</p>
+<hr />
+<h2>Stdio 运作方式</h2>
+<p>Client <strong>将 server 作为 child process（subprocess）启动</strong>。启动后：</p>
+<ul>
+<li>Client 将 JSON-RPC 消息写入 server 的 <strong>stdin</strong></li>
+<li>Server 将 JSON-RPC 消息写入其 <strong>stdout</strong></li>
+<li>双方可以<strong>随时</strong>发送消息（完全双向）</li>
+</ul>
+<pre class="highlight"><code>┌────────┐   stdin    ┌────────┐
+│ Client │ ─────────→ │ Server │
+│        │ ←───────── │        │
+└────────┘   stdout   └────────┘
+     （同一台机器，subprocess）
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+Stdio 只能在 client 和 server 位于<strong>同一台机器</strong>时运作。Client 必须能直接 spawn server process。这是硬性限制 — 无法远程托管。</p>
+</blockquote>
+<hr />
+<h2>三步 Handshake</h2>
+<p>在任何 tool call 或 resource read 之前，client 和 server 需要协商 capabilities：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>方向</th>
+<th>消息类型</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Client → Server</td>
+<td>Initialize Request</td>
+<td>Client 声明 protocol 版本 + capabilities</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Server → Client</td>
+<td>Initialize Result</td>
+<td>Server 回应其 capabilities</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Client → Server</td>
+<td>Initialized Notification</td>
+<td>Client 确认 — handshake 完成</td>
+</tr>
+</tbody>
+</table>
+<p>步骤 3 之后，连接正式建立，双方可自由交换消息。</p>
+<pre class="highlight"><code class="language-python"># Handshake 概念流程
+client.send({&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: &quot;initialize&quot;, &quot;params&quot;: {...}})
+response = server.receive()  # Initialize Result
+client.send({&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: &quot;notifications/initialized&quot;})
+# 现在可以开始 tool call
+</code></pre>
+
+<hr />
+<h2>四种通信模式</h2>
+<p>初始化完成后，Stdio 支持所有四种 MCP 通信模式：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>方向</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client → Server Request</td>
+<td>Client 向 server 发起请求</td>
+<td><code>tools/call</code>、<code>resources/read</code></td>
+</tr>
+<tr>
+<td>Server → Client Response</td>
+<td>Server 回应</td>
+<td>Tool 结果、resource 内容</td>
+</tr>
+<tr>
+<td>Server → Client Request</td>
+<td>Server 向 client 发起请求</td>
+<td><code>sampling/createMessage</code>、<code>roots/list</code></td>
+</tr>
+<tr>
+<td>Client → Server Response</td>
+<td>Client 回应</td>
+<td>Sampling 结果、root 列表</td>
+</tr>
+</tbody>
+</table>
+<p>这是<strong>完整的双向 MCP</strong> — 没有任何功能限制。</p>
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+Stdio 是唯一原生支持所有四种模式的 transport，不需要任何 workaround。这使其成为 MCP 能力的<strong>基准参考</strong>。</p>
+</blockquote>
+<hr />
+<h2>何时使用 Stdio</h2>
+<table>
+<thead>
+<tr>
+<th>使用场景</th>
+<th>适合度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本地开发与测试</td>
+<td>极佳</td>
+</tr>
+<tr>
+<td>IDE 集成（VS Code、Claude Code）</td>
+<td>极佳</td>
+</tr>
+<tr>
+<td>CI/CD pipeline</td>
+<td>良好</td>
+</tr>
+<tr>
+<td>Production 远程 server</td>
+<td>不可能</td>
+</tr>
+<tr>
+<td>多用户访问</td>
+<td>不可能</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>Transport 选择题</strong>：Stdio = 同一台机器、完整功能。题目提到 "remote" 或 "scaling" → Stdio 就是错的。</li>
+<li><strong>Handshake 顺序</strong>：三步骤必须按顺序 — Initialize Request、Initialize Result、Initialized Notification。</li>
+<li><strong>能力比较</strong>：Stdio 支持所有 MCP 功能。其他 transport 以功能换取远程访问。</li>
+<li>考试哲学：<strong>Stdio 是基准线</strong> — 先理解它支持什么，再学其他 transport 牺牲了什么。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 中的 transport 是什么？</td>
+<td>Client 与 server 之间 JSON-RPC 消息交换的通信通道</td>
+</tr>
+<tr>
+<td>Stdio transport 如何物理连接 client 和 server？</td>
+<td>Client 将 server 作为 subprocess spawn；消息通过 stdin（client→server）和 stdout（server→client）传输</td>
+</tr>
+<tr>
+<td>三步 handshake 的顺序是？</td>
+<td>1) Initialize Request (client→server) 2) Initialize Result (server→client) 3) Initialized Notification (client→server)</td>
+</tr>
+<tr>
+<td>Stdio transport 能跨机器运作吗？</td>
+<td>不能 — client 必须在同一台机器上将 server 作为本地 subprocess spawn</td>
+</tr>
+<tr>
+<td>Stdio 支持几种通信模式？</td>
+<td>四种：client→server request、server→client response、server→client request、client→server response</td>
+</tr>
+<tr>
+<td>为什么 Stdio 被称为「基准」transport？</td>
+<td>因为它支持完整的双向 MCP，没有任何功能限制</td>
+</tr>
+<tr>
+<td>什么时候不应该选 Stdio？</td>
+<td>需要远程托管、水平扩展或多用户访问时</td>
+</tr>
+<tr>
+<td>Initialized Notification 发送后会发生什么？</td>
+<td>连接正式建立 — 双方可以自由交换消息</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

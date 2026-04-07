@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 320" font-family="'PingFang TC', 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+  <rect width="620" height="320" fill="white" rx="12"/>
+  <text x="310" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#64748B" letter-spacing="1">Context Window 預算分配</text>
+
+  <!-- Stacked bar -->
+  <g transform="translate(40, 60)">
+    <rect x="0" y="0" width="40" height="60" rx="6" fill="#8B5CF6" filter="url(#shadow)"/>
+    <text x="20" y="35" text-anchor="middle" font-size="9" font-weight="600" fill="white">5-10%</text>
+
+    <rect x="44" y="0" width="55" height="60" rx="6" fill="#3B82F6" filter="url(#shadow)"/>
+    <text x="71" y="35" text-anchor="middle" font-size="9" font-weight="600" fill="white">5-15%</text>
+
+    <rect x="103" y="0" width="215" height="60" rx="6" fill="#22C55E" filter="url(#shadow)"/>
+    <text x="210" y="35" text-anchor="middle" font-size="9" font-weight="600" fill="white">30-50%</text>
+
+    <rect x="322" y="0" width="135" height="60" rx="6" fill="#FB923C" filter="url(#shadow)"/>
+    <text x="389" y="35" text-anchor="middle" font-size="9" font-weight="600" fill="white">20-30%</text>
+
+    <rect x="461" y="0" width="80" height="60" rx="6" fill="#EF4444" filter="url(#shadow)"/>
+    <text x="501" y="35" text-anchor="middle" font-size="9" font-weight="600" fill="white">10-20%</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(40, 150)">
+    <rect x="0" y="0" width="18" height="18" rx="4" fill="#8B5CF6"/>
+    <text x="26" y="14" font-size="12" font-weight="600" fill="#5B21B6">CLAUDE.md</text>
+    <text x="26" y="30" font-size="10" fill="#64748B">啟動時載入的系統指令</text>
+
+    <rect x="280" y="0" width="18" height="18" rx="4" fill="#3B82F6"/>
+    <text x="306" y="14" font-size="12" font-weight="600" fill="#1E40AF">@references</text>
+    <text x="306" y="30" font-size="10" fill="#64748B">透過 @path 明確引用的檔案</text>
+  </g>
+
+  <g transform="translate(40, 200)">
+    <rect x="0" y="0" width="18" height="18" rx="4" fill="#22C55E"/>
+    <text x="26" y="14" font-size="12" font-weight="600" fill="#166534">檔案讀取</text>
+    <text x="26" y="30" font-size="10" fill="#64748B">Claude 執行任務時讀取的程式碼</text>
+
+    <rect x="280" y="0" width="18" height="18" rx="4" fill="#FB923C"/>
+    <text x="306" y="14" font-size="12" font-weight="600" fill="#92400E">對話紀錄</text>
+    <text x="306" y="30" font-size="10" fill="#64748B">你的提示 + Claude 的回覆</text>
+  </g>
+
+  <g transform="translate(40, 250)">
+    <rect x="0" y="0" width="18" height="18" rx="4" fill="#EF4444"/>
+    <text x="26" y="14" font-size="12" font-weight="600" fill="#991B1B">回應空間</text>
+    <text x="26" y="30" font-size="10" fill="#64748B">保留給 Claude 輸出的空間</text>
+  </g>
+
+  <text x="310" y="308" text-anchor="middle" font-size="10" fill="#94A3B8">每個 token 都很珍貴 — 只載入當前任務需要的內容</text>
+</svg>

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>20 The Claude Code Sdk Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Claude Code SDK — 工程師視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試對應</td>
+<td>D2 — Tool Integration &amp; MCP（佔 20%）、D3 — Claude Code Configuration &amp; Workflows（佔 20%）、D1 — Agentic Architecture（佔 27%）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4（MCP integration — SDK 以程式化方式擴展 Claude Code）、3.6（CI/CD integration — SDK 驅動自動化工作流）、1.1（agentic loops — SDK 以程式化方式執行完整 agentic loop）</td>
+</tr>
+<tr>
+<td>課程來源</td>
+<td>claude-code-in-action / 06-sdk-and-wrap-up / Lesson 20</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話理解</h2>
+<p>Claude Code SDK 讓你從 TypeScript、Python 或 CLI 以程式化方式執行 Claude Code — 繼承所有設定和權限 — 預設為唯讀模式，需要透過 <code>allowedTools</code> 明確授權才能寫入，是互動式 Claude Code 與自動化 pipeline 之間的橋樑。</p>
+<hr />
+<p><img alt="Sdk Architecture" src="visuals/sdk-architecture-zh-TW.svg" /><br />
+<em>圖：Claude Code SDK 架構 — 三個進入點、同一引擎、權限模型。</em></p>
+<h2>SDK 是什麼，為什麼存在</h2>
+<p>終端機裡的 Claude Code 是互動式的 — 人類打字、看回應。SDK 把人從迴圈中移除：你的程式碼送出 prompt 並處理回應。</p>
+<p>關鍵點：SDK <strong>不是</strong>獨立產品。它底層跑的是完全相同的 Claude Code，這意味著：</p>
+<ul>
+<li>它讀取 <code>CLAUDE.md</code> 檔案</li>
+<li>它遵守 <code>.claude/settings.json</code> 的權限設定</li>
+<li>它使用相同的工具（Read、Write、Edit、Bash 等）</li>
+<li>它遵循相同的 agentic loop 架構</li>
+</ul>
+<blockquote>
+<p>💡 <strong>核心洞察</strong><br />
+SDK 就是沒有終端機 UI 的 Claude Code。相同引擎、相同設定、相同能力 — 不同介面。</p>
+</blockquote>
+<hr />
+<h2>三種存取方式</h2>
+<p>SDK 透過三種介面提供：</p>
+<h3>1. TypeScript（主要方式）</h3>
+<pre class="highlight"><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
+
+const messages = await query({
+  prompt: &quot;這個專案中有哪些重複的 query？&quot;,
+  options: {
+    maxTurns: 10,
+  },
+});
+
+for await (const message of messages) {
+  if (message.type === &quot;text&quot;) {
+    console.log(message.content);
+  }
+}
+</code></pre>
+
+<h3>2. Python</h3>
+<pre class="highlight"><code class="language-python">import subprocess
+import json
+
+result = subprocess.run(
+    [&quot;claude&quot;, &quot;--print&quot;, &quot;--output-format&quot;, &quot;json&quot;, &quot;Find duplicate queries&quot;],
+    capture_output=True, text=True
+)
+response = json.loads(result.stdout)
+</code></pre>
+
+<h3>3. CLI（Pipe 模式）</h3>
+<pre class="highlight"><code class="language-bash">echo &quot;Find duplicate queries&quot; | claude --print --output-format json
+</code></pre>
+
+<blockquote>
+<p>🎬 <strong>講師影片重點</strong><br />
+講師先示範 TypeScript SDK，因為它提供最豐富的 API，支援 async iteration 逐筆讀取訊息。Python 和 CLI 則是透過 subprocess 呼叫 <code>claude</code> CLI binary。</p>
+</blockquote>
+<hr />
+<h2>權限模型：預設唯讀</h2>
+<p>這是 SDK 中最重要的安全概念：</p>
+<pre class="highlight"><code class="language-typescript">// 預設：Claude 只能讀取檔案，不能修改
+const messages = await query({
+  prompt: &quot;分析這個 codebase&quot;,
+});
+
+// 明確授權寫入：必須指定 allowedTools
+const messages = await query({
+  prompt: &quot;在 package.json 加入一個 test script&quot;,
+  options: {
+    allowedTools: [&quot;Edit&quot;, &quot;Write&quot;, &quot;Bash&quot;],
+  },
+});
+</code></pre>
+
+<p><strong>為什麼預設唯讀？</strong> 程式化執行時沒有人類在迴圈中，沒有人可以批准危險操作。SDK 預設採取最安全的姿態。</p>
+<table>
+<thead>
+<tr>
+<th>權限等級</th>
+<th>Claude 可以做什麼</th>
+<th>使用場景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>預設（無 <code>allowedTools</code>）</td>
+<td>讀取檔案、分析程式碼、回答問題</td>
+<td>Code review、分析、文件查詢</td>
+</tr>
+<tr>
+<td><code>allowedTools: ["Edit"]</code></td>
+<td>讀取 + 修改既有檔案</td>
+<td>自動重構、程式碼修正</td>
+</tr>
+<tr>
+<td><code>allowedTools: ["Edit", "Write"]</code></td>
+<td>讀取 + 修改 + 建立檔案</td>
+<td>程式碼生成、Scaffolding</td>
+</tr>
+<tr>
+<td><code>allowedTools: ["Edit", "Write", "Bash"]</code></td>
+<td>完整存取包含 shell 指令</td>
+<td>CI/CD pipeline、Build 自動化</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>考試重點</strong><br />
+最小權限原則適用：只授予 SDK 呼叫實際需要的工具。Code review pipeline 不應該有 <code>Bash</code> 存取權限。</p>
+</blockquote>
+<hr />
+<h2>基本使用模式</h2>
+<p>核心模式是：<strong>import -&gt; query -&gt; iterate</strong></p>
+<pre class="highlight"><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
+
+// 1. 發送 prompt（啟動 agentic loop）
+const conversation = await query({
+  prompt: &quot;找出 src/ 中所有重複的資料庫 query&quot;,
+  options: {
+    maxTurns: 10,         // 限制 agentic loop 迭代次數
+    allowedTools: [],      // 唯讀（預設）
+  },
+});
+
+// 2. 非同步迭代訊息
+for await (const message of conversation) {
+  switch (message.type) {
+    case &quot;text&quot;:
+      console.log(&quot;Claude 說:&quot;, message.content);
+      break;
+    case &quot;tool_use&quot;:
+      console.log(&quot;Claude 使用工具:&quot;, message.name);
+      break;
+    case &quot;error&quot;:
+      console.error(&quot;錯誤:&quot;, message.content);
+      break;
+  }
+}
+</code></pre>
+
+<p><code>query()</code> 函式回傳一個 async iterable — 訊息會隨著 Claude 思考和行動串流進來，就像終端機體驗一樣。</p>
+<blockquote>
+<p>💡 <strong>核心洞察</strong><br />
+<code>maxTurns</code> 控制 Claude 可以執行多少次 agentic loop 迭代。每個 turn 可能包含多個 tool call。設太低可能讓 Claude 無法完成複雜任務；設太高可能造成不必要的成本。</p>
+</blockquote>
+<hr />
+<h2>實際使用場景</h2>
+<p>SDK 的真正威力在 pipeline 整合中展現：</p>
+<h3>Git Hooks</h3>
+<pre class="highlight"><code class="language-typescript">// pre-commit hook：檢查 secrets
+const result = await query({
+  prompt: &quot;檢查 staged 檔案中是否有寫死的 secrets 或 API keys&quot;,
+  options: { maxTurns: 5 },
+});
+</code></pre>
+
+<h3>Build Scripts</h3>
+<pre class="highlight"><code class="language-typescript">// Post-build：生成 changelog
+const result = await query({
+  prompt: &quot;比較 HEAD 與上一個 tag，生成一筆 changelog 條目&quot;,
+  options: { maxTurns: 10 },
+});
+</code></pre>
+
+<h3>CI/CD Pipelines</h3>
+<pre class="highlight"><code class="language-typescript">// PR review bot
+const result = await query({
+  prompt: `Review 這個 PR diff 找出問題:\n${prDiff}`,
+  options: {
+    maxTurns: 15,
+    allowedTools: [],  // 唯讀用於 review
+  },
+});
+</code></pre>
+
+<blockquote>
+<p>🎬 <strong>講師影片重點</strong><br />
+講師示範了兩步驟工作流：先用唯讀模式呼叫 SDK 找出重複 query，再用 <code>allowedTools: ["Edit"]</code> 修改 <code>package.json</code>。這展示了漸進式權限提升模式。</p>
+</blockquote>
+<hr />
+<h2>安全性：設定繼承</h2>
+<p>SDK 繼承 <code>.claude/settings.json</code> 的所有設定：</p>
+<pre class="highlight"><code class="language-json">{
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [&quot;Read&quot;, &quot;Glob&quot;, &quot;Grep&quot;],
+    &quot;deny&quot;: [&quot;Bash(rm *)&quot;]
+  }
+}
+</code></pre>
+
+<p>即使你的 SDK 程式碼傳入 <code>allowedTools: ["Bash"]</code>，settings 中的 deny 規則仍然適用。這是縱深防禦：</p>
+<ol>
+<li><strong>第一層</strong>：SDK <code>allowedTools</code> — 呼叫者授予的權限</li>
+<li><strong>第二層</strong>：<code>.claude/settings.json</code> — 專案允許的權限</li>
+<li><strong>第三層</strong>：Global settings — 使用者系統層級允許的權限</li>
+</ol>
+<blockquote>
+<p>🎯 <strong>考試重點</strong><br />
+SDK 權限是呼叫者授予（<code>allowedTools</code>）和設定允許的<strong>交集</strong>。如果 settings deny <code>Bash(rm *)</code>，即使有 <code>allowedTools: ["Bash"]</code>，SDK 也無法執行 <code>rm</code>。</p>
+</blockquote>
+<hr />
+<h2>總結表格</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>重點</th>
+<th>考試相關性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SDK 用途</td>
+<td>以程式化方式執行 Claude Code，無需終端機 UI</td>
+<td>D1 1.1 — 自動化中的 agentic loop</td>
+</tr>
+<tr>
+<td>三種介面</td>
+<td>TypeScript（主要）、Python、CLI</td>
+<td>D2 2.4 — 程式化工具整合</td>
+</tr>
+<tr>
+<td>預設唯讀</td>
+<td>無寫入權限，除非 <code>allowedTools</code> 明確授權</td>
+<td>D3 3.6 — 安全的 CI/CD 整合</td>
+</tr>
+<tr>
+<td>設定繼承</td>
+<td>SDK 遵守 <code>.claude/settings.json</code> 和 <code>CLAUDE.md</code></td>
+<td>D3 3.6 — 設定傳播</td>
+</tr>
+<tr>
+<td>Async Iteration</td>
+<td><code>for await (const msg of conversation)</code> 模式</td>
+<td>D1 1.1 — 串流 agentic 回應</td>
+</tr>
+<tr>
+<td>maxTurns</td>
+<td>控制 agentic loop 深度</td>
+<td>D1 1.1 — 迴圈終止控制</td>
+</tr>
+<tr>
+<td>Pipeline 整合</td>
+<td>Git hooks、CI/CD、build scripts、自動化</td>
+<td>D3 3.6 — CI/CD 整合</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>記憶卡</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>正面</th>
+<th>背面</th>
+<th>記憶錨點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Claude Code SDK 的預設權限等級是什麼？</td>
+<td>唯讀。寫入需要透過 <code>allowedTools</code> 明確授權。</td>
+<td>「沒有鑰匙就不能進」— SDK 預設門是鎖的</td>
+</tr>
+<tr>
+<td>2</td>
+<td>存取 Claude Code SDK 的三種方式？</td>
+<td>TypeScript（<code>@anthropic-ai/claude-code</code>）、Python（subprocess）、CLI（pipe 模式）</td>
+<td>三扇門通往同一個房間</td>
+</tr>
+<tr>
+<td>3</td>
+<td>SDK 中 <code>maxTurns</code> 控制什麼？</td>
+<td>Claude 每次 query 可以執行的 agentic loop 迭代次數</td>
+<td>就像賽車設定圈數上限</td>
+</tr>
+<tr>
+<td>4</td>
+<td>SDK 會遵守 <code>.claude/settings.json</code> 嗎？</td>
+<td>會 — 它繼承所有設定，包含 allow/deny 規則</td>
+<td>相同引擎、相同規則手冊</td>
+</tr>
+<tr>
+<td>5</td>
+<td>如何在 TypeScript SDK 中授予寫入權限？</td>
+<td>在 options 中傳入 <code>allowedTools: ["Edit", "Write"]</code></td>
+<td>明確的鑰匙開明確的門</td>
+</tr>
+<tr>
+<td>6</td>
+<td>CI/CD code review pipeline 推薦的權限模型？</td>
+<td>唯讀（不設 <code>allowedTools</code>）— review 不需要寫入權限</td>
+<td>稽核員，不是編輯者</td>
+</tr>
+<tr>
+<td>7</td>
+<td>TypeScript SDK 的核心使用模式？</td>
+<td>Import <code>query</code> -&gt; 帶 prompt 和 options 呼叫 -&gt; async iterate 訊息</td>
+<td>Import、query、iterate</td>
+</tr>
+<tr>
+<td>8</td>
+<td>SDK 為什麼預設唯讀？</td>
+<td>沒有人類在迴圈中批准危險操作 — 最小權限原則</td>
+<td>沒有主管就不給剪刀</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>練習題</h2>
+<h3>Q1：CI/CD 整合場景</h3>
+<p>團隊想在 CI pipeline 中用 Claude Code SDK 加入自動化 code review 步驟。Review 只分析 PR，絕不修改程式碼。哪個設定正確？</p>
+<ul>
+<li>A. <code>allowedTools: ["Read", "Grep", "Glob"]</code></li>
+<li>B. <code>allowedTools: []</code>（或完全省略這個欄位）</li>
+<li>C. <code>allowedTools: ["Edit"]</code> 搭配 settings 中的 deny 規則</li>
+<li>D. <code>allowedTools: ["Bash"]</code> 來執行分析指令</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — SDK 預設就是唯讀模式。對於只需分析（不需修改）的 code review pipeline，傳空的 `allowedTools` 陣列或省略即可。Claude 仍然可以讀取檔案、搜尋程式碼、產生分析。
+
+- A 不正確，因為 Read/Grep/Glob 預設就可用 — 不需列出
+- C 授予不必要的寫入權限再試圖限制 — 違反最小權限原則
+- D 授予遠超 review 所需的 shell 存取權限
+
+關鍵：SDK 的預設唯讀姿態就是分析類任務的正確選擇。
+</details>
+
+<h3>Q2：Agentic Loop 場景</h3>
+<p>你用 SDK 自動化 dependency 更新。Claude 需要讀取 <code>package.json</code>、檢查過期的 dependency 並更新它們。執行後你發現 Claude 在分析後停下，沒有進行修改。最可能的原因是什麼？</p>
+<ul>
+<li>A. <code>maxTurns</code> 設太低</li>
+<li>B. SDK 處於唯讀模式（沒有 <code>allowedTools</code> 授權 Edit）</li>
+<li>C. <code>.claude/settings.json</code> deny 了 Write 權限</li>
+<li>D. TypeScript SDK 不支援檔案修改</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — SDK 預設唯讀。沒有 `allowedTools: ["Edit"]`，Claude 可以分析 `package.json` 但無法修改它。Claude 會報告發現結果但跳過編輯步驟。
+
+- A 可能導致過早停止，但描述的症狀（分析後在編輯前停止）指向權限問題，不是 turn 限制
+- C 有可能但不太可能是首要原因 — SDK 自身的唯讀預設會先觸發
+- D 事實錯誤 — TypeScript SDK 在授權後完全支援檔案修改
+
+關鍵：當 SDK 只分析不修改時，先檢查 `allowedTools`。
+</details>
+</body>
+</html>

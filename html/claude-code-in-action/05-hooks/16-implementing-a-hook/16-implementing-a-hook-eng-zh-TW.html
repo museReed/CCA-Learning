@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>16 Implementing A Hook Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>實作一個 Hook — 工程師深入解析</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks for tool call interception)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>claude-code-in-action / 05-hooks / Lesson 16</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>實作一個 hook 就是在 <code>settings.local.json</code> 配置（matcher + command），然後撰寫腳本從 stdin 讀取 JSON、檢查 <code>tool_input</code>、以 exit code 0（允許）或 2（封鎖 + stderr 回饋）結束。</p>
+<hr />
+<h2>背景：從理論到實作</h2>
+<p>Lesson 15 教了你<em>定義</em> hook 的四步驟框架。這堂課完整走過一個可運作的實作 — 一個防止 Claude 讀取 <code>.env</code> 檔案的 PreToolUse hook。</p>
+<blockquote>
+<p>💡 <strong>iOS/Swift 類比</strong><br />
+</p>
+</blockquote>
+<p><img alt=".env Guard Flow" src="visuals/env-guard-flow-zh-TW.svg" /><br />
+<em>圖：.env 檔案守衛資料流 — PreToolUse 攔截 Read 呼叫，阻擋敏感檔案存取。</em></p>
+<blockquote>
+<p>這就像從概念上理解 <code>URLProtocol</code> 到實際繼承它、註冊它、然後在 Xcode debugger 中看到你的攔截器觸發。真正的學習發生在你看到各部分連結起來的時候。</p>
+</blockquote>
+<hr />
+<h2>逐步實作</h2>
+<h3>1. 配置 <code>settings.local.json</code></h3>
+<p>打開 <code>.claude/settings.local.json</code> 並加入 PreToolUse hook：</p>
+<pre class="highlight"><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Read|Grep&quot;,
+        &quot;hooks&quot;: [
+          {
+            &quot;type&quot;: &quot;command&quot;,
+            &quot;command&quot;: &quot;node ./hooks/read_hook.js&quot;
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+
+<p>關鍵配置細節：<br />
+- <strong><code>matcher: "Read|Grep"</code></strong> — 攔截兩個能存取檔案內容的工具<br />
+- <strong><code>command</code></strong> — 指向實作邏輯的 Node.js 腳本<br />
+- <strong><code>type: "command"</code></strong> — 告訴 Claude Code 這是要執行的 shell command</p>
+<blockquote>
+<p>📝 <strong>為什麼用 <code>settings.local.json</code>？</strong></p>
+<p>這個檔案被 gitignore — 用於你的個人設定。用 <code>.claude/settings.json</code>（沒有 <code>.local</code>）放團隊共用的 hook，應 commit 到版本控制。</p>
+</blockquote>
+<h3>2. 撰寫 Hook 腳本</h3>
+<p>腳本從 stdin 讀取、解析 JSON、檢查檔案路徑、以適當的 code 結束：</p>
+<pre class="highlight"><code class="language-javascript">async function main() {
+  // 第一步：從 stdin 讀取 tool call 資料
+  const chunks = [];
+  for await (const chunk of process.stdin) {
+    chunks.push(chunk);
+  }
+
+  // 第二步：解析 JSON
+  const toolArgs = JSON.parse(Buffer.concat(chunks).toString());
+
+  // 第三步：提取檔案路徑
+  const readPath =
+    toolArgs.tool_input?.file_path || toolArgs.tool_input?.path || &quot;&quot;;
+
+  // 第四步：檢查並決定
+  if (readPath.includes('.env')) {
+    console.error(&quot;You cannot read the .env file&quot;);
+    process.exit(2);  // 封鎖操作
+  }
+
+  // 若到這裡，隱含 exit code 0（允許）
+}
+
+main();
+</code></pre>
+
+<blockquote>
+<p>⚠️ <strong>關鍵實作細節</strong></p>
+<ol>
+<li><strong>從 stdin 讀取，不是 argv</strong> — Tool call 資料透過 standard input 傳入，不是命令列參數</li>
+<li><strong>用 <code>console.error()</code>，不是 <code>console.log()</code></strong> — 回饋必須送到 stderr（exit code 2 只將 stderr 發給 Claude）</li>
+<li><strong>同時檢查 <code>file_path</code> 和 <code>path</code></strong> — 不同工具在 <code>tool_input</code> 中可能用不同欄位名</li>
+<li><strong>Exit code 2，不是 1</strong> — Code 1 是一般錯誤；code 2 專門表示「封鎖此 tool call」</li>
+</ol>
+</blockquote>
+<h3>3. 重啟並測試</h3>
+<p>儲存兩個檔案後：</p>
+<ol>
+<li><strong>重啟 Claude Code</strong> — Hook 變更只在重啟後生效</li>
+<li><strong>用 Read 測試</strong>：請 Claude 讀取 <code>.env</code> — 應被封鎖</li>
+<li><strong>用 Grep 測試</strong>：請 Claude grep <code>.env</code> — 也應被封鎖</li>
+<li><strong>用允許的檔案測試</strong>：請 Claude 讀取其他檔案 — 應正常運作</li>
+</ol>
+<blockquote>
+<p>🎬 <strong>講師影片洞察</strong></p>
+<p>Claude 在回應中辨認出 hook 回饋：「I was prevented by a read hook from accessing that file.」這展示了回饋迴圈 — Claude 不只是失敗；它理解<em>原因</em>並將此傳達給使用者。</p>
+</blockquote>
+<hr />
+<h2>常見實作錯誤</h2>
+<table>
+<thead>
+<tr>
+<th>❌ 錯誤</th>
+<th>✅ 修正</th>
+<th>為什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用 <code>console.log()</code> 做回饋</td>
+<td>用 <code>console.error()</code></td>
+<td>exit code 2 時只有 stderr 會送給 Claude</td>
+</tr>
+<tr>
+<td>以 exit code 1 封鎖</td>
+<td>以 exit code 2 封鎖</td>
+<td>Code 1 = 一般錯誤；Code 2 = 刻意封鎖</td>
+</tr>
+<tr>
+<td>只讀 tool_input.file_path</td>
+<td>同時檢查 tool_input.path</td>
+<td>Grep 用 <code>path</code>，Read 用 <code>file_path</code></td>
+</tr>
+<tr>
+<td>忘記重啟 Claude Code</td>
+<td>改 hook 後一定要重啟</td>
+<td>Hook 在啟動時載入</td>
+</tr>
+<tr>
+<td>用 <code>process.argv</code> 取輸入</td>
+<td>用 <code>process.stdin</code></td>
+<td>Tool call 資料透過 stdin 傳入</td>
+</tr>
+<tr>
+<td>精確比對 <code>.env</code></td>
+<td>用 <code>.includes('.env')</code></td>
+<td>檔案路徑可能是絕對路徑</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>反模式（考試常考）</h2>
+<table>
+<thead>
+<tr>
+<th>❌ 錯誤做法</th>
+<th>✅ 正確做法</th>
+<th>為什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在腳本中檢查 tool_name 來過濾工具</td>
+<td>用 config 中的 matcher 做工具過濾；腳本做輸入驗證</td>
+<td>關注點分離 — matcher 選工具，腳本處理邏輯</td>
+</tr>
+<tr>
+<td>在 settings.json 中寫 inline hook 邏輯</td>
+<td>用外部腳本檔案</td>
+<td>可維護性、可測試性、可讀性</td>
+</tr>
+<tr>
+<td>靜默封鎖不回饋</td>
+<td>封鎖時一定要寫 stderr</td>
+<td>Claude 需要知道<em>原因</em>才能調整行為</td>
+</tr>
+<tr>
+<td>只防護 Read</td>
+<td>同時防護 Read 和 Grep</td>
+<td>兩個工具都能暴露檔案內容</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>練習題</h2>
+<h3>Q1：開發者生產力情境（S4）</h3>
+<p>你實作了一個 PreToolUse hook 來防止 Claude 讀取 <code>.env</code> 檔案。Hook 腳本用了 <code>console.log("Access denied")</code> 和 <code>process.exit(2)</code>。Claude 成功封鎖了讀取但沒顯示 "Access denied" 訊息。問題是什麼？</p>
+<ul>
+<li>A. Exit code 應該是 1，不是 2</li>
+<li>B. 回饋必須寫到 stderr（<code>console.error()</code>），不是 stdout（<code>console.log()</code>）</li>
+<li>C. Matcher 除了 <code>Read</code> 還應包含 <code>Write</code></li>
+<li>D. Hook 需要回傳 JSON 回應而非純文字訊息</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — Hook 以 exit code 2 結束時，只有 stderr 輸出會轉發給 Claude 作為回饋。`console.log()` 寫到 stdout，不會被捕獲。用 `console.error()` 寫到 stderr。
+
+- A：Code 1 是一般錯誤，不是封鎖訊號
+- C：Write 不相關 — 問題是關於讀取存取的回饋
+- D：純文字寫到 stderr 是正確機制；不需要 JSON 包裝
+</details>
+
+<h3>Q2：CI/CD 整合情境（S5）</h3>
+<p>你的團隊想實作一個 hook，檢查 Claude 是否在執行潛在危險的 Bash 命令（如 <code>rm -rf</code>）。Hook 應封鎖危險命令、允許安全命令。哪個實作方法正確？</p>
+<ul>
+<li>A. PostToolUse hook，在執行後還原危險命令的結果</li>
+<li>B. PreToolUse hook，matcher 為 <code>Bash</code>，讀取 stdin JSON，檢查 <code>tool_input.command</code>，若命令符合黑名單則以 exit code 2 結束</li>
+<li>C. PreToolUse hook，matcher 為 <code>.*</code>，封鎖所有包含 "rm" 的 tool call</li>
+<li>D. 在 system prompt 加入「永不執行 rm -rf」</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 需要 PreToolUse 在執行前封鎖。Matcher 專門指向 `Bash`。腳本檢查 `tool_input.command`（實際 shell 命令）並套用黑名單檢查。
+
+- A：PostToolUse 太晚了 — 危險命令已經執行
+- C：`.*` 太廣泛（攔截所有工具），且在任何工具中檢查 "rm" 不精確
+- D：Prompt-based，有非零失敗率 — 安全需求不可接受
+
+> 考試哲學：**Deterministic > Probabilistic**
+</details>
+
+<h3>Q3：客戶支援代理情境（S1）</h3>
+<p>你正在為客服代理實作一個 PreToolUse hook。Hook 必須在退款金額超過 $500 時封鎖 <code>process_refund</code> 工具。你的腳本讀取 stdin JSON 並檢查 <code>tool_input.amount</code>。但測試中，hook 允許了 $600 的退款。最可能的原因是什麼？</p>
+<ul>
+<li>A. Exit code 應該是 1 而不是 2</li>
+<li>B. 腳本在檢查 <code>tool_input.refund_amount</code> 而不是工具實際使用的欄位名</li>
+<li>C. 應該用 PostToolUse hook 而不是 PreToolUse</li>
+<li>D. Matcher 應該是 <code>.*</code> 來攔截所有 tool call</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 最常見的實作 bug 是 `tool_input` 中的欄位名不匹配。每個工具定義自己的 input schema。腳本必須使用工具期望的確切欄位名（可能是 `amount`、`refund_amount`、`value` 等）。
+
+- A：Exit code 2 對封鎖來說是正確的
+- C：PostToolUse 無法封鎖 — 退款已被處理
+- D：Matcher 應指向特定工具，不是所有工具
+</details>
+</body>
+</html>

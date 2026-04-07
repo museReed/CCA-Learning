@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 The Streamablehttp Transport Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The StreamableHTTP Transport — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (MCP transport 选择), 2.4 (远程 server 配置)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 03-transports / Lesson 12</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>StreamableHTTP 让你的 MCP server 上网，但就像从私人办公室搬到公共柜台 — 增加了可及性，却失去了主动找人的能力。</p>
+<hr />
+<h2>柜台类比</h2>
+<ul>
+<li><strong>Stdio</strong> = 私人办公室。你和同事面对面坐着，任何人都能随时发起对话。</li>
+<li><strong>StreamableHTTP</strong> = 服务柜台。访客（client）可以走过来提问，但柜台人员（server）<strong>不能离开柜台</strong>去找访客 — 必须等人来。</li>
+</ul>
+<p>这是 HTTP 的根本限制：<strong>server 只能回应，不能主动发起</strong>。</p>
+<hr />
+<h2>对产品的意义</h2>
+<h3>仍然可用的功能（Client-Initiated）</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>用户体验</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool call</td>
+<td>用户问 AI，AI 调用 server 工具 — 完美运作</td>
+</tr>
+<tr>
+<td>Resource read</td>
+<td>AI 从 server 获取数据 — 完美运作</td>
+</tr>
+<tr>
+<td>Prompt template</td>
+<td>AI 从 server 加载模板 — 完美运作</td>
+</tr>
+</tbody>
+</table>
+<h3>有风险的功能（Server-Initiated）</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>失去什么</th>
+<th>产品影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sampling（CreateMessage）</td>
+<td>Server 无法请求 AI 生成文字</td>
+<td>无 server 端 AI 推理</td>
+</tr>
+<tr>
+<td>Progress notification</td>
+<td>Server 无法报告「完成 50%...」</td>
+<td>用户在长任务中看不到进度</td>
+</tr>
+<tr>
+<td>Logging</td>
+<td>Server 无法推送调试消息</td>
+<td>Production 更难排查问题</td>
+</tr>
+<tr>
+<td>Root listing</td>
+<td>Server 无法问「开了哪些文件？」</td>
+<td>无 workspace 感知功能</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+如果你的产品路线图包含 <strong>server 需要向 client 提问</strong>的功能（如「批准这个操作？」或「应该用哪个文件？」），启用限制性设置的 StreamableHTTP 会阻挡这些功能。</p>
+</blockquote>
+<hr />
+<h2>两个配置开关</h2>
+<p>把它们想成基础架构团队可以设置的<strong>限制等级</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>设置</th>
+<th>关闭（默认）</th>
+<th>开启</th>
+<th>商业影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stateless_http</code></td>
+<td>Server 记住每个 client session</td>
+<td>Server 将每个请求视为独立</td>
+<td>更容易扩展，但失去进度追踪和 server-initiated 功能</td>
+</tr>
+<tr>
+<td><code>json_response</code></td>
+<td>Server 可以逐步流式传输结果</td>
+<td>Server 最后才一次返回</td>
+<td>基础架构更简单，但用户等待更久</td>
+</tr>
+</tbody>
+</table>
+<h3>限制光谱</h3>
+<pre class="highlight"><code>最多功能 ◄──────────────────────────────► 最简单架构
+
+两者都关        stateless 开      json 开         两者都开
+（默认）        或 json 开       或 stateless     （最大限制）
+</code></pre>
+
+<hr />
+<h2>PM 决策矩阵</h2>
+<table>
+<thead>
+<tr>
+<th>商业需求</th>
+<th>建议设置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「需要实时进度条」</td>
+<td>两个标志都关（默认）</td>
+</tr>
+<tr>
+<td>「需要扩展到一万用户」</td>
+<td><code>stateless_http=true</code>（接受功能损失）</td>
+</tr>
+<tr>
+<td>「简单的 webhook 风格集成」</td>
+<td>两个标志都开</td>
+</tr>
+<tr>
+<td>「Server 需要调用 AI 模型」</td>
+<td>两个标志都关 + SSE 设置</td>
+</tr>
+<tr>
+<td>「只需要基本工具访问」</td>
+<td>任何配置都行</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>利益相关者沟通的核心取舍</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Stdio</th>
+<th>StreamableHTTP（默认）</th>
+<th>StreamableHTTP（限制）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>部署</td>
+<td>仅限本地</td>
+<td>远程/云端</td>
+<td>远程/云端</td>
+</tr>
+<tr>
+<td>可扩展性</td>
+<td>单一用户</td>
+<td>中等</td>
+<td>高</td>
+</tr>
+<tr>
+<td>功能覆盖</td>
+<td>100%</td>
+<td>~80%（有 SSE workaround）</td>
+<td>~50%</td>
+</tr>
+<tr>
+<td>基础架构复杂度</td>
+<td>最低</td>
+<td>中等</td>
+<td>低</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>情境题</strong>：「Web 应用的远程 MCP server」→ StreamableHTTP。然后检查场景需要哪些功能来决定标志设置。</li>
+<li><strong>取舍题</strong>：知道每个限制等级确切失去哪些功能。</li>
+<li><strong>标志默认值</strong>：都是 <code>false</code> — 这是常考的。启用是限制而非增强。</li>
+<li><strong>方向不要搞混</strong>：Client→server 永远可用。只有 server→client 受影响。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用商业术语描述 StreamableHTTP 的功能？</td>
+<td>远程 MCP server 托管 — server 可以在云端，通过网络服务用户</td>
+</tr>
+<tr>
+<td>HTTP 对 MCP 的根本限制是什么？</td>
+<td>Server 无法主动发起通信 — 只能回应 client 请求</td>
+</tr>
+<tr>
+<td>哪些产品功能需要 server-initiated request？</td>
+<td>进度条、人工审批流程、server 端 AI 推理（sampling）</td>
+</tr>
+<tr>
+<td>两个标志的默认值是？</td>
+<td><code>stateless_http</code> 和 <code>json_response</code> 都默认为 <code>false</code>（最少限制）</td>
+</tr>
+<tr>
+<td>开启 <code>stateless_http</code> 会怎样？</td>
+<td>Server 忘记 session — 更容易扩展但失去进度追踪和 server-initiated 功能</td>
+</tr>
+<tr>
+<td>开启 <code>json_response</code> 会怎样？</td>
+<td>无 streaming — server 一次返回完整结果而非逐步更新</td>
+</tr>
+<tr>
+<td>PM 何时应该接受功能取舍？</td>
+<td>当可扩展性或基础架构简洁性比 server-initiated 功能更重要时</td>
+</tr>
+<tr>
+<td>不管标志怎么设，哪些功能永远可用？</td>
+<td>Client-initiated 功能：tool call、resource read、prompt template 获取</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

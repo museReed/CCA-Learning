@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>09 Implementing A Client Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Implementing a Client — PM Strategic Overview</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.2 Implement MCP client-server communication; T2.4 Handle tool discovery and execution flows</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 02-tools-and-inspector / Lesson 09</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The MCP client is the orchestration layer in your product that coordinates between the user, Claude, and external services — like a project manager who knows who to ask for what and when.</p>
+<hr />
+<h2>The Client as Project Manager</h2>
+<p>Think of the MCP client as a project manager coordinating a complex request:</p>
+<ol>
+<li><strong>Intake</strong> — A stakeholder (user) submits a request</li>
+<li><strong>Resource survey</strong> — The PM checks which teams (MCP servers) are available and what services they offer</li>
+<li><strong>Expert consultation</strong> — The PM presents the request and available resources to a decision-maker (Claude)</li>
+<li><strong>Delegation</strong> — The decision-maker says "have the data team pull this report" — the PM routes the request</li>
+<li><strong>Delivery</strong> — The PM collects the results and brings them back to the decision-maker for a final recommendation</li>
+<li><strong>Response</strong> — The decision-maker crafts a polished answer for the stakeholder</li>
+</ol>
+<p>This six-step pattern is the core of every MCP-powered product interaction.</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+The client is the coordination layer, not the intelligence layer. Claude provides the intelligence (deciding what to do). The MCP server provides the capabilities (doing the work). The client connects them. This separation of concerns is key to understanding the architecture.</p>
+</blockquote>
+<hr />
+<h2>The Two Essential Operations</h2>
+<p>Every MCP client does exactly two things with MCP servers:</p>
+<h3>"What Can You Do?" (Discovery)</h3>
+<p>Before any work happens, the client asks each MCP server what tools it offers. This is like a PM's first meeting with a new vendor — "Show me your service catalog."</p>
+<p>The response is a structured list of capabilities: tool names, descriptions, and what inputs each tool needs. This catalog gets passed to Claude so it can make informed decisions.</p>
+<h3>"Please Do This" (Execution)</h3>
+<p>When Claude decides to use a tool, the client takes Claude's specific request and sends it to the right MCP server. This is like the PM sending a detailed work order to the vendor: "Run analysis X on dataset Y with parameters Z."</p>
+<p>The server does the work and returns results, which the client passes back to Claude for interpretation.</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+These two operations — discovery and execution — are the only things the client does with MCP. If someone on your team describes a more complex interaction, they are likely describing multiple rounds of these same two operations.</p>
+</blockquote>
+<hr />
+<h2>The Five-Step Product Flow</h2>
+<p>From a product perspective, every user interaction with MCP-powered tools follows five steps:</p>
+<p><strong>Step 1: Discover capabilities</strong> — Your product checks what tools are available. This happens automatically and invisibly to the user.</p>
+<p><strong>Step 2: Present context to Claude</strong> — Your product sends the user's question along with the tool catalog to Claude. Claude sees both what the user wants and what tools it has to work with.</p>
+<p><strong>Step 3: Claude makes a decision</strong> — Claude either answers directly (if no tools are needed) or decides to call a specific tool with specific inputs. This is the "AI judgment" step.</p>
+<p><strong>Step 4: Execute the action</strong> — Your product sends Claude's tool request to the appropriate MCP server. The server does the work — queries a database, fetches a file, runs a calculation.</p>
+<p><strong>Step 5: Deliver the answer</strong> — Your product sends the tool results back to Claude, which crafts a natural language response for the user.</p>
+<p>The user sees none of this complexity. They ask a question and get an answer. The five steps happen in milliseconds to seconds.</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+Step 3 is where product quality is won or lost. Claude's ability to choose the right tool depends on the quality of tool descriptions (from the server) and the clarity of the user's question. Both are product design concerns.</p>
+</blockquote>
+<hr />
+<h2>The Double-Call Pattern</h2>
+<p>A subtle but important aspect: the product makes two separate calls to Claude for every tool-using interaction.</p>
+<p><strong>First call</strong>: "User asks X. Here are the available tools. What do you want to do?"<br />
+<strong>Claude responds</strong>: "I want to call tool Y with input Z."</p>
+<p><strong>Second call</strong>: "Tool Y returned these results. Now please answer the user's original question."<br />
+<strong>Claude responds</strong>: "Based on the data, here is the answer..."</p>
+<p>This double-call pattern has product implications:</p>
+<ul>
+<li><strong>Latency</strong>: Two API calls means longer response times when tools are involved</li>
+<li><strong>Cost</strong>: Two Claude API calls per interaction (important for pricing models)</li>
+<li><strong>Quality</strong>: The second call benefits from concrete data, often producing better responses than the first call alone could</li>
+</ul>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+When estimating response times and API costs for your product, remember that tool-using interactions require two Claude API calls. Non-tool interactions require only one. Your product's mix of these two types determines overall performance and cost.</p>
+</blockquote>
+<hr />
+<h2>Error Scenarios Product Teams Should Understand</h2>
+<p>Four types of failures can occur, each with different user-facing implications:</p>
+<ol>
+<li><strong>Tool not found</strong> — The tool Claude requested does not exist. Usually a configuration issue.</li>
+<li><strong>Invalid input</strong> — Claude sent the wrong type of data to a tool. Usually a tool description clarity issue.</li>
+<li><strong>Server error</strong> — The MCP server or external service failed. Infrastructure issue.</li>
+<li><strong>Transport error</strong> — Connection between client and server was lost. Network issue.</li>
+</ol>
+<p>Each requires different error handling and different user messaging.</p>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<p>This lesson completes <strong>Domain 2 (18%)</strong>:</p>
+<ul>
+<li>The client uses two SDK classes: Client (connection) and ClientSession (communication)</li>
+<li>Two essential methods: <code>list_tools()</code> and <code>call_tool()</code></li>
+<li>The five-step agentic flow from discovery to final response</li>
+<li>The double-call pattern (two Claude API calls per tool-using interaction)</li>
+<li>Error handling: check <code>result.isError</code> for tool-level failures</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the MCP client's role in business terms?</td>
+<td>It is the coordination layer — like a project manager who surveys available resources, presents options to a decision-maker (Claude), and routes execution requests.</td>
+</tr>
+<tr>
+<td>What are the only two operations an MCP client performs with MCP servers?</td>
+<td>Discovery (asking what tools are available) and Execution (calling a specific tool with specific inputs).</td>
+</tr>
+<tr>
+<td>What are the five steps of the MCP product flow?</td>
+<td>1) Discover capabilities, 2) Present context to Claude, 3) Claude decides, 4) Execute the action, 5) Deliver the answer.</td>
+</tr>
+<tr>
+<td>Why does tool-using interaction require two Claude API calls?</td>
+<td>First call: Claude receives the query and tools, decides what to do. Second call: Claude receives the tool results and crafts a final response.</td>
+</tr>
+<tr>
+<td>What are the cost implications of the double-call pattern?</td>
+<td>Every tool-using interaction costs two Claude API calls instead of one, which affects pricing models and usage projections.</td>
+</tr>
+<tr>
+<td>Which step in the five-step flow determines product quality?</td>
+<td>Step 3 (Claude's decision) — it depends on tool description quality and user question clarity, both of which are product design concerns.</td>
+</tr>
+<tr>
+<td>What are the four types of MCP client errors?</td>
+<td>Tool not found (config), Invalid input (description clarity), Server error (infrastructure), Transport error (network).</td>
+</tr>
+<tr>
+<td>What does the user experience during the five-step MCP flow?</td>
+<td>Nothing. They ask a question and get an answer. All five steps happen transparently in milliseconds to seconds.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

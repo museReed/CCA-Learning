@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05 Log And Progress Notifications Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Log and Progress Notifications — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server capabilities), 2.5 (server-to-client communication)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 01-sampling-and-notifications / Lesson 05</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP servers use <code>ctx.info()</code> for logging and <code>ctx.report_progress()</code> for progress tracking, sending real-time feedback to clients during long-running operations via one-way notifications.</p>
+<hr />
+<h2>Two Notification Mechanisms</h2>
+<p>MCP provides two distinct ways for servers to push real-time information to clients:</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Method</th>
+<th>Purpose</th>
+<th>Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Logging</td>
+<td><code>ctx.info()</code>, <code>ctx.debug()</code>, <code>ctx.warning()</code>, <code>ctx.error()</code></td>
+<td>Status messages, debug info</td>
+<td>Server -&gt; Client (fire-and-forget)</td>
+</tr>
+<tr>
+<td>Progress</td>
+<td><code>ctx.report_progress(current, total)</code></td>
+<td>Completion percentage</td>
+<td>Server -&gt; Client (fire-and-forget)</td>
+</tr>
+</tbody>
+</table>
+<p>Both are <strong>notifications</strong>, not requests — the server does not wait for a response.</p>
+<hr />
+<h2>Logging: Server-Side Implementation</h2>
+<p>The Context object exposes standard log-level methods:</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def analyze_data(ctx: Context, dataset_url: str) -&gt; str:
+    ctx.info(&quot;Starting data analysis...&quot;)
+
+    ctx.debug(f&quot;Fetching dataset from {dataset_url}&quot;)
+    data = await fetch_dataset(dataset_url)
+
+    ctx.info(f&quot;Loaded {len(data)} records&quot;)
+
+    if len(data) &gt; 100000:
+        ctx.warning(&quot;Large dataset detected — analysis may take longer&quot;)
+
+    try:
+        result = process(data)
+    except Exception as e:
+        ctx.error(f&quot;Analysis failed: {e}&quot;)
+        raise
+
+    ctx.info(&quot;Analysis complete&quot;)
+    return result
+</code></pre>
+
+<p>Log levels follow standard conventions: <code>debug</code> &lt; <code>info</code> &lt; <code>warning</code> &lt; <code>error</code>.</p>
+<hr />
+<h2>Progress: Server-Side Implementation</h2>
+<p>Use <code>report_progress()</code> within loops to show completion:</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def batch_process(ctx: Context, items: list[str]) -&gt; str:
+    total = len(items)
+    results = []
+
+    for i, item in enumerate(items):
+        ctx.report_progress(i, total)
+        result = await process_item(item)
+        results.append(result)
+
+    # Signal completion
+    ctx.report_progress(total, total)
+
+    return format_results(results)
+</code></pre>
+
+<p>Key details:<br />
+- <code>current</code> is the current step (0-indexed start)<br />
+- <code>total</code> is the total number of steps<br />
+- Client calculates percentage: <code>current / total * 100</code></p>
+<hr />
+<h2>Client-Side: Receiving Notifications</h2>
+<p>The client provides callbacks when initializing <code>ClientSession</code>:</p>
+<pre class="highlight"><code class="language-python">def handle_logging(message: LoggingMessageNotification) -&gt; None:
+    level = message.params.level    # &quot;info&quot;, &quot;debug&quot;, &quot;warning&quot;, &quot;error&quot;
+    data = message.params.data      # The log message content
+    print(f&quot;[{level.upper()}] {data}&quot;)
+
+def handle_progress(
+    progress_token: str | int,
+    current: float,
+    total: float | None
+) -&gt; None:
+    if total:
+        pct = int(current / total * 100)
+        print(f&quot;Progress: {pct}% ({current}/{total})&quot;)
+
+# Pass callbacks during session creation
+async with ClientSession(
+    read, write,
+    logging_callback=handle_logging,
+    # progress_callback is per-tool-call, not session-level
+) as session:
+    await session.initialize()
+</code></pre>
+
+<p>Important distinction:<br />
+- <code>logging_callback</code> is set at <strong>session level</strong> (in <code>ClientSession</code> init)<br />
+- <code>progress_callback</code> is set <strong>per tool call</strong> (when invoking a specific tool)</p>
+<hr />
+<h2>Presentation Varies by Client Type</h2>
+<p>The same notifications render differently depending on the client:</p>
+<table>
+<thead>
+<tr>
+<th>Client Type</th>
+<th>Logging Presentation</th>
+<th>Progress Presentation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI</td>
+<td><code>print()</code> to terminal</td>
+<td>Text-based progress bar</td>
+</tr>
+<tr>
+<td>Web app</td>
+<td>WebSocket/SSE push to frontend</td>
+<td>JavaScript progress bar</td>
+</tr>
+<tr>
+<td>Desktop app</td>
+<td>Native notification area</td>
+<td>Native progress indicator</td>
+</tr>
+<tr>
+<td>IDE extension</td>
+<td>Output panel</td>
+<td>Status bar progress</td>
+</tr>
+</tbody>
+</table>
+<p>The server sends the same data — the client decides how to display it.</p>
+<hr />
+<h2>Notifications Are Optional</h2>
+<p>Both logging and progress are <strong>optional but highly recommended</strong>:</p>
+<ul>
+<li>Server can send them without checking if client supports them</li>
+<li>Client can ignore them without breaking functionality</li>
+<li>They are fire-and-forget (no acknowledgment needed)</li>
+<li>Zero impact on tool return values</li>
+</ul>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Logging and progress notifications are the MCP equivalent of UX polish. They do not change what the tool does, but they dramatically improve the user's experience during long-running operations. A tool that silently processes for 30 seconds feels broken; the same tool with progress updates feels responsive.</p>
+</blockquote>
+<hr />
+<h2>Common Patterns</h2>
+<h3>Pattern 1: Multi-Step Pipeline</h3>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def research(ctx: Context, query: str) -&gt; str:
+    ctx.info(&quot;Step 1/3: Searching databases...&quot;)
+    ctx.report_progress(0, 3)
+    results = await search(query)
+
+    ctx.info(&quot;Step 2/3: Filtering results...&quot;)
+    ctx.report_progress(1, 3)
+    filtered = await filter_results(results)
+
+    ctx.info(&quot;Step 3/3: Generating summary...&quot;)
+    ctx.report_progress(2, 3)
+    summary = await summarize(filtered)
+
+    ctx.report_progress(3, 3)
+    ctx.info(&quot;Research complete&quot;)
+    return summary
+</code></pre>
+
+<h3>Pattern 2: Error Recovery with Logging</h3>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def fetch_with_retry(ctx: Context, url: str) -&gt; str:
+    for attempt in range(3):
+        try:
+            ctx.debug(f&quot;Attempt {attempt + 1}/3&quot;)
+            return await fetch(url)
+        except TimeoutError:
+            ctx.warning(f&quot;Attempt {attempt + 1} timed out, retrying...&quot;)
+    ctx.error(&quot;All attempts failed&quot;)
+    raise RuntimeError(&quot;Failed after 3 retries&quot;)
+</code></pre>
+
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.3</strong>: Server capabilities — notifications are a declared capability</li>
+<li><strong>D2 Task 2.5</strong>: Server-to-client communication — logging and progress are the primary examples</li>
+<li>Expect questions distinguishing notifications (one-way) from requests (bidirectional)</li>
+<li>Know that notifications are optional and do not affect tool output</li>
+<li>Key exam philosophy: <strong>UX matters</strong> — even backend tools should communicate status</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What two notification mechanisms does MCP provide for real-time feedback?</td>
+<td>Logging (<code>ctx.info()</code> etc.) and Progress (<code>ctx.report_progress()</code>)</td>
+</tr>
+<tr>
+<td>Are MCP notifications one-way or bidirectional?</td>
+<td>One-way (fire-and-forget) — server sends, no response expected</td>
+</tr>
+<tr>
+<td>Where is <code>logging_callback</code> configured in the client?</td>
+<td>At session level, passed to <code>ClientSession</code> during initialization</td>
+</tr>
+<tr>
+<td>Where is <code>progress_callback</code> configured in the client?</td>
+<td>Per tool call, not at session level</td>
+</tr>
+<tr>
+<td>What parameters does <code>report_progress()</code> take?</td>
+<td><code>current</code> (current step) and <code>total</code> (total steps)</td>
+</tr>
+<tr>
+<td>Do notifications affect the tool's return value?</td>
+<td>No — they are purely informational and optional</td>
+</tr>
+<tr>
+<td>What are the four log levels available on the Context object?</td>
+<td><code>debug</code>, <code>info</code>, <code>warning</code>, <code>error</code></td>
+</tr>
+<tr>
+<td>Why are progress notifications important for UX?</td>
+<td>A tool that silently processes for 30 seconds feels broken; progress updates make it feel responsive</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Controlling Context Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Controlling Context — 工程師視角</h1>
+<p><img alt="Context Control Tools Decision Tree" src="visuals/context-control-tools-decision-tree-zh-TW.svg" /><br />
+<em>圖：選擇上下文控制工具的決策樹。</em></p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試對應</td>
+<td>D5 — Reliability &amp; Performance（15%）、D3 — Claude Code Configuration &amp; Workflows（20%）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 ★★★（context preservation）、5.4 ★★（large codebase context）、3.5 ★★（iterative refinement）</td>
+</tr>
+<tr>
+<td>課程來源</td>
+<td>claude-code-in-action / 03-context-and-commands / Lesson 10</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話理解</h2>
+<p>Context 是有限資源 — Escape 中斷產出、雙擊 Escape 倒帶對話歷史、<code>/compact</code> 摘要保留已學知識、<code>/clear</code> 完全重來。選對工具就能讓 Claude 保持專注、節省 tokens。</p>
+<hr />
+<h2>為什麼 Context 管理很重要</h2>
+<p>Claude Code 在一個固定大小的 <strong>context window</strong> 裡運作。你發的每一條訊息、Claude 讀的每一個檔案、每一次 debug 的來回，全部都消耗 tokens。當 window 滿了，Claude 會丟失早期的資訊，導致：</p>
+<ul>
+<li><strong>重複犯錯</strong> — Claude 忘了你之前給的修正</li>
+<li><strong>注意力漂移</strong> — 不相關的 debug 歷史干擾當前任務</li>
+<li><strong>Token 浪費</strong> — 在噪音上花錢，不是在訊號上</li>
+</ul>
+<p>管理 context 不只是方便 — 它直接影響輸出品質。</p>
+<hr />
+<h2>四種 Context 控制工具</h2>
+<h3>1. Escape（按一次）— 中斷</h3>
+<p>停止 Claude 正在產出的內容。適用於：<br />
+- Claude 正往錯誤方向走<br />
+- 你想在它浪費 tokens 之前重新導向<br />
+- 你需要在 Claude 完成前提供額外指引</p>
+<blockquote>
+<p>💡 <strong>Escape + Memory = 永久修正</strong></p>
+<p>當 Claude 重複犯同一個錯（例如試圖讀取一個不存在的 config 檔），立刻按 Escape，然後用 <code>#</code> 快捷鍵儲存一條 memory，記錄正確行為。這可以防止未來 session 再犯同樣的錯 — 不只是當前對話。</p>
+</blockquote>
+<h3>2. 雙擊 Escape — 倒帶對話</h3>
+<p>按兩次 Escape 可以看到你所有的訊息歷史，跳回任何一個之前的時間點。這會<strong>丟棄選定點之後的所有訊息</strong>，等於倒帶對話。</p>
+<p>最適合用在：<br />
+- Debug 的來回污染了 context<br />
+- 你想從一個已知正確的狀態重新嘗試<br />
+- Claude 順利完成了 Task A，但在 Task B 撞到問題，你想回到 Task A 完成後的狀態</p>
+<blockquote>
+<p>🎬 <strong>影片補充</strong></p>
+<p>講師示範在 <code>auth.ts</code> 裡寫四個函式的測試。在為 <code>createSession</code> debug 一個缺少 package 的問題後，他倒帶到 debug 之前，把 prompt 改成「寫 getSession 的測試」。這保留了有用的 context（Claude 已經讀過 <code>auth.ts</code>），同時丟掉了噪音（package debug 歷史）。</p>
+</blockquote>
+<h3>3. <code>/compact</code> — 摘要後繼續</h3>
+<p>把整個對話壓縮成摘要，然後從摘要繼續。核心區別：Claude <strong>保留已學的知識</strong>，但以壓縮的形式。</p>
+<p>最適合用在：<br />
+- Claude 在這個 session 中已經累積了對 codebase 的深入理解<br />
+- 你在相關子任務之間切換（例如完成函式 2 的測試後開始函式 3）<br />
+- Context window 快滿了但累積的知識很寶貴</p>
+<h3>4. <code>/clear</code> — 全新開始</h3>
+<p>清除整個對話歷史。Claude 從零開始（除了 CLAUDE.md 和 memories）。</p>
+<p>最適合用在：<br />
+- 你要切換到完全不相關的任務<br />
+- 當前對話已經太混亂，搶救 context 反而有害<br />
+- 開始一個新的 coding session 做不同的 feature</p>
+<hr />
+<h2>決策框架：什麼時候用什麼工具？</h2>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>工具</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude 正在產出爛東西</td>
+<td><strong>Escape</strong></td>
+<td>立刻止血</td>
+</tr>
+<tr>
+<td>Claude 又犯了同樣的錯</td>
+<td><strong>Escape + Memory</strong></td>
+<td>永久修正</td>
+</tr>
+<tr>
+<td>Debug 的來回污染了 context</td>
+<td><strong>雙擊 Escape</strong></td>
+<td>倒帶到乾淨狀態，保留之前有用的 context</td>
+</tr>
+<tr>
+<td>Context 滿了但知識很寶貴</td>
+<td><strong><code>/compact</code></strong></td>
+<td>壓縮，不丟棄</td>
+</tr>
+<tr>
+<td>切換到完全不同的任務</td>
+<td><strong><code>/clear</code></strong></td>
+<td>全新開始，不帶包袱</td>
+</tr>
+<tr>
+<td>長 session，漸漸失去連貫性</td>
+<td><strong><code>/compact</code></strong></td>
+<td>摘要以回收 window 空間</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>考試重點</strong></p>
+<p>考試會測你是否理解 context preservation 和 context pollution 之間的取捨。核心洞察：<strong>更多 context 不一定更好</strong>。不相關的 context（debug 噪音、失敗的嘗試）會主動降低輸出品質。</p>
+</blockquote>
+<hr />
+<h2>工程師類比</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>類比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Context window</td>
+<td>RAM — 有限，所有執行中的 process 共享</td>
+</tr>
+<tr>
+<td>Escape（中斷）</td>
+<td>Terminal 裡的 <code>Ctrl+C</code> — 殺掉當前 process</td>
+</tr>
+<tr>
+<td>雙擊 Escape（倒帶）</td>
+<td><code>git reset --soft HEAD~3</code> — 撤銷最近的 commits，保留 working tree</td>
+</tr>
+<tr>
+<td><code>/compact</code></td>
+<td><code>git squash</code> — 把多個 commits 壓成一個，保留淨結果</td>
+</tr>
+<tr>
+<td><code>/clear</code></td>
+<td>在新目錄 <code>git init</code> — 從零開始</td>
+</tr>
+<tr>
+<td>Context pollution</td>
+<td>Memory leaks — 每次 debug 都留下殘留物，降低效能</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>反面模式</h2>
+<table>
+<thead>
+<tr>
+<th>反面模式</th>
+<th>問題</th>
+<th>更好的做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>長 session 從不用 <code>/compact</code></td>
+<td>Context window 滿了，Claude 忘記早期指令</td>
+<td>每完成一個邏輯子任務就 compact</td>
+</tr>
+<tr>
+<td>用 <code>/clear</code> 但其實 <code>/compact</code> 就夠了</td>
+<td>丟掉了寶貴的已學 context</td>
+<td>只在切換到不相關工作時才 <code>/clear</code></td>
+</tr>
+<tr>
+<td>讓 Claude 無止境 debug 不中斷</td>
+<td>浪費 tokens，用失敗的嘗試污染 context</td>
+<td>早按 Escape，提供指引，必要時倒帶</td>
+</tr>
+<tr>
+<td>不為重複犯的錯存 memory</td>
+<td>同樣的錯在每個新 session 出現</td>
+<td>Escape + <code>#</code> memory 快捷鍵永久修正</td>
+</tr>
+<tr>
+<td>開始新任務不做任何 context 管理</td>
+<td>前一個任務的噪音干擾新任務</td>
+<td><code>/compact</code>（相關任務）或 <code>/clear</code>（不相關任務）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>考試聚焦：Context Window 是一種資源</h2>
+<p><img alt="Context Window As Resource Analogy" src="visuals/context-window-as-resource-analogy-zh-TW.svg" /><br />
+<em>圖：Context Window 是有限資源 — 類比。</em></p>
+<p>這直接對應 Task Statement 5.1（context preservation）和 5.4（large codebase context）：</p>
+<table>
+<thead>
+<tr>
+<th>考試情境</th>
+<th>測什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S2（Code Gen）</td>
+<td>產生新模組的 code 前，應該 compact 還是 clear？</td>
+</tr>
+<tr>
+<td>S4（Developer Productivity）</td>
+<td>如何在多步驟 coding session 中維持專注？</td>
+</tr>
+</tbody>
+</table>
+<p>核心考試哲學：<br />
+- <strong>Context 是有限資源</strong> — 把它當記憶體配置來管理，不是無限日誌<br />
+- <strong>Signal &gt; Noise</strong> — 主動管理 window 裡留什麼<br />
+- <strong>Iterative refinement</strong>（Task 3.5）— Escape + 重新導向比讓 Claude 完成一個壞方向更快</p>
+<hr />
+<h2>模擬考題</h2>
+<h3>第一題：Code Generation 情境</h3>
+<p>你已經和 Claude Code pair-programming 30 分鐘了。Claude 讀了你的資料庫 schema、理解了你的 ORM patterns，也成功實作了三個 API endpoints。你現在需要實作第四個 endpoint，pattern 一樣。但是 context window 因為第二個 endpoint 的 debug 輸出快滿了。你該怎麼做？</p>
+<ul>
+<li>A. 用 <code>/clear</code> 重新開始做第四個 endpoint</li>
+<li>B. 用 <code>/compact</code> 摘要這個 session，然後要求做第四個 endpoint</li>
+<li>C. 不做任何 context 管理，希望 Claude 還記得那些 patterns</li>
+<li>D. 完全關掉 Claude Code，開一個新 session</li>
+</ul>
+<details><summary>答案與解析</summary>
+
+**B** — `/compact` 保留 Claude 對你的 schema、ORM patterns 和 endpoint 慣例的理解，同時壓縮 debug 噪音。這正是 `/compact` 設計的使用場景。
+
+- A 不必要地丟掉了 30 分鐘的已學 context
+- C 有 context window 溢出的風險，Claude 會丟失早期指令
+- D 等同於 A 但多了額外步驟
+
+核心洞察：Claude 有**寶貴的累積知識**（schema、patterns）— 不要丟棄它，壓縮它。
+</details>
+
+<h3>第二題：Developer Productivity 情境</h3>
+<p>你叫 Claude 重構一個 utility 檔案，但它開始改錯檔案了。Claude 在對話早期已經讀過正確的檔案。最快回到正軌的方式是什麼？</p>
+<ul>
+<li>A. 用 <code>/clear</code> 從頭開始</li>
+<li>B. 按一次 Escape 中斷，然後重新指定正確的檔案</li>
+<li>C. 讓 Claude 完成，然後叫它 undo 它的改動</li>
+<li>D. 按兩次 Escape 倒帶到錯誤重構開始前</li>
+</ul>
+<details><summary>答案與解析</summary>
+
+**D** — 雙擊 Escape 倒帶到錯誤之前，保留了 Claude 之前讀正確檔案的 context。你可以更新 prompt 更具體地指示。
+
+- A 丟失所有 context，包括 Claude 對正確檔案的了解
+- B 停止了產出但錯誤的輸出留在 context 裡，可能在後續嘗試中造成混淆
+- C 浪費 tokens 並加更多噪音到 context
+
+考試哲學：**Context preservation** — 倒帶到乾淨狀態，而不是在錯誤上疊加修正。
+</details>
+
+<h3>第三題：Iterative Refinement 情境</h3>
+<p>Claude 一直嘗試從 <code>utils/test-helpers.ts</code> import test helper，但你的專案裡這個檔案其實在 <code>test/helpers.ts</code>。這是跨不同 session 第三次犯這個錯了。最有效的長期修正是什麼？</p>
+<ul>
+<li>A. 每次都按 Escape 然後告訴 Claude 正確路徑</li>
+<li>B. 按 Escape，然後用 <code>#</code> 快捷鍵儲存一條 memory 記錄正確路徑</li>
+<li>C. 把正確路徑加到 CLAUDE.md</li>
+<li>D. B 和 C 都是有效的方法，但 B 在立即生效上更快</li>
+</ul>
+<details><summary>答案與解析</summary>
+
+**D** — Memory（B）和 CLAUDE.md（C）都能解決問題，但影片特別示範了 Escape + `#` memory 模式作為重複犯錯的快速修正。CLAUDE.md 是更重量級的方案，需要修改檔案，而且會影響整個團隊。
+
+- A 是暫時修正，不會跨 session 持久化
+- B 提供即時、永久的個人層級修正
+- C 可行但對單一檔案路徑的修正來說太重了，而且影響整個團隊
+
+考試哲學：**Iterative refinement** — 在正確的持久化層級修正重複的錯誤。
+</details>
+</body>
+</html>

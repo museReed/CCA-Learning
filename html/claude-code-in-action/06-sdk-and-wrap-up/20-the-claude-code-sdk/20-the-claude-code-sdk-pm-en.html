@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>20 The Claude Code Sdk Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Claude Code SDK — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D2 — Tool Integration &amp; MCP (20%), D3 — Claude Code Configuration &amp; Workflows (20%), D1 — Agentic Architecture (27%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 (MCP integration — SDK extends Claude Code programmatically), 3.6 (CI/CD integration — SDK enables automated workflows), 1.1 (agentic loops — SDK runs full agentic loops programmatically)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 06-sdk-and-wrap-up / Lesson 20</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>The Claude Code SDK lets other programs use Claude Code without a human at the keyboard. It is the same Claude Code — same rules, same capabilities — but controlled by scripts and pipelines instead of a person. By default it can only read, not write, which is a deliberate safety choice. PMs need to understand this because it determines what automated workflows are possible and how to specify them in requirements.</p>
+<hr />
+<p><img alt="Sdk Architecture" src="visuals/sdk-architecture.svg" /><br />
+<em>Figure: Claude Code SDK architecture — three entry points, same engine, permission model.</em></p>
+<h2>Why PMs Need to Know About the SDK</h2>
+<p>The SDK transforms Claude Code from a developer tool into an <strong>automation component</strong>. This matters for product because:</p>
+<table>
+<thead>
+<tr>
+<th>Without SDK</th>
+<th>With SDK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code helps one developer at a time</td>
+<td>Claude Code runs inside CI/CD for every PR</td>
+</tr>
+<tr>
+<td>Human must type every prompt</td>
+<td>Scripts trigger Claude Code on events (git push, build, schedule)</td>
+</tr>
+<tr>
+<td>Permissions approved by the developer in real-time</td>
+<td>Permissions must be pre-configured — no human in the loop</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Takeaway</strong><br />
+The SDK is how Claude Code scales from "one developer's assistant" to "team-wide automation." Any requirement involving automated AI code review, generation, or analysis likely needs the SDK.</p>
+</blockquote>
+<hr />
+<h2>Mental Model: Hiring a Contractor</h2>
+<p>Think of Claude Code in the terminal as having a contractor work beside you — you tell them what to do, watch them work, and approve each step.</p>
+<p>The SDK is like giving that contractor <strong>written work orders</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Terminal (In-person)</th>
+<th>SDK (Written work orders)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Communication</td>
+<td>Real-time conversation</td>
+<td>Pre-written instructions</td>
+</tr>
+<tr>
+<td>Oversight</td>
+<td>You watch every step</td>
+<td>You review results after</td>
+</tr>
+<tr>
+<td>Permissions</td>
+<td>"Sure, go ahead" in the moment</td>
+<td>Must be specified in the work order upfront</td>
+</tr>
+<tr>
+<td>Safety</td>
+<td>You can stop them mid-task</td>
+<td>Safety rules must be pre-configured</td>
+</tr>
+<tr>
+<td>Scale</td>
+<td>One project at a time</td>
+<td>Many projects simultaneously</td>
+</tr>
+</tbody>
+</table>
+<p>The key difference: <strong>when there is no human watching, you need stricter rules upfront.</strong></p>
+<hr />
+<h2>Three Ways to Use the SDK</h2>
+<p>The SDK comes in three flavors. PMs do not need to know the syntax, but should understand the trade-offs:</p>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Best For</th>
+<th>Team Profile</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TypeScript</td>
+<td>Rich integrations, real-time message processing</td>
+<td>Teams with Node.js/TypeScript expertise</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>Data pipelines, ML workflows, scripting</td>
+<td>Teams with Python-heavy stacks</td>
+</tr>
+<tr>
+<td>CLI (pipe mode)</td>
+<td>Shell scripts, quick automations, bash-based CI</td>
+<td>DevOps teams, simple integrations</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Takeaway</strong><br />
+When scoping an SDK integration, ask your engineering team which interface fits their stack. The capabilities are identical — only the programming language differs.</p>
+</blockquote>
+<hr />
+<h2>The Read-Only Default: A Product Decision</h2>
+<p>The SDK defaults to <strong>read-only</strong> mode. Claude can analyze code, find issues, and report findings — but cannot modify anything unless explicitly granted permission.</p>
+<p>This is not a limitation — it is a deliberate product safety decision.</p>
+<h3>Scenario Analysis: Why Read-Only Matters</h3>
+<p>Imagine a nightly CI job that uses Claude Code to review all open PRs:</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Permission Level</th>
+<th>What Happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PR analysis + comment</td>
+<td>Read-only (default)</td>
+<td>Claude reads code, generates review comments. Safe.</td>
+</tr>
+<tr>
+<td>Auto-fix formatting</td>
+<td>Read + Edit</td>
+<td>Claude reads code AND modifies files. Requires trust in the edit logic.</td>
+</tr>
+<tr>
+<td>Auto-fix + commit + push</td>
+<td>Read + Edit + Bash</td>
+<td>Claude can run arbitrary shell commands. High risk without guardrails.</td>
+</tr>
+</tbody>
+</table>
+<p>Each step up the permission ladder adds capability AND risk. The SDK forces you to make this trade-off explicit.</p>
+<blockquote>
+<p>🎯 <strong>Exam Note</strong><br />
+The principle of least privilege: grant only the permissions needed for the specific task. A code review bot should be read-only. A code formatting bot needs Edit. A deployment bot needs Bash. Never grant more than required.</p>
+</blockquote>
+<hr />
+<h2>How the SDK Fits Into Pipelines</h2>
+<p>The SDK is most useful as a <strong>component</strong> in larger automated workflows:</p>
+<h3>Scenario 1: Git Pre-Commit Hook</h3>
+<p><strong>Business need</strong>: Prevent accidental secret commits</p>
+<p><strong>Flow</strong>: Developer commits code -&gt; SDK analyzes staged files (read-only) -&gt; blocks commit if secrets found</p>
+<p><strong>Permission</strong>: Read-only (default) — analysis only, no modifications needed</p>
+<h3>Scenario 2: CI/CD Code Review</h3>
+<p><strong>Business need</strong>: Every PR gets an automated first-pass review</p>
+<p><strong>Flow</strong>: PR opened -&gt; CI triggers SDK -&gt; SDK reads diff and generates review -&gt; posts comments to PR</p>
+<p><strong>Permission</strong>: Read-only — review generates text output, does not modify code</p>
+<h3>Scenario 3: Automated Dependency Updates</h3>
+<p><strong>Business need</strong>: Keep dependencies current without manual work</p>
+<p><strong>Flow</strong>: Weekly schedule -&gt; SDK checks for outdated packages -&gt; SDK updates config files -&gt; creates PR</p>
+<p><strong>Permission</strong>: Read + Edit — must modify configuration files</p>
+<blockquote>
+<p>🎬 <strong>Instructor insight from the video</strong><br />
+The instructor shows a two-step demo: first using read-only mode to find duplicate queries in the codebase, then granting Edit permission to update package.json. This progressive permission pattern is the recommended approach — analyze first, then modify only what is needed.</p>
+</blockquote>
+<hr />
+<h2>Security: Settings Inheritance</h2>
+<p>The SDK inherits all security settings from the project configuration. This means:</p>
+<ol>
+<li><strong>Project-level rules</strong> (<code>.claude/settings.json</code>) apply to SDK calls</li>
+<li><strong>Deny rules cannot be overridden</strong> by the SDK caller</li>
+<li><strong>Defense in depth</strong>: even if the SDK grants a permission, project settings can still block it</li>
+</ol>
+<h3>Scenario Analysis: Multi-Layer Security</h3>
+<p>A company has these rules in <code>.claude/settings.json</code>:<br />
+- Allow: Read, Grep, Glob<br />
+- Deny: Bash commands that delete files</p>
+<p>An engineer writes an SDK script that grants <code>allowedTools: ["Bash"]</code>.</p>
+<p><strong>Result</strong>: Claude can run Bash commands EXCEPT deletion commands. The settings deny rule acts as a guardrail that the SDK cannot bypass.</p>
+<blockquote>
+<p>💡 <strong>PM Takeaway</strong><br />
+When writing requirements for SDK-based automations, specify BOTH the SDK permissions AND the project settings. They work together as layers — the SDK grants capability, and settings define boundaries.</p>
+</blockquote>
+<hr />
+<h2>PM Requirements Checklist for SDK Features</h2>
+<p>When specifying an SDK-based feature, include:</p>
+<table>
+<thead>
+<tr>
+<th>Requirement Area</th>
+<th>What to Specify</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Task scope</td>
+<td>What should the AI analyze or modify</td>
+<td>"Review all Python files in the PR diff"</td>
+</tr>
+<tr>
+<td>Permission level</td>
+<td>Read-only, Edit, Write, Bash, or combination</td>
+<td>"Read-only for analysis; Edit for auto-fix mode"</td>
+</tr>
+<tr>
+<td>Trigger</td>
+<td>What event starts the SDK call</td>
+<td>"On PR creation" or "Nightly at 2 AM"</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>Where results go</td>
+<td>"Post as PR comment" or "Write to audit log"</td>
+</tr>
+<tr>
+<td>Guardrails</td>
+<td>What the AI must NOT do</td>
+<td>"Must not modify test files" or "Max 10 agentic turns"</td>
+</tr>
+<tr>
+<td>Failure handling</td>
+<td>What happens when the SDK call fails</td>
+<td>"Log error and notify team channel"</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Anti-Patterns (Exam Favorites)</h2>
+<table>
+<thead>
+<tr>
+<th>Wrong Approach</th>
+<th>Correct Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grant full permissions "to be safe"</td>
+<td>Grant minimum permissions needed</td>
+<td>More permissions = more risk. "Safe" means fewer permissions, not more.</td>
+</tr>
+<tr>
+<td>Treat SDK as a different product from Claude Code</td>
+<td>Understand SDK is the same engine with a programmatic interface</td>
+<td>Same settings, same tools, same capabilities</td>
+</tr>
+<tr>
+<td>Skip specifying permission levels in requirements</td>
+<td>Explicitly state read-only vs. write for each automation</td>
+<td>Engineers cannot guess the intended safety posture</td>
+</tr>
+<tr>
+<td>Assume SDK automations need no human oversight</td>
+<td>Design review checkpoints for high-risk SDK actions</td>
+<td>No human in the loop means pre-configured rules must be thorough</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Summary Table</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Key Point</th>
+<th>Exam Relevance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SDK Purpose</td>
+<td>Run Claude Code programmatically as part of pipelines</td>
+<td>D1 1.1 — agentic loops in automation</td>
+</tr>
+<tr>
+<td>Three Interfaces</td>
+<td>TypeScript, Python, CLI — same capabilities</td>
+<td>D2 2.4 — programmatic tool integration</td>
+</tr>
+<tr>
+<td>Read-Only Default</td>
+<td>Safety-first: no writes unless explicitly granted</td>
+<td>D3 3.6 — secure CI/CD integration</td>
+</tr>
+<tr>
+<td>Settings Inheritance</td>
+<td>Project settings act as guardrails SDK cannot bypass</td>
+<td>D3 3.6 — defense in depth</td>
+</tr>
+<tr>
+<td>Pipeline Integration</td>
+<td>Git hooks, CI/CD, build scripts, scheduled jobs</td>
+<td>D3 3.6 — workflow automation</td>
+</tr>
+<tr>
+<td>Permission Escalation</td>
+<td>Analyze first (read-only), then modify (with grants)</td>
+<td>D3 3.6 — progressive permission model</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Front</th>
+<th>Back</th>
+<th>Memory Anchor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>What is the Claude Code SDK's default permission level?</td>
+<td>Read-only. Write access requires explicit permission grants.</td>
+<td>Contractor with a "look but don't touch" work order</td>
+</tr>
+<tr>
+<td>2</td>
+<td>What three interfaces does the SDK offer?</td>
+<td>TypeScript, Python, and CLI (pipe mode) — all with identical capabilities</td>
+<td>Three phone lines to the same office</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Why does the SDK default to read-only?</td>
+<td>No human in the loop to approve risky actions — principle of least privilege</td>
+<td>Unsupervised contractor gets stricter rules</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Does the SDK respect project settings?</td>
+<td>Yes — deny rules in settings cannot be overridden by SDK permission grants</td>
+<td>Building security overrides your visitor badge</td>
+</tr>
+<tr>
+<td>5</td>
+<td>What is the recommended approach for SDK automations that need to modify code?</td>
+<td>Analyze first in read-only mode, then modify with explicit permission grants</td>
+<td>Inspect the house before renovating</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Name three practical SDK use cases</td>
+<td>Git pre-commit hooks (secret detection), CI/CD code review, automated dependency updates</td>
+<td>Security guard, quality inspector, maintenance crew</td>
+</tr>
+<tr>
+<td>7</td>
+<td>What should PM requirements specify for SDK features?</td>
+<td>Task scope, permission level, trigger, output destination, guardrails, failure handling</td>
+<td>The complete work order checklist</td>
+</tr>
+<tr>
+<td>8</td>
+<td>How do SDK permissions and project settings interact?</td>
+<td>They intersect — SDK grants capability, settings define boundaries. Deny rules always win.</td>
+<td>Two locks on the same door</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Question 1: CI/CD Pipeline Scenario</h3>
+<p>Your team wants Claude Code to automatically review every PR and post comments. The review should analyze code quality but never modify any files. As PM, which permission specification is correct in the requirements?</p>
+<ul>
+<li>A. "Grant full access so Claude can thoroughly review the code"</li>
+<li>B. "Use read-only mode — Claude analyzes and generates review text without file modifications"</li>
+<li>C. "Grant Edit permission so Claude can fix issues it finds during review"</li>
+<li>D. "Grant Bash permission so Claude can run test suites as part of the review"</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — A code review that posts comments only needs to read code and generate text. Read-only mode provides exactly this capability with maximum safety.
+
+- A violates least privilege — review does not need write access
+- C conflates review with auto-fix — these should be separate features with separate permissions
+- D adds unnecessary risk — running tests is a separate concern from code review
+
+**PM Key Takeaway**: Separate "analysis" features (read-only) from "modification" features (write access). Never bundle them under one permission level.
+</details>
+
+<h3>Question 2: Automation Safety Scenario</h3>
+<p>An engineer proposes an SDK automation that updates dependencies weekly. The script grants <code>allowedTools: ["Edit", "Write", "Bash"]</code>. The project settings deny <code>Bash(rm *)</code>. Can the automation accidentally delete files?</p>
+<ul>
+<li>A. Yes — <code>allowedTools</code> overrides project settings</li>
+<li>B. No — project settings deny rules always take precedence over SDK grants</li>
+<li>C. Yes — but only if Claude decides deletion is necessary</li>
+<li>D. No — <code>Bash</code> is completely disabled when any deny rule exists</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — Project settings act as guardrails that SDK grants cannot bypass. The deny rule for `Bash(rm *)` prevents file deletion regardless of what `allowedTools` specifies.
+
+- A is wrong — SDK grants never override settings deny rules
+- C is wrong — Claude cannot bypass deny rules through reasoning
+- D is wrong — only the specific pattern is blocked, not all Bash usage
+
+**PM Key Takeaway**: Project settings are your safety net. When writing requirements, specify both SDK permissions AND project settings deny rules for defense in depth.
+</details>
+
+<h3>Question 3: Product Scoping Scenario</h3>
+<p>You are scoping a new feature: "AI-powered code generation that creates boilerplate files from templates." Which SDK permission level is the minimum required?</p>
+<ul>
+<li>A. Read-only (default)</li>
+<li>B. Edit only</li>
+<li>C. Edit + Write</li>
+<li>D. Edit + Write + Bash</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**C** — Code generation that creates new files needs Write permission (to create new files). Edit is needed if the generation also modifies existing files (e.g., updating an index). Bash is not needed for file creation.
+
+- A is insufficient — cannot create files in read-only mode
+- B is insufficient — Edit modifies existing files but cannot create new ones
+- D grants unnecessary Bash access — file creation does not need shell commands
+
+**PM Key Takeaway**: Map each feature action to the minimum tool it requires. "Create new files" = Write. "Modify existing files" = Edit. "Run shell commands" = Bash. Grant only what is needed.
+</details>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 460" font-family="'PingFang TC', 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94A3B8"/>
+    </marker>
+  </defs>
+  <rect width="680" height="460" fill="white" rx="12"/>
+  <text x="340" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#64748B" letter-spacing="1">安裝方式與 Provider 設定</text>
+
+  <!-- Section label: Installation -->
+  <text x="40" y="62" font-size="12" font-weight="600" fill="#94A3B8">安裝方式</text>
+  <line x1="40" y1="68" x2="640" y2="68" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- macOS Homebrew -->
+  <g transform="translate(40, 80)">
+    <rect width="185" height="90" rx="14" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="28" font-size="20">🍎</text>
+    <text x="46" y="28" font-size="13" font-weight="700" fill="#1E40AF">macOS</text>
+    <text x="20" y="50" font-size="10" fill="#3B82F6">Homebrew 安裝</text>
+    <rect x="14" y="58" width="157" height="22" rx="4" fill="#1E293B"/>
+    <text x="22" y="73" font-size="9.5" fill="#A5F3FC" font-family="'SF Mono', 'Fira Code', monospace">brew install claude-code</text>
+  </g>
+
+  <!-- macOS / Linux / WSL curl -->
+  <g transform="translate(248, 80)">
+    <rect width="185" height="90" rx="14" fill="#DCFCE7" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="28" font-size="20">🐧</text>
+    <text x="46" y="28" font-size="13" font-weight="700" fill="#166534">macOS / Linux / WSL</text>
+    <text x="20" y="50" font-size="10" fill="#22C55E">curl 一行安裝 (npm)</text>
+    <rect x="14" y="58" width="157" height="22" rx="4" fill="#1E293B"/>
+    <text x="22" y="73" font-size="9.5" fill="#A5F3FC" font-family="'SF Mono', 'Fira Code', monospace">npm install -g @anthropic...</text>
+  </g>
+
+  <!-- Windows CMD -->
+  <g transform="translate(456, 80)">
+    <rect width="185" height="90" rx="14" fill="#EDE9FE" stroke="#8B5CF6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="28" font-size="20">🪟</text>
+    <text x="46" y="28" font-size="13" font-weight="700" fill="#5B21B6">Windows</text>
+    <text x="20" y="50" font-size="10" fill="#8B5CF6">CMD（原生支援）</text>
+    <rect x="14" y="58" width="157" height="22" rx="4" fill="#1E293B"/>
+    <text x="22" y="73" font-size="9.5" fill="#A5F3FC" font-family="'SF Mono', 'Fira Code', monospace">npm install -g @anthropic...</text>
+  </g>
+
+  <!-- Downward arrows -->
+  <line x1="132" y1="175" x2="132" y2="200" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="340" y1="175" x2="340" y2="200" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="548" y1="175" x2="548" y2="200" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Auth step -->
+  <g transform="translate(200, 205)">
+    <rect width="280" height="44" rx="14" fill="#FEF3C7" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="22" y="28" font-size="18">🔑</text>
+    <text x="50" y="22" font-size="13" font-weight="700" fill="#92400E">claude login</text>
+    <text x="50" y="37" font-size="10" fill="#B45309">向 Provider 進行身份驗證</text>
+  </g>
+
+  <!-- Section label: Provider Setup -->
+  <text x="40" y="280" font-size="12" font-weight="600" fill="#94A3B8">Provider 設定</text>
+  <line x1="40" y1="286" x2="640" y2="286" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Branch arrows from center -->
+  <line x1="340" y1="253" x2="340" y2="296" stroke="#94A3B8" stroke-width="1.5"/>
+  <line x1="132" y1="296" x2="548" y2="296" stroke="#94A3B8" stroke-width="1.5"/>
+  <line x1="132" y1="296" x2="132" y2="310" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="340" y1="296" x2="340" y2="310" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="548" y1="296" x2="548" y2="310" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Anthropic Direct -->
+  <g transform="translate(40, 315)">
+    <rect width="185" height="90" rx="14" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="28" font-size="20">🏠</text>
+    <text x="46" y="28" font-size="13" font-weight="700" fill="#1E40AF">Anthropic 直連</text>
+    <text x="20" y="50" font-size="10" fill="#3B82F6">從 Console 取得 API key</text>
+    <text x="20" y="68" font-size="9.5" fill="#64748B" font-family="'SF Mono', 'Fira Code', monospace">ANTHROPIC_API_KEY</text>
+  </g>
+
+  <!-- AWS Bedrock -->
+  <g transform="translate(248, 315)">
+    <rect width="185" height="90" rx="14" fill="#FEF3C7" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="28" font-size="20">☁️</text>
+    <text x="46" y="28" font-size="13" font-weight="700" fill="#92400E">AWS Bedrock</text>
+    <text x="20" y="50" font-size="10" fill="#B45309">AWS 憑證 + 區域設定</text>
+    <text x="20" y="68" font-size="9.5" fill="#64748B" font-family="'SF Mono', 'Fira Code', monospace">CLAUDE_CODE_USE_BEDROCK=1</text>
+  </g>
+
+  <!-- Google Vertex -->
+  <g transform="translate(456, 315)">
+    <rect width="185" height="90" rx="14" fill="#DCFCE7" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="20" y="28" font-size="20">🌐</text>
+    <text x="46" y="28" font-size="13" font-weight="700" fill="#166534">Google Vertex</text>
+    <text x="20" y="50" font-size="10" fill="#22C55E">GCP 專案 + 區域設定</text>
+    <text x="20" y="68" font-size="9.5" fill="#64748B" font-family="'SF Mono', 'Fira Code', monospace">CLAUDE_CODE_USE_VERTEX=1</text>
+  </g>
+
+  <text x="340" y="450" text-anchor="middle" font-size="10" fill="#94A3B8">所有平台皆需安裝 Node.js 18+</text>
+</svg>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 Defining Prompts Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Prompts — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server primitives), 2.6 (prompt template design), 1.3 (prompt engineering for tools)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 12</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP prompts are like pre-written expert scripts that your team packages into the product — users get consistent, high-quality AI interactions without needing to become prompt engineers themselves.</p>
+<hr />
+<h2>Why PMs Should Care About Prompts</h2>
+<p>Prompts solve a fundamental product problem: <strong>the quality gap between expert and novice users</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>User Type</th>
+<th>Without MCP Prompts</th>
+<th>With MCP Prompts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Expert user</td>
+<td>Writes great prompts, gets great results</td>
+<td>Same great results, slightly faster</td>
+</tr>
+<tr>
+<td>Average user</td>
+<td>Writes mediocre prompts, gets mediocre results</td>
+<td>Gets expert-level results via pre-built templates</td>
+</tr>
+<tr>
+<td>New user</td>
+<td>Does not know what to ask, poor results</td>
+<td>Discovers workflows through slash commands</td>
+</tr>
+</tbody>
+</table>
+<p>This is the same principle as email templates, Notion template galleries, or Figma component libraries — packaging expertise for reuse.</p>
+<hr />
+<h2>Mental Model: The Restaurant Menu</h2>
+<p>Think of MCP primitives as different ways to interact with a restaurant:</p>
+<table>
+<thead>
+<tr>
+<th>Interaction</th>
+<th>MCP Primitive</th>
+<th>Who Decides</th>
+<th>Restaurant Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chef improvises</td>
+<td><strong>Tool</strong></td>
+<td>Chef (Claude)</td>
+<td>"Chef's choice — surprise me"</td>
+</tr>
+<tr>
+<td>Waiter brings water</td>
+<td><strong>Resource</strong></td>
+<td>Restaurant (app)</td>
+<td>Water appears on the table automatically</td>
+</tr>
+<tr>
+<td>Customer orders from menu</td>
+<td><strong>Prompt</strong></td>
+<td>Customer (user)</td>
+<td>"I'll have the #7 combo"</td>
+</tr>
+</tbody>
+</table>
+<p>Prompts are the menu. The kitchen (MCP server developer) has carefully designed each dish (prompt template). The customer (user) picks from tested options and gets a predictable, high-quality result.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When to Use Prompts</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Prompts Work</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Reformat this document to markdown"</td>
+<td>Tested template handles edge cases better than user's ad-hoc request</td>
+</tr>
+<tr>
+<td>"Generate a weekly summary from my notes"</td>
+<td>Complex instructions that users would struggle to write themselves</td>
+</tr>
+<tr>
+<td>"Analyze this dataset and create a report"</td>
+<td>Domain-specific workflow with multiple steps</td>
+</tr>
+<tr>
+<td>"Translate this document preserving formatting"</td>
+<td>Nuanced instructions that need careful prompt engineering</td>
+</tr>
+</tbody>
+</table>
+<h3>When NOT to Use Prompts</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User asks a freeform question</td>
+<td>Let Claude handle it directly — no template needed</td>
+</tr>
+<tr>
+<td>App needs to pre-load context</td>
+<td>Use a <strong>resource</strong> — app-controlled</td>
+</tr>
+<tr>
+<td>Claude needs to decide when to act</td>
+<td>Use a <strong>tool</strong> — model-controlled</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Slash Command UX Pattern</h2>
+<p>Prompts naturally map to the slash command pattern familiar from tools like Slack, Notion, and Discord:</p>
+<ol>
+<li><strong>User types <code>/</code></strong> — available prompts appear as a command menu</li>
+<li><strong>User selects a command</strong> (e.g., <code>/format</code>) — prompted for required parameters</li>
+<li><strong>User provides parameters</strong> (e.g., selects a document) — prompt template is filled in</li>
+<li><strong>Template is sent to Claude</strong> — Claude receives the expertly crafted instructions</li>
+<li><strong>Claude executes</strong> — using available tools to fulfill the prompt's instructions</li>
+</ol>
+<p>From the user's perspective, this feels like a "workflow button" — one click (or command) to trigger a complex, reliable operation.</p>
+<hr />
+<h2>The Four Benefits for Product</h2>
+<ol>
+<li><strong>Consistency</strong> — every user gets the same quality of instructions, eliminating the "prompt lottery"</li>
+<li><strong>Expertise encoding</strong> — domain knowledge baked into templates by the developer</li>
+<li><strong>Reusability</strong> — multiple client applications can share the same prompts from one server</li>
+<li><strong>Centralized maintenance</strong> — update a prompt on the server, all clients automatically get the improvement</li>
+</ol>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When designing an AI feature, ask these questions:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Primitive</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the user explicitly trigger this workflow?</td>
+<td>Yes</td>
+<td><strong>Prompt</strong></td>
+</tr>
+<tr>
+<td>Does Claude need to decide when to act?</td>
+<td>Yes</td>
+<td><strong>Tool</strong></td>
+</tr>
+<tr>
+<td>Does the app need data for UI or context?</td>
+<td>Yes</td>
+<td><strong>Resource</strong></td>
+</tr>
+<tr>
+<td>Is this a predefined, repeatable workflow?</td>
+<td>Yes</td>
+<td><strong>Prompt</strong></td>
+</tr>
+<tr>
+<td>Does this require specialized instructions?</td>
+<td>Yes</td>
+<td><strong>Prompt</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Not investing in prompt quality</strong> — treating prompts as simple strings instead of carefully tested templates that need iteration</li>
+<li><strong>Too many prompts</strong> — overwhelming users with choices; curate a focused set of high-value workflows</li>
+<li><strong>Not specifying prompt parameters in PRD</strong> — users need clear parameter descriptions; include them in acceptance criteria</li>
+<li><strong>Confusing prompts with system instructions</strong> — prompts are user-triggered workflows, not always-on behavior rules</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompts are the <strong>user-controlled</strong> primitive. This means the user explicitly decides when to use them, unlike tools (Claude decides) or resources (app decides). For PMs, this maps directly to "workflow features" — features where the user initiates a structured, repeatable process. In the CCA exam, the control model distinction (model / app / user) is the most frequently tested concept across D1 and D2.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know when to recommend prompts vs. tools vs. resources. The trigger is: "predefined workflow" + "user initiates" = prompt.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Prompts fit the user-controlled layer. Questions often present scenarios and ask which primitive to use.</li>
+<li>Watch for the word "workflow" or "slash command" in exam questions — these almost always point to prompts.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who controls when MCP prompts are triggered?</td>
+<td>The user (user-controlled) — via slash commands, buttons, or menu selections</td>
+</tr>
+<tr>
+<td>What product problem do MCP prompts solve?</td>
+<td>The quality gap between expert and novice users — prompts package expertise into reusable templates</td>
+</tr>
+<tr>
+<td>What is the restaurant analogy for MCP prompts?</td>
+<td>The menu — the kitchen designs each dish (template), the customer (user) picks from tested options</td>
+</tr>
+<tr>
+<td>When should a PM choose a prompt over a tool?</td>
+<td>When the workflow is predefined, repeatable, and explicitly triggered by the user</td>
+</tr>
+<tr>
+<td>What UX pattern do prompts naturally map to?</td>
+<td>Slash commands (<code>/format</code>, <code>/summarize</code>) — familiar from Slack, Notion, Discord</td>
+</tr>
+<tr>
+<td>What are the four product benefits of MCP prompts?</td>
+<td>Consistency, expertise encoding, reusability, centralized maintenance</td>
+</tr>
+<tr>
+<td>How do prompts differ from system instructions?</td>
+<td>Prompts are user-triggered workflows; system instructions are always-on behavior rules</td>
+</tr>
+<tr>
+<td>What happens after a user selects a prompt and provides parameters?</td>
+<td>The template is filled in with parameters and sent to Claude as expertly crafted instructions</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

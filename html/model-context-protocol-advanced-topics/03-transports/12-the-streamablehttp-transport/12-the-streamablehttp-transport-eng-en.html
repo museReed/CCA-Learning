@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 The Streamablehttp Transport Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The StreamableHTTP Transport — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (MCP transport selection), 2.4 (remote server configuration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 03-transports / Lesson 12</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>StreamableHTTP enables remote MCP servers over HTTP, but HTTP's request-response model means the server cannot initiate communication — trading full MCP capability for remote hosting.</p>
+<hr />
+<h2>Why StreamableHTTP Exists</h2>
+<p>Stdio requires same-machine deployment. For production systems serving multiple users or running in the cloud, you need HTTP. StreamableHTTP bridges MCP to the web — but HTTP has a fundamental constraint:</p>
+<p><strong>HTTP is client-initiated only.</strong> The server can only respond to requests; it cannot spontaneously send messages to the client.</p>
+<hr />
+<h2>Two Key Configuration Flags</h2>
+<p>StreamableHTTP behavior is controlled by two boolean settings on the server:</p>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stateless_http</code></td>
+<td><code>false</code></td>
+<td>When <code>true</code>, disables session tracking</td>
+</tr>
+<tr>
+<td><code>json_response</code></td>
+<td><code>false</code></td>
+<td>When <code>true</code>, returns plain JSON instead of SSE streams</td>
+</tr>
+</tbody>
+</table>
+<p>Both default to <code>false</code> (least restrictive). Enabling either one <strong>removes capabilities</strong>.</p>
+<pre class="highlight"><code class="language-python"># Server configuration example
+mcp_server = MCPServer(
+    stateless_http=False,  # default: sessions enabled
+    json_response=False,   # default: SSE streaming enabled
+)
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+Think of these flags as <strong>restriction toggles</strong>. The more you enable, the simpler the server becomes — but the fewer MCP features you can use.</p>
+</blockquote>
+<hr />
+<h2>What HTTP Breaks</h2>
+<p>The core limitation: <strong>servers cannot initiate requests to clients</strong> over plain HTTP.</p>
+<h3>Affected Server-Initiated Features</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>What It Does</th>
+<th>Impact When Unavailable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CreateMessage</code> (Sampling)</td>
+<td>Server asks LLM to generate text</td>
+<td>No server-side AI calls</td>
+</tr>
+<tr>
+<td><code>ListRoots</code></td>
+<td>Server queries client's workspace</td>
+<td>No file system awareness</td>
+</tr>
+<tr>
+<td>Progress Notifications</td>
+<td>Server reports task progress</td>
+<td>Client has no visibility into long operations</td>
+</tr>
+<tr>
+<td>Logging Notifications</td>
+<td>Server sends log messages</td>
+<td>No real-time debugging info</td>
+</tr>
+</tbody>
+</table>
+<h3>What Still Works</h3>
+<p>All <strong>client-initiated</strong> features work normally:</p>
+<ul>
+<li><code>tools/call</code> — client invokes server tools</li>
+<li><code>resources/read</code> — client reads server resources</li>
+<li><code>prompts/get</code> — client fetches prompt templates</li>
+</ul>
+<hr />
+<h2>The Capability Spectrum</h2>
+<pre class="highlight"><code>Full MCP (Stdio)
+    │
+    ▼
+StreamableHTTP (defaults)     ← SSE workaround partially restores server→client
+    │
+    ▼
+StreamableHTTP + stateless    ← No sessions, no server-initiated anything
+    │
+    ▼
+StreamableHTTP + json_response ← No streaming at all
+    │
+    ▼
+Both flags enabled            ← Maximum restriction, simplest server
+</code></pre>
+
+<p>Each step down <strong>trades functionality for simplicity/scalability</strong>.</p>
+<hr />
+<h2>When to Use StreamableHTTP</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Recommended Config</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Remote server, need most features</td>
+<td>Defaults (both <code>false</code>)</td>
+</tr>
+<tr>
+<td>Horizontal scaling needed</td>
+<td><code>stateless_http=true</code></td>
+</tr>
+<tr>
+<td>Simple request-response API</td>
+<td>Both <code>true</code></td>
+</tr>
+<tr>
+<td>Need sampling/progress</td>
+<td>Defaults only — flags break these</td>
+</tr>
+<tr>
+<td>Local development</td>
+<td>Use Stdio instead</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>Transport trade-off questions</strong>: StreamableHTTP = remote hosting, reduced capabilities. Know exactly which features break.</li>
+<li><strong>Flag behavior</strong>: <code>stateless_http</code> and <code>json_response</code> both default to <code>false</code>. Enabling either restricts functionality.</li>
+<li><strong>Server-initiated vs client-initiated</strong>: HTTP only breaks server-initiated patterns. Client→server always works.</li>
+<li>Exam philosophy: <strong>Remote access has a cost</strong> — every networking constraint removes MCP features.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What fundamental HTTP limitation affects MCP?</td>
+<td>HTTP is client-initiated only — servers cannot spontaneously send messages to clients</td>
+</tr>
+<tr>
+<td>What are the two StreamableHTTP configuration flags?</td>
+<td><code>stateless_http</code> and <code>json_response</code>, both defaulting to <code>false</code></td>
+</tr>
+<tr>
+<td>What happens when you enable <code>stateless_http</code>?</td>
+<td>Disables session tracking — no server-initiated requests, no sampling, no progress notifications</td>
+</tr>
+<tr>
+<td>What does <code>json_response=true</code> do?</td>
+<td>Returns plain JSON instead of SSE streams — no streaming, just final results</td>
+</tr>
+<tr>
+<td>Name two server-initiated features broken by HTTP</td>
+<td>CreateMessage (sampling) and Progress Notifications</td>
+</tr>
+<tr>
+<td>What client-initiated features still work over HTTP?</td>
+<td>tools/call, resources/read, prompts/get — all client→server requests work normally</td>
+</tr>
+<tr>
+<td>What is the capability trade-off of StreamableHTTP?</td>
+<td>Remote hosting capability in exchange for reduced/lost server-initiated MCP features</td>
+</tr>
+<tr>
+<td>When should you use StreamableHTTP defaults (both false)?</td>
+<td>When you need remote hosting but still want maximum MCP capability including SSE workarounds</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

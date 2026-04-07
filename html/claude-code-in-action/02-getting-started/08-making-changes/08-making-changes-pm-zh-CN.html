@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>08 Making Changes Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Making Changes — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试涵盖</td>
+<td>D1 — Agentic Coding Fundamentals (22%), D3 — Effective Claude Code Usage (30%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.4 ★★★ (plan mode vs direct), 3.5 ★★★ (iterative refinement), 1.1 ★ (agentic loops)</td>
+</tr>
+<tr>
+<td>考试场景</td>
+<td>S2 (Code Gen), S4 (Developer Productivity)</td>
+</tr>
+<tr>
+<td>课程来源</td>
+<td>claude-code-in-action / 02-getting-started / Lesson 08（视频 + 文字）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><img alt="Thinking Modes Token Spectrum" src="visuals/thinking-modes-token-spectrum-zh-TW.svg" /><br />
+<em>圖：Thinking Mode 頻譜 — 從 standard 到 ultrathink。</em></p>
+<p><img alt="Planning Mode Execution Flow" src="visuals/planning-mode-execution-flow-zh-TW.svg" /><br />
+<em>圖：Plan Mode 執行流程 — 探索、規劃、審查、執行。</em></p>
+<p><img alt="Plan Mode Flow" src="visuals/plan-mode-flow-zh-TW.svg" /><br />
+<em>圖：三種模式對應不同複雜度。</em></p>
+<h2>TL;DR</h2>
+<p>Claude Code 有两个超越基本聊天的强大功能：Planning Mode（用于复杂多文件任务）和 Thinking Modes（用于困难问题的深度推理）。PM 应理解这些，因为它们影响开发者生产力、token 成本，以及可以可靠自动化的任务类型。迭代改进工作流 — 提问、实现、审核、反馈、改进 — 是团队日常实际使用 Claude Code 的方式。</p>
+<hr />
+<h2>为什么 PM 必须理解这个</h2>
+<ol>
+<li><strong>生产力估算</strong> — 知道开发者何时该用 Planning Mode vs 直接执行，有助于估算任务完成时间</li>
+<li><strong>成本管理</strong> — Planning Mode 和 Thinking Modes 都增加 token 消耗；PM 需要理解质量与成本的权衡</li>
+<li><strong>任务范围界定</strong> — 理解 Planning Mode 能处理什么，有助于为 AI 辅助开发适当界定 ticket 范围</li>
+<li><strong>视觉沟通</strong> — 基于截图的工作流改变了设计师和 PM 如何向使用 Claude Code 的开发者沟通变更</li>
+</ol>
+<hr />
+<h2>商业类比</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>商业类比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>直接执行</td>
+<td>在 Slack 上快速发消息修一个 typo — 不需要开会</td>
+</tr>
+<tr>
+<td>Planning Mode</td>
+<td>多周 sprint 前的项目启动会议 — 建造前先对齐范围</td>
+</tr>
+<tr>
+<td>Thinking modes</td>
+<td>给策略团队额外一周深入分析复杂的市场决策</td>
+</tr>
+<tr>
+<td>迭代改进</td>
+<td>设计冲刺 — 展示原型、获取利益相关方反馈、迭代、上线</td>
+</tr>
+<tr>
+<td>截图输入</td>
+<td>设计师的标注 mockup — 「改这个特定按钮」并用红圈圈起来</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>决策框架：哪个模式用于哪种任务？</h2>
+<table>
+<thead>
+<tr>
+<th>任务类型</th>
+<th>建议模式</th>
+<th>Token 成本</th>
+<th>开发者时间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>修 typo、加 log 语句</td>
+<td>直接执行</td>
+<td>低</td>
+<td>几分钟</td>
+</tr>
+<tr>
+<td>实现新 API endpoint</td>
+<td>直接或 Planning</td>
+<td>中</td>
+<td>10-30 分钟</td>
+</tr>
+<tr>
+<td>跨 10 个文件重构认证</td>
+<td>Planning Mode</td>
+<td>高</td>
+<td>30-60 分钟</td>
+</tr>
+<tr>
+<td>设计最佳缓存算法</td>
+<td>Thinking Mode (ultrathink)</td>
+<td>高</td>
+<td>15-30 分钟</td>
+</tr>
+<tr>
+<td>跨多模块的全栈功能</td>
+<td>Planning + Thinking</td>
+<td>最高</td>
+<td>1-2 小时</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎬 <strong>讲师视频洞察</strong></p>
+<p>讲师提到「两个功能都消耗额外 token，所以有成本考量。」这是关键的 PM 洞察：更强大的模式在复杂任务上产生更好的结果，但成本更高。目标是适当使用 — 让工具匹配任务。</p>
+</blockquote>
+<hr />
+<h2>场景演练：与 Claude Code 的 Sprint 规划</h2>
+<p>你的团队正在规划包含不同复杂度任务的 sprint：</p>
+<table>
+<thead>
+<tr>
+<th>Ticket</th>
+<th>复杂度</th>
+<th>建议 Claude Code 模式</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>修正设置页面按钮颜色</td>
+<td>低</td>
+<td>直接执行</td>
+<td>单一文件，明确的变更</td>
+</tr>
+<tr>
+<td>为整个应用加入深色模式</td>
+<td>高（广度）</td>
+<td>Planning Mode</td>
+<td>触及 CSS、组件、多文件的状态管理</td>
+</tr>
+<tr>
+<td>优化数据库查询性能</td>
+<td>高（深度）</td>
+<td>Thinking Mode (ultrathink)</td>
+<td>需要深入分析查询模式和索引策略</td>
+</tr>
+<tr>
+<td>从零开始构建新的账务模块</td>
+<td>高（两者）</td>
+<td>Planning Mode + Thinking</td>
+<td>新架构（广度）配合复杂的业务逻辑（深度）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM 决策规则</strong></p>
+<p>估算使用 Claude Code 的 sprint 速度时，简单任务从直接执行获得 2-3 倍加速。复杂任务从 Planning Mode 获得 1.5-2 倍加速但消耗更多 token。将此纳入成本预测。</p>
+</blockquote>
+<hr />
+<h2>PM 的迭代改进循环</h2>
+<p>这是你会看到开发者每天使用的工作流：</p>
+<pre class="highlight"><code>PM 提供需求
+        │
+        ▼
+开发者询问 Claude ──→ Claude 实现 ──→ 开发者审核
+        ▲                                    │
+        │                                    ▼
+        └─── 开发者提供反馈 ◄── 需要变更？
+             （截图 + 描述）           │
+                                      ▼（否）
+                                  提交 / PR
+</code></pre>
+
+<p><strong>这对 PM 意味着什么：</strong><br />
+- 反馈循环更快（分钟级，不是天级）<br />
+- 视觉反馈（截图）现在是一等公民的沟通方式<br />
+- PM 可以通过提供期望 UI 状态的截图来参与<br />
+- 更多迭代 = 更好的结果，但每次迭代都有 token 成本</p>
+<hr />
+<h2>练习题</h2>
+<h3>Q1：Sprint 速度估算</h3>
+<p>你的工程团队正在采用 Claude Code。CTO 要你估算对 sprint 速度的影响。根据本课内容，哪个答案最有见地？</p>
+<ul>
+<li>A. 所有任务都会快 3 倍完成</li>
+<li>B. 简单任务通过直接执行获得显著加速；复杂多文件任务通过 Planning Mode 获得适度加速但 token 成本更高；净效果取决于任务组合</li>
+<li>C. 不会有可衡量的影响因为开发者仍需审核代码</li>
+<li>D. Claude Code 只帮助新功能，不帮助 bug fix</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 适当的回应。不同模式有不同的速度/成本特性。简单任务获得最大的相对加速。复杂任务从 Planning Mode 获得质量提升但消耗更多 token。Sprint 的净影响取决于任务类型的组合。
+
+**PM 重点**：不要承诺统一的加速。分析你的 sprint 任务组合，根据复杂度估算每个任务的影响。
+</details>
+
+<h3>Q2：成本优化</h3>
+<p>你团队这个月的 Claude Code token 使用量翻倍了。调查发现开发者对大多数任务都使用 "ultrathink"。适当的 PM 回应是什么？</p>
+<ul>
+<li>A. 完全禁止 ultrathink 以降低成本</li>
+<li>B. 创建指南：将 ultrathink 保留给复杂推理任务，简单变更用直接执行，多文件工作用 Planning Mode</li>
+<li>C. 接受更高的成本作为更好质量的代价</li>
+<li>D. 要求开发者少用 Claude Code</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 这是适当的回应。问题不是 ultrathink 本身而是不加区分的使用。创建让模式匹配任务复杂度的使用指南同时优化质量和成本。
+
+**PM 重点**：Token 成本优化是关于让正确的模式匹配正确的任务，而不是限制强大的功能。创建开发者可以参考的简单决策矩阵。
+</details>
+
+<h3>Q3：设计-开发工作流</h3>
+<p>你的设计团队想用 Claude Code 加速 UI 实现。他们问：「我们可以直接发截图给开发者让 Claude 来实现吗？」根据本课内容，正确答案是什么？</p>
+<ul>
+<li>A. 不行，Claude Code 不支持图片输入</li>
+<li>B. 可以，开发者可以用 Ctrl+V 直接粘贴截图到 Claude Code，Claude 可以用视觉 context 来实现或修改 UI 元素</li>
+<li>C. 只有先将截图转换成文字描述才行</li>
+<li>D. 截图只能用来识别 bug，不能用来实现新设计</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 课程明确教授基于截图的沟通作为主要输入方式。设计师可以提供标注截图，开发者粘贴到 Claude Code，Claude 用多模态理解来实现变更。
+
+**PM 重点**：这改变了设计到开发的交接流程。设计师可以视觉化沟通变更，减少 UI 修改对详细书面规格的需求。考虑更新团队工作流来利用这一点。
+</details>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 Defining Prompts Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>定義 Prompts — 工程深入解析</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試範疇</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server primitives), 2.6 (prompt template design), 1.3 (prompt engineering for tools)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 12</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>MCP prompts 是 server 端定義的參數化訊息模板，回傳 <code>list[base.Message]</code>，為使用者提供預先建立且經過測試的指令，效果優於臨時撰寫的 prompt。</p>
+<hr />
+<h2>為什麼需要 Prompts</h2>
+<p>使用者已經可以直接向 Claude 提出任何要求。MCP prompts 的價值在於<strong>專業知識封裝</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>品質</th>
+<th>一致性</th>
+<th>維護</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>使用者自己寫 prompt</td>
+<td>不穩定 — 取決於使用者能力</td>
+<td>低 — 每次不同</td>
+<td>無 — 一次性</td>
+</tr>
+<tr>
+<td>MCP server 提供 prompt</td>
+<td>高 — 經開發者測試</td>
+<td>高 — 每次用相同模板</td>
+<td>集中化 — 更新一次，所有 client 受益</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2><code>@mcp.prompt()</code> Decorator</h2>
+<p>Prompts 遵循與 tools 和 resources 相同的 decorator 模式：</p>
+<pre class="highlight"><code class="language-python">@mcp.prompt(
+    name=&quot;format&quot;,
+    description=&quot;Rewrites the contents of the document in Markdown format.&quot;
+)
+def format_document(
+    doc_id: str = Field(description=&quot;Id of the document to format&quot;)
+) -&gt; list[base.Message]:
+    prompt = f&quot;&quot;&quot;
+Your goal is to reformat a document to be written with markdown syntax.
+
+The id of the document you need to reformat is:
+&lt;document_id&gt;
+{doc_id}
+&lt;/document_id&gt;
+
+Add in headers, bullet points, tables, etc as necessary.
+Feel free to add in structure.
+Use the 'edit_document' tool to edit the document.
+After the document has been reformatted...
+&quot;&quot;&quot;
+    return [
+        base.UserMessage(prompt)
+    ]
+</code></pre>
+
+<h3>關鍵實作細節</h3>
+<ol>
+<li><strong><code>name</code> 參數</strong> — 成為 slash command 識別碼（如 <code>/format</code>）</li>
+<li><strong><code>description</code> 參數</strong> — 在 prompt 列表中顯示給使用者</li>
+<li><strong><code>Field(description=...)</code></strong> — Pydantic Field 用於參數文件說明</li>
+<li><strong>回傳類型 <code>list[base.Message]</code></strong> — 訊息列表（UserMessage、AssistantMessage）送給 Claude</li>
+<li><strong>f-string 插值</strong> — <code>{doc_id}</code> 在執行時替換為實際參數值</li>
+</ol>
+<hr />
+<h2>Prompt 中的訊息類型</h2>
+<p>Prompts 回傳訊息列表，可以包含：</p>
+<pre class="highlight"><code class="language-python"># 單一使用者訊息（最常見）
+return [base.UserMessage(prompt_text)]
+
+# 多輪對話（用於複雜工作流程）
+return [
+    base.UserMessage(&quot;Here is the task...&quot;),
+    base.AssistantMessage(&quot;I understand. Let me...&quot;),
+    base.UserMessage(&quot;Now proceed with step 2...&quot;)
+]
+</code></pre>
+
+<p>多輪 prompts 適用於：<br />
+- <strong>Few-shot 範例</strong> — 在實際任務前示範 Claude 如何回應<br />
+- <strong>複雜工作流程</strong> — 引導 Claude 完成多步驟流程<br />
+- <strong>角色設定</strong> — 在任務指令前建立 Claude 的角色</p>
+<hr />
+<h2>Prompt vs. Tool vs. Resource：控制模型</h2>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>控制者</th>
+<th>觸發方式</th>
+<th>範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tool</strong></td>
+<td>Claude（model-controlled）</td>
+<td>Claude 在推理時決定</td>
+<td><code>calculate_sqrt(3)</code></td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td>應用程式碼（app-controlled）</td>
+<td>你的程式碼呼叫 <code>read_resource()</code></td>
+<td><code>@plan.md</code> 自動完成</td>
+</tr>
+<tr>
+<td><strong>Prompt</strong></td>
+<td>使用者（user-controlled）</td>
+<td>使用者輸入 <code>/format</code> 或點擊按鈕</td>
+<td><code>/format doc_id=plan.md</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>使用 MCP Inspector 測試</h2>
+<pre class="highlight"><code class="language-bash">uv run mcp dev mcp_server.py
+</code></pre>
+
+<p>在 Inspector 中：<br />
+1. 切換到 <strong>Prompts</strong> 分頁<br />
+2. 從列表中選擇 prompt<br />
+3. 填入參數值（如 <code>doc_id = "plan.md"</code>）<br />
+4. 點擊「Get Prompt」查看插值後的訊息<br />
+5. 驗證 f-string 變數正確替換</p>
+<hr />
+<h2>設計最佳實踐</h2>
+<ol>
+<li><strong>用 XML tag 標記變數邊界</strong> — <code>&lt;document_id&gt;{doc_id}&lt;/document_id&gt;</code> 防止 prompt injection</li>
+<li><strong>在 prompt 中引用可用的 tools</strong> — 告訴 Claude 該用哪些 tools</li>
+<li><strong>明確指定輸出格式</strong> — 如果要 markdown，就說「written with markdown syntax」</li>
+<li><strong>用邊界案例測試</strong> — 空字串、長文件、特殊字元</li>
+<li><strong>保持 prompts 領域專屬</strong> — 文件 server 有格式化 prompts，資料 server 有分析 prompts</li>
+</ol>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>回傳字串而非 <code>list[base.Message]</code></strong> — prompts 必須回傳 Message 物件列表</li>
+<li><strong>忘記參數文件說明</strong> — 用 <code>Field(description=...)</code> 讓使用者知道要提供什麼</li>
+<li><strong>沒有引用 tools</strong> — 如果 prompt 預期 Claude 使用特定 tools，要在 prompt 文字中明確提及</li>
+<li><strong>過於泛用的 prompts</strong> — prompts 應善用 server 的特定功能</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompts 是 MCP 中的 <strong>user-controlled</strong> primitive。不同於 tools（Claude 決定何時行動）或 resources（你的 app 決定何時取得），prompts 透過 slash commands 或 UI 按鈕給使用者明確控制權。CCA 考試中，三方控制模型（model / app / user）是高頻考點。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：要熟悉 <code>@mcp.prompt()</code> decorator 模式、回傳類型（<code>list[base.Message]</code>）、以及透過 Pydantic <code>Field</code> 的參數處理。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：Prompts 代表 MCP 控制模型的使用者控制層。</li>
+<li>考試關鍵區分：「使用者觸發的預定義工作流程」= prompt。「Claude 決定行動」= tool。「App 取得資料」= resource。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP prompt function 回傳什麼？</td>
+<td><code>list[base.Message]</code> — UserMessage 和/或 AssistantMessage 物件的列表</td>
+</tr>
+<tr>
+<td>誰控制 MCP prompts 的觸發時機？</td>
+<td>使用者（user-controlled）— 透過 slash commands、按鈕或選單</td>
+</tr>
+<tr>
+<td>定義 MCP prompt 的 decorator 是什麼？</td>
+<td><code>@mcp.prompt(name="...", description="...")</code></td>
+</tr>
+<tr>
+<td>如何為使用者說明 prompt 參數？</td>
+<td>在 function 參數上使用 Pydantic <code>Field(description="...")</code></td>
+</tr>
+<tr>
+<td>為什麼在 prompt 模板中使用 XML tag 如 <code>&lt;document_id&gt;</code>？</td>
+<td>明確標記變數邊界、防止 prompt injection、幫助 Claude 識別結構化資料</td>
+</tr>
+<tr>
+<td>MCP 中 prompts 和 tools 的區別是什麼？</td>
+<td>Prompts 是 user-controlled（使用者明確觸發），tools 是 model-controlled（Claude 決定何時呼叫）</td>
+</tr>
+<tr>
+<td>MCP prompts 可以包含多輪對話嗎？</td>
+<td>可以 — 回傳多個 UserMessage 和 AssistantMessage 物件，用於 few-shot 範例或複雜工作流程</td>
+</tr>
+<tr>
+<td>部署前如何測試 prompts？</td>
+<td>使用 MCP Inspector — 切換到 Prompts 分頁，填入參數，驗證插值後的訊息</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15 Defining Hooks Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Hooks — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks for tool call interception)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 05-hooks / Lesson 15</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Defining a hook is a four-step process: choose PreToolUse or PostToolUse, select the tool(s) to intercept via a <code>matcher</code>, write a command that reads tool call JSON from stdin, and return an exit code (0 = allow, 2 = block).</p>
+<hr />
+<h2>Context: Where This Fits</h2>
+<p>In the previous lesson you learned <em>what</em> hooks are. This lesson focuses on <em>how to define one</em> — the four-step mental model that applies whether you are building a simple file guard or a complex compliance gate.</p>
+<blockquote>
+<p>💡 <strong>iOS/Swift analogy</strong></p>
+<p>Defining a hook is like registering a <code>URLProtocol</code> subclass: you declare <em>which</em> requests to intercept (<code>canInit(with:)</code>), write the handling logic, and return a result. The system calls you automatically at the right moment.</p>
+</blockquote>
+<hr />
+<p><img alt="Four-Step Process" src="visuals/four-step-process.svg" /><br />
+<em>Figure: The four-step process for defining a hook — Event → Matcher → Command → Exit Code.</em></p>
+<h2>The Four-Step Hook Definition Process</h2>
+<h3>Step 1 — Choose Pre or Post</h3>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>PreToolUse</th>
+<th>PostToolUse</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>When does it run?</td>
+<td><strong>Before</strong> tool execution</td>
+<td><strong>After</strong> tool execution</td>
+</tr>
+<tr>
+<td>Can it block?</td>
+<td>Yes (exit code 2)</td>
+<td>No (already happened)</td>
+</tr>
+<tr>
+<td>Analogy</td>
+<td><code>URLProtocol.canInit(with:)</code> — reject before loading</td>
+<td><code>URLSessionTaskDelegate.didFinishCollecting</code> — inspect after completion</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Critical decision point</strong></p>
+<p>If your goal is to <strong>prevent</strong> an action, you <strong>must</strong> use PreToolUse. A PostToolUse hook cannot undo what already happened — the tool has already executed.</p>
+</blockquote>
+<h3>Step 2 — Select Tools to Watch (Matcher)</h3>
+<p>The <code>matcher</code> field uses regex-like syntax to specify which tools trigger the hook:</p>
+<pre class="highlight"><code class="language-json">&quot;matcher&quot;: &quot;Read&quot;          // single tool
+&quot;matcher&quot;: &quot;Read|Grep&quot;     // multiple tools (OR)
+&quot;matcher&quot;: &quot;.*&quot;            // all tools (wildcard)
+</code></pre>
+
+<p>Built-in tools you can match against:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Read</code></td>
+<td>Read file contents</td>
+</tr>
+<tr>
+<td><code>Write</code></td>
+<td>Create or overwrite files</td>
+</tr>
+<tr>
+<td><code>Edit</code></td>
+<td>Modify existing files</td>
+</tr>
+<tr>
+<td><code>MultiEdit</code></td>
+<td>Multiple edits in one call</td>
+</tr>
+<tr>
+<td><code>Bash</code></td>
+<td>Execute shell commands</td>
+</tr>
+<tr>
+<td><code>Grep</code></td>
+<td>Search file contents</td>
+</tr>
+<tr>
+<td><code>Glob</code></td>
+<td>Find files by pattern</td>
+</tr>
+<tr>
+<td><code>WebFetch</code></td>
+<td>Fetch URL content</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Discovering available tools</strong></p>
+<p>Ask Claude directly: "List all tool names you have access to." This is especially useful when MCP servers add custom tools beyond the built-ins.</p>
+</blockquote>
+<h3>Step 3 — Write the Command (stdin JSON)</h3>
+<p>Your hook command receives a JSON object on standard input:</p>
+<pre class="highlight"><code class="language-json">{
+  &quot;session_id&quot;: &quot;2d6a1e4d-6...&quot;,
+  &quot;transcript_path&quot;: &quot;/Users/sg/...&quot;,
+  &quot;hook_event_name&quot;: &quot;PreToolUse&quot;,
+  &quot;tool_name&quot;: &quot;Read&quot;,
+  &quot;tool_input&quot;: {
+    &quot;file_path&quot;: &quot;/code/queries/.env&quot;
+  }
+}
+</code></pre>
+
+<p>Key fields your command should inspect:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tool_name</code></td>
+<td>Which tool Claude is calling</td>
+</tr>
+<tr>
+<td><code>tool_input</code></td>
+<td>The arguments Claude passed (file paths, commands, etc.)</td>
+</tr>
+<tr>
+<td><code>hook_event_name</code></td>
+<td>Confirms whether this is PreToolUse or PostToolUse</td>
+</tr>
+<tr>
+<td><code>session_id</code></td>
+<td>Identifies the current session (useful for logging)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>📝 <strong>Implementation note</strong></p>
+<p>Your command can be anything executable: a Node.js script, a shell script, a Python script, or even a compiled binary. Claude does not care about the language — only the exit code matters.</p>
+</blockquote>
+<p><img alt="Exit Code Semantics" src="visuals/exit-code-semantics.svg" /><br />
+<em>Figure: Exit code semantics — 0 means allow (tool proceeds), 2 means block (stderr fed back to Claude).</em></p>
+<h3>Step 4 — Return an Exit Code</h3>
+<table>
+<thead>
+<tr>
+<th>Exit Code</th>
+<th>Meaning</th>
+<th>Applies To</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>Allow — tool call proceeds</td>
+<td>PreToolUse and PostToolUse</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>Block — tool call is denied</td>
+<td><strong>PreToolUse only</strong></td>
+</tr>
+</tbody>
+</table>
+<p>When exiting with code 2:<br />
+- Any text written to <strong>stderr</strong> is sent to Claude as feedback<br />
+- Claude sees the rejection reason and can adjust its behavior<br />
+- This creates a feedback loop: block + explain → Claude tries a different approach</p>
+<blockquote>
+<p>⚠️ <strong>Exit code 2 is PreToolUse-only</strong></p>
+<p>Using exit code 2 in a PostToolUse hook has no blocking effect — the tool has already executed. The exit code is ignored for blocking purposes in PostToolUse.</p>
+</blockquote>
+<hr />
+<h2>Complete Configuration Example</h2>
+<pre class="highlight"><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Read|Grep&quot;,
+        &quot;hooks&quot;: [
+          {
+            &quot;type&quot;: &quot;command&quot;,
+            &quot;command&quot;: &quot;node ./hooks/read_hook.js&quot;
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+
+<p>This configuration says: "Before Claude calls Read or Grep, run <code>read_hook.js</code>. The script reads the tool call JSON from stdin, decides whether to allow or block, and exits with 0 or 2."</p>
+<hr />
+<h2>Anti-Patterns (Exam Frequently Tested)</h2>
+<table>
+<thead>
+<tr>
+<th>❌ Wrong Approach</th>
+<th>✅ Correct Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Use PostToolUse to "prevent" file reads</td>
+<td>Use PreToolUse to block before execution</td>
+<td>PostToolUse cannot undo a completed read</td>
+</tr>
+<tr>
+<td>Add "never read .env" to system prompt</td>
+<td>Use PreToolUse hook on Read|Grep</td>
+<td>Prompt instructions have non-zero failure rate</td>
+</tr>
+<tr>
+<td>Match only <code>Read</code> when guarding file access</td>
+<td>Match <code>Read\|Grep</code> (both can access file contents)</td>
+<td>Grep can also expose file contents</td>
+</tr>
+<tr>
+<td>Hardcode file paths in the matcher</td>
+<td>Use matcher for tool selection, check paths in the command logic</td>
+<td>Matcher selects tools, not file paths</td>
+</tr>
+<tr>
+<td>Forget to handle stderr on exit code 2</td>
+<td>Write clear rejection reason to stderr</td>
+<td>Claude needs feedback to understand why the operation was blocked</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Exam Focus: The Four Steps as a Decision Framework</h2>
+<p>On the CCA exam, hook definition questions typically test whether you can:</p>
+<ol>
+<li><strong>Choose the right hook type</strong> — "prevent" / "must not" → PreToolUse; "after" / "transform" / "log" → PostToolUse</li>
+<li><strong>Select the correct matcher</strong> — know which built-in tools expose which capabilities</li>
+<li><strong>Understand stdin data flow</strong> — the command receives JSON, not command-line arguments</li>
+<li><strong>Apply exit codes correctly</strong> — 0 = allow, 2 = block (PreToolUse only)</li>
+</ol>
+<p>Core exam philosophies at play:<br />
+- <strong>Architecture &gt; Prompt</strong> — hooks are structural enforcement, not suggestions<br />
+- <strong>Deterministic &gt; Probabilistic</strong> — exit code 2 is a guaranteed block, not a "please don't"</p>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: Developer Productivity Scenario (S4)</h3>
+<p>You are building a Claude Code workflow for a team that handles sensitive customer data. The <code>.env</code> file contains API keys and database credentials. You need to ensure Claude can <strong>never</strong> access its contents through any tool. Which hook configuration is correct?</p>
+<ul>
+<li>A. PostToolUse hook with matcher <code>Read</code>, checking for <code>.env</code> in the file path</li>
+<li>B. PreToolUse hook with matcher <code>Read</code>, checking for <code>.env</code> in the file path</li>
+<li>C. PreToolUse hook with matcher <code>Read|Grep</code>, checking for <code>.env</code> in the file path</li>
+<li>D. Add "Never read .env files" to CLAUDE.md</li>
+</ul>
+<details><summary>Answer</summary>
+
+**C** — PreToolUse is required to block before execution. Both `Read` and `Grep` can access file contents, so the matcher must cover both. Checking for `.env` happens inside the command logic, not the matcher.
+
+- A uses PostToolUse — too late, file already read
+- B misses `Grep` — Claude could still search `.env` contents via grep
+- D is prompt-based with non-zero failure rate
+
+> Exam philosophies: **Deterministic > Probabilistic**, **Architecture > Prompt**
+</details>
+
+<h3>Q2: CI/CD Integration Scenario (S5)</h3>
+<p>Your CI pipeline uses Claude Code to generate documentation. You want to log every Bash command Claude executes for audit purposes, without blocking any operations. Which hook definition is appropriate?</p>
+<ul>
+<li>A. PreToolUse hook with matcher <code>Bash</code>, exit code 0 after logging</li>
+<li>B. PostToolUse hook with matcher <code>Bash</code>, exit code 0 after logging</li>
+<li>C. PreToolUse hook with matcher <code>Bash</code>, exit code 2 after logging</li>
+<li>D. PostToolUse hook with matcher <code>.*</code>, exit code 2 after logging</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — Audit logging should happen after the command executes (PostToolUse) so you can also capture the result. Exit code 0 allows normal operation.
+
+- A runs before execution — you cannot log the result of a command that has not run yet
+- C blocks the operation, which defeats the purpose
+- D matches all tools (unnecessary) and uses exit code 2 (blocks everything)
+</details>
+
+<h3>Q3: Multi-Agent Research Scenario (S3)</h3>
+<p>A research agent uses multiple MCP tools to query different data sources. You need to normalize all date fields returned by these tools to ISO 8601 format. Which hook approach is correct?</p>
+<ul>
+<li>A. PreToolUse hook that transforms dates before the tool executes</li>
+<li>B. PostToolUse hook that normalizes dates after each tool returns</li>
+<li>C. Add date format instructions to each tool's description</li>
+<li>D. PreToolUse hook that blocks tools returning non-ISO dates</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — Data normalization must happen after the tool returns data (PostToolUse). The hook processes the raw output and normalizes date formats before Claude uses them.
+
+- A runs before the tool executes — there is no data to normalize yet
+- C is prompt-based and cannot guarantee format consistency
+- D cannot know what format the tool will return before it executes
+
+> Exam philosophy: **Architecture > Prompt**, **Deterministic > Probabilistic**
+</details>
+</body>
+</html>

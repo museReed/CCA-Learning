@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 Mcp Servers With Claude Code Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>MCP Servers with Claude Code — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Use &amp; Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 ★★★ (MCP integration), 2.1 ★★ (tool interfaces), 2.3 ★★ (tool distribution)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 04-integrations / Lesson 12</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP (Model Context Protocol) servers are Claude Code's extensibility mechanism — they add new tools without modifying the core, following the same plugin architecture pattern as VS Code extensions or Chrome DevTools Protocol.</p>
+<hr />
+<h2>How MCP Servers Work</h2>
+<p>MCP servers run either <strong>remotely</strong> or <strong>locally</strong> on your machine. They expose tools that Claude Code can discover and invoke at runtime.</p>
+<blockquote>
+<p>Diagram produced by nanobanana</p>
+</blockquote>
+<p>Key insight: MCP servers extend Claude's capabilities <strong>without modifying Claude Code itself</strong>. This is the plugin pattern — the same philosophy behind VS Code extensions, Webpack plugins, or Kubernetes operators.</p>
+<hr />
+<h2>Familiar Analogies</h2>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>MCP Server Equivalent</th>
+<th>Why It Fits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VS Code extensions</td>
+<td>MCP servers</td>
+<td>Add capabilities without forking the editor</td>
+</tr>
+<tr>
+<td>Express middleware</td>
+<td>MCP tool handlers</td>
+<td>Process requests through a standardized interface</td>
+</tr>
+<tr>
+<td>Chrome DevTools Protocol</td>
+<td>Playwright MCP</td>
+<td>Control a browser programmatically</td>
+</tr>
+<tr>
+<td>Kubernetes operators</td>
+<td>MCP servers</td>
+<td>Extend platform capabilities via a standard API</td>
+</tr>
+<tr>
+<td>npm packages</td>
+<td>MCP server packages</td>
+<td>Install via CLI, configure, use</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Installing an MCP Server</h2>
+<p>The Playwright MCP server is the canonical example from the course. Install it from your terminal (<strong>not</strong> inside Claude Code):</p>
+<pre class="highlight"><code class="language-bash">claude mcp add playwright npx @playwright/mcp@latest
+</code></pre>
+
+<p>This command does two things:<br />
+1. <strong>Names</strong> the MCP server <code>playwright</code><br />
+2. <strong>Registers</strong> the startup command (<code>npx @playwright/mcp@latest</code>) that runs locally</p>
+<blockquote>
+<p>💡 <strong>Key detail</strong></p>
+<p><code>claude mcp add</code> is run in your <strong>terminal</strong>, not inside a Claude Code session. This registers the server in your project's MCP configuration.</p>
+</blockquote>
+<hr />
+<h2>Permission Management</h2>
+<p>When Claude first uses an MCP tool, it asks for permission each time. To pre-approve all tools from a server, edit <code>.claude/settings.local.json</code>:</p>
+<pre class="highlight"><code class="language-json">{
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [&quot;mcp__playwright&quot;],
+    &quot;deny&quot;: []
+  }
+}
+</code></pre>
+
+<blockquote>
+<p>⚠️ <strong>Double underscores</strong></p>
+<p>The format is <code>mcp__&lt;server_name&gt;</code> — note the <strong>two</strong> underscores. This is a frequently tested detail.</p>
+</blockquote>
+<p>The <code>allow</code> array accepts glob-like patterns:<br />
+- <code>mcp__playwright</code> — allow <strong>all</strong> tools from the Playwright server<br />
+- <code>mcp__playwright__browser_click</code> — allow only a <strong>specific</strong> tool</p>
+<blockquote>
+<p>🎯 <strong>Exam note</strong></p>
+<p>The exam tests the trade-off between blanket <code>mcp__&lt;server&gt;</code> allows (convenient but less secure) vs. individual tool permissions (verbose but follows least-privilege). In CI/CD contexts, <strong>explicit per-tool permissions are required</strong> — there is no shortcut (covered in Unit 13).</p>
+</blockquote>
+<hr />
+<h2>Practical Example: Visual Feedback Loop</h2>
+<p>The course demonstrates a powerful use case — using Playwright to create a <strong>visual feedback loop</strong> for UI component generation:</p>
+<ol>
+<li>Claude opens a browser via Playwright and navigates to <code>localhost:3000</code></li>
+<li>Claude generates a test component through the app</li>
+<li>Claude <strong>visually inspects</strong> the result (not just the code)</li>
+<li>Claude identifies styling issues (e.g., "generic purple-to-blue gradient")</li>
+<li>Claude updates the generation prompt at <code>@src/lib/prompts/generation.tsx</code></li>
+<li>Claude generates a new component with the improved prompt</li>
+<li>Result: significantly better visual output</li>
+</ol>
+<blockquote>
+<p>🎬 <strong>Instructor insight from the video</strong></p>
+<p>The instructor was genuinely surprised by the quality improvement. The key advantage is that Claude can see the <strong>actual visual output</strong>, not just the code. This closes the feedback loop between code generation and visual evaluation — something that was previously only possible with human review.</p>
+</blockquote>
+<hr />
+<h2>MCP Server Ecosystem</h2>
+<p><img alt="Mcp Server Ecosystem Taxonomy" src="visuals/mcp-server-ecosystem-taxonomy.svg" /><br />
+<em>Figure: MCP server ecosystem taxonomy.</em></p>
+<p>Playwright is just one example. The ecosystem includes servers for:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Examples</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Browser automation</td>
+<td>Playwright</td>
+<td>Visual testing, UI interaction</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>SQLite, PostgreSQL</td>
+<td>Query and inspect data</td>
+</tr>
+<tr>
+<td>API testing</td>
+<td>REST clients</td>
+<td>Test endpoints programmatically</td>
+</tr>
+<tr>
+<td>File system</td>
+<td>Extended file ops</td>
+<td>Advanced file manipulation</td>
+</tr>
+<tr>
+<td>Cloud services</td>
+<td>AWS, GCP integrations</td>
+<td>Manage infrastructure</td>
+</tr>
+<tr>
+<td>Development tools</td>
+<td>Linters, formatters</td>
+<td>Automated code quality</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Exam Focus: Architecture &gt; Prompt</h2>
+<p><img alt="Mcp Plugin Architecture Flow" src="visuals/mcp-plugin-architecture-flow.svg" /><br />
+<em>Figure: MCP plugin architecture flow.</em></p>
+<p>MCP servers embody the <strong>Architecture &gt; Prompt</strong> exam philosophy:</p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Example</th>
+<th>Reliability</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt: "Please check the browser"</td>
+<td>Tell Claude to verify visually</td>
+<td>Unreliable — Claude cannot actually see</td>
+</tr>
+<tr>
+<td>Architecture: Playwright MCP</td>
+<td>Give Claude browser tools</td>
+<td>Reliable — Claude can interact with real UI</td>
+</tr>
+<tr>
+<td>Prompt: "Query the database"</td>
+<td>Hope Claude has access</td>
+<td>Fails if no DB tool exists</td>
+</tr>
+<tr>
+<td>Architecture: DB MCP server</td>
+<td>Provide actual DB tools</td>
+<td>Works — Claude has real database access</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Decision rule</strong></p>
+<p>When the exam asks about extending Claude Code's capabilities, the answer is almost always <strong>MCP server</strong> (architectural extension) over prompt instruction (hoping Claude can do something it structurally cannot).</p>
+</blockquote>
+<hr />
+<h2>Anti-Patterns</h2>
+<table>
+<thead>
+<tr>
+<th>Anti-Pattern</th>
+<th>Why It Is Wrong</th>
+<th>Correct Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Installing MCP inside a Claude Code session</td>
+<td>Must be done from terminal</td>
+<td>Use <code>claude mcp add</code> in your shell</td>
+</tr>
+<tr>
+<td>Using <code>mcp_playwright</code> (single underscore)</td>
+<td>Wrong naming convention</td>
+<td>Use <code>mcp__playwright</code> (double underscore)</td>
+</tr>
+<tr>
+<td>Allowing all MCP tools in CI/CD</td>
+<td>Security risk, violates least-privilege</td>
+<td>List each tool explicitly in <code>allowed_tools</code></td>
+</tr>
+<tr>
+<td>Relying on prompts for capabilities Claude lacks</td>
+<td>Cannot do what it has no tools for</td>
+<td>Add an MCP server that provides the capability</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: Developer Productivity Scenario</h3>
+<p>You are building a web application and want Claude Code to be able to visually verify UI changes. Which approach is most effective?</p>
+<ul>
+<li>A. Add instructions to CLAUDE.md asking Claude to imagine what the UI looks like based on the code</li>
+<li>B. Install the Playwright MCP server and configure Claude to navigate to the running application</li>
+<li>C. Take screenshots manually and paste them into the Claude Code conversation</li>
+<li>D. Write detailed CSS comments explaining the intended visual appearance</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — The Playwright MCP server gives Claude actual browser interaction capabilities. Claude can navigate, take screenshots, and evaluate visual output directly.
+
+- A is impossible — Claude cannot "imagine" UI from code with any reliability
+- C works but is manual and breaks the automation loop
+- D does not give Claude visual access
+
+Exam philosophy: **Architecture > Prompt** — give Claude the tool, don't ask it to imagine.
+</details>
+
+<h3>Q2: Code Generation Scenario</h3>
+<p>Your team uses Claude Code to generate React components. The generated components consistently have poor styling. What is the best approach to improve quality?</p>
+<ul>
+<li>A. Add more styling examples to the system prompt</li>
+<li>B. Install an MCP server that gives Claude browser access, have it evaluate generated output visually, and update the generation prompt based on actual results</li>
+<li>C. Write a PostToolUse hook that runs a CSS linter after every file write</li>
+<li>D. Create a detailed style guide document and reference it in CLAUDE.md</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — This creates a visual feedback loop where Claude can see actual results and iteratively improve. This is exactly the workflow demonstrated in the course video.
+
+- A may help but lacks visual verification
+- C catches syntax issues but not aesthetic quality
+- D provides guidelines but no verification mechanism
+
+Exam philosophy: **Architecture > Prompt** — structural feedback loops over instructional guidance.
+</details>
+
+<h3>Q3: Permission Management Scenario</h3>
+<p>A developer adds the Playwright MCP server to their project. They want to allow all Playwright tools without permission prompts during local development. Which configuration in <code>.claude/settings.local.json</code> is correct?</p>
+<ul>
+<li>A. <code>"allow": ["playwright"]</code></li>
+<li>B. <code>"allow": ["mcp_playwright"]</code></li>
+<li>C. <code>"allow": ["mcp__playwright"]</code></li>
+<li>D. <code>"allow": ["mcp__playwright__*"]</code></li>
+</ul>
+<details><summary>Answer</summary>
+
+**C** — The correct format uses double underscores: `mcp__playwright`. This allows all tools from the Playwright server.
+
+- A is missing the `mcp__` prefix
+- B uses a single underscore (incorrect)
+- D is overly specific — `mcp__playwright` already allows all tools from that server
+
+Key detail: The double underscore convention is a frequently tested exam topic.
+</details>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 Adding Context Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Adding Context — PM 觀點</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試涵蓋</td>
+<td>D3 — Effective Claude Code Usage (30%), D5 — Performance Optimization (12%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 ★★★ (CLAUDE.md hierarchy), 5.1 ★★ (context preservation), 5.4 ★★ (large codebase context)</td>
+</tr>
+<tr>
+<td>考試情境</td>
+<td>S2 (Code Gen), S4 (Developer Productivity)</td>
+</tr>
+<tr>
+<td>課程來源</td>
+<td>claude-code-in-action / 02-getting-started / Lesson 07（影片 + 文字）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>Claude Code 透過三層設定檔系統（CLAUDE.md）管理專案 context。<code>/init</code> 透過分析程式碼庫生成初始檔案。三個層級 — global（所有專案）、project（透過 repo 共享）和 local（個人覆寫）。<code>@</code> 語法讓開發者將 Claude 指向特定檔案。對 PM 來說：這是團隊如何在組織中標準化 AI 輔助開發，以及如何管理 context window 預算。</p>
+<hr />
+<h2>為什麼 PM 必須理解這個</h2>
+<ol>
+<li><strong>團隊標準化</strong> — CLAUDE.md commit 到版本控制代表每個開發者得到相同的 AI 行為。這是你維持程式碼品質一致性的槓桿。</li>
+<li><strong>加速入職</strong> — <code>/init</code> + CLAUDE.md 代表新團隊成員的 AI 助手從第一天就了解專案架構。</li>
+<li><strong>效能調校</strong> — CLAUDE.md 中太多 context 會降低效能。當團隊回報「Claude 很慢」時，PM 應理解這個取捨。</li>
+<li><strong>安全考量</strong> — CLAUDE.local.md 不會 commit 到版本控制，適合放個人 API key 或實驗性指令。</li>
+</ol>
+<hr />
+<h2>商業類比</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>商業類比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLAUDE.md hierarchy</td>
+<td>公司政策層級：企業政策（global）&lt; 部門政策（project）&lt; 個人例外（local）。越具體覆寫越一般。</td>
+</tr>
+<tr>
+<td><code>/init</code> 指令</td>
+<td>員工入職 — 閱讀所有文件、理解組織、總結關鍵流程</td>
+</tr>
+<tr>
+<td>CLAUDE.md 中的 <code>@</code> file mention</td>
+<td>例行會議議程項目 — 總是在桌上，總是被討論</td>
+</tr>
+<tr>
+<td>互動式 <code>@</code> mention</td>
+<td>臨時會議主題 — 只在相關時提出</td>
+</tr>
+<tr>
+<td><code>#</code> memory 指令</td>
+<td>更新團隊 wiki — 跨人員變動持續存在的知識</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>情境演練：將 Claude Code 推廣到 20 人團隊</h2>
+<p><img alt="Claude Md Hierarchy Priority Stack" src="visuals/claude-md-hierarchy-priority-stack-zh-TW.svg" /><br />
+<em>圖：CLAUDE.md 階層 — local 覆蓋 project 覆蓋 global。</em></p>
+<table>
+<thead>
+<tr>
+<th>階段</th>
+<th>動作</th>
+<th>CLAUDE.md 槓桿</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 初始設定</td>
+<td>技術主管在主 repo 上執行 <code>/init</code></td>
+<td>生成包含專案架構的基線 CLAUDE.md</td>
+</tr>
+<tr>
+<td>2. 標準化</td>
+<td>技術主管將編碼標準、PR 慣例、測試要求加入 CLAUDE.md</td>
+<td>所有開發者透過版本控制繼承相同規則</td>
+</tr>
+<tr>
+<td>3. 個人化</td>
+<td>個別開發者建立 CLAUDE.local.md 放個人偏好</td>
+<td>個人風格不影響團隊標準</td>
+</tr>
+<tr>
+<td>4. 優化</td>
+<td>團隊在監控 context 使用後移除低價值的 <code>@</code> 引用</td>
+<td>更好的效能，更低的 token 成本</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎬 <strong>講師影片洞察</strong></p>
+<p>講師展示 CLAUDE.md「被包含在每個請求中」— 使其本質上是持久化的 system prompt。對 PM 來說，這代表 CLAUDE.md 是控制團隊 AI 行為最具影響力的單一設定。</p>
+</blockquote>
+<hr />
+<h2>決策框架：什麼放哪裡？</h2>
+<table>
+<thead>
+<tr>
+<th>內容類型</th>
+<th>放在哪裡</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>專案架構、建置指令</td>
+<td><code>./CLAUDE.md</code>（project）</td>
+<td>每個開發者都需要；版本控制</td>
+</tr>
+<tr>
+<td>編碼標準、PR 慣例</td>
+<td><code>./CLAUDE.md</code>（project）</td>
+<td>團隊一致性；變更在 git 中追蹤</td>
+</tr>
+<tr>
+<td>個人編碼風格偏好</td>
+<td><code>~/.claude/CLAUDE.md</code>（global）</td>
+<td>適用於你所有專案；不共享</td>
+</tr>
+<tr>
+<td>實驗性指令、個人 API key</td>
+<td><code>./CLAUDE.local.md</code>（local）</td>
+<td>每專案覆寫；不 commit</td>
+</tr>
+<tr>
+<td>Schema 檔案、API 契約</td>
+<td><code>./CLAUDE.md</code> 中的 <code>@</code> 引用</td>
+<td>大多數請求需要的橫切 context</td>
+</tr>
+<tr>
+<td>任務特定的檔案</td>
+<td>聊天中的互動式 <code>@</code></td>
+<td>一次性 context；不浪費 context window</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM 決策規則</strong></p>
+<p>如果影響整個團隊，放在專案 CLAUDE.md。如果是個人的，放在 local 或 global。不確定時問自己：「新團隊成員需要這個嗎？」如果是，放專案 CLAUDE.md。</p>
+</blockquote>
+<hr />
+<h2>Context Window 預算問題</h2>
+<p><img alt="Context Window Budget Allocation" src="visuals/context-window-budget-allocation-zh-TW.svg" /><br />
+<em>圖：Context Window 預算分配。</em></p>
+<p>PM 應理解這個取捨，因為它影響效能和成本：</p>
+<table>
+<thead>
+<tr>
+<th>CLAUDE.md 中更多 context</th>
+<th>CLAUDE.md 中更少 context</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude 始終知道專案細節</td>
+<td>Claude 可能每次需要重新發現檔案</td>
+</tr>
+<tr>
+<td>每次請求更高的 token 消耗</td>
+<td>每次請求更低的 token 消耗</td>
+</tr>
+<tr>
+<td>回應品質降低的風險</td>
+<td>聚焦 context 帶來更好的推理</td>
+</tr>
+<tr>
+<td>對重複問題更快</td>
+<td>首次探索略慢</td>
+</tr>
+</tbody>
+</table>
+<p>甜蜜點：只將<strong>橫切的、經常需要的</strong>檔案放在 CLAUDE.md <code>@</code> 引用中。讓 Claude 透過工具發現其他一切。</p>
+<hr />
+<h2>練習題</h2>
+<h3>Q1：組織推廣</h3>
+<p>你的 CTO 問：「我們如何確保所有 50 名使用 Claude Code 的開發者遵循我們的編碼標準？」哪個方法正確？</p>
+<ul>
+<li>A. 發 email 請每個開發者設定他們的 Claude Code 設定</li>
+<li>B. 將編碼標準加入專案 CLAUDE.md 並 commit 到 repository</li>
+<li>C. 建立 CLAUDE.local.md 模板並請每個開發者複製</li>
+<li>D. 使用 Anthropic 儀表板設定組織級的 Claude Code 規則</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 專案 CLAUDE.md commit 到版本控制，自動套用到所有 clone repo 的開發者。這是架構解決方案 — 不需要每個開發者手動設定，不會隨時間產生偏差。
+
+**PM 重點**：CLAUDE.md 是你的政策執行機制。把它當成團隊級設定檔，不是個人設定檔。
+</details>
+
+<h3>Q2：效能抱怨</h3>
+<p>一位開發者回報：「Claude Code 以前很快但現在很慢，答案也變差了。」調查發現他們上週在 CLAUDE.md 中加了 12 個 <code>@</code> 檔案引用。你建議什麼？</p>
+<ul>
+<li>A. 請他們升級到更高的 API 層級以取得更多 context window</li>
+<li>B. 審核 <code>@</code> 引用，將非必要的移到互動式 <code>@</code> mention；只在 CLAUDE.md 中保留橫切檔案</li>
+<li>C. 叫他們完全刪除 CLAUDE.md 重新開始</li>
+<li>D. 建議他們改用更簡單的專案結構</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 課程明確教導太多 context 降低效能。適當的回應是審核和優化，而不是刪除所有東西或用錢砸問題。
+
+**PM 重點**：Context window 是有限資源。把 CLAUDE.md 中的 `@` 引用當成資料庫索引 — 每個都有維護成本，所以只保留提供橫切價值的。
+</details>
+
+<h3>Q3：新人入職</h3>
+<p>一位新開發者加入你的團隊。他們從未使用過 Claude Code。在你的專案上進行高效 AI 輔助開發的最快路徑是什麼？</p>
+<ul>
+<li>A. 給他們 2 小時的 Claude prompt engineering 培訓</li>
+<li>B. 讓他們安裝 Claude Code、pull repo（包含 CLAUDE.md），然後開始工作 — CLAUDE.md 自動提供專案 context</li>
+<li>C. 請他們執行 <code>/init</code> 生成全新的 CLAUDE.md</li>
+<li>D. 分享你的個人 CLAUDE.local.md 給他們</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 如果團隊已經 commit 維護良好的 CLAUDE.md 到 repo，新開發者自動繼承所有專案 context。基本使用不需要培訓。
+
+**PM 重點**：維護良好的 CLAUDE.md 是入職加速器。就像從第一天就讓每位新人都能使用資深工程師的大腦。
+</details>
+</body>
+</html>

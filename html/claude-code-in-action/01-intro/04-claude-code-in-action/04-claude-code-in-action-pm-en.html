@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04 Claude Code In Action Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Claude Code in Action — PM Strategic Overview</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%), D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.5 (built-in tools), 2.4 (MCP integration), 3.6 (CI/CD), 1.1 (agentic loops)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 01-intro / Lesson 04</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude Code delivers business value through autonomous multi-step task execution, extensible tooling via MCP, and automated quality gates in CI/CD — reducing engineering bottlenecks across performance, analysis, design, and compliance.</p>
+<hr />
+<h2>Built-in Tools: What PMs Need to Know</h2>
+<p><img alt="Tool Chaining Patterns Matrix" src="visuals/tool-chaining-patterns-matrix.svg" /><br />
+<em>Figure: Tool chaining patterns across four demo use cases.</em></p>
+<p><img alt="Tool Chain Pattern" src="visuals/tool-chain-pattern.svg" /><br />
+<em>Figure: Three tool chaining patterns demonstrated in Claude Code.</em></p>
+<p>Claude Code comes with default tools for reading/writing files, running commands, and searching codebases. The key PM insight: <strong>you don't need to provision special tooling for most tasks</strong>. Claude chains these built-in tools intelligently.</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Business Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File I/O (Read, Write, Edit)</td>
+<td>Autonomous code changes without human handholding</td>
+</tr>
+<tr>
+<td>Execution (Bash)</td>
+<td>Run tests, benchmarks, builds automatically</td>
+</tr>
+<tr>
+<td>Search (Grep, Glob)</td>
+<td>Navigate large codebases to understand context</td>
+</tr>
+<tr>
+<td>Notebooks (NotebookEdit)</td>
+<td>Data analysis with execution, not just code generation</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Why PMs Care</strong><br />
+When scoping Claude Code adoption, start with built-in tools. Most engineering tasks are covered without additional setup cost.</p>
+</blockquote>
+<hr />
+<h2>Demo 1: Automated Performance Audit</h2>
+<p><strong>Business problem</strong>: Performance optimization requires senior engineers, is time-consuming, and is often deprioritized.</p>
+<p><strong>What happened</strong>: Claude autonomously profiled the chalk library (429M downloads/week), identified the bottleneck, implemented a fix, and verified a 3.9x throughput improvement — all without human intervention between steps.</p>
+<p><strong>Business impact</strong>:<br />
+- Senior engineer time freed from routine optimization work<br />
+- Performance improvements happen proactively, not reactively<br />
+- Measurable results (3.9x improvement) with audit trail</p>
+<blockquote>
+<p>🎬 <strong>Instructor Insight</strong><br />
+Claude creates its own task list and tracks progress. This self-management capability means it handles complex multi-step work that would normally require task decomposition by a tech lead.</p>
+</blockquote>
+<hr />
+<h2>Demo 2: Data-Driven Insights Without a Data Team</h2>
+<p><strong>Business problem</strong>: Getting insights from data requires data analysts or data scientists. Bottleneck when the data team is at capacity.</p>
+<p><strong>What happened</strong>: Claude analyzed a video streaming platform's user churn data in a Jupyter notebook. Critically, it executed its own analysis code, read the results, and customized follow-up analysis based on what it found.</p>
+<p><strong>Business impact</strong>:<br />
+- Product teams can get preliminary data insights without waiting for the data team<br />
+- Analysis quality is higher because Claude iterates based on actual results<br />
+- Reduces time-to-insight for product decisions</p>
+<blockquote>
+<p>💡 <strong>Why PMs Care</strong><br />
+The difference between "write analysis code" and "write, execute, read results, refine" is the difference between a template and an actual insight. Claude Code does the latter.</p>
+</blockquote>
+<hr />
+<h2>Demo 3: Rapid UI Iteration Without Designer Bottleneck</h2>
+<p><strong>Business problem</strong>: UI styling iterations create back-and-forth between developers and designers. Each cycle takes hours or days.</p>
+<p><strong>What happened</strong>: Claude was given browser control tools via Playwright MCP. It opened the app, screenshotted the current state, made style changes, re-screenshotted to verify, and iterated until the result was correct.</p>
+<p><strong>Business impact</strong>:<br />
+- Faster design iteration cycles (minutes instead of hours)<br />
+- Developers can handle styling refinements autonomously<br />
+- MCP extensibility means new capabilities without retraining</p>
+<blockquote>
+<p>💡 <strong>Why PMs Care</strong><br />
+MCP is the extensibility story. When stakeholders ask "can Claude do X?" the answer is often "yes, with the right MCP server." This is a capability you can plan around.</p>
+</blockquote>
+<hr />
+<h2>Demo 4: Automated Compliance Checking in Code Review</h2>
+<p><strong>Business problem</strong>: Manual code review misses cross-cutting concerns like PII exposure, especially in infrastructure-as-code where data flows span multiple files.</p>
+<p><strong>What happened</strong>: Claude Code ran in GitHub Actions as an automated PR reviewer. It caught that a code change would expose user email (PII) through an S3 bucket shared with an external partner — by understanding the Terraform infrastructure flow.</p>
+<p><strong>Business impact</strong>:<br />
+- Compliance risks caught before merge, not in production<br />
+- Scales review capacity without hiring more senior engineers<br />
+- Understands infrastructure context, not just code syntax</p>
+<blockquote>
+<p>🎯 <strong>Exam Note</strong><br />
+This is Architecture &gt; Prompt: Claude understands infrastructure structurally. PMs should know that Claude Code's CI/CD integration provides compliance value, not just code quality.</p>
+</blockquote>
+<hr />
+<h2>Decision Framework for PMs</h2>
+<p><img alt="Builtin Vs Mcp Decision Tree" src="visuals/builtin-vs-mcp-decision-tree.svg" /><br />
+<em>Figure: Decision tree — built-in tools vs MCP servers.</em></p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Guidance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Do we need MCP servers?"</td>
+<td>Start without them. Add only when built-in tools can't cover a specific need (e.g., browser testing, API integration)</td>
+</tr>
+<tr>
+<td>"Where does Claude Code fit in our workflow?"</td>
+<td>CI/CD for automated review (Demo 4), developer productivity for ad-hoc tasks (Demos 1-3)</td>
+</tr>
+<tr>
+<td>"How do we measure ROI?"</td>
+<td>Time saved per task, issues caught pre-merge, reduction in specialist bottlenecks</td>
+</tr>
+<tr>
+<td>"What's the adoption risk?"</td>
+<td>Low for built-in tools (no setup). Medium for MCP (requires configuration). Low for CI/CD (standard GitHub Actions)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: Adoption Strategy</h3>
+<p>Your engineering team wants to adopt Claude Code. The CTO asks you to propose a phased rollout. Based on the demos in this lesson, what is the most effective ordering?</p>
+<details><summary>Answer</summary>
+
+**Phase 1**: Built-in tools for developer productivity (Demos 1-2 — performance optimization, data analysis). Zero additional setup, immediate value. **Phase 2**: CI/CD integration for automated PR review (Demo 4 — compliance/security). Requires GitHub Actions configuration but delivers organization-wide value. **Phase 3**: MCP extensions for specialized workflows (Demo 3 — browser testing, external APIs). Only when specific needs arise. This follows the exam principle of proportionate response — start simple, extend when needed.
+</details>
+
+<h3>Q2: Stakeholder Communication</h3>
+<p>A security-conscious VP asks: "How can we ensure Claude Code catches PII exposure in our infrastructure?" What is the best response?</p>
+<details><summary>Answer</summary>
+
+Claude Code can be integrated into your CI/CD pipeline as an automated PR reviewer. It reads infrastructure-as-code (like Terraform) and traces data flows across resources. It caught PII exposure in Demo 4 not because it was told to look for PII, but because it understood that user data was flowing to a shared external bucket. The key advantage: it understands architecture, so it catches issues that rule-based scanners miss. This is the Architecture > Prompt philosophy.
+</details>
+
+<h3>Q3: ROI Justification</h3>
+<p>Your team spends 20 hours/week on code review. How would you frame Claude Code's CI/CD integration to justify the setup investment?</p>
+<details><summary>Answer</summary>
+
+Frame it as augmentation, not replacement. Claude Code handles the first pass of review — catching structural issues, security concerns, and compliance risks automatically. Human reviewers then focus on business logic and architecture decisions. Expected impact: 30-50% reduction in review cycle time, near-zero PII/compliance escapes, and consistent review quality regardless of reviewer availability. The setup cost is a standard GitHub Actions workflow — typically a few hours of engineering time.
+</details>
+</body>
+</html>

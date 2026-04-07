@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 Prompts In The Client Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Client 端的 Prompts — 工程深入解析</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試範疇</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP client implementation), 2.6 (prompt consumption patterns), 1.3 (prompt orchestration)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 13</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>Client 實作 <code>list_prompts()</code> 來發現可用 prompts，以及 <code>get_prompt(name, args)</code> 來取得插值後的訊息，啟用 slash command（<code>/</code>）UX 模式，讓使用者觸發預定義工作流程。</p>
+<hr />
+<h2>兩個 Client 端方法</h2>
+<h3>1. <code>list_prompts()</code> — 發現</h3>
+<pre class="highlight"><code class="language-python">async def list_prompts(self) -&gt; list[types.Prompt]:
+    result = await self.session().list_prompts()
+    return result.prompts
+</code></pre>
+
+<p>此方法向 server 查詢所有可用 prompts。每個 <code>types.Prompt</code> 物件包含：<br />
+- <code>name</code> — 識別碼（用於 slash commands）<br />
+- <code>description</code> — 人類可讀的說明<br />
+- <code>arguments</code> — 必要/可選參數列表</p>
+<h3>2. <code>get_prompt()</code> — 帶插值的取得</h3>
+<pre class="highlight"><code class="language-python">async def get_prompt(self, prompt_name, args: dict[str, str]):
+    result = await self.session().get_prompt(prompt_name, args)
+    return result.messages
+</code></pre>
+
+<p>此方法取得特定 prompt 並進行變數插值：<br />
+- <code>prompt_name</code> — 要取得哪個 prompt（如 <code>"format"</code>）<br />
+- <code>args</code> — 字串對字串的 dict（如 <code>{"doc_id": "plan.md"}</code>）<br />
+- 回傳 <code>result.messages</code> — 準備好發送給 Claude 的 <code>base.Message</code> 物件列表</p>
+<hr />
+<h2>完整的 Prompt 工作流程</h2>
+<p>從使用者互動到 Claude 回應的端到端流程：</p>
+<pre class="highlight"><code>1. 使用者輸入 &quot;/&quot;
+   └── Client 呼叫 list_prompts()
+       └── Server 回傳可用 prompts
+
+2. 使用者選擇 &quot;/format&quot;
+   └── Client 顯示參數輸入
+       └── 使用者提供 doc_id = &quot;plan.md&quot;
+
+3. Client 呼叫 get_prompt(&quot;format&quot;, {&quot;doc_id&quot;: &quot;plan.md&quot;})
+   └── Server 執行 format_document(doc_id=&quot;plan.md&quot;)
+       └── 回傳插值後的訊息
+
+4. Client 將訊息發送給 Claude
+   └── Claude 收到專家級指令
+       └── Claude 使用 tools（如 edit_document）來完成
+
+5. Claude 回應格式化後的文件
+</code></pre>
+
+<h3>關鍵洞察：Prompts 編排 Tools</h3>
+<p>Claude 收到 prompt 訊息後，通常需要使用可用的 <strong>tools</strong> 來完成任務。Prompts 提供指令，tools 提供能力。</p>
+<hr />
+<h2>三方控制模型</h2>
+<p>這是 Lessons 10-13 中最重要的概念，也是 CCA 考試核心主題：</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>控制者</th>
+<th>觸發機制</th>
+<th>類比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>Model-controlled</td>
+<td>Claude 在推理時決定</td>
+<td>主廚決定用什麼食材</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>App-controlled</td>
+<td>你的程式碼呼叫 <code>read_resource()</code></td>
+<td>服務生自動送水</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>User-controlled</td>
+<td>使用者輸入 <code>/</code> 或點擊按鈕</td>
+<td>顧客從菜單點餐</td>
+</tr>
+</tbody>
+</table>
+<p>對應 Claude 官方介面：<br />
+- <strong>Tools</strong> — Claude 在幕後執行程式碼或計算<br />
+- <strong>Resources</strong> — 「Add from Google Drive」功能注入文件 context<br />
+- <strong>Prompts</strong> — 聊天輸入下方的工作流程按鈕</p>
+<hr />
+<h2>Slash Commands：UX 模式</h2>
+<table>
+<thead>
+<tr>
+<th>步驟</th>
+<th>使用者行為</th>
+<th>Client 行為</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>輸入 <code>/</code></td>
+<td>呼叫 <code>list_prompts()</code>，顯示命令選單</td>
+</tr>
+<tr>
+<td>2</td>
+<td>選擇命令</td>
+<td>根據 prompt arguments 顯示參數表單</td>
+</tr>
+<tr>
+<td>3</td>
+<td>提供參數</td>
+<td>驗證輸入，準備 args dict</td>
+</tr>
+<tr>
+<td>4</td>
+<td>確認</td>
+<td>呼叫 <code>get_prompt(name, args)</code>，取得訊息</td>
+</tr>
+<tr>
+<td>5</td>
+<td>（自動）</td>
+<td>將訊息發送給 Claude，顯示回應</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Prompt Arguments：變數插值</h2>
+<p><code>get_prompt()</code> 中的 <code>args</code> 參數始終是 <code>dict[str, str]</code> — 所有值都是字串：</p>
+<pre class="highlight"><code class="language-python"># Client 端
+messages = await client.get_prompt(&quot;format&quot;, {&quot;doc_id&quot;: &quot;plan.md&quot;})
+
+# Server 端（內部發生的事）
+def format_document(doc_id: str = Field(...)):
+    # doc_id = &quot;plan.md&quot; — 從 args 插值而來
+    prompt = f&quot;...{doc_id}...&quot;
+    return [base.UserMessage(prompt)]
+</code></pre>
+
+<p>即使參數代表數字或布林值，也以字串傳遞。Server function 處理必要的類型轉換。</p>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>混淆 <code>list_prompts()</code> 和 <code>get_prompt()</code></strong> — <code>list_prompts()</code> 回傳 metadata（名稱、描述），<code>get_prompt()</code> 回傳實際插值後的訊息</li>
+<li><strong>非字串的 args 值</strong> — <code>args</code> dict 必須是 <code>dict[str, str]</code>，不是 <code>dict[str, Any]</code></li>
+<li><strong>錯誤發送 prompt 訊息</strong> — <code>get_prompt()</code> 的訊息直接進入對話，就像使用者打的一樣</li>
+<li><strong>忘記 prompts 使用 tools</strong> — prompts 提供指令，但 Claude 通常需要 tools 來完成任務；兩者都必須可用</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>三方控制模型（Tools = model-controlled、Resources = app-controlled、Prompts = user-controlled）是 CCA 考試中最重要的 MCP 架構概念。每個 primitive 服務不同的利害關係人：tools 服務 Claude，resources 服務你的應用，prompts 服務你的使用者。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：要知道兩個 client 方法 — <code>list_prompts()</code> 用於發現，<code>get_prompt(name, args)</code> 用於取得。<code>args</code> dict 是 <code>dict[str, str]</code>。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：三方控制模型是基石概念。預期情境題會問根據控制者該用哪個 primitive。</li>
+<li>考題中出現「slash command」、「workflow button」或「user triggers」幾乎都指向 prompts。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>處理 MCP prompts 的兩個 client 方法是什麼？</td>
+<td><code>list_prompts()</code> 用於發現可用 prompts，<code>get_prompt(name, args)</code> 用於取得插值後的訊息</td>
+</tr>
+<tr>
+<td><code>get_prompt()</code> 中 <code>args</code> 參數的類型是什麼？</td>
+<td><code>dict[str, str]</code> — 所有 key 和 value 都是字串</td>
+</tr>
+<tr>
+<td><code>get_prompt()</code> 回傳什麼？</td>
+<td><code>result.messages</code> — 準備好發送給 Claude 的 <code>base.Message</code> 物件列表</td>
+</tr>
+<tr>
+<td>MCP prompts 對應什麼 UI 模式？</td>
+<td>Slash commands（<code>/</code>）— 使用者輸入 <code>/</code>、看到可用命令、選擇一個、提供參數</td>
+</tr>
+<tr>
+<td>Prompts 和 tools 如何協作？</td>
+<td>Prompts 提供指令（做什麼），tools 提供能力（怎麼做）— Claude 使用 tools 來完成 prompt 指令</td>
+</tr>
+<tr>
+<td>三種 MCP 控制模型是什麼？</td>
+<td>Tools = model-controlled（Claude 決定）、Resources = app-controlled（你的程式碼決定）、Prompts = user-controlled（使用者決定）</td>
+</tr>
+<tr>
+<td>典型 client 中什麼觸發 <code>list_prompts()</code>？</td>
+<td>使用者在聊天輸入中輸入 <code>/</code> — client 向 server 查詢可用 prompts</td>
+</tr>
+<tr>
+<td>Claude 官方介面中什麼展示了 prompt 模式？</td>
+<td>聊天輸入下方的工作流程按鈕 — 預定義的、使用者觸發的工作流程</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

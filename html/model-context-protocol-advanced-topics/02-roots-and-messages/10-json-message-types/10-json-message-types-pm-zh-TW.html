@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Json Message Types Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>JSON Message Types — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 (client-server communication patterns), 2.6 (MCP protocol specification)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / Lesson 10</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP 通訊使用兩種 JSON 訊息 — 對話（request-response）和公告（notification）— 在一個 client 和 server 都能主動開口的雙向協議中。</p>
+<hr />
+<p><img alt="Message Types" src="visuals/message-types-zh-TW.svg" /></p>
+<h2>心智模型：對講機 vs. 廣播器</h2>
+<table>
+<thead>
+<tr>
+<th>訊息類型</th>
+<th>類比</th>
+<th>行為</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Request-Result</strong></td>
+<td>對講機對話</td>
+<td>「收到嗎？」...「收到，資訊如下」</td>
+</tr>
+<tr>
+<td><strong>Notification</strong></td>
+<td>廣播器公告</td>
+<td>「注意：進度 50%」（不需回應）</td>
+</tr>
+</tbody>
+</table>
+<p>關鍵差異：對講機訊息等待回覆；廣播器公告不等。</p>
+<hr />
+<h2>PM 為什麼需要理解訊息類型</h2>
+<p>你不需要讀 JSON，但需要理解其影響：</p>
+<h3>1. 錯誤處理需求</h3>
+<ul>
+<li><strong>Request-Result</strong>：如果回應永遠不來，產品必須處理逾時和重試</li>
+<li><strong>Notification</strong>：如果丟失，不會壞 — 但使用者錯過狀態更新</li>
+</ul>
+<p>這影響你可靠性的驗收標準。</p>
+<h3>2. 產品架構決策</h3>
+<ul>
+<li>知道 MCP 是 <strong>雙向的</strong> 意味著 server 不只是被動的 tool 提供者 — 它可以主動向 client 請求（如 sampling）</li>
+<li>這開啟了簡單 request-response API 無法支援的產品可能性</li>
+</ul>
+<h3>3. Transport 選擇</h3>
+<p>不同部署環境支援不同 transport。理解訊息類型幫助評估哪個 transport 適合你的產品。</p>
+<hr />
+<h2>兩類訊息</h2>
+<h3>類別 1：Request-Result（對話）</h3>
+<p>有人問問題，有人回答。</p>
+<table>
+<thead>
+<tr>
+<th>誰問</th>
+<th>問什麼</th>
+<th>誰答</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client</td>
+<td>「執行這個 tool」（CallTool）</td>
+<td>Server</td>
+</tr>
+<tr>
+<td>Client</td>
+<td>「你有哪些 tools？」（ListTools）</td>
+<td>Server</td>
+</tr>
+<tr>
+<td>Client</td>
+<td>「給我這個 resource」（ReadResource）</td>
+<td>Server</td>
+</tr>
+<tr>
+<td>Client</td>
+<td>「讓我們連線」（Initialize）</td>
+<td>Server</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>「請幫我呼叫 Claude」（CreateMessage — sampling）</td>
+<td>Client</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>「我可以存取哪些目錄？」（ListRoots）</td>
+<td>Client</td>
+</tr>
+</tbody>
+</table>
+<p>注意 <strong>兩端都能提問</strong>。這就是 MCP 雙向的原因。</p>
+<h3>類別 2：Notification（公告）</h3>
+<p>有人分享資訊，不期望回應。</p>
+<table>
+<thead>
+<tr>
+<th>誰公告</th>
+<th>說什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Server</td>
+<td>「進度：50% 完成」</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>「Log：搜尋資料庫中...」</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>「我的 tool 清單已變更」</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>「某個 resource 已更新」</td>
+</tr>
+<tr>
+<td>Client</td>
+<td>「我的 root 目錄已變更」</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>雙向：兩端都能說話</h2>
+<p>這是關鍵的架構洞察。MCP 不像 web API 只有 client 發起：</p>
+<table>
+<thead>
+<tr>
+<th>傳統 API</th>
+<th>MCP 協議</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client 發送 request</td>
+<td>Client 發送 request</td>
+</tr>
+<tr>
+<td>Server 回應</td>
+<td>Server 回應</td>
+</tr>
+<tr>
+<td>Server 無法發起</td>
+<td><strong>Server 可以發起</strong>（sampling、root 查詢）</td>
+</tr>
+<tr>
+<td>單向關係</td>
+<td><strong>Peer-to-peer 關係</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+MCP 是雙向道路。作為 PM，這意味著你可以設計 server 主動請求東西的產品功能 — 如透過 sampling 請 client 摘要資料。這是 REST API 原生不支援的能力。</p>
+</blockquote>
+<hr />
+<h2>規格用 TypeScript 撰寫</h2>
+<p>官方 MCP 規格在 GitHub 上，用 TypeScript 撰寫。PM 要點：</p>
+<ul>
+<li>TypeScript 用於 <strong>描述資料結構</strong>（如 schema），非必要語言</li>
+<li>Server 和 client 可用 <strong>任何語言</strong> 建置（Python, Go, JavaScript, Rust）</li>
+<li>規格是訊息長什麼樣的 <strong>source of truth</strong></li>
+<li>工程師辯論「這個訊息有哪些欄位？」時 — 規格就是答案</li>
+</ul>
+<hr />
+<h2>每種訊息類型的產品影響</h2>
+<table>
+<thead>
+<tr>
+<th>訊息類型</th>
+<th>產品影響</th>
+<th>PM 關注點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CallToolRequest/Result</td>
+<td>核心 tool 執行</td>
+<td>必須定義逾時和錯誤狀態</td>
+</tr>
+<tr>
+<td>InitializeRequest/Result</td>
+<td>連線設定</td>
+<td>預先定義支援的 capabilities</td>
+</tr>
+<tr>
+<td>CreateMessageRequest/Result</td>
+<td>Sampling（server 使用 AI）</td>
+<td>成本轉移到 client — 定價影響</td>
+</tr>
+<tr>
+<td>ProgressNotification</td>
+<td>長時間操作的 UX</td>
+<td>必須設計載入狀態</td>
+</tr>
+<tr>
+<td>LoggingNotification</td>
+<td>除錯和監控</td>
+<td>必須定義 log 保留策略</td>
+</tr>
+<tr>
+<td>ToolListChangedNotification</td>
+<td>動態 tool 發現</td>
+<td>UI 必須處理 tool 清單更新</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常見考試情境</h2>
+<h3>情境：Transport 中訊息丟失</h3>
+<p>問：「一個 progress notification 在傳輸中丟失。會發生什麼？」<br />
+答：不會壞 — 使用者錯過一次狀態更新但 tool 繼續運作。Notification 是 fire-and-forget。</p>
+<p>問：「一個 CallToolResult 在傳輸中丟失。會發生什麼？」<br />
+答：Client 逾時且必須重試。Request-Result 配對需要回應 — 缺少 result 就是失敗。</p>
+<p>這個區別經常被考。</p>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.4</strong>：Communication patterns — 知道兩類訊息和每端發送什麼</li>
+<li><strong>D2 Task 2.6</strong>：Protocol specification — 知道它用 TypeScript 做型別描述</li>
+<li>關鍵區別：Request 有 <code>id</code> 欄位，Notification 沒有</li>
+<li>知道 MCP 是雙向的 — server 可以發起 request（sampling、list_roots）</li>
+<li>考試哲學：<strong>Protocol literacy</strong> — 理解訊息類型影響錯誤處理和架構</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 訊息分為哪兩類？</td>
+<td>Request-Result 配對（期望回應）和 Notification（fire-and-forget）</td>
+</tr>
+<tr>
+<td>協議中 Request 和 Notification 怎麼區分？</td>
+<td>Request 有 <code>id</code> 欄位且期望回應；Notification 無 <code>id</code> 且不期望回應</td>
+</tr>
+<tr>
+<td>MCP 是只有 client 發起的協議嗎？</td>
+<td>不是 — 它是雙向的；client 和 server 都能發起 request</td>
+</tr>
+<tr>
+<td>MCP 規格用什麼撰寫？</td>
+<td>TypeScript — 用於型別描述，非必要的實作語言</td>
+</tr>
+<tr>
+<td>Notification 丟失會怎樣？</td>
+<td>不會壞 — 接收方錯過資訊性更新但功能繼續</td>
+</tr>
+<tr>
+<td>Request Result 丟失會怎樣？</td>
+<td>發送方必須處理逾時並可能重試 — 這是失敗情境</td>
+</tr>
+<tr>
+<td>舉一個 server 發起 request 的例子？</td>
+<td>CreateMessageRequest（sampling）— server 請 client 呼叫 Claude</td>
+</tr>
+<tr>
+<td>為什麼 transport 選擇對 MCP 很重要？</td>
+<td>所有 transport 必須支援雙向通訊，因為兩端都能發起訊息</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

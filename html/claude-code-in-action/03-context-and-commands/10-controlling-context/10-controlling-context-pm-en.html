@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Controlling Context Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Controlling Context — PM Perspective</h1>
+<p><img alt="Context Window As Resource Analogy" src="visuals/context-window-as-resource-analogy.svg" /><br />
+<em>Figure: Context window as a finite resource — analogy.</em></p>
+<p><img alt="Context Control Tools Decision Tree" src="visuals/context-control-tools-decision-tree.svg" /><br />
+<em>Figure: Decision tree for choosing context control tools.</em></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D5 — Reliability &amp; Performance (15%), D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 ★★★ (context preservation), 5.4 ★★ (large codebase context), 3.5 ★★ (iterative refinement)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 03-context-and-commands / Lesson 10</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>Claude Code has a limited "working memory" (context window). Just like a meeting that goes too long, the conversation accumulates noise and Claude loses focus. Four tools manage this: <strong>Escape</strong> (interrupt), <strong>Double-Escape</strong> (rewind), <strong><code>/compact</code></strong> (summarize and continue), and <strong><code>/clear</code></strong> (fresh start). PMs need to understand this because context management directly affects developer productivity and AI output quality — which impacts sprint velocity and product timelines.</p>
+<hr />
+<h2>Why PMs Need to Know This</h2>
+<p>You do not need to manage context yourself, but you need to understand:</p>
+<ol>
+<li><strong>Why "just ask Claude again" is not free</strong> — every interaction costs tokens and context space</li>
+<li><strong>Why long coding sessions produce worse results</strong> — context pollution is a real engineering constraint</li>
+<li><strong>How to set realistic expectations</strong> — a 2-hour Claude session is not linearly productive</li>
+</ol>
+<p>This knowledge helps you plan sprints, estimate effort, and communicate with engineering about AI-assisted development.</p>
+<hr />
+<h2>Mental Model: The Meeting Room Whiteboard</h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Whiteboard Analogy</th>
+<th>When to Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Escape</strong></td>
+<td>"Wait, stop writing — let me clarify"</td>
+<td>Someone is going the wrong direction</td>
+</tr>
+<tr>
+<td><strong>Double-Escape</strong></td>
+<td>Erase the last 3 items and restart from a good point</td>
+<td>A tangent derailed the meeting</td>
+</tr>
+<tr>
+<td><strong><code>/compact</code></strong></td>
+<td>Take a photo of the whiteboard, erase it, paste the photo as a small reference</td>
+<td>Whiteboard is full but insights are valuable</td>
+</tr>
+<tr>
+<td><strong><code>/clear</code></strong></td>
+<td>Wipe the board completely for a new topic</td>
+<td>Switching to an entirely different meeting agenda</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Decision Framework</strong></p>
+<p>Ask yourself: "Does the AI still need what it learned, or is it starting something unrelated?"<br />
+- Needs prior knowledge → <strong><code>/compact</code></strong><br />
+- Clean slate is better → <strong><code>/clear</code></strong></p>
+</blockquote>
+<hr />
+<h2>Product Scenario Walkthrough</h2>
+<h3>Scenario: Sprint Planning for AI-Assisted Development</h3>
+<p>Your engineering team uses Claude Code daily. A senior engineer reports: "Claude works great for the first 20 minutes, then starts making weird mistakes." Here is what is happening and what you can recommend:</p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Root Cause</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude repeats fixed bugs</td>
+<td>Debugging noise filled the context window</td>
+<td>Use <code>/compact</code> between subtasks</td>
+</tr>
+<tr>
+<td>Claude forgets project conventions</td>
+<td>Earlier instructions fell out of the context</td>
+<td>Save conventions as memories or in CLAUDE.md</td>
+</tr>
+<tr>
+<td>Claude modifies wrong files</td>
+<td>Irrelevant context from a previous task</td>
+<td>Use <code>/clear</code> when switching features</td>
+</tr>
+<tr>
+<td>Claude's output quality degrades over time</td>
+<td>Context window is saturated with low-signal content</td>
+<td>Train team to use Escape + rewind proactively</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>PM Takeaway</strong></p>
+<p>Context management is a <strong>developer skill</strong> that should be part of your team's AI onboarding. Teams that actively manage context report significantly better results from AI coding assistants.</p>
+</blockquote>
+<hr />
+<h2>The Four Tools — What PMs Need to Know</h2>
+<h3>Escape — "Stop and Redirect"</h3>
+<p>When Claude is heading in the wrong direction, the developer presses Escape to stop it mid-output. This saves tokens and prevents bad output from polluting the context.</p>
+<p><strong>PM relevance</strong>: This is why "Claude went off on a tangent for 10 minutes" is a training issue, not a Claude issue. Developers should be interrupting early.</p>
+<h3>Double-Escape — "Undo the Last Few Steps"</h3>
+<p>Pressing Escape twice lets the developer rewind the conversation to any previous message. Everything after that point is discarded.</p>
+<p><strong>PM relevance</strong>: This is the equivalent of "let's go back to what was working and try a different approach." It preserves useful context while removing the failed attempt.</p>
+<h3><code>/compact</code> — "Summarize and Continue"</h3>
+<p>Compresses the entire conversation into a summary. Claude retains what it learned but in condensed form.</p>
+<p><strong>PM relevance</strong>: This is the tool that enables long productive sessions. Without it, sessions degrade after 20-30 minutes. With it, developers can maintain productive AI sessions for hours.</p>
+<h3><code>/clear</code> — "Start Fresh"</h3>
+<p>Wipes everything. Claude begins with zero context.</p>
+<p><strong>PM relevance</strong>: Essential when switching between unrelated tasks. Using leftover context from one feature while working on another causes cross-contamination.</p>
+<hr />
+<h2>Instructor Insights (From the Video)</h2>
+<p>Key points PMs should note from the video demonstration:</p>
+<ol>
+<li><strong>Context management is proactive, not reactive</strong> — The instructor uses these tools <em>before</em> Claude shows problems, not after. This is a best practice the team should adopt.</li>
+<li><strong>The Escape + Memory combo</strong> — When Claude makes a recurring mistake, the instructor presses Escape and saves a memory. This is a permanent fix, not a per-session workaround. Encourage your team to build up memories over time.</li>
+<li><strong>"Conversation control shortcuts seem like convenience, but they really improve Claude's ability to work effectively"</strong> — The instructor's own words. These are not nice-to-haves; they are essential workflow tools.</li>
+</ol>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Question 1: Developer Productivity Scenario</h3>
+<p>Your team has been using Claude Code for two months. During a retro, engineers report that Claude works well for small tasks but struggles during longer feature implementation sessions (1+ hours). Several engineers mention that Claude "forgets" earlier decisions and starts contradicting itself. What team-level recommendation would improve this?</p>
+<ul>
+<li>A. Switch to a model with a larger context window</li>
+<li>B. Train the team to use <code>/compact</code> between subtasks and <code>/clear</code> when switching features</li>
+<li>C. Limit Claude Code sessions to 15 minutes maximum</li>
+<li>D. Add all project documentation to CLAUDE.md so Claude never forgets</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — The root cause is context pollution during long sessions. Teaching the team proper context management tools addresses the actual problem. This is an exam-tested concept under Task 5.1 (context preservation).
+
+- A might help but does not address the fundamental issue of context pollution — a larger window still fills up with noise
+- C is overly restrictive and reduces productivity
+- D would make CLAUDE.md too large, itself consuming context window space
+
+**PM Key Takeaway**: Context management is a learnable skill. Include it in your team's AI tooling onboarding.
+</details>
+
+<h3>Question 2: Code Generation Scenario</h3>
+<p>A developer has spent 25 minutes with Claude building a complex data pipeline. Claude now understands the schema, transformation rules, and error handling patterns. The developer needs to add a new transformation step but the context window is nearly full. What should they do?</p>
+<ul>
+<li>A. Use <code>/clear</code> and re-explain the entire pipeline</li>
+<li>B. Use <code>/compact</code> to compress the session, then add the new transformation</li>
+<li>C. Start a new Claude Code session and paste the pipeline code</li>
+<li>D. Continue without context management</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — `/compact` preserves Claude's understanding of the pipeline architecture while freeing context space. The accumulated knowledge (schema, transformation patterns, error handling) is exactly the kind of context worth preserving.
+
+- A wastes 25 minutes of accumulated understanding
+- C loses context and requires manual re-explanation
+- D risks context overflow where Claude loses critical early information
+
+**PM Key Takeaway**: When a developer says "I had to re-explain everything to Claude," ask if they tried `/compact` first.
+</details>
+</body>
+</html>

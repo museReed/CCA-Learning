@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 Mcp Servers With Claude Code Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>MCP Servers with Claude Code — 工程师视角</h1>
+<p><img alt="Mcp Server Ecosystem Taxonomy" src="visuals/mcp-server-ecosystem-taxonomy-zh-TW.svg" /><br />
+<em>圖：MCP Server 生態分類。</em></p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试对应</td>
+<td>D2 — Tool Use &amp; Integration（占 18%）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 ★★★（MCP integration）、2.1 ★★（tool interfaces）、2.3 ★★（tool distribution）</td>
+</tr>
+<tr>
+<td>课程来源</td>
+<td>claude-code-in-action / 04-integrations / Lesson 12</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话理解</h2>
+<p>MCP (Model Context Protocol) server 就是 Claude Code 的 <strong>plugin 架构</strong> — 不改核心就能加新工具，跟 VS Code extension 或 Chrome DevTools Protocol 是同一套思路。</p>
+<hr />
+<h2>MCP Server 怎么运作</h2>
+<p>MCP server 可以跑在<strong>远端</strong>或<strong>本地</strong>。它们通过标准化的 protocol 把工具暴露给 Claude Code，让 Claude 在 runtime 动态发现和调用。</p>
+<blockquote>
+<p>📎 架构图由 nanobanana 产出</p>
+</blockquote>
+<p>重点：MCP server 扩展 Claude 能力的方式是<strong>不修改 Claude Code 本身</strong>。这就是 plugin pattern — VS Code extension、Webpack plugin、Kubernetes operator 都是这套哲学。</p>
+<hr />
+<h2>你已经熟悉的类比</h2>
+<table>
+<thead>
+<tr>
+<th>你用过的技术</th>
+<th>MCP Server 对应</th>
+<th>为什么像</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VS Code extension</td>
+<td>MCP server</td>
+<td>不 fork editor 就能加功能</td>
+</tr>
+<tr>
+<td>Express middleware</td>
+<td>MCP tool handler</td>
+<td>通过标准化接口处理请求</td>
+</tr>
+<tr>
+<td>Chrome DevTools Protocol</td>
+<td>Playwright MCP</td>
+<td>程序化控制浏览器</td>
+</tr>
+<tr>
+<td>Kubernetes operator</td>
+<td>MCP server</td>
+<td>通过标准 API 扩展平台能力</td>
+</tr>
+<tr>
+<td>npm package</td>
+<td>MCP server package</td>
+<td>CLI 安装、设置、使用</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>安装 MCP Server</h2>
+<p>课程用 Playwright MCP server 做示范。在你的 <strong>terminal</strong> 执行（不是在 Claude Code 里面）：</p>
+<pre class="highlight"><code class="language-bash">claude mcp add playwright npx @playwright/mcp@latest
+</code></pre>
+
+<p>这个命令做两件事：<br />
+1. <strong>命名</strong> MCP server 为 <code>playwright</code><br />
+2. <strong>注册</strong> 启动命令（<code>npx @playwright/mcp@latest</code>），在本地执行</p>
+<blockquote>
+<p>💡 <strong>重要细节</strong></p>
+<p><code>claude mcp add</code> 是在你的 <strong>terminal</strong> 执行，不是在 Claude Code session 里面。这会把 server 注册到项目的 MCP 设置中。</p>
+</blockquote>
+<hr />
+<h2>权限管理</h2>
+<p>Claude 第一次使用 MCP 工具时，每次都会问你要不要允许。如果觉得烦，可以在 <code>.claude/settings.local.json</code> 里预先授权：</p>
+<pre class="highlight"><code class="language-json">{
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [&quot;mcp__playwright&quot;],
+    &quot;deny&quot;: []
+  }
+}
+</code></pre>
+
+<blockquote>
+<p>⚠️ <strong>双下划线</strong></p>
+<p>格式是 <code>mcp__&lt;server_name&gt;</code> — 注意是<strong>两个</strong>下划线。这是考试常考的细节。</p>
+</blockquote>
+<p><code>allow</code> 数组支持不同粒度：<br />
+- <code>mcp__playwright</code> — 允许 Playwright server 的<strong>所有</strong>工具<br />
+- <code>mcp__playwright__browser_click</code> — 只允许<strong>特定</strong>工具</p>
+<blockquote>
+<p>🎯 <strong>考试重点</strong></p>
+<p>考试会考 blanket <code>mcp__&lt;server&gt;</code> allow（方便但安全性低）vs 逐一列出工具权限（啰嗦但符合 least-privilege）的取舍。在 CI/CD 环境中，<strong>必须逐一列出每个工具</strong> — 没有捷径（Unit 13 会详细讲）。</p>
+</blockquote>
+<hr />
+<h2>实际案例：视觉反馈回路</h2>
+<p>课程展示了一个强大的用法 — 用 Playwright 建立 UI component 生成的<strong>视觉反馈回路</strong>：</p>
+<ol>
+<li>Claude 通过 Playwright 打开浏览器，导航到 <code>localhost:3000</code></li>
+<li>Claude 通过 app 生成一个测试 component</li>
+<li>Claude <strong>实际看到</strong>视觉结果（不只是看代码）</li>
+<li>Claude 发现 styling 问题（例如「generic 的紫到蓝渐变」）</li>
+<li>Claude 更新 <code>@src/lib/prompts/generation.tsx</code> 里的生成 prompt</li>
+<li>Claude 用改善后的 prompt 生成新 component</li>
+<li>结果：视觉品质显著提升</li>
+</ol>
+<blockquote>
+<p>🎬 <strong>视频补充</strong></p>
+<p>讲师对品质提升的程度感到惊讶。关键优势是 Claude 能看到<strong>真实的视觉输出</strong>，不只是代码。这把「代码生成」和「视觉评估」之间的 feedback loop 闭合了 — 以前只有人工 review 才能做到。</p>
+</blockquote>
+<hr />
+<h2>MCP Server 生态系</h2>
+<p>Playwright 只是冰山一角。生态系包括：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>示例</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>浏览器自动化</td>
+<td>Playwright</td>
+<td>视觉测试、UI 交互</td>
+</tr>
+<tr>
+<td>数据库</td>
+<td>SQLite、PostgreSQL</td>
+<td>查询和检查数据</td>
+</tr>
+<tr>
+<td>API 测试</td>
+<td>REST clients</td>
+<td>程序化测试 endpoint</td>
+</tr>
+<tr>
+<td>文件系统</td>
+<td>进阶文件操作</td>
+<td>进阶文件处理</td>
+</tr>
+<tr>
+<td>云端服务</td>
+<td>AWS、GCP 集成</td>
+<td>管理基础设施</td>
+</tr>
+<tr>
+<td>开发工具</td>
+<td>Linter、formatter</td>
+<td>自动化代码品质</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>考试必记：Architecture &gt; Prompt</h2>
+<p><img alt="Mcp Plugin Architecture Flow" src="visuals/mcp-plugin-architecture-flow-zh-TW.svg" /><br />
+<em>圖：MCP 外掛架構流程。</em></p>
+<p>MCP server 体现了 <strong>Architecture &gt; Prompt</strong> 的考试哲学：</p>
+<table>
+<thead>
+<tr>
+<th>做法</th>
+<th>示例</th>
+<th>可靠性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt: 「请检查浏览器」</td>
+<td>叫 Claude 去做视觉验证</td>
+<td>不可靠 — Claude 实际上看不到</td>
+</tr>
+<tr>
+<td>Architecture: Playwright MCP</td>
+<td>给 Claude 浏览器工具</td>
+<td>可靠 — Claude 能跟真实 UI 交互</td>
+</tr>
+<tr>
+<td>Prompt: 「查一下数据库」</td>
+<td>期望 Claude 有 DB 存取</td>
+<td>没有 DB 工具就会失败</td>
+</tr>
+<tr>
+<td>Architecture: DB MCP server</td>
+<td>提供真正的 DB 工具</td>
+<td>可靠 — Claude 有实际的数据库存取</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>判断口诀</strong></p>
+<p>考试问到「如何扩展 Claude Code 的能力」，答案几乎都是 <strong>MCP server</strong>（架构层扩展），而不是 prompt instruction（期望 Claude 做到它结构上做不到的事）。</p>
+</blockquote>
+<hr />
+<h2>常见反模式</h2>
+<table>
+<thead>
+<tr>
+<th>反模式</th>
+<th>为什么错</th>
+<th>正确做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在 Claude Code session 里安装 MCP</td>
+<td>必须在 terminal 执行</td>
+<td>在 shell 里用 <code>claude mcp add</code></td>
+</tr>
+<tr>
+<td>用 <code>mcp_playwright</code>（单下划线）</td>
+<td>命名规范错误</td>
+<td>用 <code>mcp__playwright</code>（双下划线）</td>
+</tr>
+<tr>
+<td>在 CI/CD 里允许所有 MCP 工具</td>
+<td>安全风险，违反 least-privilege</td>
+<td>在 <code>allowed_tools</code> 里逐一列出</td>
+</tr>
+<tr>
+<td>靠 prompt 描述 Claude 没有的能力</td>
+<td>没有工具就做不到</td>
+<td>加一个有该能力的 MCP server</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>模拟考题</h2>
+<h3>第一题：开发者生产力情境</h3>
+<p>你在开发一个 web 应用，想让 Claude Code 能视觉化验证 UI 变更。最有效的做法是什么？</p>
+<ul>
+<li>A. 在 CLAUDE.md 加指示，请 Claude 根据代码想象 UI 长什么样子</li>
+<li>B. 安装 Playwright MCP server，设置 Claude 导航到正在运行的应用</li>
+<li>C. 手动截图后贴到 Claude Code 对话中</li>
+<li>D. 写详细的 CSS 注释说明预期的视觉效果</li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**B** — Playwright MCP server 让 Claude 有实际的浏览器交互能力。Claude 可以导航、截图、直接评估视觉输出。
+
+- A 不可能 — Claude 无法从代码「想象」UI
+- C 可行但是手动流程，打破了自动化回路
+- D 不能让 Claude 实际看到视觉结果
+
+考试哲学：**Architecture > Prompt** — 给 Claude 工具，不要叫它想象。
+</details>
+
+<h3>第二题：Code Generation 情境</h3>
+<p>你的团队用 Claude Code 生成 React component。生成出来的 component 一直 styling 很差。最佳改善方式是什么？</p>
+<ul>
+<li>A. 在 system prompt 加更多 styling 示例</li>
+<li>B. 安装 MCP server 让 Claude 有浏览器存取，让它视觉化评估生成结果，并根据实际结果更新生成 prompt</li>
+<li>C. 写一个 PostToolUse hook，每次写文件后跑 CSS linter</li>
+<li>D. 建立一份详细的 style guide 文件，在 CLAUDE.md 里引用</li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**B** — 这建立了一个视觉反馈回路，Claude 可以看到实际结果并迭代改善。这正是课程视频展示的 workflow。
+
+- A 可能有帮助，但缺乏视觉验证
+- C 抓得到语法问题，但抓不到美学品质
+- D 提供方针，但没有验证机制
+
+考试哲学：**Architecture > Prompt** — 结构化的 feedback loop 胜过指导性的说明。
+</details>
+
+<h3>第三题：权限管理情境</h3>
+<p>一个开发者在项目里加了 Playwright MCP server。他想在本地开发时允许所有 Playwright 工具，不要每次都问。在 <code>.claude/settings.local.json</code> 里正确的设置是哪个？</p>
+<ul>
+<li>A. <code>"allow": ["playwright"]</code></li>
+<li>B. <code>"allow": ["mcp_playwright"]</code></li>
+<li>C. <code>"allow": ["mcp__playwright"]</code></li>
+<li>D. <code>"allow": ["mcp__playwright__*"]</code></li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**C** — 正确格式是双下划线：`mcp__playwright`。这会允许 Playwright server 的所有工具。
+
+- A 少了 `mcp__` 前缀
+- B 用了单下划线（不正确）
+- D 太过具体 — `mcp__playwright` 本身就已经允许该 server 的所有工具
+
+重要细节：双下划线惯例是考试常考的知识点。
+</details>
+</body>
+</html>

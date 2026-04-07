@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>17 Gotchas Around Hooks Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Hooks 的注意事项 — 工程师深入解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks for tool call interception)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>claude-code-in-action / 05-hooks / Lesson 17（纯文字课）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>Hook 脚本应使用<strong>绝对路径</strong>以确保安全性（防止 path interception 和 binary planting 攻击），但绝对路径破坏跨机器的可移植性 — 解法是 <code>settings.example.json</code> + init script 模式，用 <code>$PWD</code> 占位符替换为机器特定的绝对路径。</p>
+<hr />
+<h2>背景：安全性与可移植性的取舍</h2>
+<p>你已经知道如何定义和实现 hook（Lesson 15-16）。这堂课解决一个真实世界的部署问题：安全最佳实践（绝对路径）与团队协作（共享设置文件）之间的紧张关系。</p>
+<blockquote>
+<p>💡 <strong>iOS/Swift 类比</strong></p>
+<p>这就像 certificate pinning 的取舍：硬编码 hash（安全但证书轮换时坏掉）vs 从 config 加载（灵活但需要安全的分发机制）。你两者都需要 — 解法是自动化的 setup 步骤。</p>
+</blockquote>
+<hr />
+<h2>核心问题</h2>
+<h3>为什么要绝对路径？</h3>
+<pre class="highlight"><code class="language-json">// ❌ 相对路径（安全风险）
+&quot;command&quot;: &quot;node ./hooks/read_hook.js&quot;
+
+// ✅ 绝对路径（安全）
+&quot;command&quot;: &quot;node /Users/alice/projects/queries/hooks/read_hook.js&quot;
+</code></pre>
+
+<p>绝对路径缓解两种攻击向量：</p>
+<table>
+<thead>
+<tr>
+<th>攻击</th>
+<th>描述</th>
+<th>绝对路径如何帮助</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Path interception</strong></td>
+<td>攻击者在 <code>$PATH</code> 中较早出现的目录放入恶意脚本</td>
+<td>绝对路径完全绕过 <code>$PATH</code> 解析</td>
+</tr>
+<tr>
+<td><strong>Binary planting</strong></td>
+<td>攻击者在工作目录放入同名恶意文件</td>
+<td>绝对路径指向确切的文件</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>安全性不可妥协</strong><br />
+</p>
+</blockquote>
+<p><img alt="Security vs Portability" src="visuals/security-portability-tradeoff-zh-TW.svg" /><br />
+<em>圖：安全性與可攜性的取捨 — 絕對路徑安全但綁定機器；Template + init script 可兩全其美。</em></p>
+<blockquote>
+<p>CCA 考试将安全最佳实践视为正确答案。</p>
+</blockquote>
+<hr />
+<h2>解法：模板 + Init Script</h2>
+<p><img alt="Template Init Pattern" src="visuals/template-init-pattern-zh-TW.svg" /><br />
+<em>圖：Template → Init → Local 模式 — 提交含 $PWD 佔位符的 template，一次性 init 產生機器專屬設定。</em></p>
+<h3>1. <code>settings.example.json</code>（commit 到 git）</h3>
+<pre class="highlight"><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Read|Grep&quot;,
+        &quot;hooks&quot;: [
+          {
+            &quot;type&quot;: &quot;command&quot;,
+            &quot;command&quot;: &quot;node $PWD/hooks/read_hook.js&quot;
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+
+<h3>2. <code>scripts/init-claude.js</code>（commit 到 git）</h3>
+<p>读取模板 → 替换 <code>$PWD</code> → 写入 <code>settings.local.json</code></p>
+<h3>3. <code>settings.local.json</code>（gitignored，自动生成）</h3>
+<p>带有机器特定绝对路径的输出文件。<strong>永远不 commit</strong>。</p>
+<blockquote>
+<p>📝 <strong>为何对团队很重要</strong></p>
+<p>此模式确保：安全（绝对路径）+ 可移植（模板适用任何机器）+ 自动化（不需手动编辑路径）+ 版本控制（模板追踪；生成文件不追踪）</p>
+</blockquote>
+<hr />
+<h2>两个 Settings 文件解释</h2>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>用途</th>
+<th>在 Git？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>settings.json</code></td>
+<td>团队共用设置</td>
+<td>是</td>
+</tr>
+<tr>
+<td><code>settings.local.json</code></td>
+<td>带机器特定绝对路径的生成文件</td>
+<td>否（gitignored）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>反模式（考试常考）</h2>
+<table>
+<thead>
+<tr>
+<th>❌ 错误做法</th>
+<th>✅ 正确做法</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hook command 用相对路径</td>
+<td>用绝对路径</td>
+<td>相对路径易受攻击</td>
+</tr>
+<tr>
+<td>Commit 带绝对路径的 <code>settings.local.json</code></td>
+<td>Commit 带 <code>$PWD</code> 占位符的 <code>settings.example.json</code></td>
+<td>绝对路径是机器特定的</td>
+</tr>
+<tr>
+<td>每个开发者手动编辑路径</td>
+<td>用 init script 自动生成</td>
+<td>手动编辑容易出错</td>
+</tr>
+<tr>
+<td>跳过安全建议</td>
+<td>永远用绝对路径</td>
+<td>CCA 考试期望安全最佳实践</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>练习题</h2>
+<h3>Q1：开发者生产力场景（S4）</h3>
+<p>团队想在所有开发者之间共享 PreToolUse hook 配置。推荐方法是？</p>
+<ul>
+<li>A. Commit 带相对路径的 <code>settings.local.json</code></li>
+<li>B. Commit 带绝对路径的 <code>settings.json</code></li>
+<li>C. Commit 带 <code>$PWD</code> 占位符的 <code>settings.example.json</code> 和生成 <code>settings.local.json</code> 的 init script</li>
+<li>D. 每个开发者手动创建自己的 <code>settings.local.json</code></li>
+</ul>
+<details><summary>答案</summary>
+
+**C** — 此模式提供安全性和可移植性。
+
+- A：相对路径是安全风险
+- B：共享设置中的绝对路径在其他机器上会坏
+- D：手动设置不可扩展
+</details>
+
+<h3>Q2：CI/CD 集成场景（S5）</h3>
+<p>CI pipeline 的 hook 配置用相对路径。安全审计标记为漏洞。正确修正？</p>
+<ul>
+<li>A. 将 hooks 目录加到 CI runner 的 <code>$PATH</code></li>
+<li>B. 在 CI 加入 setup 步骤，根据 runner 的 workspace 目录生成带绝对路径的 <code>settings.local.json</code></li>
+<li>C. 在 CI 停用 hook</li>
+<li>D. 用 <code>settings.json</code> 加硬编码的路径</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — Setup 步骤反映 init script 模式。
+
+- A：不修复相对脚本路径漏洞
+- C：CI 中可能需要 hook
+- D：CI runner 有不同 workspace 路径
+</details>
+
+<h3>Q3：代码生成场景（S2）</h3>
+<p>新开发者 clone 项目后 hook 不工作。有 <code>settings.example.json</code> 但没有 <code>settings.local.json</code>。原因？</p>
+<ul>
+<li>A. Hook 功能默认停用</li>
+<li>B. 需要执行 <code>npm run setup</code> 从模板生成 <code>settings.local.json</code></li>
+<li>C. 需手动复制 <code>settings.example.json</code></li>
+<li>D. 操作系统不支持 hook</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — `settings.local.json` 被 gitignore，必须由 init script 生成。
+
+- A：Hook 默认可用
+- C：直接复制不替换 `$PWD` 会留下坏掉的占位符
+- D：Hook 是跨平台的
+</details>
+</body>
+</html>

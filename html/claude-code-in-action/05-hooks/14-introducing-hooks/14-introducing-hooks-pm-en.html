@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>14 Introducing Hooks Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing Hooks — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20% of exam)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 05-hooks / Lesson 14</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>Hooks are Claude Code's "quality control checkpoints" and "automated triggers." Think of them as a business rule engine inside your product: before an AI action, you can intercept and review it (Pre); after an action, you can trigger quality checks (Post). PMs need to understand this mechanism because it determines what AI behaviors can be <strong>guaranteed</strong> vs. what is merely <strong>best-effort</strong>.</p>
+<hr />
+<p><img alt="Tool Execution Pipeline" src="visuals/tool-execution-pipeline.svg" /><br />
+<em>Figure: How Claude Code processes tool calls — the model proposes, the system intercepts via hooks, then executes.</em></p>
+<h2>Why PMs Need to Understand Hooks</h2>
+<p>As a PM, you don't need to write hooks yourself, but you do need to know:</p>
+<ol>
+<li><strong>What behaviors can be 100% guaranteed</strong> — what hooks can enforce</li>
+<li><strong>What behaviors are only best-effort</strong> — what prompt instructions can do</li>
+<li><strong>How to communicate requirements to engineers</strong> — knowing when to ask for a hook</li>
+</ol>
+<p>This directly affects the acceptance criteria and risk assessments you write in PRDs.</p>
+<hr />
+<h2>Mental Model: Airport Security vs. In-Flight Announcements</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>PreToolUse Hook</th>
+<th>PostToolUse Hook</th>
+<th>Prompt Instruction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Analogy</td>
+<td>Airport security — fail the check, you don't board</td>
+<td>Customs on arrival — already landed, but can be inspected</td>
+<td>In-flight announcement: "Please fasten your seatbelt"</td>
+</tr>
+<tr>
+<td>Guarantee Level</td>
+<td><strong>100% certain</strong> to execute</td>
+<td><strong>100% certain</strong> to execute</td>
+<td>95–99% (AI may ignore)</td>
+</tr>
+<tr>
+<td>Can it block the action?</td>
+<td>Yes, can prevent the action</td>
+<td>No (already happened), but can clean up</td>
+<td>Cannot be guaranteed</td>
+</tr>
+<tr>
+<td>Use Cases</td>
+<td>Compliance, security, access control</td>
+<td>Quality checks, formatting, notifications</td>
+<td>Style preferences, tone suggestions</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>Core Exam Philosophy (PMs must remember)</strong></p>
+<ul>
+<li><strong>Architecture &gt; Prompt</strong> — If structure can solve it, don't rely on prompting</li>
+<li><strong>Deterministic &gt; Probabilistic</strong> — If code can guarantee it, don't rely on AI self-discipline</li>
+</ul>
+</blockquote>
+<hr />
+<p><img alt="Hook vs Prompt Decision" src="visuals/hook-vs-prompt-decision.svg" /><br />
+<em>Figure: Decision framework for choosing hooks (deterministic enforcement) vs. prompt rules (flexible guidance).</em></p>
+<h2>Product Scenario Walkthrough</h2>
+<h3>Scenario: Customer Support Agent</h3>
+<p>You are planning an AI customer support system with the following requirements:</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Implementation</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Refunds &gt; $500 must go to human review</td>
+<td><strong>PreToolUse hook</strong> — intercept <code>process_refund</code>, block and escalate if amount exceeds threshold</td>
+<td>Compliance requirement — zero tolerance for slipping through</td>
+</tr>
+<tr>
+<td>Replies should have a friendly tone</td>
+<td><strong>Prompt instruction</strong></td>
+<td>Preference-based requirement — occasional deviation is acceptable</td>
+</tr>
+<tr>
+<td>Log every reply to CRM</td>
+<td><strong>PostToolUse hook</strong> — automatically write to CRM after each reply</td>
+<td>Process automation — guaranteed to run every time</td>
+</tr>
+<tr>
+<td>Prioritize self-service options</td>
+<td><strong>Prompt instruction</strong></td>
+<td>Strategic preference — flexibility is acceptable</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Decision Framework</strong></p>
+<p>When writing a PRD, ask yourself: "If the AI gets this behavior wrong 1 out of 100 times, what are the consequences?"<br />
+- Severe consequences (financial loss, compliance violation) → <strong>must use a hook</strong><br />
+- Minor consequences (slightly off tone, inconsistent formatting) → <strong>prompt instruction is sufficient</strong></p>
+</blockquote>
+<hr />
+<h2>Configuration: Who Controls What</h2>
+<p>Hooks have three configuration levels — this matters to PMs because it determines <strong>team governance</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Who Manages It</th>
+<th>Typical Use</th>
+<th>PM's Concern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Global (<code>~/.claude/settings.json</code>)</td>
+<td>Individual developer</td>
+<td>Personal preferences (auto-format)</td>
+<td>Cannot control — varies per person</td>
+</tr>
+<tr>
+<td>Project shared (<code>.claude/settings.json</code>)</td>
+<td>Tech Lead / Team</td>
+<td>Team standards (lint, tests)</td>
+<td><strong>Can require team-wide consistency</strong></td>
+</tr>
+<tr>
+<td>Project local (<code>.claude/settings.local.json</code>)</td>
+<td>Individual</td>
+<td>Personal overrides</td>
+<td>Cannot enforce</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Takeaway</strong></p>
+<p>If your acceptance criteria requires a hook to be active, make sure it lives at the <strong>Project shared</strong> level — not a personal setting.</p>
+</blockquote>
+<hr />
+<h2>Hooks in the Bigger Picture</h2>
+<p>Hooks appear across multiple exam domains:</p>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th>How Hooks Are Tested</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>D1 Agentic Architecture (27%)</strong></td>
+<td>Agent SDK hook mechanism — PostToolUse for data normalization, PreToolUse for policy enforcement</td>
+</tr>
+<tr>
+<td><strong>D3 Claude Code Config (20%)</strong></td>
+<td>Settings hierarchy, <code>/hooks</code> command, matcher syntax</td>
+</tr>
+<tr>
+<td><strong>D5 Reliability (15%)</strong></td>
+<td>Hook as a validation gate to ensure quality between pipeline steps</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Instructor Insights (From the Video)</h2>
+<p>A few nuances from the instructor's video that PMs should note:</p>
+<ol>
+<li><strong>Hooks receive complete tool call details</strong> — Not just "Claude wants to write a file," but "Claude wants to use the Write tool to write <code>/src/auth.ts</code> with the following content..." This means hooks can make very granular decisions.</li>
+<li><strong>PostToolUse feedback loop</strong> — After receiving hook feedback, Claude automatically self-corrects. No human intervention needed — this is a <strong>self-healing</strong> design.</li>
+<li><strong>Instructor's own words: "Wrapping your head around hooks can be really challenging"</strong> — If your engineers need time to understand this concept, that is completely normal.</li>
+</ol>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Question 1: Customer Support Scenario</h3>
+<p>Your AI customer support agent handles returns and refunds. Company policy requires identity verification before any financial operation. This rule is currently enforced through system prompt instructions. A customer has reported receiving a refund without being asked to verify their identity. What is the recommended fix?</p>
+<ul>
+<li>A. Strengthen the system prompt with more forceful language requiring verification</li>
+<li>B. Add few-shot examples demonstrating the correct verification flow</li>
+<li>C. Implement a PreToolUse hook that blocks <code>process_refund</code> until <code>get_customer</code> returns a verified status</li>
+<li>D. Add a PostToolUse hook that checks whether identity verification occurred after the refund is processed</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**C** — Identity verification before a financial operation is a compliance requirement. Prompt-based solutions (A, B) have a non-zero failure rate — the customer report already proves this. PostToolUse (D) is too late — the refund has already been processed. A PreToolUse hook's prerequisite gate is deterministic.
+
+> 🎯 Exam philosophy: **Deterministic > Probabilistic**, **Validation > Trust**
+
+**PM Key Takeaway**: This is why writing "must verify identity" in a PRD is not enough — you need to specify that the enforcement mechanism is a hook, not a prompt.
+</details>
+
+<h3>Question 2: Code Review CI Scenario</h3>
+<p>Your team has integrated Claude Code into a CI pipeline for automated PR review. Engineers have reported that Claude sometimes modifies migration files, causing deployment issues. What would you recommend?</p>
+<ul>
+<li>A. Add "do not modify migration files" to CLAUDE.md</li>
+<li>B. Configure a PreToolUse hook to block Write/Edit operations on the <code>migrations/</code> directory</li>
+<li>C. Configure a PostToolUse hook to revert changes after Claude modifies a migration file</li>
+<li>D. Create a separate review pipeline that excludes migration files from Claude's view</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — A PreToolUse hook deterministically prevents the problem before it occurs. A is prompt-based (unreliable for high-severity scenarios). C is after-the-fact remediation that adds complexity. D removes valuable context that Claude may need to review migration-related code.
+
+**PM Key Takeaway**: "Sometimes" = you need a deterministic solution. Tone occasionally off → prompt is fine; modifying migrations causing deployment issues → severe consequence → use a hook.
+</details>
+
+<h3>Question 3: Multi-Agent Research Scenario</h3>
+<p>A coordinator agent distributes research tasks to multiple subagents. Different backend APIs return dates in different formats (Unix timestamp, ISO 8601, locale-specific string). The synthesis subagent frequently misinterprets dates. What is the best approach?</p>
+<ul>
+<li>A. Add date format instructions to the synthesis subagent's prompt</li>
+<li>B. Implement a PostToolUse hook on each backend tool to normalize all dates to ISO 8601 before the agent processes the results</li>
+<li>C. Have the coordinator agent convert dates before passing results to the synthesis subagent</li>
+<li>D. Use few-shot examples to demonstrate the different date formats</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — PostToolUse hooks perform data normalization at the tool boundary, making this the most reliable and maintainable solution. A and D are probabilistic. C increases the coordinator's complexity and requires it to understand all possible date formats.
+
+> 🎯 Exam philosophy: **Architecture > Prompt**, **Deterministic > Probabilistic**
+
+**PM Key Takeaway**: Data normalization is an infrastructure-level concern — it should not depend on AI "understanding" different formats. Just as you would not rely on the frontend to convert date formats in a data pipeline, don't rely on AI to do it here.
+</details>
+</body>
+</html>

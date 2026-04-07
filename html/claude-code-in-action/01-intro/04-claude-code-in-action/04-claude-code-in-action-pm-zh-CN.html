@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04 Claude Code In Action Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Claude Code in Action — PM 策略概览</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%), D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>任务声明</td>
+<td>2.5 (built-in tools), 2.4 (MCP integration), 3.6 (CI/CD), 1.1 (agentic loops)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>claude-code-in-action / 01-intro / Lesson 04</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><img alt="Tool Chaining Patterns Matrix" src="visuals/tool-chaining-patterns-matrix-zh-TW.svg" /><br />
+<em>圖：四個 Demo 的工具鏈接模式矩陣。</em></p>
+<p><img alt="Tool Chain Pattern" src="visuals/tool-chain-pattern-zh-TW.svg" /><br />
+<em>圖：Claude Code 中三種工具鏈接模式。</em></p>
+<p><img alt="Builtin Vs Mcp Decision Tree" src="visuals/builtin-vs-mcp-decision-tree-zh-TW.svg" /><br />
+<em>圖：決策樹 — 內建工具 vs MCP Server。</em></p>
+<h2>一句话摘要</h2>
+<p>Claude Code 通过自主多步骤任务执行、MCP 可扩展工具、以及 CI/CD 中的自动化质量闸门，减少工程瓶颈 — 涵盖性能、分析、设计与合规面向。</p>
+<hr />
+<h2>内建工具：PM 需要知道的事</h2>
+<p>Claude Code 默认搭载读写文件、执行命令、搜索代码库的工具。PM 的关键洞察：<strong>大多数任务不需要额外配置特殊工具</strong>。Claude 会智慧地串联这些内建工具。</p>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>商业影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文件 I/O（Read, Write, Edit）</td>
+<td>自主修改代码，无需人工逐步指导</td>
+</tr>
+<tr>
+<td>执行（Bash）</td>
+<td>自动执行测试、benchmark、构建</td>
+</tr>
+<tr>
+<td>搜索（Grep, Glob）</td>
+<td>在大型代码库中导航理解上下文</td>
+</tr>
+<tr>
+<td>Notebook（NotebookEdit）</td>
+<td>有执行能力的数据分析，而非只是代码生成</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM 为何该关注</strong><br />
+规划 Claude Code 导入时，从内建工具开始。大多数工程任务无需额外设置成本即可涵盖。</p>
+</blockquote>
+<hr />
+<h2>Demo 1：自动化性能审计</h2>
+<p><strong>商业问题</strong>：性能优化需要资深工程师、耗时、且常被排到低优先级。</p>
+<p><strong>发生了什么</strong>：Claude 自主对 chalk 包（每周 4.29 亿次下载）进行 profiler 分析、找到瓶颈、实现修复、验证 3.9 倍吞吐量提升 — 步骤之间完全无需人工介入。</p>
+<p><strong>商业影响</strong>：<br />
+- 资深工程师时间从例行优化工作中释放<br />
+- 性能改善主动发生，而非被动应对<br />
+- 可量化的成果（3.9 倍提升）附带完整审计轨迹</p>
+<blockquote>
+<p>🎬 <strong>讲师洞察</strong><br />
+Claude 创建自己的任务清单并追踪进度。这种自我管理能力意味着它能处理通常需要技术主管分解任务的复杂多步骤工作。</p>
+</blockquote>
+<hr />
+<h2>Demo 2：无需数据团队的数据洞察</h2>
+<p><strong>商业问题</strong>：从数据中获取洞察需要数据分析师或数据科学家。数据团队满载时形成瓶颈。</p>
+<p><strong>发生了什么</strong>：Claude 在 Jupyter notebook 中分析视频流媒体平台的用户流失数据。关键是，它执行自己的分析代码、读取结果、并根据发现定制后续分析。</p>
+<p><strong>商业影响</strong>：<br />
+- 产品团队无需等待数据团队即可获取初步数据洞察<br />
+- 分析质量更高，因为 Claude 根据实际结果迭代<br />
+- 减少产品决策的洞察获取时间</p>
+<blockquote>
+<p>💡 <strong>PM 为何该关注</strong><br />
+「写分析代码」与「写代码、执行、读结果、改进」的差别，就是模板与真正洞察的差别。Claude Code 做的是后者。</p>
+</blockquote>
+<hr />
+<h2>Demo 3：无需设计师瓶颈的快速 UI 迭代</h2>
+<p><strong>商业问题</strong>：UI 样式迭代在开发者和设计师之间产生来回。每个循环需要数小时到数天。</p>
+<p><strong>发生了什么</strong>：Claude 通过 Playwright MCP 获得浏览器控制工具。它打开应用、截图查看当前状态、修改样式、重新截图验证，反复迭代直到结果正确。</p>
+<p><strong>商业影响</strong>：<br />
+- 更快的设计迭代周期（分钟而非小时）<br />
+- 开发者可自主处理样式微调<br />
+- MCP 扩展性意味着新能力无需重新训练</p>
+<blockquote>
+<p>💡 <strong>PM 为何该关注</strong><br />
+MCP 是扩展性的故事。当利益相关方问「Claude 能做 X 吗？」答案常常是「可以，用对的 MCP server 就行。」这是你可以纳入规划的能力。</p>
+</blockquote>
+<hr />
+<h2>Demo 4：代码审查中的自动化合规检查</h2>
+<p><strong>商业问题</strong>：人工代码审查会遗漏跨领域的关注点，如 PII 暴露，特别是在 infrastructure-as-code 中数据流横跨多个文件的情况。</p>
+<p><strong>发生了什么</strong>：Claude Code 在 GitHub Actions 中作为自动 PR 审查者执行。它发现一个代码变更会通过与外部合作伙伴共享的 S3 bucket 暴露用户 email（PII）— 通过理解 Terraform 基础设施流程。</p>
+<p><strong>商业影响</strong>：<br />
+- 合规风险在 merge 前被拦截，而非在生产环境<br />
+- 扩展审查能量无需增聘更多资深工程师<br />
+- 理解基础设施上下文，而非只是代码语法</p>
+<blockquote>
+<p>🎯 <strong>考试重点</strong><br />
+这是 Architecture &gt; Prompt：Claude 结构性理解基础设施。PM 应知道 Claude Code 的 CI/CD 集成提供的是合规价值，而不只是代码质量。</p>
+</blockquote>
+<hr />
+<h2>PM 决策框架</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>指引</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「需要 MCP servers 吗？」</td>
+<td>先不用。只在内建工具无法覆盖特定需求时才加（如浏览器测试、API 集成）</td>
+</tr>
+<tr>
+<td>「Claude Code 适合放在工作流的哪里？」</td>
+<td>CI/CD 用于自动审查（Demo 4），开发者生产力用于临时任务（Demo 1-3）</td>
+</tr>
+<tr>
+<td>「如何衡量 ROI？」</td>
+<td>每任务节省时间、merge 前拦截的问题数、专家瓶颈的减少</td>
+</tr>
+<tr>
+<td>「导入风险？」</td>
+<td>内建工具低风险（无需设置）。MCP 中等（需要配置）。CI/CD 低风险（标准 GitHub Actions）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>练习题</h2>
+<h3>Q1：导入策略</h3>
+<p>你的工程团队想导入 Claude Code。CTO 要求你提出分阶段推行方案。根据本课的 Demo，最有效的顺序是什么？</p>
+<details><summary>答案</summary>
+
+**第一阶段**：内建工具用于开发者生产力（Demo 1-2 — 性能优化、数据分析）。零额外设置，即时产生价值。**第二阶段**：CI/CD 集成用于自动 PR 审查（Demo 4 — 合规/安全）。需要 GitHub Actions 配置但提供组织层级价值。**第三阶段**：MCP 扩展用于特定工作流（Demo 3 — 浏览器测试、外部 API）。只在特定需求出现时。这遵循考试原则「适度响应」— 先简单，需要时再扩展。
+</details>
+
+<h3>Q2：利益相关方沟通</h3>
+<p>一位注重安全的副总裁问：「如何确保 Claude Code 能拦截我们基础设施中的 PII 暴露？」最佳回应是什么？</p>
+<details><summary>答案</summary>
+
+Claude Code 可以集成到 CI/CD pipeline 中作为自动 PR 审查者。它读取 infrastructure-as-code（如 Terraform）并追踪跨资源的数据流。在 Demo 4 中它拦截 PII 暴露不是因为被告知要找 PII，而是因为它理解用户数据正流向共享的外部 bucket。关键优势：它理解架构，所以能拦截基于规则的扫描器遗漏的问题。这是 Architecture > Prompt 哲学。
+</details>
+
+<h3>Q3：ROI 论证</h3>
+<p>你的团队每周花 20 小时在代码审查上。你会如何包装 Claude Code 的 CI/CD 集成来论证设置投资的合理性？</p>
+<details><summary>答案</summary>
+
+定位为增强而非替代。Claude Code 处理审查的第一轮 — 自动拦截结构性问题、安全顾虑和合规风险。人工审查者则专注于商业逻辑和架构决策。预期影响：审查周期时间减少 30-50%、PII/合规逃脱接近零、且不论审查者是否有空都维持一致的审查质量。设置成本是标准的 GitHub Actions workflow — 通常只需几小时的工程时间。
+</details>
+</body>
+</html>

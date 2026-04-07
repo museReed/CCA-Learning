@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15 Mcp Review Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>MCP Review — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server primitives), 2.4-2.6 (resource/tool/prompt design), 1.1 (agentic architecture)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 04-assessment / Lesson 15</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP has three core server primitives — Tools (model-controlled), Resources (app-controlled), and Prompts (user-controlled) — and choosing the right one depends on who should control the interaction.</p>
+<hr />
+<p><img alt="Three Primitives" src="visuals/three-primitives.svg" /></p>
+<h2>The Three Primitives: Complete Reference</h2>
+<h3>1. Tools — Model-Controlled</h3>
+<p>Claude decides when and how to call tools during its reasoning process.</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+def calculate_sqrt(number: float) -&gt; float:
+    &quot;&quot;&quot;Calculate the square root of a number.&quot;&quot;&quot;
+    return math.sqrt(number)
+</code></pre>
+
+<p><strong>When to use</strong>: Give Claude capabilities it does not have natively — database queries, API calls, file operations, calculations, code execution.</p>
+<p><strong>Key characteristics</strong>:<br />
+- Claude autonomously decides invocation timing<br />
+- Results feed back into Claude's reasoning<br />
+- Can have side effects (write, delete, send)<br />
+- The model sees the tool schema and decides when the tool is relevant</p>
+<p><strong>Real-world example in Claude's interface</strong>: When Claude executes JavaScript code or performs calculations behind the scenes.</p>
+<hr />
+<h3>2. Resources — App-Controlled</h3>
+<p>Your application code decides when to fetch resource data.</p>
+<pre class="highlight"><code class="language-python">@mcp.resource(&quot;docs://documents/{doc_id}&quot;, mime_type=&quot;text/plain&quot;)
+def fetch_doc(doc_id: str) -&gt; str:
+    return docs[doc_id]
+</code></pre>
+
+<p><strong>When to use</strong>: Fetch data for UI display or inject context into prompts — autocomplete lists, document mentions, sidebar panels.</p>
+<p><strong>Key characteristics</strong>:<br />
+- Application code calls <code>read_resource()</code>, not Claude<br />
+- Content injected directly into prompt (no tool call overhead)<br />
+- Read-only — no side effects<br />
+- Two types: direct (static URI) and templated (parameterized URI)</p>
+<p><strong>Real-world example in Claude's interface</strong>: "Add from Google Drive" — the app fetches document content and injects it as context.</p>
+<hr />
+<h3>3. Prompts — User-Controlled</h3>
+<p>Users explicitly trigger predefined workflows through UI interactions.</p>
+<pre class="highlight"><code class="language-python">@mcp.prompt(name=&quot;format&quot;, description=&quot;Rewrite document in Markdown&quot;)
+def format_document(doc_id: str = Field(...)) -&gt; list[base.Message]:
+    return [base.UserMessage(f&quot;Reformat document {doc_id} to markdown...&quot;)]
+</code></pre>
+
+<p><strong>When to use</strong>: Predefined, repeatable workflows that users trigger on demand — slash commands, workflow buttons, guided procedures.</p>
+<p><strong>Key characteristics</strong>:<br />
+- User triggers via <code>/command</code>, button click, or menu selection<br />
+- Returns <code>list[base.Message]</code> sent to Claude<br />
+- Often orchestrates tools (prompts provide instructions, tools provide capabilities)<br />
+- Parameterized with <code>args: dict[str, str]</code></p>
+<p><strong>Real-world example in Claude's interface</strong>: Workflow buttons below the chat input.</p>
+<hr />
+<h2>The Decision Guide</h2>
+<p>This is the most important decision framework for the CCA exam:</p>
+<pre class="highlight"><code>Need to give Claude new capabilities?
+  → TOOLS (model-controlled)
+
+Need data for UI display or prompt context?
+  → RESOURCES (app-controlled)
+
+Want predefined workflows users can trigger?
+  → PROMPTS (user-controlled)
+</code></pre>
+
+<h3>Extended Decision Matrix</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Primitive</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude calculates a value</td>
+<td>Tool</td>
+<td>Claude decides when to calculate</td>
+</tr>
+<tr>
+<td>Autocomplete dropdown shows documents</td>
+<td>Resource</td>
+<td>App fetches list for UI</td>
+</tr>
+<tr>
+<td>User types <code>@plan.md</code> to inject context</td>
+<td>Resource</td>
+<td>App fetches and injects content</td>
+</tr>
+<tr>
+<td>User types <code>/format</code> to reformat a doc</td>
+<td>Prompt</td>
+<td>User explicitly triggers workflow</td>
+</tr>
+<tr>
+<td>Claude queries a database mid-conversation</td>
+<td>Tool</td>
+<td>Claude decides when to query</td>
+</tr>
+<tr>
+<td>Sidebar shows relevant documents</td>
+<td>Resource</td>
+<td>App decides what to display</td>
+</tr>
+<tr>
+<td>User clicks "Summarize" button</td>
+<td>Prompt</td>
+<td>User triggers predefined workflow</td>
+</tr>
+<tr>
+<td>Claude sends an email</td>
+<td>Tool</td>
+<td>Claude decides when action is needed</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Control Model Summary Table</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Tools</th>
+<th>Resources</th>
+<th>Prompts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Controller</td>
+<td>Claude (model)</td>
+<td>App code</td>
+<td>User</td>
+</tr>
+<tr>
+<td>Trigger</td>
+<td>Claude's reasoning</td>
+<td><code>read_resource()</code> call</td>
+<td><code>/</code> command or button</td>
+</tr>
+<tr>
+<td>Side effects</td>
+<td>Yes (write, send, delete)</td>
+<td>No (read-only)</td>
+<td>No (just messages)</td>
+</tr>
+<tr>
+<td>Return type</td>
+<td>Tool result</td>
+<td>Content with MIME type</td>
+<td><code>list[base.Message]</code></td>
+</tr>
+<tr>
+<td>Decorator</td>
+<td><code>@mcp.tool()</code></td>
+<td><code>@mcp.resource()</code></td>
+<td><code>@mcp.prompt()</code></td>
+</tr>
+<tr>
+<td>Client method</td>
+<td><code>call_tool()</code></td>
+<td><code>read_resource()</code></td>
+<td><code>get_prompt()</code></td>
+</tr>
+<tr>
+<td>Discovery</td>
+<td><code>list_tools()</code></td>
+<td><code>list_resources()</code></td>
+<td><code>list_prompts()</code></td>
+</tr>
+<tr>
+<td>UX pattern</td>
+<td>Invisible to user</td>
+<td><code>@mention</code> autocomplete</td>
+<td><code>/</code> slash commands</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>How They Work Together</h2>
+<p>In a real application, all three primitives collaborate:</p>
+<ol>
+<li><strong>Resources</strong> populate the UI with available documents (autocomplete)</li>
+<li><strong>Prompts</strong> let users trigger workflows (<code>/format plan.md</code>)</li>
+<li>The prompt tells Claude to reformat the document</li>
+<li>Claude uses <strong>Tools</strong> to read and edit the document</li>
+<li>The result appears in the chat</li>
+</ol>
+<p>This is the full MCP stack: Resources feed data → Prompts orchestrate workflows → Tools execute actions.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Using tools when resources would suffice</strong> — if data is read-only and needed for UI/context, use a resource (faster, no tool call overhead)</li>
+<li><strong>Using tools when prompts are appropriate</strong> — if the user explicitly triggers a workflow, use a prompt (better UX, more consistent)</li>
+<li><strong>Confusing the control model</strong> — the single most important distinction is WHO controls: model, app, or user</li>
+<li><strong>Forgetting that prompts orchestrate tools</strong> — prompts and tools are complementary, not competing</li>
+<li><strong>Making resources that have side effects</strong> — resources must be read-only; side effects belong in tools</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The three-way control model (Tools = model-controlled, Resources = app-controlled, Prompts = user-controlled) is the foundational concept of MCP architecture. Every exam question about "which primitive to use" can be answered by asking: "Who should control this interaction?" This single question resolves the vast majority of D2 scenario questions on the CCA exam.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: This lesson is the capstone. Every concept from Lessons 5-13 feeds into the "which primitive?" decision.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: The control model maps to agent architecture layers — model layer (tools), application layer (resources), user layer (prompts).</li>
+<li><strong>Exam strategy</strong>: When a scenario question asks "which approach is best," first identify the controller (model/app/user), then select the corresponding primitive.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three MCP server primitives?</td>
+<td>Tools (model-controlled), Resources (app-controlled), Prompts (user-controlled)</td>
+</tr>
+<tr>
+<td>Who controls Tools in MCP?</td>
+<td>Claude (model-controlled) — Claude decides when and how to call tools during reasoning</td>
+</tr>
+<tr>
+<td>Who controls Resources in MCP?</td>
+<td>Application code (app-controlled) — your code calls <code>read_resource()</code> to fetch data</td>
+</tr>
+<tr>
+<td>Who controls Prompts in MCP?</td>
+<td>The user (user-controlled) — triggered via slash commands, buttons, or menu selections</td>
+</tr>
+<tr>
+<td>When should you use a Tool vs. a Resource?</td>
+<td>Tool: Claude needs capabilities (actions, side effects). Resource: app needs read-only data for UI or context</td>
+</tr>
+<tr>
+<td>When should you use a Prompt vs. a Tool?</td>
+<td>Prompt: user explicitly triggers a predefined workflow. Tool: Claude autonomously decides to act</td>
+</tr>
+<tr>
+<td>What is the decision question for choosing an MCP primitive?</td>
+<td>"Who should control this interaction?" — Model = Tool, App = Resource, User = Prompt</td>
+</tr>
+<tr>
+<td>How do the three primitives work together?</td>
+<td>Resources feed data to UI, Prompts orchestrate workflows for users, Tools execute actions for Claude</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

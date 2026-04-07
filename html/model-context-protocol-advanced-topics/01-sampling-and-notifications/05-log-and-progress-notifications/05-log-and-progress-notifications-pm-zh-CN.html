@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05 Log And Progress Notifications Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Log and Progress Notifications — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server capabilities), 2.5 (server-to-client communication)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 01-sampling-and-notifications / Lesson 05</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP server 可以在长时间操作中发送实时状态更新和进度指示器给 client，将沉默的黑箱处理转变为透明、友好的用户体验。</p>
+<hr />
+<h2>心智模型：餐厅厨房</h2>
+<p>把 MCP tool 想成餐厅厨房：</p>
+<table>
+<thead>
+<tr>
+<th>没有 Notification</th>
+<th>有 Notification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>你点餐后沉默等待</td>
+<td>服务员说「您的前菜正在准备」</td>
+</tr>
+<tr>
+<td>过了 20 分钟 — 菜要来了吗？</td>
+<td>「主菜正在烤箱里，还要 10 分钟」</td>
+</tr>
+<tr>
+<td>你考虑离开</td>
+<td>「正在摆盘 — 马上好！」</td>
+</tr>
+<tr>
+<td>菜来了（或没来）</td>
+<td>菜来了，而且全程都有被告知</td>
+</tr>
+</tbody>
+</table>
+<p>Notification 不改变食物，改变的是 <strong>用餐体验</strong>。</p>
+<hr />
+<h2>两种实时反馈类型</h2>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>功能</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Logging</strong></td>
+<td>处理中的状态消息（「搜索数据库中...」「找到 42 条结果」）</td>
+<td>服务员的口头更新</td>
+</tr>
+<tr>
+<td><strong>Progress</strong></td>
+<td>完成百分比（30%、60%、90%）</td>
+<td>外卖追踪页的进度条</td>
+</tr>
+</tbody>
+</table>
+<p>两者都是 <strong>可选的</strong> — tool 没有它们也能运作。但它们大幅改善感知性能和用户信任。</p>
+<hr />
+<h2>PM 为什么要关心</h2>
+<h3>1. 用户的速度感知</h3>
+<p>研究一致显示，有进度指示器的任务感觉比没有的更快，即使花费相同时间。对于可能跑 10-60 秒的 AI 工具，这至关重要。</p>
+<h3>2. 降低放弃率</h3>
+<p>用户在长时间操作中没有看到反馈时会：<br />
+- 认为工具坏了<br />
+- 重试（产生重复工作）<br />
+- 完全放弃工作流程</p>
+<h3>3. 调试和支持</h3>
+<p>Logging 让你的支持团队能看到失败操作中发生了什么，不需要请用户重现问题。</p>
+<hr />
+<h2>产品设计考量</h2>
+<p>撰写 MCP tool 需求时，考虑：</p>
+<table>
+<thead>
+<tr>
+<th>Tool 耗时</th>
+<th>建议 UX</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 2 秒</td>
+<td>不需要 notification</td>
+</tr>
+<tr>
+<td>2-10 秒</td>
+<td>Logging 消息（「搜索中...」「处理中...」）</td>
+</tr>
+<tr>
+<td>10-60 秒</td>
+<td>Logging + 进度条</td>
+</tr>
+<tr>
+<td>&gt; 60 秒</td>
+<td>Logging + 进度 + 考虑拆成更小步骤</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Client 呈现灵活性</h2>
+<p>Server 发送原始数据，不同 client 有不同呈现方式：</p>
+<table>
+<thead>
+<tr>
+<th>Client 类型</th>
+<th>Logging 呈现</th>
+<th>Progress 呈现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Terminal/CLI</td>
+<td>stdout 文字行</td>
+<td>ASCII 进度条</td>
+</tr>
+<tr>
+<td>Web app</td>
+<td>Toast 通知或 log panel</td>
+<td>HTML/CSS 进度条</td>
+</tr>
+<tr>
+<td>Desktop app</td>
+<td>系统通知区域</td>
+<td>原生 OS 进度环</td>
+</tr>
+<tr>
+<td>聊天界面</td>
+<td>行内状态消息</td>
+<td>动态加载指示器</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+作为 PM，你指定 <strong>沟通什么信息</strong>（步骤、百分比、警告）。你 <strong>不需要</strong> 指定 <strong>怎么显示</strong> — 那是 client 的责任。这种关注点分离意味着一个设计良好的 server 在所有 client 类型上都能表现出色。</p>
+</blockquote>
+<hr />
+<h2>Notification 是 Fire-and-Forget</h2>
+<p>PM 需要理解的关键架构细节：</p>
+<ul>
+<li>Notification 是 <strong>单向的</strong>：server 发送，不等待确认</li>
+<li>Client 忽略它们也不会坏</li>
+<li><strong>不影响</strong> tool 的实际输出</li>
+<li>对处理时间增加的额外开销极小</li>
+</ul>
+<p>这意味着你永远可以建议加上 notification — 没有缺点。</p>
+<hr />
+<h2>错误沟通策略</h2>
+<p>Logging level 对应用户面向的沟通层级：</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>何时使用</th>
+<th>用户体验</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Debug</td>
+<td>内部细节（URL、记录数）</td>
+<td>通常不显示给终端用户</td>
+</tr>
+<tr>
+<td>Info</td>
+<td>主要里程碑（「步骤 2/4 完成」）</td>
+<td>作为状态显示给用户</td>
+</tr>
+<tr>
+<td>Warning</td>
+<td>性能降低（「大型数据集，可能较慢」）</td>
+<td>提醒 — 用户可决定是否等待</td>
+</tr>
+<tr>
+<td>Error</td>
+<td>失败（「数据库连接中断」）</td>
+<td>错误消息 — 用户采取行动</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.3</strong>：Server capabilities — notification 在设计良好的 server 中是预期的</li>
+<li><strong>D2 Task 2.5</strong>：Server-to-client communication — logging 和 progress 是主要范例</li>
+<li>考试测试理解 notification 是单向的（非 request-response）</li>
+<li>核心哲学：<strong>好的 UX 不是可选项</strong> — 即使基础设施 tool 也应沟通状态</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP server 可以发送哪两种实时反馈？</td>
+<td>Logging（状态消息）和 Progress（完成百分比）</td>
+</tr>
+<tr>
+<td>MCP notification 是 tool 功能必需的吗？</td>
+<td>不是 — 可选但强烈建议用于 UX</td>
+</tr>
+<tr>
+<td>Client 忽略 notification 会怎样？</td>
+<td>不会坏 — notification 是 fire-and-forget</td>
+</tr>
+<tr>
+<td>为什么进度指示器对 AI 工具很重要？</td>
+<td>有进度反馈的任务用户感觉更快，也更不容易放弃</td>
+</tr>
+<tr>
+<td>谁决定 notification 怎么显示？</td>
+<td>Client — server 发送原始数据，每个 client 适当渲染</td>
+</tr>
+<tr>
+<td>PM 在什么 tool 耗时下应建议加 notification？</td>
+<td>超过 2 秒的操作</td>
+</tr>
+<tr>
+<td>四个 logging level 是什么？</td>
+<td>Debug（内部）、Info（里程碑）、Warning（降级）、Error（失败）</td>
+</tr>
+<tr>
+<td>Notification 可以改变 tool 的返回值吗？</td>
+<td>不可以 — 纯粹是信息性的旁路沟通</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

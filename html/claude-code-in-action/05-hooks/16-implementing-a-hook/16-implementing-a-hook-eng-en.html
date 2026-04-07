@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>16 Implementing A Hook Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Implementing a Hook — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks for tool call interception)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 05-hooks / Lesson 16</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Implementing a hook means wiring up the configuration in <code>settings.local.json</code> (matcher + command) and writing the script that reads stdin JSON, inspects <code>tool_input</code>, and exits with code 0 (allow) or 2 (block + stderr feedback).</p>
+<hr />
+<h2>Context: From Theory to Practice</h2>
+<p>Lesson 15 taught you the four-step framework for <em>defining</em> a hook. This lesson walks through a complete, working implementation — a PreToolUse hook that prevents Claude from reading <code>.env</code> files.</p>
+<blockquote>
+<p>💡 <strong>iOS/Swift analogy</strong></p>
+<p>This is like going from understanding <code>URLProtocol</code> conceptually to actually subclassing it, registering it, and seeing your interceptor fire in the Xcode debugger. The real learning happens when you see the pieces connect.</p>
+</blockquote>
+<hr />
+<p><img alt=".env Guard Flow" src="visuals/env-guard-flow.svg" /><br />
+<em>Figure: .env file guard data flow — PreToolUse intercepts Read calls and blocks access to sensitive files.</em></p>
+<h2>Step-by-Step Implementation</h2>
+<h3>1. Configure <code>settings.local.json</code></h3>
+<p>Open <code>.claude/settings.local.json</code> and add a PreToolUse hook entry:</p>
+<pre class="highlight"><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Read|Grep&quot;,
+        &quot;hooks&quot;: [
+          {
+            &quot;type&quot;: &quot;command&quot;,
+            &quot;command&quot;: &quot;node ./hooks/read_hook.js&quot;
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+
+<p>Key configuration details:<br />
+- <strong><code>matcher: "Read|Grep"</code></strong> — catches both tools that can access file contents<br />
+- <strong><code>command</code></strong> — points to the Node.js script that implements the logic<br />
+- <strong><code>type: "command"</code></strong> — tells Claude Code this is a shell command to execute</p>
+<blockquote>
+<p>📝 <strong>Why <code>settings.local.json</code>?</strong></p>
+<p>This file is gitignored — it is for your personal settings. Use <code>.claude/settings.json</code> (no <code>.local</code>) for team-shared hooks that should be committed to version control.</p>
+</blockquote>
+<h3>2. Write the Hook Script</h3>
+<p>The script reads stdin, parses JSON, checks the file path, and exits with the appropriate code:</p>
+<pre class="highlight"><code class="language-javascript">async function main() {
+  // Step 1: Read tool call data from stdin
+  const chunks = [];
+  for await (const chunk of process.stdin) {
+    chunks.push(chunk);
+  }
+
+  // Step 2: Parse the JSON
+  const toolArgs = JSON.parse(Buffer.concat(chunks).toString());
+
+  // Step 3: Extract the file path
+  const readPath =
+    toolArgs.tool_input?.file_path || toolArgs.tool_input?.path || &quot;&quot;;
+
+  // Step 4: Check and decide
+  if (readPath.includes('.env')) {
+    console.error(&quot;You cannot read the .env file&quot;);
+    process.exit(2);  // Block the operation
+  }
+
+  // If we reach here, exit code 0 (allow) is implicit
+}
+
+main();
+</code></pre>
+
+<blockquote>
+<p>⚠️ <strong>Critical implementation details</strong></p>
+<ol>
+<li><strong>Read from stdin, not argv</strong> — Tool call data comes via standard input, not command-line arguments</li>
+<li><strong>Use <code>console.error()</code>, not <code>console.log()</code></strong> — Feedback must go to stderr (code 2 only sends stderr to Claude)</li>
+<li><strong>Check both <code>file_path</code> and <code>path</code></strong> — Different tools may use different field names in <code>tool_input</code></li>
+<li><strong>Exit code 2, not 1</strong> — Code 1 is a generic error; code 2 specifically signals "block this tool call"</li>
+</ol>
+</blockquote>
+<h3>3. Restart and Test</h3>
+<p>After saving both files:</p>
+<ol>
+<li><strong>Restart Claude Code</strong> — Hook changes only take effect after restart</li>
+<li><strong>Test with Read</strong>: Ask Claude to read <code>.env</code> — should be blocked</li>
+<li><strong>Test with Grep</strong>: Ask Claude to grep <code>.env</code> — should also be blocked</li>
+<li><strong>Test with allowed files</strong>: Ask Claude to read other files — should work normally</li>
+</ol>
+<blockquote>
+<p>🎬 <strong>Instructor insight from the video</strong></p>
+<p>Claude recognizes the hook feedback in its response: "I was prevented by a read hook from accessing that file." This demonstrates the feedback loop — Claude does not just fail; it understands <em>why</em> and communicates that back to the user.</p>
+</blockquote>
+<hr />
+<h2>Data Flow Diagram</h2>
+<pre class="highlight"><code>User asks Claude to read .env
+        ↓
+Claude decides to call Read tool with { file_path: &quot;.env&quot; }
+        ↓
+PreToolUse hook fires → runs read_hook.js
+        ↓
+read_hook.js reads stdin JSON → parses tool_input
+        ↓
+Checks: does file_path include &quot;.env&quot;?
+        ↓
+  YES → console.error(&quot;You cannot read .env&quot;) → process.exit(2)
+        ↓
+  Claude receives error message → tells user the file is protected
+
+  NO  → implicit exit(0) → Read tool executes normally
+</code></pre>
+
+<hr />
+<h2>Common Implementation Mistakes</h2>
+<table>
+<thead>
+<tr>
+<th>❌ Mistake</th>
+<th>✅ Fix</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Use <code>console.log()</code> for feedback</td>
+<td>Use <code>console.error()</code></td>
+<td>Only stderr is sent to Claude on exit code 2</td>
+</tr>
+<tr>
+<td>Exit with code 1 to block</td>
+<td>Exit with code 2</td>
+<td>Code 1 = generic error; Code 2 = intentional block</td>
+</tr>
+<tr>
+<td>Read tool_input.file_path only</td>
+<td>Also check tool_input.path</td>
+<td>Grep uses <code>path</code>, Read uses <code>file_path</code></td>
+</tr>
+<tr>
+<td>Forget to restart Claude Code</td>
+<td>Always restart after hook changes</td>
+<td>Hooks are loaded at startup</td>
+</tr>
+<tr>
+<td>Use <code>process.argv</code> for input</td>
+<td>Use <code>process.stdin</code></td>
+<td>Tool call data is piped via stdin</td>
+</tr>
+<tr>
+<td>Exact match on <code>.env</code></td>
+<td>Use <code>.includes('.env')</code></td>
+<td>File path may be absolute (e.g., <code>/home/user/project/.env</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Anti-Patterns (Exam Frequently Tested)</h2>
+<table>
+<thead>
+<tr>
+<th>❌ Wrong Approach</th>
+<th>✅ Correct Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Check tool_name in the script to filter tools</td>
+<td>Use matcher in config for tool filtering; use script for input validation</td>
+<td>Separation of concerns — matcher handles tool selection, script handles logic</td>
+</tr>
+<tr>
+<td>Write hook logic inline in settings.json</td>
+<td>Use external script files</td>
+<td>Maintainability, testability, and readability</td>
+</tr>
+<tr>
+<td>Silently block without feedback</td>
+<td>Always write to stderr when blocking</td>
+<td>Claude needs to know <em>why</em> to adjust behavior</td>
+</tr>
+<tr>
+<td>Only protect against Read</td>
+<td>Protect against Read AND Grep</td>
+<td>Both tools can expose file contents</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Exam Focus: Implementation Patterns</h2>
+<p>The CCA exam tests your understanding of:</p>
+<ol>
+<li><strong>Configuration structure</strong> — <code>matcher</code> + <code>hooks</code> array with <code>type</code> and <code>command</code></li>
+<li><strong>Data flow</strong> — stdin JSON → parse → inspect <code>tool_input</code> → exit code</li>
+<li><strong>Exit code semantics</strong> — 0 = allow, 2 = block (PreToolUse only)</li>
+<li><strong>Feedback mechanism</strong> — stderr on exit code 2 goes to Claude</li>
+<li><strong>Tool input field names</strong> — different tools use different field names (<code>file_path</code> vs <code>path</code>)</li>
+</ol>
+<p>Core exam philosophies demonstrated:<br />
+- <strong>Architecture &gt; Prompt</strong> — a script that exits with code 2 is deterministic; a prompt saying "don't read .env" is probabilistic<br />
+- <strong>Deterministic &gt; Probabilistic</strong> — the hook <em>always</em> blocks, no exceptions</p>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: Developer Productivity Scenario (S4)</h3>
+<p>You have implemented a PreToolUse hook to prevent Claude from reading <code>.env</code> files. The hook script uses <code>console.log("Access denied")</code> and <code>process.exit(2)</code>. Claude successfully blocks the read but does not display the "Access denied" message. What is the issue?</p>
+<ul>
+<li>A. The exit code should be 1, not 2</li>
+<li>B. The feedback must be written to stderr (<code>console.error()</code>), not stdout (<code>console.log()</code>)</li>
+<li>C. The matcher should include <code>Write</code> in addition to <code>Read</code></li>
+<li>D. The hook needs to return a JSON response instead of a plain text message</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — When a hook exits with code 2, only stderr output is forwarded to Claude as feedback. `console.log()` writes to stdout, which is not captured. Use `console.error()` to write to stderr.
+
+- A: Code 1 is a generic error, not a blocking signal
+- C: Write is irrelevant — the issue is about read access feedback
+- D: Plain text to stderr is the correct mechanism; no JSON wrapper needed
+</details>
+
+<h3>Q2: CI/CD Integration Scenario (S5)</h3>
+<p>Your team wants to implement a hook that checks whether Claude is executing potentially dangerous Bash commands (like <code>rm -rf</code>). The hook should block dangerous commands and allow safe ones. Which implementation approach is correct?</p>
+<ul>
+<li>A. PostToolUse hook that reverts dangerous command results after execution</li>
+<li>B. PreToolUse hook with matcher <code>Bash</code> that reads stdin JSON, inspects <code>tool_input.command</code>, and exits with code 2 if the command matches a blocklist</li>
+<li>C. PreToolUse hook with matcher <code>.*</code> that blocks all tool calls containing "rm"</li>
+<li>D. Add "never run rm -rf" to the system prompt</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — PreToolUse is needed to block before execution. The matcher targets `Bash` specifically. The script inspects `tool_input.command` (the actual shell command) and applies a blocklist check.
+
+- A: PostToolUse is too late — the dangerous command has already executed
+- C: Matching `.*` is too broad (catches all tools) and checking for "rm" in any tool is imprecise
+- D: Prompt-based with non-zero failure rate — unacceptable for security
+
+> Exam philosophy: **Deterministic > Probabilistic**
+</details>
+
+<h3>Q3: Customer Support Agent Scenario (S1)</h3>
+<p>You are implementing a PreToolUse hook for a customer support agent. The hook must block the <code>process_refund</code> tool when the refund amount exceeds $500. Your script reads stdin JSON and checks <code>tool_input.amount</code>. However, during testing, the hook allows refunds of $600. What is the most likely cause?</p>
+<ul>
+<li>A. The exit code should be 1 instead of 2</li>
+<li>B. The script is checking <code>tool_input.refund_amount</code> instead of the actual field name used by the tool</li>
+<li>C. PostToolUse hooks should be used instead of PreToolUse</li>
+<li>D. The matcher should be <code>.*</code> to catch all tool calls</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — The most common implementation bug is mismatching field names in `tool_input`. Each tool defines its own input schema. The script must use the exact field name that the tool expects (which might be `amount`, `refund_amount`, `value`, etc.).
+
+- A: Exit code 2 is correct for blocking
+- C: PostToolUse cannot block — the refund would already be processed
+- D: The matcher should target the specific tool, not all tools
+
+> Exam philosophy: **Architecture > Prompt** — implementation correctness matters
+</details>
+</body>
+</html>

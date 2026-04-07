@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>17 Gotchas Around Hooks Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Hooks 的注意事项 — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试范围</td>
+<td>D3 — Claude Code Configuration &amp; Workflows（占考试 20%）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks)</td>
+</tr>
+<tr>
+<td>课程来源</td>
+<td>claude-code-in-action / 05-hooks / Lesson 17（纯文字课）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>重点摘要</h2>
+<p>Hook 脚本应使用绝对文件路径以确保安全，但绝对路径是机器特定的，跨团队共享时会坏掉。解法是模板文件（<code>settings.example.json</code>）搭配占位符，由自动化 setup script 转换为机器特定的绝对路径。PM 需要理解这一点，因为它影响新人入职、CI/CD 配置和安全合规。</p>
+<hr />
+<h2>PM 为何需要关注</h2>
+<ol>
+<li><strong>安全审计</strong> — 若组织要求安全审查，相对路径的 hook command 会被标记</li>
+<li><strong>开发者入职</strong> — 新团队成员需要执行 setup 步骤才能让 hook 运行</li>
+<li><strong>CI/CD pipeline</strong> — 自动化环境中的 hook 需要机器特定配置</li>
+<li><strong>团队一致性</strong> — 没有模板模式，hook 可能在某些机器上静默失败</li>
+</ol>
+<hr />
+<h2>心智模型：办公大楼门禁卡</h2>
+<table>
+<thead>
+<tr>
+<th>方面</th>
+<th>门禁卡系统</th>
+<th>Hook 配置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>安全需求</td>
+<td>扫描器必须连到确切的安全服务器</td>
+<td>Hook 必须指向确切的脚本文件（绝对路径）</td>
+</tr>
+<tr>
+<td>可移植问题</td>
+<td>每栋大楼安全服务器在不同地址</td>
+<td>每台开发机器文件在不同路径</td>
+</tr>
+<tr>
+<td>解法</td>
+<td>模板卡配置 + 大楼特定 setup</td>
+<td>模板设置文件 + 机器特定 init script</td>
+</tr>
+<tr>
+<td>入职</td>
+<td>新员工在自己大楼激活卡片</td>
+<td>新开发者在机器上执行 <code>npm run setup</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM 重点</strong></p>
+<p>绝对路径 = 更高安全性，但需要自动化 setup 步骤。如果你的 PRD 要求 hook，在部署计划中包含"新开发者入职需要 setup 步骤"。</p>
+</blockquote>
+<hr />
+<h2>工程师会看到的两个文件</h2>
+<p><img alt="Security vs Portability" src="visuals/security-portability-tradeoff-zh-TW.svg" /><br />
+<em>圖：安全性與可攜性的取捨 — 絕對路徑安全但綁定機器；Template + init script 可兩全其美。</em></p>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>谁创建</th>
+<th>在 Git？</th>
+<th>包含 Hook？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>settings.json</code></td>
+<td>Team lead，commit</td>
+<td><strong>是</strong></td>
+<td>一般设置（无机器特定路径）</td>
+</tr>
+<tr>
+<td><code>settings.local.json</code></td>
+<td>Setup script 自动生成</td>
+<td><strong>否</strong></td>
+<td>带绝对路径的 Hook command</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>PM 治理备注</strong></p>
+<p>如果合规 hook 只在 <code>settings.local.json</code>，它取决于每个开发者是否执行了 setup script。将此包含在入职检查清单中。</p>
+</blockquote>
+<hr />
+<h2>入职影响</h2>
+<table>
+<thead>
+<tr>
+<th>发生什么</th>
+<th>影响</th>
+<th>修正</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>settings.local.json</code> 不存在</td>
+<td>没有 hook 启用</td>
+<td>执行 <code>npm run setup</code></td>
+</tr>
+<tr>
+<td>直接复制 <code>settings.example.json</code></td>
+<td><code>$PWD</code> 占位符残留</td>
+<td>正确执行 init script</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>反模式（考试常考）</h2>
+<table>
+<thead>
+<tr>
+<th>❌ 错误做法</th>
+<th>✅ 正确做法</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>为方便允许相对路径</td>
+<td>为安全要求绝对路径</td>
+<td>安全审计会标记</td>
+</tr>
+<tr>
+<td>Commit 机器特定设置到 git</td>
+<td>用模板 + init script 模式</td>
+<td>机器特定路径在其他机器坏掉</td>
+</tr>
+<tr>
+<td>略过 setup 步骤文档</td>
+<td>在入职检查清单中包含 setup</td>
+<td>新开发者会有不起作用的 hook</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>练习题</h2>
+<h3>Q1：开发者生产力场景（S4）</h3>
+<p>团队部署了 PreToolUse hook 防止 Claude 访问凭证文件。新开发者加入后 Claude 在他们机器上可以读取凭证。最可能原因？</p>
+<ul>
+<li>A. Claude Code 在某些 OS 上有绕过 hook 的 bug</li>
+<li>B. 新开发者没有执行 setup script，<code>settings.local.json</code> 从未生成</li>
+<li>C. Hook 配置在全局层级，不在项目中</li>
+<li>D. PreToolUse hook 只对 Read 有效</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — `settings.local.json` 被 gitignore，必须由 setup script 生成。
+
+**PM 重点**：Hook 激活是开发环境 setup 的一部分，必须在入职检查清单中。
+</details>
+
+<h3>Q2：CI/CD 集成场景（S5）</h3>
+<p>安全团队要求所有 hook 脚本使用绝对路径。CI pipeline 在动态配置的 runner 上运行。如何配置？</p>
+<ul>
+<li>A. CI 中用相对路径</li>
+<li>B. 加入 CI pipeline 步骤，执行 init script 生成带绝对路径的 <code>settings.local.json</code></li>
+<li>C. 在 <code>settings.json</code> 硬编码路径</li>
+<li>D. 在 CI 停用 hook</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — Init script 模式在 CI 也适用。
+
+**PM 重点**：CI/CD 环境需要与开发者机器相同的安全态势。
+</details>
+
+<h3>Q3：客户支持场景（S1）</h3>
+<p>安全审计发现 hook command 用相对路径。工程团队认为绝对路径会让设置文件难以共享。推荐解法？</p>
+<ul>
+<li>A. 接受安全风险</li>
+<li>B. 用带 <code>$PWD</code> 占位符的 <code>settings.example.json</code> 模板和自动化 init script</li>
+<li>C. 移除 hook，改用 system prompt</li>
+<li>D. 用相对路径但加 CLAUDE.md 指令</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 模板 + init script 模式同时满足安全和团队共享需求。
+
+**PM 重点**：当工程师提出安全-便利取舍时，寻找两者兼顾的方案。
+</details>
+</body>
+</html>

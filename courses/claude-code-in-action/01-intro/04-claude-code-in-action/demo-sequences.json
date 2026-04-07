@@ -1,0 +1,84 @@
+{
+  "unit": "04-claude-code-in-action",
+  "demos": [
+    {
+      "id": "demo-1",
+      "title": "Performance Optimization — chalk library",
+      "srt_range": [13, 33],
+      "key_frames": [
+        {"frame": "frame_016.jpg", "caption": "chalk documentation — 5th most downloaded npm package"},
+        {"frame": "frame_022.jpg", "caption": "429 million downloads last week"},
+        {"frame": "frame_027.jpg", "caption": "Claude creates todo list and runs benchmarks"},
+        {"frame": "frame_030.jpg", "caption": "CPU profiling to identify slow operations"},
+        {"frame": "frame_032.jpg", "caption": "3.9x throughput improvement result"}
+      ],
+      "walkthrough_steps": [
+        "Instructor introduces chalk — a JS package for colored terminal text, 5th most downloaded in npm (429M/week)",
+        "Asks Claude Code to find and optimize performance issues in chalk",
+        "Claude creates a todo list to track progress",
+        "Runs benchmarks to identify worst performing cases",
+        "Writes a file to zoom in on one particular case",
+        "Uses CPU profiler to understand why that case is slow",
+        "Implements improvements — achieves 3.9x throughput improvement"
+      ]
+    },
+    {
+      "id": "demo-2",
+      "title": "Data Analysis — CSV churn analysis in Jupyter notebook",
+      "srt_range": [34, 46],
+      "key_frames": [
+        {"frame": "frame_037.jpg", "caption": "CSV dataset of video streaming platform users"},
+        {"frame": "frame_041.jpg", "caption": "Claude runs analysis in Jupyter notebook"},
+        {"frame": "frame_044.jpg", "caption": "Claude executes cells and views results to customize analysis"}
+      ],
+      "walkthrough_steps": [
+        "Instructor provides CSV file with video streaming platform user data",
+        "Asks Claude to do general analysis and identify causes of churn in a Jupyter notebook",
+        "Claude writes code into notebook cells, executes them, and views results",
+        "Claude customizes successive cells based on previous execution results",
+        "Demonstrates Claude's ability to not just write code but also execute and iterate"
+      ]
+    },
+    {
+      "id": "demo-3",
+      "title": "UI Styling with Playwright MCP — extending Claude Code",
+      "srt_range": [47, 61],
+      "key_frames": [
+        {"frame": "frame_049.jpg", "caption": "UI generation app — chat interface and header need styling"},
+        {"frame": "frame_054.jpg", "caption": "Claude given access to Playwright MCP browser tools"},
+        {"frame": "frame_058.jpg", "caption": "Claude opens browser, navigates to app, takes screenshot"},
+        {"frame": "frame_061.jpg", "caption": "Improved styling result after iteration"}
+      ],
+      "walkthrough_steps": [
+        "Instructor shows a UI generation app — chat interface and header look unstyled",
+        "Gives Claude Code access to Playwright MCP server (new browser control tools)",
+        "Asks Claude to improve styling and use the browser to verify",
+        "Claude opens browser, navigates to app, takes screenshot of current state",
+        "Updates styling, takes another screenshot, iterates on design",
+        "Result: a polished, professional-looking interface"
+      ]
+    },
+    {
+      "id": "demo-4",
+      "title": "GitHub PR Review — catching PII exposure in Terraform infrastructure",
+      "srt_range": [62, 103],
+      "key_frames": [
+        {"frame": "frame_066.jpg", "caption": "Claude Code GitHub Actions integration overview"},
+        {"frame": "frame_072.jpg", "caption": "AWS infrastructure diagram — DynamoDB, Lambda, S3 bucket"},
+        {"frame": "frame_083.jpg", "caption": "One-line code change adds user email to shared S3 bucket"},
+        {"frame": "frame_094.jpg", "caption": "Pull request with the email addition change"},
+        {"frame": "frame_098.jpg", "caption": "Claude Code automated review catches PII exposure to external partner"}
+      ],
+      "walkthrough_steps": [
+        "Explains Claude Code can run in GitHub Actions — triggered by PRs or issue mentions",
+        "Sets up scenario: AWS infrastructure with DynamoDB → Lambda → S3 bucket",
+        "S3 bucket shared with internal AND external marketing team",
+        "Months later, internal team requests adding user email to bucket export",
+        "Developer adds one line to Lambda function — forgets bucket is shared externally",
+        "This exposes PII (email) to external partner — a serious security issue",
+        "Claude Code automated PR review catches this: identifies data flow and PII exposure",
+        "Review shows exact steps of data flow and explains the external partner risk"
+      ]
+    }
+  ]
+}

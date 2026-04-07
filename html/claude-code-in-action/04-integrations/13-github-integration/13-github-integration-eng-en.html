@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 Github Integration Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>GitHub Integration — Engineering Deep Dive</h1>
+<p><img alt="Github Workflows Two Actions" src="visuals/github-workflows-two-actions.svg" /><br />
+<em>Figure: GitHub workflows — @claude mention + PR review.</em></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.6 ★★★ (CI/CD integration), 2.4 ★★ (MCP integration), 1.1 ★ (agentic loops)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 04-integrations / Lesson 13</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude Code's GitHub integration provides two automated workflows via GitHub Actions: <code>@claude</code> mention support for interactive tasks in issues/PRs, and automatic PR reviews. Both run Claude in non-interactive mode using the <code>-p</code> flag with explicit <code>allowed_tools</code> permissions.</p>
+<hr />
+<h2>Two Default Workflows</h2>
+<p>The integration installs two GitHub Actions workflow files in <code>.github/workflows/</code>:</p>
+<blockquote>
+<p>Diagram produced by nanobanana</p>
+</blockquote>
+<h3>1. Mention Action (<code>@claude</code>)</h3>
+<p>Triggered when someone mentions <code>@claude</code> in an issue or pull request comment.</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What Happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. User mentions <code>@claude</code></td>
+<td>"Fix the toggle buttons" with a screenshot</td>
+</tr>
+<tr>
+<td>2. GitHub Action starts</td>
+<td>Workflow spins up, sets up environment</td>
+</tr>
+<tr>
+<td>3. Claude analyzes</td>
+<td>Creates a task checklist, plans approach</td>
+</tr>
+<tr>
+<td>4. Claude executes</td>
+<td>Accesses codebase, runs tools, tests the app</td>
+</tr>
+<tr>
+<td>5. Claude responds</td>
+<td>Posts findings/fix directly in the issue/PR</td>
+</tr>
+</tbody>
+</table>
+<h3>2. PR Review Action</h3>
+<p>Triggered automatically when a pull request is created.</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What Happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. PR is opened</td>
+<td>Developer pushes changes</td>
+</tr>
+<tr>
+<td>2. GitHub Action starts</td>
+<td>Workflow runs automatically</td>
+</tr>
+<tr>
+<td>3. Claude reviews</td>
+<td>Analyzes changes, checks for issues</td>
+</tr>
+<tr>
+<td>4. Claude reports</td>
+<td>Posts detailed review on the PR</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎬 <strong>Instructor insight from the video</strong></p>
+<p>In the demo, the instructor created a fake bug report with a screenshot, mentioned <code>@claude</code>, and Claude autonomously navigated to the app via Playwright, tested the buttons, confirmed they worked fine, and posted its findings. Claude created a step-by-step checklist before executing — this is the <strong>agentic loop</strong> pattern (plan → execute → observe → report).</p>
+</blockquote>
+<hr />
+<h2>Setup Process</h2>
+<pre class="highlight"><code class="language-bash"># Inside Claude Code, run:
+/install-github-app
+</code></pre>
+
+<p>This walks you through three steps:<br />
+1. Install the Claude Code app on GitHub<br />
+2. Add your API key<br />
+3. Auto-generate a PR with the workflow files</p>
+<p>After merging the PR, the two workflow files appear in <code>.github/workflows/</code>.</p>
+<hr />
+<h2>Customizing Workflows</h2>
+<h3>Adding Project Setup Steps</h3>
+<p>Before Claude runs, you can add environment preparation:</p>
+<pre class="highlight"><code class="language-yaml">- name: Project Setup
+  run: |
+    npm run setup
+    npm run dev:daemon
+</code></pre>
+
+<h3>Custom Instructions</h3>
+<p>Provide Claude with context about the running environment:</p>
+<pre class="highlight"><code class="language-yaml">custom_instructions: |
+  The project is already set up with all dependencies installed.
+  The server is already running at localhost:3000. Logs from it
+  are being written to logs.txt. If needed, you can query the
+  db with the 'sqlite3' cli. If needed, use the mcp__playwright
+  set of tools to launch a browser and interact with the app.
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>Key detail</strong></p>
+<p>Custom instructions tell Claude what is already available in the CI environment. Since Claude cannot interactively discover this (it runs non-interactively with <code>-p</code>), these instructions are critical for Claude to know what tools and services are accessible.</p>
+</blockquote>
+<h3>MCP Server Configuration</h3>
+<p>Configure MCP servers for the GitHub Actions environment:</p>
+<pre class="highlight"><code class="language-yaml">mcp_config: |
+  {
+    &quot;mcpServers&quot;: {
+      &quot;playwright&quot;: {
+        &quot;command&quot;: &quot;npx&quot;,
+        &quot;args&quot;: [
+          &quot;@playwright/mcp@latest&quot;,
+          &quot;--allowed-origins&quot;,
+          &quot;localhost:3000;cdn.tailwindcss.com;esm.sh&quot;
+        ]
+      }
+    }
+  }
+</code></pre>
+
+<hr />
+<h2>Tool Permissions: The <code>-p</code> Flag and <code>allowed_tools</code></h2>
+<p><img alt="Permission Model Local Vs Ci" src="visuals/permission-model-local-vs-ci.svg" /><br />
+<em>Figure: Permission model — local interactive vs CI non-interactive.</em></p>
+<p>This is the <strong>most exam-critical</strong> concept in this unit.</p>
+<p>When Claude runs in GitHub Actions, it uses the <code>-p</code> flag (non-interactive / "print" mode). In this mode, there is no human to approve permissions, so <strong>every tool must be explicitly listed</strong>:</p>
+<pre class="highlight"><code class="language-yaml">allowed_tools: &quot;Bash(npm:*),Bash(sqlite3:*),mcp__playwright__browser_snapshot,mcp__playwright__browser_click,...&quot;
+</code></pre>
+
+<blockquote>
+<p>⚠️ <strong>Critical exam detail</strong></p>
+<p>Unlike local development where you can use <code>mcp__playwright</code> to allow all tools from a server, in GitHub Actions <strong>each MCP tool must be individually listed</strong>. There is no shortcut. The instructor explicitly says: "There is no shortcut for permissions like we saw previously."</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Context</th>
+<th>Permission Style</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local development</td>
+<td>Blanket server allow</td>
+<td><code>"allow": ["mcp__playwright"]</code></td>
+</tr>
+<tr>
+<td>GitHub Actions (CI)</td>
+<td>Individual tool listing</td>
+<td><code>allowed_tools: "mcp__playwright__browser_click,mcp__playwright__browser_snapshot,..."</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>Exam note</strong></p>
+<p>The <code>-p</code> flag is the key indicator that Claude is running in non-interactive CI mode. Exam questions about CI/CD scenarios (S5) will often include this flag as a signal. When you see <code>-p</code>, think: explicit permissions, no human approval, <code>allowed_tools</code> required.</p>
+</blockquote>
+<hr />
+<h2>The Agentic Loop in CI</h2>
+<p>When Claude runs via <code>@claude</code> mention, it demonstrates the agentic loop pattern:</p>
+<ol>
+<li><strong>Plan</strong> — Claude creates a checklist of steps (visible in the GitHub comment)</li>
+<li><strong>Execute</strong> — Claude runs tools (Bash, Playwright, Read, Write)</li>
+<li><strong>Observe</strong> — Claude evaluates results</li>
+<li><strong>Report</strong> — Claude posts findings back to the issue/PR</li>
+</ol>
+<p>This is Task Statement 1.1 (agentic loops) applied in a CI/CD context. The loop is autonomous — no human intervention between steps.</p>
+<hr />
+<h2>Familiar Analogies</h2>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>GitHub Integration Equivalent</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CI/CD bots (Dependabot, Renovate)</td>
+<td>PR Review Action</td>
+<td>Automated PR analysis</td>
+</tr>
+<tr>
+<td>ChatOps (<code>/deploy</code> in Slack)</td>
+<td><code>@claude</code> mention</td>
+<td>Trigger agent from a comment</td>
+</tr>
+<tr>
+<td>Jenkins pipeline agent</td>
+<td>Claude in GitHub Actions</td>
+<td>Non-interactive tool execution</td>
+</tr>
+<tr>
+<td>Code review tools (SonarQube)</td>
+<td>PR Review Action</td>
+<td>Automated quality gates</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Configuration Hierarchy</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What It Configures</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Workflow YAML</td>
+<td>When Claude runs, env setup</td>
+<td><code>.github/workflows/*.yml</code></td>
+</tr>
+<tr>
+<td><code>custom_instructions</code></td>
+<td>What Claude knows about the env</td>
+<td>Inside workflow YAML</td>
+</tr>
+<tr>
+<td><code>mcp_config</code></td>
+<td>What tools Claude has access to</td>
+<td>Inside workflow YAML</td>
+</tr>
+<tr>
+<td><code>allowed_tools</code></td>
+<td>What Claude is permitted to use</td>
+<td>Inside workflow YAML</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>Project-wide instructions</td>
+<td>Repository root</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Anti-Patterns</h2>
+<table>
+<thead>
+<tr>
+<th>Anti-Pattern</th>
+<th>Why It Is Wrong</th>
+<th>Correct Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Not listing MCP tools individually in CI</td>
+<td>Claude cannot use tools it is not explicitly allowed</td>
+<td>List each tool in <code>allowed_tools</code></td>
+</tr>
+<tr>
+<td>Forgetting to set up the environment before Claude runs</td>
+<td>Claude will fail to find running services</td>
+<td>Add setup steps before the Claude action</td>
+</tr>
+<tr>
+<td>Not providing <code>custom_instructions</code> about the CI environment</td>
+<td>Claude will waste tokens discovering what is available</td>
+<td>Tell Claude what is already running</td>
+</tr>
+<tr>
+<td>Using interactive mode in CI</td>
+<td>CI has no human to approve permissions</td>
+<td>Use <code>-p</code> flag for non-interactive mode</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: CI/CD Pipeline Scenario</h3>
+<p>Your team wants to add Claude Code as an automated PR reviewer in GitHub Actions. Claude needs to access a PostgreSQL database to validate migration files. Which configuration is correct?</p>
+<ul>
+<li>A. Add <code>mcp__postgresql</code> to <code>.claude/settings.local.json</code> allow list</li>
+<li>B. Configure <code>mcp_config</code> with the PostgreSQL MCP server in the workflow YAML, and list each PostgreSQL tool individually in <code>allowed_tools</code></li>
+<li>C. Add "you have access to PostgreSQL" in <code>custom_instructions</code> without configuring an MCP server</li>
+<li>D. Configure <code>mcp_config</code> with the PostgreSQL MCP server and use <code>mcp__postgresql</code> in <code>allowed_tools</code> to allow all tools</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — In GitHub Actions, you must configure the MCP server in `mcp_config` AND list each tool individually in `allowed_tools`. There is no shortcut for MCP tool permissions in CI.
+
+- A configures local settings, not CI
+- C tells Claude about PostgreSQL but does not give it actual access
+- D uses blanket permission which is not available in GitHub Actions — each tool must be listed individually
+
+Exam philosophy: **Explicit Permissions > Blanket Access** in CI/CD contexts.
+</details>
+
+<h3>Q2: Developer Productivity Scenario</h3>
+<p>A developer wants Claude to automatically test UI changes when mentioned in a GitHub issue. The app runs on <code>localhost:3000</code>. What steps are needed in the workflow configuration?</p>
+<ul>
+<li>A. Just add <code>@claude</code> mention support — Claude will figure out the rest</li>
+<li>B. Add a setup step to start the dev server, configure Playwright MCP in <code>mcp_config</code>, list Playwright tools in <code>allowed_tools</code>, and add <code>custom_instructions</code> explaining the running server</li>
+<li>C. Add Playwright MCP to <code>.claude/settings.json</code> and deploy the app to a public URL</li>
+<li>D. Configure <code>custom_instructions</code> telling Claude to use <code>curl</code> to test the app</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — All four components are needed: environment setup (start the server), MCP configuration (give Claude browser tools), explicit permissions (list each Playwright tool), and custom instructions (tell Claude what is already running).
+
+- A is insufficient — Claude needs explicit configuration in CI
+- C mixes local and CI configuration approaches
+- D does not give Claude actual browser interaction capability
+
+Exam philosophy: **Architecture > Prompt** — give Claude the tools and environment, do not hope it can work with `curl` alone.
+</details>
+
+<h3>Q3: CI/CD Automation Scenario</h3>
+<p>Your team has configured Claude Code in GitHub Actions for PR reviews. Engineers notice Claude is not using the Playwright MCP server despite it being configured in <code>mcp_config</code>. What is the most likely issue?</p>
+<ul>
+<li>A. The Playwright MCP server is not compatible with GitHub Actions</li>
+<li>B. The individual Playwright tools are not listed in <code>allowed_tools</code></li>
+<li>C. Claude needs to be restarted after MCP configuration changes</li>
+<li>D. The <code>custom_instructions</code> do not mention Playwright</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — In GitHub Actions, configuring an MCP server in `mcp_config` is not enough. Each tool from that server must also be individually listed in `allowed_tools`. This is the most common misconfiguration.
+
+- A is incorrect — Playwright works in GitHub Actions
+- C is incorrect — Claude starts fresh for each action run
+- D may be helpful but is not the root cause — tools need explicit permission, not just instructions
+
+Key exam term: `allowed_tools` is the permission gate in CI/CD mode.
+</details>
+</body>
+</html>

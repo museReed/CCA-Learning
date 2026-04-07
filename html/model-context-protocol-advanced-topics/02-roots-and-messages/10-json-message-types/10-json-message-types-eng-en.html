@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Json Message Types Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>JSON Message Types — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 (client-server communication patterns), 2.6 (MCP protocol specification)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / Lesson 10</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>All MCP communication uses JSON messages in two categories: Request-Result pairs (bidirectional, expects a response) and Notifications (one-way, fire-and-forget), forming a bidirectional protocol where both client and server can initiate communication.</p>
+<hr />
+<p><img alt="Message Types" src="visuals/message-types.svg" /></p>
+<h2>Two Categories of Messages</h2>
+<p>Every message in MCP falls into one of two categories:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Pattern</th>
+<th>Expects Response?</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Request-Result</strong></td>
+<td>Sender sends request, receiver returns result</td>
+<td>Yes</td>
+<td>CallToolRequest/Result, ListPromptsRequest/Result</td>
+</tr>
+<tr>
+<td><strong>Notification</strong></td>
+<td>Sender sends, done</td>
+<td>No</td>
+<td>ProgressNotification, LoggingNotification</td>
+</tr>
+</tbody>
+</table>
+<p>This distinction is fundamental — it determines how you design error handling, timeouts, and message ordering.</p>
+<hr />
+<h2>Request-Result Pairs</h2>
+<p>Requests always come with a matching Result type. The sender blocks (or awaits) until the result arrives.</p>
+<h3>Common Request-Result Pairs</h3>
+<table>
+<thead>
+<tr>
+<th>Request</th>
+<th>Result</th>
+<th>Initiator</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CallToolRequest</code></td>
+<td><code>CallToolResult</code></td>
+<td>Client</td>
+<td>Execute a tool on the server</td>
+</tr>
+<tr>
+<td><code>ListPromptsRequest</code></td>
+<td><code>ListPromptsResult</code></td>
+<td>Client</td>
+<td>Discover available prompts</td>
+</tr>
+<tr>
+<td><code>ReadResourceRequest</code></td>
+<td><code>ReadResourceResult</code></td>
+<td>Client</td>
+<td>Read a server resource</td>
+</tr>
+<tr>
+<td><code>InitializeRequest</code></td>
+<td><code>InitializeResult</code></td>
+<td>Client</td>
+<td>Establish connection, negotiate capabilities</td>
+</tr>
+<tr>
+<td><code>CreateMessageRequest</code></td>
+<td><code>CreateMessageResult</code></td>
+<td>Server</td>
+<td>Sampling — ask client to call LLM</td>
+</tr>
+<tr>
+<td><code>ListRootsRequest</code></td>
+<td><code>ListRootsResult</code></td>
+<td>Server</td>
+<td>Discover client's approved directories</td>
+</tr>
+</tbody>
+</table>
+<pre class="highlight"><code class="language-json">// Example: CallToolRequest
+{
+  &quot;jsonrpc&quot;: &quot;2.0&quot;,
+  &quot;id&quot;: 1,
+  &quot;method&quot;: &quot;tools/call&quot;,
+  &quot;params&quot;: {
+    &quot;name&quot;: &quot;search_files&quot;,
+    &quot;arguments&quot;: {
+      &quot;query&quot;: &quot;config.yaml&quot;
+    }
+  }
+}
+
+// Example: CallToolResult
+{
+  &quot;jsonrpc&quot;: &quot;2.0&quot;,
+  &quot;id&quot;: 1,
+  &quot;result&quot;: {
+    &quot;content&quot;: [
+      {
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;text&quot;: &quot;Found config.yaml at /project/config.yaml&quot;
+      }
+    ]
+  }
+}
+</code></pre>
+
+<p>Note the <code>id</code> field — it correlates the request with its result (JSON-RPC 2.0 standard).</p>
+<hr />
+<h2>Notifications</h2>
+<p>Notifications are fire-and-forget. No <code>id</code> field, no response expected.</p>
+<h3>Common Notifications</h3>
+<table>
+<thead>
+<tr>
+<th>Notification</th>
+<th>Sender</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ProgressNotification</code></td>
+<td>Server</td>
+<td>Report tool execution progress</td>
+</tr>
+<tr>
+<td><code>LoggingMessageNotification</code></td>
+<td>Server</td>
+<td>Send log messages to client</td>
+</tr>
+<tr>
+<td><code>ToolListChangedNotification</code></td>
+<td>Server</td>
+<td>Alert client that available tools changed</td>
+</tr>
+<tr>
+<td><code>ResourceUpdatedNotification</code></td>
+<td>Server</td>
+<td>Alert client that a resource was modified</td>
+</tr>
+<tr>
+<td><code>RootsListChangedNotification</code></td>
+<td>Client</td>
+<td>Alert server that roots were updated</td>
+</tr>
+</tbody>
+</table>
+<pre class="highlight"><code class="language-json">// Example: ProgressNotification (no &quot;id&quot; field)
+{
+  &quot;jsonrpc&quot;: &quot;2.0&quot;,
+  &quot;method&quot;: &quot;notifications/progress&quot;,
+  &quot;params&quot;: {
+    &quot;progressToken&quot;: &quot;task-123&quot;,
+    &quot;progress&quot;: 75,
+    &quot;total&quot;: 100
+  }
+}
+</code></pre>
+
+<p>Key difference from requests: <strong>no <code>id</code> field</strong> = notification.</p>
+<hr />
+<h2>Bidirectional Protocol</h2>
+<p>MCP is bidirectional — both sides can initiate communication:</p>
+<pre class="highlight"><code>Client                          Server
+  |                               |
+  |-- InitializeRequest ---------&gt;|  (Client initiates)
+  |&lt;-- InitializeResult ----------|
+  |                               |
+  |-- CallToolRequest -----------&gt;|  (Client initiates)
+  |&lt;-- ProgressNotification ------|  (Server pushes)
+  |&lt;-- LoggingNotification -------|  (Server pushes)
+  |&lt;-- CallToolResult ------------|
+  |                               |
+  |&lt;-- CreateMessageRequest ------|  (Server initiates — sampling!)
+  |-- CreateMessageResult -------&gt;|
+  |                               |
+  |-- RootsListChanged ----------&gt;|  (Client pushes notification)
+</code></pre>
+
+<p>This is different from a simple HTTP API where only the client initiates. Both sides are peers in MCP.</p>
+<hr />
+<h2>The Specification</h2>
+<p>The MCP specification is written in <strong>TypeScript</strong> on GitHub. Important context:</p>
+<ul>
+<li>TypeScript is used for <strong>type description</strong>, not execution</li>
+<li>The spec defines message shapes, not implementation language</li>
+<li>Servers can be written in any language (Python, Go, Rust, etc.)</li>
+<li>The TypeScript types serve as the canonical reference for all implementations</li>
+</ul>
+<pre class="highlight"><code class="language-typescript">// From the spec — defines the shape, not runtime code
+interface CallToolRequest {
+  method: &quot;tools/call&quot;;
+  params: {
+    name: string;
+    arguments?: Record&lt;string, unknown&gt;;
+  };
+}
+</code></pre>
+
+<hr />
+<h2>Client vs. Server Messages</h2>
+<p>Understanding which side sends what:</p>
+<table>
+<thead>
+<tr>
+<th>Client Sends (to Server)</th>
+<th>Server Sends (to Client)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>InitializeRequest</code></td>
+<td><code>InitializeResult</code></td>
+</tr>
+<tr>
+<td><code>CallToolRequest</code></td>
+<td><code>CallToolResult</code></td>
+</tr>
+<tr>
+<td><code>ListPromptsRequest</code></td>
+<td><code>ListPromptsResult</code></td>
+</tr>
+<tr>
+<td><code>ReadResourceRequest</code></td>
+<td><code>ReadResourceResult</code></td>
+</tr>
+<tr>
+<td><code>RootsListChangedNotification</code></td>
+<td><code>ProgressNotification</code></td>
+</tr>
+<tr>
+<td><code>CreateMessageResult</code> (response)</td>
+<td><code>CreateMessageRequest</code> (sampling)</td>
+</tr>
+<tr>
+<td></td>
+<td><code>LoggingMessageNotification</code></td>
+</tr>
+<tr>
+<td></td>
+<td><code>ToolListChangedNotification</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Why This Matters for Transport</h2>
+<p>Understanding message types is essential for choosing the right transport:</p>
+<table>
+<thead>
+<tr>
+<th>Transport</th>
+<th>Supports Bidirectional?</th>
+<th>Supports Notifications?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>stdio</strong></td>
+<td>Yes (stdin/stdout)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>SSE</strong></td>
+<td>Yes (HTTP POST + SSE stream)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Streamable HTTP</strong></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>All MCP transports must support both directions because the protocol is inherently bidirectional.</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+MCP is not a REST API. It is a peer-to-peer protocol over a transport layer. Both client and server can send requests AND notifications. Understanding this bidirectional nature is essential for designing robust MCP integrations — you must handle incoming messages from both directions.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.4</strong>: Client-server communication patterns — the two message categories define the protocol</li>
+<li><strong>D2 Task 2.6</strong>: MCP protocol specification — know that it is written in TypeScript for type description</li>
+<li>Expect questions differentiating Requests (have <code>id</code>, expect response) from Notifications (no <code>id</code>, fire-and-forget)</li>
+<li>Know which messages each side can send — sampling flips the typical direction</li>
+<li>Key exam philosophy: <strong>Understand the protocol</strong> — message types determine error handling, timeouts, and transport requirements</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the two categories of MCP messages?</td>
+<td>Request-Result pairs (bidirectional, expects response) and Notifications (one-way, fire-and-forget)</td>
+</tr>
+<tr>
+<td>How do you distinguish a Request from a Notification in JSON?</td>
+<td>Requests have an <code>id</code> field; Notifications do not</td>
+</tr>
+<tr>
+<td>Is MCP unidirectional or bidirectional?</td>
+<td>Bidirectional — both client and server can initiate requests and send notifications</td>
+</tr>
+<tr>
+<td>What language is the MCP specification written in?</td>
+<td>TypeScript — used for type description, not execution</td>
+</tr>
+<tr>
+<td>Give an example of a server-initiated request.</td>
+<td><code>CreateMessageRequest</code> (sampling) — server asks client to call an LLM</td>
+</tr>
+<tr>
+<td>What notification does a server send when its tool list changes?</td>
+<td><code>ToolListChangedNotification</code></td>
+</tr>
+<tr>
+<td>What JSON-RPC version does MCP use?</td>
+<td>JSON-RPC 2.0</td>
+</tr>
+<tr>
+<td>Why must MCP transports support bidirectional communication?</td>
+<td>Because both client and server can initiate requests (e.g., client calls tools, server requests sampling)</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

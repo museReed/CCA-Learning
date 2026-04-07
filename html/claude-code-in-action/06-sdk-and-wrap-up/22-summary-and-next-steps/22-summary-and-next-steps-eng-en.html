@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>22 Summary And Next Steps Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Summary and Next Steps — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>All 5 Domains (D1-D5)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>Review: 1.1, 2.1, 2.4, 3.1, 3.2, 3.6</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 06-sdk-and-wrap-up / Lesson 22</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The course concludes with three actionable recommendations — stay updated, experiment with customization, and automate via GitHub integration — serving as a synthesis of all five CCA exam domains covered across the entire course.</p>
+<hr />
+<p><img alt="Course Review Map" src="visuals/course-review-map.svg" /><br />
+<em>Figure: Course chapters mapped to CCA exam domains.</em></p>
+<h2>Instructor's Three Recommendations</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Recommendation</th>
+<th>What It Means</th>
+<th>Exam Domain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Stay Updated</strong></td>
+<td>Claude Code is in active development; new features, tools, and techniques are released frequently. Monitor the Claude Code homepage and changelog.</td>
+<td>D1 — Agentic Architecture (understanding evolving capabilities)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Experiment</strong></td>
+<td>Author custom commands, enrich <code>CLAUDE.md</code>, try MCP servers beyond the course. Build muscle memory through experimentation.</td>
+<td>D2 — Tool Use &amp; MCP, D3 — Configuration</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Automate</strong></td>
+<td>Use GitHub integration to delegate repetitive tasks. Think about what triggers (PR created, issue opened, <code>@claude</code> mention) can drive automation.</td>
+<td>D3 — CI/CD, D5 — Developer Productivity</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Course-to-Exam Domain Mapping</h2>
+<p>This is the most important review table for exam preparation. Each chapter maps to specific CCA domains:</p>
+<table>
+<thead>
+<tr>
+<th>Chapter</th>
+<th>Lessons</th>
+<th>Primary Domain</th>
+<th>Secondary Domain</th>
+<th>Key Concepts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01 — Intro</td>
+<td>02-04</td>
+<td>D1 — Agentic Architecture (27%)</td>
+<td>D5 — Developer Productivity (18%)</td>
+<td>Agentic loops, plan-execute-observe cycle, coding assistant vs autocomplete</td>
+</tr>
+<tr>
+<td>02 — Getting Started</td>
+<td>05-08</td>
+<td>D3 — Configuration (20%)</td>
+<td>D1 — Agentic Architecture (27%)</td>
+<td><code>CLAUDE.md</code>, project setup, context window, permission model, iterative changes</td>
+</tr>
+<tr>
+<td>03 — Context &amp; Commands</td>
+<td>10-11</td>
+<td>D3 — Configuration (20%)</td>
+<td>D2 — Tool Use &amp; MCP (20%)</td>
+<td>Context management, <code>@file</code> references, custom slash commands, <code>.claude/commands/</code></td>
+</tr>
+<tr>
+<td>04 — Integrations</td>
+<td>12-13</td>
+<td>D2 — Tool Use &amp; MCP (20%)</td>
+<td>D3 — Configuration (20%)</td>
+<td>MCP architecture (host/client/server), <code>settings.json</code>, GitHub Actions, <code>-p</code> flag, <code>allowed_tools</code></td>
+</tr>
+<tr>
+<td>05 — Hooks</td>
+<td>14-19</td>
+<td>D3 — Configuration (20%)</td>
+<td>D1 — Agentic Architecture (27%)</td>
+<td>Hook lifecycle (9 types), PreToolUse/PostToolUse, blocking vs non-blocking, stdin/stdout protocol</td>
+</tr>
+<tr>
+<td>06 — SDK &amp; Wrap Up</td>
+<td>20-22</td>
+<td>D1 — Agentic Architecture (27%)</td>
+<td>D4 — Security (15%)</td>
+<td>SDK programmatic access, <code>claudeClient.sendMessage()</code>, conversation turns array, synthesis</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Key Concepts Revision Table</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Chapter</th>
+<th>Domain</th>
+<th>One-Sentence Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agentic loop</td>
+<td>01</td>
+<td>D1</td>
+<td>Claude plans, executes tools, observes results, and iterates autonomously until the task is complete.</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>02</td>
+<td>D3</td>
+<td>Project-level instructions file that Claude reads automatically to understand project conventions and constraints.</td>
+</tr>
+<tr>
+<td>Permission model</td>
+<td>02</td>
+<td>D4</td>
+<td>Three tiers — project (<code>settings.json</code>), user (<code>settings.local.json</code>), enterprise (<code>settings.enterprise.json</code>) — with allowlists and denylists.</td>
+</tr>
+<tr>
+<td>Context window</td>
+<td>03</td>
+<td>D1</td>
+<td>Finite token budget; managed via <code>@file</code> references, <code>.claudeignore</code>, and compaction.</td>
+</tr>
+<tr>
+<td>Custom commands</td>
+<td>03</td>
+<td>D3</td>
+<td>Markdown files in <code>.claude/commands/</code> that define reusable slash commands with <code>$ARGUMENTS</code> interpolation.</td>
+</tr>
+<tr>
+<td>MCP architecture</td>
+<td>04</td>
+<td>D2</td>
+<td>Host (Claude Code) connects to MCP servers via stdio/SSE; servers expose tools, resources, and prompts.</td>
+</tr>
+<tr>
+<td><code>allowed_tools</code> in CI</td>
+<td>04</td>
+<td>D3/D4</td>
+<td>In non-interactive mode (<code>-p</code> flag), every tool must be individually listed — no blanket server permissions.</td>
+</tr>
+<tr>
+<td>Hooks</td>
+<td>05</td>
+<td>D3</td>
+<td>Scripts that execute at specific lifecycle points; 9 types, 2 blocking (PreToolUse, UserPromptSubmit).</td>
+</tr>
+<tr>
+<td>Hook stdin/stdout protocol</td>
+<td>05</td>
+<td>D3</td>
+<td>Hooks receive JSON on stdin, return JSON on stdout. Structure varies by hook type and tool matcher.</td>
+</tr>
+<tr>
+<td>SDK (<code>@anthropic-ai/claude-code</code>)</td>
+<td>06</td>
+<td>D1</td>
+<td>Node.js package for programmatic Claude Code access; returns conversation turns array, supports streaming.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA Exam Study Checklist</h2>
+<p>Use this checklist to verify you have covered every major topic from the course:</p>
+<h3>D1 — Agentic Architecture (27%)</h3>
+<ul>
+<li>[ ] Can explain the agentic loop (plan, execute, observe, iterate)</li>
+<li>[ ] Understand how Claude decides which tools to use</li>
+<li>[ ] Know the difference between agentic coding and autocomplete</li>
+<li>[ ] Can describe the SDK's programmatic interface (<code>sendMessage</code>, conversation turns)</li>
+<li>[ ] Understand subagent architecture (Task tool)</li>
+</ul>
+<h3>D2 — Tool Use &amp; MCP (20%)</h3>
+<ul>
+<li>[ ] Can describe MCP architecture: host, client, server</li>
+<li>[ ] Know the three MCP primitives: tools, resources, prompts</li>
+<li>[ ] Understand transport mechanisms: stdio and SSE</li>
+<li>[ ] Can configure MCP servers in <code>settings.json</code></li>
+<li>[ ] Know the difference between local and CI MCP permissions</li>
+</ul>
+<h3>D3 — Configuration &amp; Workflows (20%)</h3>
+<ul>
+<li>[ ] Can create and structure <code>CLAUDE.md</code> files (root, nested, <code>~/.claude/CLAUDE.md</code>)</li>
+<li>[ ] Know how to build custom commands in <code>.claude/commands/</code></li>
+<li>[ ] Understand the hook system: 9 types, blocking vs non-blocking</li>
+<li>[ ] Can configure GitHub Actions workflows for Claude Code</li>
+<li>[ ] Know the <code>custom_instructions</code>, <code>mcp_config</code>, <code>allowed_tools</code> configuration layers</li>
+</ul>
+<h3>D4 — Security &amp; Trust (15%)</h3>
+<ul>
+<li>[ ] Understand the three-tier permission model (project/user/enterprise)</li>
+<li>[ ] Know allowlist vs denylist behavior</li>
+<li>[ ] Can explain why CI requires explicit per-tool permissions</li>
+<li>[ ] Understand hook security implications (PreToolUse as access control)</li>
+</ul>
+<h3>D5 — Developer Productivity (18%)</h3>
+<ul>
+<li>[ ] Can identify when to use Claude Code vs traditional tools</li>
+<li>[ ] Know how to structure prompts for effective agentic execution</li>
+<li>[ ] Understand how automation (GitHub integration) reduces manual work</li>
+<li>[ ] Can evaluate the right level of customization (CLAUDE.md, commands, hooks, SDK)</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<h3>Card 1</h3>
+<p><strong>Q:</strong> What are the three transport mechanisms for MCP servers?<br />
+<strong>A:</strong> stdio (local process) and SSE (HTTP streaming). The course primarily covers stdio for local MCP servers and the GitHub Actions environment.</p>
+<h3>Card 2</h3>
+<p><strong>Q:</strong> What is the <code>-p</code> flag and when is it used?<br />
+<strong>A:</strong> The <code>-p</code> (print/pipe) flag runs Claude Code in non-interactive mode. Used in CI/CD (GitHub Actions). Requires <code>allowed_tools</code> to explicitly list every permitted tool since no human is available to approve.</p>
+<h3>Card 3</h3>
+<p><strong>Q:</strong> Name the two blocking hook types.<br />
+<strong>A:</strong> <code>PreToolUse</code> and <code>UserPromptSubmit</code>. These can prevent Claude from proceeding by returning <code>{ "decision": "block" }</code>.</p>
+<h3>Card 4</h3>
+<p><strong>Q:</strong> What are the three levels of <code>CLAUDE.md</code> configuration?<br />
+<strong>A:</strong> (1) Project root <code>CLAUDE.md</code>, (2) Nested directory <code>CLAUDE.md</code> files (scoped to subtree), (3) User-global <code>~/.claude/CLAUDE.md</code>.</p>
+<h3>Card 5</h3>
+<p><strong>Q:</strong> How does the SDK differ from the CLI?<br />
+<strong>A:</strong> The SDK (<code>@anthropic-ai/claude-code</code>) provides programmatic access via Node.js. You call <code>claudeClient.sendMessage()</code> and receive a conversation turns array. The CLI is interactive terminal use.</p>
+<h3>Card 6</h3>
+<p><strong>Q:</strong> What file structure do custom commands use?<br />
+<strong>A:</strong> Markdown files in <code>.claude/commands/</code> (project-scoped) or <code>~/.claude/commands/</code> (user-scoped). Invoked with <code>/command-name</code>. Support <code>$ARGUMENTS</code> placeholder for parameterization.</p>
+<h3>Card 7</h3>
+<p><strong>Q:</strong> In GitHub Actions, why can you not use <code>mcp__playwright</code> as a blanket permission?<br />
+<strong>A:</strong> In non-interactive mode (<code>-p</code> flag), there is no human to approve tool use. Every individual tool must be explicitly listed in <code>allowed_tools</code>. The blanket server-level permission only works in interactive (local) mode.</p>
+<h3>Card 8</h3>
+<p><strong>Q:</strong> What is the hook stdin/stdout protocol?<br />
+<strong>A:</strong> Hooks receive JSON on stdin with context about the event. They return JSON on stdout. For PreToolUse: return <code>{ "decision": "allow" }</code> or <code>{ "decision": "block", "reason": "..." }</code>. Structure varies by hook type.</p>
+<h3>Card 9</h3>
+<p><strong>Q:</strong> What three recommendations does the instructor give for continued learning?<br />
+<strong>A:</strong> (1) Stay updated — Claude Code is actively evolving. (2) Experiment — try custom commands, CLAUDE.md customization, new MCP servers. (3) Automate — use GitHub integration for repetitive tasks triggered by events.</p>
+<h3>Card 10</h3>
+<p><strong>Q:</strong> Which exam domain has the highest weight?<br />
+<strong>A:</strong> D1 — Agentic Architecture at 27%. It covers agentic loops, tool selection, SDK, and the fundamental plan-execute-observe cycle.</p>
+</body>
+</html>

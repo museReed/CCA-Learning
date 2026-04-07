@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11 Accessing Resources Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Accessing Resources — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP client implementation), 2.4 (resource consumption patterns), 2.5 (content type handling)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Client-side resource access uses <code>read_resource()</code> with <code>AnyUrl</code>, processes the <code>ReadResourceResult.contents</code> list, and branches on MIME type to parse JSON or return raw text.</p>
+<hr />
+<h2>The Client-Side Resource Pattern</h2>
+<p>While Lesson 10 covered how to define resources on the server, this lesson focuses on the client code that consumes those resources. The key function is <code>read_resource()</code>.</p>
+<h3>Core Implementation</h3>
+<pre class="highlight"><code class="language-python">import json
+from pydantic import AnyUrl
+
+async def read_resource(self, uri: str) -&gt; Any:
+    result = await self.session().read_resource(AnyUrl(uri))
+    resource = result.contents[0]
+
+    if isinstance(resource, types.TextResourceContents):
+        if resource.mimeType == &quot;application/json&quot;:
+            return json.loads(resource.text)
+
+    return resource.text
+</code></pre>
+
+<h3>Line-by-Line Breakdown</h3>
+<ol>
+<li><strong><code>AnyUrl(uri)</code></strong> — Pydantic's URL validator. Accepts any URI scheme (<code>docs://</code>, <code>file://</code>, custom schemes). Validates format at parse time.</li>
+<li><strong><code>result.contents[0]</code></strong> — The response has a <code>contents</code> list. We take the first element since a single resource request typically returns one item.</li>
+<li><strong><code>isinstance(resource, types.TextResourceContents)</code></strong> — Type check to confirm we have text content (vs. binary <code>BlobResourceContents</code>).</li>
+<li><strong>MIME type branch</strong> — If <code>application/json</code>, parse with <code>json.loads()</code>. Otherwise, return the raw <code>.text</code> string.</li>
+</ol>
+<hr />
+<h2>Response Structure Deep Dive</h2>
+<p>The <code>ReadResourceResult</code> returned by the server has this shape:</p>
+<pre class="highlight"><code>ReadResourceResult
+  └── contents: list[TextResourceContents | BlobResourceContents]
+        └── [0]
+              ├── uri: str
+              ├── mimeType: str
+              ├── text: str  (for TextResourceContents)
+              └── blob: bytes (for BlobResourceContents)
+</code></pre>
+
+<p>Key design decisions:<br />
+- <strong><code>contents</code> is a list</strong> — though typically one item, the protocol supports returning multiple content blocks<br />
+- <strong>Two content types</strong> — <code>TextResourceContents</code> for text-based data, <code>BlobResourceContents</code> for binary<br />
+- <strong>MIME type lives on the content object</strong> — not on the result wrapper, because each content block can have a different type</p>
+<hr />
+<h2>MIME Type Handling Strategy</h2>
+<p>A production-ready client should handle more MIME types than the minimal example:</p>
+<pre class="highlight"><code class="language-python">async def read_resource(self, uri: str) -&gt; Any:
+    result = await self.session().read_resource(AnyUrl(uri))
+    resource = result.contents[0]
+
+    if isinstance(resource, types.TextResourceContents):
+        mime = resource.mimeType or &quot;text/plain&quot;
+        if mime == &quot;application/json&quot;:
+            return json.loads(resource.text)
+        elif mime in (&quot;text/plain&quot;, &quot;text/markdown&quot;, &quot;text/html&quot;):
+            return resource.text
+        else:
+            return resource.text  # fallback for unknown text types
+
+    # BlobResourceContents for binary data
+    return resource.blob
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th>MIME Type</th>
+<th>Parse Strategy</th>
+<th>Return Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>application/json</code></td>
+<td><code>json.loads(resource.text)</code></td>
+<td><code>dict</code> or <code>list</code></td>
+</tr>
+<tr>
+<td><code>text/plain</code></td>
+<td><code>resource.text</code></td>
+<td><code>str</code></td>
+</tr>
+<tr>
+<td><code>text/markdown</code></td>
+<td><code>resource.text</code></td>
+<td><code>str</code></td>
+</tr>
+<tr>
+<td>Binary types</td>
+<td><code>resource.blob</code></td>
+<td><code>bytes</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The <code>@</code> Autocomplete UX Pattern</h2>
+<p>From the user's perspective, resource access powers the <code>@mention</code> workflow:</p>
+<ol>
+<li><strong>User types <code>@</code></strong> — client calls <code>list_resources()</code> to populate autocomplete dropdown</li>
+<li><strong>User navigates with arrow keys</strong> — selects desired resource from list</li>
+<li><strong>User presses space to confirm</strong> — client calls <code>read_resource(selected_uri)</code></li>
+<li><strong>Content injected into prompt</strong> — resource content becomes part of the prompt context, no tool call required</li>
+</ol>
+<p>This is fundamentally different from tools: the data is in the prompt <strong>before</strong> Claude starts reasoning, resulting in faster and more accurate responses.</p>
+<hr />
+<h2>Testing Resource Access</h2>
+<p>In the MCP Inspector:<br />
+1. Navigate to the <strong>Resources</strong> tab<br />
+2. Click a direct resource to read it immediately<br />
+3. For templated resources, fill in parameter values<br />
+4. Inspect the response structure: URI, MIME type, content</p>
+<p>In your CLI client:<br />
+1. Type <code>@</code> to trigger autocomplete<br />
+2. Select a resource<br />
+3. Verify the content appears in the prompt context<br />
+4. Confirm Claude can reference the content in its response</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Forgetting <code>AnyUrl()</code> wrapper</strong> — passing a raw string instead of wrapping it with Pydantic's <code>AnyUrl</code> will cause a type error</li>
+<li><strong>Not handling the <code>contents</code> list</strong> — accessing <code>result.text</code> directly instead of <code>result.contents[0].text</code></li>
+<li><strong>Missing JSON parsing</strong> — treating <code>application/json</code> content as raw text, leading to string-encoded JSON in the prompt</li>
+<li><strong>Ignoring binary resources</strong> — not handling <code>BlobResourceContents</code> for non-text data</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Resource content goes directly into the prompt — it is not processed through a tool call. This means the data is available to Claude as first-class context, reducing latency and avoiding the model needing to "ask" for information. For the CCA exam, remember: resources are <strong>app-controlled</strong> and inject context <strong>before</strong> model reasoning begins.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know the <code>read_resource()</code> pattern — <code>AnyUrl</code>, <code>contents[0]</code>, MIME type branching. This is testable implementation detail.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Understand that resources inject context into prompts without tool calls, which is more efficient for known data needs.</li>
+<li>Scenario questions may describe a feature where data "appears in the chat" or "is available without Claude asking" — this is resource access, not tool invocation.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What Pydantic type wraps the URI in <code>read_resource()</code>?</td>
+<td><code>AnyUrl</code> — it validates URI format and accepts any scheme (docs://, file://, etc.)</td>
+</tr>
+<tr>
+<td>How do you access the actual content from a <code>ReadResourceResult</code>?</td>
+<td><code>result.contents[0]</code> — the contents field is a list, take the first element</td>
+</tr>
+<tr>
+<td>How should a client handle <code>application/json</code> MIME type from a resource?</td>
+<td>Call <code>json.loads(resource.text)</code> to parse the JSON string into a Python dict/list</td>
+</tr>
+<tr>
+<td>What happens to resource content when a user selects an <code>@mention</code>?</td>
+<td>It is injected directly into the prompt context — no tool call is triggered</td>
+</tr>
+<tr>
+<td>What are the two content types in MCP resource responses?</td>
+<td><code>TextResourceContents</code> (for text/JSON data) and <code>BlobResourceContents</code> (for binary data)</td>
+</tr>
+<tr>
+<td>Why is resource access faster than tool-based data fetching?</td>
+<td>Resource data is in the prompt before Claude starts reasoning — no extra round-trip needed</td>
+</tr>
+<tr>
+<td>What triggers the autocomplete list in the <code>@mention</code> pattern?</td>
+<td>The client calls <code>list_resources()</code> when the user types <code>@</code></td>
+</tr>
+<tr>
+<td>What is the default fallback when MIME type is not <code>application/json</code>?</td>
+<td>Return <code>resource.text</code> as a raw string</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

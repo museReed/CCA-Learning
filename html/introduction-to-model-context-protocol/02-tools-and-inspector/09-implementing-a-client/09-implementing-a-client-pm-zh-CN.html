@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>09 Implementing A Client Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Implementing a Client — PM 战略概览</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.2 实现 MCP client-server 通信; T2.4 处理 tool discovery 和执行流程</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 02-tools-and-inspector / Lesson 09</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>MCP client 是你产品中的协调层，在用户、Claude 和外部服务之间协调——就像一位知道什么时候该问谁什么事的项目经理。</p>
+<hr />
+<h2>Client 就是项目经理</h2>
+<p>把 MCP client 想象成协调复杂请求的项目经理：</p>
+<ol>
+<li><strong>接收</strong> — 利益相关者（用户）提交请求</li>
+<li><strong>资源调查</strong> — PM 检查哪些团队（MCP server）可用及提供什么服务</li>
+<li><strong>专家咨询</strong> — PM 把请求和可用资源呈现给决策者（Claude）</li>
+<li><strong>委派</strong> — 决策者说"请数据团队拉这份报告"— PM 路由请求</li>
+<li><strong>交付</strong> — PM 收集结果带回给决策者做最终建议</li>
+<li><strong>响应</strong> — 决策者为利益相关者组成精炼的答案</li>
+</ol>
+<p>这六步模式是每个 MCP 驱动的产品交互的核心。</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+Client 是协调层，不是智能层。Claude 提供智能（决定做什么）。MCP server 提供能力（做事）。Client 连接它们。这个关注点分离是理解架构的关键。</p>
+</blockquote>
+<hr />
+<h2>两个核心操作</h2>
+<p>每个 MCP client 与 MCP server 只做两件事：</p>
+<h3>"你能做什么？"（Discovery）</h3>
+<p>在任何工作开始前，client 会问每个 MCP server 它提供什么 tools。这就像 PM 与新供应商的第一次会议——"让我看看你的服务目录。"</p>
+<p>响应是结构化的能力清单：tool 名称、描述，以及每个 tool 需要什么输入。这份目录传给 Claude 让它做出明智决策。</p>
+<h3>"请做这件事"（Execution）</h3>
+<p>当 Claude 决定使用 tool 时，client 接受 Claude 的具体请求并发送到正确的 MCP server。这就像 PM 发送详细的工作订单给供应商："用参数 Z 对数据集 Y 执行分析 X。"</p>
+<p>Server 做完工作返回结果，client 把结果传回 Claude 做解读。</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+这两个操作——discovery 和 execution——是 client 与 MCP 做的唯一的事。如果团队中有人描述更复杂的交互，他们可能是在描述多轮同样的两个操作。</p>
+</blockquote>
+<hr />
+<h2>五步产品流程</h2>
+<p>从产品角度，每次用户与 MCP 驱动的 tools 交互都遵循五个步骤：</p>
+<p><strong>步骤 1：发现能力</strong> — 你的产品检查有哪些 tools 可用。这自动且对用户不可见地发生。</p>
+<p><strong>步骤 2：向 Claude 呈现上下文</strong> — 你的产品把用户的问题连同 tool 目录发送给 Claude。Claude 同时看到用户要什么和它有什么 tools 可以用。</p>
+<p><strong>步骤 3：Claude 做决定</strong> — Claude 要么直接回答（如果不需要 tools）或决定用特定输入调用特定 tool。这是"AI 判断"步骤。</p>
+<p><strong>步骤 4：执行动作</strong> — 你的产品把 Claude 的 tool 请求发送到适当的 MCP server。Server 做工作——查询数据库、获取文件、跑计算。</p>
+<p><strong>步骤 5：交付答案</strong> — 你的产品把 tool 结果送回 Claude，它为用户组成自然语言响应。</p>
+<p>用户看不到这些复杂性。他们问问题然后得到答案。五个步骤在毫秒到秒内完成。</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+步骤 3 是产品质量胜负的关键。Claude 选择正确 tool 的能力取决于 tool 描述的质量（来自 server）和用户问题的清晰度。两者都是产品设计关切。</p>
+</blockquote>
+<hr />
+<h2>双调用模式</h2>
+<p>一个微妙但重要的方面：每次使用 tool 的交互中，产品会对 Claude 做两次独立调用。</p>
+<p><strong>第一次调用</strong>："用户问 X。这些是可用 tools。你想怎么做？"<br />
+<strong>Claude 响应</strong>："我想用输入 Z 调用 tool Y。"</p>
+<p><strong>第二次调用</strong>："Tool Y 返回了这些结果。现在请回答用户的原始问题。"<br />
+<strong>Claude 响应</strong>："根据数据，答案是..."</p>
+<p>这个双调用模式有产品影响：</p>
+<ul>
+<li><strong>延迟</strong>：涉及 tools 时两次 API 调用意味着更长的响应时间</li>
+<li><strong>成本</strong>：每次交互两次 Claude API 调用（对定价模型很重要）</li>
+<li><strong>质量</strong>：第二次调用受益于具体数据，常常产生比仅第一次调用更好的响应</li>
+</ul>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+估算产品的响应时间和 API 成本时，记住使用 tool 的交互需要两次 Claude API 调用。不使用 tool 的交互只需一次。你的产品中这两种类型的混合比例决定整体性能和成本。</p>
+</blockquote>
+<hr />
+<h2>产品团队应理解的错误场景</h2>
+<p>四种类型的失败可能发生，每种对用户端有不同影响：</p>
+<ol>
+<li><strong>Tool 找不到</strong> — Claude 请求的 tool 不存在。通常是配置问题。</li>
+<li><strong>无效输入</strong> — Claude 发送了错误类型的数据给 tool。通常是 tool 描述清晰度问题。</li>
+<li><strong>Server 错误</strong> — MCP server 或外部服务失败。基础设施问题。</li>
+<li><strong>传输错误</strong> — Client 和 server 之间的连接中断。网络问题。</li>
+</ol>
+<p>每种需要不同的错误处理和不同的用户消息。</p>
+<hr />
+<h2>CCA 考试关联性</h2>
+<p>本课完成 <strong>Domain 2 (18%)</strong>：</p>
+<ul>
+<li>Client 使用两个 SDK 类：Client（连接）和 ClientSession（通信）</li>
+<li>两个核心方法：<code>list_tools()</code> 和 <code>call_tool()</code></li>
+<li>从 discovery 到最终响应的五步 agentic 流程</li>
+<li>双调用模式（每次使用 tool 的交互两次 Claude API 调用）</li>
+<li>错误处理：检查 <code>result.isError</code> 捕获 tool 级别失败</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用商业语言描述 MCP client 的角色是什么？</td>
+<td>它是协调层——就像一位调查可用资源、向决策者（Claude）呈现选项、路由执行请求的项目经理。</td>
+</tr>
+<tr>
+<td>MCP client 与 MCP server 只做哪两个操作？</td>
+<td>Discovery（问有哪些 tools 可用）和 Execution（用特定输入调用特定 tool）。</td>
+</tr>
+<tr>
+<td>MCP 产品流程的五个步骤是什么？</td>
+<td>1) 发现能力, 2) 向 Claude 呈现上下文, 3) Claude 做决定, 4) 执行动作, 5) 交付答案。</td>
+</tr>
+<tr>
+<td>为什么使用 tool 的交互需要两次 Claude API 调用？</td>
+<td>第一次：Claude 收到查询和 tools，决定做什么。第二次：Claude 收到 tool 结果，组成最终响应。</td>
+</tr>
+<tr>
+<td>双调用模式的成本影响是什么？</td>
+<td>每次使用 tool 的交互花费两次 Claude API 调用而非一次，影响定价模型和使用量预估。</td>
+</tr>
+<tr>
+<td>五步流程中哪一步决定产品质量？</td>
+<td>步骤 3（Claude 的决定）——取决于 tool 描述质量和用户问题清晰度，两者都是产品设计关切。</td>
+</tr>
+<tr>
+<td>MCP client 有哪四种错误类型？</td>
+<td>Tool 找不到（配置）、无效输入（描述清晰度）、Server 错误（基础设施）、传输错误（网络）。</td>
+</tr>
+<tr>
+<td>用户在五步 MCP 流程中体验到什么？</td>
+<td>什么也没有。他们问问题然后得到答案。所有五步透明地在毫秒到秒内发生。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 Roots Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Roots — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (MCP security model), 2.3 (MCP server capabilities)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / Lesson 07</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Roots 授予 MCP server 存取特定檔案和目錄的權限，解決檔案路徑探索問題，同時提供安全邊界限制 server 可存取的範圍。</p>
+<hr />
+<p><img alt="Roots Access" src="visuals/roots-access-zh-TW.svg" /></p>
+<h2>Roots 解決的問題</h2>
+<p>沒有 roots 時，處理檔案的 MCP server 面臨根本性問題：<strong>它怎麼知道該去哪裡找？</strong></p>
+<ul>
+<li>Claude 無法搜尋整個檔案系統</li>
+<li>使用者不應該需要輸入完整路徑如 <code>/Users/reed/Documents/project/src/main.py</code></li>
+<li>Server 對使用者的工作空間毫無概念</li>
+</ul>
+<p>Roots 透過給 server 一份核准的起始目錄清單來解決問題。</p>
+<hr />
+<h2>Roots 如何運作</h2>
+<p>流程很直觀：</p>
+<pre class="highlight"><code>Client                     Server
+  |                          |
+  |-- list_roots() ---------&gt;|  (server 問：「我能存取什麼？」)
+  |&lt;-- [Root(&quot;/projects&quot;),   |
+  |     Root(&quot;/data&quot;)]  -----|  (client 答：「這些目錄」)
+  |                          |
+  |                          |-- read_dir(&quot;/projects&quot;) --&gt;
+  |                          |-- 找到目標檔案 -----------&gt;
+  |                          |-- 對檔案使用 tool --------&gt;
+</code></pre>
+
+<ol>
+<li>Server 呼叫 <code>list_roots()</code> 探索核准的目錄</li>
+<li>Server 讀取這些目錄尋找檔案</li>
+<li>Server 只在 root 邊界內操作</li>
+</ol>
+<hr />
+<h2>Server 端：使用 Roots</h2>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def find_and_read(ctx: Context, filename: str) -&gt; str:
+    # 步驟 1：取得核准的 roots
+    roots = await ctx.session.list_roots()
+
+    # 步驟 2：在 roots 內搜尋
+    for root in roots:
+        root_path = Path(root.uri.replace(&quot;file://&quot;, &quot;&quot;))
+        for path in root_path.rglob(filename):
+            if path.is_file():
+                return path.read_text()
+
+    return f&quot;File '{filename}' not found in any root&quot;
+</code></pre>
+
+<p>重點：<br />
+- Roots 以 URI 格式回傳（如 <code>file:///Users/reed/project</code>）<br />
+- Server 必須將 URI 轉換為檔案系統路徑<br />
+- <code>rglob()</code> 在每個 root 內遞迴搜尋</p>
+<hr />
+<h2>Client 端：宣告 Roots</h2>
+<p>Client 定義 server 可以存取哪些目錄：</p>
+<pre class="highlight"><code class="language-python">from mcp import Root
+
+roots = [
+    Root(uri=&quot;file:///Users/reed/projects/my-app&quot;, name=&quot;My App&quot;),
+    Root(uri=&quot;file:///Users/reed/data&quot;, name=&quot;Data Directory&quot;),
+]
+
+# Roots 在 client session 設定時提供
+async with ClientSession(read, write) as session:
+    await session.initialize()
+    # Client 透過 list_roots handler 暴露 roots
+</code></pre>
+
+<p>Client 完全控制暴露什麼 — 這是安全特性。</p>
+<hr />
+<h2>安全性：SDK 不會自動強制執行</h2>
+<p>這是考試最關鍵的重點：</p>
+<p><strong>MCP SDK 不會自動強制 root 邊界。</strong> Server 收到 root 清單，但沒有任何機制阻止它存取那些 roots 之外的檔案。你必須自己實作強制執行：</p>
+<pre class="highlight"><code class="language-python">def is_path_allowed(file_path: str, roots: list[Root]) -&gt; bool:
+    &quot;&quot;&quot;檢查路徑是否在核准的 root 內。&quot;&quot;&quot;
+    target = Path(file_path).resolve()
+    for root in roots:
+        root_path = Path(root.uri.replace(&quot;file://&quot;, &quot;&quot;)).resolve()
+        if target.is_relative_to(root_path):
+            return True
+    return False
+
+@mcp.tool()
+async def safe_read(ctx: Context, file_path: str) -&gt; str:
+    roots = await ctx.session.list_roots()
+
+    if not is_path_allowed(file_path, roots):
+        raise PermissionError(f&quot;Access denied: {file_path} is outside approved roots&quot;)
+
+    return Path(file_path).read_text()
+</code></pre>
+
+<p>務必使用 <code>.resolve()</code> 防止 path traversal 攻擊（如 <code>../../etc/passwd</code>）。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Roots 是 <strong>慣例</strong>，不是 sandbox。SDK 提供探索核准目錄的機制，但 server 開發者必須自己實作存取控制。這是常考題 — 答案永遠是「自己實作 <code>is_path_allowed()</code>」。</p>
+</blockquote>
+<hr />
+<h2>Roots 的好處</h2>
+<table>
+<thead>
+<tr>
+<th>好處</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>使用者友善</strong></td>
+<td>使用者說「看我的專案」而不是打完整路徑</td>
+</tr>
+<tr>
+<td><strong>聚焦搜尋</strong></td>
+<td>Server 搜尋特定目錄，非整個檔案系統</td>
+</tr>
+<tr>
+<td><strong>安全邊界</strong></td>
+<td>限制 server 應存取的範圍（有強制時）</td>
+</tr>
+<tr>
+<td><strong>彈性</strong></td>
+<td>Client 可動態新增/移除 roots</td>
+</tr>
+<tr>
+<td><strong>多專案支援</strong></td>
+<td>多個 roots 可指向不同專案</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Path Traversal 防護</h2>
+<p>實作 <code>is_path_allowed()</code> 時，處理這些攻擊向量：</p>
+<pre class="highlight"><code class="language-python"># 需防範的危險輸入：
+&quot;../../../etc/passwd&quot;           # 相對路徑逃脫
+&quot;/Users/reed/projects/../.ssh&quot;  # 路徑中段穿越
+&quot;./symlink_to_root&quot;             # Symlink 逃脫
+
+# 防禦：永遠先解析為絕對路徑
+target = Path(file_path).resolve()  # 解析 symlinks 和 ..
+</code></pre>
+
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.2</strong>：MCP 安全模型 — roots 是主要的檔案系統安全機制</li>
+<li><strong>D2 Task 2.3</strong>：Server capabilities — <code>list_roots()</code> 是基礎功能</li>
+<li>預期考題關於 enforcement — 答案永遠是「SDK 不自動強制，需手動實作」</li>
+<li>Path traversal 防護是常見情境題</li>
+<li>核心考試哲學：<strong>Validation &gt; Trust</strong> — 不要假設 server 會自律</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP roots 解決什麼問題？</td>
+<td>檔案路徑探索 — 給 server 核准的起始目錄，而非搜尋整個檔案系統</td>
+</tr>
+<tr>
+<td>MCP SDK 會自動強制 root 邊界嗎？</td>
+<td>不會 — server 收到 root 清單但必須手動實作 <code>is_path_allowed()</code> 強制執行</td>
+</tr>
+<tr>
+<td>Server 呼叫什麼方法探索核准目錄？</td>
+<td><code>ctx.session.list_roots()</code></td>
+</tr>
+<tr>
+<td>Roots 以什麼格式回傳？</td>
+<td>URI（如 <code>file:///Users/reed/project</code>）</td>
+</tr>
+<tr>
+<td>為什麼檢查路徑時必須呼叫 <code>.resolve()</code>？</td>
+<td>防止使用 <code>..</code> 或 symlink 的 path traversal 攻擊</td>
+</tr>
+<tr>
+<td>誰控制暴露哪些 roots？</td>
+<td>Client — 在 session 設定時定義 root 清單</td>
+</tr>
+<tr>
+<td>Roots 可以動態變更嗎？</td>
+<td>可以 — client 可在 session 期間新增或移除 roots</td>
+</tr>
+<tr>
+<td>Roots 背後的安全哲學是什麼？</td>
+<td>慣例而非 sandbox — 機制存在但 enforcement 是開發者的責任</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

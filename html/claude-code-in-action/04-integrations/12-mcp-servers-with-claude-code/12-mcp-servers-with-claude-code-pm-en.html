@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 Mcp Servers With Claude Code Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>MCP Servers with Claude Code — PM Perspective</h1>
+<p><img alt="Mcp Server Ecosystem Taxonomy" src="visuals/mcp-server-ecosystem-taxonomy.svg" /><br />
+<em>Figure: MCP server ecosystem taxonomy.</em></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D2 — Tool Use &amp; Integration (18% of exam)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 ★★★ (MCP integration), 2.1 ★★ (tool interfaces), 2.3 ★★ (tool distribution)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 04-integrations / Lesson 12</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><img alt="Mcp Plugin Architecture Flow" src="visuals/mcp-plugin-architecture-flow.svg" /><br />
+<em>Figure: MCP plugin architecture flow.</em></p>
+<p><img alt="Mcp Architecture" src="visuals/mcp-architecture.svg" /><br />
+<em>Figure: MCP server architecture — Claude Code ↔ Protocol ↔ Servers ↔ External Systems.</em></p>
+<h2>TL;DR</h2>
+<p>MCP servers are Claude Code's plugin system. They let you extend what Claude can do — browse the web, query databases, interact with APIs — without changing Claude Code itself. For PMs, the key insight is that MCP servers turn "Claude cannot do X" into "Claude can do X" at an architectural level. This is fundamentally different from prompt engineering, which only works within Claude's existing capabilities.</p>
+<hr />
+<h2>Why PMs Need to Understand MCP Servers</h2>
+<ol>
+<li><strong>Scoping product capabilities</strong> — Knowing what MCP servers exist tells you what Claude-powered features are feasible</li>
+<li><strong>Build vs. configure decisions</strong> — Many capabilities are available as MCP servers already; no custom development needed</li>
+<li><strong>Security and permission governance</strong> — MCP servers require explicit permission management, which affects your risk assessment</li>
+<li><strong>CI/CD implications</strong> — MCP servers in automated pipelines need different permission configurations than local development</li>
+</ol>
+<hr />
+<h2>Mental Model: App Store for AI Tools</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>App Store Analogy</th>
+<th>MCP Server Reality</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Core product</td>
+<td>iPhone out of the box</td>
+<td>Claude Code's built-in tools (Read, Write, Bash, etc.)</td>
+</tr>
+<tr>
+<td>Extension</td>
+<td>Installing an app</td>
+<td>Adding an MCP server</td>
+</tr>
+<tr>
+<td>Permission</td>
+<td>"Allow Camera access?"</td>
+<td>"Allow mcp__playwright tools?"</td>
+</tr>
+<tr>
+<td>Ecosystem</td>
+<td>App Store catalog</td>
+<td>MCP server registry</td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td>App settings</td>
+<td><code>.claude/settings.local.json</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>Core Exam Philosophy (PMs must remember)</strong></p>
+<ul>
+<li><strong>Architecture &gt; Prompt</strong> — If Claude needs a capability, give it a tool (MCP server). Do not try to prompt it into doing something it structurally cannot do.</li>
+<li><strong>Explicit Permissions &gt; Blanket Access</strong> — Especially in CI/CD, each tool must be individually allowed.</li>
+</ul>
+</blockquote>
+<hr />
+<h2>Product Scenario Walkthrough</h2>
+<h3>Scenario: Improving UI Component Generation</h3>
+<p>Your team uses an AI-powered component generator. The generated components look generic — lots of purple-to-blue gradients and standard Tailwind patterns. The product goal is to produce more creative, distinctive components.</p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Implementation</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt engineering only</td>
+<td>Add "be more creative" to the generation prompt</td>
+<td>Marginal improvement — Claude has no visual feedback</td>
+</tr>
+<tr>
+<td>MCP + visual feedback loop</td>
+<td>Install Playwright MCP → Claude generates component → Claude opens browser to see result → Claude updates prompt based on visual evaluation</td>
+<td>Significant improvement — Claude iterates based on actual visual output</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Decision Framework</strong></p>
+<p>Ask yourself: "Does this require Claude to perceive or interact with something outside its context window?"<br />
+- Yes → You need an MCP server (architectural solution)<br />
+- No → Prompt engineering may suffice</p>
+</blockquote>
+<hr />
+<h2>Business Impact of MCP Servers</h2>
+<table>
+<thead>
+<tr>
+<th>Impact Area</th>
+<th>Without MCP</th>
+<th>With MCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Visual QA</td>
+<td>Manual review by humans</td>
+<td>Claude verifies UI automatically via Playwright</td>
+</tr>
+<tr>
+<td>Database operations</td>
+<td>Copy-paste query results into Claude</td>
+<td>Claude queries DB directly</td>
+</tr>
+<tr>
+<td>API testing</td>
+<td>Manual endpoint testing</td>
+<td>Claude tests endpoints and validates responses</td>
+</tr>
+<tr>
+<td>Development velocity</td>
+<td>Claude generates code blindly</td>
+<td>Claude generates, verifies, and iterates autonomously</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Permission Governance</h2>
+<p>MCP servers have a permission model that PMs should understand for risk assessment:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Location</th>
+<th>Who Controls</th>
+<th>Security Level</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local allow-all</td>
+<td><code>.claude/settings.local.json</code></td>
+<td>Individual developer</td>
+<td>Low — convenient for dev</td>
+</tr>
+<tr>
+<td>Project shared</td>
+<td><code>.claude/settings.json</code></td>
+<td>Team / Tech Lead</td>
+<td>Medium — team standard</td>
+</tr>
+<tr>
+<td>CI/CD explicit</td>
+<td>GitHub Actions workflow file</td>
+<td>DevOps / Team</td>
+<td><strong>High — each tool listed individually</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Takeaway</strong></p>
+<p>In production/CI contexts, MCP tool permissions must be explicitly listed one by one. There is no blanket "allow all tools from this server" shortcut. This is a deliberate security design — include it in your risk assessment.</p>
+</blockquote>
+<hr />
+<h2>Instructor Insights (From the Video)</h2>
+<ol>
+<li><strong>Visual feedback changes everything</strong> — The instructor was genuinely surprised by the quality improvement when Claude could see actual UI output. This suggests that visual verification capabilities should be a standard part of any UI-focused AI workflow.</li>
+<li><strong>MCP servers are the extensibility story</strong> — The instructor positions MCP as the primary way to extend Claude Code. If your product roadmap includes AI capabilities that Claude does not have out of the box, MCP servers are the answer.</li>
+<li><strong>Ecosystem is growing rapidly</strong> — The instructor recommends exploring MCP servers that align with your specific project needs, suggesting the ecosystem is mature enough for production use.</li>
+</ol>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Question 1: Developer Productivity Scenario</h3>
+<p>Your team wants Claude Code to verify that generated UI components match the design specification. Currently, developers manually compare screenshots. What would you recommend?</p>
+<ul>
+<li>A. Add the design specification to CLAUDE.md so Claude knows what to aim for</li>
+<li>B. Install the Playwright MCP server so Claude can open a browser and visually compare generated components against the spec</li>
+<li>C. Create a PostToolUse hook that runs visual regression tests after every file write</li>
+<li>D. Have developers paste screenshots into Claude Code conversations for review</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — The Playwright MCP server gives Claude actual browser access to see and evaluate UI output. This creates an automated visual feedback loop.
+
+- A gives Claude knowledge but no visual perception capability
+- C could work for automated testing but requires pre-existing test infrastructure
+- D works but is manual and breaks the automation benefit
+
+**PM Key Takeaway**: When the gap is "Claude cannot perceive something," the solution is an MCP server that gives it that perception — not a prompt that describes what it should perceive.
+</details>
+
+<h3>Question 2: Code Generation Scenario</h3>
+<p>A PM is scoping an AI-powered feature that needs Claude to interact with a PostgreSQL database. The engineer says "we can just tell Claude the schema and have it write queries." What is the better approach?</p>
+<ul>
+<li>A. The engineer's approach is correct — providing schema context in the prompt is sufficient</li>
+<li>B. Install a PostgreSQL MCP server so Claude can directly query and validate against the live database</li>
+<li>C. Create a custom tool that wraps database queries and expose it via the Agent SDK</li>
+<li>D. Both B and C are valid, depending on whether this is Claude Code or an Agent SDK application</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**D** — For Claude Code workflows, a PostgreSQL MCP server (B) is the right approach. For Agent SDK applications, a custom tool (C) is the right approach. The key principle is the same: give Claude structural access to the database, do not rely on schema knowledge in prompts alone.
+
+**PM Key Takeaway**: The engineer's "just tell Claude" approach (A) is the classic prompt-over-architecture anti-pattern. Always prefer giving Claude real tools over describing capabilities in prompts.
+</details>
+</body>
+</html>

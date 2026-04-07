@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 Streamablehttp In Depth Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>StreamableHTTP In Depth — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (MCP transport 选择), 2.4 (远程 server 配置), 2.5 (SSE streaming 模式)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 03-transports / Lesson 13</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>SSE（Server-Sent Events）是部分恢复 HTTP 上 server-to-client 通信的 workaround，使用双连接架构 — primary SSE 处理 server-initiated 消息，per-tool SSE stream 处理特定调用的结果。</p>
+<hr />
+<p><img alt="Streamable Http Sse" src="visuals/streamable-http-sse-zh-TW.svg" /></p>
+<h2>SSE 解决什么问题</h2>
+<p>HTTP 只能由 client 发起。但 MCP 需要 server 推送消息（progress、log、sampling request）。<strong>SSE</strong> 翻转了这个限制：client 开启一个持久连接，server 随时可以通过该连接推送事件。</p>
+<pre class="highlight"><code>传统 HTTP：
+  Client ──request──→ Server
+  Client ←──response── Server
+  （server 无法发起）
+
+使用 SSE：
+  Client ──GET /sse──→ Server
+  Client ←──event 1─── Server  （server 随时推送）
+  Client ←──event 2─── Server
+  Client ←──event 3─── Server
+  ...
+</code></pre>
+
+<hr />
+<h2>连接建立顺序</h2>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>动作</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Client 发送 Initialize Request</td>
+<td>POST 到 server</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Server 返回 Initialize Result + <strong>session ID</strong></td>
+<td>Session ID 追踪此 client</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Client 发送 Initialized Notification</td>
+<td>带 session ID 的 POST</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Client 开启 SSE 连接</td>
+<td><strong>GET request</strong> — 保持开启接收 server-initiated 消息</td>
+</tr>
+</tbody>
+</table>
+<p>Session ID 至关重要 — 它将 GET SSE 连接与同一 client 的 POST 请求链接起来。</p>
+<pre class="highlight"><code class="language-python"># 步骤 1-3：正常 handshake
+session_id = initialize_handshake(server_url)
+
+# 步骤 4：开启持久 SSE 连接
+sse_stream = requests.get(f&quot;{server_url}/sse&quot;,
+    headers={&quot;Mcp-Session-Id&quot;: session_id},
+    stream=True
+)
+</code></pre>
+
+<hr />
+<h2>双 SSE 架构</h2>
+<p>这是核心架构概念。有<strong>两种</strong> SSE 连接：</p>
+<h3>1. Primary SSE 连接（GET）</h3>
+<ul>
+<li>初始化后开启一次</li>
+<li><strong>全 session 保持开启</strong></li>
+<li>传输 <strong>server-initiated 消息</strong>：sampling request、root list request</li>
+<li>把它想成「通用通知频道」</li>
+</ul>
+<h3>2. Tool-Specific SSE 连接（POST）</h3>
+<ul>
+<li>为<strong>每次 tool call</strong> 创建</li>
+<li>Tool call 完成时<strong>自动关闭</strong></li>
+<li>传输 <strong>tool 专属消息</strong>：progress 更新、log 条目、最终结果</li>
+<li>把它想成「per-task 频道」</li>
+</ul>
+<pre class="highlight"><code>Client                          Server
+  │                               │
+  │──── GET /sse ────────────────→│  （Primary SSE — 保持开启）
+  │←─── server-initiated msgs ───│
+  │                               │
+  │──── POST /tools/call ────────→│  （Tool SSE — 自动关闭）
+  │←─── progress, logs, result ──│
+  │                               │
+  │──── POST /tools/call ────────→│  （另一个 Tool SSE）
+  │←─── progress, logs, result ──│
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+双 SSE 设计意味着 server 可以通过 tool SSE 推送特定 tool call 的 progress，<strong>同时</strong>通过 primary SSE 推送无关的 server-initiated request。它们是独立的频道。</p>
+</blockquote>
+<hr />
+<h2>消息路由规则</h2>
+<p>理解哪些消息走哪个频道是考试关键：</p>
+<table>
+<thead>
+<tr>
+<th>消息类型</th>
+<th>SSE 频道</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Progress notification</td>
+<td>Tool-specific SSE</td>
+<td>绑定到特定 tool call</td>
+</tr>
+<tr>
+<td>Log 消息</td>
+<td>Tool-specific SSE</td>
+<td>在 tool 执行期间产生</td>
+</tr>
+<tr>
+<td>Tool 结果</td>
+<td>Tool-specific SSE</td>
+<td>该次调用的最终答案</td>
+</tr>
+<tr>
+<td>CreateMessage（sampling）</td>
+<td>Primary SSE</td>
+<td>Server-initiated，不绑定 tool call</td>
+</tr>
+<tr>
+<td>ListRoots</td>
+<td>Primary SSE</td>
+<td>Server-initiated，不绑定 tool call</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>什么会破坏 SSE 机制</h2>
+<p>Lesson 12 的两个配置标志直接影响 SSE：</p>
+<table>
+<thead>
+<tr>
+<th>标志</th>
+<th>对 SSE 的影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stateless_http=true</code></td>
+<td>无 session ID → 无 primary SSE 连接 → 无 server-initiated 消息</td>
+</tr>
+<tr>
+<td><code>json_response=true</code></td>
+<td>完全无 streaming → tool call 只返回最终 JSON → 执行期间无 progress/log</td>
+</tr>
+</tbody>
+</table>
+<p>两个标志都启用 = SSE 完全停用。回到基本 HTTP request-response。</p>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>SSE 架构题</strong>：知道双连接模型 — primary（持久、server-initiated）vs tool-specific（per-call、自动关闭）。</li>
+<li><strong>消息路由</strong>：Progress 和 log 走 tool SSE。Sampling 和 roots 走 primary SSE。</li>
+<li><strong>标志影响</strong>：<code>stateless_http</code> 杀死 primary SSE。<code>json_response</code> 杀死所有 streaming。</li>
+<li><strong>Session ID</strong>：链接 GET 和 POST 连接。没有它，server 无法关联请求。</li>
+<li>考试哲学：<strong>SSE 是 workaround，不是完整解决方案</strong> — 它只是部分恢复 server→client 通信。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SSE 在 MCP 中解决什么问题？</td>
+<td>HTTP server 无法主动通信 — SSE 提供持久连接让 server 推送事件</td>
+</tr>
+<tr>
+<td>两种 SSE 连接类型是什么？</td>
+<td>Primary SSE（GET、保持开启、server-initiated 消息）和 Tool-specific SSE（POST、per-call、自动关闭）</td>
+</tr>
+<tr>
+<td>Progress notification 路由到哪里？</td>
+<td>Tool-specific SSE 连接（绑定到特定 tool call）</td>
+</tr>
+<tr>
+<td>Sampling（CreateMessage）request 路由到哪里？</td>
+<td>Primary SSE 连接（server-initiated，不绑定任何 tool call）</td>
+</tr>
+<tr>
+<td>Session ID 的作用是什么？</td>
+<td>将持久 GET SSE 连接与同一 client 的 POST 请求链接起来</td>
+</tr>
+<tr>
+<td><code>stateless_http=true</code> 会怎样？</td>
+<td>无 session ID、无 primary SSE 连接、无 server-initiated 消息</td>
+</tr>
+<tr>
+<td><code>json_response=true</code> 会怎样？</td>
+<td>完全无 SSE streaming — 只返回最终 JSON 结果</td>
+</tr>
+<tr>
+<td>SSE 的建立顺序是？</td>
+<td>Initialize Request → Initialize Result（获取 session ID）→ Initialized Notification → GET request 开启 primary SSE</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

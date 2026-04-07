@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>17 Gotchas Around Hooks Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Hooks 的注意事項 — PM 觀點</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試範圍</td>
+<td>D3 — Claude Code Configuration &amp; Workflows（佔考試 20%）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks)</td>
+</tr>
+<tr>
+<td>課程來源</td>
+<td>claude-code-in-action / 05-hooks / Lesson 17（純文字課）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>重點摘要</h2>
+<p>Hook 腳本應使用絕對檔案路徑以確保安全，但絕對路徑是機器特定的，跨團隊共享時會壞掉。解法是模板檔案（<code>settings.example.json</code>）搭配佔位符，由自動化 setup script 轉換為機器特定的絕對路徑。PM 需要理解這一點，因為它影響新人入職、CI/CD 配置和安全合規。</p>
+<hr />
+<h2>PM 為何需要關注</h2>
+<ol>
+<li><strong>安全審計</strong> — 若組織要求安全審查，相對路徑的 hook command 會被標記</li>
+<li><strong>開發者入職</strong> — 新團隊成員需要執行 setup 步驟才能讓 hook 運作</li>
+<li><strong>CI/CD pipeline</strong> — 自動化環境中的 hook 需要機器特定配置</li>
+<li><strong>團隊一致性</strong> — 沒有模板模式，hook 可能在某些機器上靜默失敗</li>
+</ol>
+<hr />
+<h2>心智模型：辦公大樓門禁卡</h2>
+<table>
+<thead>
+<tr>
+<th>面向</th>
+<th>門禁卡系統</th>
+<th>Hook 配置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>安全需求</td>
+<td>掃描器必須連到確切的安全伺服器</td>
+<td>Hook 必須指向確切的腳本檔（絕對路徑）</td>
+</tr>
+<tr>
+<td>可攜問題</td>
+<td>每棟大樓安全伺服器在不同地址</td>
+<td>每台開發機器檔案在不同路徑</td>
+</tr>
+<tr>
+<td>解法</td>
+<td>模板卡配置 + 大樓特定 setup</td>
+<td>模板設定檔 + 機器特定 init script</td>
+</tr>
+<tr>
+<td>入職</td>
+<td>新員工在自己大樓啟用卡片</td>
+<td>新開發者在機器上執行 <code>npm run setup</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM 重點</strong></p>
+<p>絕對路徑 = 更高安全性，但需要自動化 setup 步驟。如果你的 PRD 要求 hook，在部署計畫中包含「新開發者入職需要 setup 步驟」。</p>
+</blockquote>
+<hr />
+<h2>工程師會看到的兩個檔案</h2>
+<p><img alt="Security vs Portability" src="visuals/security-portability-tradeoff-zh-TW.svg" /><br />
+<em>圖：安全性與可攜性的取捨 — 絕對路徑安全但綁定機器；Template + init script 可兩全其美。</em></p>
+<table>
+<thead>
+<tr>
+<th>檔案</th>
+<th>誰建立</th>
+<th>在 Git？</th>
+<th>包含 Hook？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>settings.json</code></td>
+<td>Team lead，commit</td>
+<td><strong>是</strong></td>
+<td>一般設定（無機器特定路徑）</td>
+</tr>
+<tr>
+<td><code>settings.local.json</code></td>
+<td>Setup script 自動生成</td>
+<td><strong>否</strong></td>
+<td>帶絕對路徑的 Hook command</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>PM 治理備註</strong></p>
+<p>如果合規 hook 只在 <code>settings.local.json</code>，它取決於每個開發者是否執行了 setup script。將此包含在入職檢查清單中。</p>
+</blockquote>
+<hr />
+<h2>PM 應知道的安全概念</h2>
+<table>
+<thead>
+<tr>
+<th>攻擊</th>
+<th>商業風險</th>
+<th>預防</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Path interception</strong></td>
+<td>惡意程式碼取代了預期的 hook 腳本執行</td>
+<td>絕對路徑繞過目錄搜尋</td>
+</tr>
+<tr>
+<td><strong>Binary planting</strong></td>
+<td>攻擊者在專案目錄放入假冒腳本</td>
+<td>絕對路徑忽略同名本地檔案</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>入職影響</h2>
+<table>
+<thead>
+<tr>
+<th>發生什麼</th>
+<th>影響</th>
+<th>修正</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>settings.local.json</code> 不存在</td>
+<td>沒有 hook 啟用</td>
+<td>執行 <code>npm run setup</code></td>
+</tr>
+<tr>
+<td>直接複製 <code>settings.example.json</code></td>
+<td><code>$PWD</code> 佔位符殘留 — hook 靜默失敗</td>
+<td>正確執行 init script</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM 行動項目</strong></p>
+<p>在團隊入職文件中加入「執行專案 setup script」。透過請 Claude 讀取受保護檔案來驗證 hook 是否啟用。</p>
+</blockquote>
+<hr />
+<h2>反模式（考試常考）</h2>
+<table>
+<thead>
+<tr>
+<th>❌ 錯誤做法</th>
+<th>✅ 正確做法</th>
+<th>為什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>為方便允許相對路徑</td>
+<td>為安全要求絕對路徑</td>
+<td>安全審計會標記相對路徑</td>
+</tr>
+<tr>
+<td>Commit 機器特定設定到 git</td>
+<td>用模板 + init script 模式</td>
+<td>機器特定路徑在其他機器壞掉</td>
+</tr>
+<tr>
+<td>略過 setup 步驟文件</td>
+<td>在入職檢查清單中包含 setup</td>
+<td>新開發者會有不起作用的 hook</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>練習題</h2>
+<h3>Q1：開發者生產力情境（S4）</h3>
+<p>團隊部署了 PreToolUse hook 防止 Claude 存取憑證檔。新開發者加入後 Claude 在他們機器上可以讀取憑證。最可能原因？</p>
+<ul>
+<li>A. Claude Code 在某些 OS 上有繞過 hook 的 bug</li>
+<li>B. 新開發者沒有執行 setup script，<code>settings.local.json</code> 從未生成</li>
+<li>C. Hook 配置在全域層級，不在專案中</li>
+<li>D. PreToolUse hook 只對 Read 有效，不對 Grep</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — `settings.local.json` 被 gitignore，必須由 setup script 生成。沒執行 setup 就沒有 hook 啟用。
+
+**PM 重點**：Hook 啟用是開發環境 setup 的一部分。像資料庫 migration 或依賴安裝一樣 — 必須在入職檢查清單中。
+</details>
+
+<h3>Q2：CI/CD 整合情境（S5）</h3>
+<p>安全團隊要求所有 hook 腳本使用絕對路徑。CI pipeline 在動態配置的 runner 上運行，workspace 目錄每次不同。如何為 CI 配置 hook？</p>
+<ul>
+<li>A. CI 中用相對路徑，自動化環境安全性較不重要</li>
+<li>B. 加入 CI pipeline 步驟，執行 init script 生成帶當前 workspace 絕對路徑的 <code>settings.local.json</code></li>
+<li>C. 在 <code>settings.json</code> 寫死最常見的 CI workspace 路徑</li>
+<li>D. 在 CI 停用 hook</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — Init script 模式在 CI 也適用。Setup 步驟從模板生成機器特定的絕對路徑。
+
+**PM 重點**：CI/CD 環境需要與開發者機器相同的安全態勢。
+</details>
+
+<h3>Q3：客戶支援情境（S1）</h3>
+<p>安全審計發現 hook command 用相對路徑。工程團隊認為絕對路徑會讓設定檔難以共享。推薦解法？</p>
+<ul>
+<li>A. 接受安全風險</li>
+<li>B. 用帶 <code>$PWD</code> 佔位符的 <code>settings.example.json</code> 模板和自動化 init script</li>
+<li>C. 移除 hook，改用 system prompt</li>
+<li>D. 用相對路徑但加 CLAUDE.md 指令</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 模板 + init script 模式同時滿足安全（絕對路徑）和團隊共享（可攜性）。
+
+**PM 重點**：當工程師提出安全-便利取捨時，尋找兩者兼顧的方案。
+</details>
+</body>
+</html>

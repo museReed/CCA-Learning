@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11 Accessing Resources Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Accessing Resources — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP client implementation), 2.4 (resource consumption patterns), 2.5 (content type handling)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Accessing resources is like your app pulling files from a shared drive and placing them on the meeting table before the discussion starts — Claude sees the data immediately without needing to ask for it.</p>
+<hr />
+<h2>Why PMs Need to Understand Resource Access</h2>
+<p>Resource access is the client-side pattern that powers features like:<br />
+- <strong>Document mentions</strong> (<code>@plan.md</code> in a chat interface)<br />
+- <strong>Context panels</strong> (sidebar showing relevant data)<br />
+- <strong>Autocomplete dropdowns</strong> (selecting from available items)</p>
+<p>As a PM, understanding this pattern helps you:<br />
+1. <strong>Spec the right interaction model</strong> — users see data instantly, not after Claude "looks it up"<br />
+2. <strong>Set realistic performance expectations</strong> — resource injection is faster than tool-based retrieval<br />
+3. <strong>Design better UX flows</strong> — the <code>@mention</code> pattern is a proven interaction paradigm</p>
+<hr />
+<h2>Mental Model: The Meeting Briefing</h2>
+<p>Imagine you are organizing a meeting:</p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Analogy</th>
+<th>MCP Equivalent</th>
+<th>User Experience</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Pre-meeting briefing</strong></td>
+<td>Assistant prints relevant reports and places them on the table before the meeting starts</td>
+<td><strong>Resource access</strong></td>
+<td>Fast — everyone can reference docs immediately</td>
+</tr>
+<tr>
+<td><strong>Mid-meeting lookup</strong></td>
+<td>Someone says "let me go check the filing room" and leaves to get a document</td>
+<td><strong>Tool call</strong></td>
+<td>Slower — meeting pauses while data is fetched</td>
+</tr>
+</tbody>
+</table>
+<p>Resources are the pre-meeting briefing. Your application gathers the data in advance and hands it to Claude as context. Claude never has to "leave the room" to get information.</p>
+<hr />
+<h2>The <code>@Mention</code> User Journey</h2>
+<p>Here is the step-by-step UX flow that resource access enables:</p>
+<ol>
+<li><strong>User types <code>@</code> in the chat input</strong> — the app queries the server for available resources</li>
+<li><strong>Autocomplete dropdown appears</strong> — showing available documents, data sources, or references</li>
+<li><strong>User selects an item</strong> (arrow keys + space) — the app fetches the full content of that resource</li>
+<li><strong>Content is silently injected into the prompt</strong> — the user does not see the raw content; it becomes invisible context</li>
+<li><strong>User presses Enter to send</strong> — Claude receives both the user's question and the referenced document</li>
+<li><strong>Claude responds with full context</strong> — no "let me look that up" delay, no additional tool calls</li>
+</ol>
+<p>This is the same pattern you see in Claude's official interface when using "Add from Google Drive."</p>
+<hr />
+<h2>Product Implications</h2>
+<h3>Performance</h3>
+<p>Resource injection happens before Claude starts reasoning. This means:<br />
+- <strong>No extra latency</strong> from tool calls<br />
+- <strong>No wasted tokens</strong> from Claude describing what it is about to look up<br />
+- <strong>First response is already informed</strong> — no follow-up round-trips</p>
+<h3>Data Format Awareness</h3>
+<p>Resources come with format hints (MIME types) that affect how your app handles them:</p>
+<table>
+<thead>
+<tr>
+<th>Data Format</th>
+<th>What the App Does</th>
+<th>PM Consideration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Structured data (JSON)</td>
+<td>Parses into objects for rich display</td>
+<td>Can power tables, charts, or filters in the UI</td>
+</tr>
+<tr>
+<td>Plain text</td>
+<td>Displays as-is or injects into chat</td>
+<td>Simple to implement but limited visual options</td>
+</tr>
+<tr>
+<td>Binary (PDF, images)</td>
+<td>Needs special rendering</td>
+<td>Requires viewer component in your UI spec</td>
+</tr>
+</tbody>
+</table>
+<h3>Error Handling</h3>
+<p>If a resource is not found or unavailable, the app should handle this gracefully. In your PRD, specify:<br />
+- What the user sees when a referenced document is unavailable<br />
+- Whether to show a warning or silently omit the resource<br />
+- Fallback behavior (e.g., Claude can still answer without the resource)</p>
+<hr />
+<h2>Comparison: Resource Access vs. Tool-Based Retrieval</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Resource Access</th>
+<th>Tool-Based Retrieval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trigger</td>
+<td>User selects <code>@mention</code> or app pre-loads</td>
+<td>Claude decides to call a tool</td>
+</tr>
+<tr>
+<td>Timing</td>
+<td>Before Claude responds</td>
+<td>During Claude's reasoning</td>
+</tr>
+<tr>
+<td>User perception</td>
+<td>Instant context</td>
+<td>"Let me look that up..." delay</td>
+</tr>
+<tr>
+<td>Token efficiency</td>
+<td>Data is already in prompt</td>
+<td>Extra tokens for tool call + result</td>
+</tr>
+<tr>
+<td>Control</td>
+<td>App-controlled (deterministic)</td>
+<td>Model-controlled (Claude decides)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Designing tool-based UX when resources would work</strong> — if the user explicitly selects what data to include, use resources (not tools)</li>
+<li><strong>Not specifying the autocomplete experience</strong> — resource-powered autocomplete needs design specs: search behavior, result ranking, display format</li>
+<li><strong>Ignoring data size</strong> — large resources (entire databases, huge documents) should be paginated or summarized before injection</li>
+<li><strong>Assuming Claude controls resource access</strong> — resources are app-controlled; Claude does not decide when to fetch them</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The <code>@mention</code> pattern powered by resources creates a user experience where context is gathered <strong>before</strong> the AI starts thinking. This is fundamentally faster and more predictable than tool-based data retrieval. When writing PRDs, always ask: "Can this data be pre-loaded as a resource, or does Claude need to decide when to fetch it?"</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Expect questions about the client-side resource pattern. Know that <code>read_resource()</code> returns a <code>contents</code> list and that MIME types determine parsing behavior.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Resource access reduces latency by injecting data into the prompt before model reasoning. This is a key architecture trade-off.</li>
+<li>Watch for scenarios describing "data appears in the interface" or "context is pre-loaded" — these describe resource access, not tool calls.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What triggers the autocomplete dropdown in the <code>@mention</code> pattern?</td>
+<td>The client queries the server for available resources when the user types <code>@</code></td>
+</tr>
+<tr>
+<td>How is resource content delivered to Claude?</td>
+<td>Injected directly into the prompt context — no tool call is required</td>
+</tr>
+<tr>
+<td>What is the meeting room analogy for resource access?</td>
+<td>Pre-meeting briefing: the assistant prints reports and places them on the table before the meeting starts</td>
+</tr>
+<tr>
+<td>Why is resource access faster than tool-based retrieval for the user?</td>
+<td>Data is already in the prompt before Claude starts reasoning — no extra round-trip or "let me look that up" delay</td>
+</tr>
+<tr>
+<td>What determines how the client parses resource content?</td>
+<td>The MIME type on the resource — <code>application/json</code> is parsed as JSON, <code>text/plain</code> is used as raw text</td>
+</tr>
+<tr>
+<td>Who controls when resources are accessed — Claude, the app, or the user?</td>
+<td>The application code (app-controlled), though the user may trigger it by typing <code>@</code></td>
+</tr>
+<tr>
+<td>What should a PM specify for resource error handling in a PRD?</td>
+<td>What the user sees when a referenced document is unavailable, warning behavior, and fallback behavior</td>
+</tr>
+<tr>
+<td>What real-world feature demonstrates the resource access pattern?</td>
+<td>Claude's "Add from Google Drive" — the app fetches document content and injects it as prompt context</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

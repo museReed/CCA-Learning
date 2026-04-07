@@ -1,0 +1,142 @@
+# The Server Inspector — PM 战略概览
+
+| Item | Detail |
+|------|--------|
+| Exam Domain | D2 — Tool Design & MCP Integration (18%) |
+| Task Statements | T2.6 测试与调试 MCP server; T2.7 部署前验证 tool 行为 |
+| Source | introduction-to-model-context-protocol / 02-tools-and-inspector / Lesson 07 |
+
+---
+
+## 一句话摘要
+
+MCP Inspector 是 AI 工具的试驾环境——就像展示间，你可以在投入生产前试用任何 tool。
+
+---
+
+## 为什么 PM 应关心 Inspector
+
+MCP Inspector 是开发工具，但它对产品有直接影响。它是你能看到 Claude 看到什么的地方——tool 的名称、描述和参数。如果在 Inspector 中看起来令人困惑，对 Claude 也会令人困惑，最终对用户也是如此。
+
+把 Inspector 想成**产品预览环境**。在 tools 上线之前，你可以验证：
+
+- Tool 名称是否直观？
+- 描述是否清楚到让 Claude 选对 tool？
+- 参数名称和描述是否不言自明？
+- 错误消息是否帮助 Claude 优雅恢复？
+
+> **PM Takeaway**
+> 安排团队的 Inspector 审查会议。让 PM 在 Inspector 中看 tool 描述，常能抓到工程师忽略的清晰度问题——因为他们已经知道 tool 做什么。
+
+---
+
+## Inspector 作为质量关卡
+
+在制造业中，产品出货前会经过质量检查站。MCP Inspector 对 AI tools 提供同样的功能：
+
+**没有 Inspector 测试**：写 tool → 部署 → 用户遇到问题 → 在生产环境调试
+
+**有 Inspector 测试**：写 tool → 在 Inspector 测试 → 修正问题 → 部署 → 用户得到完善的体验
+
+Inspector 在问题触达用户前拦截三类问题：
+
+1. **功能 bug** — Tool 没有返回正确结果
+2. **Schema 问题** — 参数类型错误、缺描述、或错误标记为必填/可选
+3. **UX 问题** — 描述模糊、错误消息无帮助、返回值格式差
+
+> **PM Takeaway**
+> 为任何新的 MCP tool 加上"Inspector 已测试"作为完成定义。没有通过 Inspector 验证的 tool 不应进入生产环境。
+
+---
+
+## Inspector 中你看到什么
+
+Inspector 呈现三类 MCP server 能力：
+
+**Resources 标签页** — 想象成"数据图书馆"书架。Server 能提供什么信息？文件、数据库记录、配置数据等。
+
+**Tools 标签页** — 想象成"动作"菜单。Server 能做什么？创建文件、查询数据库、发送消息等。
+
+**Prompts 标签页** — 想象成"模板"抽屉。Server 提供什么预写的 prompt 模式？
+
+产品评估时，你大部分时间都在 Tools 标签页。每个 tool 条目显示 Claude 决定是否使用它时看到的完全相同的内容。
+
+---
+
+## 状态持久性：测试真实工作流
+
+Inspector 的关键功能之一是 tool 状态在调用之间持久存在。用产品语言来说，这意味着你可以测试完整的用户工作流，而不只是孤立的动作。
+
+多步骤工作流测试示例：
+
+1. 创建文档（tool 调用 1）
+2. 读取文档以验证正确创建（tool 调用 2）
+3. 编辑文档（tool 调用 3）
+4. 再次读取以验证编辑（tool 调用 4）
+
+这映射真实用户与你的产品交互的方式。每一步都依赖前一步，Inspector 让你验证整条链路都正确运作。
+
+> **PM Takeaway**
+> 在 Inspector 中审查 tools 时，不要只测快乐路径。测试用户实际会遵循的序列——包括边界情况，如读取不存在的文档，或编辑别人正在处理的文档。
+
+---
+
+## 开发反馈循环
+
+Inspector 启用了紧密的反馈循环，加速 tool 开发：
+
+**传统方式**（没有 Inspector）：
+1. 写 tool 代码
+2. 建 client 集成
+3. 连接 Claude
+4. 发送测试查询
+5. 如果出问题，找出哪一层失败
+6. 修正并从步骤 2 重新开始
+
+**Inspector 方式**：
+1. 写 tool 代码
+2. 打开 Inspector
+3. 直接测试 tool
+4. 如果出问题，一定是 tool 代码的问题
+5. 修正并立即重新测试
+
+Inspector 方式更快是因为它消除了变量。当 tool 在 Inspector 中失败时，你知道问题在 tool 代码中，不在 client、不在传输层、也不在 Claude 的解读中。
+
+---
+
+## 连接 Inspector 洞察到产品决策
+
+在 Inspector 中测试后，PM 可以对以下做出明智决策：
+
+- **Tool 命名惯例** — Tools 命名是否一致？用户能猜出"proc_doc_v2"做什么吗？
+- **描述质量** — 只读描述就能理解每个 tool 做什么吗？
+- **参数设计** — 必填参数是否太多？默认值是否合理？
+- **错误体验** — 出问题时，错误消息是否指向解决方案？
+
+这些都是碰巧存在于代码中的产品设计决策。
+
+---
+
+## CCA 考试关联性
+
+本课涵盖 **Domain 2 (18%)** 的测试概念：
+
+- Inspector 通过 `mcp dev mcp_server.py` 在 `localhost:6274` 启动
+- 三个标签页：Resources、Tools、Prompts
+- 状态在调用之间持久存在，支持多步骤测试
+- Inspector 位于开发和 client 集成之间的工作流中
+
+---
+
+## Flashcards
+
+| Front | Back |
+|-------|------|
+| 用商业语言描述 MCP Inspector 是什么？ | AI 工具的试驾环境，你可以在上线前预览和测试——就像 tool 能力的 staging 环境。 |
+| 为什么 PM 应该在 Inspector 中审查 tools？ | Tool 描述、参数名称和错误消息是直接影响 Claude 使用 tools 和用户体验产品的产品设计决策。 |
+| Inspector 显示哪三类内容？ | Resources（server 提供的数据）、Tools（server 能执行的动作）和 Prompts（可重用模板模式）。 |
+| 状态持久性对测试意味着什么？ | 你可以测试每个 tool 调用依赖前一个调用的多步骤工作流，映射真实用户的交互模式。 |
+| Inspector 如何减少调试时间？ | 它把 tool 问题从 client、传输和 Claude 解读问题中隔离出来。如果 tool 在 Inspector 中失败，问题一定在 tool 代码中。 |
+| 新 MCP tools 的"完成定义"应是什么？ | Inspector 已测试——没有通过功能、schema 正确性和描述质量的 Inspector 验证，tool 不应进入生产环境。 |
+| PM 可以通过 Inspector 测试做出什么产品决策？ | Tool 命名惯例、描述质量、参数设计、默认值和错误消息的有用性。 |
+| Inspector 如何融入开发工作流？ | 写 tool 代码 → 用 Inspector 测试 → 修正问题 → 与 client 集成。跳过 Inspector 测试会导致后续更难诊断的问题。 |

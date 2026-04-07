@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11 The Stdio Transport Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The STDIO Transport — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (MCP transport selection), 2.3 (server lifecycle management)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 03-transports / Lesson 11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Stdio transport runs an MCP server as a local subprocess, using stdin/stdout for fully bidirectional JSON-RPC message exchange with a three-phase handshake.</p>
+<hr />
+<p><img alt="Transport Comparison" src="visuals/transport-comparison.svg" /></p>
+<h2>What Is a Transport?</h2>
+<p>A transport is the <strong>communication channel</strong> through which JSON-RPC messages flow between an MCP client and server. Think of it as the pipe — the protocol defines the message format, the transport defines how those messages physically move.</p>
+<p>Stdio is the <strong>simplest and most capable</strong> transport in the MCP specification.</p>
+<hr />
+<h2>How Stdio Works</h2>
+<p>The client <strong>launches the server as a child process</strong> (subprocess). Once running:</p>
+<ul>
+<li>Client writes JSON-RPC messages to the server's <strong>stdin</strong></li>
+<li>Server writes JSON-RPC messages to its <strong>stdout</strong></li>
+<li>Both sides can send messages <strong>at any time</strong> (fully bidirectional)</li>
+</ul>
+<pre class="highlight"><code>┌────────┐   stdin    ┌────────┐
+│ Client │ ─────────→ │ Server │
+│        │ ←───────── │        │
+└────────┘   stdout   └────────┘
+     (same machine, subprocess)
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+Stdio only works when client and server are on the <strong>same machine</strong>. The client must be able to spawn the server process directly. This is a hard constraint — no remote hosting possible.</p>
+</blockquote>
+<hr />
+<h2>The Three-Message Handshake</h2>
+<p>Before any tool calls or resource reads, client and server negotiate capabilities:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Direction</th>
+<th>Message Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Client → Server</td>
+<td>Initialize Request</td>
+<td>Client declares protocol version + capabilities</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Server → Client</td>
+<td>Initialize Result</td>
+<td>Server responds with its capabilities</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Client → Server</td>
+<td>Initialized Notification</td>
+<td>Client confirms — handshake complete</td>
+</tr>
+</tbody>
+</table>
+<p>After step 3, the connection is live and both sides can freely exchange messages.</p>
+<pre class="highlight"><code class="language-python"># Conceptual handshake flow
+client.send({&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: &quot;initialize&quot;, &quot;params&quot;: {...}})
+response = server.receive()  # Initialize Result
+client.send({&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: &quot;notifications/initialized&quot;})
+# Now ready for tool calls
+</code></pre>
+
+<hr />
+<h2>Four Communication Patterns</h2>
+<p>Once initialized, Stdio supports all four MCP communication patterns:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Direction</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client → Server Request</td>
+<td>Client asks server</td>
+<td><code>tools/call</code>, <code>resources/read</code></td>
+</tr>
+<tr>
+<td>Server → Client Response</td>
+<td>Server answers</td>
+<td>Tool result, resource content</td>
+</tr>
+<tr>
+<td>Server → Client Request</td>
+<td>Server asks client</td>
+<td><code>sampling/createMessage</code>, <code>roots/list</code></td>
+</tr>
+<tr>
+<td>Client → Server Response</td>
+<td>Client answers</td>
+<td>Sampling result, root list</td>
+</tr>
+</tbody>
+</table>
+<p>This is <strong>full bidirectional MCP</strong> — no features are restricted.</p>
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+Stdio is the only transport that natively supports all four patterns without workarounds. This makes it the <strong>baseline reference</strong> for MCP capability.</p>
+</blockquote>
+<hr />
+<h2>When to Use Stdio</h2>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Fit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local development &amp; testing</td>
+<td>Excellent</td>
+</tr>
+<tr>
+<td>IDE integrations (VS Code, Claude Code)</td>
+<td>Excellent</td>
+</tr>
+<tr>
+<td>CI/CD pipelines</td>
+<td>Good</td>
+</tr>
+<tr>
+<td>Production remote servers</td>
+<td>Not possible</td>
+</tr>
+<tr>
+<td>Multi-user access</td>
+<td>Not possible</td>
+</tr>
+</tbody>
+</table>
+<p>Stdio is ideal when the client can directly spawn and manage the server process.</p>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>Transport selection questions</strong>: Stdio = same machine, full capability. If the question mentions "remote" or "scaling", Stdio is wrong.</li>
+<li><strong>Handshake sequence</strong>: Know the three steps in order — Initialize Request, Initialize Result, Initialized Notification.</li>
+<li><strong>Capability comparison</strong>: Stdio supports ALL MCP features. Other transports trade features for remote access.</li>
+<li>Exam philosophy: <strong>Stdio is the baseline</strong> — understand what it supports, then learn what other transports sacrifice.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is a transport in MCP?</td>
+<td>The communication channel for JSON-RPC message exchange between client and server</td>
+</tr>
+<tr>
+<td>How does Stdio transport physically connect client and server?</td>
+<td>Client spawns server as subprocess; messages flow via stdin (client→server) and stdout (server→client)</td>
+</tr>
+<tr>
+<td>What are the three handshake messages in order?</td>
+<td>1) Initialize Request (client→server) 2) Initialize Result (server→client) 3) Initialized Notification (client→server)</td>
+</tr>
+<tr>
+<td>Can Stdio transport work across different machines?</td>
+<td>No — client must spawn server as a local subprocess on the same machine</td>
+</tr>
+<tr>
+<td>How many communication patterns does Stdio support?</td>
+<td>Four: client→server request, server→client response, server→client request, client→server response</td>
+</tr>
+<tr>
+<td>What makes Stdio the "baseline" transport?</td>
+<td>It supports full bidirectional MCP with zero feature restrictions</td>
+</tr>
+<tr>
+<td>When is Stdio the wrong choice?</td>
+<td>When you need remote hosting, horizontal scaling, or multi-user access</td>
+</tr>
+<tr>
+<td>What happens after the Initialized Notification is sent?</td>
+<td>The connection is live — both sides can freely exchange messages</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

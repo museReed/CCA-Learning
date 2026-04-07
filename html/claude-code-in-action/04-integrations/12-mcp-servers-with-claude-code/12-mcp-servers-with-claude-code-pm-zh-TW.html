@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 Mcp Servers With Claude Code Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>MCP Servers with Claude Code — PM 視角</h1>
+<p><img alt="Mcp Server Ecosystem Taxonomy" src="visuals/mcp-server-ecosystem-taxonomy-zh-TW.svg" /><br />
+<em>圖：MCP Server 生態分類。</em></p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試對應</td>
+<td>D2 — Tool Use &amp; Integration（佔 18%）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 ★★★（MCP integration）、2.1 ★★（tool interfaces）、2.3 ★★（tool distribution）</td>
+</tr>
+<tr>
+<td>課程來源</td>
+<td>claude-code-in-action / 04-integrations / Lesson 12</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><img alt="Mcp Plugin Architecture Flow" src="visuals/mcp-plugin-architecture-flow-zh-TW.svg" /><br />
+<em>圖：MCP 外掛架構流程。</em></p>
+<p><img alt="Mcp Architecture" src="visuals/mcp-architecture-zh-TW.svg" /><br />
+<em>圖：MCP Server 架構 — Claude Code ↔ 協定 ↔ Server ↔ 外部系統。</em></p>
+<h2>TL;DR</h2>
+<p>MCP server 是 Claude Code 的 plugin 系統。它讓你擴展 Claude 能做的事 — 瀏覽網頁、查資料庫、操作 API — 不需要改 Claude Code 本身。PM 的關鍵洞察：MCP server 把「Claude 做不到 X」變成「Claude 做得到 X」，而且是在架構層面解決。這跟 prompt engineering 根本不同 — prompt 只能在 Claude 既有能力範圍內運作。</p>
+<hr />
+<h2>Why PMs Need to Understand MCP Servers</h2>
+<ol>
+<li><strong>界定產品能力範圍</strong> — 知道有哪些 MCP server 存在，就知道哪些 Claude 驅動的功能是可行的</li>
+<li><strong>Build vs. configure 決策</strong> — 很多能力已經有現成的 MCP server，不需要客製開發</li>
+<li><strong>安全與權限治理</strong> — MCP server 需要明確的權限管理，影響你的 risk assessment</li>
+<li><strong>CI/CD 影響</strong> — 自動化 pipeline 裡的 MCP server 需要跟本地開發不同的權限設定</li>
+</ol>
+<hr />
+<h2>Mental Model: AI 工具的 App Store</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>App Store 類比</th>
+<th>MCP Server 實際</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>核心產品</td>
+<td>開箱即用的 iPhone</td>
+<td>Claude Code 內建工具（Read、Write、Bash 等）</td>
+</tr>
+<tr>
+<td>擴展</td>
+<td>安裝一個 app</td>
+<td>加入 MCP server</td>
+</tr>
+<tr>
+<td>權限</td>
+<td>「允許存取相機？」</td>
+<td>「允許 mcp__playwright 工具？」</td>
+</tr>
+<tr>
+<td>生態系</td>
+<td>App Store 目錄</td>
+<td>MCP server registry</td>
+</tr>
+<tr>
+<td>設定</td>
+<td>App 設定</td>
+<td><code>.claude/settings.local.json</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>考試核心哲學（PM 必記）</strong></p>
+<ul>
+<li><strong>Architecture &gt; Prompt</strong> — 如果 Claude 需要某種能力，給它工具（MCP server）。不要試圖用 prompt 讓它做結構上做不到的事。</li>
+<li><strong>Explicit Permissions &gt; Blanket Access</strong> — 特別是在 CI/CD 裡，每個工具都必須逐一允許。</li>
+</ul>
+</blockquote>
+<hr />
+<h2>Product Scenario Walkthrough</h2>
+<h3>Scenario: 改善 UI Component 生成品質</h3>
+<p>你的團隊用 AI 生成 component。生成出來的 component 看起來很 generic — 全是紫到藍漸層和標準的 Tailwind patterns。產品目標是生成更有創意、更有辨識度的 component。</p>
+<table>
+<thead>
+<tr>
+<th>做法</th>
+<th>實現方式</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>只用 prompt engineering</td>
+<td>在生成 prompt 加「要更有創意」</td>
+<td>改善有限 — Claude 沒有視覺回饋</td>
+</tr>
+<tr>
+<td>MCP + 視覺回饋迴圈</td>
+<td>安裝 Playwright MCP → Claude 生成 component → Claude 打開瀏覽器看結果 → Claude 根據視覺評估更新 prompt</td>
+<td>顯著改善 — Claude 根據實際視覺輸出迭代</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM 決策框架</strong></p>
+<p>問自己：「這需要 Claude 感知或互動 context window 以外的東西嗎？」<br />
+- 是 → 你需要 MCP server（架構解決方案）<br />
+- 否 → Prompt engineering 可能就夠了</p>
+</blockquote>
+<hr />
+<h2>MCP Server 的商業影響</h2>
+<table>
+<thead>
+<tr>
+<th>影響面</th>
+<th>沒有 MCP</th>
+<th>有 MCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>視覺 QA</td>
+<td>人工 review</td>
+<td>Claude 透過 Playwright 自動驗證 UI</td>
+</tr>
+<tr>
+<td>資料庫操作</td>
+<td>複製貼上 query 結果給 Claude</td>
+<td>Claude 直接查詢 DB</td>
+</tr>
+<tr>
+<td>API 測試</td>
+<td>手動測 endpoint</td>
+<td>Claude 測試 endpoint 並驗證回應</td>
+</tr>
+<tr>
+<td>開發速度</td>
+<td>Claude 盲寫程式碼</td>
+<td>Claude 生成、驗證、自主迭代</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>權限治理</h2>
+<p>MCP server 有一套權限模型，PM 應該了解以做 risk assessment：</p>
+<table>
+<thead>
+<tr>
+<th>設定</th>
+<th>位置</th>
+<th>誰控制</th>
+<th>安全等級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本地全部允許</td>
+<td><code>.claude/settings.local.json</code></td>
+<td>個人開發者</td>
+<td>低 — 方便開發</td>
+</tr>
+<tr>
+<td>專案共用</td>
+<td><code>.claude/settings.json</code></td>
+<td>團隊 / Tech Lead</td>
+<td>中 — 團隊標準</td>
+</tr>
+<tr>
+<td>CI/CD 明確列出</td>
+<td>GitHub Actions workflow 檔</td>
+<td>DevOps / 團隊</td>
+<td><strong>高 — 逐一列出每個工具</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Takeaway</strong></p>
+<p>在 production/CI 環境裡，MCP 工具權限必須逐一列出。沒有「允許這個 server 的所有工具」的捷徑。這是刻意的安全設計 — 要納入你的 risk assessment。</p>
+</blockquote>
+<hr />
+<h2>Instructor Insights（影片補充）</h2>
+<ol>
+<li><strong>視覺回饋改變一切</strong> — 講師對 Claude 能看到實際 UI 輸出後的品質提升感到驚訝。這意味著視覺驗證能力應該是任何 UI 導向 AI workflow 的標配。</li>
+<li><strong>MCP server 是擴展性的核心</strong> — 講師把 MCP 定位為擴展 Claude Code 的主要方式。如果你的產品 roadmap 包含 Claude 原生沒有的 AI 能力，MCP server 就是答案。</li>
+<li><strong>生態系快速成長</strong> — 講師建議探索跟你專案需求相符的 MCP server，暗示生態系已經成熟到可以用在 production。</li>
+</ol>
+<hr />
+<h2>Practice Questions</h2>
+<h3>第一題：開發者生產力情境</h3>
+<p>你的團隊希望 Claude Code 能驗證生成的 UI component 是否符合設計規格。目前開發者是手動比對截圖。你會建議什麼？</p>
+<ul>
+<li>A. 把設計規格加到 CLAUDE.md，讓 Claude 知道要瞄準什麼</li>
+<li>B. 安裝 Playwright MCP server，讓 Claude 打開瀏覽器，視覺化比對生成的 component 和規格</li>
+<li>C. 建立 PostToolUse hook，每次寫檔後跑 visual regression test</li>
+<li>D. 讓開發者截圖貼到 Claude Code 對話裡做 review</li>
+</ul>
+<details><summary>答案與解析</summary>
+
+**B** — Playwright MCP server 讓 Claude 有實際的瀏覽器存取，能看到和評估 UI 輸出。這建立了自動化的視覺回饋迴圈。
+
+- A 給 Claude 知識但沒有視覺感知能力
+- C 可行但需要既有的測試基礎設施
+- D 可行但是手動流程，失去了自動化的好處
+
+**PM 重點**：當落差是「Claude 無法感知某個東西」時，解決方案是 MCP server 賦予它感知能力 — 不是 prompt 描述它應該感知什麼。
+</details>
+
+<h3>第二題：Code Generation 情境</h3>
+<p>一個 PM 在 scope 一個需要 Claude 跟 PostgreSQL 資料庫互動的 AI 功能。工程師說「我們直接在 prompt 給 Claude schema 讓它寫 query 就好」。更好的做法是什麼？</p>
+<ul>
+<li>A. 工程師的做法是對的 — 在 prompt 提供 schema context 就夠了</li>
+<li>B. 安裝 PostgreSQL MCP server，讓 Claude 直接查詢和驗證 live 資料庫</li>
+<li>C. 建立一個 custom tool 包裝資料庫 query，透過 Agent SDK 暴露</li>
+<li>D. B 和 C 都是對的，取決於這是 Claude Code 還是 Agent SDK 應用</li>
+</ul>
+<details><summary>答案與解析</summary>
+
+**D** — 對 Claude Code workflow 來說，PostgreSQL MCP server（B）是正確做法。對 Agent SDK 應用來說，custom tool（C）是正確做法。核心原則一樣：給 Claude 結構化的資料庫存取，不要只靠 prompt 裡的 schema 知識。
+
+**PM 重點**：工程師的「就跟 Claude 說」做法（A）是典型的 prompt-over-architecture 反模式。永遠優先給 Claude 真正的工具，而非在 prompt 裡描述能力。
+</details>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03 Introducing Mcp Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing MCP — 工程深度解析</h1>
+<p><img alt="Mcp Architecture" src="visuals/mcp-architecture-zh-TW.svg" /></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.1 设计与实现 tool schemas; T2.3 配置 MCP server 连接</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 01-mcp-basics / Lesson 03</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>MCP 是一个标准化通信协议层，让 Claude 通过专用的 MCP server 访问外部工具与数据，不再需要手写集成代码。</p>
+<hr />
+<h2>MCP 到底是什么</h2>
+<p>Model Context Protocol (MCP) 是位于你的应用程序与外部服务之间的<strong>通信协议</strong>。与其为 Claude 需要访问的每个服务手写 tool schema 和 API 集成代码，MCP 把这个职责委派给专用的 MCP server。</p>
+<p>核心架构遵循一个简单模式：</p>
+<pre class="highlight"><code>你的应用程序 (MCP Client)
+        |
+        v
+    MCP Server（例如 GitHub MCP Server）
+        |
+        v
+    外部服务（例如 GitHub API）
+</code></pre>
+
+<p>每个 MCP server 提供一个标准化接口，包含 <strong>tools</strong>、<strong>prompts</strong> 和 <strong>resources</strong>。你的应用程序只需要会说 MCP 协议——server 处理所有服务特定的细节。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+MCP 之于 AI 工具集成，就像 USB 之于硬件外设。不再需要为每个设备准备专用接头，一个标准化协议就能搞定所有连接。</p>
+</blockquote>
+<hr />
+<h2>MCP 解决的问题</h2>
+<p>假设你在构建一个聊天界面，用户问 Claude 关于他们的 GitHub 数据。用户问："我所有 repo 中有哪些 open pull requests？"</p>
+<p>没有 MCP 的话，你需要：</p>
+<ol>
+<li><strong>定义 tool schemas</strong> — 为每个 GitHub 操作写 JSON schema（repos、PRs、issues、projects 等）</li>
+<li><strong>实现 handler 函数</strong> — 把 Claude 的 tool call 转译成 GitHub API 请求的代码</li>
+<li><strong>处理认证</strong> — OAuth tokens、rate limiting、pagination</li>
+<li><strong>持续维护</strong> — GitHub API 改版、废弃、新功能</li>
+</ol>
+<pre class="highlight"><code class="language-python"># 没有 MCP：你要自己写和维护这些
+tools = [
+    {
+        &quot;name&quot;: &quot;get_pull_requests&quot;,
+        &quot;description&quot;: &quot;List open PRs across repositories&quot;,
+        &quot;input_schema&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {
+                &quot;state&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;open&quot;, &quot;closed&quot;, &quot;all&quot;]},
+                &quot;repo&quot;: {&quot;type&quot;: &quot;string&quot;}
+            }
+        }
+    },
+    # ... 几十个 tool 定义
+]
+
+def handle_get_pull_requests(state, repo):
+    # 认证、分页、错误处理...
+    response = requests.get(f&quot;https://api.github.com/repos/{repo}/pulls&quot;,
+                          params={&quot;state&quot;: state},
+                          headers={&quot;Authorization&quot;: f&quot;token {token}&quot;})
+    # ... 更多代码
+</code></pre>
+
+<p>有了 MCP，GitHub MCP server 直接提供这一切。你的代码只需连上 MCP server 并传递 tool call。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+真正要命的是维护负担。光是 GitHub 就有数百个 API endpoint。没有 MCP，每次 API 变更都可能破坏你的 tool 定义。MCP server 把维护工作集中化了。</p>
+</blockquote>
+<hr />
+<h2>MCP 架构组件</h2>
+<h3>MCP Client</h3>
+<p>MCP Client 就是你的应用程序——代表 Claude 连接 MCP server 的系统。它负责：</p>
+<ul>
+<li>通过 <code>ListToolsRequest</code> 发现可用的 tools</li>
+<li>通过 <code>CallToolRequest</code> 执行 tools</li>
+<li>管理传输层（stdio、HTTP、WebSockets）</li>
+</ul>
+<h3>MCP Server</h3>
+<p>MCP Server 是一个独立进程，封装外部服务。它：</p>
+<ul>
+<li>定义 tool schemas（名称、描述、输入参数）</li>
+<li>实现 tool 执行逻辑</li>
+<li>处理服务特定的认证和错误处理</li>
+<li>在 tools 之外也提供 prompts 和 resources</li>
+</ul>
+<h3>谁来建 MCP Server？</h3>
+<p>任何人都可以编写 MCP server。实际情况：</p>
+<ul>
+<li><strong>服务提供者</strong>常会发布官方 MCP server（例如 AWS、GitHub）</li>
+<li><strong>社区贡献者</strong>为热门服务构建 server</li>
+<li><strong>你自己</strong>可以为内部工具和 API 构建自定义 MCP server</li>
+</ul>
+<hr />
+<h2>MCP vs. Tool Use：关键区别</h2>
+<p>这是常见的考试主题。MCP 和 tool use 是<strong>互补的，不是相同的</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>它做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tool Use</strong></td>
+<td>Claude 决定调用 tool、格式化输入、处理结果的机制</td>
+</tr>
+<tr>
+<td><strong>MCP</strong></td>
+<td>提供 tool 定义和执行基础设施给 Claude 的协议</td>
+</tr>
+</tbody>
+</table>
+<p>这样想：tool use 是<strong>动词</strong>（Claude 调用 tool），而 MCP 是<strong>名词</strong>（提供并执行那些 tools 的系统）。</p>
+<p>没有 MCP 你仍然有 tool use——只是要自己写所有 tool 定义。没有 tool use，MCP server 就没用——因为 Claude 没有机制去调用它们。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+CCA 考试中，不要把 MCP 和 tool use 混为一谈。MCP 是关于<em>谁定义和维护 tools</em>。Tool use 是关于 <em>Claude 如何调用它们</em>。它们一起工作但是不同概念。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联性</h2>
+<p>本课直接对应 <strong>Domain 2: Tool Design &amp; MCP Integration (18%)</strong>。重点考试角度：</p>
+<ul>
+<li><strong>架构理解</strong>：掌握 Client-Server 关系及各组件的功能</li>
+<li><strong>问题识别</strong>：识别何时 MCP 是正确的解法（大量 API 端点、维护负担、标准化需求）</li>
+<li><strong>MCP vs. tool use</strong>：此区别出现在多道考题中，要精确描述各概念涵盖的范围</li>
+<li><strong>Server 编写权</strong>：理解 MCP 是一个开放生态系统，不是 Anthropic 独占的封闭系统</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 主要解决什么问题？</td>
+<td>消除为 Claude 需要访问的每个外部服务手动编写、测试和维护 tool schemas 及集成代码的需求。</td>
+</tr>
+<tr>
+<td>MCP server 可以提供哪三种能力？</td>
+<td>Tools、prompts 和 resources。</td>
+</tr>
+<tr>
+<td>MCP 和 tool use 的关系是什么？</td>
+<td>它们互补：MCP 提供 tool 定义和执行基础设施；tool use 是 Claude 调用那些 tools 的机制。</td>
+</tr>
+<tr>
+<td>谁可以编写 MCP server？</td>
+<td>任何人——服务提供者、社区贡献者，或构建自定义集成的个人开发者。</td>
+</tr>
+<tr>
+<td>MCP Client 的角色是什么？</td>
+<td>MCP Client 是你的应用程序，连接 MCP server、发现可用 tools、路由 tool 执行请求。</td>
+</tr>
+<tr>
+<td>在 MCP 架构中，tool 执行实际发生在哪里？</td>
+<td>在 MCP server 上，不是在你的应用程序 server 上。MCP server 处理所有服务特定的实现细节。</td>
+</tr>
+<tr>
+<td>为什么 MCP 被比喻为 USB？</td>
+<td>就像 USB 用一个协议标准化硬件连接，MCP 标准化 AI 工具集成，不需要为每个服务准备专用接头。</td>
+</tr>
+<tr>
+<td>没有 MCP 的情况下，GitHub 集成你需要自己实现什么？</td>
+<td>每个操作的 tool schema、API 调用的 handler 函数、认证处理、分页、速率限制，以及应对 API 变更的持续维护。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

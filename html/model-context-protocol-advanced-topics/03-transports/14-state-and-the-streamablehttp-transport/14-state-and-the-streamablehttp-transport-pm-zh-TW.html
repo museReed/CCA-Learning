@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>14 State And The Streamablehttp Transport Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>State and the StreamableHTTP Transport — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (MCP transport 選擇), 2.4 (遠端 server 配置), 2.6 (水平擴展模式)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 03-transports / Lesson 14</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>當你的 MCP server 變得熱門需要擴展時，你面臨選擇：用複雜基礎架構保留豐富功能，或走 stateless 路線簡單擴展但失去進度追蹤和 AI sampling 等關鍵能力。</p>
+<hr />
+<p><img alt="Scaling Tradeoff" src="visuals/scaling-tradeoff-zh-TW.svg" /></p>
+<h2>連鎖餐廳類比</h2>
+<p>想像你的 MCP server 是一家餐廳：</p>
+<ul>
+<li><strong>單一店面</strong>（一個 server instance）：服務生記得你的點餐，可以查看餐點進度，還會主動推薦甜點。完整服務。</li>
+<li><strong>連鎖擴張</strong>（水平擴展）：你在調度員後面開了多家分店。客人打電話到 A 店預約，但餐點訂單被送到 B 店。B 店完全不知道預約的事。</li>
+</ul>
+<p>這就是擴展 MCP server 的<strong>協調問題</strong>。</p>
+<hr />
+<h2>為什麼這對你的產品很重要</h2>
+<p>隨著使用者增長，單一 MCP server instance 無法承受負載。你需要在 load balancer 後面放多個 instance。但 MCP 的 session 模型假設只有一個 server：</p>
+<table>
+<thead>
+<tr>
+<th>Client 做什麼</th>
+<th>哪個 Instance 處理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>開啟 SSE 連線（持久）</td>
+<td>Instance A</td>
+</tr>
+<tr>
+<td>發起 tool call（POST）</td>
+<td>Instance B（隨機！）</td>
+</tr>
+<tr>
+<td>期望收到 progress 更新</td>
+<td>Instance A 有 SSE... 但 B 有任務</td>
+</tr>
+</tbody>
+</table>
+<p>Load balancer 不理解 MCP session。它只是分配請求。</p>
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+這不是 bug — 而是 stateful protocol（帶 session 的 MCP）和 stateless 基礎架構（HTTP load balancer）之間的根本張力。每個建構 production MCP server 的團隊都會碰到這面牆。</p>
+</blockquote>
+<hr />
+<h2>兩種擴展策略</h2>
+<h3>策略 1：Sticky Session（保留功能）</h3>
+<p>強制 load balancer 永遠將同一 client 路由到同一 server instance。</p>
+<table>
+<thead>
+<tr>
+<th>優點</th>
+<th>缺點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>保留所有 MCP 功能</td>
+<td>負載分配不均</td>
+</tr>
+<tr>
+<td>不需要改 code</td>
+<td>每個 client 有單點故障</td>
+</tr>
+<tr>
+<td>熟悉的模式</td>
+<td>較難自動擴展</td>
+</tr>
+</tbody>
+</table>
+<h3>策略 2：走 Stateless（輕鬆擴展）</h3>
+<p>啟用 <code>stateless_http=true</code> — 每個請求獨立。</p>
+<table>
+<thead>
+<tr>
+<th>優點</th>
+<th>缺點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>任何 instance 處理任何請求</td>
+<td>無進度追蹤</td>
+</tr>
+<tr>
+<td>標準 load balancing 可用</td>
+<td>無 server-initiated 功能</td>
+</tr>
+<tr>
+<td>輕鬆自動擴展</td>
+<td>無 sampling（server 不能呼叫 AI）</td>
+</tr>
+<tr>
+<td>更好的容錯性</td>
+<td>無初始化 = 無 capability 協商</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>利害關係人功能影響摘要</h2>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>有狀態</th>
+<th>Stateless</th>
+<th>商業影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>進度條</td>
+<td>可用</td>
+<td>失去</td>
+<td>使用者在長時間操作時盲等</td>
+</tr>
+<tr>
+<td>Sampling（AI 推理）</td>
+<td>可用</td>
+<td>失去</td>
+<td>Server 無法讓 AI 協助決策</td>
+</tr>
+<tr>
+<td>批准流程</td>
+<td>可用</td>
+<td>失去</td>
+<td>無 server 端的 human-in-the-loop</td>
+</tr>
+<tr>
+<td>基本 tool call</td>
+<td>可用</td>
+<td>可用</td>
+<td>核心功能保留</td>
+</tr>
+<tr>
+<td>Resource read</td>
+<td>可用</td>
+<td>可用</td>
+<td>資料存取保留</td>
+</tr>
+<tr>
+<td>自動擴展</td>
+<td>複雜</td>
+<td>簡單</td>
+<td>基礎架構團隊可用標準工具</td>
+</tr>
+<tr>
+<td>容錯性</td>
+<td>差（session 遺失）</td>
+<td>優秀（無狀態可遺失）</td>
+<td>Instance 故障時更好的正常運行時間</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>何時選擇哪種方案</h2>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>建議方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 100 同時使用者</td>
+<td>單一 server，兩個旗標都 false（完整功能）</td>
+</tr>
+<tr>
+<td>100-10K 使用者，功能重要</td>
+<td>Sticky session（保留狀態）</td>
+</tr>
+<tr>
+<td>10K+ 使用者，基本工具存取</td>
+<td>Stateless 模式</td>
+</tr>
+<tr>
+<td>簡單 API 整合</td>
+<td>Stateless + JSON response</td>
+</tr>
+<tr>
+<td>Prototype/MVP</td>
+<td>單一 server，所有功能</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2><code>json_response</code> 旗標（額外簡化）</h2>
+<p>在 stateless 之上，還可以啟用 <code>json_response=true</code>：</p>
+<table>
+<thead>
+<tr>
+<th>不啟用（預設）</th>
+<th>啟用 <code>json_response=true</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>結果即時串流</td>
+<td>最後一次回傳</td>
+</tr>
+<tr>
+<td>使用者看到部分進度</td>
+<td>使用者等待，然後一次取得全部</td>
+</tr>
+<tr>
+<td>更複雜的基礎架構</td>
+<td>標準 REST API 行為</td>
+</tr>
+</tbody>
+</table>
+<p>兩個旗標都開 = 最簡單的 MCP server。本質上就是帶 MCP 訊息格式的 REST API。</p>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>擴展情境題</strong>：「Load balancer 後面的 MCP server」→ 雙連線問題 → stateless 是典型答案。</li>
+<li><strong>取捨分析</strong>：知道 <code>stateless_http=true</code> 確切失去什麼 — 五個功能停用。</li>
+<li><strong>無需初始化</strong>：Stateless 模式跳過 handshake — 任何 instance、任何請求、無需設定。</li>
+<li><strong>旗標組合</strong>：兩者都 true = 最簡單的 server。考試可能問「最大可擴展性用哪個配置？」</li>
+<li>考試哲學：<strong>MCP transport 設計中，擴展上去 = 功能下來</strong>。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 面臨什麼擴展問題？</td>
+<td>來自同一 client 的兩個連線（SSE + POST）可能命中 load balancer 後面的不同 server instance</td>
+</tr>
+<tr>
+<td>MCP 水平擴展的標準解決方案是？</td>
+<td><code>stateless_http=true</code> — 消除 session 狀態，讓任何 instance 處理任何請求</td>
+</tr>
+<tr>
+<td>走 stateless 後使用者失去什麼？</td>
+<td>進度條、sampling、server 發起的批准流程、resource subscription</td>
+</tr>
+<tr>
+<td>走 stateless 後使用者保留什麼？</td>
+<td>基本 tool call 和 resource read — 所有 client-initiated 功能</td>
+</tr>
+<tr>
+<td>Stateless 提供什麼基礎架構好處？</td>
+<td>標準 round-robin load balancing、輕鬆自動擴展、更好的容錯性</td>
+</tr>
+<tr>
+<td><code>json_response=true</code> 在 stateless 之上加了什麼？</td>
+<td>消除 streaming — 只有最終 JSON 回應，行為像標準 REST API</td>
+</tr>
+<tr>
+<td>PM 何時應選 sticky session 而非 stateless？</td>
+<td>當產品需要進度追蹤、sampling 或批准流程，且使用者數量可控時</td>
+</tr>
+<tr>
+<td>最簡單的 MCP server 配置是什麼？</td>
+<td>兩者都設為 <code>true</code> — 帶 MCP 訊息格式的基本 HTTP request-response</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

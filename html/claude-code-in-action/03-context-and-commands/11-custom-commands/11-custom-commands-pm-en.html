@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11 Custom Commands Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Custom Commands — PM Perspective</h1>
+<p><img alt="Custom Commands Scope Architecture" src="visuals/custom-commands-scope-architecture.svg" /><br />
+<em>Figure: Custom commands scope — project vs user level.</em></p>
+<p><img alt="Custom Command Mechanism" src="visuals/custom-command-mechanism.svg" /><br />
+<em>Figure: Custom commands — markdown files become slash commands.</em></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20% of exam)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 ★★★ (custom commands &amp; skills), 3.1 ★★ (CLAUDE.md config)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 03-context-and-commands / Lesson 11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>Custom commands are reusable workflow templates that your engineering team can create and share. Instead of each developer writing their own prompt for common tasks (auditing dependencies, writing tests, reviewing code), the team defines a command once in <code>.claude/commands/</code> and everyone uses it the same way. PMs should care because this is how you standardize AI-assisted workflows across a team — reducing inconsistency and onboarding friction.</p>
+<hr />
+<h2>Why PMs Need to Know This</h2>
+<ol>
+<li><strong>Consistency</strong> — When every developer uses <code>/audit</code> instead of their own version of "check my dependencies," the output is predictable</li>
+<li><strong>Onboarding</strong> — New team members can type <code>/</code> to see all available workflows without reading documentation</li>
+<li><strong>Process codification</strong> — Your team's best practices become executable, not just documented</li>
+<li><strong>Discoverability</strong> — Commands are visible to the whole team when committed to the repo</li>
+</ol>
+<hr />
+<h2>Mental Model: Team Playbook</h2>
+<p>Think of custom commands as a <strong>team playbook</strong> — a shared set of standard operating procedures.</p>
+<table>
+<thead>
+<tr>
+<th>Without Commands</th>
+<th>With Commands</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"How does our team audit dependencies?" — ask a senior dev</td>
+<td>Type <code>/audit</code> — everyone follows the same process</td>
+</tr>
+<tr>
+<td>"What's our test-writing convention?" — read documentation</td>
+<td>Type <code>/write_tests src/auth.ts</code> — convention is built in</td>
+</tr>
+<tr>
+<td>Each developer's output is slightly different</td>
+<td>Standardized output across the team</td>
+</tr>
+<tr>
+<td>Knowledge lives in people's heads</td>
+<td>Knowledge lives in the codebase</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Takeaway</strong></p>
+<p>Custom commands are how you turn tribal knowledge into shared infrastructure. If you hear "only Alice knows how to do X," that workflow should become a command.</p>
+</blockquote>
+<hr />
+<h2>How It Works (Non-Technical Summary)</h2>
+<ol>
+<li>A developer creates a markdown file in the project's <code>.claude/commands/</code> folder</li>
+<li>The filename becomes a slash command (e.g., <code>audit.md</code> → <code>/audit</code>)</li>
+<li>The file contains instructions for Claude — what to check, what to do, how to respond</li>
+<li>The special placeholder <code>$ARGUMENTS</code> lets users pass in specific details when running the command</li>
+<li>The file is committed to the repo, so the whole team has access</li>
+</ol>
+<p><strong>Example</strong>: <code>/write_tests src/auth.ts</code> tells Claude: "Write tests for <code>src/auth.ts</code> following our project's test patterns."</p>
+<hr />
+<h2>Product Scenario Walkthrough</h2>
+<h3>Scenario: Standardizing Code Quality Across a Growing Team</h3>
+<p><img alt="Claude Code Configuration Hierarchy" src="visuals/claude-code-configuration-hierarchy.svg" /><br />
+<em>Figure: Claude Code configuration hierarchy.</em></p>
+<p>Your team grew from 3 to 8 engineers in two months. You notice:<br />
+- Code review comments are repetitive ("you forgot to add tests," "wrong import pattern")<br />
+- New engineers take a week to learn project conventions<br />
+- AI-generated code quality varies widely between developers</p>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Command Solution</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Inconsistent test patterns</td>
+<td><code>/write_tests $ARGUMENTS</code> — encodes test conventions</td>
+<td>All AI-generated tests follow the same structure</td>
+</tr>
+<tr>
+<td>Forgotten dependency audits</td>
+<td><code>/audit</code> — runs full audit + fix + test cycle</td>
+<td>One-click compliance check</td>
+</tr>
+<tr>
+<td>Varying code review quality</td>
+<td><code>/review $ARGUMENTS</code> — standardized review checklist</td>
+<td>Consistent review output</td>
+</tr>
+<tr>
+<td>Slow onboarding</td>
+<td>New devs type <code>/</code> to see all team workflows</td>
+<td>Self-service discoverability</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>PM Takeaway</strong></p>
+<p>When planning AI-assisted development workflows, ask engineering: "Which repetitive tasks should become custom commands?" This is a low-effort, high-impact improvement.</p>
+</blockquote>
+<hr />
+<h2>Commands vs Other Configuration</h2>
+<p>PMs often confuse when to use which tool. Here is the practical distinction:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Analogy</th>
+<th>When PM Should Request It</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Custom Commands</strong></td>
+<td>SOP playbook</td>
+<td>"Every developer should follow the same process for X"</td>
+</tr>
+<tr>
+<td><strong>CLAUDE.md</strong></td>
+<td>Project README for Claude</td>
+<td>"Claude should always know Y about our project"</td>
+</tr>
+<tr>
+<td><strong>Hooks</strong></td>
+<td>Automated compliance check</td>
+<td>"Z must never happen — we need a guarantee"</td>
+</tr>
+<tr>
+<td><strong>Memories</strong></td>
+<td>Personal sticky notes</td>
+<td>Individual preference — PM does not manage this</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Instructor Insights (From the Video)</h2>
+<ol>
+<li><strong>Commands are markdown files</strong> — No programming required. A PM could draft a command template and hand it to engineering for review.</li>
+<li><strong><code>$ARGUMENTS</code> accepts any text</strong> — Not just file paths. You could create <code>/estimate $ARGUMENTS</code> where the argument is a feature description.</li>
+<li><strong>Restart required</strong> — After adding new commands, Claude Code must be restarted. Factor this into workflow documentation.</li>
+</ol>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Question 1: Developer Productivity Scenario</h3>
+<p>Your engineering team uses Claude Code but each developer writes their own prompt for common tasks. This leads to inconsistent code quality. As a PM, which recommendation would have the most impact on standardization?</p>
+<ul>
+<li>A. Write detailed CLAUDE.md instructions covering every workflow</li>
+<li>B. Create a set of custom commands in <code>.claude/commands/</code> for the most common workflows and commit them to the repo</li>
+<li>C. Send a team email with recommended prompts for each workflow</li>
+<li>D. Configure hooks to enforce code quality standards</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — Custom commands codify team workflows into the project structure, making them discoverable, consistent, and versionable. They specifically address the "each developer writes their own prompt" problem.
+
+- A is for persistent project knowledge, not on-demand workflows
+- C is manual and will drift over time as people modify prompts
+- D is for deterministic enforcement, not workflow standardization
+
+**PM Key Takeaway**: Commands are the right tool when you want everyone to follow the same process. Hooks are the right tool when you need guarantees.
+</details>
+
+<h3>Question 2: Code Generation Scenario</h3>
+<p>A new engineer joins your team and asks "how do I know what AI workflows are available?" What feature of custom commands addresses this?</p>
+<ul>
+<li>A. Custom commands are documented in CLAUDE.md automatically</li>
+<li>B. Typing <code>/</code> in Claude Code lists all available commands, including team-defined custom commands</li>
+<li>C. Custom commands send notifications when they are created</li>
+<li>D. Custom commands are only available to the developer who created them</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — Custom commands appear in the `/` command menu alongside built-in commands. This makes team workflows self-documenting and discoverable without reading external documentation.
+
+- A is not automatic — CLAUDE.md is a separate file
+- C is not a feature of commands
+- D is incorrect — project-scoped commands in `.claude/commands/` are available to all team members
+
+**PM Key Takeaway**: Discoverability is a key benefit of custom commands over shared documents or tribal knowledge.
+</details>
+</body>
+</html>

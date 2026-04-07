@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 Roots Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Roots — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (MCP security model), 2.3 (MCP server capabilities)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / Lesson 07</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Roots 是 MCP 告诉 server「你可以看这里，只有这里」的方式 — 同时解决文件发现的易用性问题和无限制访问的安全问题。</p>
+<hr />
+<p><img alt="Roots Access" src="visuals/roots-access-zh-TW.svg" /></p>
+<h2>心智模型：大楼门禁卡</h2>
+<p>把 roots 想成办公大楼的门禁卡：</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>大楼类比</th>
+<th>MCP 对应</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Root</td>
+<td>门禁卡授权进入 3 楼和 7 楼</td>
+<td>Client 说「你可以访问 /projects 和 /data」</td>
+</tr>
+<tr>
+<td>有 roots 的 Server</td>
+<td>持卡员工</td>
+<td>Server 知道要搜索哪些目录</td>
+</tr>
+<tr>
+<td>没有 roots 的 Server</td>
+<td>没卡的访客</td>
+<td>必须询问确切房号（完整文件路径）</td>
+</tr>
+<tr>
+<td>Enforcement</td>
+<td>每层楼的闸门</td>
+<td><code>is_path_allowed()</code> 函数（必须自建）</td>
+</tr>
+</tbody>
+</table>
+<p>关键洞察：<strong>门禁卡本身不锁门</strong> — 闸门才锁。同样地，roots 告诉 server 该去哪里，但 enforcement 必须另外实现。</p>
+<hr />
+<h2>Roots 解决的两个问题</h2>
+<h3>问题 1：易用性</h3>
+<p>没有 roots 时，用户必须提供确切路径：<br />
+- 「读取 <code>/Users/reed/Documents/projects/my-app/src/components/Header.tsx</code>」</p>
+<p>有 roots 时，用户只需说：<br />
+- 「读取 Header.tsx」</p>
+<p>Server 知道要在核准的目录内搜索。</p>
+<h3>问题 2：安全性</h3>
+<p>没有 roots 时，MCP server 可能访问系统上任何文件：<br />
+- 个人文档、SSH key、含密码的环境文件</p>
+<p>有 roots 时，server 的范围被限制在核准的目录。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Roots 解决的问题和 Google Drive 或 Dropbox 的「文件夹权限」相同 — 定义工具可以看到的边界。作为 PM，如果你的产品处理文件，roots 就是实现最小权限访问的机制。</p>
+</blockquote>
+<hr />
+<h2>流程说明（无代码）</h2>
+<ol>
+<li><strong>Client 声明 roots</strong>：「这个 server 可以访问我的项目文件夹和数据文件夹」</li>
+<li><strong>Server 发现 roots</strong>：「我有两个目录的访问权 — 让我在那里搜索」</li>
+<li><strong>用户发出请求</strong>：「找到配置文件」</li>
+<li><strong>Server 在 roots 内搜索</strong>：先看项目文件夹，再看数据文件夹</li>
+<li><strong>Server 找到并使用文件</strong>：返回配置文件内容</li>
+</ol>
+<p>用户从不需要打完整路径。Server 从不看核准目录以外的地方。</p>
+<hr />
+<h2>关键安全缺口</h2>
+<p>这是 PM 必须传达给工程团队的最重要细节：</p>
+<p><strong>MCP SDK 不会自动强制 root 边界。</strong></p>
+<p>SDK 提供核准 roots 的清单。但技术上没有任何机制阻止 server 忽略清单而访问其他文件。你的工程团队必须自建 enforcement。</p>
+<table>
+<thead>
+<tr>
+<th>SDK 提供的</th>
+<th>团队必须建的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Root 发现机制</td>
+<td>访问控制验证</td>
+</tr>
+<tr>
+<td>核准目录清单</td>
+<td>Path traversal 防护</td>
+</tr>
+<tr>
+<td>标准 URI 格式</td>
+<td>Symlink 解析</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM 行动项</strong>：在 PRD 中明确要求访问文件的 tool 必须实现路径验证。不要假设 SDK 会处理。</p>
+<hr />
+<h2>产品情境</h2>
+<h3>情境 1：Code Review 工具</h3>
+<p>Code review MCP server 需要读取源代码。没有 roots 时：<br />
+- 用户必须为每个文件贴上完整路径<br />
+- Server 可能意外读取含 API key 的 <code>.env</code> 文件</p>
+<p>有 roots 时：<br />
+- Client 将 server 指向 repository root<br />
+- Server 在 repo 内自然搜索<br />
+- Repo 外的文件不可访问（有 enforcement 时）</p>
+<h3>情境 2：多项目工作空间</h3>
+<p>开发者同时做三个项目。Client 配置三个 roots：<br />
+- <code>/projects/frontend</code>（React app）<br />
+- <code>/projects/backend</code>（Python API）<br />
+- <code>/projects/shared</code>（共用库）</p>
+<p>Server 可以跨三个项目搜索，用户不需切换上下文。</p>
+<hr />
+<h2>PM 安全检查清单</h2>
+<p>审查访问文件的 MCP tool 设计时，确认：</p>
+<ul>
+<li>[ ] Server 在访问文件前调用 <code>list_roots()</code></li>
+<li>[ ] 路径验证函数存在（<code>is_path_allowed()</code>）</li>
+<li>[ ] Path traversal 攻击有处理（解析 <code>..</code> 和 symlinks）</li>
+<li>[ ] 被拒绝的访问尝试有记录</li>
+<li>[ ] 用户可以查看和修改 root 配置</li>
+</ul>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.2</strong>：MCP 安全模型 — roots 是文件系统安全机制</li>
+<li><strong>D2 Task 2.3</strong>：Server capabilities — 理解 <code>list_roots()</code> 如何启用文件发现</li>
+<li>预期情境题：「Server 访问了核准 roots 外的文件。哪里出了问题？」答：enforcement 未实现</li>
+<li>核心考试哲学：<strong>Validation &gt; Trust</strong> — SDK 默认信任 server；你的代码必须加上验证</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP roots 解决哪两个问题？</td>
+<td>易用性（不需完整路径）和安全性（限制 server 访问核准的目录）</td>
+</tr>
+<tr>
+<td>MCP SDK 会自动阻止 server 访问 roots 外的文件吗？</td>
+<td>不会 — SDK 提供 root 清单但不强制边界；开发者必须实现验证</td>
+</tr>
+<tr>
+<td>PM 对 roots 的关键行动项是什么？</td>
+<td>在 PRD 中明确要求路径验证 — 不要假设 SDK 会处理</td>
+</tr>
+<tr>
+<td>Roots 的安全类比是什么？</td>
+<td>大楼门禁卡 — 告诉你可以去哪，但闸门（enforcement code）必须另外建</td>
+</tr>
+<tr>
+<td>Roots 如何改善用户体验？</td>
+<td>用户说「找配置文件」而非打完整路径 — server 在核准目录内搜索</td>
+</tr>
+<tr>
+<td>Client 可以配置多个 roots 吗？</td>
+<td>可以 — 例如同时指向多个项目目录</td>
+</tr>
+<tr>
+<td>Roots 最大的安全风险是什么？</td>
+<td>Server 收到 roots 但不验证路径 — path traversal 攻击可逃出 root 边界</td>
+</tr>
+<tr>
+<td>哪个考试哲学适用于 roots？</td>
+<td>Validation &gt; Trust — 不要假设 server 会自我限制；加上程序化 enforcement</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

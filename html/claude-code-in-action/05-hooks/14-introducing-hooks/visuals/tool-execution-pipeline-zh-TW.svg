@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" font-family="'PingFang TC', 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/>
+    </filter>
+    <linearGradient id="preGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EEF2FF"/>
+      <stop offset="100%" stop-color="#E0E7FF"/>
+    </linearGradient>
+    <linearGradient id="postGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0FDF4"/>
+      <stop offset="100%" stop-color="#DCFCE7"/>
+    </linearGradient>
+    <linearGradient id="toolGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFF7ED"/>
+      <stop offset="100%" stop-color="#FFEDD5"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94A3B8"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#22C55E"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#EF4444"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="320" fill="white" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#64748B" letter-spacing="1">工具執行管線</text>
+
+  <!-- ===== Node 1: 提問 ===== -->
+  <g transform="translate(30, 80)">
+    <rect width="120" height="100" rx="16" fill="white" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="60" y="50" text-anchor="middle" font-size="28">💬</text>
+    <text x="60" y="78" text-anchor="middle" font-size="14" font-weight="600" fill="#334155">提問</text>
+    <text x="60" y="93" text-anchor="middle" font-size="10" fill="#94A3B8">使用者輸入</text>
+  </g>
+
+  <!-- Arrow 1→2 -->
+  <line x1="155" y1="130" x2="190" y2="130" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== Node 2: 模型 ===== -->
+  <g transform="translate(195, 80)">
+    <rect width="120" height="100" rx="16" fill="white" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="60" y="50" text-anchor="middle" font-size="28">🧠</text>
+    <text x="60" y="78" text-anchor="middle" font-size="14" font-weight="600" fill="#334155">模型</text>
+    <text x="60" y="93" text-anchor="middle" font-size="10" fill="#94A3B8">選擇工具</text>
+  </g>
+
+  <!-- Arrow 2→3 -->
+  <line x1="320" y1="130" x2="355" y2="130" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== Node 3: PreToolUse ===== -->
+  <g transform="translate(360, 65)">
+    <rect width="140" height="130" rx="16" fill="url(#preGrad)" stroke="#818CF8" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="70" y="40" text-anchor="middle" font-size="28">🛡️</text>
+    <text x="70" y="65" text-anchor="middle" font-size="13" font-weight="700" fill="#4338CA">PreToolUse</text>
+    <text x="70" y="82" text-anchor="middle" font-size="11" fill="#6366F1">守門員</text>
+    <!-- 放行 / 攔截 badges -->
+    <g transform="translate(14, 92)">
+      <rect width="50" height="24" rx="12" fill="#22C55E" opacity="0.15"/>
+      <text x="25" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#16A34A">✓ 放行</text>
+    </g>
+    <g transform="translate(76, 92)">
+      <rect width="50" height="24" rx="12" fill="#EF4444" opacity="0.15"/>
+      <text x="25" y="16" text-anchor="middle" font-size="11" font-weight="600" fill="#DC2626">✗ 攔截</text>
+    </g>
+  </g>
+
+  <!-- Arrow 3→4 (Allow path) -->
+  <line x1="505" y1="130" x2="545" y2="130" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="525" y="120" text-anchor="middle" font-size="9" fill="#22C55E" font-weight="600">exit 0</text>
+
+  <!-- Block path: curved arrow back to Model -->
+  <path d="M 430 195 Q 430 240 320 240 Q 255 240 255 195" fill="none" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowRed)"/>
+  <text x="345" y="258" text-anchor="middle" font-size="10" fill="#EF4444" font-weight="600">exit 2 + 回饋原因</text>
+
+  <!-- ===== Node 4: 工具 ===== -->
+  <g transform="translate(550, 80)">
+    <rect width="120" height="100" rx="16" fill="url(#toolGrad)" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="60" y="50" text-anchor="middle" font-size="28">🔧</text>
+    <text x="60" y="78" text-anchor="middle" font-size="14" font-weight="600" fill="#9A3412">工具</text>
+    <text x="60" y="93" text-anchor="middle" font-size="10" fill="#C2410C">實際執行</text>
+  </g>
+
+  <!-- Arrow 4→5 -->
+  <line x1="675" y1="130" x2="710" y2="130" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== Node 5: PostToolUse ===== -->
+  <g transform="translate(715, 65)">
+    <rect width="150" height="130" rx="16" fill="url(#postGrad)" stroke="#4ADE80" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="75" y="40" text-anchor="middle" font-size="28">🔍</text>
+    <text x="75" y="65" text-anchor="middle" font-size="13" font-weight="700" fill="#166534">PostToolUse</text>
+    <text x="75" y="82" text-anchor="middle" font-size="11" fill="#16A34A">觀察者</text>
+    <!-- Feedback items -->
+    <g transform="translate(10, 92)">
+      <rect width="130" height="24" rx="12" fill="#166534" opacity="0.1"/>
+      <text x="65" y="16" text-anchor="middle" font-size="10" fill="#166534">檢查 · 格式化 · 回饋</text>
+    </g>
+  </g>
+
+  <!-- Feedback arrow from PostToolUse back to Model -->
+  <path d="M 790 195 Q 790 290 450 290 Q 255 290 255 185" fill="none" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+  <text x="525" y="302" text-anchor="middle" font-size="10" fill="#94A3B8">回饋 → Claude 下一輪自動修正</text>
+</svg>

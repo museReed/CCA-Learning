@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15 Defining Hooks Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Hooks — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20% of exam)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 05-hooks / Lesson 15</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>Defining a hook follows four steps that mirror setting up a quality checkpoint in a factory: (1) decide whether to inspect <em>before</em> or <em>after</em> the work is done, (2) choose which production lines to monitor, (3) write the inspection procedure, and (4) decide whether to approve or reject the output. PMs must understand this process to write correct acceptance criteria and communicate with engineers about what can be <em>guaranteed</em> vs. what is <em>best-effort</em>.</p>
+<hr />
+<h2>Why PMs Need to Understand Hook Definition</h2>
+<p>When you write a PRD, you specify requirements. Some requirements <em>must</em> be met 100% of the time (compliance, security), while others are <em>best-effort</em> (tone, formatting). Understanding the four-step hook definition process helps you:</p>
+<ol>
+<li><strong>Specify the enforcement mechanism</strong> — not just "what" but "how"</li>
+<li><strong>Estimate engineering effort</strong> — hooks require a script, not just a prompt edit</li>
+<li><strong>Set realistic expectations</strong> — hooks are deterministic; prompts are probabilistic</li>
+</ol>
+<hr />
+<h2>Mental Model: Factory Quality Checkpoint</h2>
+<p>Think of Claude Code as a factory assembly line. Tools are the machines (drilling, welding, painting). Hooks are the quality checkpoints you install:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Factory Analogy</th>
+<th>Hook Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Pre or Post?</td>
+<td>Inspect raw materials before drilling, or inspect finished parts after welding?</td>
+<td>PreToolUse blocks before action; PostToolUse inspects after action</td>
+</tr>
+<tr>
+<td>2. Which line?</td>
+<td>Monitor the paint booth and the welding station</td>
+<td><code>matcher</code>: <code>"Read|Grep"</code> selects which tools</td>
+</tr>
+<tr>
+<td>3. Inspection procedure</td>
+<td>Quality inspector follows a checklist</td>
+<td>Command script reads tool call data (JSON) and applies rules</td>
+</tr>
+<tr>
+<td>4. Pass or fail?</td>
+<td>Green light (continue) or red light (stop the line)</td>
+<td>Exit code 0 (allow) or 2 (block)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Decision Framework</strong></p>
+<p>When writing acceptance criteria, ask: "Is this a green-light/red-light requirement (hook), or a guideline (prompt)?"<br />
+- <strong>Red light</strong>: "The system MUST prevent reading credentials" → Hook<br />
+- <strong>Guideline</strong>: "The system SHOULD respond in a friendly tone" → Prompt</p>
+</blockquote>
+<hr />
+<p><img alt="Four-Step Hook Definition" src="visuals/four-step-process.svg" /><br />
+<em>Figure: The four-step process for defining a hook — Event → Matcher → Command → Exit Code.</em></p>
+<h2>The Four Steps in Business Terms</h2>
+<h3>Step 1: Before or After?</h3>
+<table>
+<thead>
+<tr>
+<th>Requirement Type</th>
+<th>Hook Type</th>
+<th>Business Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prevention / Compliance</td>
+<td><strong>PreToolUse</strong></td>
+<td>Block refunds &gt; $500 without manager approval</td>
+</tr>
+<tr>
+<td>Logging / Quality Check</td>
+<td><strong>PostToolUse</strong></td>
+<td>Log every customer interaction to CRM</td>
+</tr>
+<tr>
+<td>Auto-correction</td>
+<td><strong>PostToolUse</strong></td>
+<td>Run spell-check after every document edit</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Critical for PMs</strong></p>
+<p>If your requirement says "must never" or "must always prevent," specify PreToolUse in your acceptance criteria. PostToolUse cannot prevent — it only reacts after the fact.</p>
+</blockquote>
+<h3>Step 2: Which Operations to Monitor?</h3>
+<p>The <code>matcher</code> field selects which AI tools trigger the checkpoint. Common scenarios:</p>
+<table>
+<thead>
+<tr>
+<th>PM Requirement</th>
+<th>Engineer Translates To</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Claude must not read credential files"</td>
+<td><code>matcher: "Read|Grep"</code></td>
+</tr>
+<tr>
+<td>"Auto-format every file Claude writes"</td>
+<td><code>matcher: "Write|Edit|MultiEdit"</code></td>
+</tr>
+<tr>
+<td>"Log all shell commands"</td>
+<td><code>matcher: "Bash"</code></td>
+</tr>
+<tr>
+<td>"Monitor everything"</td>
+<td><code>matcher: ".*"</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Common PM Oversight</strong></p>
+<p>PMs often forget that <code>Grep</code> (search) can also expose file contents, not just <code>Read</code>. Always ask your engineer: "Are there other tools that could access this data?"</p>
+</blockquote>
+<h3>Step 3: The Inspection Logic</h3>
+<p>The hook command receives detailed information about what Claude is trying to do — not just "Claude wants to read a file" but specifically "Claude wants to read <code>/src/config/.env</code> using the Read tool."</p>
+<p>This granularity means hooks can make very precise decisions based on file paths, command content, or any other parameter.</p>
+<h3>Step 4: The Verdict</h3>
+<table>
+<thead>
+<tr>
+<th>Verdict</th>
+<th>Exit Code</th>
+<th>What Happens Next</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Approved</td>
+<td>0</td>
+<td>Tool call proceeds normally</td>
+</tr>
+<tr>
+<td>Rejected</td>
+<td>2</td>
+<td>Tool call is blocked; Claude receives the rejection reason and adjusts</td>
+</tr>
+</tbody>
+</table>
+<p>The rejection feedback creates a self-correcting loop — Claude does not just fail silently; it understands <em>why</em> and tries an alternative approach.</p>
+<hr />
+<h2>Instructor Insights (From the Video)</h2>
+<p>Key points from the instructor that PMs should note:</p>
+<ol>
+<li><strong>Tool discovery is dynamic</strong> — The available tools change when MCP servers are added. Engineers can ask Claude "list your available tools" to discover what can be monitored.</li>
+<li><strong>Matcher uses regex-like syntax</strong> — The pipe symbol <code>|</code> means OR. This is a technical detail, but PMs should know that one hook can watch multiple tools.</li>
+<li><strong>stderr feedback is critical</strong> — When a hook blocks an action, the error message goes directly to Claude. Good error messages help Claude find alternatives; poor messages cause confusion.</li>
+</ol>
+<hr />
+<h2>Anti-Patterns (Exam Frequently Tested)</h2>
+<table>
+<thead>
+<tr>
+<th>❌ Wrong Approach</th>
+<th>✅ Correct Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Write "must prevent X" in PRD without specifying enforcement mechanism</td>
+<td>Specify "enforce via PreToolUse hook" in acceptance criteria</td>
+<td>Without specification, engineers may use prompt-based solutions</td>
+</tr>
+<tr>
+<td>Assume PostToolUse can prevent actions</td>
+<td>Use PreToolUse for prevention requirements</td>
+<td>PostToolUse runs after the action — too late to prevent</td>
+</tr>
+<tr>
+<td>Monitor only one tool when multiple tools can do the same thing</td>
+<td>Ask engineers which tools can access the data</td>
+<td>Grep can read file contents just like Read</td>
+</tr>
+<tr>
+<td>Skip the rejection message</td>
+<td>Require clear feedback messages in hook specs</td>
+<td>Claude needs feedback to self-correct</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: Customer Support Scenario (S1)</h3>
+<p>You are writing a PRD for an AI customer support agent. One requirement states: "The agent must never access customer payment details stored in the <code>.credentials</code> directory." An engineer proposes adding this instruction to the system prompt. What should you recommend?</p>
+<ul>
+<li>A. Accept the engineer's proposal — prompt instructions are sufficient for access control</li>
+<li>B. Request a PreToolUse hook that blocks Read and Grep operations on <code>.credentials</code> paths</li>
+<li>C. Request a PostToolUse hook that logs when Claude accesses <code>.credentials</code> files</li>
+<li>D. Add the restriction to CLAUDE.md and set it as a team-shared project setting</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — "Must never access" is a compliance requirement that demands deterministic enforcement. PreToolUse hooks block the action before it occurs. Both Read and Grep must be covered because either tool can expose file contents.
+
+- A is prompt-based with non-zero failure rate — unacceptable for compliance
+- C is PostToolUse — too late, the file has already been read
+- D is still a prompt-based instruction, not a programmatic enforcement
+
+**PM Takeaway**: When you write "must never" in a PRD, you are specifying a deterministic requirement. The enforcement mechanism must match — use a hook, not a prompt.
+</details>
+
+<h3>Q2: Developer Productivity Scenario (S4)</h3>
+<p>Your team wants Claude Code to automatically run a code formatter after every file edit. The formatter should not block Claude's work — just clean up formatting. Which step-by-step approach would you specify in the requirements?</p>
+<ul>
+<li>A. PreToolUse hook on Write|Edit that runs the formatter before Claude writes the file</li>
+<li>B. PostToolUse hook on Write|Edit|MultiEdit that runs the formatter after Claude edits, exit code 0</li>
+<li>C. Add "always format your code" to the system prompt</li>
+<li>D. PostToolUse hook on Read that runs the formatter after Claude reads files</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — Formatting must happen after the file is edited (PostToolUse). The matcher should cover all edit operations (Write, Edit, MultiEdit). Exit code 0 means "proceed normally" — no blocking.
+
+- A runs before the edit — there is nothing to format yet
+- C is prompt-based and cannot guarantee consistent formatting
+- D targets the wrong tool — Read does not modify files
+
+**PM Takeaway**: "Automatically after every edit" + "should not block" = PostToolUse with exit code 0. This is a quality enhancement, not a compliance gate.
+</details>
+
+<h3>Q3: Code Generation Scenario (S2)</h3>
+<p>A team uses Claude Code to generate API endpoint code. They want to ensure all generated files follow the project's naming convention (<code>snake_case</code>). If a file does not follow the convention, the generation should be blocked. What hook configuration should you request?</p>
+<ul>
+<li>A. PostToolUse hook on Write that checks naming and logs a warning</li>
+<li>B. PreToolUse hook on Write that validates the file name and blocks with exit code 2 if non-compliant</li>
+<li>C. Add naming convention examples to CLAUDE.md</li>
+<li>D. PostToolUse hook on Write that renames the file after creation</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — "Should be blocked" means prevention, which requires PreToolUse. The hook checks the file name in the tool input before the Write operation executes.
+
+- A is PostToolUse — the file is already written with the wrong name
+- C is prompt-based and probabilistic
+- D is reactive cleanup — more complex and error-prone than prevention
+
+**PM Takeaway**: "Block if non-compliant" is the key phrase. Blocking requires PreToolUse. If the requirement said "fix if non-compliant," PostToolUse would be appropriate.
+</details>
+</body>
+</html>

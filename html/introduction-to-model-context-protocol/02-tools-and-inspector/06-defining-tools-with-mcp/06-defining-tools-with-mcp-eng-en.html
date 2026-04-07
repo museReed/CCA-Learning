@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06 Defining Tools With Mcp Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Tools with MCP — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.1 Design and implement tool schemas; T2.5 Use MCP SDK to define tools with type safety</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 02-tools-and-inspector / Lesson 06</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The Python MCP SDK (FastMCP) lets you define tools as decorated Python functions with type hints, automatically generating JSON schemas and handling validation without manual schema writing.</p>
+<hr />
+<p><img alt="Tools Decorator" src="visuals/tools-decorator.svg" /></p>
+<h2>FastMCP: The Python SDK</h2>
+<p>FastMCP is the official Python SDK for building MCP servers. It eliminates the tedious process of manually writing JSON tool schemas by leveraging Python's type system.</p>
+<pre class="highlight"><code class="language-python">from mcp.server.fastmcp import FastMCP
+
+# Create an MCP server instance
+mcp = FastMCP(&quot;document-tools&quot;)
+</code></pre>
+
+<p>The <code>FastMCP</code> constructor takes a server name string. This name identifies your MCP server to clients during the connection handshake.</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+The server name is not just a label — it appears in client logs and debugging output. Choose a descriptive name that reflects the server's purpose (e.g., "github-tools", "document-tools", "database-query").</p>
+</blockquote>
+<hr />
+<h2>Defining Tools with @mcp.tool()</h2>
+<p>Tools are defined as regular Python functions decorated with <code>@mcp.tool()</code>. FastMCP inspects the function signature to auto-generate the tool's JSON schema.</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+def read_doc_contents(file_path: str) -&gt; str:
+    &quot;&quot;&quot;Read and return the contents of a document.
+
+    Args:
+        file_path: The path to the document to read.
+    &quot;&quot;&quot;
+    with open(file_path, &quot;r&quot;) as f:
+        return f.read()
+</code></pre>
+
+<p>What happens behind the scenes:</p>
+<ol>
+<li><strong>Function name</strong> becomes the tool name: <code>read_doc_contents</code></li>
+<li><strong>Docstring</strong> becomes the tool description (what Claude sees when deciding to use the tool)</li>
+<li><strong>Type hints</strong> become the JSON schema types: <code>file_path: str</code> → <code>{"type": "string"}</code></li>
+<li><strong>Return type</strong> defines the output format</li>
+</ol>
+<p>The auto-generated JSON schema looks like:</p>
+<pre class="highlight"><code class="language-json">{
+    &quot;name&quot;: &quot;read_doc_contents&quot;,
+    &quot;description&quot;: &quot;Read and return the contents of a document.&quot;,
+    &quot;inputSchema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;file_path&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;description&quot;: &quot;The path to the document to read.&quot;
+            }
+        },
+        &quot;required&quot;: [&quot;file_path&quot;]
+    }
+}
+</code></pre>
+
+<blockquote>
+<p><strong>Key Insight</strong><br />
+The docstring is critical for Claude's tool selection accuracy. A vague docstring means Claude may choose the wrong tool or miss it entirely. Write docstrings that clearly state what the tool does, when to use it, and what it returns.</p>
+</blockquote>
+<hr />
+<h2>Field Descriptions with Annotated Types</h2>
+<p>For more precise parameter descriptions, use <code>Field</code> from Pydantic:</p>
+<pre class="highlight"><code class="language-python">from pydantic import Field
+from typing import Annotated
+
+@mcp.tool()
+def edit_document(
+    file_path: Annotated[str, Field(description=&quot;Path to the document to edit&quot;)],
+    new_content: Annotated[str, Field(description=&quot;The new content to write to the document&quot;)],
+    create_backup: Annotated[bool, Field(description=&quot;Whether to create a .bak backup first&quot;)] = True
+) -&gt; str:
+    &quot;&quot;&quot;Edit a document by replacing its contents.
+
+    Overwrites the file at file_path with new_content.
+    Optionally creates a backup of the original file.
+    &quot;&quot;&quot;
+    if create_backup:
+        import shutil
+        shutil.copy2(file_path, f&quot;{file_path}.bak&quot;)
+
+    with open(file_path, &quot;w&quot;) as f:
+        f.write(new_content)
+
+    return f&quot;Document {file_path} updated successfully&quot;
+</code></pre>
+
+<p>Key patterns:</p>
+<ul>
+<li><strong><code>Annotated[type, Field(...)]</code></strong> — Adds rich descriptions to individual parameters</li>
+<li><strong>Default values</strong> — Parameters with defaults become optional in the schema</li>
+<li><strong>Boolean flags</strong> — Use <code>Field(description=...)</code> to explain what the flag controls</li>
+</ul>
+<hr />
+<h2>Error Handling</h2>
+<p>MCP tools handle errors using standard Python exceptions. FastMCP catches exceptions and returns them as error responses to the client.</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+def read_doc_contents(file_path: str) -&gt; str:
+    &quot;&quot;&quot;Read and return the contents of a document.&quot;&quot;&quot;
+    try:
+        with open(file_path, &quot;r&quot;) as f:
+            return f.read()
+    except FileNotFoundError:
+        raise ValueError(f&quot;Document not found: {file_path}&quot;)
+    except PermissionError:
+        raise ValueError(f&quot;Permission denied: {file_path}&quot;)
+</code></pre>
+
+<p>Best practices for MCP tool errors:</p>
+<ul>
+<li><strong>Raise <code>ValueError</code></strong> for user-facing errors (invalid input, not found, etc.)</li>
+<li><strong>Let unexpected exceptions propagate</strong> — FastMCP wraps them as internal errors</li>
+<li><strong>Include context in error messages</strong> — Claude uses error messages to decide next steps</li>
+</ul>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Good error messages are part of tool design. When Claude receives an error like "Document not found: /path/to/file", it can explain the issue to the user or try an alternative approach. A generic "Error occurred" gives Claude nothing to work with.</p>
+</blockquote>
+<hr />
+<h2>Benefits Over Manual Schema Writing</h2>
+<table>
+<thead>
+<tr>
+<th>Manual Approach</th>
+<th>FastMCP Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Write JSON schema by hand</td>
+<td>Auto-generated from type hints</td>
+</tr>
+<tr>
+<td>Manually validate inputs</td>
+<td>Pydantic auto-validation</td>
+</tr>
+<tr>
+<td>Separate schema and implementation</td>
+<td>Schema lives with the code</td>
+</tr>
+<tr>
+<td>Easy to have schema/code drift</td>
+<td>Always in sync</td>
+</tr>
+<tr>
+<td>Verbose boilerplate</td>
+<td>Clean, Pythonic functions</td>
+</tr>
+</tbody>
+</table>
+<p>The auto-validation is particularly powerful. If Claude sends <code>file_path: 42</code> instead of a string, FastMCP catches the type error before your function runs.</p>
+<hr />
+<h2>Running the Server</h2>
+<pre class="highlight"><code class="language-python">if __name__ == &quot;__main__&quot;:
+    mcp.run()
+</code></pre>
+
+<p>The <code>mcp.run()</code> method starts the MCP server, defaulting to stdio transport. For HTTP transport:</p>
+<pre class="highlight"><code class="language-python">if __name__ == &quot;__main__&quot;:
+    mcp.run(transport=&quot;sse&quot;)  # Server-Sent Events over HTTP
+</code></pre>
+
+<hr />
+<h2>CCA Exam Relevance</h2>
+<p>This lesson is central to <strong>Domain 2 (18%)</strong>. Key exam areas:</p>
+<ul>
+<li><strong><code>@mcp.tool()</code> decorator</strong>: Know that it auto-generates JSON schemas from function signatures</li>
+<li><strong>Docstrings matter</strong>: They become tool descriptions that Claude uses for tool selection</li>
+<li><strong>Type hints to schemas</strong>: Understand the mapping (str→string, int→integer, bool→boolean, etc.)</li>
+<li><strong>Field descriptions</strong>: Know how <code>Annotated[type, Field(...)]</code> adds parameter-level descriptions</li>
+<li><strong>Error handling pattern</strong>: Understand that Python exceptions become MCP error responses</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does <code>@mcp.tool()</code> do?</td>
+<td>It decorates a Python function to register it as an MCP tool, auto-generating the JSON schema from the function's name, docstring, type hints, and parameter descriptions.</td>
+</tr>
+<tr>
+<td>How does FastMCP generate tool descriptions?</td>
+<td>From the function's docstring. The first line typically becomes the short description, and the full docstring provides detailed context for Claude's tool selection.</td>
+</tr>
+<tr>
+<td>How are parameter descriptions added in FastMCP?</td>
+<td>Using <code>Annotated[type, Field(description="...")]</code> from Pydantic, or from the Args section of the docstring.</td>
+</tr>
+<tr>
+<td>What happens when a tool raises a ValueError?</td>
+<td>FastMCP catches it and returns it as an error response to the MCP client. Claude then sees the error message and can decide how to respond.</td>
+</tr>
+<tr>
+<td>How does FastMCP handle input validation?</td>
+<td>It uses Pydantic auto-validation based on type hints. If Claude sends the wrong type for a parameter, the error is caught before the function executes.</td>
+</tr>
+<tr>
+<td>What does <code>FastMCP("name")</code> create?</td>
+<td>An MCP server instance with the given name. The name identifies the server to clients during connection and appears in logs.</td>
+</tr>
+<tr>
+<td>What is the advantage of FastMCP over manual JSON schema writing?</td>
+<td>Schema auto-generation from type hints, automatic input validation, schema always in sync with code, and much less boilerplate.</td>
+</tr>
+<tr>
+<td>How do you make a tool parameter optional in FastMCP?</td>
+<td>Give it a default value in the function signature. Parameters with defaults become optional in the generated JSON schema.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

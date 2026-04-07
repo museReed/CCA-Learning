@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06 Defining Tools With Mcp Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Tools with MCP — PM 策略概覽</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.1 設計與實作 tool schemas; T2.5 使用 MCP SDK 定義型別安全的 tools</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 02-tools-and-inspector / Lesson 06</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>MCP SDK 把 tool 建立從為期數週的規格撰寫專案，變成寫一個帶好描述的 Python 函式——大幅降低給 Claude 新能力所需的工程量。</p>
+<hr />
+<p><img alt="Tools Decorator" src="visuals/tools-decorator-zh-TW.svg" /></p>
+<h2>舊方式：規格驅動開發</h2>
+<p>在 MCP SDK 之前，讓 Claude 存取新 tool 需要一個多步驟流程，很像撰寫法律合約：</p>
+<ol>
+<li><strong>寫 JSON schema</strong> — 每個參數、其型別、約束和描述的正式規格</li>
+<li><strong>寫 handler 函式</strong> — 實際做事的程式碼</li>
+<li><strong>保持同步</strong> — 每次函式改變，schema 也必須改</li>
+<li><strong>測試 schema</strong> — 驗證 Claude 正確解讀 schema</li>
+</ol>
+<p>這就像要求每個員工在做任何工作之前先寫正式職位描述，然後每次職責變更時更新那份文件。</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+舊方式造成「tool 瓶頸」——每個新能力都需要先完成 schema 規格工作才能建任何實際功能。FastMCP 完全移除了這個瓶頸。</p>
+</blockquote>
+<hr />
+<h2>新方式：直接寫函式</h2>
+<p>用 FastMCP，工程工作流大幅簡化：</p>
+<ol>
+<li>寫一個做你想做的事的 Python 函式</li>
+<li>加一個裝飾器（<code>@mcp.tool()</code>）</li>
+<li>寫一個好的 docstring 解釋它做什麼</li>
+</ol>
+<p>就這樣。SDK 自動從程式碼本身產生正式規格。函式本身就是規格。</p>
+<p>想像兩者的差異：</p>
+<ul>
+<li><strong>舊方式</strong>：撰寫詳細的 10 頁需求文件、取得核准、然後聘請承包商做事</li>
+<li><strong>新方式</strong>：在對話中描述你需要什麼，工作立即開始</li>
+</ul>
+<p>給 PM 的關鍵洞察是 <strong>tool 描述的品質</strong>（docstring）直接影響 Claude 使用 tool 的效果。這是產品思維重要的地方——不在技術 schema，而在清楚表達 tool 做什麼、何時使用、回傳什麼。</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+Tool 描述是產品設計決策，不只是技術細節。寫得好的描述意味著 Claude 在正確的時間選擇正確的 tool。模糊的描述意味著 Claude 犯錯或完全忽略 tool。</p>
+</blockquote>
+<hr />
+<h2>為什麼描述是產品決策</h2>
+<p>當 Claude 收到使用者查詢時，它會讀過所有可用的 tool 描述並決定使用哪個（如果有的話）。這就像客戶在目錄中閱讀產品描述。</p>
+<p>考慮同一個 tool 的兩種描述：</p>
+<p><strong>模糊</strong>：「讀取文件」</p>
+<p><strong>精確</strong>：「讀取並回傳指定檔案路徑的完整文字內容。當使用者詢問文件內容、需要檢閱檔案、或想在文件中搜尋時使用。」</p>
+<p>精確的描述給 Claude 清楚的信號，說明何時及如何使用 tool。模糊的描述留下太多歧義。</p>
+<p>這直接映射到產品文案撰寫——描述越清楚，使用者體驗越好。</p>
+<hr />
+<h2>錯誤訊息即使用者體驗</h2>
+<p>當 tools 失敗時，Claude 收到的錯誤訊息決定它如何優雅地處理情況。好的錯誤訊息就像好的客服培訓：</p>
+<p><strong>差的錯誤</strong>：「操作失敗」<br />
+- Claude 告訴使用者：「出了問題。請再試一次。」</p>
+<p><strong>好的錯誤</strong>：「在 /reports/q3.pdf 找不到文件。reports 目錄包含：q1.pdf、q2.pdf、q4.pdf」<br />
+- Claude 告訴使用者：「我找不到 q3.pdf，但我看到有 q1、q2 和 q4 報告。要我讀其中一個嗎？」</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+錯誤訊息是使用者體驗的一部分，即使使用者從未直接看到。它們決定 Claude 是優雅復原還是給出死胡同回應。審查 tool 規格時，永遠檢查錯誤處理設計。</p>
+</blockquote>
+<hr />
+<h2>驗證安全網</h2>
+<p>FastMCP 在 tool 程式碼執行前自動驗證輸入。這就像在生產線前設置品質管控檢查站：</p>
+<ul>
+<li>如果 Claude 發送數字而預期是文字字串，驗證會攔截</li>
+<li>如果缺少必填欄位，驗證會攔截</li>
+<li>如果值超出允許範圍，驗證會攔截</li>
+</ul>
+<p>這意味著 tool 開發者可以專注於「快樂路徑」——輸入正確時會發生什麼——讓 SDK 處理輸入錯誤。更少 bug、更少防禦性程式碼、更快開發。</p>
+<hr />
+<h2>對產品團隊的策略影響</h2>
+<p><strong>更快的能力擴展</strong>：為 AI 產品新增 tool 從數天降到數小時。這意味著產品可以更快回應使用者回饋和市場需求。</p>
+<p><strong>更低的工程門檻</strong>：初級開發者也能建立 MCP tools。SDK 處理複雜的協定細節，開發者專注於商業邏輯。</p>
+<p><strong>更好的 tool 品質</strong>：自動驗證在 bug 觸達使用者前攔截。Schema-程式碼同步消除了整類「測試時能用但生產環境失敗」的問題。</p>
+<p><strong>描述驅動設計</strong>：PM 能做的最有影響力的事是確保 tool 描述清楚、具體、且與使用者意圖對齊。這是產品專業直接改善 AI 表現的地方。</p>
+<hr />
+<h2>CCA 考試關聯性</h2>
+<p>本課涵蓋 <strong>Domain 2 (18%)</strong>，重點在：</p>
+<ul>
+<li>理解 <code>@mcp.tool()</code> 從 Python 函式自動產生 schema</li>
+<li>知道 docstring 變成 Claude 用於選擇的 tool 描述</li>
+<li>辨認好的描述改善 tool 選擇準確度</li>
+<li>理解驗證和錯誤處理模式</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP SDK 從 tool 建立流程中消除了什麼？</td>
+<td>手動 JSON schema 撰寫。SDK 從 Python 函式簽章和 type hints 自動產生 schema。</td>
+</tr>
+<tr>
+<td>為什麼 tool 描述是產品決策？</td>
+<td>因為 Claude 讀描述來決定用哪個 tool。清楚、具體的描述帶來更好的 tool 選擇和更好的使用者體驗。</td>
+</tr>
+<tr>
+<td>好的和差的 tool 錯誤訊息有什麼區別？</td>
+<td>好的錯誤包含上下文（什麼出錯、有什麼替代方案）。差的錯誤是通用的（「失敗」）。好的錯誤讓 Claude 優雅復原。</td>
+</tr>
+<tr>
+<td>FastMCP 中「自動驗證」是什麼意思？</td>
+<td>SDK 在 tool 程式碼執行前自動檢查 Claude 的 tool 輸入是否符合預期型別和約束，及早攔截錯誤。</td>
+</tr>
+<tr>
+<td>FastMCP 如何影響開發速度？</td>
+<td>新增 tool 從數天（手動 schema + handler + 測試）降到數小時（寫函式 + 裝飾器 + docstring）。</td>
+</tr>
+<tr>
+<td>PM 能為 MCP tools 做的最有影響力的事是什麼？</td>
+<td>確保 tool 描述清楚、具體、且與使用者意圖對齊——這直接影響 Claude 選擇和使用 tools 的效果。</td>
+</tr>
+<tr>
+<td>FastMCP 中 schema-程式碼同步如何運作？</td>
+<td>Schema 從程式碼本身產生，所以它們永遠不會不同步。函式的變更自動更新 schema。</td>
+</tr>
+<tr>
+<td>Claude 發送無效輸入到 FastMCP tool 時會發生什麼？</td>
+<td>Pydantic 驗證在 tool 函式執行前攔截型別錯誤，回傳清楚的錯誤訊息給 Claude。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

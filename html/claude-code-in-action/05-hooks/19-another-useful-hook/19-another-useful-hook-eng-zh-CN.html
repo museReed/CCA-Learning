@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>19 Another Useful Hook Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Another Useful Hook — 工程师视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试对应</td>
+<td>D3 — Claude Code Configuration &amp; Workflows（占 20%）、D1 — Agentic Architecture（占 27%）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.5（Agent SDK hooks：tool call interception）、3.2（custom commands &amp; hooks）、1.7（session state &amp; resumption）</td>
+</tr>
+<tr>
+<td>课程来源</td>
+<td>claude-code-in-action / 05-hooks / Lesson 19（纯文字课程）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话理解</h2>
+<p>除了 PreToolUse 和 PostToolUse，Claude Code 还有 7 种 hook 类型（<code>Notification</code>、<code>Stop</code>、<code>SubagentStop</code>、<code>PreCompact</code>、<code>UserPromptSubmit</code>、<code>SessionStart</code>、<code>SessionEnd</code>）——而且 stdin 输入结构会因 hook 类型和 tool matcher 不同而改变，所以用 <code>jq . &gt; log.json</code> 的 debug hook 是开发时必备的。</p>
+<hr />
+<p><img alt="Hook 分類總覽" src="visuals/hook-taxonomy-zh-TW.svg" /><br />
+<em>圖：Hook 完整分類 — 全部 9 種 Hook 依生命週期、是否可攔截、用途分類。</em></p>
+<h2>完整的 Hook 分类</h2>
+<p>课程大部分聚焦在 PreToolUse 和 PostToolUse。这节课揭开了完整面貌：</p>
+<table>
+<thead>
+<tr>
+<th>Hook 类型</th>
+<th>何时触发</th>
+<th>能否阻止？</th>
+<th>主要用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PreToolUse</code></td>
+<td>工具执行前</td>
+<td>可以</td>
+<td>访问控制、政策 enforcement、前置条件检查</td>
+</tr>
+<tr>
+<td><code>PostToolUse</code></td>
+<td>工具执行后</td>
+<td>不行（只能反馈）</td>
+<td>Type checking、linting、duplication review</td>
+</tr>
+<tr>
+<td><code>Notification</code></td>
+<td>Claude 发送通知时（需要权限或闲置 60 秒）</td>
+<td>不行</td>
+<td>自定义警报、Slack/email 通知</td>
+</tr>
+<tr>
+<td><code>Stop</code></td>
+<td>Claude 完成回应时</td>
+<td>不行</td>
+<td>Session 日志、摘要生成、清理</td>
+</tr>
+<tr>
+<td><code>SubagentStop</code></td>
+<td>Subagent（UI 中显示为「Task」）完成时</td>
+<td>不行</td>
+<td>Subagent 输出验证、结果聚合</td>
+</tr>
+<tr>
+<td><code>PreCompact</code></td>
+<td>Compact 操作前（手动或自动）</td>
+<td>不行</td>
+<td>Context 保存、压缩前 fact extraction</td>
+</tr>
+<tr>
+<td><code>UserPromptSubmit</code></td>
+<td>用户提交 prompt，Claude 处理前</td>
+<td>可以</td>
+<td>输入验证、prompt 预处理、日志</td>
+</tr>
+<tr>
+<td><code>SessionStart</code></td>
+<td>开始或恢复 session 时</td>
+<td>不行</td>
+<td>环境设置、context 加载</td>
+</tr>
+<tr>
+<td><code>SessionEnd</code></td>
+<td>Session 结束时</td>
+<td>不行</td>
+<td>清理、session 日志、状态持久化</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>工程类比</strong></p>
+<p>把 Claude Code 想成一个 iOS app：<br />
+- <code>PreToolUse</code>/<code>PostToolUse</code> = <code>URLProtocol</code> 拦截器（per-request middleware）<br />
+- <code>SessionStart</code>/<code>SessionEnd</code> = <code>applicationDidFinishLaunching</code> / <code>applicationWillTerminate</code><br />
+- <code>Notification</code> = <code>UNUserNotificationCenter</code> delegate<br />
+- <code>Stop</code> = <code>Operation</code> 上的 completion handler<br />
+- <code>PreCompact</code> = <code>didReceiveMemoryWarning</code>（即将裁剪 context）<br />
+- <code>UserPromptSubmit</code> = <code>textFieldShouldReturn</code>（在处理前拦截）</p>
+</blockquote>
+<hr />
+<h2>令人困惑的部分：不同的 stdin 输入结构</h2>
+<p>每种 hook 类型收到的 <strong>stdin JSON 结构不同</strong>。而且对 <code>PreToolUse</code>/<code>PostToolUse</code> 来说，<code>tool_input</code> 字段会因被调用的工具而异。</p>
+<h3>示例 1：PostToolUse on TodoWrite</h3>
+<pre class="highlight"><code class="language-json">{
+  &quot;session_id&quot;: &quot;9ecf22fa-edf8-4332-ae85-b6d5456eda64&quot;,
+  &quot;transcript_path&quot;: &quot;&lt;path_to_transcript&gt;&quot;,
+  &quot;hook_event_name&quot;: &quot;PostToolUse&quot;,
+  &quot;tool_name&quot;: &quot;TodoWrite&quot;,
+  &quot;tool_input&quot;: {
+    &quot;todos&quot;: [{ &quot;content&quot;: &quot;write a readme&quot;, &quot;status&quot;: &quot;pending&quot;, &quot;priority&quot;: &quot;medium&quot;, &quot;id&quot;: &quot;1&quot; }]
+  },
+  &quot;tool_response&quot;: {
+    &quot;oldTodos&quot;: [],
+    &quot;newTodos&quot;: [{ &quot;content&quot;: &quot;write a readme&quot;, &quot;status&quot;: &quot;pending&quot;, &quot;priority&quot;: &quot;medium&quot;, &quot;id&quot;: &quot;1&quot; }]
+  }
+}
+</code></pre>
+
+<p>PostToolUse 的关键字段：<br />
+- <code>tool_name</code> — 使用了哪个工具<br />
+- <code>tool_input</code> — Claude 传给工具的输入（每个工具不同）<br />
+- <code>tool_response</code> — 工具返回的结果（每个工具不同）</p>
+<h3>示例 2：Stop Hook</h3>
+<pre class="highlight"><code class="language-json">{
+  &quot;session_id&quot;: &quot;af9f50b6-f042-4773-b3e2-c3a4814765ce&quot;,
+  &quot;transcript_path&quot;: &quot;&lt;path_to_transcript&gt;&quot;,
+  &quot;hook_event_name&quot;: &quot;Stop&quot;,
+  &quot;stop_hook_active&quot;: false
+}
+</code></pre>
+
+<p>注意：没有 <code>tool_name</code>、没有 <code>tool_input</code>、没有 <code>tool_response</code>。结构完全不同。</p>
+<blockquote>
+<p>⚠️ <strong>写 hook 最大的陷阱</strong></p>
+<p>你不能假设 stdin 结构。一个为 PostToolUse on <code>Write</code> 写的 hook 脚本，如果收到 PostToolUse on <code>TodoWrite</code> 就会 crash，因为 <code>tool_input</code> 的字段完全不同。访问嵌套字段前一定要先验证结构。</p>
+</blockquote>
+<hr />
+<h2>Debug Hook：你最好的朋友</h2>
+<p><img alt="除錯 Hook 模式" src="visuals/debug-hook-pattern-zh-TW.svg" /><br />
+<em>圖：除錯 Hook 模式 — 先用 jq 觀察 stdin，再建構正式邏輯，如同寫 HTTP client 前先用 curl -v。</em></p>
+<p>这节课最实用的技巧是一个通用 debug hook，把 stdin 写到文件：</p>
+<pre class="highlight"><code class="language-json">&quot;PostToolUse&quot;: [
+  {
+    &quot;matcher&quot;: &quot;*&quot;,
+    &quot;hooks&quot;: [
+      {
+        &quot;type&quot;: &quot;command&quot;,
+        &quot;command&quot;: &quot;jq . &gt; post-log.json&quot;
+      }
+    ]
+  }
+]
+</code></pre>
+
+<p>它做了什么：<br />
+1. <code>*</code> matcher 捕捉<strong>所有</strong>工具使用<br />
+2. <code>jq .</code> 把 JSON stdin 格式化<br />
+3. 输出写到 <code>post-log.json</code><br />
+4. 你可以检查 hook 会收到的确切数据</p>
+<blockquote>
+<p>💡 <strong>开发工作流</strong></p>
+<ol>
+<li>加上 debug hook，<code>matcher: "*"</code></li>
+<li>正常使用 Claude Code——触发你想要 hook 的工具</li>
+<li>检查 <code>post-log.json</code> 看确切的 stdin 结构</li>
+<li>根据真实数据撰写你的正式 hook 脚本</li>
+<li>用正式 hook 替换 debug hook</li>
+</ol>
+<p>这跟用 <code>curl -v</code> 检查 HTTP response 后再写 API client 是一样的模式。</p>
+</blockquote>
+<p>任何 hook 类型都适用——只要换 key：</p>
+<pre class="highlight"><code class="language-json">&quot;Stop&quot;: [
+  {
+    &quot;matcher&quot;: &quot;*&quot;,
+    &quot;hooks&quot;: [
+      {
+        &quot;type&quot;: &quot;command&quot;,
+        &quot;command&quot;: &quot;jq . &gt; stop-log.json&quot;
+      }
+    ]
+  }
+]
+</code></pre>
+
+<hr />
+<h2>各 Hook 类型的常见 stdin 字段</h2>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>PreToolUse</th>
+<th>PostToolUse</th>
+<th>Stop</th>
+<th>Notification</th>
+<th>SubagentStop</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>session_id</code></td>
+<td>有</td>
+<td>有</td>
+<td>有</td>
+<td>有</td>
+<td>有</td>
+</tr>
+<tr>
+<td><code>transcript_path</code></td>
+<td>有</td>
+<td>有</td>
+<td>有</td>
+<td>有</td>
+<td>有</td>
+</tr>
+<tr>
+<td><code>hook_event_name</code></td>
+<td>有</td>
+<td>有</td>
+<td>有</td>
+<td>有</td>
+<td>有</td>
+</tr>
+<tr>
+<td><code>tool_name</code></td>
+<td>有</td>
+<td>有</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td><code>tool_input</code></td>
+<td>有</td>
+<td>有</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td><code>tool_response</code></td>
+<td>无</td>
+<td>有</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td><code>stop_hook_active</code></td>
+<td>无</td>
+<td>无</td>
+<td>有</td>
+<td>无</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>考试提示</strong></p>
+<p><code>transcript_path</code> 字段在<strong>所有</strong> hook 类型中都有。这代表任何 hook 都可以访问完整的对话记录——对 logging、auditing、context extraction 很有用。</p>
+</blockquote>
+<hr />
+<h2>额外 Hook 的实际应用</h2>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>用途</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Stop</code></td>
+<td>Session 摘要日志</td>
+<td>把 Claude 做了什么写到 log 文件</td>
+</tr>
+<tr>
+<td><code>SubagentStop</code></td>
+<td>验证 subagent 输出</td>
+<td>检查 research subagent 是否返回了结构化数据</td>
+</tr>
+<tr>
+<td><code>PreCompact</code></td>
+<td>保存关键 facts</td>
+<td>在 context 被裁剪前 extract 关键决策</td>
+</tr>
+<tr>
+<td><code>UserPromptSubmit</code></td>
+<td>输入预处理</td>
+<td>Claude 收到 prompt 前根据 template 验证</td>
+</tr>
+<tr>
+<td><code>SessionStart</code></td>
+<td>环境启动</td>
+<td>加载项目特定的 context 或验证前置条件</td>
+</tr>
+<tr>
+<td><code>SessionEnd</code></td>
+<td>清理</td>
+<td>移除临时文件、更新 session 日志</td>
+</tr>
+<tr>
+<td><code>Notification</code></td>
+<td>自定义警报</td>
+<td>Claude 需要权限时发 Slack 通知</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Anti-Patterns（考试常考）</h2>
+<table>
+<thead>
+<tr>
+<th>❌ 错误做法</th>
+<th>✅ 正确做法</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>假设所有 hook 收到相同的 stdin 结构</td>
+<td>先用 <code>jq . &gt; log.json</code> 发现结构</td>
+<td>stdin 因 hook 类型和 tool matcher 而异</td>
+</tr>
+<tr>
+<td>直接访问 <code>tool_input</code> 字段不做验证</td>
+<td>先检查 <code>tool_name</code>，再访问工具特定字段</td>
+<td>不同工具有不同的 <code>tool_input</code> 形状</td>
+</tr>
+<tr>
+<td>在 production 的重量级 hook 用 <code>matcher: "*"</code></td>
+<td>把 matcher scope 到特定工具</td>
+<td><code>*</code> 捕捉所有东西——冲击性能和成本</td>
+</tr>
+<tr>
+<td>没先测试 stdin 就写 hook 脚本</td>
+<td>用 debug hook → 检查 → 写正式 hook</td>
+<td>节省 debug 时间并防止 runtime errors</td>
+</tr>
+<tr>
+<td>忽略 hook 中的 <code>transcript_path</code></td>
+<td>用它做 context-aware 的 hook 逻辑</td>
+<td>Transcript 提供完整对话历史给需要它的 hook</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA 考试关联</h2>
+<blockquote>
+<p>🎯 <strong>这些概念会出现在哪些考试场景</strong></p>
+<ul>
+<li><strong>S2（Code Generation）</strong>：<code>Stop</code> hook 用于 CI pipeline 的 session logging</li>
+<li><strong>S4（Developer Productivity）</strong>：<code>SessionStart</code> 做环境设置、<code>PreCompact</code> 做 context 保存</li>
+<li><strong>S5（CI/CD）</strong>：理解 hook 类型以 orchestrate pipeline</li>
+</ul>
+<p><strong>常见题型</strong>：「你需要在 Claude 完成回应后执行一个动作。应该用哪种 hook？」<br />
+答案方向：<code>Stop</code> hook——它在 Claude 完成回应时触发，不管最后用了哪个工具。</p>
+</blockquote>
+<hr />
+<h2>模拟考题</h2>
+<h3>第一题：CI/CD Pipeline 场景</h3>
+<p>你的 CI pipeline 用 Claude Code 做 PR review。你需要在 Claude 完成回应后把 review 结果写到 log 文件。正确的 hook 配置是哪个？</p>
+<ul>
+<li>A. PostToolUse hook，matcher 设为 <code>*</code>，写到 log 文件</li>
+<li>B. Stop hook，读取 transcript 并写出摘要</li>
+<li>C. PreToolUse hook，捕捉所有 tool calls</li>
+<li>D. Notification hook，在闲置 60 秒后触发</li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**B** — `Stop` hook 在 Claude 完成回应时触发，是生成 session 摘要的正确时机。它可以通过 `transcript_path` 访问完整对话记录。
+
+- A 在每次 tool use 后都会触发，不只是结束时——会产生很多不完整的 log
+- C 在工具执行前触发，不是 Claude 完成后
+- D 在闲置或需要权限时触发，不是完成时
+
+关键：把 hook 类型跟你需要的 lifecycle event 配对。
+</details>
+
+<h3>第二题：Developer Productivity 场景</h3>
+<p>你在写一个 PostToolUse hook，只想处理文件编辑，但它在 Claude 使用 <code>Bash</code> 或 <code>Read</code> 等其他工具时一直 crash。最可能的原因和修正是什么？</p>
+<ul>
+<li>A. Matcher 设错了——从 <code>*</code> 改成 <code>Write|Edit|MultiEdit</code></li>
+<li>B. Hook 脚本假设 <code>tool_input</code> 一定有 <code>file_path</code> 字段，但不同工具有不同的 <code>tool_input</code> 结构</li>
+<li>C. PostToolUse hook 不能访问 <code>tool_input</code>——改用 PreToolUse</li>
+<li>D. Hook 需要从项目设置移到全局设置</li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**B** — `tool_input` 结构因工具而异。`Write` 工具有 `file_path` 和 `content`，但 `Bash` 工具有 `command`。如果 hook 没有先检查 `tool_name` 就直接假设 `tool_input.file_path` 存在，碰到非文件工具就会 crash。
+
+- A 是部分修正（限缩 matcher），但 root cause 是脚本没有验证输入结构
+- C 事实上是错的——PostToolUse hook 确实会收到 `tool_input`
+- D 跟 crash 无关
+
+最佳做法：访问工具特定的 `tool_input` 字段前先检查 `tool_name`，或者把 matcher scope 到特定工具。
+</details>
+
+<h3>第三题：Multi-Agent 架构场景</h3>
+<p>你需要验证一个 subagent（UI 中显示为「Task」）返回的是结构化 JSON 数据，然后 coordinator 才能处理它。应该用哪种 hook？</p>
+<ul>
+<li>A. PostToolUse hook，挂在 coordinator 的 tool calls 上</li>
+<li>B. SubagentStop hook，检查 subagent 的输出</li>
+<li>C. Stop hook，在主 session 结束时执行</li>
+<li>D. PreCompact hook，在 context 裁剪前检查数据</li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**B** — `SubagentStop` 在 subagent 完成时触发，这正是你需要的 lifecycle event。它让你在 coordinator 处理之前验证 subagent 的输出。
+
+- A 会在 coordinator 的 tool calls 上触发，不是 subagent 完成时
+- C 在整个 session 结束时才触发，太迟了
+- D 是关于 context compaction，不是 subagent 输出验证
+
+考试哲学：选择跟特定 lifecycle event 匹配的 hook 类型。
+</details>
+</body>
+</html>

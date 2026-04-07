@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>20 The Claude Code Sdk Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Claude Code SDK — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Integration &amp; MCP (20%), D3 — Claude Code Configuration &amp; Workflows (20%), D1 — Agentic Architecture (27%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 (MCP integration — SDK extends Claude Code programmatically), 3.6 (CI/CD integration — SDK enables automated workflows), 1.1 (agentic loops — SDK runs full agentic loops programmatically)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 06-sdk-and-wrap-up / Lesson 20</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The Claude Code SDK lets you run Claude Code programmatically from TypeScript, Python, or CLI — inheriting all settings and permissions — with a read-only default that requires explicit <code>allowedTools</code> grants for write access, making it the bridge between interactive Claude Code and automated pipelines.</p>
+<hr />
+<p><img alt="Sdk Architecture" src="visuals/sdk-architecture.svg" /><br />
+<em>Figure: Claude Code SDK architecture — three entry points, same engine, permission model.</em></p>
+<h2>What the SDK Is and Why It Exists</h2>
+<p>Claude Code in the terminal is interactive — a human types prompts and reviews responses. The SDK removes the human from the loop: your code sends prompts and processes responses programmatically.</p>
+<p>Key insight: the SDK is <strong>not</strong> a separate product. It runs the exact same Claude Code under the hood, meaning:</p>
+<ul>
+<li>It reads <code>CLAUDE.md</code> files</li>
+<li>It respects <code>.claude/settings.json</code> permissions</li>
+<li>It uses the same tools (Read, Write, Edit, Bash, etc.)</li>
+<li>It follows the same agentic loop architecture</li>
+</ul>
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+The SDK is Claude Code without the terminal UI. Same engine, same configuration, same capabilities — different interface.</p>
+</blockquote>
+<hr />
+<h2>Three Access Methods</h2>
+<p>The SDK is available through three interfaces:</p>
+<h3>1. TypeScript (Primary)</h3>
+<pre class="highlight"><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
+
+const messages = await query({
+  prompt: &quot;What duplicate queries exist in this project?&quot;,
+  options: {
+    maxTurns: 10,
+  },
+});
+
+for await (const message of messages) {
+  if (message.type === &quot;text&quot;) {
+    console.log(message.content);
+  }
+}
+</code></pre>
+
+<h3>2. Python</h3>
+<pre class="highlight"><code class="language-python">import subprocess
+import json
+
+result = subprocess.run(
+    [&quot;claude&quot;, &quot;--print&quot;, &quot;--output-format&quot;, &quot;json&quot;, &quot;Find duplicate queries&quot;],
+    capture_output=True, text=True
+)
+response = json.loads(result.stdout)
+</code></pre>
+
+<h3>3. CLI (Pipe mode)</h3>
+<pre class="highlight"><code class="language-bash">echo &quot;Find duplicate queries&quot; | claude --print --output-format json
+</code></pre>
+
+<blockquote>
+<p>🎬 <strong>Instructor insight from the video</strong><br />
+The instructor demonstrates the TypeScript SDK first because it provides the richest API with async iteration over messages. Python and CLI work via subprocess calls to the <code>claude</code> CLI binary.</p>
+</blockquote>
+<hr />
+<h2>The Permission Model: Read-Only by Default</h2>
+<p>This is the most important security concept in the SDK:</p>
+<pre class="highlight"><code class="language-typescript">// DEFAULT: Claude can only READ files, not modify them
+const messages = await query({
+  prompt: &quot;Analyze this codebase&quot;,
+});
+
+// EXPLICIT WRITE: Must specify allowedTools
+const messages = await query({
+  prompt: &quot;Add a test script to package.json&quot;,
+  options: {
+    allowedTools: [&quot;Edit&quot;, &quot;Write&quot;, &quot;Bash&quot;],
+  },
+});
+</code></pre>
+
+<p><strong>Why read-only by default?</strong> When running programmatically (no human in the loop), there is no one to approve risky actions. The SDK defaults to the safest posture.</p>
+<table>
+<thead>
+<tr>
+<th>Permission Level</th>
+<th>What Claude Can Do</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Default (no <code>allowedTools</code>)</td>
+<td>Read files, analyze code, answer questions</td>
+<td>Code review, analysis, documentation queries</td>
+</tr>
+<tr>
+<td><code>allowedTools: ["Edit"]</code></td>
+<td>Read + modify existing files</td>
+<td>Automated refactoring, code fixes</td>
+</tr>
+<tr>
+<td><code>allowedTools: ["Edit", "Write"]</code></td>
+<td>Read + modify + create files</td>
+<td>Code generation, scaffolding</td>
+</tr>
+<tr>
+<td><code>allowedTools: ["Edit", "Write", "Bash"]</code></td>
+<td>Full access including shell commands</td>
+<td>CI/CD pipelines, build automation</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>Exam Note</strong><br />
+The principle of least privilege applies: grant only the tools the SDK invocation actually needs. A code review pipeline should NOT have <code>Bash</code> access.</p>
+</blockquote>
+<hr />
+<h2>Basic Usage Pattern</h2>
+<p>The core pattern is: <strong>import -&gt; query -&gt; iterate</strong></p>
+<pre class="highlight"><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
+
+// 1. Send a prompt (starts an agentic loop)
+const conversation = await query({
+  prompt: &quot;Find all duplicate database queries in src/&quot;,
+  options: {
+    maxTurns: 10,         // Limit agentic loop iterations
+    allowedTools: [],      // Read-only (default)
+  },
+});
+
+// 2. Iterate over messages asynchronously
+for await (const message of conversation) {
+  switch (message.type) {
+    case &quot;text&quot;:
+      console.log(&quot;Claude says:&quot;, message.content);
+      break;
+    case &quot;tool_use&quot;:
+      console.log(&quot;Claude used tool:&quot;, message.name);
+      break;
+    case &quot;error&quot;:
+      console.error(&quot;Error:&quot;, message.content);
+      break;
+  }
+}
+</code></pre>
+
+<p>The <code>query()</code> function returns an async iterable — messages stream in as Claude thinks and acts, just like the terminal experience.</p>
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+<code>maxTurns</code> controls how many agentic loop iterations Claude can perform. Each turn may involve multiple tool calls. Setting this too low may prevent Claude from completing complex tasks; too high may cause unnecessary cost.</p>
+</blockquote>
+<hr />
+<h2>Practical Use Cases</h2>
+<p>The SDK's real power emerges in pipeline integration:</p>
+<h3>Git Hooks</h3>
+<pre class="highlight"><code class="language-typescript">// pre-commit hook: check for secrets
+const result = await query({
+  prompt: &quot;Check staged files for hardcoded secrets or API keys&quot;,
+  options: { maxTurns: 5 },
+});
+// Parse result, exit 1 if secrets found
+</code></pre>
+
+<h3>Build Scripts</h3>
+<pre class="highlight"><code class="language-typescript">// Post-build: generate changelog
+const result = await query({
+  prompt: &quot;Compare HEAD with last tag, generate a changelog entry&quot;,
+  options: { maxTurns: 10 },
+});
+</code></pre>
+
+<h3>CI/CD Pipelines</h3>
+<pre class="highlight"><code class="language-typescript">// PR review bot
+const result = await query({
+  prompt: `Review this PR diff for issues:\n${prDiff}`,
+  options: {
+    maxTurns: 15,
+    allowedTools: [],  // Read-only for review
+  },
+});
+</code></pre>
+
+<blockquote>
+<p>🎬 <strong>Instructor insight from the video</strong><br />
+The instructor demos a two-step workflow: first calling the SDK in read-only mode to find duplicate queries, then calling it again with <code>allowedTools: ["Edit"]</code> to modify <code>package.json</code>. This illustrates the progressive permission escalation pattern.</p>
+</blockquote>
+<hr />
+<h2>Security: Settings Inheritance</h2>
+<p>The SDK inherits all settings from <code>.claude/settings.json</code>:</p>
+<pre class="highlight"><code class="language-json">{
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [&quot;Read&quot;, &quot;Glob&quot;, &quot;Grep&quot;],
+    &quot;deny&quot;: [&quot;Bash(rm *)&quot;]
+  }
+}
+</code></pre>
+
+<p>Even if your SDK code passes <code>allowedTools: ["Bash"]</code>, the deny rules in settings still apply. This is defense in depth:</p>
+<ol>
+<li><strong>Layer 1</strong>: SDK <code>allowedTools</code> — what the caller grants</li>
+<li><strong>Layer 2</strong>: <code>.claude/settings.json</code> — what the project allows</li>
+<li><strong>Layer 3</strong>: Global settings — what the user allows system-wide</li>
+</ol>
+<blockquote>
+<p>🎯 <strong>Exam Note</strong><br />
+SDK permissions are the <strong>intersection</strong> of what the caller grants (<code>allowedTools</code>) and what the settings allow. If settings deny <code>Bash(rm *)</code>, the SDK cannot run <code>rm</code> even with <code>allowedTools: ["Bash"]</code>.</p>
+</blockquote>
+<hr />
+<h2>Summary Table</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Key Point</th>
+<th>Exam Relevance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SDK Purpose</td>
+<td>Run Claude Code programmatically without terminal UI</td>
+<td>D1 1.1 — agentic loops in automation</td>
+</tr>
+<tr>
+<td>Three Interfaces</td>
+<td>TypeScript (primary), Python, CLI</td>
+<td>D2 2.4 — programmatic tool integration</td>
+</tr>
+<tr>
+<td>Read-Only Default</td>
+<td>No write access unless <code>allowedTools</code> explicitly granted</td>
+<td>D3 3.6 — secure CI/CD integration</td>
+</tr>
+<tr>
+<td>Settings Inheritance</td>
+<td>SDK respects <code>.claude/settings.json</code> and <code>CLAUDE.md</code></td>
+<td>D3 3.6 — configuration propagation</td>
+</tr>
+<tr>
+<td>Async Iteration</td>
+<td><code>for await (const msg of conversation)</code> pattern</td>
+<td>D1 1.1 — streaming agentic responses</td>
+</tr>
+<tr>
+<td>maxTurns</td>
+<td>Controls agentic loop depth</td>
+<td>D1 1.1 — loop termination control</td>
+</tr>
+<tr>
+<td>Pipeline Integration</td>
+<td>Git hooks, CI/CD, build scripts, automation</td>
+<td>D3 3.6 — CI/CD integration</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Front</th>
+<th>Back</th>
+<th>Memory Anchor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>What is the default permission level of the Claude Code SDK?</td>
+<td>Read-only. Write access requires explicit <code>allowedTools</code> grants.</td>
+<td>"No keys, no entry" — SDK defaults to locked doors</td>
+</tr>
+<tr>
+<td>2</td>
+<td>What are the three ways to access the Claude Code SDK?</td>
+<td>TypeScript (<code>@anthropic-ai/claude-code</code>), Python (subprocess), CLI (pipe mode)</td>
+<td>Three doors to the same room</td>
+</tr>
+<tr>
+<td>3</td>
+<td>What does <code>maxTurns</code> control in the SDK?</td>
+<td>The number of agentic loop iterations Claude can perform per query</td>
+<td>Like setting a lap limit in a race</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Does the SDK respect <code>.claude/settings.json</code>?</td>
+<td>Yes — it inherits all settings, including allow/deny rules</td>
+<td>Same engine, same rulebook</td>
+</tr>
+<tr>
+<td>5</td>
+<td>How do you grant write access in the TypeScript SDK?</td>
+<td>Pass <code>allowedTools: ["Edit", "Write"]</code> in the options</td>
+<td>Explicit keys for explicit doors</td>
+</tr>
+<tr>
+<td>6</td>
+<td>What is the recommended permission model for a CI/CD code review pipeline?</td>
+<td>Read-only (no <code>allowedTools</code>) — review does not need write access</td>
+<td>Auditor, not editor</td>
+</tr>
+<tr>
+<td>7</td>
+<td>What is the core usage pattern of the TypeScript SDK?</td>
+<td>Import <code>query</code> -&gt; call with prompt and options -&gt; async iterate over messages</td>
+<td>Import, query, iterate</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Why does the SDK default to read-only?</td>
+<td>No human in the loop to approve risky actions — principle of least privilege</td>
+<td>No supervisor, no scissors</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: CI/CD Integration Scenario</h3>
+<p>Your team wants to add an automated code review step to the CI pipeline using the Claude Code SDK. The review should analyze PRs but never modify code. Which configuration is correct?</p>
+<ul>
+<li>A. <code>allowedTools: ["Read", "Grep", "Glob"]</code></li>
+<li>B. <code>allowedTools: []</code> (or omit the field entirely)</li>
+<li>C. <code>allowedTools: ["Edit"]</code> with deny rules in settings</li>
+<li>D. <code>allowedTools: ["Bash"]</code> to run analysis commands</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — The SDK defaults to read-only mode. For a code review pipeline that should only analyze (never modify), either pass an empty `allowedTools` array or omit the field. Claude can still read files, search code, and generate analysis.
+
+- A is incorrect because Read/Grep/Glob are available by default — no need to list them
+- C grants unnecessary write access then tries to restrict it — violates least privilege
+- D grants shell access which is far more than review needs
+
+Key: The SDK's default read-only posture is the correct choice for analysis-only tasks.
+</details>
+
+<h3>Q2: Agentic Loop Scenario</h3>
+<p>You are using the SDK to automate dependency updates. Claude needs to read <code>package.json</code>, check for outdated dependencies, and update them. After running, you notice Claude stops after analyzing but before making edits. What is the most likely cause?</p>
+<ul>
+<li>A. <code>maxTurns</code> is set too low</li>
+<li>B. The SDK is in read-only mode (no <code>allowedTools</code> for Edit)</li>
+<li>C. <code>.claude/settings.json</code> denies Write access</li>
+<li>D. The TypeScript SDK does not support file modifications</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — The SDK defaults to read-only. Without `allowedTools: ["Edit"]`, Claude can analyze `package.json` but cannot modify it. Claude will report findings but skip the edit step.
+
+- A could cause premature stopping, but the symptom described (analyzes then stops before editing) points to permission, not turn limits
+- C is possible but less likely as the default cause — the SDK's own read-only default triggers first
+- D is factually wrong — the TypeScript SDK fully supports file modifications when granted access
+
+Key: Always check `allowedTools` first when the SDK analyzes but does not modify.
+</details>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 420" font-family="'PingFang TC', 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94A3B8"/>
+    </marker>
+  </defs>
+  <rect width="520" height="420" fill="white" rx="12"/>
+  <text x="260" y="32" text-anchor="middle" font-size="15" font-weight="600" fill="#64748B" letter-spacing="1">迭代精煉循環</text>
+
+  <!-- Center label -->
+  <circle cx="260" cy="220" r="50" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="260" y="215" text-anchor="middle" font-size="11" font-weight="700" fill="#64748B">迭代</text>
+  <text x="260" y="232" text-anchor="middle" font-size="11" font-weight="700" fill="#64748B">精煉</text>
+
+  <!-- Step 1: Request (top) -->
+  <g transform="translate(170, 55)">
+    <rect width="180" height="60" rx="14" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="22" y="28" font-size="20">🗣️</text>
+    <text x="50" y="25" font-size="12" font-weight="700" fill="#1E40AF">提出需求</text>
+    <text x="50" y="44" font-size="10" fill="#3B82F6">描述想要的元件</text>
+  </g>
+
+  <!-- Step 2: Claude Builds (right) -->
+  <g transform="translate(350, 185)">
+    <rect width="155" height="68" rx="14" fill="#EDE9FE" stroke="#8B5CF6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="18" y="30" font-size="20">🧠</text>
+    <text x="46" y="27" font-size="12" font-weight="700" fill="#5B21B6">Claude 建構</text>
+    <text x="46" y="46" font-size="10" fill="#8B5CF6">生成 / 精煉</text>
+    <text x="46" y="59" font-size="10" fill="#8B5CF6">元件程式碼</text>
+  </g>
+
+  <!-- Step 3: View Result (bottom) -->
+  <g transform="translate(170, 335)">
+    <rect width="180" height="60" rx="14" fill="#DCFCE7" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="22" y="28" font-size="20">👀</text>
+    <text x="50" y="25" font-size="12" font-weight="700" fill="#166534">檢視結果</text>
+    <text x="50" y="44" font-size="10" fill="#22C55E">在瀏覽器中預覽</text>
+  </g>
+
+  <!-- Step 4: Feedback (left) -->
+  <g transform="translate(15, 185)">
+    <rect width="155" height="68" rx="14" fill="#FEF3C7" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="18" y="30" font-size="20">✏️</text>
+    <text x="46" y="27" font-size="12" font-weight="700" fill="#92400E">回饋意見</text>
+    <text x="46" y="46" font-size="10" fill="#B45309">描述需要修改</text>
+    <text x="46" y="59" font-size="10" fill="#B45309">的地方</text>
+  </g>
+
+  <!-- Arrows: top -> right -->
+  <path d="M 350 100 Q 400 100 400 185" fill="none" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- right -> bottom -->
+  <path d="M 400 253 Q 400 365 350 365" fill="none" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- bottom -> left -->
+  <path d="M 170 365 Q 120 365 120 253" fill="none" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- left -> top -->
+  <path d="M 120 185 Q 120 100 170 100" fill="none" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <text x="260" y="412" text-anchor="middle" font-size="10" fill="#94A3B8">每次循環都改善結果 — 小而具體的回饋效果最好</text>
+</svg>

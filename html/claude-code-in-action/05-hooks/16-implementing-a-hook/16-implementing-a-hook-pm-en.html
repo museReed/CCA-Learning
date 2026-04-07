@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>16 Implementing A Hook Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Implementing a Hook — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20% of exam)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 05-hooks / Lesson 16</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>This lesson demonstrates a complete, working hook implementation — from configuration to testing. PMs do not need to write hooks, but understanding the implementation flow helps you write better acceptance criteria, estimate engineering effort, and verify that security requirements are properly enforced.</p>
+<hr />
+<p><img alt="Implementation Flow" src="visuals/env-guard-flow.svg" /><br />
+<em>Figure: .env file guard data flow — PreToolUse intercepts Read calls and blocks access to sensitive files.</em></p>
+<h2>The Implementation Flow (No Code Required)</h2>
+<p>Think of implementing a hook like setting up a new security camera system in a building:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Building Security</th>
+<th>Hook Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Register the camera</td>
+<td>Add it to the security control panel</td>
+<td>Add hook entry in <code>settings.local.json</code></td>
+</tr>
+<tr>
+<td>2. Point it at the right door</td>
+<td>Set the camera angle</td>
+<td>Set <code>matcher</code> to target specific tools</td>
+</tr>
+<tr>
+<td>3. Program the alert rules</td>
+<td>"Alert if someone enters after 10pm"</td>
+<td>Write script: "Block if file path contains .env"</td>
+</tr>
+<tr>
+<td>4. Test the system</td>
+<td>Walk through the door to verify</td>
+<td>Ask Claude to read .env — verify it is blocked</td>
+</tr>
+<tr>
+<td>5. Activate</td>
+<td>Turn on the system</td>
+<td>Restart Claude Code</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Insight</strong></p>
+<p>The most important detail: hooks require a <strong>restart</strong> to take effect. This means deploying a new hook to a team is not instantaneous — factor this into your rollout plan.</p>
+</blockquote>
+<hr />
+<h2>What PMs Should Verify</h2>
+<p>When your engineer implements a hook, here is a checklist for your acceptance criteria:</p>
+<h3>1. Coverage Check</h3>
+<ul>
+<li><strong>Does the hook cover all relevant tools?</strong> For file access protection, both <code>Read</code> and <code>Grep</code> must be covered. Ask: "Can Claude access this data through any other tool?"</li>
+</ul>
+<h3>2. Feedback Quality</h3>
+<ul>
+<li><strong>Does the blocking message explain why?</strong> Claude receives the stderr message. A good message ("You cannot read .env — it contains credentials") helps Claude try alternatives. A bad message ("Blocked") causes confusion.</li>
+</ul>
+<h3>3. Testing Completeness</h3>
+<ul>
+<li><strong>Positive test</strong>: The hook blocks the restricted action</li>
+<li><strong>Negative test</strong>: The hook allows normal operations to proceed</li>
+<li><strong>Edge cases</strong>: Absolute paths, relative paths, similar file names</li>
+</ul>
+<h3>4. Settings Level</h3>
+<ul>
+<li><strong>Personal hooks</strong> → <code>settings.local.json</code> (not in git)</li>
+<li><strong>Team hooks</strong> → <code>settings.json</code> (committed to git)</li>
+<li>Compliance hooks should always be at team level</li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>PM Risk Alert</strong></p>
+<p>If a security hook is in <code>settings.local.json</code>, each developer must configure it individually. For compliance requirements, insist on <code>settings.json</code> (team-shared).</p>
+</blockquote>
+<hr />
+<p><img alt="Self-Correcting Loop" src="visuals/self-correcting-loop.svg" /><br />
+<em>Figure: Self-correcting feedback loop — Claude tries, hook blocks with explanation, Claude adjusts automatically.</em></p>
+<h2>The Self-Correcting Feedback Loop</h2>
+<p>One of the most powerful aspects of hooks for PMs to understand:</p>
+<ol>
+<li>Claude tries to read <code>.env</code></li>
+<li>Hook blocks and sends feedback: "You cannot read the .env file"</li>
+<li>Claude acknowledges: "I was prevented by a read hook from accessing that file"</li>
+<li>Claude adjusts its approach — no human intervention needed</li>
+</ol>
+<p>This means hooks create <strong>autonomous compliance</strong> — the AI agent self-corrects without needing a human to intervene. This is a significant product advantage over prompt-based approaches.</p>
+<hr />
+<h2>Engineering Effort Estimation</h2>
+<p>For PMs planning sprints:</p>
+<table>
+<thead>
+<tr>
+<th>Hook Complexity</th>
+<th>Effort</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simple file guard</td>
+<td>1-2 hours</td>
+<td>Block reading <code>.env</code>, <code>.credentials</code></td>
+</tr>
+<tr>
+<td>Pattern-based blocker</td>
+<td>2-4 hours</td>
+<td>Block Bash commands matching a blocklist</td>
+</tr>
+<tr>
+<td>Conditional logic</td>
+<td>4-8 hours</td>
+<td>Block refunds &gt; $500, allow if manager-approved</td>
+</tr>
+<tr>
+<td>Multi-tool coordination</td>
+<td>1-2 days</td>
+<td>Enforce workflow ordering across multiple tools</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Anti-Patterns (Exam Frequently Tested)</h2>
+<table>
+<thead>
+<tr>
+<th>❌ Wrong Approach</th>
+<th>✅ Correct Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Assume the hook "just works" after saving</td>
+<td>Always restart Claude Code after hook changes</td>
+<td>Hooks load at startup only</td>
+</tr>
+<tr>
+<td>Accept silent blocking (no feedback message)</td>
+<td>Require clear, actionable error messages</td>
+<td>Without feedback, Claude cannot self-correct</td>
+</tr>
+<tr>
+<td>Put compliance hooks in personal settings</td>
+<td>Put compliance hooks in team-shared settings</td>
+<td>Personal settings cannot be enforced across the team</td>
+</tr>
+<tr>
+<td>Test only the blocking case</td>
+<td>Test both blocking and allowing</td>
+<td>Overly aggressive hooks break normal workflows</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: Customer Support Scenario (S1)</h3>
+<p>Your team has implemented a PreToolUse hook to prevent the AI support agent from processing refunds over $500. During testing, the hook correctly blocks large refunds. However, the agent responds to customers with "I encountered an error" instead of explaining the policy. What should you recommend?</p>
+<ul>
+<li>A. Add refund policy instructions to the system prompt</li>
+<li>B. Improve the stderr message in the hook to include the policy explanation (e.g., "Refunds over $500 require manager approval — please escalate")</li>
+<li>C. Switch to a PostToolUse hook so the agent can see the refund was blocked</li>
+<li>D. Remove the hook and rely on prompt instructions for a better customer experience</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — The hook's stderr message is forwarded directly to Claude as feedback. A clear, policy-specific message helps Claude explain the situation to the customer accurately.
+
+- A: Prompt instructions do not address the root cause (poor hook feedback)
+- C: PostToolUse cannot block — the refund would already be processed
+- D: Removing deterministic enforcement for UX reasons creates compliance risk
+
+**PM Takeaway**: Hook feedback quality directly affects customer experience. Write your acceptance criteria to include "the hook must provide a clear policy explanation in its error message."
+</details>
+
+<h3>Q2: Developer Productivity Scenario (S4)</h3>
+<p>Your team deployed a PreToolUse hook to block Claude from modifying migration files. An engineer reports that the hook was not active on their machine, and Claude modified a migration file. Investigation reveals the hook was configured in <code>settings.local.json</code> on the team lead's machine only. What is the correct fix?</p>
+<ul>
+<li>A. Email all engineers to add the hook to their personal settings</li>
+<li>B. Move the hook configuration to <code>.claude/settings.json</code> and commit it to version control</li>
+<li>C. Add "do not modify migration files" to CLAUDE.md as a backup</li>
+<li>D. Configure the hook at the global level (<code>~/.claude/settings.json</code>) on all machines</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — Team-shared hooks belong in `.claude/settings.json` (committed to git), ensuring all team members automatically get the configuration.
+
+- A: Manual distribution is error-prone and not scalable
+- C: CLAUDE.md is prompt-based — does not provide deterministic enforcement
+- D: Global settings require manual setup on each machine and are not version-controlled
+
+**PM Takeaway**: Compliance hooks must be in version-controlled, team-shared settings — not personal configurations.
+</details>
+
+<h3>Q3: Multi-Agent Research Scenario (S3)</h3>
+<p>An engineer has implemented a PostToolUse hook that runs a data validator after each API tool call. During testing, the hook correctly validates data, but Claude does not use the validated data in its responses. What is the most likely issue?</p>
+<ul>
+<li>A. The hook should be changed to PreToolUse</li>
+<li>B. The hook's feedback (validated data) is being written to stdout instead of stderr</li>
+<li>C. The matcher is not targeting the correct tools</li>
+<li>D. Claude's context window is too small to include the hook feedback</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — PostToolUse hook feedback must be written to stderr to be included in Claude's context. If the validated data is written to stdout, Claude never sees it.
+
+- A: PreToolUse runs before the data exists — cannot validate
+- C: If the hook is running (it detects data correctly), the matcher is fine
+- D: Hook feedback is small and does not significantly impact context window
+
+**PM Takeaway**: Verify with your engineer that hook output goes to stderr, not stdout. This is a common implementation mistake that silently breaks the feedback loop.
+</details>
+</body>
+</html>

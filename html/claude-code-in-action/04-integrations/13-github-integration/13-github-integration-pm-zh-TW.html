@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 Github Integration Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>GitHub Integration — PM 視角</h1>
+<p><img alt="Github Workflows Two Actions" src="visuals/github-workflows-two-actions-zh-TW.svg" /><br />
+<em>圖：GitHub 工作流 — @claude 提及 + PR 審查。</em></p>
+<p><img alt="Github Integration Workflows" src="visuals/github-integration-workflows-zh-TW.svg" /><br />
+<em>圖：GitHub 整合 — 兩個自動化工作流。</em></p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試對應</td>
+<td>D3 — Claude Code Configuration &amp; Workflows（佔 20%）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.6 ★★★（CI/CD integration）、2.4 ★★（MCP integration）、1.1 ★（agentic loops）</td>
+</tr>
+<tr>
+<td>課程來源</td>
+<td>claude-code-in-action / 04-integrations / Lesson 13</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>Claude Code 的 GitHub 整合把 Claude 變成住在你 GitHub workflow 裡的自動化團隊成員。兩個能力：(1) 在 issue/PR 裡 <code>@claude</code> 提及觸發互動式任務執行，(2) 每個 PR 自動 review。PM 需要理解這個，因為它定義了 AI 如何融入 code review 和 CI/CD 流程 — 以及權限治理該怎麼做。</p>
+<hr />
+<h2>Why PMs Need to Understand GitHub Integration</h2>
+<ol>
+<li><strong>流程自動化決策</strong> — 知道 Claude 能在 code review 和 issue triage 的哪些環節取代人工</li>
+<li><strong>品質關卡設計</strong> — 自動化 PR review 建立了結構性的品質層</li>
+<li><strong>權限治理</strong> — CI/CD 需要明確的工具權限（沒有 blanket access）</li>
+<li><strong>團隊 workflow 影響</strong> — <code>@claude</code> mention 改變了開發者跟 issue 和 PR 互動的方式</li>
+</ol>
+<hr />
+<h2>Mental Model: 自動化團隊成員</h2>
+<p><img alt="Permission Model Local Vs Ci" src="visuals/permission-model-local-vs-ci-zh-TW.svg" /><br />
+<em>圖：權限模型 — 本地互動 vs CI 非互動。</em></p>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>人類對應</th>
+<th>Claude GitHub 整合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PR Reviewer</td>
+<td>資深工程師 review 程式碼</td>
+<td>PR Review Action — 自動、一致</td>
+</tr>
+<tr>
+<td>Issue Responder</td>
+<td>On-call 工程師 triage bug</td>
+<td><code>@claude</code> mention — 即時、自主</td>
+</tr>
+<tr>
+<td>QA Tester</td>
+<td>Merge 前手動測試</td>
+<td>Claude + Playwright — 自動化視覺測試</td>
+</tr>
+<tr>
+<td>記錄者</td>
+<td>工程師記錄調查結果</td>
+<td>Claude 在 issue/PR 貼出詳細報告</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>考試核心哲學（PM 必記）</strong></p>
+<ul>
+<li><strong>自動化 code review 是結構性地抓問題</strong> — 每次都跑，不是靠人記得</li>
+<li><strong><code>-p</code> flag = 非互動模式</strong> — Claude 不需人工核准就運行，所以權限必須明確</li>
+<li><strong>Architecture &gt; Prompt</strong> — 結構化的 CI 整合勝過叫開發者記得去 review</li>
+</ul>
+</blockquote>
+<hr />
+<h2>兩個 Workflow：做什麼</h2>
+<h3>1. <code>@claude</code> Mention — 互動式任務執行</h3>
+<p>任何人都可以在 issue 或 PR 留言中提及 <code>@claude</code> 來觸發 Claude。Claude 會：<br />
+- 分析請求<br />
+- 建立 step-by-step 計畫（在留言中可見）<br />
+- 執行計畫（跑程式碼、測試 app、讀檔案）<br />
+- 在 issue/PR 裡回報結果</p>
+<p><strong>PM 應用場景</strong>：Bug triage — QA 工程師截圖一個 bug，提及 <code>@claude</code>，Claude 調查、測試、回報，不需要開發者介入。</p>
+<h3>2. PR Review — 自動 Code Review</h3>
+<p>每個 PR 自動觸發 Claude review 變更。Claude 會：<br />
+- 分析 diff<br />
+- 檢查潛在問題<br />
+- 貼出結構化的 review</p>
+<p><strong>PM 應用場景</strong>：品質關卡 — 不管團隊忙不忙，每個 PR 都有基本 review。在時間壓力下人類可能遺漏的結構性問題，自動化 review 都能抓到。</p>
+<blockquote>
+<p>💡 <strong>PM 決策框架</strong></p>
+<p>把這兩個想成不同的產品能力：<br />
+- <code>@claude</code> mention = <strong>隨需 AI agent</strong>（reactive，使用者觸發）<br />
+- PR review = <strong>自動化品質關卡</strong>（proactive，always-on）</p>
+</blockquote>
+<hr />
+<h2>PM 該理解的設定</h2>
+<p>你不需要寫 YAML，但要理解每個設定層控制什麼：</p>
+<table>
+<thead>
+<tr>
+<th>設定層</th>
+<th>做什麼</th>
+<th>PM 該關心的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>custom_instructions</code></td>
+<td>告訴 Claude CI 環境的資訊</td>
+<td>確保 Claude 知道你的測試基礎設施</td>
+</tr>
+<tr>
+<td><code>mcp_config</code></td>
+<td>給 Claude 存取工具（例如 Playwright）</td>
+<td>決定 Claude <strong>能做什麼</strong></td>
+</tr>
+<tr>
+<td><code>allowed_tools</code></td>
+<td>控制 Claude 可以使用哪些工具</td>
+<td><strong>安全治理</strong> — 每個工具明確列出</td>
+</tr>
+<tr>
+<td>Setup 步驟</td>
+<td>在 Claude 運行前準備環境</td>
+<td>確保 app 已啟動讓 Claude 測試</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Takeaway</strong></p>
+<p><code>allowed_tools</code> 設定是權限邊界。在 CI/CD 裡，每個工具都必須逐一列出——沒有「允許全部」的選項。這是刻意的安全設計。如果團隊加了新的 MCP 工具，<code>allowed_tools</code> 清單也必須更新。</p>
+</blockquote>
+<hr />
+<h2>商業影響</h2>
+<table>
+<thead>
+<tr>
+<th>面向</th>
+<th>GitHub 整合前</th>
+<th>GitHub 整合後</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PR Review 覆蓋率</td>
+<td>取決於 reviewer 是否有空</td>
+<td>100% — 每個 PR 都被 review</td>
+</tr>
+<tr>
+<td>Bug Triage 回應時間</td>
+<td>數小時（等開發者調查）</td>
+<td>數分鐘（Claude 立即調查）</td>
+</tr>
+<tr>
+<td>程式碼品質一致性</td>
+<td>因 reviewer 而異</td>
+<td>標準化 — Claude 用同樣方式檢查每個 PR</td>
+</tr>
+<tr>
+<td>開發者 context switching</td>
+<td>頻繁（review 請求打斷 flow）</td>
+<td>減少 — Claude 處理第一輪 review</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Instructor Insights（影片補充）</h2>
+<ol>
+<li><strong>Claude 執行前先建立可見的計畫</strong> — 透過 <code>@claude</code> 觸發時，Claude 會在留言中貼出步驟 checklist。這個透明度對建立團隊信任很重要。</li>
+<li><strong>CI 裡的端到端測試</strong> — 講師設定 Claude 啟動 app、透過 Playwright 打開瀏覽器、測試 UI 功能——全在 GitHub Action 裡完成。這是一個完整的測試迴圈。</li>
+<li><strong>明確權限是不可妥協的</strong> — 講師強調在 GitHub Actions 裡，每個 MCP 工具都必須逐一列出。沒有捷徑。這是 CI/CD 最重要的設定細節。</li>
+</ol>
+<hr />
+<h2>Practice Questions</h2>
+<h3>第一題：CI/CD Pipeline 情境</h3>
+<p>你的團隊想在 GitHub Actions 加自動化 PR review。工程師問能不能用跟本地開發一樣的權限設定（<code>.claude/settings.local.json</code> 裡的 <code>mcp__playwright</code>）。你怎麼回答？</p>
+<ul>
+<li>A. 可以，CI 用同樣的設定</li>
+<li>B. 不行 — 在 GitHub Actions 裡，每個工具必須在 <code>allowed_tools</code> 逐一列出。CI 模式沒有 blanket server-level permission</li>
+<li>C. 不行 — MCP server 不能在 GitHub Actions 裡使用</li>
+<li>D. 可以，但要把 <code>mcp__playwright</code> 加到 <code>.claude/settings.json</code>（project shared）而不是 local</li>
+</ul>
+<details><summary>答案與解析</summary>
+
+**B** — 在 GitHub Actions（用 `-p` flag 的非互動模式）裡，每個 MCP 工具都必須在 `allowed_tools` 逐一列出。本地 `.claude/settings.local.json` 的 blanket `mcp__playwright` 權限不適用。
+
+- A 錯誤假設 CI 和本地用同一套權限模型
+- C 錯誤 — MCP server 可以在 CI 裡用，只是權限更嚴格
+- D 混淆了 settings 檔案 scope 和 CI 權限需求
+
+**PM 重點**：規劃 CI/CD 整合時，要考慮明確權限的需求。每加一個新的 MCP 工具到 workflow，`allowed_tools` 都需要更新。
+</details>
+
+<h3>第二題：開發者生產力情境</h3>
+<p>QA 團隊透過建 GitHub issue 附截圖來回報 bug。目前每個 bug 都需要開發者手動調查。Claude Code 的 GitHub 整合怎麼幫忙？</p>
+<ul>
+<li>A. 加 <code>@claude</code> mention 支援，讓 QA 可以直接在 issue 裡觸發 Claude 調查 bug，包含透過 Playwright 做瀏覽器測試</li>
+<li>B. 設定自動 PR review 在 bug 到 QA 之前就抓住</li>
+<li>C. 把 Claude 的調查結果加到 CLAUDE.md 讓開發者知道常見 bug</li>
+<li>D. 設定 PreToolUse hook 防止 bug 被引入</li>
+</ul>
+<details><summary>答案與解析</summary>
+
+**A** — `@claude` mention workflow 正好就是為這個場景設計的。QA 可以貼截圖、提及 `@claude`，Claude 就會調查——導航到 app、測試功能、直接在 issue 裡回報結果。
+
+- B 是預防性的，但沒有解決現有的 bug triage
+- C 是文件化，不是自動化
+- D 是開發期的控制，不是 QA workflow
+
+**PM 重點**：`@claude` mention 把 bug triage 從「需要開發者介入的阻塞活動」變成「AI 自動化的 workflow」。QA 更快得到回應，開發者被打斷的次數更少。
+</details>
+</body>
+</html>

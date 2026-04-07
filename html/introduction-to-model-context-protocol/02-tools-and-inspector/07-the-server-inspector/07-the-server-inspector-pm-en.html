@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 The Server Inspector Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Server Inspector — PM Strategic Overview</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.6 Test and debug MCP servers; T2.7 Validate tool behavior before deployment</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 02-tools-and-inspector / Lesson 07</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The MCP Inspector is a test-drive environment for AI tools — like a car showroom where you can take any tool for a spin before putting it into production.</p>
+<hr />
+<h2>Why PMs Should Care About the Inspector</h2>
+<p>The MCP Inspector is a development tool, but it has direct product implications. It is the place where you can see exactly what Claude sees when it looks at your tools — the names, descriptions, and parameters. If something looks confusing in the Inspector, it will be confusing to Claude, and ultimately confusing to your users.</p>
+<p>Think of the Inspector as a <strong>product preview environment</strong>. Before your tools go live, you can verify:</p>
+<ul>
+<li>Are tool names intuitive?</li>
+<li>Are descriptions clear enough for Claude to select the right tool?</li>
+<li>Are parameter names and descriptions self-explanatory?</li>
+<li>Do error messages help Claude recover gracefully?</li>
+</ul>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+Schedule Inspector review sessions with your team. Having a PM look at tool descriptions in the Inspector often catches clarity issues that engineers miss because they already know what the tool does.</p>
+</blockquote>
+<hr />
+<h2>The Inspector as Quality Gate</h2>
+<p>In manufacturing, products pass through quality checkpoints before shipping. The MCP Inspector serves the same purpose for AI tools:</p>
+<p><strong>Without Inspector testing</strong>: Write tool → Deploy → Users encounter issues → Debug in production</p>
+<p><strong>With Inspector testing</strong>: Write tool → Test in Inspector → Fix issues → Deploy → Users get a polished experience</p>
+<p>The Inspector catches three categories of issues before they reach users:</p>
+<ol>
+<li><strong>Functional bugs</strong> — The tool does not return the correct result</li>
+<li><strong>Schema issues</strong> — Parameters are mistyped, missing descriptions, or incorrectly marked as required/optional</li>
+<li><strong>UX issues</strong> — Descriptions are vague, error messages are unhelpful, return values are poorly formatted</li>
+</ol>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+Add "Inspector-tested" as a definition of done for any new MCP tool. No tool should move to production without passing Inspector validation.</p>
+</blockquote>
+<hr />
+<h2>What You See in the Inspector</h2>
+<p>The Inspector presents three categories of MCP server capabilities:</p>
+<p><strong>Resources tab</strong> — Think of this as the "data library" shelf. What information can the server provide? Files, database records, configuration data, etc.</p>
+<p><strong>Tools tab</strong> — Think of this as the "actions" menu. What can the server do? Create files, query databases, send messages, etc.</p>
+<p><strong>Prompts tab</strong> — Think of this as the "templates" drawer. What pre-written prompt patterns does the server offer?</p>
+<p>For product evaluation, the Tools tab is where you spend most of your time. Each tool entry shows you exactly what Claude will see when deciding whether to use it.</p>
+<hr />
+<h2>State Persistence: Testing Real Workflows</h2>
+<p>One of the Inspector's key features is that tool state persists between calls. In product terms, this means you can test complete user workflows, not just isolated actions.</p>
+<p>Example of a multi-step workflow test:</p>
+<ol>
+<li>Create a document (tool call 1)</li>
+<li>Read the document to verify it was created correctly (tool call 2)</li>
+<li>Edit the document (tool call 3)</li>
+<li>Read it again to verify the edit (tool call 4)</li>
+</ol>
+<p>This mirrors how a real user would interact with your product. Each step depends on the previous one, and the Inspector lets you verify the entire chain works correctly.</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+When reviewing tools in the Inspector, do not just test happy paths. Test the sequences users will actually follow — including edge cases like reading a document that does not exist, or editing a document someone else is working on.</p>
+</blockquote>
+<hr />
+<h2>The Development Feedback Loop</h2>
+<p>The Inspector enables a tight feedback loop that accelerates tool development:</p>
+<p><strong>Traditional approach</strong> (without Inspector):<br />
+1. Write tool code<br />
+2. Build client integration<br />
+3. Connect to Claude<br />
+4. Send a test query<br />
+5. If something is wrong, figure out which layer failed<br />
+6. Fix and repeat from step 2</p>
+<p><strong>Inspector approach</strong>:<br />
+1. Write tool code<br />
+2. Open Inspector<br />
+3. Test the tool directly<br />
+4. If something is wrong, it is definitely the tool code<br />
+5. Fix and re-test immediately</p>
+<p>The Inspector approach is faster because it eliminates variables. When a tool fails in the Inspector, you know the issue is in the tool code, not the client, not the transport layer, and not Claude's interpretation.</p>
+<hr />
+<h2>Connecting Inspector Insights to Product Decisions</h2>
+<p>After testing in the Inspector, PMs can make informed decisions about:</p>
+<ul>
+<li><strong>Tool naming conventions</strong> — Are tools named consistently? Would a user guess what "proc_doc_v2" does?</li>
+<li><strong>Description quality</strong> — Would you understand what each tool does just by reading its description?</li>
+<li><strong>Parameter design</strong> — Are there too many required parameters? Are defaults sensible?</li>
+<li><strong>Error experience</strong> — When things go wrong, does the error point toward a solution?</li>
+</ul>
+<p>These are product design decisions that happen to live in code.</p>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<p>This lesson covers <strong>Domain 2 (18%)</strong> testing concepts:</p>
+<ul>
+<li>The Inspector is launched with <code>mcp dev mcp_server.py</code> at <code>localhost:6274</code></li>
+<li>Three tabs: Resources, Tools, Prompts</li>
+<li>State persists between calls for multi-step testing</li>
+<li>Inspector sits between development and client integration in the workflow</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the MCP Inspector in business terms?</td>
+<td>A test-drive environment where you can preview and test AI tools before they go to production — like a staging environment for tool capabilities.</td>
+</tr>
+<tr>
+<td>Why should PMs review tools in the Inspector?</td>
+<td>Tool descriptions, parameter names, and error messages are product design decisions that directly affect how well Claude uses tools and how users experience the product.</td>
+</tr>
+<tr>
+<td>What three categories does the Inspector display?</td>
+<td>Resources (data the server provides), Tools (actions the server can perform), and Prompts (reusable template patterns).</td>
+</tr>
+<tr>
+<td>What does state persistence mean for testing?</td>
+<td>You can test multi-step workflows where each tool call depends on previous ones, mirroring real user interaction patterns.</td>
+</tr>
+<tr>
+<td>How does the Inspector reduce debugging time?</td>
+<td>It isolates tool issues from client, transport, and Claude interpretation issues. If a tool fails in the Inspector, the problem is definitely in the tool code.</td>
+</tr>
+<tr>
+<td>What should be the "definition of done" for new MCP tools?</td>
+<td>Inspector-tested — no tool should move to production without passing Inspector validation for functionality, schema correctness, and description quality.</td>
+</tr>
+<tr>
+<td>What product decisions can PMs inform through Inspector testing?</td>
+<td>Tool naming conventions, description quality, parameter design, default values, and error message helpfulness.</td>
+</tr>
+<tr>
+<td>How does the Inspector fit into the development workflow?</td>
+<td>Write tool code → Test with Inspector → Fix issues → Integrate with client. Skipping Inspector testing leads to harder-to-diagnose issues later.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

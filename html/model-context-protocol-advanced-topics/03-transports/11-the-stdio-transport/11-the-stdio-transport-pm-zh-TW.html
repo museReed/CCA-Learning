@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11 The Stdio Transport Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The STDIO Transport — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (MCP transport 選擇), 2.3 (server 生命週期管理)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 03-transports / Lesson 11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Stdio 是 MCP 的「僅限本地」transport — 就像同一棟大樓內的直撥電話，功能完整但無法對外連線。</p>
+<hr />
+<p><img alt="Transport Comparison" src="visuals/transport-comparison-zh-TW.svg" /></p>
+<h2>快遞類比</h2>
+<p>把 MCP transport 想成<strong>訊息的遞送方式</strong>：</p>
+<ul>
+<li><strong>Stdio</strong> = 大樓內部信件系統。快速、可靠、服務齊全 — 但只在大樓內運作。</li>
+<li><strong>StreamableHTTP</strong> = 郵局服務。可以跨城市寄送，但某些服務（如當日急件）無法提供。</li>
+</ul>
+<p>作為 PM，transport 的選擇直接影響<strong>產品能支援哪些功能</strong>。</p>
+<hr />
+<h2>運作方式（商業視角）</h2>
+<p>MCP client（你的 AI 應用程式）在同一台電腦上<strong>啟動 server 作為輔助程式</strong>。它們透過直接管道溝通 — 就像兩位同事互傳便條。</p>
+<p><strong>Handshake</strong> — 開始工作前的三步建立連線：</p>
+<table>
+<thead>
+<tr>
+<th>步驟</th>
+<th>發生什麼</th>
+<th>商業類比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Initialize Request</td>
+<td>Client 自我介紹</td>
+<td>「嗨，我是 AI 應用，我需要工具 X、Y、Z」</td>
+</tr>
+<tr>
+<td>2. Initialize Result</td>
+<td>Server 回應能力</td>
+<td>「收到，我可以提供工具 A、B、C」</td>
+</tr>
+<tr>
+<td>3. Initialized Notification</td>
+<td>Client 確認</td>
+<td>「太好了，開始工作吧」</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 為何該關心 Transport 選擇</h2>
+<h3>完整功能存取</h3>
+<p>Stdio 支援<strong>所有四種通訊模式</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>商業意義</th>
+<th>範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client 詢問 server</td>
+<td>AI 請求工具</td>
+<td>「查詢這位客戶的訂單」</td>
+</tr>
+<tr>
+<td>Server 回答 client</td>
+<td>工具回傳結果</td>
+<td>「這是訂單詳情」</td>
+</tr>
+<tr>
+<td>Server 詢問 client</td>
+<td>Server 需要輸入</td>
+<td>「我需要使用者批准才能繼續」</td>
+</tr>
+<tr>
+<td>Client 回答 server</td>
+<td>Client 提供輸入</td>
+<td>「使用者已批准退款」</td>
+</tr>
+</tbody>
+</table>
+<p>後兩種模式（server-initiated）對於 <strong>agentic workflow</strong> 至關重要 — server 需要請求人類批准或額外上下文。</p>
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+評估 MCP server 供應商時，要問：「你的 transport 支援 server-initiated request 嗎？」如果不支援，human-in-the-loop 批准流程等功能就無法運作。</p>
+</blockquote>
+<hr />
+<h2>PM 決策框架</h2>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>是 → Stdio</th>
+<th>否 → 考慮 HTTP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Server 在同一台機器上嗎？</td>
+<td>是</td>
+<td>需要遠端</td>
+</tr>
+<tr>
+<td>是用於開發/測試嗎？</td>
+<td>是</td>
+<td>大規模 Production</td>
+</tr>
+<tr>
+<td>需要所有 MCP 功能嗎？</td>
+<td>是</td>
+<td>可以犧牲部分</td>
+</tr>
+<tr>
+<td>一次只有一位使用者？</td>
+<td>是</td>
+<td>需要多使用者</td>
+</tr>
+</tbody>
+</table>
+<h3>一句話總結取捨</h3>
+<p>Stdio 給你 <strong>100% 的 MCP 功能</strong>，但限制你只能<strong>本地單機部署</strong>。</p>
+<hr />
+<h2>產品影響</h2>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>Transport 影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>開發者工具（IDE plugin）</td>
+<td>Stdio 完美 — 與 IDE 一起本地執行</td>
+</tr>
+<tr>
+<td>有 AI 功能的 SaaS 產品</td>
+<td>無法使用 Stdio — 需要遠端 transport</td>
+</tr>
+<tr>
+<td>企業內部本地機器工具</td>
+<td>Stdio 適合桌面部署</td>
+</tr>
+<tr>
+<td>雲端託管 AI agent</td>
+<td>必須使用 StreamableHTTP 或類似方案</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>情境題</strong>：「哪種 transport 適合本地開發工具？」→ Stdio</li>
+<li><strong>功能比較</strong>：Stdio = 完整功能、僅限本地。以此為基準線。</li>
+<li><strong>Handshake 知識</strong>：三步訊息，按順序。Initialize Request → Initialize Result → Initialized Notification。</li>
+<li><strong>取捨題</strong>：Stdio 的限制在於部署範圍，而非功能性。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用商業術語描述 Stdio transport？</td>
+<td>直接的本地通訊通道 — 像大樓內部信件系統。服務齊全，但完全沒有遠端能力</td>
+</tr>
+<tr>
+<td>Stdio 對產品施加什麼限制？</td>
+<td>Server 必須與 client 在同一台機器上運行 — 無法遠端或雲端部署</td>
+</tr>
+<tr>
+<td>為什麼「server-initiated request」對 PM 很重要？</td>
+<td>它支援 human-in-the-loop 批准、進度更新和 sampling 等功能 — 對 agentic workflow 至關重要</td>
+</tr>
+<tr>
+<td>MCP 連線建立的三個步驟是？</td>
+<td>Initialize Request → Initialize Result → Initialized Notification（三步 handshake）</td>
+</tr>
+<tr>
+<td>PM 何時應該選 Stdio 而非 HTTP transport？</td>
+<td>當產品在本地運行（開發工具、桌面應用）且需要完整 MCP 功能支援時</td>
+</tr>
+<tr>
+<td>Stdio 支援但 HTTP 可能不支援的功能？</td>
+<td>Server-initiated request（sampling、root listing）和 server-initiated notification（progress、logging）</td>
+</tr>
+<tr>
+<td>Stdio 的部署限制是什麼？</td>
+<td>僅限單機 — 無法遠端託管 server 或從中央 server 服務多位使用者</td>
+</tr>
+<tr>
+<td>Stdio 在考試中與其他 transport 的關係？</td>
+<td>Stdio 是具備完整能力的基準線 — 其他 transport 用功能換取遠端存取和可擴展性</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

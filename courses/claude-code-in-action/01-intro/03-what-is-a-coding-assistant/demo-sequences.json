@@ -1,0 +1,26 @@
+{
+  "unit": "03-what-is-a-coding-assistant",
+  "demos": [
+    {
+      "id": "demo-1",
+      "title": "Tool Use Flow — How a Coding Assistant Reads a File",
+      "srt_range": [33, 63],
+      "key_frames": [
+        {"frame": "frame_034.jpg", "caption": "Language model cannot read files directly"},
+        {"frame": "frame_045.jpg", "caption": "Coding assistant appends tool instructions to request"},
+        {"frame": "frame_050.jpg", "caption": "Model responds with ReadFile: main.go"},
+        {"frame": "frame_056.jpg", "caption": "Assistant reads file and sends contents back"},
+        {"frame": "frame_060.jpg", "caption": "Model provides final answer with file contents"}
+      ],
+      "walkthrough_steps": [
+        "Instructor explains language models alone cannot read files — they only process and return text",
+        "Shows what happens when you ask a plain LM to read main.go — it says it can't",
+        "Explains the coding assistant automatically appends tool instructions to your request",
+        "Model responds with carefully formatted 'ReadFile: main.go'",
+        "Coding assistant intercepts this, actually reads the file, sends contents back to model",
+        "Model writes final answer based on real file contents",
+        "This system is called 'tool use' — gives models extra capabilities"
+      ]
+    }
+  ]
+}

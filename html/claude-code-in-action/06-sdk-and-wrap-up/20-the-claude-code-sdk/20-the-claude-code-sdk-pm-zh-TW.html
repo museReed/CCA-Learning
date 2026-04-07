@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>20 The Claude Code Sdk Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Claude Code SDK — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試對應</td>
+<td>D2 — Tool Integration &amp; MCP（佔 20%）、D3 — Claude Code Configuration &amp; Workflows（佔 20%）、D1 — Agentic Architecture（佔 27%）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4（MCP integration — SDK 以程式化方式擴展 Claude Code）、3.6（CI/CD integration — SDK 驅動自動化工作流）、1.1（agentic loops — SDK 以程式化方式執行完整 agentic loop）</td>
+</tr>
+<tr>
+<td>課程來源</td>
+<td>claude-code-in-action / 06-sdk-and-wrap-up / Lesson 20</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>Claude Code SDK 讓其他程式可以在沒有人類操作鍵盤的情況下使用 Claude Code。它是相同的 Claude Code — 相同規則、相同能力 — 但由腳本和 pipeline 控制而非人類。預設只能讀取、不能寫入，這是刻意的安全設計。PM 需要理解這點，因為它決定了哪些自動化工作流是可行的，以及如何在需求中描述它們。</p>
+<hr />
+<p><img alt="Sdk Architecture" src="visuals/sdk-architecture-zh-TW.svg" /><br />
+<em>圖：Claude Code SDK 架構 — 三個進入點、同一引擎、權限模型。</em></p>
+<h2>PM 為什麼需要了解 SDK</h2>
+<p>SDK 將 Claude Code 從開發者工具轉變為<strong>自動化組件</strong>。這對產品很重要：</p>
+<table>
+<thead>
+<tr>
+<th>沒有 SDK</th>
+<th>有 SDK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code 一次幫一位開發者</td>
+<td>Claude Code 在 CI/CD 中為每個 PR 運行</td>
+</tr>
+<tr>
+<td>人類必須手動輸入每個 prompt</td>
+<td>腳本在事件（git push、build、排程）觸發時啟動 Claude Code</td>
+</tr>
+<tr>
+<td>權限由開發者即時批准</td>
+<td>權限必須預先配置 — 沒有人類在迴圈中</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM 重點</strong><br />
+SDK 是 Claude Code 從「一位開發者的助手」擴展到「團隊級自動化」的方式。任何涉及自動化 AI code review、程式碼生成或分析的需求，大概率需要 SDK。</p>
+</blockquote>
+<hr />
+<h2>心智模型：聘請承包商</h2>
+<p>把終端機裡的 Claude Code 想像成承包商在你身邊工作 — 你告訴他做什麼、看著他工作、逐步批准。</p>
+<p>SDK 就像給承包商<strong>書面工作指令</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>面向</th>
+<th>終端機（當面）</th>
+<th>SDK（書面工作指令）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>溝通</td>
+<td>即時對話</td>
+<td>預先寫好的指令</td>
+</tr>
+<tr>
+<td>監督</td>
+<td>你看著每一步</td>
+<td>你事後審查結果</td>
+</tr>
+<tr>
+<td>權限</td>
+<td>當下說「好，去做吧」</td>
+<td>必須在工作指令中預先指定</td>
+</tr>
+<tr>
+<td>安全</td>
+<td>你可以隨時叫停</td>
+<td>安全規則必須預先配置</td>
+</tr>
+<tr>
+<td>規模</td>
+<td>一次一個專案</td>
+<td>同時處理多個專案</td>
+</tr>
+</tbody>
+</table>
+<p>關鍵差異：<strong>沒有人類監督時，你需要更嚴格的前期規則。</strong></p>
+<hr />
+<h2>三種使用 SDK 的方式</h2>
+<p>SDK 有三種介面。PM 不需要知道語法，但應了解取捨：</p>
+<table>
+<thead>
+<tr>
+<th>介面</th>
+<th>最適合</th>
+<th>團隊特徵</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TypeScript</td>
+<td>豐富的整合、即時訊息處理</td>
+<td>有 Node.js/TypeScript 專長的團隊</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>資料 pipeline、ML 工作流、腳本</td>
+<td>Python 為主的技術棧</td>
+</tr>
+<tr>
+<td>CLI（pipe 模式）</td>
+<td>Shell 腳本、快速自動化、bash-based CI</td>
+<td>DevOps 團隊、簡單整合</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM 重點</strong><br />
+規劃 SDK 整合時，問你的工程團隊哪個介面適合他們的技術棧。功能完全相同 — 只有程式語言不同。</p>
+</blockquote>
+<hr />
+<h2>預設唯讀：一個產品決策</h2>
+<p>SDK 預設為<strong>唯讀</strong>模式。Claude 可以分析程式碼、找出問題、報告發現 — 但無法修改任何東西，除非被明確授權。</p>
+<p>這不是限制 — 這是刻意的產品安全決策。</p>
+<h3>場景分析：為什麼唯讀很重要</h3>
+<p>想像一個每晚的 CI 作業，用 Claude Code 審查所有未關閉的 PR：</p>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>權限等級</th>
+<th>會發生什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PR 分析 + 留言</td>
+<td>唯讀（預設）</td>
+<td>Claude 讀取程式碼、產生 review 留言。安全。</td>
+</tr>
+<tr>
+<td>自動修正格式</td>
+<td>讀取 + Edit</td>
+<td>Claude 讀取程式碼並修改檔案。需要信任編輯邏輯。</td>
+</tr>
+<tr>
+<td>自動修正 + commit + push</td>
+<td>讀取 + Edit + Bash</td>
+<td>Claude 可以執行任意 shell 指令。沒有護欄時風險很高。</td>
+</tr>
+</tbody>
+</table>
+<p>每往上一個權限階梯，都增加能力和風險。SDK 強制你明確做出這個取捨。</p>
+<blockquote>
+<p>🎯 <strong>考試重點</strong><br />
+最小權限原則：只授予特定任務所需的權限。Code review bot 應該唯讀。格式化 bot 需要 Edit。部署 bot 需要 Bash。絕不授予超過所需的權限。</p>
+</blockquote>
+<hr />
+<h2>SDK 如何融入 Pipeline</h2>
+<p>SDK 最有用的角色是更大自動化工作流中的<strong>組件</strong>：</p>
+<h3>場景 1：Git Pre-Commit Hook</h3>
+<p><strong>業務需求</strong>：防止意外提交 secrets</p>
+<p><strong>流程</strong>：開發者提交程式碼 -&gt; SDK 分析 staged 檔案（唯讀） -&gt; 發現 secrets 時阻止提交</p>
+<p><strong>權限</strong>：唯讀（預設） — 只需分析，不需修改</p>
+<h3>場景 2：CI/CD Code Review</h3>
+<p><strong>業務需求</strong>：每個 PR 都獲得自動化第一輪審查</p>
+<p><strong>流程</strong>：PR 開啟 -&gt; CI 觸發 SDK -&gt; SDK 讀取 diff 並產生 review -&gt; 在 PR 上發布留言</p>
+<p><strong>權限</strong>：唯讀 — review 產生文字輸出，不修改程式碼</p>
+<h3>場景 3：自動化 Dependency 更新</h3>
+<p><strong>業務需求</strong>：無需手動工作即可保持 dependency 最新</p>
+<p><strong>流程</strong>：每週排程 -&gt; SDK 檢查過期套件 -&gt; SDK 更新設定檔 -&gt; 建立 PR</p>
+<p><strong>權限</strong>：讀取 + Edit — 必須修改設定檔</p>
+<blockquote>
+<p>🎬 <strong>講師影片重點</strong><br />
+講師展示兩步驟示範：先用唯讀模式找出 codebase 中的重複 query，再授予 Edit 權限更新 package.json。這種漸進式權限模式是推薦做法 — 先分析，只修改需要的部分。</p>
+</blockquote>
+<hr />
+<h2>安全性：設定繼承</h2>
+<p>SDK 繼承專案設定中的所有安全規則。這意味著：</p>
+<ol>
+<li><strong>專案層級規則</strong>（<code>.claude/settings.json</code>）適用於 SDK 呼叫</li>
+<li><strong>Deny 規則無法被覆寫</strong> — SDK 呼叫者無法繞過</li>
+<li><strong>縱深防禦</strong>：即使 SDK 授予權限，專案設定仍可阻止</li>
+</ol>
+<h3>場景分析：多層安全</h3>
+<p>一家公司在 <code>.claude/settings.json</code> 中設定了這些規則：<br />
+- 允許：Read、Grep、Glob<br />
+- 禁止：刪除檔案的 Bash 指令</p>
+<p>工程師寫了一個 SDK 腳本，授予 <code>allowedTools: ["Bash"]</code>。</p>
+<p><strong>結果</strong>：Claude 可以執行 Bash 指令，但刪除指令除外。Settings 的 deny 規則是 SDK 無法繞過的護欄。</p>
+<blockquote>
+<p>💡 <strong>PM 重點</strong><br />
+撰寫 SDK 自動化需求時，同時指定 SDK 權限和專案設定。它們作為層級配合工作 — SDK 授予能力，settings 定義邊界。</p>
+</blockquote>
+<hr />
+<h2>SDK 功能的 PM 需求清單</h2>
+<p>指定 SDK 功能時，應包含：</p>
+<table>
+<thead>
+<tr>
+<th>需求領域</th>
+<th>該指定什麼</th>
+<th>範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>任務範圍</td>
+<td>AI 應分析或修改什麼</td>
+<td>「審查 PR diff 中的所有 Python 檔案」</td>
+</tr>
+<tr>
+<td>權限等級</td>
+<td>唯讀、Edit、Write、Bash 或組合</td>
+<td>「分析用唯讀；自動修正模式用 Edit」</td>
+</tr>
+<tr>
+<td>觸發條件</td>
+<td>什麼事件啟動 SDK 呼叫</td>
+<td>「PR 建立時」或「每晚凌晨 2 點」</td>
+</tr>
+<tr>
+<td>輸出</td>
+<td>結果送到哪裡</td>
+<td>「發布為 PR 留言」或「寫入稽核日誌」</td>
+</tr>
+<tr>
+<td>護欄</td>
+<td>AI 不得做什麼</td>
+<td>「不得修改測試檔案」或「最多 10 個 agentic turn」</td>
+</tr>
+<tr>
+<td>失敗處理</td>
+<td>SDK 呼叫失敗時怎麼辦</td>
+<td>「記錄錯誤並通知團隊頻道」</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>反模式（考試常考）</h2>
+<table>
+<thead>
+<tr>
+<th>錯誤做法</th>
+<th>正確做法</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>授予完整權限「以策安全」</td>
+<td>只授予最小所需權限</td>
+<td>權限越多 = 風險越大。「安全」意味著更少權限，不是更多</td>
+</tr>
+<tr>
+<td>把 SDK 當作不同於 Claude Code 的產品</td>
+<td>理解 SDK 是相同引擎的程式化介面</td>
+<td>相同設定、相同工具、相同能力</td>
+</tr>
+<tr>
+<td>需求中略過權限等級</td>
+<td>明確指定每個自動化的唯讀 vs. 寫入</td>
+<td>工程師無法猜測預期的安全姿態</td>
+</tr>
+<tr>
+<td>假設 SDK 自動化不需要人類監督</td>
+<td>為高風險 SDK 操作設計審查檢查點</td>
+<td>沒有人類在迴圈中意味著預配置的規則必須完善</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>總結表格</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>重點</th>
+<th>考試相關性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SDK 用途</td>
+<td>以程式化方式執行 Claude Code 作為 pipeline 組件</td>
+<td>D1 1.1 — 自動化中的 agentic loop</td>
+</tr>
+<tr>
+<td>三種介面</td>
+<td>TypeScript、Python、CLI — 相同能力</td>
+<td>D2 2.4 — 程式化工具整合</td>
+</tr>
+<tr>
+<td>預設唯讀</td>
+<td>安全優先：除非明確授權否則不能寫入</td>
+<td>D3 3.6 — 安全的 CI/CD 整合</td>
+</tr>
+<tr>
+<td>設定繼承</td>
+<td>專案設定是 SDK 無法繞過的護欄</td>
+<td>D3 3.6 — 縱深防禦</td>
+</tr>
+<tr>
+<td>Pipeline 整合</td>
+<td>Git hooks、CI/CD、build scripts、排程作業</td>
+<td>D3 3.6 — 工作流自動化</td>
+</tr>
+<tr>
+<td>權限升級</td>
+<td>先分析（唯讀），再修改（明確授權）</td>
+<td>D3 3.6 — 漸進式權限模型</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>記憶卡</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>正面</th>
+<th>背面</th>
+<th>記憶錨點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Claude Code SDK 的預設權限等級是什麼？</td>
+<td>唯讀。寫入需要明確的權限授予。</td>
+<td>承包商拿到「只看不動」的工作指令</td>
+</tr>
+<tr>
+<td>2</td>
+<td>SDK 提供哪三種介面？</td>
+<td>TypeScript、Python、CLI（pipe 模式）— 功能完全相同</td>
+<td>打到同一間辦公室的三條電話線</td>
+</tr>
+<tr>
+<td>3</td>
+<td>SDK 為什麼預設唯讀？</td>
+<td>沒有人類在迴圈中批准危險操作 — 最小權限原則</td>
+<td>無人監督的承包商要更嚴格的規定</td>
+</tr>
+<tr>
+<td>4</td>
+<td>SDK 會遵守專案設定嗎？</td>
+<td>會 — settings 中的 deny 規則無法被 SDK 權限授予覆寫</td>
+<td>大樓保全優先於你的訪客證</td>
+</tr>
+<tr>
+<td>5</td>
+<td>SDK 自動化需要修改程式碼時，推薦做法是什麼？</td>
+<td>先用唯讀模式分析，再用明確權限授予修改</td>
+<td>先驗屋再裝修</td>
+</tr>
+<tr>
+<td>6</td>
+<td>列舉三個 SDK 實際使用場景</td>
+<td>Git pre-commit hook（Secret 偵測）、CI/CD code review、自動化 dependency 更新</td>
+<td>保全、品檢員、維修隊</td>
+</tr>
+<tr>
+<td>7</td>
+<td>PM 為 SDK 功能撰寫需求時應指定什麼？</td>
+<td>任務範圍、權限等級、觸發條件、輸出目的地、護欄、失敗處理</td>
+<td>完整的工作指令清單</td>
+</tr>
+<tr>
+<td>8</td>
+<td>SDK 權限和專案設定如何互動？</td>
+<td>取交集 — SDK 授予能力，settings 定義邊界。Deny 規則永遠勝出。</td>
+<td>同一扇門上的兩把鎖</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>練習題</h2>
+<h3>問題 1：CI/CD Pipeline 場景</h3>
+<p>團隊希望 Claude Code 自動審查每個 PR 並發布留言。Review 應分析程式碼品質但絕不修改檔案。作為 PM，需求中哪個權限規格是正確的？</p>
+<ul>
+<li>A. 「授予完整存取權，讓 Claude 可以徹底審查程式碼」</li>
+<li>B. 「使用唯讀模式 — Claude 分析並產生 review 文字，不修改檔案」</li>
+<li>C. 「授予 Edit 權限，讓 Claude 可以修正 review 中發現的問題」</li>
+<li>D. 「授予 Bash 權限，讓 Claude 可以在 review 過程中執行測試套件」</li>
+</ul>
+<details><summary>答案與說明</summary>
+
+**B** — 只發布留言的 code review 只需要讀取程式碼和產生文字。唯讀模式恰好提供此能力，且安全性最高。
+
+- A 違反最小權限 — review 不需要寫入權限
+- C 混淆了 review 和 auto-fix — 這應該是分開的功能，各有各的權限
+- D 增加不必要的風險 — 跑測試和 code review 是不同的事
+
+**PM 重點**：將「分析」功能（唯讀）和「修改」功能（寫入權限）分開。絕不將它們綁在同一個權限等級下。
+</details>
+
+<h3>問題 2：自動化安全場景</h3>
+<p>工程師提議一個 SDK 自動化，每週更新 dependency。腳本授予 <code>allowedTools: ["Edit", "Write", "Bash"]</code>。專案設定 deny <code>Bash(rm *)</code>。自動化會意外刪除檔案嗎？</p>
+<ul>
+<li>A. 會 — <code>allowedTools</code> 覆寫專案設定</li>
+<li>B. 不會 — 專案設定的 deny 規則始終優先於 SDK 授權</li>
+<li>C. 會 — 但只在 Claude 判斷刪除是必要的情況下</li>
+<li>D. 不會 — 有任何 deny 規則時 <code>Bash</code> 完全被停用</li>
+</ul>
+<details><summary>答案與說明</summary>
+
+**B** — 專案設定作為 SDK 授權無法繞過的護欄。`Bash(rm *)` 的 deny 規則無論 `allowedTools` 指定什麼都會阻止檔案刪除。
+
+- A 錯誤 — SDK 授權永遠無法覆寫 settings deny 規則
+- C 錯誤 — Claude 無法透過推理繞過 deny 規則
+- D 錯誤 — 只有特定 pattern 被封鎖，不是所有 Bash 用法
+
+**PM 重點**：專案設定是你的安全網。撰寫需求時，同時指定 SDK 權限和專案設定的 deny 規則以實現縱深防禦。
+</details>
+
+<h3>問題 3：產品規劃場景</h3>
+<p>你正在規劃一個新功能：「AI 驅動的程式碼生成，從範本建立 boilerplate 檔案。」最小所需的 SDK 權限等級是什麼？</p>
+<ul>
+<li>A. 唯讀（預設）</li>
+<li>B. 僅 Edit</li>
+<li>C. Edit + Write</li>
+<li>D. Edit + Write + Bash</li>
+</ul>
+<details><summary>答案與說明</summary>
+
+**C** — 建立新檔案的程式碼生成需要 Write 權限（建立新檔案）。如果生成也修改既有檔案（例如更新 index），還需要 Edit。檔案建立不需要 Bash。
+
+- A 不足 — 唯讀模式無法建立檔案
+- B 不足 — Edit 修改既有檔案但無法建立新檔案
+- D 授予不必要的 Bash 存取權 — 檔案建立不需要 shell 指令
+
+**PM 重點**：將每個功能動作對應到最小所需工具。「建立新檔案」= Write。「修改既有檔案」= Edit。「執行 shell 指令」= Bash。只授予所需的。
+</details>
+</body>
+</html>

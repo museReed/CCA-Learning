@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 The Server Inspector Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Server Inspector — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.6 测试与调试 MCP server; T2.7 部署前验证 tool 行为</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 02-tools-and-inspector / Lesson 07</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>MCP Inspector 是浏览器界面的调试工具，让你无需构建完整应用程序就能交互式测试 MCP server，通过 <code>mcp dev</code> 在 localhost:6274 运行。</p>
+<hr />
+<h2>什么是 MCP Inspector？</h2>
+<p>MCP Inspector 是 MCP SDK 提供的开发工具，给你一个浏览器界面的 UI 来测试 MCP server。不需要为了测试 tools 是否运作而构建完整的应用程序（client、Claude 集成、用户界面），你可以用 Inspector 直接与 MCP server 交互。</p>
+<pre class="highlight"><code class="language-bash"># 对你的 MCP server 启动 Inspector
+mcp dev mcp_server.py
+</code></pre>
+
+<p>这个命令会：</p>
+<ol>
+<li>以子进程启动你的 MCP server</li>
+<li>在 <code>http://localhost:6274</code> 启动 web UI</li>
+<li>自动建立 MCP 连接</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Inspector 消除了 MCP 开发的鸡生蛋问题。你不需要可用的 client 来测试 server，也不需要可用的 server 来理解 server 提供什么。它把两端的开发解耦了。</p>
+</blockquote>
+<hr />
+<h2>Inspector 界面</h2>
+<p>在浏览器打开 <code>localhost:6274</code> 时，你会看到 Inspector UI 的几个关键组件：</p>
+<h3>Connect 按钮</h3>
+<p>界面顶部是 <strong>Connect</strong> 按钮。点击它建立 Inspector（作为 client）与你的 server 之间的 MCP 连接。连接状态指示器显示你是否已连接。</p>
+<h3>三个主要标签页</h3>
+<p>Inspector 把 MCP server 的能力整理到三个标签页：</p>
+<table>
+<thead>
+<tr>
+<th>标签页</th>
+<th>显示什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Resources</strong></td>
+<td>Server 提供的数据源（文件、数据库等）</td>
+</tr>
+<tr>
+<td><strong>Tools</strong></td>
+<td>Server 提供的可执行函数</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>Server 提供的可重用 prompt 模板</td>
+</tr>
+</tbody>
+</table>
+<h3>Tools 标签页</h3>
+<p>点击 Tools 标签页显示 server 提供的所有 tools 列表。每个 tool 条目显示：</p>
+<ul>
+<li>Tool 名称</li>
+<li>Tool 描述（来自 docstring）</li>
+<li>输入参数及其类型和描述</li>
+</ul>
+<p>你可以选择任何 tool，在输入字段输入参数值，点击 <strong>Run Tool</strong> 执行。</p>
+<hr />
+<h2>测试工作流</h2>
+<p>使用 Inspector 的标准开发工作流遵循此模式：</p>
+<h3>1. 写你的 Tool</h3>
+<pre class="highlight"><code class="language-python">from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP(&quot;my-tools&quot;)
+
+@mcp.tool()
+def calculate_total(prices: list[float], tax_rate: float = 0.1) -&gt; float:
+    &quot;&quot;&quot;计算含税总价。
+
+    Args:
+        prices: 各品项价格列表。
+        tax_rate: 税率（十进制，默认 0.1 = 10%）。
+    &quot;&quot;&quot;
+    subtotal = sum(prices)
+    return subtotal * (1 + tax_rate)
+</code></pre>
+
+<h3>2. 启动 Inspector</h3>
+<pre class="highlight"><code class="language-bash">mcp dev mcp_server.py
+</code></pre>
+
+<h3>3. 连接并测试</h3>
+<ol>
+<li>打开 <code>http://localhost:6274</code></li>
+<li>点击 <strong>Connect</strong></li>
+<li>切到 <strong>Tools</strong> 标签页</li>
+<li>选择 <code>calculate_total</code></li>
+<li>输入测试值：<code>prices: [10.0, 20.0, 30.0]</code>、<code>tax_rate: 0.08</code></li>
+<li>点击 <strong>Run Tool</strong></li>
+<li>验证输出：<code>64.8</code></li>
+</ol>
+<h3>4. 迭代</h3>
+<p>如果输出错误或 tool 报错，修正代码再重新测试。Inspector 维持连接，所以你可以重复测试而不需重启。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Inspector 中 tool 调用之间的状态是持久的。如果第一次 tool 调用创建了文件，后续 tool 调用可以读取该文件。这让你能测试多步骤工作流而不需在每次调用之间重置。</p>
+</blockquote>
+<hr />
+<h2>调用间的状态持久性</h2>
+<p>Inspector 最有用的功能之一是状态在同一 session 的 tool 调用之间持久存在。这对测试有副作用的 tools 至关重要：</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+def create_note(title: str, content: str) -&gt; str:
+    &quot;&quot;&quot;创建新笔记。&quot;&quot;&quot;
+    notes_db[title] = content
+    return f&quot;笔记 '{title}' 已创建&quot;
+
+@mcp.tool()
+def read_note(title: str) -&gt; str:
+    &quot;&quot;&quot;读取现有笔记。&quot;&quot;&quot;
+    return notes_db.get(title, &quot;找不到笔记&quot;)
+</code></pre>
+
+<p>在 Inspector 中，你可以：</p>
+<ol>
+<li>调用 <code>create_note(title="meeting", content="讨论 Q3 目标")</code></li>
+<li>然后调用 <code>read_note(title="meeting")</code></li>
+<li>验证它返回"讨论 Q3 目标"</li>
+</ol>
+<p>这个顺序测试能力对验证协同运作的 tools 至关重要。</p>
+<hr />
+<h2>用 Inspector 调试</h2>
+<p>Inspector 对于调试这些常见问题特别有价值：</p>
+<p><strong>Schema 问题</strong>：如果你的 tool 输入 schema 不对（缺字段、类型错误），你会在 Tools 标签页立即看到。Inspector 显示你的 server 确切提供的 schema。</p>
+<p><strong>参数描述</strong>：你可以在 Inspector UI 中阅读参数描述来验证它们是否清楚有用——Claude 会看到同样的描述。</p>
+<p><strong>错误处理</strong>：故意发送无效输入来验证你的错误消息是有信息量的，而不只是 stack trace。</p>
+<p><strong>返回值</strong>：验证 tool 输出结构够好、信息够充分让 Claude 能解读。</p>
+<hr />
+<h2>在开发工作流中的定位</h2>
+<p>Inspector 在 MCP 开发工作流中的定位如下：</p>
+<pre class="highlight"><code>写 Tool 代码  →  用 Inspector 测试  →  修正问题  →  与 Client 集成
+                        ↑                    |
+                        └────────────────────┘
+</code></pre>
+
+<p>在所有 tools 通过 Inspector 测试之前，不应进入 client 集成。这节省大量调试时间，因为 Inspector 问题（schema、参数、错误）比 client 端问题容易诊断得多——在 client 端，问题可能在 client 代码、传输层或 server 中。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Inspector 不只是方便——它是必要的质量关卡。跳过 Inspector 测试直接进入 client 集成，就像跳过单元测试直接做集成测试。你会花更多时间调试，而非更少。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联性</h2>
+<p>本课涵盖 <strong>Domain 2 (18%)</strong> 的测试与调试：</p>
+<ul>
+<li><strong><code>mcp dev</code> 命令</strong>：知道这个命令对 MCP server 文件启动 Inspector</li>
+<li><strong>localhost:6274</strong>：Inspector 的默认 URL</li>
+<li><strong>三个标签页</strong>：Resources、Tools、Prompts——知道每个显示什么</li>
+<li><strong>状态持久性</strong>：理解 tool 状态在 session 内的调用之间持久存在</li>
+<li><strong>开发工作流</strong>：Inspector 位于写代码和 client 集成之间</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>什么命令启动 MCP Inspector？</td>
+<td><code>mcp dev mcp_server.py</code> — 它启动 server 并打开浏览器界面的测试 UI。</td>
+</tr>
+<tr>
+<td>MCP Inspector 在什么 URL 运行？</td>
+<td><code>http://localhost:6274</code></td>
+</tr>
+<tr>
+<td>MCP Inspector 有哪三个标签页？</td>
+<td>Resources（数据源）、Tools（可执行函数）和 Prompts（可重用模板）。</td>
+</tr>
+<tr>
+<td>Inspector 中 tool 调用之间的状态是否持久？</td>
+<td>是的。如果一次 tool 调用创建了数据，后续调用可以在同一 session 中访问它。</td>
+</tr>
+<tr>
+<td>为什么应在与 client 集成前先用 Inspector 测试？</td>
+<td>Inspector 问题（schema、参数、错误）比 client 端问题容易诊断得多，在 client 端问题可能在多个层中。</td>
+</tr>
+<tr>
+<td>在 Inspector 的 Tools 标签页中可以验证什么？</td>
+<td>Tool 名称、描述、参数类型、参数描述和输入 schema——Claude 会看到完全相同的内容。</td>
+</tr>
+<tr>
+<td>如何用 Inspector 测试错误处理？</td>
+<td>故意发送无效输入，验证错误消息有信息量且有上下文，而非原始 stack trace。</td>
+</tr>
+<tr>
+<td>标准 MCP 开发工作流是什么？</td>
+<td>写 tool 代码 → 用 Inspector 测试 → 修正问题 → 与 client 集成。不要跳过 Inspector 步骤。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>19 Another Useful Hook Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Another Useful Hook — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%), D1 — Agentic Architecture (27%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.5 (Agent SDK hooks), 3.2 (custom commands &amp; hooks), 1.7 (session state &amp; resumption)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 05-hooks / Lesson 19 (text-only)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>Claude Code has 9 hook types — not just PreToolUse and PostToolUse. The additional hooks (<code>Stop</code>, <code>SubagentStop</code>, <code>Notification</code>, <code>PreCompact</code>, <code>UserPromptSubmit</code>, <code>SessionStart</code>, <code>SessionEnd</code>) cover the full AI session lifecycle. For PMs, this means you can specify automation at <strong>every stage</strong> of the AI workflow — from session start to finish, not just during tool execution.</p>
+<hr />
+<p><img alt="Hook Taxonomy" src="visuals/hook-taxonomy.svg" /><br />
+<em>Figure: Complete hook taxonomy — all 9 hook types organized by lifecycle stage, blocking capability, and use case.</em></p>
+<h2>Why PMs Need to Know All Hook Types</h2>
+<p>Understanding the full hook taxonomy lets you write more precise requirements:</p>
+<table>
+<thead>
+<tr>
+<th>PM Question</th>
+<th>Relevant Hook</th>
+<th>Example Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"What happens when the AI finishes a task?"</td>
+<td><code>Stop</code></td>
+<td>"Generate a summary report after each review session"</td>
+</tr>
+<tr>
+<td>"How do we set up the environment?"</td>
+<td><code>SessionStart</code></td>
+<td>"Load project configuration when Claude starts"</td>
+</tr>
+<tr>
+<td>"What happens when a sub-task completes?"</td>
+<td><code>SubagentStop</code></td>
+<td>"Validate subagent output before coordinator uses it"</td>
+</tr>
+<tr>
+<td>"How do we preserve context?"</td>
+<td><code>PreCompact</code></td>
+<td>"Extract key decisions before auto-compaction"</td>
+</tr>
+<tr>
+<td>"Can we validate user input?"</td>
+<td><code>UserPromptSubmit</code></td>
+<td>"Check prompts against template before processing"</td>
+</tr>
+</tbody>
+</table>
+<p>Without knowing these hook types, PMs default to vague requirements like "the system should log everything" — which engineers cannot implement precisely.</p>
+<hr />
+<h2>Mental Model: Hotel Guest Lifecycle</h2>
+<p>Think of an AI session like a hotel guest's stay:</p>
+<table>
+<thead>
+<tr>
+<th>Hotel Event</th>
+<th>Hook Type</th>
+<th>What Happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Guest checks in</td>
+<td><code>SessionStart</code></td>
+<td>Room prepared, preferences loaded</td>
+</tr>
+<tr>
+<td>Guest makes a request (room service)</td>
+<td><code>PreToolUse</code></td>
+<td>Verify request is allowed, check credit</td>
+</tr>
+<tr>
+<td>Request fulfilled</td>
+<td><code>PostToolUse</code></td>
+<td>Quality check, update bill</td>
+</tr>
+<tr>
+<td>Guest asks front desk but nobody's there</td>
+<td><code>Notification</code></td>
+<td>Alert manager (permission needed or idle)</td>
+</tr>
+<tr>
+<td>Concierge finishes a delegated errand</td>
+<td><code>SubagentStop</code></td>
+<td>Report back to guest with results</td>
+</tr>
+<tr>
+<td>Room getting cluttered</td>
+<td><code>PreCompact</code></td>
+<td>Housekeeping saves important items before cleaning</td>
+</tr>
+<tr>
+<td>Guest writes in suggestion box</td>
+<td><code>UserPromptSubmit</code></td>
+<td>Front desk reviews before forwarding to management</td>
+</tr>
+<tr>
+<td>Guest finishes all requests for the day</td>
+<td><code>Stop</code></td>
+<td>Daily summary prepared</td>
+</tr>
+<tr>
+<td>Guest checks out</td>
+<td><code>SessionEnd</code></td>
+<td>Final bill, cleanup, loyalty points</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Takeaway</strong></p>
+<p>You don't need to understand the technical implementation of each hook. You need to know <strong>which lifecycle moments can be automated</strong> so you can write requirements that engineers can map to specific hook types.</p>
+</blockquote>
+<hr />
+<h2>The Variable Data Problem (Simplified for PMs)</h2>
+<p>One challenge engineers face: each hook type receives different data. This is important for PMs because it affects what information is available at each stage:</p>
+<table>
+<thead>
+<tr>
+<th>Hook Type</th>
+<th>Available Data</th>
+<th>PM Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PreToolUse</code> / <code>PostToolUse</code></td>
+<td>Which tool, what input, what output</td>
+<td>Can make decisions based on specific tool actions</td>
+</tr>
+<tr>
+<td><code>Stop</code></td>
+<td>Session ID, transcript path</td>
+<td>Can generate summaries but doesn't know the last specific action</td>
+</tr>
+<tr>
+<td><code>Notification</code></td>
+<td>Session ID, notification details</td>
+<td>Can alert but has limited context</td>
+</tr>
+<tr>
+<td><code>SubagentStop</code></td>
+<td>Session ID, subagent output</td>
+<td>Can validate sub-task results</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>Why PMs need to care</strong></p>
+<p>If you write a requirement like "log every database query Claude makes," engineers need to know this means a PostToolUse hook on database tools (which has <code>tool_input</code> with the query). If you write "summarize what Claude did after each session," that's a Stop hook (which has <code>transcript_path</code> but no individual tool data).</p>
+</blockquote>
+<hr />
+<h2>Product Scenario Walkthrough</h2>
+<h3>Scenario: AI-Powered Code Review Pipeline</h3>
+<p>You are PM for a CI/CD system that uses Claude Code for automated code reviews. Here's how different hook types apply:</p>
+<table>
+<thead>
+<tr>
+<th>Pipeline Stage</th>
+<th>Hook Type</th>
+<th>Automation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pipeline starts</td>
+<td><code>SessionStart</code></td>
+<td>Load repo config, set review scope</td>
+</tr>
+<tr>
+<td>Claude reviews a file</td>
+<td><code>PostToolUse</code></td>
+<td>Run linter after each file read</td>
+</tr>
+<tr>
+<td>Claude writes review comments</td>
+<td><code>PostToolUse</code></td>
+<td>Validate comment format</td>
+</tr>
+<tr>
+<td>A research subagent investigates a pattern</td>
+<td><code>SubagentStop</code></td>
+<td>Verify research results are structured</td>
+</tr>
+<tr>
+<td>Context getting large</td>
+<td><code>PreCompact</code></td>
+<td>Save key findings before trimming</td>
+</tr>
+<tr>
+<td>Claude finishes review</td>
+<td><code>Stop</code></td>
+<td>Generate review summary, write to PR</td>
+</tr>
+<tr>
+<td>Pipeline ends</td>
+<td><code>SessionEnd</code></td>
+<td>Clean up temp files, update metrics</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PRD Language</strong>:<br />
+- Instead of: "The system should automatically generate a review summary"<br />
+- Write: "A <code>Stop</code> hook generates a structured review summary written to the PR after Claude finishes responding"</p>
+<p>This gives engineers an unambiguous implementation target.</p>
+<hr />
+<h2>The Debug Hook: A PM Should Know It Exists</h2>
+<p>Engineers use a simple debug technique to discover what data each hook receives:</p>
+<pre class="highlight"><code class="language-json">{
+  &quot;matcher&quot;: &quot;*&quot;,
+  &quot;hooks&quot;: [{ &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;jq . &gt; log.json&quot; }]
+}
+</code></pre>
+
+<p><strong>Why PMs should care</strong>: If engineers say "we don't know what data is available at this lifecycle stage," the answer is: use a debug hook to discover it. This prevents requirements from being blocked by "we'd need to investigate."</p>
+<hr />
+<h2>Hook Type Decision Framework for PMs</h2>
+<p>When writing requirements, use this decision tree:</p>
+<ol>
+<li><strong>Does it need to happen BEFORE an AI action?</strong> → PreToolUse (can block)</li>
+<li><strong>Does it need to happen AFTER an AI action?</strong> → PostToolUse (feedback only)</li>
+<li><strong>Does it need to happen when Claude is DONE responding?</strong> → Stop</li>
+<li><strong>Does it need to happen when a SUB-TASK completes?</strong> → SubagentStop</li>
+<li><strong>Does it need to happen at SESSION start/end?</strong> → SessionStart / SessionEnd</li>
+<li><strong>Does it need to happen when CONTEXT is about to be trimmed?</strong> → PreCompact</li>
+<li><strong>Does it need to happen when the USER submits a prompt?</strong> → UserPromptSubmit</li>
+<li><strong>Does it need to happen when Claude NEEDS ATTENTION?</strong> → Notification</li>
+</ol>
+<blockquote>
+<p>💡 <strong>Simple rule</strong></p>
+<p>Match the hook to the <strong>lifecycle moment</strong>, not the action. "After Claude finishes" is a Stop hook, not a PostToolUse hook on every tool.</p>
+</blockquote>
+<hr />
+<h2>Anti-Patterns (Exam Favorites)</h2>
+<table>
+<thead>
+<tr>
+<th>❌ Wrong Approach</th>
+<th>✅ Correct Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Write "the system should log everything"</td>
+<td>Specify which hook type logs what data</td>
+<td>Vague requirements lead to over-engineering or under-engineering</td>
+</tr>
+<tr>
+<td>Assume all hooks provide the same data</td>
+<td>Understand that data varies by hook type</td>
+<td>Requirements may ask for data not available at that lifecycle stage</td>
+</tr>
+<tr>
+<td>Use PostToolUse for session-end actions</td>
+<td>Use Stop hook for session-end actions</td>
+<td>PostToolUse fires per-tool, Stop fires once at the end</td>
+</tr>
+<tr>
+<td>Ignore SubagentStop in multi-agent designs</td>
+<td>Use SubagentStop to validate sub-task outputs</td>
+<td>Without validation, coordinator may process malformed subagent data</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Question 1: CI/CD Pipeline Scenario</h3>
+<p>Your team's CI pipeline uses Claude Code for automated PR reviews. After Claude finishes reviewing, you need a summary written to a log file for auditing. Which approach is correct?</p>
+<ul>
+<li>A. PostToolUse hook with <code>matcher: "*"</code> that appends to a log after every tool call</li>
+<li>B. Stop hook that reads the transcript and generates a structured summary</li>
+<li>C. SessionEnd hook that writes a raw dump of all data</li>
+<li>D. Notification hook that sends the summary when Claude goes idle</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — The Stop hook fires exactly when Claude finishes responding. It has access to `transcript_path` for generating a meaningful summary. This is the correct lifecycle moment for "after Claude finishes."
+
+- A fires after every tool call, generating many partial entries — not a clean summary
+- C fires when the entire session ends, which may be too late or too broad
+- D fires on idle or permission requests, not on completion
+
+**PM Key Takeaway**: "After Claude finishes" maps to the `Stop` hook, not PostToolUse. Getting the lifecycle moment right is critical for writing implementable requirements.
+</details>
+
+<h3>Question 2: Multi-Agent Research Scenario</h3>
+<p>A coordinator agent dispatches research tasks to subagents. You need to ensure each subagent returns structured JSON data before the coordinator processes it. What should you specify in the requirements?</p>
+<ul>
+<li>A. Add validation instructions to the coordinator's system prompt</li>
+<li>B. Implement a SubagentStop hook that validates the subagent's output structure</li>
+<li>C. Implement a PostToolUse hook on the coordinator's tool calls</li>
+<li>D. Add a PreCompact hook to check data before context trimming</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — `SubagentStop` fires when a subagent completes, which is the exact point where output validation should occur. It provides deterministic validation before the coordinator processes potentially malformed data.
+
+- A is prompt-based (probabilistic) and puts the burden on the coordinator
+- C fires on the coordinator's own tool calls, not when subagents finish
+- D is about context management, not output validation
+
+**PM Key Takeaway**: In multi-agent architectures, specify validation at the **boundary between agents** — that's where SubagentStop hooks live.
+</details>
+
+<h3>Question 3: Developer Productivity Scenario</h3>
+<p>Your development team wants to automatically load project-specific context (coding standards, architecture decisions) when starting a Claude Code session. Which hook type is appropriate?</p>
+<ul>
+<li>A. PreToolUse hook that loads context before the first tool call</li>
+<li>B. UserPromptSubmit hook that injects context before the first prompt</li>
+<li>C. SessionStart hook that loads project context when the session begins</li>
+<li>D. Notification hook that loads context when Claude requests permission</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**C** — `SessionStart` fires when a session begins or is resumed, making it the natural place to load environment and project context.
+
+- A only fires when a specific tool is called, which may not be the first action
+- B fires on every user prompt, not just session start — would repeatedly load context
+- D fires on notifications, which is unrelated to session initialization
+
+**PM Key Takeaway**: Environment setup belongs in `SessionStart`, not in per-action hooks. This ensures context is loaded once and available throughout the session.
+</details>
+</body>
+</html>

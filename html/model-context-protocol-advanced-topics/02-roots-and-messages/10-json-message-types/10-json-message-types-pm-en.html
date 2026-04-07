@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Json Message Types Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>JSON Message Types — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 (client-server communication patterns), 2.6 (MCP protocol specification)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / Lesson 10</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP communication uses two types of JSON messages — conversations (request-response) and announcements (notifications) — in a bidirectional protocol where both client and server can start talking.</p>
+<hr />
+<p><img alt="Message Types" src="visuals/message-types.svg" /></p>
+<h2>Mental Model: Walkie-Talkies vs. Loudspeakers</h2>
+<table>
+<thead>
+<tr>
+<th>Message Type</th>
+<th>Analogy</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Request-Result</strong></td>
+<td>Walkie-talkie conversation</td>
+<td>"Do you copy?" ... "Copy that, here's the info"</td>
+</tr>
+<tr>
+<td><strong>Notification</strong></td>
+<td>Loudspeaker announcement</td>
+<td>"Attention: progress at 50%" (no response needed)</td>
+</tr>
+</tbody>
+</table>
+<p>The key difference: walkie-talkie messages wait for a reply; loudspeaker announcements do not.</p>
+<hr />
+<h2>Why PMs Need to Understand Message Types</h2>
+<p>You do not need to read JSON, but you need to understand the implications:</p>
+<h3>1. Error Handling Requirements</h3>
+<ul>
+<li><strong>Request-Result</strong>: If the response never comes, your product must handle timeouts and retries</li>
+<li><strong>Notification</strong>: If it is lost, nothing breaks — but the user misses a status update</li>
+</ul>
+<p>This affects your acceptance criteria for reliability.</p>
+<h3>2. Product Architecture Decisions</h3>
+<ul>
+<li>Knowing MCP is <strong>bidirectional</strong> means your server is not just a passive tool provider — it can actively request things from the client (like sampling)</li>
+<li>This opens product possibilities that simple request-response APIs cannot support</li>
+</ul>
+<h3>3. Transport Selection</h3>
+<p>Different deployment environments support different transports. Understanding message types helps evaluate which transport fits your product.</p>
+<hr />
+<h2>The Two Message Categories</h2>
+<h3>Category 1: Request-Result (Conversations)</h3>
+<p>Someone asks a question, someone answers.</p>
+<table>
+<thead>
+<tr>
+<th>Who Asks</th>
+<th>What They Ask</th>
+<th>Who Answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client</td>
+<td>"Run this tool" (CallTool)</td>
+<td>Server</td>
+</tr>
+<tr>
+<td>Client</td>
+<td>"What tools do you have?" (ListTools)</td>
+<td>Server</td>
+</tr>
+<tr>
+<td>Client</td>
+<td>"Give me this resource" (ReadResource)</td>
+<td>Server</td>
+</tr>
+<tr>
+<td>Client</td>
+<td>"Let's connect" (Initialize)</td>
+<td>Server</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>"Please call Claude for me" (CreateMessage — sampling)</td>
+<td>Client</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>"What directories can I access?" (ListRoots)</td>
+<td>Client</td>
+</tr>
+</tbody>
+</table>
+<p>Notice that <strong>both sides can ask questions</strong>. This is what makes MCP bidirectional.</p>
+<h3>Category 2: Notifications (Announcements)</h3>
+<p>Someone shares information. No response expected.</p>
+<table>
+<thead>
+<tr>
+<th>Who Announces</th>
+<th>What They Say</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Server</td>
+<td>"Progress: 50% complete"</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>"Log: Searching database..."</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>"My tool list has changed"</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>"A resource was updated"</td>
+</tr>
+<tr>
+<td>Client</td>
+<td>"My root directories changed"</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Bidirectional: Both Sides Talk</h2>
+<p>This is the critical architectural insight. MCP is NOT like a web API where only the client initiates:</p>
+<table>
+<thead>
+<tr>
+<th>Traditional API</th>
+<th>MCP Protocol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client sends request</td>
+<td>Client sends request</td>
+</tr>
+<tr>
+<td>Server responds</td>
+<td>Server responds</td>
+</tr>
+<tr>
+<td>Server cannot initiate</td>
+<td><strong>Server CAN initiate</strong> (sampling, root queries)</td>
+</tr>
+<tr>
+<td>One-way relationship</td>
+<td><strong>Peer-to-peer relationship</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+MCP is a two-way street. As a PM, this means you can design product features where the server proactively asks for things — like requesting the client to summarize data via sampling. This is a capability that REST APIs do not natively support.</p>
+</blockquote>
+<hr />
+<h2>The Specification Is in TypeScript</h2>
+<p>The official MCP specification lives on GitHub and is written in TypeScript. Key points for PMs:</p>
+<ul>
+<li>TypeScript is used to <strong>describe data shapes</strong> (like a schema), not as a required language</li>
+<li>Servers and clients can be built in <strong>any language</strong> (Python, Go, JavaScript, Rust)</li>
+<li>The spec is the <strong>source of truth</strong> for what messages look like</li>
+<li>When engineers debate "what fields does this message have?" — the spec is the answer</li>
+</ul>
+<hr />
+<h2>Product Implications of Each Message Type</h2>
+<table>
+<thead>
+<tr>
+<th>Message Type</th>
+<th>Product Implication</th>
+<th>PM Concern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CallToolRequest/Result</td>
+<td>Core tool execution</td>
+<td>Must define timeouts and error states</td>
+</tr>
+<tr>
+<td>InitializeRequest/Result</td>
+<td>Connection setup</td>
+<td>Defines supported capabilities upfront</td>
+</tr>
+<tr>
+<td>CreateMessageRequest/Result</td>
+<td>Sampling (server uses AI)</td>
+<td>Cost shifts to client — pricing impact</td>
+</tr>
+<tr>
+<td>ProgressNotification</td>
+<td>UX during long operations</td>
+<td>Must design loading states</td>
+</tr>
+<tr>
+<td>LoggingNotification</td>
+<td>Debugging and monitoring</td>
+<td>Must define log retention policy</td>
+</tr>
+<tr>
+<td>ToolListChangedNotification</td>
+<td>Dynamic tool discovery</td>
+<td>UI must handle tool list updates</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common Exam Scenarios</h2>
+<h3>Scenario: Message Lost During Transport</h3>
+<p>Q: "A progress notification is lost during transmission. What happens?"<br />
+A: Nothing breaks — the user misses one status update but the tool continues working. Notifications are fire-and-forget.</p>
+<p>Q: "A CallToolResult is lost during transmission. What happens?"<br />
+A: The client times out and must retry. Request-Result pairs require responses — a missing result is a failure.</p>
+<p>This distinction is frequently tested.</p>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.4</strong>: Communication patterns — know the two categories and which side sends what</li>
+<li><strong>D2 Task 2.6</strong>: Protocol specification — know it is in TypeScript, used for type description</li>
+<li>Key distinction: Requests have an <code>id</code> field, Notifications do not</li>
+<li>Know that MCP is bidirectional — server can initiate requests (sampling, list_roots)</li>
+<li>Exam philosophy: <strong>Protocol literacy</strong> — understanding message types informs error handling and architecture</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the two categories of MCP messages?</td>
+<td>Request-Result pairs (expect a response) and Notifications (fire-and-forget)</td>
+</tr>
+<tr>
+<td>How does a Request differ from a Notification in the protocol?</td>
+<td>Requests have an <code>id</code> field and expect a response; Notifications have no <code>id</code> and expect nothing back</td>
+</tr>
+<tr>
+<td>Is MCP a client-only-initiates protocol?</td>
+<td>No — it is bidirectional; both client and server can initiate requests</td>
+</tr>
+<tr>
+<td>What is the MCP specification written in?</td>
+<td>TypeScript — for type description, not as a required implementation language</td>
+</tr>
+<tr>
+<td>What happens if a Notification is lost?</td>
+<td>Nothing breaks — the recipient misses an informational update but functionality continues</td>
+</tr>
+<tr>
+<td>What happens if a Request Result is lost?</td>
+<td>The sender must handle the timeout and potentially retry — it is a failure scenario</td>
+</tr>
+<tr>
+<td>Give an example of a server-initiated request.</td>
+<td>CreateMessageRequest (sampling) — the server asks the client to call Claude</td>
+</tr>
+<tr>
+<td>Why does transport choice matter for MCP?</td>
+<td>All transports must support bidirectional communication because both sides can initiate messages</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>08 Making Changes Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Making Changes — 工程深度筆記</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D1 — Agentic Coding Fundamentals (22%), D3 — Effective Claude Code Usage (30%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.4 ★★★ (plan mode vs direct), 3.5 ★★★ (iterative refinement), 1.1 ★ (agentic loops)</td>
+</tr>
+<tr>
+<td>考試情境</td>
+<td>S2 (Code Gen), S4 (Developer Productivity)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>claude-code-in-action / 02-getting-started / Lesson 08（影片 + 文字）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Claude Code 提供三種操作模式應對不同複雜度：直接執行用於簡單變更，Planning Mode 用於複雜的多檔案重構，Thinking Modes 用於模糊問題的深度推理。</p>
+<hr />
+<h2>截圖溝通</h2>
+<p>告訴 Claude 要改什麼最精確的方式是展示給它看：</p>
+<ol>
+<li><strong>截取螢幕截圖</strong> — 你想修改的 UI 元素</li>
+<li><strong>用 Ctrl+V 貼上</strong>（macOS 上不是 Cmd+V）到 Claude Code 聊天中</li>
+<li><strong>描述你想要的變更</strong> — 相對於截圖</li>
+</ol>
+<blockquote>
+<p>🎬 <strong>講師影片洞察</strong></p>
+<p>講師示範貼上 uigen 應用的截圖並請 Claude 修改 UI。他特別強調用 Ctrl+V — 「是 Ctrl+V，不是 Cmd+V」— 因為這是 Claude Code 用於圖片貼上的快捷鍵。</p>
+</blockquote>
+<p>這是<strong>多模態輸入</strong> — Claude 同時處理圖片和文字指令來理解變更。截圖消除了關於你指的是哪個元素的歧義。</p>
+<hr />
+<h2>Planning Mode（Task 3.4 ★★★）</h2>
+<p><img alt="Planning Mode Execution Flow" src="visuals/planning-mode-execution-flow-zh-TW.svg" /><br />
+<em>圖：Plan Mode 執行流程 — 探索、規劃、審查、執行。</em></p>
+<p><img alt="Plan Mode Flow" src="visuals/plan-mode-flow-zh-TW.svg" /><br />
+<em>圖：三種模式對應不同複雜度。</em></p>
+<p>Planning Mode 是 Claude Code 處理複雜、多檔案變更的機制。它將<strong>規劃</strong>與<strong>執行</strong>分離。</p>
+<h3>如何啟用</h3>
+<p>按 <code>Shift+Tab</code> 兩次（如果已經自動接受編輯則按一次）：</p>
+<pre class="highlight"><code>一般模式：  提問 → Claude 立即執行
+Plan Mode：提問 → Claude 規劃 → 你審核 → Claude 執行
+</code></pre>
+
+<h3>Planning Mode 做什麼</h3>
+<ol>
+<li><strong>讀取更多檔案</strong> — Claude 更廣泛地探索你的程式碼庫</li>
+<li><strong>建立詳細計畫</strong> — 展示它打算做什麼</li>
+<li><strong>等待核准</strong> — 你在任何變更前審核並可以重新導向</li>
+<li><strong>執行計畫</strong> — 只在你確認後</li>
+</ol>
+<pre class="highlight"><code>┌──────────┐    ┌─────────────────┐    ┌──────────────┐
+│ 你提問   │───→│ Claude 探索     │───→│ Claude 規劃  │
+└──────────┘    │（讀取檔案、     │    │（逐步        │
+                │  搜尋程式碼）   │    │  行動清單）   │
+                └─────────────────┘    └──────┬───────┘
+                                              │
+                                              ▼
+                                       ┌──────────────┐
+                                       │ 你審核       │
+                                       │ 計畫         │
+                                       └──────┬───────┘
+                                              │
+                                    ┌─────────┴─────────┐
+                                    ▼                   ▼
+                              ┌──────────┐        ┌──────────┐
+                              │ 核准     │        │ 重新導向 │
+                              │ → 執行   │        │ → 重新規劃│
+                              └──────────┘        └──────────┘
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>關鍵洞察</strong></p>
+<p>Planning Mode 不只是「較慢的執行」。它是根本不同的工作流，在行動前蒐集更多 context。規劃階段的額外檔案讀取通常能捕捉到直接執行會遺漏的相依性和邊界情況。</p>
+</blockquote>
+<h3>何時使用 Planning Mode</h3>
+<table>
+<thead>
+<tr>
+<th>使用 Planning Mode</th>
+<th>使用直接執行</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>多檔案重構</td>
+<td>單檔案編輯</td>
+</tr>
+<tr>
+<td>架構變更</td>
+<td>簡單 bug fix</td>
+</tr>
+<tr>
+<td>跨模組的新功能實作</td>
+<td>新增一個 CSS class</td>
+</tr>
+<tr>
+<td>不確定範圍的任務</td>
+<td>確切知道要改什麼</td>
+</tr>
+<tr>
+<td>不熟悉的程式碼庫</td>
+<td>充分理解的程式碼</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Thinking Modes（Extended Thinking）</h2>
+<p><img alt="Thinking Modes Token Spectrum" src="visuals/thinking-modes-token-spectrum-zh-TW.svg" /><br />
+<em>圖：Thinking Mode 頻譜 — 從 standard 到 ultrathink。</em></p>
+<p>Thinking modes 在回應前給 Claude 更多 token 進行內部推理。這與 Planning Mode 是正交的 — 它們解決不同的問題。</p>
+<h3>頻譜</h3>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>推理深度</th>
+<th>最適合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>（預設）</td>
+<td>標準</td>
+<td>多數任務</td>
+</tr>
+<tr>
+<td>"Think"</td>
+<td>基本延伸</td>
+<td>中等複雜度</td>
+</tr>
+<tr>
+<td>"Think more"</td>
+<td>延伸</td>
+<td>複雜邏輯</td>
+</tr>
+<tr>
+<td>"Think a lot"</td>
+<td>全面</td>
+<td>多步演算法</td>
+</tr>
+<tr>
+<td>"Think longer"</td>
+<td>延長時間</td>
+<td>深度分析</td>
+</tr>
+<tr>
+<td>"Ultrathink"</td>
+<td>最大化</td>
+<td>最困難的問題、模糊需求</td>
+</tr>
+</tbody>
+</table>
+<p>每個級別逐步給 Claude 更多 token 進行內部推理。</p>
+<blockquote>
+<p>🎬 <strong>講師影片洞察</strong></p>
+<p>講師解釋 thinking modes 給 Claude「更多 token 來推理問題」。他將 ultrathink 定位為最大推理能力，在 Claude 掙扎於特別複雜或模糊的任務時很有用。他也提到成本取捨：「兩個功能都消耗額外的 token。」</p>
+</blockquote>
+<hr />
+<h2>Planning Mode vs Thinking Mode（關鍵考試區別）</h2>
+<p>這是考試最重要的區別之一：</p>
+<table>
+<thead>
+<tr>
+<th>維度</th>
+<th>Planning Mode</th>
+<th>Thinking Mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>做什麼</strong></td>
+<td>讀取更多檔案，建立行動計畫</td>
+<td>更深度地推理問題</td>
+</tr>
+<tr>
+<td><strong>複雜度類型</strong></td>
+<td>廣度 — 多檔案、多元件</td>
+<td>深度 — 複雜邏輯、模糊需求</td>
+</tr>
+<tr>
+<td><strong>輸出</strong></td>
+<td>你在執行前審核的計畫</td>
+<td>更徹底推理的回應</td>
+</tr>
+<tr>
+<td><strong>啟動</strong></td>
+<td>Shift+Tab（切換）</td>
+<td>在 prompt 中加關鍵字（"think"、"ultrathink"）</td>
+</tr>
+<tr>
+<td><strong>使用者互動</strong></td>
+<td>審核-核准循環</td>
+<td>不需要額外互動</td>
+</tr>
+<tr>
+<td><strong>成本驅動</strong></td>
+<td>更多檔案讀取（tool call）</td>
+<td>更多推理 token</td>
+</tr>
+</tbody>
+</table>
+<pre class="highlight"><code>複雜度矩陣：
+                        低推理            高推理
+                        複雜度            複雜度
+                    ┌─────────────────┬─────────────────┐
+低程式碼庫           │   直接           │   Think /       │
+複雜度              │   執行           │   Ultrathink    │
+                    ├─────────────────┼─────────────────┤
+高程式碼庫           │   Planning       │   Planning +    │
+複雜度              │   Mode           │   Thinking Mode │
+                    └─────────────────┴─────────────────┘
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>關鍵洞察</strong></p>
+<p>你可以組合兩種模式。對於需要理解多個檔案（廣度）又要解決複雜演算法（深度）的任務，使用 Planning Mode 加上 "think" 或 "ultrathink" 關鍵字。這讓 Claude 同時獲得廣泛 context 和深度推理。</p>
+</blockquote>
+<hr />
+<h2>迭代改進工作流（Task 3.5 ★★★）</h2>
+<p>完整的迭代工作流結合所有三種技術：</p>
+<ol>
+<li><strong>初始請求</strong> — 描述你想要的（文字 + 選用截圖）</li>
+<li><strong>Claude 實作</strong> — 直接執行或透過 Planning Mode</li>
+<li><strong>你審核</strong> — 在瀏覽器/IDE 中檢查結果</li>
+<li><strong>提供回饋</strong> — 結果截圖 + 描述要改什麼</li>
+<li><strong>Claude 改進</strong> — 基於你的回饋迭代</li>
+<li><strong>重複</strong> 直到滿意</li>
+</ol>
+<blockquote>
+<p>⚠️ <strong>成本考量</strong></p>
+<p>Planning Mode 和 Thinking Modes 都消耗額外 token。Planning Mode 讀取更多檔案（tool call token）。Thinking modes 使用更多推理 token。在任務複雜度足以證明成本合理時使用，不要作為每個請求的預設。</p>
+</blockquote>
+<hr />
+<h2>熟悉的類比</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>類比</th>
+<th>為何合適</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>直接執行</td>
+<td>請資深工程師修一個 typo — 直接做</td>
+<td>簡單任務，不需要規劃</td>
+</tr>
+<tr>
+<td>Planning Mode</td>
+<td>Sprint 前的架構審核 — 先規劃再建造</td>
+<td>複雜任務需要前期探索</td>
+</tr>
+<tr>
+<td>Thinking modes</td>
+<td>給考試題目額外時間</td>
+<td>更多時間 = 困難問題更好的推理</td>
+</tr>
+<tr>
+<td>Ultrathink</td>
+<td>困難設計問題的白板 session</td>
+<td>最大推理資源應對最大複雜度</td>
+</tr>
+<tr>
+<td>截圖輸入</td>
+<td>指著特定按鈕說「改這個」</td>
+<td>視覺溝通消除歧義</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>考試重點</h2>
+<table>
+<thead>
+<tr>
+<th>考試概念</th>
+<th>本課教了什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Plan mode vs direct (3.4) ★★★</strong></td>
+<td>Planning Mode 用於多檔案/複雜任務；直接用於簡單編輯。Planning 讀取更多檔案並建立可審核的計畫。</td>
+</tr>
+<tr>
+<td><strong>Iterative refinement (3.5) ★★★</strong></td>
+<td>提問 → 實作 → 審核 → 回饋 → 改進循環。截圖加速溝通。</td>
+</tr>
+<tr>
+<td><strong>Agentic loops (1.1) ★</strong></td>
+<td>迭代改進就是實踐中的 agentic loop — 蒐集 context、規劃、行動、評估、重複。</td>
+</tr>
+</tbody>
+</table>
+<p>關鍵考試區別：</p>
+<ul>
+<li><strong>Planning Mode vs Thinking Mode</strong> — 廣度 vs 深度。Planning 讀更多檔案；thinking 推理更深。它們是互補的，不是替代的。</li>
+<li><strong>Extended thinking 不是 prompt 技巧</strong> — 它是分配更多推理 token 的架構功能。考試哲學「Architecture &gt; Prompt」適用。</li>
+</ul>
+<blockquote>
+<p>🎯 <strong>考試筆記</strong></p>
+<p>當考試呈現「複雜多檔案重構」情境時，答案幾乎總是涉及 Planning Mode。當情境涉及「模糊需求」或「複雜演算法」時，答案涉及 Thinking Modes。兩者同時出現時，組合使用。</p>
+</blockquote>
+<hr />
+<h2>練習題</h2>
+<h3>Q1：模式選擇</h3>
+<p>一位開發者需要重新命名一個在 Node.js monorepo 中被 15 個檔案引用的資料庫欄位。哪種方法最合適？</p>
+<ul>
+<li>A. 直接執行 — 直接請 Claude 重新命名</li>
+<li>B. Planning Mode — 讓 Claude 探索程式碼庫、識別所有引用，並在變更前建立計畫</li>
+<li>C. Ultrathink — 請 Claude 深度推理這個重新命名</li>
+<li>D. 為每個需要變更的檔案開一個新的 Claude session</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 這是經典的 Planning Mode 情境：影響多個檔案的變更需要先廣泛探索程式碼庫。Planning Mode 會讀取相關檔案、識別所有引用，並呈現全面的計畫。
+
+- A 有遺漏某些檔案引用的風險
+- C 解決了錯誤的問題 — 這需要廣度（多檔案），不是深度（複雜推理）
+- D 違背了 agentic coding 助手的目的
+
+考試哲學：**Architecture > Prompt** — Planning Mode 是處理多檔案複雜度的結構方法。
+</details>
+
+<h3>Q2：組合模式</h3>
+<p>一位開發者被指派設計新的快取策略，涉及修改資料存取層、API 路由和設定系統。最佳快取演算法取決於程式碼庫中的特定存取模式。哪種方法最好？</p>
+<ul>
+<li>A. 直接執行配上詳細的 prompt</li>
+<li>B. 只用 Planning Mode — 它會找出演算法</li>
+<li>C. 只用 Ultrathink — 它會找出檔案變更</li>
+<li>D. Planning Mode + ultrathink — Planning Mode 用於廣泛的程式碼庫理解，ultrathink 用於推理最佳快取演算法</li>
+</ul>
+<details><summary>答案</summary>
+
+**D** — 此任務同時具有廣度複雜度（跨程式碼庫的多個元件）和深度複雜度（選擇最佳快取演算法）。組合 Planning Mode 和 thinking mode 同時處理兩個維度。
+
+考試哲學：**Proportionate response** — 對特定的複雜度配置使用正確的工具組合。
+</details>
+
+<h3>Q3：成本效益使用</h3>
+<p>一位初級開發者開始對每個請求都使用 "ultrathink"，包括簡單任務如「新增一個 console.log 語句」。他們的 token 使用量增加了 5 倍。你給什麼建議？</p>
+<ul>
+<li>A. Ultrathink 是免費的，讓他們繼續</li>
+<li>B. 將 thinking modes 保留給真正有複雜度的任務 — 模糊需求、複雜演算法或困難除錯。簡單任務不會從額外推理 token 中受益。</li>
+<li>C. 他們應該改用 Planning Mode 而不是 ultrathink</li>
+<li>D. 他們永遠不應該用 ultrathink — 它是實驗性的</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — Thinking modes 消耗額外 token。對於加 log 語句這種簡單任務，標準執行就夠了。Ultrathink 是給真正困難的問題 — 更多推理時間能產生更好結果的場景。
+
+考試哲學：**Proportionate response** — 讓工具的力量匹配任務的複雜度。不要用大砲打蚊子。
+</details>
+
+<hr />
+<h2>反模式</h2>
+<table>
+<thead>
+<tr>
+<th>反模式</th>
+<th>為何失敗</th>
+<th>更好的方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每個任務都用 Planning Mode</td>
+<td>簡單變更浪費 token；不必要地更慢</td>
+<td>簡單、範圍明確的變更用直接執行</td>
+</tr>
+<tr>
+<td>瑣碎任務用 ultrathink</td>
+<td>燒推理 token 卻無益處</td>
+<td>將 thinking modes 保留給真正複雜的問題</td>
+</tr>
+<tr>
+<td>從不用 Planning Mode</td>
+<td>多檔案變更中遺漏相依性</td>
+<td>範圍不明確或跨多檔案時啟用 Planning Mode</td>
+</tr>
+<tr>
+<td>只用文字描述 UI 變更</td>
+<td>有歧義 — 「左邊的按鈕」可以指很多東西</td>
+<td>貼截圖並指向特定元素</td>
+</tr>
+<tr>
+<td>跳過 Planning Mode 的審核步驟</td>
+<td>失去意義；可能執行有缺陷的計畫</td>
+<td>核准執行前永遠審核計畫</td>
+</tr>
+<tr>
+<td>用 Cmd+V 而不是 Ctrl+V 貼截圖</td>
+<td>圖片不會貼入 Claude Code</td>
+<td>截圖貼上專用 Ctrl+V</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

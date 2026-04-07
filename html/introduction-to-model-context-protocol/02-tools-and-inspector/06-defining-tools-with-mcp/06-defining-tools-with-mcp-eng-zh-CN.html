@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06 Defining Tools With Mcp Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Tools with MCP — 工程深度解析</h1>
+<p><img alt="Tools Decorator" src="visuals/tools-decorator-zh-TW.svg" /></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.1 设计与实现 tool schemas; T2.5 使用 MCP SDK 定义类型安全的 tools</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 02-tools-and-inspector / Lesson 06</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>Python MCP SDK（FastMCP）让你用装饰器和 type hints 定义 tools，自动生成 JSON schema 并处理验证，无需手写 schema。</p>
+<hr />
+<h2>FastMCP：Python SDK</h2>
+<p>FastMCP 是构建 MCP server 的官方 Python SDK。它利用 Python 的类型系统，消除了手动编写 JSON tool schema 的繁琐过程。</p>
+<pre class="highlight"><code class="language-python">from mcp.server.fastmcp import FastMCP
+
+# 创建 MCP server 实例
+mcp = FastMCP(&quot;document-tools&quot;)
+</code></pre>
+
+<p><code>FastMCP</code> 构造函数接受 server 名称字符串。此名称在连接握手时向 client 标识你的 MCP server。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Server 名称不只是标签——它会出现在 client 的 log 和调试输出中。选择能反映 server 用途的描述性名称（例如 "github-tools"、"document-tools"、"database-query"）。</p>
+</blockquote>
+<hr />
+<h2>用 @mcp.tool() 定义 Tools</h2>
+<p>Tools 定义为标准 Python 函数，加上 <code>@mcp.tool()</code> 装饰器。FastMCP 检查函数签名来自动生成 tool 的 JSON schema。</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+def read_doc_contents(file_path: str) -&gt; str:
+    &quot;&quot;&quot;读取并返回文档内容。
+
+    Args:
+        file_path: 要读取的文档路径。
+    &quot;&quot;&quot;
+    with open(file_path, &quot;r&quot;) as f:
+        return f.read()
+</code></pre>
+
+<p>幕后发生的事：</p>
+<ol>
+<li><strong>函数名称</strong>变成 tool 名称：<code>read_doc_contents</code></li>
+<li><strong>Docstring</strong> 变成 tool 描述（Claude 决定是否使用此 tool 时看到的内容）</li>
+<li><strong>Type hints</strong> 变成 JSON schema 类型：<code>file_path: str</code> → <code>{"type": "string"}</code></li>
+<li><strong>返回类型</strong>定义输出格式</li>
+</ol>
+<p>自动生成的 JSON schema 看起来像：</p>
+<pre class="highlight"><code class="language-json">{
+    &quot;name&quot;: &quot;read_doc_contents&quot;,
+    &quot;description&quot;: &quot;读取并返回文档内容。&quot;,
+    &quot;inputSchema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;file_path&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;description&quot;: &quot;要读取的文档路径。&quot;
+            }
+        },
+        &quot;required&quot;: [&quot;file_path&quot;]
+    }
+}
+</code></pre>
+
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Docstring 对 Claude 的 tool 选择准确度至关重要。模糊的 docstring 意味着 Claude 可能选错 tool 或完全忽略它。写清楚说明 tool 做什么、何时使用、返回什么的 docstring。</p>
+</blockquote>
+<hr />
+<h2>用 Annotated Types 添加字段描述</h2>
+<p>要更精确的参数描述，使用 Pydantic 的 <code>Field</code>：</p>
+<pre class="highlight"><code class="language-python">from pydantic import Field
+from typing import Annotated
+
+@mcp.tool()
+def edit_document(
+    file_path: Annotated[str, Field(description=&quot;要编辑的文档路径&quot;)],
+    new_content: Annotated[str, Field(description=&quot;要写入文档的新内容&quot;)],
+    create_backup: Annotated[bool, Field(description=&quot;是否先创建 .bak 备份&quot;)] = True
+) -&gt; str:
+    &quot;&quot;&quot;通过替换内容来编辑文档。
+
+    用 new_content 覆写 file_path 的文件。
+    可选择创建原始文件的备份。
+    &quot;&quot;&quot;
+    if create_backup:
+        import shutil
+        shutil.copy2(file_path, f&quot;{file_path}.bak&quot;)
+
+    with open(file_path, &quot;w&quot;) as f:
+        f.write(new_content)
+
+    return f&quot;文档 {file_path} 更新成功&quot;
+</code></pre>
+
+<p>关键模式：</p>
+<ul>
+<li><strong><code>Annotated[type, Field(...)]</code></strong> — 为单个参数添加丰富描述</li>
+<li><strong>默认值</strong> — 有默认值的参数在 schema 中变成可选</li>
+<li><strong>布尔标志</strong> — 用 <code>Field(description=...)</code> 解释标志控制什么</li>
+</ul>
+<hr />
+<h2>错误处理</h2>
+<p>MCP tools 使用标准 Python 异常处理错误。FastMCP 捕获异常并作为错误响应返回给 client。</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+def read_doc_contents(file_path: str) -&gt; str:
+    &quot;&quot;&quot;读取并返回文档内容。&quot;&quot;&quot;
+    try:
+        with open(file_path, &quot;r&quot;) as f:
+            return f.read()
+    except FileNotFoundError:
+        raise ValueError(f&quot;找不到文档：{file_path}&quot;)
+    except PermissionError:
+        raise ValueError(f&quot;权限被拒：{file_path}&quot;)
+</code></pre>
+
+<p>MCP tool 错误处理最佳实践：</p>
+<ul>
+<li><strong>抛出 <code>ValueError</code></strong> 用于面向用户的错误（无效输入、找不到等）</li>
+<li><strong>让非预期异常传播</strong> — FastMCP 会将它们包装为内部错误</li>
+<li><strong>在错误消息中包含上下文</strong> — Claude 使用错误消息来决定下一步</li>
+</ul>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+好的错误消息是 tool 设计的一部分。当 Claude 收到像"找不到文档：/path/to/file"的错误时，它能向用户解释问题或尝试替代方案。通用的"发生错误"让 Claude 无从着手。</p>
+</blockquote>
+<hr />
+<h2>相较于手动 Schema 编写的优势</h2>
+<table>
+<thead>
+<tr>
+<th>手动方式</th>
+<th>FastMCP 方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>手写 JSON schema</td>
+<td>从 type hints 自动生成</td>
+</tr>
+<tr>
+<td>手动验证输入</td>
+<td>Pydantic 自动验证</td>
+</tr>
+<tr>
+<td>Schema 和实现分离</td>
+<td>Schema 与代码同在</td>
+</tr>
+<tr>
+<td>容易 schema/代码不同步</td>
+<td>永远同步</td>
+</tr>
+<tr>
+<td>冗长的样板代码</td>
+<td>干净的 Pythonic 函数</td>
+</tr>
+</tbody>
+</table>
+<p>自动验证特别强大。如果 Claude 发送 <code>file_path: 42</code> 而不是字符串，FastMCP 在你的函数执行前就捕获类型错误。</p>
+<hr />
+<h2>运行 Server</h2>
+<pre class="highlight"><code class="language-python">if __name__ == &quot;__main__&quot;:
+    mcp.run()
+</code></pre>
+
+<p><code>mcp.run()</code> 启动 MCP server，默认使用 stdio transport。使用 HTTP transport：</p>
+<pre class="highlight"><code class="language-python">if __name__ == &quot;__main__&quot;:
+    mcp.run(transport=&quot;sse&quot;)  # HTTP 上的 Server-Sent Events
+</code></pre>
+
+<hr />
+<h2>CCA 考试关联性</h2>
+<p>本课是 <strong>Domain 2 (18%)</strong> 的核心。重点考试领域：</p>
+<ul>
+<li><strong><code>@mcp.tool()</code> 装饰器</strong>：知道它从函数签名自动生成 JSON schema</li>
+<li><strong>Docstring 很重要</strong>：它们变成 Claude 用于 tool 选择的 tool 描述</li>
+<li><strong>Type hints 到 schema</strong>：理解映射关系（str→string、int→integer、bool→boolean 等）</li>
+<li><strong>Field 描述</strong>：知道 <code>Annotated[type, Field(...)]</code> 如何添加参数级别的描述</li>
+<li><strong>错误处理模式</strong>：理解 Python 异常变成 MCP 错误响应</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@mcp.tool()</code> 做什么？</td>
+<td>装饰 Python 函数将其注册为 MCP tool，从函数的名称、docstring、type hints 和参数描述自动生成 JSON schema。</td>
+</tr>
+<tr>
+<td>FastMCP 如何生成 tool 描述？</td>
+<td>从函数的 docstring。第一行通常成为简短描述，完整 docstring 为 Claude 的 tool 选择提供详细上下文。</td>
+</tr>
+<tr>
+<td>在 FastMCP 中如何添加参数描述？</td>
+<td>使用 Pydantic 的 <code>Annotated[type, Field(description="...")]</code>，或从 docstring 的 Args 部分。</td>
+</tr>
+<tr>
+<td>Tool 抛出 ValueError 时会发生什么？</td>
+<td>FastMCP 捕获它并作为错误响应返回给 MCP client。Claude 然后看到错误消息并决定如何响应。</td>
+</tr>
+<tr>
+<td>FastMCP 如何处理输入验证？</td>
+<td>基于 type hints 使用 Pydantic 自动验证。如果 Claude 发送错误类型的参数，错误在函数执行前被捕获。</td>
+</tr>
+<tr>
+<td><code>FastMCP("name")</code> 创建什么？</td>
+<td>一个带有指定名称的 MCP server 实例。名称在连接时向 client 标识 server，并出现在 log 中。</td>
+</tr>
+<tr>
+<td>FastMCP 相对于手动 JSON schema 编写的优势是什么？</td>
+<td>从 type hints 自动生成 schema、自动输入验证、schema 永远与代码同步、大幅减少样板代码。</td>
+</tr>
+<tr>
+<td>在 FastMCP 中如何让 tool 参数变可选？</td>
+<td>在函数签名中给它默认值。有默认值的参数在生成的 JSON schema 中变成可选。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

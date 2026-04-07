@@ -1,0 +1,61 @@
+{
+  "unit": "07-adding-context",
+  "max_valid_srt_entry": 68,
+  "demos": [
+    {
+      "id": "demo-1",
+      "title": "Running /init to Generate CLAUDE.md",
+      "srt_range": [18, 25],
+      "key_frames": [
+        {"frame": "frame_019.jpg", "caption": "Running /init command in terminal"},
+        {"frame": "frame_022.jpg", "caption": "Claude analyzes codebase and generates CLAUDE.md summary"},
+        {"frame": "frame_025.jpg", "caption": "Permission prompt — Enter to accept or Shift+Tab for auto-accept"}
+      ],
+      "walkthrough_steps": [
+        "Instructor opens terminal and starts Claude Code with `claude` command",
+        "Runs `/init` command — Claude analyzes entire codebase",
+        "Claude figures out project purpose, architecture, relevant commands, critical files",
+        "Summarizes findings and writes them to CLAUDE.md file",
+        "Permission prompt appears — can hit Enter to accept or Shift+Tab for free file writes"
+      ]
+    },
+    {
+      "id": "demo-2",
+      "title": "Using # Memory Mode to Add Custom Instructions",
+      "srt_range": [41, 50],
+      "key_frames": [
+        {"frame": "frame_044.jpg", "caption": "Typing # to enter memory mode in Claude Code"},
+        {"frame": "frame_048.jpg", "caption": "Adding 'don't write comments so often' instruction"},
+        {"frame": "frame_050.jpg", "caption": "Instruction merged into CLAUDE.md file"}
+      ],
+      "walkthrough_steps": [
+        "Instructor explains Claude is adding too many comments in code",
+        "Types `#` in Claude Code to enter memory mode",
+        "Enters instruction: 'don't write comments so often'",
+        "Specifies to add instruction to project CLAUDE.md file",
+        "Claude intelligently merges instruction into existing CLAUDE.md",
+        "Opens file and verifies the instruction was added"
+      ]
+    },
+    {
+      "id": "demo-3",
+      "title": "Using @ File Mentions for Targeted Context",
+      "srt_range": [51, 68],
+      "key_frames": [
+        {"frame": "frame_055.jpg", "caption": "Using @auth to mention authentication files"},
+        {"frame": "frame_060.jpg", "caption": "Mentioning @prisma/schema.prisma in CLAUDE.md"},
+        {"frame": "frame_064.jpg", "caption": "Adding schema reference to CLAUDE.md via # memory mode"},
+        {"frame": "frame_068.jpg", "caption": "Claude answers data structure question without reading schema file"}
+      ],
+      "walkthrough_steps": [
+        "Instructor shows how to use `@` to mention files in chat — includes file contents in request",
+        "Example: `How does the auth system work? @auth` — Claude shows auth-related files to choose from",
+        "Shows using `@` syntax inside CLAUDE.md to permanently reference important files",
+        "Example: references @prisma/schema.prisma for database structure",
+        "Uses `#` memory mode to add the schema reference to CLAUDE.md",
+        "Asks 'what attributes does a user have?' — Claude answers immediately without reading schema file",
+        "File contents from @ mentions are automatically included in every request"
+      ]
+    }
+  ]
+}

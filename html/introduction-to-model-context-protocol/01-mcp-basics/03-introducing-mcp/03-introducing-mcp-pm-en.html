@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03 Introducing Mcp Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing MCP — PM Strategic Overview</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.1 Design and implement tool schemas; T2.3 Configure MCP server connections</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 01-mcp-basics / Lesson 03</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP is a universal adapter standard that lets AI assistants plug into any external service without requiring custom integration work for each one.</p>
+<hr />
+<p><img alt="Mcp Architecture" src="visuals/mcp-architecture.svg" /></p>
+<h2>The Business Problem: Integration Sprawl</h2>
+<p>Imagine you are managing a product team building a customer-facing AI assistant. The assistant needs to access GitHub for engineering data, Salesforce for customer data, and Slack for internal communications. Without a standard protocol, your engineering team must build and maintain a separate integration for each service — like building a custom power adapter for every appliance in your office.</p>
+<p>This creates three compounding problems:</p>
+<ol>
+<li><strong>Development cost</strong> — Every new service requires weeks of custom integration work</li>
+<li><strong>Maintenance burden</strong> — When any service updates its API, your team must update the integration</li>
+<li><strong>Quality risk</strong> — Each hand-built integration is another surface for bugs and security issues</li>
+</ol>
+<p>This is exactly what happened before USB existed in the hardware world. Every printer, keyboard, and mouse had its own proprietary connector. USB standardized the interface and transformed the entire industry.</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+When evaluating whether to adopt MCP for your product, the key question is not "can we build integrations ourselves?" but "should we be spending engineering cycles on integration plumbing instead of product features?"</p>
+</blockquote>
+<hr />
+<h2>How MCP Changes the Game</h2>
+<p>MCP introduces a standard "plug" that all services can implement. Instead of your team building custom integrations, they connect to pre-built MCP servers that already know how to talk to each service.</p>
+<p>Think of it as the difference between:</p>
+<ul>
+<li><strong>Before MCP</strong>: Hiring a translator who speaks English-to-Spanish, another who speaks English-to-French, and another who speaks English-to-Japanese — each one custom-trained for your specific needs</li>
+<li><strong>After MCP</strong>: Using a universal translation service where translators follow a standard protocol, and you can swap them in and out without retraining anyone</li>
+</ul>
+<p>The MCP architecture has two key roles:</p>
+<p><strong>MCP Client</strong> — Your product (the thing users interact with). It knows how to ask for tools and use them, but does not need to know how each external service works internally.</p>
+<p><strong>MCP Server</strong> — A specialized connector for a specific service (GitHub, Salesforce, etc.). It handles all the service-specific complexity and presents a clean, standardized interface.</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+MCP is a "buy vs. build" accelerator. For every MCP server that exists in the ecosystem, your team avoids weeks of integration work. The ROI scales with the number of services your AI product needs to access.</p>
+</blockquote>
+<hr />
+<h2>The MCP Ecosystem: Who Builds What</h2>
+<p>One of MCP's most important characteristics is its open ecosystem. MCP servers can be built by:</p>
+<ul>
+<li><strong>Service providers</strong> (first-party): Companies like AWS or Stripe release official MCP servers for their platforms</li>
+<li><strong>Community developers</strong> (third-party): Open-source contributors build and maintain servers for popular services</li>
+<li><strong>Your own team</strong> (internal): For proprietary internal tools and databases that no public MCP server covers</li>
+</ul>
+<p>This mirrors the app store model. Apple builds the platform (MCP protocol), some apps come from major companies (official MCP servers), and anyone can publish their own (custom servers).</p>
+<hr />
+<h2>MCP vs. Tool Use: A Common Confusion</h2>
+<p>Stakeholders and even some engineers confuse these two concepts. Here is the clear distinction:</p>
+<p><strong>Tool use</strong> is the capability — Claude can call functions, retrieve data, and take actions. This exists with or without MCP.</p>
+<p><strong>MCP</strong> is the delivery mechanism — it provides the tool definitions and execution infrastructure so your team does not have to build them from scratch.</p>
+<p>An analogy: tool use is like the ability to make phone calls. MCP is like a phone directory and switchboard service. You could make calls without a directory (manually dialing numbers you looked up yourself), but the directory makes it dramatically faster and more reliable.</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+In product discussions, frame MCP as the "how" of tool integration, not the "what." The "what" is Claude's ability to use tools. MCP just makes tool integration dramatically cheaper and faster to ship.</p>
+</blockquote>
+<hr />
+<h2>Strategic Implications for Product Decisions</h2>
+<p>When planning your product roadmap, MCP affects several key decisions:</p>
+<p><strong>Time-to-market</strong>: Adding a new integration drops from weeks to days (or hours) when an MCP server already exists.</p>
+<p><strong>Build vs. buy</strong>: For standard services, using existing MCP servers is almost always the right call. Custom MCP servers make sense only for proprietary internal systems.</p>
+<p><strong>Vendor lock-in</strong>: MCP is an open protocol, not proprietary to Anthropic. This reduces dependency on any single AI provider.</p>
+<p><strong>Scalability</strong>: Your product can support dozens of integrations without proportional engineering headcount growth.</p>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<p>This lesson maps to <strong>Domain 2 (18%)</strong> — expect questions about:</p>
+<ul>
+<li>The business case for MCP over custom integrations</li>
+<li>Correctly distinguishing MCP from tool use (a frequent exam trap)</li>
+<li>Understanding the open ecosystem model (anyone can author servers)</li>
+<li>Identifying the Client-Server architecture roles</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What business problem does MCP solve?</td>
+<td>It eliminates the need for teams to build and maintain custom integrations for every external service their AI product needs to access.</td>
+</tr>
+<tr>
+<td>What real-world analogy best describes MCP?</td>
+<td>USB for AI integrations — one standard protocol that any service can implement, replacing custom connectors for each service.</td>
+</tr>
+<tr>
+<td>What is the difference between MCP and tool use?</td>
+<td>Tool use is Claude's ability to call functions. MCP is the protocol that provides tool definitions and execution, so teams do not have to build them manually.</td>
+</tr>
+<tr>
+<td>Who can build MCP servers?</td>
+<td>Service providers (official), community developers (open-source), or your own team (for internal tools).</td>
+</tr>
+<tr>
+<td>How does MCP affect time-to-market?</td>
+<td>Adding a new service integration drops from weeks to days or hours when a pre-built MCP server exists.</td>
+</tr>
+<tr>
+<td>What are the two roles in MCP architecture?</td>
+<td>MCP Client (your product, which discovers and uses tools) and MCP Server (the connector that wraps an external service).</td>
+</tr>
+<tr>
+<td>Why does MCP reduce vendor lock-in risk?</td>
+<td>MCP is an open protocol, not proprietary to Anthropic, so switching AI providers does not require rebuilding all integrations.</td>
+</tr>
+<tr>
+<td>What three types of capabilities does an MCP server expose?</td>
+<td>Tools (actions), prompts (reusable templates), and resources (data access).</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

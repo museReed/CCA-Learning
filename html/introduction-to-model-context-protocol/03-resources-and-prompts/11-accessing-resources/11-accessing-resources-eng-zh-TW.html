@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11 Accessing Resources Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>存取 Resources — 工程深入解析</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試範疇</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP client implementation), 2.4 (resource consumption patterns), 2.5 (content type handling)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>Client 端透過 <code>read_resource()</code> 搭配 <code>AnyUrl</code> 存取資源，處理 <code>ReadResourceResult.contents</code> 列表，並根據 MIME type 分支解析 JSON 或回傳原始文字。</p>
+<hr />
+<h2>Client 端 Resource 存取模式</h2>
+<p>Lesson 10 介紹了如何在 server 端定義 resources，本課聚焦在消費這些 resources 的 client 端程式碼。核心 function 是 <code>read_resource()</code>。</p>
+<h3>核心實作</h3>
+<pre class="highlight"><code class="language-python">import json
+from pydantic import AnyUrl
+
+async def read_resource(self, uri: str) -&gt; Any:
+    result = await self.session().read_resource(AnyUrl(uri))
+    resource = result.contents[0]
+
+    if isinstance(resource, types.TextResourceContents):
+        if resource.mimeType == &quot;application/json&quot;:
+            return json.loads(resource.text)
+
+    return resource.text
+</code></pre>
+
+<h3>逐行解析</h3>
+<ol>
+<li><strong><code>AnyUrl(uri)</code></strong> — Pydantic 的 URL 驗證器。接受任何 URI scheme（<code>docs://</code>、<code>file://</code>、自訂 scheme），在解析時驗證格式。</li>
+<li><strong><code>result.contents[0]</code></strong> — 回應有 <code>contents</code> 列表。取第一個元素，因為單一 resource 請求通常回傳一個項目。</li>
+<li><strong><code>isinstance(resource, types.TextResourceContents)</code></strong> — 型別檢查，確認是文字內容（相對於二進位 <code>BlobResourceContents</code>）。</li>
+<li><strong>MIME type 分支</strong> — 如果是 <code>application/json</code>，用 <code>json.loads()</code> 解析。否則回傳原始 <code>.text</code> 字串。</li>
+</ol>
+<hr />
+<h2>回應結構深入解析</h2>
+<p>Server 回傳的 <code>ReadResourceResult</code> 結構如下：</p>
+<pre class="highlight"><code>ReadResourceResult
+  └── contents: list[TextResourceContents | BlobResourceContents]
+        └── [0]
+              ├── uri: str
+              ├── mimeType: str
+              ├── text: str  (TextResourceContents)
+              └── blob: bytes (BlobResourceContents)
+</code></pre>
+
+<p>關鍵設計決策：<br />
+- <strong><code>contents</code> 是一個列表</strong> — 雖然通常只有一個項目，但協議支持回傳多個 content block<br />
+- <strong>兩種 content 類型</strong> — <code>TextResourceContents</code> 用於文字資料，<code>BlobResourceContents</code> 用於二進位<br />
+- <strong>MIME type 在 content 物件上</strong> — 不在 result 包裝器上，因為每個 content block 可以有不同類型</p>
+<hr />
+<h2>MIME Type 處理策略</h2>
+<table>
+<thead>
+<tr>
+<th>MIME Type</th>
+<th>解析策略</th>
+<th>回傳類型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>application/json</code></td>
+<td><code>json.loads(resource.text)</code></td>
+<td><code>dict</code> 或 <code>list</code></td>
+</tr>
+<tr>
+<td><code>text/plain</code></td>
+<td><code>resource.text</code></td>
+<td><code>str</code></td>
+</tr>
+<tr>
+<td><code>text/markdown</code></td>
+<td><code>resource.text</code></td>
+<td><code>str</code></td>
+</tr>
+<tr>
+<td>二進位類型</td>
+<td><code>resource.blob</code></td>
+<td><code>bytes</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2><code>@</code> 自動完成 UX 模式</h2>
+<p>從使用者角度看，resource 存取驅動 <code>@mention</code> 工作流程：</p>
+<ol>
+<li><strong>使用者輸入 <code>@</code></strong> — client 呼叫 <code>list_resources()</code> 填充自動完成下拉選單</li>
+<li><strong>使用者用方向鍵瀏覽</strong> — 從列表中選擇想要的 resource</li>
+<li><strong>使用者按空白鍵確認</strong> — client 呼叫 <code>read_resource(selected_uri)</code></li>
+<li><strong>內容注入 prompt</strong> — resource 內容成為 prompt context 的一部分，不需要 tool call</li>
+</ol>
+<p>這與 tool 根本不同：資料在 Claude <strong>開始推理之前</strong>就在 prompt 中，帶來更快更準確的回應。</p>
+<hr />
+<h2>測試 Resource 存取</h2>
+<p>在 MCP Inspector 中：<br />
+1. 切換到 <strong>Resources</strong> 分頁<br />
+2. 點擊 direct resource 立即讀取<br />
+3. 對 templated resources，填入參數值<br />
+4. 檢視回應結構：URI、MIME type、內容</p>
+<p>在你的 CLI client 中：<br />
+1. 輸入 <code>@</code> 觸發自動完成<br />
+2. 選擇一個 resource<br />
+3. 驗證內容出現在 prompt context 中<br />
+4. 確認 Claude 可以在回應中引用該內容</p>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>忘記 <code>AnyUrl()</code> 包裝</strong> — 傳入原始字串而非用 Pydantic 的 <code>AnyUrl</code> 包裝會導致型別錯誤</li>
+<li><strong>沒有處理 <code>contents</code> 列表</strong> — 直接存取 <code>result.text</code> 而非 <code>result.contents[0].text</code></li>
+<li><strong>漏掉 JSON 解析</strong> — 將 <code>application/json</code> 內容當作原始文字處理，導致 prompt 中出現字串編碼的 JSON</li>
+<li><strong>忽略二進位 resources</strong> — 沒有處理非文字資料的 <code>BlobResourceContents</code></li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Resource 內容直接進入 prompt — 不經過 tool call 處理。這意味著資料作為一級 context 提供給 Claude，降低延遲且避免模型需要「詢問」資訊。CCA 考試要記住：resources 是 <strong>app-controlled</strong>，在模型推理<strong>開始前</strong>注入 context。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：要熟悉 <code>read_resource()</code> 模式 — <code>AnyUrl</code>、<code>contents[0]</code>、MIME type 分支。這是可考的實作細節。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：理解 resources 不需 tool call 就能將 context 注入 prompt，對已知資料需求更有效率。</li>
+<li>情境題可能描述「資料出現在聊天中」或「不需 Claude 詢問就可用」— 這是 resource 存取，不是 tool 呼叫。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read_resource()</code> 中包裝 URI 的 Pydantic 類型是什麼？</td>
+<td><code>AnyUrl</code> — 驗證 URI 格式並接受任何 scheme（docs://、file:// 等）</td>
+</tr>
+<tr>
+<td>如何從 <code>ReadResourceResult</code> 存取實際內容？</td>
+<td><code>result.contents[0]</code> — contents 欄位是列表，取第一個元素</td>
+</tr>
+<tr>
+<td>Client 應如何處理 resource 的 <code>application/json</code> MIME type？</td>
+<td>呼叫 <code>json.loads(resource.text)</code> 將 JSON 字串解析為 Python dict/list</td>
+</tr>
+<tr>
+<td>使用者選擇 <code>@mention</code> 時，resource 內容去哪裡？</td>
+<td>直接注入 prompt context — 不觸發 tool call</td>
+</tr>
+<tr>
+<td>MCP resource 回應中的兩種 content 類型是什麼？</td>
+<td><code>TextResourceContents</code>（文字/JSON 資料）和 <code>BlobResourceContents</code>（二進位資料）</td>
+</tr>
+<tr>
+<td>為什麼 resource 存取比 tool 取得資料更快？</td>
+<td>Resource 資料在 Claude 開始推理前就在 prompt 中 — 不需要額外往返</td>
+</tr>
+<tr>
+<td><code>@mention</code> 模式中什麼觸發自動完成列表？</td>
+<td>使用者輸入 <code>@</code> 時，client 呼叫 <code>list_resources()</code></td>
+</tr>
+<tr>
+<td>MIME type 不是 <code>application/json</code> 時的預設回退是什麼？</td>
+<td>回傳 <code>resource.text</code> 作為原始字串</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

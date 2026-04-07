@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>22 Summary And Next Steps Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Summary and Next Steps — 工程師視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試對應</td>
+<td>全部 5 個 Domain（D1-D5）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>複習：1.1、2.1、2.4、3.1、3.2、3.6</td>
+</tr>
+<tr>
+<td>課程來源</td>
+<td>claude-code-in-action / 06-sdk-and-wrap-up / Lesson 22</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話理解</h2>
+<p>課程最後給出三個行動建議 — 持續關注更新、勇於實驗客製化、善用 GitHub 整合自動化 — 同時作為整門課涵蓋的五大 CCA 考試 domain 的總複習。</p>
+<hr />
+<p><img alt="Course Review Map" src="visuals/course-review-map-zh-TW.svg" /><br />
+<em>圖：課程章節對應 CCA 考試領域。</em></p>
+<h2>講師的三個建議</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>建議</th>
+<th>具體含義</th>
+<th>對應考試 Domain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Stay Updated（保持更新）</strong></td>
+<td>Claude Code 持續活躍開發中，新功能、工具和技巧頻繁推出。追蹤 Claude Code 首頁和 changelog。</td>
+<td>D1 — Agentic Architecture（理解不斷演進的能力）</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Experiment（實驗）</strong></td>
+<td>撰寫 custom commands、豐富 <code>CLAUDE.md</code>、嘗試課程之外的 MCP servers。透過動手實驗建立肌肉記憶。</td>
+<td>D2 — Tool Use &amp; MCP、D3 — Configuration</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Automate（自動化）</strong></td>
+<td>用 GitHub integration 將重複性任務交給 Claude。思考哪些觸發條件（PR 建立、Issue 開啟、<code>@claude</code> mention）可以驅動自動化。</td>
+<td>D3 — CI/CD、D5 — Developer Productivity</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>課程章節 vs 考試 Domain 對照表</h2>
+<p>這是考前複習最重要的對照表。每個章節對應到特定的 CCA domain：</p>
+<table>
+<thead>
+<tr>
+<th>章節</th>
+<th>課程</th>
+<th>主要 Domain</th>
+<th>次要 Domain</th>
+<th>核心概念</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01 — Intro</td>
+<td>02-04</td>
+<td>D1 — Agentic Architecture（27%）</td>
+<td>D5 — Developer Productivity（18%）</td>
+<td>Agentic loops、plan-execute-observe 循環、coding assistant vs autocomplete</td>
+</tr>
+<tr>
+<td>02 — Getting Started</td>
+<td>05-08</td>
+<td>D3 — Configuration（20%）</td>
+<td>D1 — Agentic Architecture（27%）</td>
+<td><code>CLAUDE.md</code>、project setup、context window、permission model、iterative changes</td>
+</tr>
+<tr>
+<td>03 — Context &amp; Commands</td>
+<td>10-11</td>
+<td>D3 — Configuration（20%）</td>
+<td>D2 — Tool Use &amp; MCP（20%）</td>
+<td>Context 管理、<code>@file</code> 引用、custom slash commands、<code>.claude/commands/</code></td>
+</tr>
+<tr>
+<td>04 — Integrations</td>
+<td>12-13</td>
+<td>D2 — Tool Use &amp; MCP（20%）</td>
+<td>D3 — Configuration（20%）</td>
+<td>MCP 架構（host/client/server）、<code>settings.json</code>、GitHub Actions、<code>-p</code> flag、<code>allowed_tools</code></td>
+</tr>
+<tr>
+<td>05 — Hooks</td>
+<td>14-19</td>
+<td>D3 — Configuration（20%）</td>
+<td>D1 — Agentic Architecture（27%）</td>
+<td>Hook 生命週期（9 種）、PreToolUse/PostToolUse、blocking vs non-blocking、stdin/stdout 協定</td>
+</tr>
+<tr>
+<td>06 — SDK &amp; Wrap Up</td>
+<td>20-22</td>
+<td>D1 — Agentic Architecture（27%）</td>
+<td>D4 — Security（15%）</td>
+<td>SDK programmatic access、<code>claudeClient.sendMessage()</code>、conversation turns array、總複習</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>核心概念複習表</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>章節</th>
+<th>Domain</th>
+<th>一句話定義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agentic loop</td>
+<td>01</td>
+<td>D1</td>
+<td>Claude 自主地計畫、執行工具、觀察結果、迭代，直到任務完成。</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>02</td>
+<td>D3</td>
+<td>專案層級的指令檔，Claude 會自動讀取以理解專案慣例和約束。</td>
+</tr>
+<tr>
+<td>Permission model</td>
+<td>02</td>
+<td>D4</td>
+<td>三層架構 — project（<code>settings.json</code>）、user（<code>settings.local.json</code>）、enterprise（<code>settings.enterprise.json</code>）— 使用 allowlist 和 denylist。</td>
+</tr>
+<tr>
+<td>Context window</td>
+<td>03</td>
+<td>D1</td>
+<td>有限的 token 預算；透過 <code>@file</code> 引用、<code>.claudeignore</code> 和 compaction 管理。</td>
+</tr>
+<tr>
+<td>Custom commands</td>
+<td>03</td>
+<td>D3</td>
+<td>放在 <code>.claude/commands/</code> 的 Markdown 檔案，定義可重複使用的 slash command，支援 <code>$ARGUMENTS</code> 插值。</td>
+</tr>
+<tr>
+<td>MCP architecture</td>
+<td>04</td>
+<td>D2</td>
+<td>Host（Claude Code）透過 stdio/SSE 連接 MCP servers；servers 提供 tools、resources 和 prompts。</td>
+</tr>
+<tr>
+<td>CI 中的 <code>allowed_tools</code></td>
+<td>04</td>
+<td>D3/D4</td>
+<td>在 non-interactive 模式（<code>-p</code> flag）下，每個 tool 必須逐一列出 — 不能用 blanket server 權限。</td>
+</tr>
+<tr>
+<td>Hooks</td>
+<td>05</td>
+<td>D3</td>
+<td>在特定生命週期節點執行的腳本；9 種類型，2 種可 blocking（PreToolUse、UserPromptSubmit）。</td>
+</tr>
+<tr>
+<td>Hook stdin/stdout 協定</td>
+<td>05</td>
+<td>D3</td>
+<td>Hooks 透過 stdin 接收 JSON，透過 stdout 回傳 JSON。結構依 hook 類型和 tool matcher 而異。</td>
+</tr>
+<tr>
+<td>SDK（<code>@anthropic-ai/claude-code</code>）</td>
+<td>06</td>
+<td>D1</td>
+<td>Node.js 套件，提供 programmatic 存取；呼叫 <code>claudeClient.sendMessage()</code> 回傳 conversation turns array，支援 streaming。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA 考試備考清單</h2>
+<p>用這份清單確認你已涵蓋課程中的每個主要主題：</p>
+<h3>D1 — Agentic Architecture（27%）</h3>
+<ul>
+<li>[ ] 能解釋 agentic loop（plan、execute、observe、iterate）</li>
+<li>[ ] 理解 Claude 如何決定使用哪些 tools</li>
+<li>[ ] 知道 agentic coding 和 autocomplete 的差異</li>
+<li>[ ] 能描述 SDK 的 programmatic 介面（<code>sendMessage</code>、conversation turns）</li>
+<li>[ ] 理解 subagent 架構（Task tool）</li>
+</ul>
+<h3>D2 — Tool Use &amp; MCP（20%）</h3>
+<ul>
+<li>[ ] 能描述 MCP 架構：host、client、server</li>
+<li>[ ] 知道三個 MCP primitives：tools、resources、prompts</li>
+<li>[ ] 理解傳輸機制：stdio 和 SSE</li>
+<li>[ ] 能在 <code>settings.json</code> 中設定 MCP servers</li>
+<li>[ ] 知道 local 和 CI 環境下 MCP 權限的差異</li>
+</ul>
+<h3>D3 — Configuration &amp; Workflows（20%）</h3>
+<ul>
+<li>[ ] 能建立和組織 <code>CLAUDE.md</code> 檔案（root、nested、<code>~/.claude/CLAUDE.md</code>）</li>
+<li>[ ] 知道如何在 <code>.claude/commands/</code> 中建立 custom commands</li>
+<li>[ ] 理解 hook 系統：9 種類型、blocking vs non-blocking</li>
+<li>[ ] 能設定 Claude Code 的 GitHub Actions workflows</li>
+<li>[ ] 知道 <code>custom_instructions</code>、<code>mcp_config</code>、<code>allowed_tools</code> 設定層級</li>
+</ul>
+<h3>D4 — Security &amp; Trust（15%）</h3>
+<ul>
+<li>[ ] 理解三層 permission model（project/user/enterprise）</li>
+<li>[ ] 知道 allowlist vs denylist 行為</li>
+<li>[ ] 能解釋為什麼 CI 需要逐一列出 tool 權限</li>
+<li>[ ] 理解 hook 的安全意涵（PreToolUse 作為存取控制）</li>
+</ul>
+<h3>D5 — Developer Productivity（18%）</h3>
+<ul>
+<li>[ ] 能判斷何時使用 Claude Code vs 傳統工具</li>
+<li>[ ] 知道如何組織 prompt 以達到有效的 agentic 執行</li>
+<li>[ ] 理解自動化（GitHub integration）如何減少手動工作</li>
+<li>[ ] 能評估合適的客製化層級（CLAUDE.md、commands、hooks、SDK）</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<h3>Card 1</h3>
+<p><strong>Q:</strong> MCP servers 的傳輸機制有哪些？<br />
+<strong>A:</strong> stdio（本機 process）和 SSE（HTTP streaming）。課程主要涵蓋 stdio 用於本機 MCP servers 和 GitHub Actions 環境。</p>
+<h3>Card 2</h3>
+<p><strong>Q:</strong> <code>-p</code> flag 是什麼？何時使用？<br />
+<strong>A:</strong> <code>-p</code>（print/pipe）flag 讓 Claude Code 以 non-interactive 模式運行。用於 CI/CD（GitHub Actions）。因為沒有人類可以批准，需要 <code>allowed_tools</code> 逐一列出每個允許的 tool。</p>
+<h3>Card 3</h3>
+<p><strong>Q:</strong> 列出兩種 blocking hook 類型。<br />
+<strong>A:</strong> <code>PreToolUse</code> 和 <code>UserPromptSubmit</code>。這兩種可以透過回傳 <code>{ "decision": "block" }</code> 阻止 Claude 繼續。</p>
+<h3>Card 4</h3>
+<p><strong>Q:</strong> <code>CLAUDE.md</code> 設定的三個層級是什麼？<br />
+<strong>A:</strong> (1) 專案根目錄 <code>CLAUDE.md</code>，(2) 巢狀目錄 <code>CLAUDE.md</code> 檔案（作用範圍限於子目錄），(3) 使用者全域 <code>~/.claude/CLAUDE.md</code>。</p>
+<h3>Card 5</h3>
+<p><strong>Q:</strong> SDK 和 CLI 的差異是什麼？<br />
+<strong>A:</strong> SDK（<code>@anthropic-ai/claude-code</code>）透過 Node.js 提供 programmatic 存取。呼叫 <code>claudeClient.sendMessage()</code> 回傳 conversation turns array。CLI 是互動式終端機使用。</p>
+<h3>Card 6</h3>
+<p><strong>Q:</strong> Custom commands 使用什麼檔案結構？<br />
+<strong>A:</strong> <code>.claude/commands/</code>（project scope）或 <code>~/.claude/commands/</code>（user scope）中的 Markdown 檔案。用 <code>/command-name</code> 呼叫。支援 <code>$ARGUMENTS</code> placeholder 做參數化。</p>
+<h3>Card 7</h3>
+<p><strong>Q:</strong> 在 GitHub Actions 中，為什麼不能用 <code>mcp__playwright</code> 作為 blanket 權限？<br />
+<strong>A:</strong> 在 non-interactive 模式（<code>-p</code> flag）中，沒有人類可以批准 tool 使用。每個 tool 必須在 <code>allowed_tools</code> 中逐一列出。Blanket server-level 權限只在互動（本機）模式下有效。</p>
+<h3>Card 8</h3>
+<p><strong>Q:</strong> Hook 的 stdin/stdout 協定是什麼？<br />
+<strong>A:</strong> Hooks 透過 stdin 接收帶有事件 context 的 JSON。透過 stdout 回傳 JSON。對 PreToolUse：回傳 <code>{ "decision": "allow" }</code> 或 <code>{ "decision": "block", "reason": "..." }</code>。結構依 hook 類型而異。</p>
+<h3>Card 9</h3>
+<p><strong>Q:</strong> 講師給了哪三個持續學習的建議？<br />
+<strong>A:</strong> (1) Stay updated — Claude Code 持續演進中。(2) Experiment — 嘗試 custom commands、CLAUDE.md 客製化、新的 MCP servers。(3) Automate — 用 GitHub integration 處理由事件觸發的重複性任務。</p>
+<h3>Card 10</h3>
+<p><strong>Q:</strong> 哪個考試 domain 權重最高？<br />
+<strong>A:</strong> D1 — Agentic Architecture，佔 27%。涵蓋 agentic loops、tool selection、SDK，以及核心的 plan-execute-observe 循環。</p>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 350" font-family="'SF Pro Display', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 3.5 L 0 7 z" fill="#94A3B8"/>
+    </marker>
+  </defs>
+  <rect width="520" height="350" fill="white" rx="12"/>
+  <text x="260" y="28" text-anchor="middle" font-size="15" font-weight="600" fill="#64748B" letter-spacing="0.5">CONTEXT CONTROL — DECISION TREE</text>
+
+  <!-- Start node -->
+  <rect x="190" y="42" width="140" height="32" rx="14" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="260" y="63" text-anchor="middle" font-size="11" font-weight="600" fill="#EA580C">🤔 What's the problem?</text>
+
+  <!-- Arrow down from start splits into branches -->
+  <line x1="210" y1="74" x2="80" y2="100" stroke="#94A3B8" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="240" y1="74" x2="190" y2="100" stroke="#94A3B8" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="280" y1="74" x2="330" y2="100" stroke="#94A3B8" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="310" y1="74" x2="440" y2="100" stroke="#94A3B8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- Branch 1: Bad output right now -->
+  <rect x="10" y="100" width="140" height="36" rx="14" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="80" y="115" text-anchor="middle" font-size="10" font-weight="600" fill="#DC2626">Bad output</text>
+  <text x="80" y="128" text-anchor="middle" font-size="10" fill="#DC2626">right now?</text>
+
+  <line x1="80" y1="136" x2="80" y2="158" stroke="#94A3B8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <rect x="15" y="160" width="130" height="44" rx="14" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="80" y="178" text-anchor="middle" font-size="18">⎋</text>
+  <text x="80" y="196" text-anchor="middle" font-size="11" font-weight="600" fill="#2563EB">Escape</text>
+
+  <text x="80" y="220" text-anchor="middle" font-size="9" fill="#94A3B8">Abandon current</text>
+  <text x="80" y="231" text-anchor="middle" font-size="9" fill="#94A3B8">response</text>
+
+  <!-- Branch 2: Same mistake repeating -->
+  <rect x="155" y="100" width="140" height="36" rx="14" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="225" y="115" text-anchor="middle" font-size="10" font-weight="600" fill="#DC2626">Same mistake</text>
+  <text x="225" y="128" text-anchor="middle" font-size="10" fill="#DC2626">repeating?</text>
+
+  <line x1="225" y1="136" x2="225" y2="158" stroke="#94A3B8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <rect x="160" y="160" width="130" height="44" rx="14" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="225" y="178" text-anchor="middle" font-size="18">⎋</text>
+  <text x="225" y="196" text-anchor="middle" font-size="11" font-weight="600" fill="#16A34A">Esc + /memory</text>
+
+  <text x="225" y="220" text-anchor="middle" font-size="9" fill="#94A3B8">Save correction to</text>
+  <text x="225" y="231" text-anchor="middle" font-size="9" fill="#94A3B8">memory, then retry</text>
+
+  <!-- Branch 3: Context full -->
+  <rect x="300" y="100" width="120" height="36" rx="14" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="115" text-anchor="middle" font-size="10" font-weight="600" fill="#EA580C">Context</text>
+  <text x="360" y="128" text-anchor="middle" font-size="10" fill="#EA580C">getting full?</text>
+
+  <line x1="360" y1="136" x2="360" y2="158" stroke="#94A3B8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <rect x="295" y="160" width="130" height="44" rx="14" fill="#EDE9FE" stroke="#8B5CF6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="178" text-anchor="middle" font-size="18">📦</text>
+  <text x="360" y="196" text-anchor="middle" font-size="11" font-weight="600" fill="#7C3AED">/compact</text>
+
+  <text x="360" y="220" text-anchor="middle" font-size="9" fill="#94A3B8">Summarize history,</text>
+  <text x="360" y="231" text-anchor="middle" font-size="9" fill="#94A3B8">free up space</text>
+
+  <!-- Branch 4: Different task -->
+  <rect x="430" y="100" width="80" height="36" rx="14" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="470" y="115" text-anchor="middle" font-size="10" font-weight="600" fill="#EA580C">Different</text>
+  <text x="470" y="128" text-anchor="middle" font-size="10" fill="#EA580C">task?</text>
+
+  <line x1="470" y1="136" x2="470" y2="158" stroke="#94A3B8" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <rect x="405" y="160" width="130" height="44" rx="14" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="470" y="178" text-anchor="middle" font-size="18">🆕</text>
+  <text x="470" y="196" text-anchor="middle" font-size="11" font-weight="600" fill="#2563EB">/clear</text>
+
+  <text x="470" y="220" text-anchor="middle" font-size="9" fill="#94A3B8">Fresh start,</text>
+  <text x="470" y="231" text-anchor="middle" font-size="9" fill="#94A3B8">blank context</text>
+
+  <!-- Bonus: Double-Escape note -->
+  <rect x="60" y="255" width="170" height="44" rx="14" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1" filter="url(#shadow)"/>
+  <text x="145" y="273" text-anchor="middle" font-size="10" font-weight="600" fill="#64748B">💡 Debugging detour?</text>
+  <text x="145" y="289" text-anchor="middle" font-size="10" fill="#64748B">Double-Escape = undo last turn</text>
+
+  <text x="260" y="340" text-anchor="middle" font-size="10" fill="#94A3B8">Each tool matches a specific context problem — pick the right one.</text>
+</svg>

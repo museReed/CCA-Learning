@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>17 Gotchas Around Hooks Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Gotchas Around Hooks — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks for tool call interception)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 05-hooks / Lesson 17 (text-only)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Hook scripts should use <strong>absolute paths</strong> for security (preventing path interception and binary planting attacks), but absolute paths break portability across machines — solve this with a <code>settings.example.json</code> + init script pattern that replaces <code>$PWD</code> placeholders with machine-specific absolute paths.</p>
+<hr />
+<h2>Context: The Security-Portability Trade-Off</h2>
+<p>You know how to define and implement hooks (Lessons 15-16). This lesson addresses a real-world deployment problem: the tension between security best practices (absolute paths) and team collaboration (sharing settings files).</p>
+<blockquote>
+<p>💡 <strong>iOS/Swift analogy</strong></p>
+<p>This is like the tension between hardcoding a certificate pinning hash (secure but breaks when the cert rotates) vs. loading it from a config (flexible but requires a secure distribution mechanism). You need both security AND portability — the solution is an automated setup step.</p>
+</blockquote>
+<hr />
+<h2>The Core Problem</h2>
+<h3>Why Absolute Paths?</h3>
+<p>Claude Code's security recommendations state that hook commands should use <strong>absolute paths</strong>:</p>
+<pre class="highlight"><code class="language-json">// ❌ Relative path (security risk)
+&quot;command&quot;: &quot;node ./hooks/read_hook.js&quot;
+
+// ✅ Absolute path (secure)
+&quot;command&quot;: &quot;node /Users/alice/projects/queries/hooks/read_hook.js&quot;
+</code></pre>
+
+<p>Absolute paths mitigate two attack vectors:</p>
+<table>
+<thead>
+<tr>
+<th>Attack</th>
+<th>Description</th>
+<th>How Absolute Paths Help</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Path interception</strong> (<a href="https://attack.mitre.org/techniques/T1574/007/">MITRE T1574.007</a>)</td>
+<td>Attacker places a malicious <code>node</code> or script in a directory that appears earlier in <code>$PATH</code></td>
+<td>Absolute path bypasses <code>$PATH</code> resolution entirely</td>
+</tr>
+<tr>
+<td><strong>Binary planting</strong> (<a href="https://owasp.org/www-community/attacks/Binary_planting">OWASP</a>)</td>
+<td>Attacker places a malicious file with the same name in the working directory</td>
+<td>Absolute path points to the exact file, not a relative lookup</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Security is non-negotiable</strong></p>
+<p>The CCA exam treats security best practices as the correct answer. If a question asks about hook command paths, absolute paths are always preferred.</p>
+</blockquote>
+<h3>Why This Breaks Portability</h3>
+<p>The problem is simple: absolute paths are machine-specific.</p>
+<pre class="highlight"><code>Alice's machine: /Users/alice/projects/queries/hooks/read_hook.js
+Bob's machine:   /home/bob/dev/queries/hooks/read_hook.js
+CI server:       /workspace/queries/hooks/read_hook.js
+</code></pre>
+
+<p>If you commit <code>settings.json</code> with Alice's absolute path, it breaks on Bob's machine and in CI.</p>
+<hr />
+<p><img alt="Security vs Portability" src="visuals/security-portability-tradeoff.svg" /><br />
+<em>Figure: The security vs. portability tradeoff — absolute paths are secure but machine-specific; template + init script solves both.</em></p>
+<h2>The Solution: Template + Init Script</h2>
+<p>The course project solves this with a three-file pattern:</p>
+<p><img alt="Template Init Pattern" src="visuals/template-init-pattern.svg" /><br />
+<em>Figure: Template → Init → Local pattern — committed template with $PWD placeholders, one-time init generates machine-specific config.</em></p>
+<h3>1. <code>settings.example.json</code> (committed to git)</h3>
+<pre class="highlight"><code class="language-json">{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Read|Grep&quot;,
+        &quot;hooks&quot;: [
+          {
+            &quot;type&quot;: &quot;command&quot;,
+            &quot;command&quot;: &quot;node $PWD/hooks/read_hook.js&quot;
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+
+<p>The <code>$PWD</code> placeholder marks where the absolute path should go.</p>
+<h3>2. <code>scripts/init-claude.js</code> (committed to git)</h3>
+<p>This script:<br />
+1. Reads <code>settings.example.json</code><br />
+2. Replaces all <code>$PWD</code> placeholders with the actual working directory<br />
+3. Writes the result to <code>settings.local.json</code></p>
+<h3>3. <code>settings.local.json</code> (gitignored, generated)</h3>
+<p>The output file with machine-specific absolute paths. This file is <strong>never committed</strong> — it is regenerated per machine.</p>
+<h3>The Workflow</h3>
+<pre class="highlight"><code>Developer clones repo
+        ↓
+Runs `npm run setup` (or `npm run dev`)
+        ↓
+init-claude.js executes
+        ↓
+$PWD → /Users/alice/projects/queries
+        ↓
+settings.local.json generated with absolute paths
+        ↓
+Claude Code uses settings.local.json with secure, machine-specific paths
+</code></pre>
+
+<blockquote>
+<p>📝 <strong>Why this matters for teams</strong></p>
+<p>This pattern ensures:<br />
+- <strong>Security</strong>: Every developer uses absolute paths<br />
+- <strong>Portability</strong>: The template works on any machine<br />
+- <strong>Automation</strong>: No manual path editing required<br />
+- <strong>Version control</strong>: The template is tracked; the generated file is not</p>
+</blockquote>
+<hr />
+<h2>Two Settings Files Explained</h2>
+<p>After running <code>npm run dev</code>, you will see two <code>.json</code> files in the <code>.claude</code> directory:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>In Git?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>settings.json</code></td>
+<td>Team-shared settings (no hooks with paths, or shared non-path configs)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>settings.local.json</code></td>
+<td>Generated file with machine-specific absolute paths for hooks</td>
+<td>No (gitignored)</td>
+</tr>
+</tbody>
+</table>
+<p>This is why the lesson title mentions "gotchas" — seeing two settings files can be confusing if you do not understand the template-generation pattern.</p>
+<hr />
+<h2>Anti-Patterns (Exam Frequently Tested)</h2>
+<table>
+<thead>
+<tr>
+<th>❌ Wrong Approach</th>
+<th>✅ Correct Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Use relative paths in hook commands</td>
+<td>Use absolute paths</td>
+<td>Relative paths are vulnerable to path interception and binary planting</td>
+</tr>
+<tr>
+<td>Commit <code>settings.local.json</code> with absolute paths</td>
+<td>Commit <code>settings.example.json</code> with <code>$PWD</code> placeholders</td>
+<td>Absolute paths are machine-specific — they break on other machines</td>
+</tr>
+<tr>
+<td>Manually edit paths for each developer</td>
+<td>Use an init script to auto-generate</td>
+<td>Manual editing is error-prone and not scalable</td>
+</tr>
+<tr>
+<td>Skip the security recommendation</td>
+<td>Always use absolute paths</td>
+<td>CCA exam expects security best practices</td>
+</tr>
+<tr>
+<td>Put hook paths in <code>settings.json</code> (shared)</td>
+<td>Put hook paths in <code>settings.local.json</code> (generated)</td>
+<td>Shared settings should not contain machine-specific paths</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Exam Focus: Settings File Hierarchy + Security</h2>
+<p>The CCA exam may combine hook security with settings hierarchy questions:</p>
+<table>
+<thead>
+<tr>
+<th>Settings File</th>
+<th>Scope</th>
+<th>In Git?</th>
+<th>Hook Paths?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>~/.claude/settings.json</code></td>
+<td>Global (all projects)</td>
+<td>No</td>
+<td>Absolute (machine-specific)</td>
+</tr>
+<tr>
+<td><code>.claude/settings.json</code></td>
+<td>Project (team-shared)</td>
+<td>Yes</td>
+<td>Avoid paths; use for non-path configs</td>
+</tr>
+<tr>
+<td><code>.claude/settings.local.json</code></td>
+<td>Project (personal)</td>
+<td>No</td>
+<td>Absolute (generated from template)</td>
+</tr>
+</tbody>
+</table>
+<p>Key exam principles:<br />
+- <strong>Security</strong>: Absolute paths prevent path interception attacks<br />
+- <strong>Portability</strong>: Template + init script pattern solves the sharing problem<br />
+- <strong>Hierarchy</strong>: More local settings take higher priority (same as git config)</p>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: Developer Productivity Scenario (S4)</h3>
+<p>Your team wants to share a PreToolUse hook configuration across all developers. The hook script is located in the project's <code>hooks/</code> directory. What is the recommended approach?</p>
+<ul>
+<li>A. Commit <code>settings.local.json</code> with relative paths to the hook scripts</li>
+<li>B. Commit <code>settings.json</code> with absolute paths to the hook scripts</li>
+<li>C. Commit a <code>settings.example.json</code> with <code>$PWD</code> placeholders and an init script that generates <code>settings.local.json</code> with absolute paths</li>
+<li>D. Have each developer manually create their own <code>settings.local.json</code> with their absolute paths</li>
+</ul>
+<details><summary>Answer</summary>
+
+**C** — This pattern provides both security (absolute paths) and portability (template works on any machine). The init script automates the generation.
+
+- A: Relative paths are a security risk (path interception, binary planting)
+- B: Absolute paths in shared settings break on other machines
+- D: Manual setup is error-prone and not scalable
+</details>
+
+<h3>Q2: CI/CD Integration Scenario (S5)</h3>
+<p>Your CI pipeline uses Claude Code with hooks. The pipeline runs on different CI runners with different file system layouts. The hook configuration uses relative paths (<code>node ./hooks/check.js</code>). A security audit flags this as a vulnerability. What is the correct fix?</p>
+<ul>
+<li>A. Add the hooks directory to the CI runner's <code>$PATH</code></li>
+<li>B. Use a setup step in CI that generates <code>settings.local.json</code> with absolute paths based on the runner's workspace directory</li>
+<li>C. Disable hooks in CI since they are not needed for non-interactive mode</li>
+<li>D. Use <code>settings.json</code> with a hardcoded path that matches all CI runners</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — The setup step mirrors the `init-claude.js` pattern: detect the workspace directory and generate `settings.local.json` with absolute paths.
+
+- A: Modifying `$PATH` does not fix the relative script path vulnerability
+- C: Hooks may be needed in CI for compliance checks
+- D: CI runners have different workspace paths — hardcoding breaks portability
+</details>
+
+<h3>Q3: Code Generation Scenario (S2)</h3>
+<p>A new developer joins your team and clones the project. They start Claude Code and notice that hooks are not working. They see a <code>settings.example.json</code> but no <code>settings.local.json</code>. What is the most likely cause and fix?</p>
+<ul>
+<li>A. The hooks feature is disabled by default; they need to enable it in global settings</li>
+<li>B. They need to run the project's setup script (e.g., <code>npm run setup</code>) to generate <code>settings.local.json</code> from the template</li>
+<li>C. They need to copy <code>settings.example.json</code> to <code>settings.json</code> manually</li>
+<li>D. Claude Code does not support hooks on their operating system</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — The `settings.local.json` file is gitignored and must be generated by the init script. Running the setup command (`npm run setup`) triggers the script that replaces `$PWD` placeholders with actual paths.
+
+- A: Hooks are available by default; no global toggle needed
+- C: Simply copying without replacing `$PWD` would leave broken placeholder paths
+- D: Hooks are platform-independent
+</details>
+</body>
+</html>

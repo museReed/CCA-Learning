@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Defining Resources Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>定義 Resources — 工程深入解析</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試範疇</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server primitives), 2.4 (resource URI design), 2.5 (MIME type handling)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 10</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>Resources 是 MCP server 中用來透過 URI 對外暴露唯讀資料的 primitive，類似 HTTP server 中的 GET handler。</p>
+<hr />
+<p><img alt="Resources Types" src="visuals/resources-types-zh-TW.svg" /></p>
+<h2>Resources vs. Tools：何時該用哪個</h2>
+<p>在 MCP server 開發中，第一個架構決策就是選擇 resource 還是 tool：</p>
+<table>
+<thead>
+<tr>
+<th>面向</th>
+<th>Resource</th>
+<th>Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用途</td>
+<td>暴露資料（唯讀）</td>
+<td>執行動作（可有副作用）</td>
+</tr>
+<tr>
+<td>控制者</td>
+<td>應用程式碼（app-controlled）</td>
+<td>Claude（model-controlled）</td>
+</tr>
+<tr>
+<td>呼叫方式</td>
+<td>Client 程式碼呼叫 <code>read_resource()</code></td>
+<td>Claude 自主決定呼叫</td>
+</tr>
+<tr>
+<td>HTTP 類比</td>
+<td>GET endpoint</td>
+<td>POST/PUT/DELETE endpoint</td>
+</tr>
+<tr>
+<td>Context 注入</td>
+<td>內容直接注入 prompt</td>
+<td>結果由 Claude 內部處理</td>
+</tr>
+</tbody>
+</table>
+<p>當你需要填充 UI（如自動完成清單）或將 context 注入 prompt（如 <code>@</code> 文件提及）時，resource 是正確選擇。</p>
+<hr />
+<h2>兩種 Resource 類型</h2>
+<h3>1. Direct Resources — 靜態 URI</h3>
+<p>Direct resource 的 URI 是固定的，沒有參數。每次回傳相同「形狀」的資料。</p>
+<pre class="highlight"><code class="language-python">@mcp.resource(
+    &quot;docs://documents&quot;,
+    mime_type=&quot;application/json&quot;
+)
+def list_docs() -&gt; list[str]:
+    return list(docs.keys())
+</code></pre>
+
+<p>URI <code>docs://documents</code> 是靜態的，適合用於列出所有可用項目、回傳 server metadata 或提供設定值。</p>
+<h3>2. Templated Resources — 參數化 URI</h3>
+<p>Templated resource 在 URI 中使用 <code>{param}</code> 佔位符。Python SDK 會自動提取這些值並作為 keyword arguments 傳入。</p>
+<pre class="highlight"><code class="language-python">@mcp.resource(
+    &quot;docs://documents/{doc_id}&quot;,
+    mime_type=&quot;text/plain&quot;
+)
+def fetch_doc(doc_id: str) -&gt; str:
+    if doc_id not in docs:
+        raise ValueError(f&quot;Doc with id {doc_id} not found&quot;)
+    return docs[doc_id]
+</code></pre>
+
+<p>當 client 請求 <code>docs://documents/plan.md</code> 時，SDK 將 <code>plan.md</code> 解析為 <code>doc_id</code> 並傳入 <code>fetch_doc(doc_id="plan.md")</code>。</p>
+<hr />
+<h2><code>mime_type</code> 參數</h2>
+<p>MIME type 告訴 client 如何解讀回傳的資料：</p>
+<table>
+<thead>
+<tr>
+<th>MIME Type</th>
+<th>使用場景</th>
+<th>Client 行為</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>application/json</code></td>
+<td>結構化資料（list、object）</td>
+<td>Client 呼叫 <code>json.loads()</code></td>
+</tr>
+<tr>
+<td><code>text/plain</code></td>
+<td>文件、日誌、純文字</td>
+<td>Client 使用原始字串</td>
+</tr>
+<tr>
+<td><code>application/pdf</code></td>
+<td>二進位檔案</td>
+<td>Client 以 binary 處理</td>
+</tr>
+</tbody>
+</table>
+<p>SDK 自動處理序列化 — 回傳 Python list 或 dict 就會變成有效 JSON，不需要手動 <code>json.dumps()</code>。</p>
+<hr />
+<h2>Request-Response 流程</h2>
+<pre class="highlight"><code>Client Code --&gt; MCP Client --&gt; MCP Server --&gt; Resource Function
+                                                    |
+Client Code &lt;-- MCP Client &lt;-- ReadResourceResult &lt;-+
+</code></pre>
+
+<ol>
+<li>你的程式碼呼叫 <code>session.read_resource(AnyUrl(uri))</code></li>
+<li>MCP client 發送 <code>ReadResourceRequest</code> 到 server</li>
+<li>Server 將 URI 配對到正確的 resource function</li>
+<li>Function 執行並回傳資料</li>
+<li>SDK 包裝成 <code>ReadResourceResult</code>（含 MIME type metadata）</li>
+</ol>
+<hr />
+<h2>使用 MCP Inspector 測試</h2>
+<p>啟動 inspector：</p>
+<pre class="highlight"><code class="language-bash">uv run mcp dev mcp_server.py
+</code></pre>
+
+<p>Inspector UI 顯示兩個分頁：<br />
+- <strong>Resources</strong> — 列出 direct/static resources（點擊即可讀取）<br />
+- <strong>Resource Templates</strong> — 列出 templated resources（需提供參數值來測試）</p>
+<p>Inspector 顯示完整的回應結構，包括 MIME type 和序列化後的內容，是驗證 resource 實作的必備工具。</p>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>忘記設定 <code>mime_type</code></strong> — client 可能因缺少 MIME type 而錯誤解析回應</li>
+<li><strong>用 resource 做有副作用的操作</strong> — 如果 function 有 write、delete 等副作用，應該用 tool</li>
+<li><strong>手動序列化</strong> — 自己呼叫 <code>json.dumps()</code> 但 SDK 已經處理了，導致雙重序列化</li>
+<li><strong>混淆 direct 和 templated</strong> — URI 沒有 <code>{}</code> 參數就一定是 direct resource</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Resources 是 <strong>app-controlled</strong> — 你的應用程式碼決定何時讀取它們。這與 tool（Claude 決定何時呼叫）有根本性差異。理解這個控制邊界對 CCA 考試中的 MCP 架構題至關重要。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：預期會出現「何時用 resource vs. tool」的情境題。關鍵區分是控制模型 — app-controlled vs. model-controlled。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：Resources 將 context 注入 prompt 而不需要 tool call，降低延遲和 token 消耗。</li>
+<li>注意情境題中「資料需要顯示在 UI」或「用作 context」的描述 — 這些指向 resource 而非 tool。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 中兩種 resource 類型是什麼？</td>
+<td>Direct resources（靜態 URI、無參數）和 Templated resources（含 <code>{param}</code> 佔位符的參數化 URI）</td>
+</tr>
+<tr>
+<td>Resource decorator 中的 <code>mime_type</code> 參數有什麼作用？</td>
+<td>告訴 client 如何解讀回傳的資料（如 <code>application/json</code> 用於結構化資料）</td>
+</tr>
+<tr>
+<td>誰控制 MCP resources 的存取時機？</td>
+<td>應用程式碼（app-controlled），不是 Claude 也不是使用者</td>
+</tr>
+<tr>
+<td>Python SDK 如何處理 templated resource 的參數？</td>
+<td>自動從 URI 解析 <code>{param}</code> 並將匹配值作為 keyword arguments 傳入 function</td>
+</tr>
+<tr>
+<td>啟動 MCP Inspector 的指令是什麼？</td>
+<td><code>uv run mcp dev mcp_server.py</code></td>
+</tr>
+<tr>
+<td>MCP resources 的 HTTP 類比是什麼？</td>
+<td>GET request handler — 暴露唯讀資料，無副作用</td>
+</tr>
+<tr>
+<td>從 resource 回傳 dict 時需要呼叫 <code>json.dumps()</code> 嗎？</td>
+<td>不需要 — SDK 自動處理序列化</td>
+</tr>
+<tr>
+<td>使用者提及 <code>@document</code> 時，resource 內容最終去哪裡？</td>
+<td>直接注入到送給 Claude 的 prompt 中，不需要 tool call</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

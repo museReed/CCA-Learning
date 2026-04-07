@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15 Defining Hooks Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>定义 Hooks — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试范围</td>
+<td>D3 — Claude Code Configuration &amp; Workflows（占考试 20%）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (custom commands &amp; hooks), 1.5 (Agent SDK hooks)</td>
+</tr>
+<tr>
+<td>课程来源</td>
+<td>claude-code-in-action / 05-hooks / Lesson 15</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>重点摘要</h2>
+<p>定义一个 hook 遵循四个步骤，就像在工厂设置质量检查站：（1）决定在工作完成<em>前</em>还是<em>后</em>检查，（2）选择要监控哪条生产线，（3）编写检查程序，（4）决定批准还是退回。PM 必须理解这个流程，才能撰写正确的验收标准，并与工程师沟通什么可以被<em>保证</em>、什么只是<em>尽力而为</em>。</p>
+<hr />
+<h2>PM 为何需要理解 Hook 定义</h2>
+<p>当你撰写 PRD 时，你在指定需求。有些需求<em>必须</em> 100% 达成（合规、安全），有些则是<em>尽力而为</em>（语气、格式）。理解四步骤 hook 定义流程帮助你：</p>
+<ol>
+<li><strong>指定执行机制</strong> — 不只说"什么"，还说"怎么做"</li>
+<li><strong>评估工程量</strong> — hook 需要写脚本，不只是改 prompt</li>
+<li><strong>设定合理期望</strong> — hook 是确定性的；prompt 是概率性的</li>
+</ol>
+<hr />
+<h2>心智模型：工厂质量检查站</h2>
+<p><img alt="Four-Step Hook Definition" src="visuals/four-step-process-zh-TW.svg" /><br />
+<em>圖：定義 Hook 的四步驟流程 — Event → Matcher → Command → Exit Code。</em></p>
+<p>把 Claude Code 想象成工厂生产线。工具是机器（钻孔、焊接、喷漆）。Hook 是你安装的质量检查站：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>工厂类比</th>
+<th>Hook 定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 前还是后？</td>
+<td>钻孔前检查原料，还是焊接后检查成品？</td>
+<td>PreToolUse 在动作前封锁；PostToolUse 在动作后检查</td>
+</tr>
+<tr>
+<td>2. 哪条线？</td>
+<td>监控喷漆室和焊接站</td>
+<td><code>matcher</code>：<code>"Read|Grep"</code> 选择要监控的工具</td>
+</tr>
+<tr>
+<td>3. 检查程序</td>
+<td>质检员按照检查清单</td>
+<td>Command 脚本读取 tool call 数据（JSON）并应用规则</td>
+</tr>
+<tr>
+<td>4. 通过或退回？</td>
+<td>绿灯（继续）或红灯（停线）</td>
+<td>Exit code 0（允许）或 2（封锁）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM 决策框架</strong></p>
+<p>撰写验收标准时问自己："这是绿灯/红灯需求（hook），还是指导方针（prompt）？"<br />
+- <strong>红灯</strong>："系统必须阻止读取凭证" → Hook<br />
+- <strong>指导方针</strong>："系统应以友善语气回应" → Prompt</p>
+</blockquote>
+<hr />
+<h2>以商业语言描述四步骤</h2>
+<h3>第一步：前还是后？</h3>
+<table>
+<thead>
+<tr>
+<th>需求类型</th>
+<th>Hook 类型</th>
+<th>商业示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>预防 / 合规</td>
+<td><strong>PreToolUse</strong></td>
+<td>未经主管批准，封锁超过 $500 的退款</td>
+</tr>
+<tr>
+<td>记录 / 质量检查</td>
+<td><strong>PostToolUse</strong></td>
+<td>记录每次客户互动到 CRM</td>
+</tr>
+<tr>
+<td>自动修正</td>
+<td><strong>PostToolUse</strong></td>
+<td>每次文档编辑后执行拼写检查</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>PM 必知</strong></p>
+<p>如果你的需求写"绝不可以"或"必须永远防止"，在验收标准中指定 PreToolUse。PostToolUse 无法防止 — 它只在事后反应。</p>
+</blockquote>
+<h3>第二步：监控哪些操作？</h3>
+<p><code>matcher</code> 字段选择哪些 AI 工具会触发检查站。常见场景：</p>
+<table>
+<thead>
+<tr>
+<th>PM 需求</th>
+<th>工程师翻译为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Claude 不可读取凭证文件"</td>
+<td><code>matcher: "Read|Grep"</code></td>
+</tr>
+<tr>
+<td>"自动格式化 Claude 写的每个文件"</td>
+<td><code>matcher: "Write|Edit|MultiEdit"</code></td>
+</tr>
+<tr>
+<td>"记录所有 shell 命令"</td>
+<td><code>matcher: "Bash"</code></td>
+</tr>
+<tr>
+<td>"监控所有操作"</td>
+<td><code>matcher: ".*"</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM 常见疏忽</strong></p>
+<p>PM 经常忘记 <code>Grep</code>（搜索）也能暴露文件内容，不只 <code>Read</code>。务必问工程师："还有哪些工具可以访问这些数据？"</p>
+</blockquote>
+<h3>第三步：检查逻辑</h3>
+<p>Hook command 收到的是 Claude 要做什么的详细信息 — 不只是"Claude 想读文件"，而是具体的"Claude 想用 Read 工具读取 <code>/src/config/.env</code>"。</p>
+<p>这种精细度意味着 hook 可以根据文件路径、命令内容或任何其他参数做出非常精确的判断。</p>
+<h3>第四步：裁决</h3>
+<table>
+<thead>
+<tr>
+<th>裁决</th>
+<th>Exit Code</th>
+<th>接下来发生什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>批准</td>
+<td>0</td>
+<td>Tool call 正常执行</td>
+</tr>
+<tr>
+<td>退回</td>
+<td>2</td>
+<td>Tool call 被封锁；Claude 收到拒绝原因并调整方法</td>
+</tr>
+</tbody>
+</table>
+<p>拒绝反馈创造了自我修正回路 — Claude 不是静默失败；它理解<em>原因</em>并尝试替代方法。</p>
+<hr />
+<h2>讲师洞察（来自视频）</h2>
+<p>PM 应注意的讲师重点：</p>
+<ol>
+<li><strong>工具发现是动态的</strong> — 加入 MCP server 后可用工具会改变。工程师可以问 Claude"列出你可用的工具"来发现什么可以被监控。</li>
+<li><strong>Matcher 使用类 regex 语法</strong> — Pipe 符号 <code>|</code> 代表 OR。这是技术细节，但 PM 应知道一个 hook 可以监控多个工具。</li>
+<li><strong>stderr 反馈很关键</strong> — 当 hook 封锁动作时，错误信息直接发送给 Claude。好的错误信息帮助 Claude 找替代方案；差的信息造成困惑。</li>
+</ol>
+<hr />
+<h2>反模式（考试常考）</h2>
+<table>
+<thead>
+<tr>
+<th>❌ 错误做法</th>
+<th>✅ 正确做法</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PRD 写"必须防止 X"但不指定执行机制</td>
+<td>验收标准中指定"通过 PreToolUse hook 执行"</td>
+<td>不指定的话，工程师可能用 prompt 方案</td>
+</tr>
+<tr>
+<td>假设 PostToolUse 能防止动作</td>
+<td>预防需求用 PreToolUse</td>
+<td>PostToolUse 在动作之后才运行 — 太晚了</td>
+</tr>
+<tr>
+<td>多个工具能做同样的事却只监控一个</td>
+<td>问工程师哪些工具能访问数据</td>
+<td>Grep 和 Read 一样能读文件内容</td>
+</tr>
+<tr>
+<td>略过拒绝信息</td>
+<td>hook 规格中要求清楚的反馈信息</td>
+<td>Claude 需要反馈才能自我修正</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>练习题</h2>
+<h3>Q1：客户支持场景（S1）</h3>
+<p>你正在为 AI 客服代理撰写 PRD。其中一项需求："代理绝不可访问存储在 <code>.credentials</code> 目录的客户付款数据。"工程师提议将此指令加到 system prompt。你应该建议什么？</p>
+<ul>
+<li>A. 接受工程师提案 — prompt 指令足以做访问控制</li>
+<li>B. 要求 PreToolUse hook，封锁对 <code>.credentials</code> 路径的 Read 和 Grep 操作</li>
+<li>C. 要求 PostToolUse hook，记录 Claude 访问 <code>.credentials</code> 文件的时间</li>
+<li>D. 将限制加到 CLAUDE.md 并设为团队共用项目设置</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — "绝不可访问"是合规需求，需要确定性执行。PreToolUse hook 在动作发生前封锁。Read 和 Grep 都必须涵盖，因为两者都能暴露文件内容。
+
+- A 是 prompt-based，有非零失败率 — 合规需求不可接受
+- C 是 PostToolUse — 太晚了，文件已被读取
+- D 仍是 prompt 指令，不是程序化执行
+
+**PM 重点**：当你在 PRD 写"绝不可"，你在指定确定性需求。执行机制必须相符 — 用 hook，不是 prompt。
+</details>
+
+<h3>Q2：开发者生产力场景（S4）</h3>
+<p>你的团队希望 Claude Code 在每次文件编辑后自动执行代码格式化。格式化不应封锁 Claude 的工作 — 只是清理格式。你在需求中应指定什么方法？</p>
+<ul>
+<li>A. PreToolUse hook 搭配 Write|Edit，在 Claude 写文件前执行格式化</li>
+<li>B. PostToolUse hook 搭配 Write|Edit|MultiEdit，Claude 编辑后执行格式化，exit code 0</li>
+<li>C. 在 system prompt 加入"永远格式化你的代码"</li>
+<li>D. PostToolUse hook 搭配 Read，Claude 读取文件后执行格式化</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — 格式化必须在文件被编辑后进行（PostToolUse）。Matcher 应涵盖所有编辑操作（Write、Edit、MultiEdit）。Exit code 0 代表"正常继续" — 不封锁。
+
+- A 在编辑前执行 — 还没有东西可以格式化
+- C 是 prompt-based，无法保证一致的格式化
+- D 指向错误的工具 — Read 不修改文件
+
+**PM 重点**："每次编辑后自动" + "不应封锁" = PostToolUse 搭配 exit code 0。这是质量增强，不是合规闸门。
+</details>
+
+<h3>Q3：代码生成场景（S2）</h3>
+<p>团队用 Claude Code 生成 API endpoint 代码。他们希望确保所有生成的文件遵循项目命名惯例（<code>snake_case</code>）。若文件不符合惯例，生成应被封锁。你应该要求什么 hook 配置？</p>
+<ul>
+<li>A. PostToolUse hook 搭配 Write，检查命名并记录警告</li>
+<li>B. PreToolUse hook 搭配 Write，验证文件名并在不合规时以 exit code 2 封锁</li>
+<li>C. 在 CLAUDE.md 加入命名惯例示例</li>
+<li>D. PostToolUse hook 搭配 Write，创建后重新命名文件</li>
+</ul>
+<details><summary>答案</summary>
+
+**B** — "应被封锁"代表预防，需要 PreToolUse。Hook 在 Write 操作执行前检查 tool input 中的文件名。
+
+- A 是 PostToolUse — 文件已用错误名称写入
+- C 是 prompt-based 且为概率性的
+- D 是事后修补 — 比预防更复杂且更容易出错
+
+**PM 重点**："不合规则封锁"是关键句。封锁需要 PreToolUse。若需求是"不合规则修正"，PostToolUse 才合适。
+</details>
+</body>
+</html>

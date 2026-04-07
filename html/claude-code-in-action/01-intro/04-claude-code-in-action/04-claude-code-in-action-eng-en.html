@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04 Claude Code In Action Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Claude Code in Action — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%), D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.5 (built-in tools), 2.4 (MCP integration), 3.6 (CI/CD), 1.1 (agentic loops)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 01-intro / Lesson 04</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><img alt="Builtin Vs Mcp Decision Tree" src="visuals/builtin-vs-mcp-decision-tree.svg" /><br />
+<em>Figure: Decision tree — built-in tools vs MCP servers.</em></p>
+<h2>One-Liner</h2>
+<p>Claude Code's power comes from intelligent tool chaining across built-in capabilities, easy extensibility via MCP servers, and seamless CI/CD integration — not from any single tool in isolation.</p>
+<hr />
+<h2>Built-in Tools Overview</h2>
+<p>Claude Code ships with a default set of tools that cover file I/O, execution, and search:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+<th>Category</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read</td>
+<td>Read file contents (supports images, PDFs, notebooks)</td>
+<td>File I/O</td>
+</tr>
+<tr>
+<td>Write</td>
+<td>Create or overwrite files</td>
+<td>File I/O</td>
+</tr>
+<tr>
+<td>Edit</td>
+<td>Make targeted, surgical edits to existing files</td>
+<td>File I/O</td>
+</tr>
+<tr>
+<td>Bash</td>
+<td>Execute shell commands</td>
+<td>Execution</td>
+</tr>
+<tr>
+<td>Grep</td>
+<td>Search file contents with regex (powered by ripgrep)</td>
+<td>Search</td>
+</tr>
+<tr>
+<td>Glob</td>
+<td>Find files by name/pattern</td>
+<td>Search</td>
+</tr>
+<tr>
+<td>NotebookEdit</td>
+<td>Edit Jupyter notebook cells</td>
+<td>Notebook</td>
+</tr>
+<tr>
+<td>WebFetch</td>
+<td>Fetch and analyze web content</td>
+<td>Web</td>
+</tr>
+<tr>
+<td>WebSearch</td>
+<td>Search the web for current information</td>
+<td>Web</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+The power isn't in any single tool — it's in how Claude chains them intelligently. Each demo in this lesson showcases a different chaining pattern.</p>
+</blockquote>
+<hr />
+<h2>Demo 1: Performance Optimization — Intelligent Tool Chaining</h2>
+<p><strong>Context</strong>: chalk is the 5th most downloaded npm package (~429M downloads/week). Even small performance improvements have massive ecosystem impact.</p>
+<p><strong>What Claude did</strong> (tool chain):<br />
+1. <strong>Plan</strong> — Created a structured todo list to track multi-step work<br />
+2. <strong>Search</strong> — Used Grep/Glob to find performance-relevant code paths<br />
+3. <strong>Benchmark</strong> — Ran existing benchmarks via Bash to establish baseline<br />
+4. <strong>Focus</strong> — Wrote a targeted test file isolating the hot path<br />
+5. <strong>Profile</strong> — Ran CPU profiler via Bash, Read the output<br />
+6. <strong>Fix</strong> — Used Edit to implement the optimization<br />
+7. <strong>Verify</strong> — Re-ran benchmarks to confirm improvement</p>
+<p><strong>Result</strong>: 3.9x throughput improvement on the targeted operation.</p>
+<blockquote>
+<p>🎬 <strong>Instructor Insight</strong><br />
+Claude builds a todo list to track its own progress through complex tasks. This self-management behavior emerges naturally — it's how agentic loops maintain coherence across many steps.</p>
+<p>🎯 <strong>Exam Note</strong><br />
+This is the canonical example of Task 1.1 (agentic loops): Claude autonomously plans, executes, observes, and refines without human intervention between steps.</p>
+</blockquote>
+<hr />
+<h2>Demo 2: Data Analysis — Execute and Iterate</h2>
+<p><strong>Context</strong>: CSV dataset of video streaming platform users. Goal: analyze user churn patterns.</p>
+<p><strong>What Claude did</strong>:<br />
+1. Read the CSV to understand schema<br />
+2. Wrote analysis code in Jupyter notebook cells<br />
+3. <strong>Executed cells and read the output</strong> — this is the critical differentiator<br />
+4. Based on actual results, customized the next analysis step<br />
+5. Iteratively refined visualizations and statistical tests</p>
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+Claude doesn't just generate code and hope it works. It executes cells, observes results, and adapts. This execute-observe-refine loop produces dramatically better analysis than generate-only approaches.</p>
+</blockquote>
+<p><strong>Why this matters for the exam</strong>: This demonstrates Task 3.5 (iterative refinement). The quality difference between "write code" and "write code, run it, read output, adjust" is substantial.</p>
+<hr />
+<h2>Demo 3: MCP Extensibility — Playwright Browser Control</h2>
+<p><strong>Context</strong>: A small app that generates UI components from text descriptions. Claude needs to style the output visually.</p>
+<p><strong>What Claude did</strong>:<br />
+1. Was given access to Playwright MCP server (browser control tools)<br />
+2. Opened the browser, took a screenshot to see current state<br />
+3. Made CSS/style changes via Edit<br />
+4. Re-screenshotted to verify visual result<br />
+5. Iterated until the styling matched expectations</p>
+<p><strong>Key technical points</strong>:<br />
+- MCP tools are added via configuration — no retraining needed<br />
+- Claude adapts to new tools based on their descriptions alone<br />
+- Tool description quality determines how effectively Claude uses the tool</p>
+<blockquote>
+<p>💡 <strong>Exam Connection</strong><br />
+This demonstrates Task 2.4: Integrate MCP servers into Claude Code and agent workflows. The exam philosophy here is <strong>Tool description &gt; Few-shot</strong> — clear, well-written tool descriptions matter more than examples.</p>
+</blockquote>
+<hr />
+<h2>Demo 4: CI/CD Integration — Automated PR Security Review</h2>
+<p><strong>Context</strong>: Claude Code runs inside GitHub Actions, triggered by PR creation or <code>@claude</code> mentions in PR comments.</p>
+<p><strong>Scenario</strong>:<br />
+- AWS infrastructure defined in Terraform<br />
+- Architecture: DynamoDB table -&gt; Lambda function -&gt; S3 bucket<br />
+- The S3 bucket is shared with an external partner<br />
+- A PR adds user email to the data flow<br />
+- Adding PII (email) to a bucket shared externally = <strong>security/compliance risk</strong></p>
+<p><strong>What Claude caught</strong>: The PII exposure risk — not because it was told "check for PII," but because it understood the Terraform infrastructure flow and recognized that user email would end up in the shared S3 bucket.</p>
+<blockquote>
+<p>🎯 <strong>Exam Note</strong><br />
+This maps directly to Task 3.6 (CI/CD integration) and embodies the exam philosophy: <strong>Architecture &gt; Prompt</strong>. Claude catches issues by understanding infrastructure code structurally, not by being told what to look for.</p>
+</blockquote>
+<hr />
+<h2>Tool Chaining Patterns (Exam-Relevant)</h2>
+<p><img alt="Tool Chaining Patterns Matrix" src="visuals/tool-chaining-patterns-matrix.svg" /><br />
+<em>Figure: Tool chaining patterns across four demo use cases.</em></p>
+<p><img alt="Tool Chain Pattern" src="visuals/tool-chain-pattern.svg" /><br />
+<em>Figure: Three tool chaining patterns demonstrated in Claude Code.</em></p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Example from Demos</th>
+<th>Task Statement</th>
+<th>When to Apply</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plan -&gt; Execute -&gt; Verify</td>
+<td>chalk optimization (D1)</td>
+<td>1.1: Agentic loops</td>
+<td>Complex multi-step tasks</td>
+</tr>
+<tr>
+<td>Execute -&gt; Observe -&gt; Refine</td>
+<td>Jupyter analysis (D2)</td>
+<td>3.5: Iterative refinement</td>
+<td>Data analysis, debugging</td>
+</tr>
+<tr>
+<td>New tool adoption via MCP</td>
+<td>Playwright browser (D3)</td>
+<td>2.4: MCP integration</td>
+<td>When built-in tools insufficient</td>
+</tr>
+<tr>
+<td>Automated review in CI</td>
+<td>GitHub PR review (D4)</td>
+<td>3.6: CI/CD pipelines</td>
+<td>Code review, compliance</td>
+</tr>
+<tr>
+<td>Proportionate tool selection</td>
+<td>All demos</td>
+<td>2.5: Built-in tools</td>
+<td>Start simple, extend when needed</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Exam Philosophy: Proportionate Response</strong><br />
+Start with built-in tools. Only add MCP servers or custom tooling when built-in capabilities are genuinely insufficient. The exam tests whether you know WHEN to extend, not just HOW.</p>
+</blockquote>
+<hr />
+<h2>Key Takeaways for the Exam</h2>
+<ol>
+<li><strong>Built-in tools are powerful</strong> — most tasks don't need MCP extensions</li>
+<li><strong>Tool chaining is the multiplier</strong> — the sequence matters more than individual tools</li>
+<li><strong>MCP extends, doesn't replace</strong> — MCP servers add capabilities (browser, APIs) that built-in tools can't cover</li>
+<li><strong>CI/CD integration is a first-class use case</strong> — Claude Code in GitHub Actions for automated review</li>
+<li><strong>Architecture understanding &gt; explicit instructions</strong> — Claude reasons about code structure, not just syntax</li>
+</ol>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: CI/CD Security Review</h3>
+<p>Your team uses Terraform to manage AWS infrastructure. A junior developer submits a PR that adds a <code>user_phone</code> field to a Lambda function that writes to an S3 bucket shared with a third-party analytics partner. How should you configure Claude Code to catch this?</p>
+<details><summary>Answer</summary>
+
+Configure Claude Code as a GitHub Actions workflow triggered on PR creation. Claude will read the Terraform files, understand the data flow (Lambda -> shared S3 bucket), and flag that `user_phone` is PII being sent to an external partner. The key insight is that you do NOT need to write a prompt saying "check for PII" — Claude understands infrastructure-as-code and can trace data flows. This is Architecture > Prompt in action (Task 3.6).
+</details>
+
+<h3>Q2: Tool Selection</h3>
+<p>You need Claude Code to optimize a Python function's performance. Which sequence of built-in tools represents the best approach?</p>
+<p>A) Edit the code directly with a known optimization pattern<br />
+B) Read the code -&gt; Bash (run profiler) -&gt; Read profiler output -&gt; Edit (apply fix) -&gt; Bash (re-run benchmark)<br />
+C) Write a completely new implementation from scratch<br />
+D) Grep for similar optimizations in the codebase and copy them</p>
+<details><summary>Answer</summary>
+
+**B**. This follows the Plan -> Profile -> Fix -> Verify pattern from Demo 1. The key is that Claude should measure before optimizing (run profiler), then verify the improvement (re-run benchmark). Option A skips measurement. Option C is disproportionate. Option D doesn't address the specific bottleneck. This tests Task 2.5 (effective built-in tool use) and Task 1.1 (agentic loop design).
+</details>
+
+<h3>Q3: MCP Extensibility</h3>
+<p>You want Claude Code to verify that your web application's login page renders correctly after CSS changes. Which approach is most appropriate?</p>
+<p>A) Have Claude Read the CSS file and reason about visual appearance<br />
+B) Add a Playwright MCP server so Claude can screenshot and visually verify<br />
+C) Write unit tests for every CSS property<br />
+D) Use Bash to run a headless browser and save screenshots for manual review</p>
+<details><summary>Answer</summary>
+
+**B**. This matches Demo 3 exactly. Playwright MCP gives Claude the ability to open a browser, take screenshots, and visually verify the result — creating a tight feedback loop. Option A can't verify visual rendering. Option C is brittle and doesn't test visual appearance. Option D requires manual review, losing the automation benefit. This tests Task 2.4 (MCP integration) and the principle that MCP extends Claude's capabilities when built-in tools are insufficient.
+</details>
+</body>
+</html>

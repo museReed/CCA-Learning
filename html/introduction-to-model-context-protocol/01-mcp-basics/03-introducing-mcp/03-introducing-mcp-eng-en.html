@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03 Introducing Mcp Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing MCP — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.1 Design and implement tool schemas; T2.3 Configure MCP server connections</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 01-mcp-basics / Lesson 03</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP is a standardized communication layer that lets Claude access external tools and data through dedicated MCP servers, eliminating the need to hand-write integration code.</p>
+<hr />
+<p><img alt="Mcp Architecture" src="visuals/mcp-architecture.svg" /></p>
+<h2>What MCP Actually Is</h2>
+<p>Model Context Protocol (MCP) is a <strong>communication protocol</strong> that sits between your application and external services. Rather than writing bespoke tool schemas and API integration code for every service Claude needs to access, MCP delegates that responsibility to specialized MCP servers.</p>
+<p>The core architecture follows a simple pattern:</p>
+<pre class="highlight"><code>Your Application (MCP Client)
+        |
+        v
+    MCP Server (e.g., GitHub MCP Server)
+        |
+        v
+    External Service (e.g., GitHub API)
+</code></pre>
+
+<p>Each MCP server exposes a standardized interface containing <strong>tools</strong>, <strong>prompts</strong>, and <strong>resources</strong>. Your application only needs to know how to speak MCP — the server handles all service-specific details.</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+MCP is to AI tool integration what USB is to hardware peripherals. Instead of a custom connector for every device, you get one standardized protocol that everything plugs into.</p>
+</blockquote>
+<hr />
+<h2>The Problem MCP Solves</h2>
+<p>Consider building a chat interface where users ask Claude about their GitHub data. A user asks: "What open pull requests are there across all my repositories?"</p>
+<p>Without MCP, you would need to:</p>
+<ol>
+<li><strong>Define tool schemas</strong> — JSON schemas for every GitHub operation (repos, PRs, issues, projects, etc.)</li>
+<li><strong>Implement handler functions</strong> — Code that translates Claude's tool calls into GitHub API requests</li>
+<li><strong>Handle authentication</strong> — OAuth tokens, rate limiting, pagination</li>
+<li><strong>Maintain everything</strong> — GitHub API changes, deprecations, new features</li>
+</ol>
+<pre class="highlight"><code class="language-python"># WITHOUT MCP: You write and maintain all of this
+tools = [
+    {
+        &quot;name&quot;: &quot;get_pull_requests&quot;,
+        &quot;description&quot;: &quot;List open PRs across repositories&quot;,
+        &quot;input_schema&quot;: {
+            &quot;type&quot;: &quot;object&quot;,
+            &quot;properties&quot;: {
+                &quot;state&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;open&quot;, &quot;closed&quot;, &quot;all&quot;]},
+                &quot;repo&quot;: {&quot;type&quot;: &quot;string&quot;}
+            }
+        }
+    },
+    # ... dozens more tool definitions
+]
+
+def handle_get_pull_requests(state, repo):
+    # Authentication, pagination, error handling...
+    response = requests.get(f&quot;https://api.github.com/repos/{repo}/pulls&quot;,
+                          params={&quot;state&quot;: state},
+                          headers={&quot;Authorization&quot;: f&quot;token {token}&quot;})
+    # ... more code
+</code></pre>
+
+<p>With MCP, the GitHub MCP server provides all of this out of the box. Your code simply connects to the MCP server and passes tool calls through.</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+The maintenance burden is the real killer. GitHub alone has hundreds of API endpoints. Without MCP, every API change potentially breaks your tool definitions. MCP servers centralize that maintenance.</p>
+</blockquote>
+<hr />
+<h2>MCP Architecture Components</h2>
+<h3>MCP Client</h3>
+<p>The MCP Client is your application — the system that connects to MCP servers on behalf of Claude. It handles:</p>
+<ul>
+<li>Discovering available tools via <code>ListToolsRequest</code></li>
+<li>Executing tools via <code>CallToolRequest</code></li>
+<li>Managing the transport layer (stdio, HTTP, WebSockets)</li>
+</ul>
+<h3>MCP Server</h3>
+<p>The MCP Server is a standalone process that wraps an external service. It:</p>
+<ul>
+<li>Defines tool schemas (names, descriptions, input parameters)</li>
+<li>Implements tool execution logic</li>
+<li>Handles service-specific authentication and error handling</li>
+<li>Exposes prompts and resources alongside tools</li>
+</ul>
+<h3>Who Builds MCP Servers?</h3>
+<p>Anyone can author an MCP server. In practice:</p>
+<ul>
+<li><strong>Service providers</strong> often release official MCP servers (e.g., AWS, GitHub)</li>
+<li><strong>Community contributors</strong> build servers for popular services</li>
+<li><strong>You</strong> can build custom MCP servers for internal tools and APIs</li>
+</ul>
+<hr />
+<h2>MCP vs. Tool Use: The Critical Distinction</h2>
+<p>This is a common exam topic. MCP and tool use are <strong>complementary, not identical</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>What It Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tool Use</strong></td>
+<td>The mechanism by which Claude decides to call a tool, formats the input, and processes the result</td>
+</tr>
+<tr>
+<td><strong>MCP</strong></td>
+<td>The protocol that provides tool definitions and execution infrastructure to Claude</td>
+</tr>
+</tbody>
+</table>
+<p>Think of it this way: tool use is the <strong>verb</strong> (Claude calling a tool), while MCP is the <strong>noun</strong> (the system that supplies and runs those tools).</p>
+<p>Without MCP, you still have tool use — you just have to write all the tool definitions yourself. Without tool use, MCP servers are useless — there is no mechanism for Claude to invoke them.</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+On the CCA exam, do not conflate MCP with tool use. MCP is about <em>who defines and maintains tools</em>. Tool use is about <em>how Claude invokes them</em>. They work together but are distinct concepts.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<p>This lesson maps directly to <strong>Domain 2: Tool Design &amp; MCP Integration (18%)</strong>. Key exam angles:</p>
+<ul>
+<li><strong>Architecture understanding</strong>: Know the Client-Server relationship and what each component does</li>
+<li><strong>Problem identification</strong>: Recognize when MCP is the right solution (large API surface, maintenance burden, standardization needs)</li>
+<li><strong>MCP vs. tool use</strong>: This distinction appears in multiple exam questions. Be precise about what each concept covers</li>
+<li><strong>Server authorship</strong>: Understand that MCP is an open ecosystem, not a closed Anthropic-only system</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the primary problem MCP solves?</td>
+<td>It eliminates the need to manually write, test, and maintain tool schemas and integration code for every external service Claude needs to access.</td>
+</tr>
+<tr>
+<td>What three types of capabilities can an MCP server expose?</td>
+<td>Tools, prompts, and resources.</td>
+</tr>
+<tr>
+<td>How does MCP relate to tool use?</td>
+<td>They are complementary: MCP provides tool definitions and execution infrastructure; tool use is the mechanism by which Claude invokes those tools.</td>
+</tr>
+<tr>
+<td>Who can author MCP servers?</td>
+<td>Anyone — service providers, community contributors, or individual developers building custom integrations.</td>
+</tr>
+<tr>
+<td>What is the role of the MCP Client?</td>
+<td>The MCP Client is your application that connects to MCP servers, discovers available tools, and routes tool execution requests.</td>
+</tr>
+<tr>
+<td>In the MCP architecture, where does tool execution actually happen?</td>
+<td>On the MCP server, not on your application server. The MCP server handles all service-specific implementation details.</td>
+</tr>
+<tr>
+<td>Why is MCP compared to USB?</td>
+<td>Like USB standardizes hardware connections with one protocol, MCP standardizes AI tool integrations so you do not need a custom connector for every service.</td>
+</tr>
+<tr>
+<td>What would you need to implement yourself WITHOUT MCP for a GitHub integration?</td>
+<td>Tool schemas for every operation, handler functions for API calls, authentication handling, pagination, rate limiting, and ongoing maintenance for API changes.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

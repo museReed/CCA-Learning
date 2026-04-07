@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>19 Another Useful Hook Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Another Useful Hook — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%), D1 — Agentic Architecture (27%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.5 (Agent SDK hooks for tool call interception), 3.2 (custom commands &amp; hooks), 1.7 (session state &amp; resumption)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 05-hooks / Lesson 19 (text-only)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Beyond PreToolUse and PostToolUse, Claude Code offers 7 additional hook types (<code>Notification</code>, <code>Stop</code>, <code>SubagentStop</code>, <code>PreCompact</code>, <code>UserPromptSubmit</code>, <code>SessionStart</code>, <code>SessionEnd</code>) — and the stdin input structure varies by both hook type and tool matcher, making a <code>jq . &gt; log.json</code> debug hook essential for development.</p>
+<hr />
+<p><img alt="Hook Taxonomy" src="visuals/hook-taxonomy.svg" /><br />
+<em>Figure: Complete hook taxonomy — all 9 hook types organized by lifecycle stage, blocking capability, and use case.</em></p>
+<h2>The Complete Hook Taxonomy</h2>
+<p>Most of this course focused on PreToolUse and PostToolUse. This lesson reveals the full picture:</p>
+<table>
+<thead>
+<tr>
+<th>Hook Type</th>
+<th>When It Fires</th>
+<th>Can Block?</th>
+<th>Key Use Cases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PreToolUse</code></td>
+<td>Before a tool executes</td>
+<td>Yes</td>
+<td>Access control, policy enforcement, prerequisite checks</td>
+</tr>
+<tr>
+<td><code>PostToolUse</code></td>
+<td>After a tool executes</td>
+<td>No (feedback only)</td>
+<td>Type checking, linting, duplication review</td>
+</tr>
+<tr>
+<td><code>Notification</code></td>
+<td>When Claude sends a notification (permission needed or 60s idle)</td>
+<td>No</td>
+<td>Custom alerting, Slack/email notifications</td>
+</tr>
+<tr>
+<td><code>Stop</code></td>
+<td>When Claude finishes responding</td>
+<td>No</td>
+<td>Session logging, summary generation, cleanup</td>
+</tr>
+<tr>
+<td><code>SubagentStop</code></td>
+<td>When a subagent (displayed as "Task" in UI) finishes</td>
+<td>No</td>
+<td>Subagent output validation, aggregation</td>
+</tr>
+<tr>
+<td><code>PreCompact</code></td>
+<td>Before a compact operation (manual or automatic)</td>
+<td>No</td>
+<td>Context preservation, fact extraction before compaction</td>
+</tr>
+<tr>
+<td><code>UserPromptSubmit</code></td>
+<td>When user submits a prompt, before Claude processes it</td>
+<td>Yes</td>
+<td>Input validation, prompt preprocessing, logging</td>
+</tr>
+<tr>
+<td><code>SessionStart</code></td>
+<td>When starting or resuming a session</td>
+<td>No</td>
+<td>Environment setup, context loading</td>
+</tr>
+<tr>
+<td><code>SessionEnd</code></td>
+<td>When a session ends</td>
+<td>No</td>
+<td>Cleanup, session logging, state persistence</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Engineering analogy</strong></p>
+<p>If you think of Claude Code as an iOS app:<br />
+- <code>PreToolUse</code>/<code>PostToolUse</code> = <code>URLProtocol</code> interceptors (per-request middleware)<br />
+- <code>SessionStart</code>/<code>SessionEnd</code> = <code>applicationDidFinishLaunching</code> / <code>applicationWillTerminate</code><br />
+- <code>Notification</code> = <code>UNUserNotificationCenter</code> delegate<br />
+- <code>Stop</code> = completion handler on an <code>Operation</code><br />
+- <code>PreCompact</code> = <code>didReceiveMemoryWarning</code> (about to trim context)<br />
+- <code>UserPromptSubmit</code> = <code>textFieldShouldReturn</code> (intercept before processing)</p>
+</blockquote>
+<hr />
+<h2>The Confusing Part: Variable stdin Input</h2>
+<p>Each hook type receives <strong>different stdin JSON structures</strong>. And for <code>PreToolUse</code>/<code>PostToolUse</code>, the <code>tool_input</code> field varies based on which tool was called.</p>
+<h3>Example 1: PostToolUse on TodoWrite</h3>
+<pre class="highlight"><code class="language-json">{
+  &quot;session_id&quot;: &quot;9ecf22fa-edf8-4332-ae85-b6d5456eda64&quot;,
+  &quot;transcript_path&quot;: &quot;&lt;path_to_transcript&gt;&quot;,
+  &quot;hook_event_name&quot;: &quot;PostToolUse&quot;,
+  &quot;tool_name&quot;: &quot;TodoWrite&quot;,
+  &quot;tool_input&quot;: {
+    &quot;todos&quot;: [{ &quot;content&quot;: &quot;write a readme&quot;, &quot;status&quot;: &quot;pending&quot;, &quot;priority&quot;: &quot;medium&quot;, &quot;id&quot;: &quot;1&quot; }]
+  },
+  &quot;tool_response&quot;: {
+    &quot;oldTodos&quot;: [],
+    &quot;newTodos&quot;: [{ &quot;content&quot;: &quot;write a readme&quot;, &quot;status&quot;: &quot;pending&quot;, &quot;priority&quot;: &quot;medium&quot;, &quot;id&quot;: &quot;1&quot; }]
+  }
+}
+</code></pre>
+
+<p>Key fields for PostToolUse:<br />
+- <code>tool_name</code> — which tool was used<br />
+- <code>tool_input</code> — what Claude sent TO the tool (varies per tool)<br />
+- <code>tool_response</code> — what the tool returned (varies per tool)</p>
+<h3>Example 2: Stop Hook</h3>
+<pre class="highlight"><code class="language-json">{
+  &quot;session_id&quot;: &quot;af9f50b6-f042-4773-b3e2-c3a4814765ce&quot;,
+  &quot;transcript_path&quot;: &quot;&lt;path_to_transcript&gt;&quot;,
+  &quot;hook_event_name&quot;: &quot;Stop&quot;,
+  &quot;stop_hook_active&quot;: false
+}
+</code></pre>
+
+<p>Notice: No <code>tool_name</code>, no <code>tool_input</code>, no <code>tool_response</code>. Completely different structure.</p>
+<blockquote>
+<p>⚠️ <strong>This is the #1 pitfall when writing hooks</strong></p>
+<p>You cannot assume the stdin structure. A hook script that works for PostToolUse on <code>Write</code> will crash if it receives PostToolUse on <code>TodoWrite</code> because the <code>tool_input</code> fields are completely different. Always validate the structure before accessing nested fields.</p>
+</blockquote>
+<hr />
+<p><img alt="Debug Hook Pattern" src="visuals/debug-hook-pattern.svg" /><br />
+<em>Figure: Debug hook pattern — inspect stdin with jq before building production logic, like using curl -v before writing an HTTP client.</em></p>
+<h2>The Debug Hook: Your Best Friend</h2>
+<p>The lesson's most practical tip is a universal debug hook that logs stdin to a file:</p>
+<pre class="highlight"><code class="language-json">&quot;PostToolUse&quot;: [
+  {
+    &quot;matcher&quot;: &quot;*&quot;,
+    &quot;hooks&quot;: [
+      {
+        &quot;type&quot;: &quot;command&quot;,
+        &quot;command&quot;: &quot;jq . &gt; post-log.json&quot;
+      }
+    ]
+  }
+]
+</code></pre>
+
+<p>What this does:<br />
+1. The <code>*</code> matcher catches <strong>all</strong> tool uses<br />
+2. <code>jq .</code> pretty-prints the JSON stdin<br />
+3. Output is written to <code>post-log.json</code><br />
+4. You can inspect exactly what data your hook will receive</p>
+<blockquote>
+<p>💡 <strong>Development workflow</strong></p>
+<ol>
+<li>Add the debug hook with <code>matcher: "*"</code></li>
+<li>Use Claude Code normally — trigger the tools you want to hook</li>
+<li>Inspect <code>post-log.json</code> to see the exact stdin structure</li>
+<li>Write your actual hook script based on the real data</li>
+<li>Replace the debug hook with your production hook</li>
+</ol>
+<p>This is the same pattern as using <code>curl -v</code> to inspect HTTP responses before writing API client code.</p>
+</blockquote>
+<p>This works for any hook type — just change the key:</p>
+<pre class="highlight"><code class="language-json">&quot;Stop&quot;: [
+  {
+    &quot;matcher&quot;: &quot;*&quot;,
+    &quot;hooks&quot;: [
+      {
+        &quot;type&quot;: &quot;command&quot;,
+        &quot;command&quot;: &quot;jq . &gt; stop-log.json&quot;
+      }
+    ]
+  }
+]
+</code></pre>
+
+<hr />
+<h2>Common stdin Fields by Hook Type</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>PreToolUse</th>
+<th>PostToolUse</th>
+<th>Stop</th>
+<th>Notification</th>
+<th>SubagentStop</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>session_id</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>transcript_path</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>hook_event_name</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>tool_name</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>tool_input</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>tool_response</code></td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>stop_hook_active</code></td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Exam tip</strong></p>
+<p>The <code>transcript_path</code> field is available in ALL hook types. This means any hook can access the full conversation transcript — useful for logging, auditing, and context extraction.</p>
+</blockquote>
+<hr />
+<h2>Practical Applications of Additional Hooks</h2>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>Use Case</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Stop</code></td>
+<td>Session summary logging</td>
+<td>Write a summary of what Claude did to a log file</td>
+</tr>
+<tr>
+<td><code>SubagentStop</code></td>
+<td>Validate subagent output</td>
+<td>Check if research subagent returned structured data</td>
+</tr>
+<tr>
+<td><code>PreCompact</code></td>
+<td>Preserve critical facts</td>
+<td>Extract key decisions before context is trimmed</td>
+</tr>
+<tr>
+<td><code>UserPromptSubmit</code></td>
+<td>Input preprocessing</td>
+<td>Validate prompts against a template before Claude sees them</td>
+</tr>
+<tr>
+<td><code>SessionStart</code></td>
+<td>Environment bootstrap</td>
+<td>Load project-specific context or verify prerequisites</td>
+</tr>
+<tr>
+<td><code>SessionEnd</code></td>
+<td>Cleanup</td>
+<td>Remove temporary files, update session log</td>
+</tr>
+<tr>
+<td><code>Notification</code></td>
+<td>Custom alerts</td>
+<td>Send Slack notification when Claude needs permission</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Anti-Patterns (Exam Favorites)</h2>
+<table>
+<thead>
+<tr>
+<th>❌ Wrong Approach</th>
+<th>✅ Correct Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Assume all hooks receive the same stdin structure</td>
+<td>Use <code>jq . &gt; log.json</code> to discover the structure first</td>
+<td>stdin varies by hook type AND by tool matcher</td>
+</tr>
+<tr>
+<td>Hard-code <code>tool_input</code> field access without validation</td>
+<td>Check <code>tool_name</code> first, then access tool-specific fields</td>
+<td>Different tools have different <code>tool_input</code> shapes</td>
+</tr>
+<tr>
+<td>Use <code>matcher: "*"</code> in production for heavyweight hooks</td>
+<td>Scope matchers to specific tools</td>
+<td><code>*</code> catches everything — performance and cost impact</td>
+</tr>
+<tr>
+<td>Write hook scripts without testing stdin first</td>
+<td>Use debug hook → inspect → write production hook</td>
+<td>Saves debugging time and prevents runtime errors</td>
+</tr>
+<tr>
+<td>Ignore <code>transcript_path</code> in hooks</td>
+<td>Use it for context-aware hook logic</td>
+<td>Transcript provides full conversation history for hooks that need it</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA Exam Connection</h2>
+<blockquote>
+<p>🎯 <strong>Exam scenarios where these concepts appear</strong></p>
+<ul>
+<li><strong>S2 (Code Generation)</strong>: <code>Stop</code> hook for session logging in CI pipelines</li>
+<li><strong>S4 (Developer Productivity)</strong>: <code>SessionStart</code> for environment setup, <code>PreCompact</code> for context preservation</li>
+<li><strong>S5 (CI/CD)</strong>: Understanding hook types for pipeline orchestration</li>
+</ul>
+<p><strong>Common exam pattern</strong>: "You need to perform an action when Claude finishes responding. Which hook type should you use?"<br />
+Answer direction: <code>Stop</code> hook — it fires when Claude finishes responding, regardless of which tool was last used.</p>
+</blockquote>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: CI/CD Pipeline Scenario</h3>
+<p>Your CI pipeline uses Claude Code to review PRs. You need to write a summary of Claude's review findings to a log file after Claude finishes responding. Which hook configuration is correct?</p>
+<ul>
+<li>A. PostToolUse hook with matcher <code>*</code> that writes to a log file</li>
+<li>B. Stop hook that reads the transcript and writes a summary</li>
+<li>C. PreToolUse hook that captures all tool calls</li>
+<li>D. Notification hook that triggers after 60 seconds of inactivity</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — The `Stop` hook fires when Claude finishes responding, making it the right place to generate a session summary. It has access to `transcript_path` for reading the full conversation.
+
+- A would fire after every single tool use, not just at the end — creates many partial logs
+- C fires before tool execution, not after Claude is done
+- D fires on idle or permission request, not on completion
+
+Key: Match the hook type to the lifecycle event you need.
+</details>
+
+<h3>Q2: Developer Productivity Scenario</h3>
+<p>You are writing a PostToolUse hook that should only process file edits but it keeps crashing when Claude uses other tools like <code>Bash</code> or <code>Read</code>. What is the most likely cause and fix?</p>
+<ul>
+<li>A. The matcher is wrong — change it from <code>*</code> to <code>Write|Edit|MultiEdit</code></li>
+<li>B. The hook script assumes <code>tool_input</code> always has a <code>file_path</code> field, but different tools have different <code>tool_input</code> structures</li>
+<li>C. PostToolUse hooks cannot access <code>tool_input</code> — use PreToolUse instead</li>
+<li>D. The hook needs to be moved from project settings to global settings</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — The `tool_input` structure varies by tool. A `Write` tool has `file_path` and `content`, but a `Bash` tool has `command`. If the hook assumes `tool_input.file_path` exists without checking `tool_name` first, it crashes on non-file tools.
+
+- A is a partial fix (scoping the matcher), but the root cause is the script not validating input structure
+- C is factually wrong — PostToolUse hooks DO receive `tool_input`
+- D is unrelated to the crash
+
+Best practice: Always check `tool_name` before accessing tool-specific `tool_input` fields, OR scope your matcher to specific tools.
+</details>
+
+<h3>Q3: Multi-Agent Architecture Scenario</h3>
+<p>You need to validate that a subagent (displayed as "Task" in the UI) returns properly structured JSON data before the coordinator processes it. Which hook type should you use?</p>
+<ul>
+<li>A. PostToolUse hook on the coordinator's tool calls</li>
+<li>B. SubagentStop hook that inspects the subagent's output</li>
+<li>C. Stop hook that runs when the main session finishes</li>
+<li>D. PreCompact hook that checks data before context trimming</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — `SubagentStop` fires when a subagent finishes, which is the exact lifecycle event you need. It allows you to validate the subagent's output before the coordinator processes it.
+
+- A would fire on the coordinator's tool calls, not the subagent's completion
+- C fires when the entire session ends, which is too late
+- D is about context compaction, not subagent output validation
+
+Exam philosophy: Choose the hook type that matches the specific lifecycle event.
+</details>
+</body>
+</html>

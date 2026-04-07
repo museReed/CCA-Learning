@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>18 Useful Hooks Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Useful Hooks — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%), D1 — Agentic Architecture (27%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.5 (Agent SDK hooks for tool call interception &amp; data normalization), 3.2 (custom commands &amp; hooks), 1.2 (multi-agent coordinator-subagent patterns)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 05-hooks / Lesson 18</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>PostToolUse hooks can run compiler/linter checks after every edit (type-checking hook) or launch a separate Claude Code instance to review changes for code duplication (query deduplication hook) — both creating <strong>self-correcting feedback loops</strong> without human intervention.</p>
+<hr />
+<h2>The Problem: Claude Breaks Things It Cannot See</h2>
+<p>When Claude modifies a function signature, it updates the definition file but often misses call sites in other files. This is analogous to an iOS developer changing a protocol method signature in one file — if you don't have the compiler checking all conformances, broken call sites slip through.</p>
+<p>In a TypeScript project:<br />
+1. <code>schema.ts</code> defines <code>createSchema()</code><br />
+2. <code>main.ts</code> calls <code>createSchema()</code><br />
+3. You ask Claude to add a <code>verbose: boolean</code> parameter to <code>createSchema()</code><br />
+4. Claude updates <code>schema.ts</code> but <strong>does not update <code>main.ts</code></strong><br />
+5. Result: type error at the call site that Claude never catches</p>
+<blockquote>
+<p>🎬 <strong>Instructor insight from the video</strong></p>
+<p>The instructor demonstrates this exact scenario live — Claude successfully edits the function definition but leaves <code>main.ts</code> broken. The key insight: Claude doesn't automatically run the TypeScript compiler, so it has no signal that something is wrong elsewhere in the project.</p>
+</blockquote>
+<hr />
+<p><img alt="Type-Check Feedback Loop" src="visuals/type-check-feedback-loop.svg" /><br />
+<em>Figure: TypeScript type-check feedback loop — PostToolUse runs tsc, errors feed back to Claude for automatic fixing.</em></p>
+<h2>Hook 1: TypeScript Type-Checking Hook</h2>
+<h3>How It Works</h3>
+<p>A PostToolUse hook that runs <code>tsc --noEmit</code> after every file edit:</p>
+<pre class="highlight"><code class="language-json">&quot;PostToolUse&quot;: [
+  {
+    &quot;matcher&quot;: &quot;Write|Edit|MultiEdit&quot;,
+    &quot;hooks&quot;: [
+      {
+        &quot;type&quot;: &quot;command&quot;,
+        &quot;command&quot;: &quot;node hooks/tsc.js&quot;
+      }
+    ]
+  }
+]
+</code></pre>
+
+<p>The hook script:<br />
+1. Runs <code>tsc --noEmit</code> (type check without generating output files)<br />
+2. Captures any compiler errors<br />
+3. If errors exist, exits with code 2 and outputs the errors<br />
+4. Claude receives the errors as feedback and fixes them on the next turn</p>
+<blockquote>
+<p>💡 <strong>Engineering analogy</strong></p>
+<p>This is identical to how Xcode's build system works — after you edit a <code>.swift</code> file, the compiler incrementally checks all dependent files. The hook replicates this compiler feedback loop for Claude Code.</p>
+</blockquote>
+<h3>Extending to Other Languages</h3>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Hook Command</th>
+<th>What It Checks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TypeScript</td>
+<td><code>tsc --noEmit</code></td>
+<td>Type errors across the project</td>
+</tr>
+<tr>
+<td>Python</td>
+<td><code>mypy .</code> or <code>pyright</code></td>
+<td>Type annotation violations</td>
+</tr>
+<tr>
+<td>Rust</td>
+<td><code>cargo check</code></td>
+<td>Borrow checker + type errors</td>
+</tr>
+<tr>
+<td>Go</td>
+<td><code>go vet ./...</code></td>
+<td>Static analysis issues</td>
+</tr>
+<tr>
+<td>Untyped JS/Python</td>
+<td><code>npm test</code> or <code>pytest</code></td>
+<td>Run tests as a proxy for type checking</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Performance consideration</strong></p>
+<p>The TypeScript hook is relatively lightweight — <code>tsc --noEmit</code> on a medium project takes 2-5 seconds. For large projects, consider scoping the check to changed files only.</p>
+</blockquote>
+<hr />
+<h2>The Second Problem: Code Duplication in Large Projects</h2>
+<p>When Claude receives a complex, multi-step task (e.g., "build a Slack integration that alerts about pending orders"), it may lose focus on existing code and write duplicate functionality.</p>
+<h3>The Scenario</h3>
+<ul>
+<li><code>src/queries/orderQueries.ts</code> already has <code>getPendingOrders()</code></li>
+<li>You ask Claude: "Create a Slack integration that alerts about orders pending longer than 3 days"</li>
+<li><strong>Focused task</strong>: Claude finds and reuses <code>getPendingOrders()</code> — correct</li>
+<li><strong>Complex task</strong> (after <code>/clear</code>): Claude writes a brand new <code>getOrdersPendingTooLong()</code> query — duplicate code</li>
+</ul>
+<blockquote>
+<p>🎬 <strong>Instructor insight from the video</strong></p>
+<p>The instructor shows that when the task is simple and focused ("print out pending orders"), Claude reuses the existing query. But when the same requirement is buried inside a larger task (Slack integration), Claude creates a duplicate. The context window and task complexity directly affect Claude's ability to discover existing code.</p>
+</blockquote>
+<hr />
+<p><img alt="Multi-Agent Review" src="visuals/multi-agent-review.svg" /><br />
+<em>Figure: Multi-agent review pattern — a PostToolUse hook spawns a second Claude instance to review changes.</em></p>
+<h2>Hook 2: Query Duplication Prevention Hook</h2>
+<h3>Architecture</h3>
+<p>This hook uses a <strong>multi-agent review pattern</strong> — one Claude instance reviews another's work:</p>
+<pre class="highlight"><code>Claude (primary) writes to queries/ directory
+    ↓
+PostToolUse hook triggers
+    ↓
+Hook launches a SECOND Claude Code instance (via TypeScript SDK)
+    ↓
+Second instance reviews the change against existing queries
+    ↓
+If duplicate found: exit code 2 + feedback → primary Claude removes duplicate
+If no duplicate: exit code 0 → primary Claude continues
+</code></pre>
+
+<h3>Configuration</h3>
+<pre class="highlight"><code class="language-json">&quot;PostToolUse&quot;: [
+  {
+    &quot;matcher&quot;: &quot;Write|Edit|MultiEdit&quot;,
+    &quot;hooks&quot;: [
+      {
+        &quot;type&quot;: &quot;command&quot;,
+        &quot;command&quot;: &quot;node hooks/query-hook.js&quot;
+      }
+    ]
+  }
+]
+</code></pre>
+
+<p>The hook script:<br />
+1. Checks if the changed file is in the <code>./queries</code> directory (early exit if not)<br />
+2. Constructs a prompt asking Claude to review the change for duplicates<br />
+3. Launches a separate Claude Code instance using the <strong>TypeScript SDK</strong> (<code>@anthropic-ai/claude-code</code> package)<br />
+4. Parses the response — if duplicates found, exits with code 2 and feedback message<br />
+5. Primary Claude receives the feedback and refactors to use the existing query</p>
+<blockquote>
+<p>💡 <strong>This is a multi-agent pattern inside a hook</strong></p>
+<p>The query hook is essentially a coordinator-subagent pattern (Task Statement 1.2) embedded within the hook system (Task Statement 1.5). The "reviewer" subagent has a scoped context — it only looks at the queries directory, not the entire project. This aligns with the exam philosophy: <strong>Scoped context &gt; Full history</strong>.</p>
+</blockquote>
+<h3>Trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cleaner codebase, less duplication</td>
+<td>Additional time per edit (~10-30 seconds)</td>
+</tr>
+<tr>
+<td>Consistent query organization</td>
+<td>Additional API usage (second Claude instance)</td>
+</tr>
+<tr>
+<td>Catches duplicates Claude would miss</td>
+<td>Only practical for critical directories</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Best practice: Scope your monitoring</strong></p>
+<p>The instructor explicitly recommends watching only "a handful of directories, like really important folders inside of your project, just to minimize the amount of extra work that is being done."</p>
+</blockquote>
+<hr />
+<h2>Anti-Patterns (Exam Favorites)</h2>
+<table>
+<thead>
+<tr>
+<th>❌ Wrong Approach</th>
+<th>✅ Correct Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Add "always run type checker" to system prompt</td>
+<td>PostToolUse hook running <code>tsc --noEmit</code></td>
+<td>Prompt is probabilistic; hook is deterministic</td>
+</tr>
+<tr>
+<td>Ask Claude to "check for duplicate code before writing"</td>
+<td>PostToolUse hook with separate reviewer instance</td>
+<td>Claude loses focus in complex tasks — demonstrated in the video</td>
+</tr>
+<tr>
+<td>Monitor ALL directories with the duplication hook</td>
+<td>Scope to critical directories only</td>
+<td>Performance cost outweighs benefit for non-critical directories</td>
+</tr>
+<tr>
+<td>Use PreToolUse to block duplicate writes</td>
+<td>Use PostToolUse to review and provide feedback</td>
+<td>You need to see what was written to determine if it's a duplicate</td>
+</tr>
+<tr>
+<td>Rely on Claude to always find existing code</td>
+<td>Automated review as a safety net</td>
+<td>Claude's ability to find existing code degrades with task complexity</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA Exam Connection</h2>
+<blockquote>
+<p>🎯 <strong>Exam scenarios where these concepts appear</strong></p>
+<ul>
+<li><strong>S2 (Code Generation)</strong>: TypeScript type-checking hook = ensuring code quality in generated code</li>
+<li><strong>S4 (Developer Productivity)</strong>: Both hooks improve developer workflow by catching issues automatically</li>
+<li><strong>S5 (CI/CD)</strong>: Hooks in CI pipelines for automated quality gates</li>
+</ul>
+<p><strong>Common exam pattern</strong>: "Claude modified a function but broke call sites elsewhere. What is the best approach?"<br />
+Answer direction: PostToolUse hook running the compiler/type checker — Architecture &gt; Prompt.</p>
+</blockquote>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: Code Generation Scenario</h3>
+<p>Your team uses Claude Code for a TypeScript project with 200+ files. Engineers report that when Claude modifies function signatures, it frequently breaks call sites in other files. What is the most effective solution?</p>
+<ul>
+<li>A. Add instructions to CLAUDE.md: "After modifying any function signature, search for and update all call sites"</li>
+<li>B. Configure a PostToolUse hook that runs <code>tsc --noEmit</code> after every file edit and feeds type errors back to Claude</li>
+<li>C. Switch to using the <code>--resume</code> flag so Claude maintains context of all files it has seen</li>
+<li>D. Implement a PreToolUse hook that prevents Claude from modifying function signatures</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — A PostToolUse hook running the TypeScript compiler provides deterministic feedback. Claude receives the type errors in its context and fixes them automatically.
+
+- A is prompt-based and has a non-zero failure rate, especially in large projects
+- C does not guarantee Claude will remember or re-check all call sites
+- D prevents legitimate work — the goal is not to block signature changes, but to catch downstream effects
+
+Exam philosophies: **Architecture > Prompt**, **Deterministic > Probabilistic**
+</details>
+
+<h3>Q2: Developer Productivity Scenario</h3>
+<p>In a large project with many SQL query files, Claude sometimes creates duplicate queries instead of reusing existing ones. This happens most often when the query-related task is part of a larger, multi-step request. What is the best approach?</p>
+<ul>
+<li>A. Add few-shot examples showing Claude how to search for existing queries first</li>
+<li>B. Configure a PostToolUse hook that launches a separate Claude instance to review query changes for duplicates</li>
+<li>C. Consolidate all queries into a single file so Claude can see them all at once</li>
+<li>D. Always use <code>/clear</code> before giving Claude a new task to prevent context interference</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — A separate reviewer instance provides an independent check (exam philosophy: **Independent review > Self-review**). The hook catches duplicates that the primary instance missed due to task complexity.
+
+- A is prompt-based and the video demonstrates this exact failure mode — Claude misses existing code when focused on complex tasks
+- C creates a massive file that may exceed Claude's attention capacity and is poor code organization
+- D removes useful context and doesn't address the root cause
+
+Exam philosophies: **Architecture > Prompt**, **Independent review > Self-review**, **Scoped context > Full history**
+</details>
+
+<h3>Q3: Multi-Agent Architecture Scenario</h3>
+<p>You are designing a PostToolUse hook that launches a separate Claude Code instance to review changes. What is the most important consideration for the reviewer instance?</p>
+<ul>
+<li>A. Give it the full project context so it can make comprehensive decisions</li>
+<li>B. Scope its context to only the relevant directory and the specific change being reviewed</li>
+<li>C. Have it run in the same session as the primary Claude instance</li>
+<li>D. Configure it as a PreToolUse hook instead so it can block changes before they happen</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — Scoped context is a core exam principle. The reviewer subagent should only see what it needs — the relevant directory and the change. Full project context (A) wastes tokens and may dilute focus. Same session (C) is not how the hook architecture works — hooks launch separate processes. PreToolUse (D) cannot review a change that hasn't been made yet.
+
+Exam philosophy: **Scoped context > Full history**
+</details>
+</body>
+</html>

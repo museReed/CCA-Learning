@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06 Project Setup Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Project Setup — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%), D3 — Effective Claude Code Usage (30%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.5 (built-in tools — awareness), 3.5 (iterative refinement — intro)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 02-getting-started / Lesson 06 (text-only)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><img alt="Iterative Refinement Cycle" src="visuals/iterative-refinement-cycle.svg" /><br />
+<em>Figure: The iterative refinement cycle — request, build, view, feedback.</em></p>
+<h2>TL;DR</h2>
+<p>The course uses a small Node.js app that generates UI components via Claude's API. PMs should understand: (1) the project demonstrates how Claude Code works with real codebases, (2) it has an optional API key — meaning the tool works even without external API access, and (3) the iterative generate-review-refine workflow it introduces is how teams actually use Claude Code in practice.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<ol>
+<li><strong>Product demo literacy</strong> — Understanding the demo project helps you follow along and communicate what Claude Code does to stakeholders</li>
+<li><strong>Iterative workflow introduction</strong> — The generate-review-refine cycle is how engineering teams adopt Claude Code; this is the productivity story you will pitch</li>
+<li><strong>API key optionality</strong> — Demonstrates graceful degradation, a product design pattern worth noting</li>
+</ol>
+<hr />
+<h2>Business Analogies</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Business Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Demo project with optional API</td>
+<td>Like a freemium SaaS — core features work without payment, premium features need a key</td>
+</tr>
+<tr>
+<td><code>npm run setup</code> one-time init</td>
+<td>Like onboarding setup in an enterprise tool — run once, then start working</td>
+</tr>
+<tr>
+<td>Iterative UI generation</td>
+<td>Like design sprints — show prototype, get feedback, refine, repeat</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Scenario Walkthrough: Explaining Claude Code to Stakeholders</h2>
+<p>Your VP of Engineering asks: "What does Claude Code actually do with our code?"</p>
+<p>Using the demo project as a reference:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What Happens</th>
+<th>Business Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Developer asks Claude to build a feature</td>
+<td>Claude reads the project structure and relevant files</td>
+<td>No pre-indexing needed; works on any codebase from day one</td>
+</tr>
+<tr>
+<td>2. Claude generates implementation</td>
+<td>Code is written directly in the project files</td>
+<td>No copy-paste from a separate chat window</td>
+</tr>
+<tr>
+<td>3. Developer reviews in browser</td>
+<td>The app reflects changes immediately</td>
+<td>Feedback loop is seconds, not hours</td>
+</tr>
+<tr>
+<td>4. Developer provides refinement feedback</td>
+<td>Claude iterates on the implementation</td>
+<td>Converges on the right solution through dialogue</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Practice Question</h2>
+<h3>Scenario: ROI Estimation</h3>
+<p>Your CFO asks whether the team needs Anthropic API keys for every developer to use Claude Code. Based on this lesson, what is the correct answer?</p>
+<ul>
+<li>A. Yes — Claude Code requires an API key to function at all</li>
+<li>B. No — Claude Code itself does not need an Anthropic API key; the demo project optionally uses one for its own features</li>
+<li>C. API keys are only needed for the first setup, then can be removed</li>
+<li>D. One shared API key is sufficient for the entire team</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — Claude Code authenticates through its own mechanism (Lesson 05). The Anthropic API key in this lesson is for the demo project's UI generation feature, not for Claude Code itself. The demo works without it using static fallback data.
+
+**PM Takeaway**: Do not conflate the demo project's API key with Claude Code's authentication. These are separate systems. Claude Code's cost is through its own subscription/usage model, not through API keys in project `.env` files.
+</details>
+</body>
+</html>

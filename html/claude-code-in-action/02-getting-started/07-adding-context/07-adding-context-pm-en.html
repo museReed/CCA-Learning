@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 Adding Context Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Adding Context — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D3 — Effective Claude Code Usage (30%), D5 — Performance Optimization (12%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 ★★★ (CLAUDE.md hierarchy), 5.1 ★★ (context preservation), 5.4 ★★ (large codebase context)</td>
+</tr>
+<tr>
+<td>Exam Scenarios</td>
+<td>S2 (Code Gen), S4 (Developer Productivity)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 02-getting-started / Lesson 07 (video + text)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>Claude Code manages project context through a three-tier configuration file system (CLAUDE.md). <code>/init</code> generates the initial file by analyzing the codebase. Three levels exist — global (all projects), project (shared via repo), and local (personal overrides). The <code>@</code> syntax lets developers point Claude at specific files. For PMs: this is how teams standardize AI-assisted development across an organization, and how context window budget is managed.</p>
+<hr />
+<h2>Why PMs Must Understand This</h2>
+<ol>
+<li><strong>Team standardization</strong> — CLAUDE.md committed to source control means every developer gets the same AI behavior. This is your lever for consistent code quality.</li>
+<li><strong>Onboarding acceleration</strong> — <code>/init</code> + CLAUDE.md means new team members' AI assistant already knows the project architecture from day one.</li>
+<li><strong>Performance tuning</strong> — Too much context in CLAUDE.md degrades performance. PMs should understand this trade-off when teams report "Claude is slow."</li>
+<li><strong>Security consideration</strong> — CLAUDE.local.md is not committed to source control, making it safe for personal API keys or experimental directives.</li>
+</ol>
+<hr />
+<h2>Business Analogies</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Business Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLAUDE.md hierarchy</td>
+<td>Company policy levels: corporate policy (global) &lt; department policy (project) &lt; individual exceptions (local). More specific overrides more general.</td>
+</tr>
+<tr>
+<td><code>/init</code> command</td>
+<td>Employee onboarding — read all documentation, understand the org, summarize key processes</td>
+</tr>
+<tr>
+<td><code>@</code> file mentions in CLAUDE.md</td>
+<td>Standing meeting agenda items — always on the table, always discussed</td>
+</tr>
+<tr>
+<td>Interactive <code>@</code> mentions</td>
+<td>Ad-hoc meeting topics — brought up only when relevant</td>
+</tr>
+<tr>
+<td><code>#</code> memory command</td>
+<td>Updating the team wiki — persistent knowledge that survives personnel changes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Scenario Walkthrough: Rolling Out Claude Code to a 20-Person Team</h2>
+<p><img alt="Claude Md Hierarchy Priority Stack" src="visuals/claude-md-hierarchy-priority-stack.svg" /><br />
+<em>Figure: CLAUDE.md hierarchy — local overrides project overrides global.</em></p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Action</th>
+<th>CLAUDE.md Lever</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Initial setup</td>
+<td>Tech lead runs <code>/init</code> on the main repo</td>
+<td>Generates baseline CLAUDE.md with project architecture</td>
+</tr>
+<tr>
+<td>2. Standardize</td>
+<td>Tech lead adds coding standards, PR conventions, test requirements to CLAUDE.md</td>
+<td>All developers inherit same rules via source control</td>
+</tr>
+<tr>
+<td>3. Personalize</td>
+<td>Individual developers create CLAUDE.local.md for personal preferences</td>
+<td>Personal style without affecting team standards</td>
+</tr>
+<tr>
+<td>4. Optimize</td>
+<td>Team removes low-value <code>@</code> references from CLAUDE.md after monitoring context usage</td>
+<td>Better performance, lower token costs</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎬 <strong>Instructor insight from the video</strong></p>
+<p>The instructor shows that CLAUDE.md is "included in every request" — making it essentially a persistent system prompt. For PMs, this means the CLAUDE.md is the single most impactful configuration for controlling AI behavior across the team.</p>
+</blockquote>
+<hr />
+<h2>Decision Framework: What Goes Where?</h2>
+<table>
+<thead>
+<tr>
+<th>Content Type</th>
+<th>Where to Put It</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project architecture, build commands</td>
+<td><code>./CLAUDE.md</code> (project)</td>
+<td>Every developer needs this; version-controlled</td>
+</tr>
+<tr>
+<td>Coding standards, PR conventions</td>
+<td><code>./CLAUDE.md</code> (project)</td>
+<td>Team consistency; changes tracked in git</td>
+</tr>
+<tr>
+<td>Personal coding style preferences</td>
+<td><code>~/.claude/CLAUDE.md</code> (global)</td>
+<td>Applies to all your projects; not shared</td>
+</tr>
+<tr>
+<td>Experimental directives, personal API keys</td>
+<td><code>./CLAUDE.local.md</code> (local)</td>
+<td>Per-project overrides; not committed</td>
+</tr>
+<tr>
+<td>Schema files, API contracts</td>
+<td><code>@</code> reference in <code>./CLAUDE.md</code></td>
+<td>Cross-cutting context needed on most requests</td>
+</tr>
+<tr>
+<td>Task-specific files</td>
+<td>Interactive <code>@</code> in chat</td>
+<td>One-time context; does not waste context window</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Decision Rule</strong></p>
+<p>If it affects the whole team, it goes in project CLAUDE.md. If it is personal, it goes in local or global. If you are unsure, ask: "Would a new team member need this?" If yes, project CLAUDE.md.</p>
+</blockquote>
+<hr />
+<h2>The Context Window Budget Problem</h2>
+<p><img alt="Context Window Budget Allocation" src="visuals/context-window-budget-allocation.svg" /><br />
+<em>Figure: Context window budget allocation across different sources.</em></p>
+<p>PMs should understand this trade-off because it affects both performance and cost:</p>
+<table>
+<thead>
+<tr>
+<th>More context in CLAUDE.md</th>
+<th>Less context in CLAUDE.md</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude always knows project details</td>
+<td>Claude may need to discover files each time</td>
+</tr>
+<tr>
+<td>Higher token consumption per request</td>
+<td>Lower token consumption per request</td>
+</tr>
+<tr>
+<td>Risk of degraded response quality</td>
+<td>Better reasoning with focused context</td>
+</tr>
+<tr>
+<td>Faster for repeated questions</td>
+<td>Slightly slower for first-time exploration</td>
+</tr>
+</tbody>
+</table>
+<p>The sweet spot: put <strong>cross-cutting, frequently needed</strong> files in CLAUDE.md <code>@</code> references. Let Claude discover everything else through its tools.</p>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: Organizational Rollout</h3>
+<p>Your CTO asks: "How do we ensure all 50 developers using Claude Code follow our coding standards?" Which approach is correct?</p>
+<ul>
+<li>A. Send an email asking each developer to configure their Claude Code settings</li>
+<li>B. Add coding standards to the project CLAUDE.md and commit it to the repository</li>
+<li>C. Create a CLAUDE.local.md template and ask each developer to copy it</li>
+<li>D. Use the Anthropic dashboard to set organization-wide Claude Code rules</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — Project CLAUDE.md is committed to source control and automatically applied to all developers who clone the repo. This is the architectural solution — no manual setup per developer, no drift over time.
+
+- A does not scale and creates drift
+- C uses the wrong file type (local is gitignored, will not propagate)
+- D does not exist as described
+
+**PM Takeaway**: CLAUDE.md is your policy enforcement mechanism. Treat it like a team-wide configuration file, not a personal settings file.
+</details>
+
+<h3>Q2: Performance Complaint</h3>
+<p>A developer reports: "Claude Code used to be fast but now it is slow and gives worse answers." Investigation reveals they added 12 <code>@</code> file references to CLAUDE.md last week. What do you recommend?</p>
+<ul>
+<li>A. Ask them to upgrade to a higher API tier for more context window</li>
+<li>B. Audit the <code>@</code> references and move non-essential ones to interactive <code>@</code> mentions; keep only cross-cutting files in CLAUDE.md</li>
+<li>C. Tell them to remove CLAUDE.md entirely and start over</li>
+<li>D. Suggest they switch to a simpler project structure</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — The lesson explicitly teaches that too much context degrades performance. The proportionate response is to audit and optimize, not to remove everything or throw money at the problem.
+
+**PM Takeaway**: Context window is a finite resource. Treat `@` references in CLAUDE.md like database indexes — each one has a maintenance cost, so only keep the ones that provide cross-cutting value.
+</details>
+
+<h3>Q3: New Hire Onboarding</h3>
+<p>A new developer joins your team. They have never used Claude Code. What is the fastest path to productive AI-assisted development on your project?</p>
+<ul>
+<li>A. Give them a 2-hour training on prompt engineering for Claude</li>
+<li>B. Have them install Claude Code, pull the repo (which includes CLAUDE.md), and start working — the CLAUDE.md provides project context automatically</li>
+<li>C. Ask them to run <code>/init</code> to generate a fresh CLAUDE.md</li>
+<li>D. Share your personal CLAUDE.local.md with them</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — If the team has already committed a well-maintained CLAUDE.md to the repo, the new developer inherits all project context automatically. No training needed for basic usage.
+
+- A is disproportionate for getting started
+- C would overwrite the team's existing CLAUDE.md
+- D shares personal settings, not team standards (and local files are gitignored anyway)
+
+**PM Takeaway**: A well-maintained CLAUDE.md is an onboarding accelerator. It is like having a senior engineer's brain available to every new hire from day one.
+</details>
+</body>
+</html>

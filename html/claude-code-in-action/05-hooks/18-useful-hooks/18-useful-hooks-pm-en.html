@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>18 Useful Hooks Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Useful Hooks — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Coverage</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%), D1 — Agentic Architecture (27%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.5 (Agent SDK hooks), 3.2 (custom commands &amp; hooks), 1.2 (multi-agent coordinator-subagent patterns)</td>
+</tr>
+<tr>
+<td>Course Source</td>
+<td>claude-code-in-action / 05-hooks / Lesson 18</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>This lesson introduces two practical hooks that solve real-world AI development problems: (1) a <strong>type-checking hook</strong> that catches ripple effects when AI modifies code, and (2) a <strong>duplication prevention hook</strong> that uses a second AI instance to review changes. For PMs, the key insight is: AI tools have predictable blind spots, and <strong>hooks provide guaranteed safeguards</strong> where prompt instructions fall short.</p>
+<hr />
+<h2>Why PMs Need to Know This</h2>
+<p>These hooks address two common failure modes in AI-assisted development:</p>
+<table>
+<thead>
+<tr>
+<th>Failure Mode</th>
+<th>Business Impact</th>
+<th>Hook Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI changes a function but breaks other files</td>
+<td>Bugs ship to production, developer trust erodes</td>
+<td>Type-checking hook catches errors automatically</td>
+</tr>
+<tr>
+<td>AI creates duplicate code instead of reusing existing</td>
+<td>Technical debt accumulates, maintenance costs rise</td>
+<td>Duplication review hook flags redundant code</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM takeaway</strong>: When writing acceptance criteria for AI-assisted features, you need to specify which quality gates are automated (hooks) vs. which are best-effort (prompts).</p>
+<hr />
+<h2>Mental Model: Factory Quality Control</h2>
+<h3>Hook 1: The Inline Inspector</h3>
+<p>Imagine a factory assembly line where a robot modifies a part. An inline quality inspector immediately checks whether the modification caused problems downstream:</p>
+<table>
+<thead>
+<tr>
+<th>Factory</th>
+<th>AI Development</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Robot modifies a part</td>
+<td>Claude modifies a function signature</td>
+</tr>
+<tr>
+<td>Inline inspector checks downstream fit</td>
+<td>PostToolUse hook runs type checker</td>
+</tr>
+<tr>
+<td>Part doesn't fit? → Sent back for rework</td>
+<td>Type errors found? → Claude fixes them</td>
+</tr>
+<tr>
+<td>No human needed</td>
+<td>No developer intervention needed</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The key</strong>: The inspector runs <strong>automatically after every modification</strong> — not when someone remembers to check.</p>
+<h3>Hook 2: The Independent Auditor</h3>
+<p>Now imagine the factory has many storage rooms of components. When a worker creates a new component, an independent auditor checks whether a similar component already exists:</p>
+<table>
+<thead>
+<tr>
+<th>Factory</th>
+<th>AI Development</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Worker creates new component</td>
+<td>Claude writes new database query</td>
+</tr>
+<tr>
+<td>Auditor checks existing inventory</td>
+<td>Second Claude instance reviews existing queries</td>
+</tr>
+<tr>
+<td>Duplicate found? → Use existing part</td>
+<td>Duplicate found? → Reuse existing query</td>
+</tr>
+<tr>
+<td>Extra time for audit, but less waste</td>
+<td>Extra API cost, but cleaner codebase</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>PM Decision Point</strong></p>
+<p>The duplication hook costs extra time and money per edit. This is a classic <strong>quality vs. speed trade-off</strong> that PMs must evaluate. The instructor recommends: only monitor the most critical directories — don't audit everything.</p>
+</blockquote>
+<hr />
+<p><img alt="Type-Check Feedback Loop" src="visuals/type-check-feedback-loop.svg" /><br />
+<em>Figure: TypeScript type-check feedback loop — PostToolUse runs tsc, errors feed back to Claude for automatic fixing.</em></p>
+<h2>When AI Loses Focus: A PM Must-Know</h2>
+<p>The video demonstrates a critical insight about AI capability limits:</p>
+<table>
+<thead>
+<tr>
+<th>Task Type</th>
+<th>AI Behavior</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simple, focused: "Print pending orders"</td>
+<td>Claude finds and reuses existing code</td>
+<td>Correct</td>
+</tr>
+<tr>
+<td>Complex, multi-step: "Build Slack integration with order alerts"</td>
+<td>Claude writes brand new duplicate code</td>
+<td>Wrong</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why this matters to PMs</strong>: When you write complex feature requirements that involve many steps, the AI is <strong>more likely to create redundant code</strong>. This is not a bug — it is a predictable limitation of how context works. Hooks compensate for this limitation.</p>
+<blockquote>
+<p>🎯 <strong>Core Exam Philosophy</strong></p>
+<p><strong>Architecture &gt; Prompt</strong> — Structural safeguards (hooks) are more reliable than instructional ones (prompts).<br />
+<strong>Independent review &gt; Self-review</strong> — A separate reviewer catches what the original worker missed.</p>
+</blockquote>
+<hr />
+<p><img alt="Multi-Agent Review" src="visuals/multi-agent-review.svg" /><br />
+<em>Figure: Multi-agent review pattern — a PostToolUse hook spawns a second Claude instance to review changes.</em></p>
+<h2>Product Scenario Walkthrough</h2>
+<h3>Scenario: E-Commerce Platform with Multiple Development Teams</h3>
+<p>You are the PM for an e-commerce platform. Your backend has 50+ SQL query files across multiple domains (orders, inventory, customers, payments). Three development teams use Claude Code daily.</p>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Without Hook</th>
+<th>With Hook</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Team A adds "get pending orders" query</td>
+<td>Duplicate of existing query in Team B's code</td>
+<td>Second Claude instance catches the duplicate</td>
+</tr>
+<tr>
+<td>Developer modifies API response type</td>
+<td>Call sites in 12 other files break silently</td>
+<td>Type checker hook catches all 12 errors immediately</td>
+</tr>
+<tr>
+<td>Complex feature request spans multiple domains</td>
+<td>Claude creates redundant utilities</td>
+<td>Scoped review hook flags existing alternatives</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PRD Implication</strong>: Your acceptance criteria should specify:<br />
+- "All TypeScript edits must trigger automated type checking" (= PostToolUse hook)<br />
+- "New queries in critical directories must be reviewed for duplicates" (= duplication review hook)<br />
+- These are <strong>not optional developer preferences</strong> — they are <strong>required quality gates</strong></p>
+<blockquote>
+<p>💡 <strong>PM Framing for Engineers</strong></p>
+<p>Instead of saying "Claude should check for duplicates" (prompt-based, unreliable), say: "We need a PostToolUse hook that automatically reviews changes to the queries directory for duplication." This gives engineers a clear architectural requirement.</p>
+</blockquote>
+<hr />
+<h2>Trade-off Analysis for PMs</h2>
+<table>
+<thead>
+<tr>
+<th>Factor</th>
+<th>Type-Checking Hook</th>
+<th>Duplication Review Hook</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cost per trigger</td>
+<td>Low (~2-5 seconds)</td>
+<td>High (~10-30 seconds + API cost)</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>All TypeScript files</td>
+<td>Scoped to critical directories</td>
+</tr>
+<tr>
+<td>False positive rate</td>
+<td>Near zero (compiler is deterministic)</td>
+<td>Low but possible (AI judgment)</td>
+</tr>
+<tr>
+<td>Setup complexity</td>
+<td>Simple (one command)</td>
+<td>Moderate (TypeScript SDK integration)</td>
+</tr>
+<tr>
+<td><strong>Recommendation</strong></td>
+<td>Enable for all projects</td>
+<td>Enable for high-value directories only</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Instructor Insights (From the Video)</h2>
+<ol>
+<li><strong>Task complexity degrades AI code discovery</strong> — When the task is simple, Claude finds existing code. When the task is complex, Claude loses focus and writes duplicates. This is a <strong>predictable pattern</strong>, not a random bug.</li>
+<li><strong>Hooks can use the TypeScript SDK</strong> — This means hooks can programmatically launch separate Claude Code instances. This opens up multi-agent review patterns inside the hook system.</li>
+<li><strong>"It really comes down to trade-offs"</strong> — The instructor explicitly frames this as a cost-benefit decision, not a universal best practice. PMs should evaluate per-directory.</li>
+</ol>
+<hr />
+<h2>Anti-Patterns (Exam Favorites)</h2>
+<table>
+<thead>
+<tr>
+<th>❌ Wrong Approach</th>
+<th>✅ Correct Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Write in PRD: "AI should always check types"</td>
+<td>Require PostToolUse hook for type checking</td>
+<td>Prompt-based requirements have non-zero failure rate</td>
+</tr>
+<tr>
+<td>Assume AI will find existing code</td>
+<td>Implement automated duplication review</td>
+<td>AI loses focus on complex tasks — demonstrated in video</td>
+</tr>
+<tr>
+<td>Monitor all directories with review hook</td>
+<td>Scope to critical directories only</td>
+<td>Cost outweighs benefit for low-value directories</td>
+</tr>
+<tr>
+<td>Rely on code reviews to catch duplicates</td>
+<td>Use hooks as a first line of defense</td>
+<td>Human reviewers also miss duplicates; hooks are consistent</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Question 1: Developer Productivity Scenario</h3>
+<p>Your engineering team reports that Claude Code frequently introduces type errors when modifying shared TypeScript utilities. These errors are caught during code review, but by then the developer has moved on to other tasks. As PM, which requirement should you add to the team's development workflow?</p>
+<ul>
+<li>A. Add a team-wide CLAUDE.md instruction: "Always run the type checker after modifying shared utilities"</li>
+<li>B. Require engineers to manually run <code>tsc --noEmit</code> after each Claude Code session</li>
+<li>C. Implement a PostToolUse hook that automatically runs the type checker after every file edit</li>
+<li>D. Schedule a daily batch type-check job that emails engineers about accumulated errors</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**C** — A PostToolUse hook provides immediate, automatic feedback with zero developer effort. The type errors are caught and fixed in the same Claude Code session, before the developer moves on.
+
+- A is a prompt instruction — Claude may ignore it, especially during complex tasks
+- B adds manual overhead that developers will forget
+- D delays error detection by hours, increasing the cost to fix
+
+**PM Key Takeaway**: The goal is to catch errors **at the moment they are introduced**, not downstream. Hooks achieve this; prompts and manual processes do not.
+</details>
+
+<h3>Question 2: E-Commerce Platform Scenario</h3>
+<p>Your e-commerce platform has a <code>queries/</code> directory with 200+ SQL functions. Engineers using Claude Code report duplicate queries appearing regularly. The duplication is most severe when Claude is given multi-step tasks. What approach best balances quality and cost?</p>
+<ul>
+<li>A. Configure a PostToolUse hook that launches a separate Claude instance to review all file changes across the entire project</li>
+<li>B. Configure a PostToolUse hook that launches a separate Claude instance to review changes only in the <code>queries/</code> directory</li>
+<li>C. Add few-shot examples to the system prompt showing how to search for existing queries</li>
+<li>D. Consolidate all queries into fewer files to increase the chance Claude sees existing ones</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**B** — Scoping the review hook to only the `queries/` directory balances quality (catches duplicates) with cost (doesn't add overhead to every file edit). The instructor explicitly recommends this approach.
+
+- A is too expensive — reviewing every file change project-wide would significantly slow development
+- C is prompt-based and the video demonstrates this exact failure mode
+- D is poor software architecture and creates maintenance problems
+
+**PM Key Takeaway**: Quality gates should be **targeted to high-risk areas**, not applied uniformly. This is the "proportionate response" principle.
+</details>
+
+<h3>Question 3: Multi-Agent Architecture Scenario</h3>
+<p>A product team is debating whether to implement the query duplication hook. The engineering lead says it adds 15-20 seconds per query file edit. As PM, how should you frame this decision?</p>
+<ul>
+<li>A. Reject the hook because it slows down developers</li>
+<li>B. Accept the hook for all directories to maximize code quality</li>
+<li>C. Evaluate the trade-off: implement the hook only for critical directories where duplication has high business impact</li>
+<li>D. Replace the hook with a weekly code duplication audit</li>
+</ul>
+<details><summary>Answer and Explanation</summary>
+
+**C** — This is a proportionate response. The hook adds cost per edit, so it should be targeted at directories where duplication has the highest impact (e.g., payment queries, order queries). Low-risk directories (e.g., test utilities) may not justify the overhead.
+
+- A ignores a proven quality problem
+- B over-applies the solution, creating unnecessary overhead
+- D delays detection and increases fix cost
+
+**PM Key Takeaway**: The exam tests proportionate responses. "Always" and "never" answers are usually wrong — context-appropriate solutions are correct.
+</details>
+</body>
+</html>

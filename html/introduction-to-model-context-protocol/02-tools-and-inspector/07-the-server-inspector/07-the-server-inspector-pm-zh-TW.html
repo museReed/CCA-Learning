@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 The Server Inspector Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Server Inspector — PM 策略概覽</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.6 測試與除錯 MCP server; T2.7 部署前驗證 tool 行為</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 02-tools-and-inspector / Lesson 07</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>MCP Inspector 是 AI 工具的試駕環境——就像展示間，你可以在投入生產前試用任何 tool。</p>
+<hr />
+<h2>為什麼 PM 應關心 Inspector</h2>
+<p>MCP Inspector 是開發工具，但它對產品有直接影響。它是你能看到 Claude 看到什麼的地方——tool 的名稱、描述和參數。如果在 Inspector 中看起來令人困惑，對 Claude 也會令人困惑，最終對使用者也是如此。</p>
+<p>把 Inspector 想成<strong>產品預覽環境</strong>。在 tools 上線之前，你可以驗證：</p>
+<ul>
+<li>Tool 名稱是否直觀？</li>
+<li>描述是否清楚到讓 Claude 選對 tool？</li>
+<li>參數名稱和描述是否不言自明？</li>
+<li>錯誤訊息是否幫助 Claude 優雅復原？</li>
+</ul>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+安排團隊的 Inspector 審查會議。讓 PM 在 Inspector 中看 tool 描述，常能抓到工程師忽略的清晰度問題——因為他們已經知道 tool 做什麼。</p>
+</blockquote>
+<hr />
+<h2>Inspector 作為品質關卡</h2>
+<p>在製造業中，產品出貨前會經過品質檢查站。MCP Inspector 對 AI tools 提供同樣的功能：</p>
+<p><strong>沒有 Inspector 測試</strong>：寫 tool → 部署 → 使用者遇到問題 → 在生產環境除錯</p>
+<p><strong>有 Inspector 測試</strong>：寫 tool → 在 Inspector 測試 → 修正問題 → 部署 → 使用者得到完善的體驗</p>
+<p>Inspector 在問題觸達使用者前攔截三類問題：</p>
+<ol>
+<li><strong>功能 bug</strong> — Tool 沒有回傳正確結果</li>
+<li><strong>Schema 問題</strong> — 參數型別錯誤、缺描述、或錯誤標記為必填/選填</li>
+<li><strong>UX 問題</strong> — 描述模糊、錯誤訊息無幫助、回傳值格式差</li>
+</ol>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+為任何新的 MCP tool 加上「Inspector 已測試」作為完成定義。沒有通過 Inspector 驗證的 tool 不應進入生產環境。</p>
+</blockquote>
+<hr />
+<h2>Inspector 中你看到什麼</h2>
+<p>Inspector 呈現三類 MCP server 能力：</p>
+<p><strong>Resources 頁籤</strong> — 想像成「資料圖書館」書架。Server 能提供什麼資訊？檔案、資料庫記錄、設定資料等。</p>
+<p><strong>Tools 頁籤</strong> — 想像成「動作」選單。Server 能做什麼？建立檔案、查詢資料庫、發送訊息等。</p>
+<p><strong>Prompts 頁籤</strong> — 想像成「範本」抽屜。Server 提供什麼預寫的 prompt 模式？</p>
+<p>產品評估時，你大部分時間都在 Tools 頁籤。每個 tool 條目顯示 Claude 決定是否使用它時看到的完全相同的內容。</p>
+<hr />
+<h2>狀態持久性：測試真實工作流</h2>
+<p>Inspector 的關鍵功能之一是 tool 狀態在呼叫之間持久存在。用產品語言來說，這意味著你可以測試完整的使用者工作流，而不只是孤立的動作。</p>
+<p>多步驟工作流測試範例：</p>
+<ol>
+<li>建立文件（tool 呼叫 1）</li>
+<li>讀取文件以驗證正確建立（tool 呼叫 2）</li>
+<li>編輯文件（tool 呼叫 3）</li>
+<li>再次讀取以驗證編輯（tool 呼叫 4）</li>
+</ol>
+<p>這映射真實使用者與你的產品互動的方式。每一步都依賴前一步，Inspector 讓你驗證整條鏈路都正確運作。</p>
+<blockquote>
+<p><strong>PM Takeaway</strong><br />
+在 Inspector 中審查 tools 時，不要只測快樂路徑。測試使用者實際會遵循的序列——包括邊界情況，如讀取不存在的文件，或編輯別人正在處理的文件。</p>
+</blockquote>
+<hr />
+<h2>開發回饋迴圈</h2>
+<p>Inspector 啟用了緊密的回饋迴圈，加速 tool 開發：</p>
+<p><strong>傳統方式</strong>（沒有 Inspector）：<br />
+1. 寫 tool 程式碼<br />
+2. 建 client 整合<br />
+3. 連接 Claude<br />
+4. 發送測試查詢<br />
+5. 如果出問題，找出哪一層失敗<br />
+6. 修正並從步驟 2 重新開始</p>
+<p><strong>Inspector 方式</strong>：<br />
+1. 寫 tool 程式碼<br />
+2. 開啟 Inspector<br />
+3. 直接測試 tool<br />
+4. 如果出問題，一定是 tool 程式碼的問題<br />
+5. 修正並立即重新測試</p>
+<p>Inspector 方式更快是因為它消除了變數。當 tool 在 Inspector 中失敗時，你知道問題在 tool 程式碼中，不在 client、不在傳輸層、也不在 Claude 的解讀中。</p>
+<hr />
+<h2>連結 Inspector 洞察到產品決策</h2>
+<p>在 Inspector 中測試後，PM 可以對以下做出明智決策：</p>
+<ul>
+<li><strong>Tool 命名慣例</strong> — Tools 命名是否一致？使用者能猜出「proc_doc_v2」做什麼嗎？</li>
+<li><strong>描述品質</strong> — 只讀描述就能理解每個 tool 做什麼嗎？</li>
+<li><strong>參數設計</strong> — 必填參數是否太多？預設值是否合理？</li>
+<li><strong>錯誤體驗</strong> — 出問題時，錯誤訊息是否指向解決方案？</li>
+</ul>
+<p>這些都是碰巧存在於程式碼中的產品設計決策。</p>
+<hr />
+<h2>CCA 考試關聯性</h2>
+<p>本課涵蓋 <strong>Domain 2 (18%)</strong> 的測試概念：</p>
+<ul>
+<li>Inspector 透過 <code>mcp dev mcp_server.py</code> 在 <code>localhost:6274</code> 啟動</li>
+<li>三個頁籤：Resources、Tools、Prompts</li>
+<li>狀態在呼叫之間持久存在，支援多步驟測試</li>
+<li>Inspector 位於開發和 client 整合之間的工作流中</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用商業語言描述 MCP Inspector 是什麼？</td>
+<td>AI 工具的試駕環境，你可以在上線前預覽和測試——就像 tool 能力的 staging 環境。</td>
+</tr>
+<tr>
+<td>為什麼 PM 應該在 Inspector 中審查 tools？</td>
+<td>Tool 描述、參數名稱和錯誤訊息是直接影響 Claude 使用 tools 和使用者體驗產品的產品設計決策。</td>
+</tr>
+<tr>
+<td>Inspector 顯示哪三類內容？</td>
+<td>Resources（server 提供的資料）、Tools（server 能執行的動作）和 Prompts（可重用範本模式）。</td>
+</tr>
+<tr>
+<td>狀態持久性對測試意味著什麼？</td>
+<td>你可以測試每個 tool 呼叫依賴前一個呼叫的多步驟工作流，映射真實使用者的互動模式。</td>
+</tr>
+<tr>
+<td>Inspector 如何減少除錯時間？</td>
+<td>它把 tool 問題從 client、傳輸和 Claude 解讀問題中隔離出來。如果 tool 在 Inspector 中失敗，問題一定在 tool 程式碼中。</td>
+</tr>
+<tr>
+<td>新 MCP tools 的「完成定義」應是什麼？</td>
+<td>Inspector 已測試——沒有通過功能、schema 正確性和描述品質的 Inspector 驗證，tool 不應進入生產環境。</td>
+</tr>
+<tr>
+<td>PM 可以透過 Inspector 測試做出什麼產品決策？</td>
+<td>Tool 命名慣例、描述品質、參數設計、預設值和錯誤訊息的有用性。</td>
+</tr>
+<tr>
+<td>Inspector 如何融入開發工作流？</td>
+<td>寫 tool 程式碼 → 用 Inspector 測試 → 修正問題 → 與 client 整合。跳過 Inspector 測試會導致後續更難診斷的問題。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

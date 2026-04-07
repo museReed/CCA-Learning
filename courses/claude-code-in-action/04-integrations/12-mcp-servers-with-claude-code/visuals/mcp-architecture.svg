@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" width="800" height="520">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+    <marker id="arrowDown" markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748B"/>
+    </marker>
+    <marker id="arrowUp" markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto-start-reverse">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748B"/>
+    </marker>
+    <marker id="arrowDownGreen" markerWidth="10" markerHeight="7" refX="5" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#22C55E"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="520" rx="16" fill="#FAFBFC"/>
+
+  <!-- Title -->
+  <text x="400" y="42" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="22" font-weight="700" fill="#1E293B">MCP Server Architecture</text>
+
+  <!-- Claude Code Box (center top) -->
+  <rect x="270" y="70" width="260" height="64" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="400" y="100" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="15" font-weight="600" fill="#3B82F6">🤖 Claude Code</text>
+  <text x="400" y="120" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="12" fill="#64748B">AI Agent / Host Application</text>
+
+  <!-- Bidirectional arrows from Claude Code to MCP Servers -->
+  <line x1="200" y1="134" x2="200" y2="220" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrowDown)" marker-start="url(#arrowUp)"/>
+  <line x1="400" y1="134" x2="400" y2="220" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrowDown)" marker-start="url(#arrowUp)"/>
+  <line x1="600" y1="134" x2="600" y2="220" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrowDown)" marker-start="url(#arrowUp)"/>
+
+  <!-- Protocol Label -->
+  <rect x="255" y="160" width="290" height="26" rx="13" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="400" y="178" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="12" font-weight="500" fill="#64748B">MCP Protocol (JSON-RPC)</text>
+
+  <!-- MCP Server 1: Playwright -->
+  <rect x="100" y="220" width="200" height="64" rx="12" fill="#F5F3FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="200" y="250" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="14" font-weight="600" fill="#8B5CF6">🎭 Playwright MCP</text>
+  <text x="200" y="270" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" fill="#7C3AED">Web Automation Server</text>
+
+  <!-- MCP Server 2: Database -->
+  <rect x="300" y="220" width="200" height="64" rx="12" fill="#F5F3FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="400" y="250" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="14" font-weight="600" fill="#8B5CF6">🗄️ Database MCP</text>
+  <text x="400" y="270" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" fill="#7C3AED">Query &amp; Schema Server</text>
+
+  <!-- MCP Server 3: Custom API -->
+  <rect x="500" y="220" width="200" height="64" rx="12" fill="#F5F3FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="600" y="250" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="14" font-weight="600" fill="#8B5CF6">🔗 Custom API MCP</text>
+  <text x="600" y="270" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" fill="#7C3AED">Integration Server</text>
+
+  <!-- Arrows down to external systems -->
+  <line x1="200" y1="284" x2="200" y2="360" stroke="#22C55E" stroke-width="1.5" marker-end="url(#arrowDownGreen)"/>
+  <line x1="400" y1="284" x2="400" y2="360" stroke="#22C55E" stroke-width="1.5" marker-end="url(#arrowDownGreen)"/>
+  <line x1="600" y1="284" x2="600" y2="360" stroke="#22C55E" stroke-width="1.5" marker-end="url(#arrowDownGreen)"/>
+
+  <!-- External System 1: Browser -->
+  <rect x="120" y="360" width="160" height="54" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <text x="200" y="385" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="14" font-weight="600" fill="#16A34A">🌐 Browser</text>
+  <text x="200" y="403" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" fill="#15803D">Chrome / Firefox</text>
+
+  <!-- External System 2: Database -->
+  <rect x="320" y="360" width="160" height="54" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <text x="400" y="385" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="14" font-weight="600" fill="#16A34A">💾 PostgreSQL / SQLite</text>
+  <text x="400" y="403" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" fill="#15803D">Database Engine</text>
+
+  <!-- External System 3: External Service -->
+  <rect x="520" y="360" width="160" height="54" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <text x="600" y="385" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="14" font-weight="600" fill="#16A34A">☁️ External Service</text>
+  <text x="600" y="403" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="11" fill="#15803D">REST / GraphQL API</text>
+
+  <!-- Annotation -->
+  <rect x="180" y="450" width="440" height="40" rx="20" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="400" y="475" text-anchor="middle" font-family="'SF Pro Display', 'Helvetica Neue', sans-serif" font-size="13" font-weight="500" fill="#EA580C">💡 Plugin pattern: extend without modifying core</text>
+</svg>

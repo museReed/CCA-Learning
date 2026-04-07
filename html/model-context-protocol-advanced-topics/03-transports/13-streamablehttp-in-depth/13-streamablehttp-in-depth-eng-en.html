@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 Streamablehttp In Depth Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>StreamableHTTP In Depth — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (MCP transport selection), 2.4 (remote server configuration), 2.5 (SSE streaming patterns)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 03-transports / Lesson 13</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>SSE (Server-Sent Events) is the workaround that partially restores server-to-client communication over HTTP, using dual connections — a primary SSE for server-initiated messages and per-tool SSE streams for call-specific results.</p>
+<hr />
+<p><img alt="Streamable Http Sse" src="visuals/streamable-http-sse.svg" /></p>
+<h2>The Problem SSE Solves</h2>
+<p>HTTP is client-initiated only. But MCP needs the server to push messages (progress, logs, sampling requests). <strong>SSE</strong> flips this: the client opens a persistent connection, and the server pushes events down that connection whenever it wants.</p>
+<pre class="highlight"><code>Traditional HTTP:
+  Client ──request──→ Server
+  Client ←──response── Server
+  (server cannot initiate)
+
+With SSE:
+  Client ──GET /sse──→ Server
+  Client ←──event 1─── Server  (server pushes anytime)
+  Client ←──event 2─── Server
+  Client ←──event 3─── Server
+  ...
+</code></pre>
+
+<hr />
+<h2>Connection Setup Sequence</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Client sends Initialize Request</td>
+<td>POST to server</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Server returns Initialize Result + <strong>session ID</strong></td>
+<td>Session ID tracks this client</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Client sends Initialized Notification</td>
+<td>POST with session ID</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Client opens SSE connection</td>
+<td><strong>GET request</strong> — stays open for server-initiated messages</td>
+</tr>
+</tbody>
+</table>
+<p>The session ID is critical — it links the GET SSE connection to the POST requests from the same client.</p>
+<pre class="highlight"><code class="language-python"># Step 1-3: Normal handshake
+session_id = initialize_handshake(server_url)
+
+# Step 4: Open persistent SSE connection
+sse_stream = requests.get(f&quot;{server_url}/sse&quot;,
+    headers={&quot;Mcp-Session-Id&quot;: session_id},
+    stream=True
+)
+</code></pre>
+
+<hr />
+<h2>Dual SSE Architecture</h2>
+<p>This is the key architectural concept. There are <strong>two types</strong> of SSE connections:</p>
+<h3>1. Primary SSE Connection (GET)</h3>
+<ul>
+<li>Opened once after initialization</li>
+<li><strong>Stays open</strong> for the entire session</li>
+<li>Carries <strong>server-initiated messages</strong>: sampling requests, root list requests</li>
+<li>Think of it as the "general notification channel"</li>
+</ul>
+<h3>2. Tool-Specific SSE Connections (POST)</h3>
+<ul>
+<li>Created for <strong>each tool call</strong></li>
+<li><strong>Auto-closes</strong> when the tool call completes</li>
+<li>Carries <strong>tool-specific messages</strong>: progress updates, log entries, final result</li>
+<li>Think of it as a "per-task channel"</li>
+</ul>
+<pre class="highlight"><code>Client                          Server
+  │                               │
+  │──── GET /sse ────────────────→│  (Primary SSE — stays open)
+  │←─── server-initiated msgs ───│
+  │                               │
+  │──── POST /tools/call ────────→│  (Tool SSE — auto-closes)
+  │←─── progress, logs, result ──│
+  │                               │
+  │──── POST /tools/call ────────→│  (Another tool SSE)
+  │←─── progress, logs, result ──│
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+The dual SSE design means the server can push progress for a specific tool call via the tool SSE, AND simultaneously push unrelated server-initiated requests via the primary SSE. They are independent channels.</p>
+</blockquote>
+<hr />
+<h2>Message Routing Rules</h2>
+<p>Understanding which messages go where is exam-critical:</p>
+<table>
+<thead>
+<tr>
+<th>Message Type</th>
+<th>SSE Channel</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Progress notifications</td>
+<td>Tool-specific SSE</td>
+<td>Tied to a specific tool call</td>
+</tr>
+<tr>
+<td>Log messages</td>
+<td>Tool-specific SSE</td>
+<td>Generated during tool execution</td>
+</tr>
+<tr>
+<td>Tool results</td>
+<td>Tool-specific SSE</td>
+<td>The final answer for that call</td>
+</tr>
+<tr>
+<td>CreateMessage (sampling)</td>
+<td>Primary SSE</td>
+<td>Server-initiated, not tied to a tool call</td>
+</tr>
+<tr>
+<td>ListRoots</td>
+<td>Primary SSE</td>
+<td>Server-initiated, not tied to a tool call</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>What Breaks the SSE Mechanism</h2>
+<p>The two configuration flags from Lesson 12 directly impact SSE:</p>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Effect on SSE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stateless_http=true</code></td>
+<td>No session ID → no primary SSE connection → no server-initiated messages</td>
+</tr>
+<tr>
+<td><code>json_response=true</code></td>
+<td>No streaming at all → tool calls return final JSON only → no progress/logs mid-call</td>
+</tr>
+</tbody>
+</table>
+<p>Both flags enabled = SSE is completely disabled. You're back to basic HTTP request-response.</p>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>SSE architecture questions</strong>: Know the dual connection model — primary (persistent, server-initiated) vs tool-specific (per-call, auto-close).</li>
+<li><strong>Message routing</strong>: Progress and logs go to tool SSE. Sampling and roots go to primary SSE.</li>
+<li><strong>Flag impact</strong>: <code>stateless_http</code> kills the primary SSE. <code>json_response</code> kills all streaming.</li>
+<li><strong>Session ID</strong>: Links GET and POST connections. Without it, the server cannot correlate requests.</li>
+<li>Exam philosophy: <strong>SSE is a workaround, not a full solution</strong> — it partially restores server→client communication.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What problem does SSE solve in MCP?</td>
+<td>HTTP servers cannot initiate communication — SSE provides a persistent connection for server-pushed events</td>
+</tr>
+<tr>
+<td>What are the two types of SSE connections?</td>
+<td>Primary SSE (GET, stays open, server-initiated messages) and Tool-specific SSE (POST, per-call, auto-closes)</td>
+</tr>
+<tr>
+<td>Where do progress notifications route?</td>
+<td>Tool-specific SSE connection (tied to the specific tool call)</td>
+</tr>
+<tr>
+<td>Where do sampling (CreateMessage) requests route?</td>
+<td>Primary SSE connection (server-initiated, not tied to any tool call)</td>
+</tr>
+<tr>
+<td>What does the session ID do?</td>
+<td>Links the GET SSE connection to POST requests from the same client</td>
+</tr>
+<tr>
+<td>What happens when <code>stateless_http=true</code>?</td>
+<td>No session ID, no primary SSE connection, no server-initiated messages</td>
+</tr>
+<tr>
+<td>What happens when <code>json_response=true</code>?</td>
+<td>No SSE streaming at all — only final JSON results returned</td>
+</tr>
+<tr>
+<td>What is the setup sequence for SSE?</td>
+<td>Initialize Request → Initialize Result (get session ID) → Initialized Notification → GET request opens primary SSE</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

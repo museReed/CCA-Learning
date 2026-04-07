@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Defining Resources Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>定義 Resources — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試範疇</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server primitives), 2.4 (resource URI design), 2.5 (MIME type handling)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 10</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>Resources 是 MCP server 的「參考資料庫」— 讓你的應用程式拉取資料用於顯示或提供 context，就像圖書館員根據書名幫你取書。</p>
+<hr />
+<p><img alt="Resources Types" src="visuals/resources-types-zh-TW.svg" /></p>
+<h2>為什麼 PM 需要理解 Resources</h2>
+<p>身為 PM，你的產品需求決定了功能該用 resource、tool 還是 prompt。判斷錯誤會導致：</p>
+<ol>
+<li><strong>浪費工程資源</strong> — 本來用 resource 就能解決的需求，卻做成了 tool</li>
+<li><strong>糟糕的使用者體驗</strong> — 讓使用者等 Claude「查資料」，但其實資料可以預先載入</li>
+<li><strong>錯誤的驗收標準</strong> — 在 PRD 中指定了錯誤的互動模式</li>
+</ol>
+<hr />
+<h2>心智模型：辦公室檔案系統</h2>
+<p>把 MCP server 想像成一棟辦公大樓，裡面有三個部門：</p>
+<table>
+<thead>
+<tr>
+<th>部門</th>
+<th>MCP Primitive</th>
+<th>誰決定使用</th>
+<th>辦公室類比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>檔案櫃</td>
+<td><strong>Resource</strong></td>
+<td>櫃台人員（你的 app）</td>
+<td>櫃台人員拿出檔案給訪客</td>
+</tr>
+<tr>
+<td>執行桌</td>
+<td><strong>Tool</strong></td>
+<td>主管（Claude）</td>
+<td>主管決定打電話給會計處理退款</td>
+</tr>
+<tr>
+<td>工作手冊</td>
+<td><strong>Prompt</strong></td>
+<td>員工（使用者）</td>
+<td>員工按照標準作業流程執行</td>
+</tr>
+</tbody>
+</table>
+<p>Resources 就是檔案櫃。你的應用程式碼打開抽屜、取出檔案，然後顯示在 UI 上或交給 Claude 作為 context。Claude 自己不會去開檔案櫃 — 這個區別非常關鍵。</p>
+<hr />
+<h2>兩種 Resource 類型</h2>
+<h3>1. Direct Resources — 「給我整本目錄」</h3>
+<p>就像問圖書館員：「給我看所有可用的書。」請求永遠相同，URI 是固定的。</p>
+<ul>
+<li><strong>產品範例</strong>：自動完成下拉選單，顯示所有可用文件</li>
+<li><strong>URI 模式</strong>：<code>docs://documents</code>（無變數）</li>
+</ul>
+<h3>2. Templated Resources — 「給我這本特定的書」</h3>
+<p>就像問：「給我看 ID 是 plan.md 的書。」請求包含一個參數。</p>
+<ul>
+<li><strong>產品範例</strong>：使用者輸入 <code>@plan.md</code> 時，系統取得該特定文件</li>
+<li><strong>URI 模式</strong>：<code>docs://documents/{doc_id}</code>（大括號中有變數）</li>
+</ul>
+<hr />
+<h2>文件提及功能 — 產品情境演練</h2>
+<p>想像你正在設計一個聊天介面，使用者可以引用文件：</p>
+<ol>
+<li><strong>使用者輸入 <code>@</code></strong> — 你的 app 呼叫「列出所有文件」resource 來填充自動完成選單</li>
+<li><strong>使用者選擇 <code>plan.md</code></strong> — 你的 app 呼叫「取得特定文件」resource，帶入 <code>doc_id=plan.md</code></li>
+<li><strong>文件內容注入 prompt</strong> — Claude 立即看到文件內容，不需額外步驟</li>
+<li><strong>Claude 回應</strong> — 帶著完整文件 context，即時回覆</li>
+</ol>
+<p>這比另一種方案（Claude 呼叫 tool 去取文件）更快更流暢，因為資料在 Claude 開始思考前就已經在 prompt 裡了。</p>
+<hr />
+<h2>產品決策框架</h2>
+<p>撰寫 AI 功能的 PRD 時，問自己：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>如果是...</th>
+<th>如果否...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>資料需要出現在 UI 中（下拉選單、側邊欄）？</td>
+<td><strong>Resource</strong></td>
+<td>可能是 tool</td>
+</tr>
+<tr>
+<td>資料需要在 Claude 回應前就預載為 context？</td>
+<td><strong>Resource</strong></td>
+<td>如果 Claude 需要自己決定就用 tool</td>
+</tr>
+<tr>
+<td>取得這筆資料是否有副作用（寫入、刪除、扣款）？</td>
+<td><strong>Tool</strong>（絕不是 resource）</td>
+<td>Resource 是安全的</td>
+</tr>
+<tr>
+<td>Claude 是否需要自主決定何時取得這筆資料？</td>
+<td><strong>Tool</strong></td>
+<td>Resource</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>資料格式提示（MIME Types）</h2>
+<p>Resources 包含「格式提示」告訴 client 如何顯示資料：</p>
+<table>
+<thead>
+<tr>
+<th>格式提示</th>
+<th>含義</th>
+<th>產品意涵</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>application/json</code></td>
+<td>結構化資料（列表、表格）</td>
+<td>可渲染為豐富的 UI 元件</td>
+</tr>
+<tr>
+<td><code>text/plain</code></td>
+<td>純文字</td>
+<td>直接顯示或注入聊天</td>
+</tr>
+<tr>
+<td><code>application/pdf</code></td>
+<td>二進位文件</td>
+<td>可能需要特殊檢視器</td>
+</tr>
+</tbody>
+</table>
+<p>這對 UI 規格很重要 — 知道資料格式有助於設計正確的顯示元件。</p>
+<hr />
+<h2>PM 常見錯誤</h2>
+<ol>
+<li><strong>該用 resource 的地方指定成 tool</strong> — 如果資料是唯讀且需要顯示在 UI，resource 更簡單也更快</li>
+<li><strong>以為 Claude 會去取 resource</strong> — resources 是 app-controlled；你的 app 去取，不是 Claude</li>
+<li><strong>忽略自動完成模式</strong> — resources 天然支持使用者覺得直覺的 <code>@mention</code> UX 模式</li>
+<li><strong>沒有考慮資料新鮮度</strong> — resources 在請求時回傳資料；如需即時更新，需與工程討論快取策略</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>PM 最需要記住的一點：resources 是 <strong>app-controlled</strong>。你的應用程式碼決定何時取得資料。這意味著你可以保證在 Claude 開始推理前資料已經就緒，帶來更快的回應時間和更好的 UX。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：情境題會描述一個功能，問該用哪個 primitive。如果情境涉及在 UI 中顯示資料或將 context 注入 prompt，答案就是 resources。</li>
+<li><strong>控制模型是關鍵區分</strong>：Tools = model-controlled、Resources = app-controlled、Prompts = user-controlled。這個三分法經常出現。</li>
+<li>小心陷阱答案：建議用 tool「為 UI 取得資料」— 這種場景正確的 primitive 是 resource。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>誰控制 MCP resources 的存取時機 — Claude、app 還是使用者？</td>
+<td>應用程式碼（app-controlled）</td>
+</tr>
+<tr>
+<td>MCP 中兩種 resource 類型是什麼？</td>
+<td>Direct resources（固定 URI、無參數）和 Templated resources（URI 含變數佔位符）</td>
+</tr>
+<tr>
+<td>Resources 天然支持什麼產品 UX 模式？</td>
+<td><code>@mention</code> 自動完成模式 — 輸入 <code>@</code>、看到可用項目、選擇一個、內容注入 prompt</td>
+</tr>
+<tr>
+<td>PM 何時該在 PRD 中指定 resource 而非 tool？</td>
+<td>資料是唯讀、需要顯示在 UI 中、或需要在 Claude 回應前預載為 context 時</td>
+</tr>
+<tr>
+<td>MIME type 提示對 resources 有什麼作用？</td>
+<td>告訴 client 應用如何解讀和顯示回傳的資料</td>
+</tr>
+<tr>
+<td>為什麼 resources 提供 context 比 tools 更快？</td>
+<td>Resource 資料在 Claude 開始推理前就直接注入 prompt，避免額外的往返</td>
+</tr>
+<tr>
+<td>Resource 可以有副作用（寫入、刪除、扣款）嗎？</td>
+<td>不可以 — resources 是唯讀的。如需副作用，請用 tool</td>
+</tr>
+<tr>
+<td>在辦公室類比中，resource 是什麼？</td>
+<td>檔案櫃 — 櫃台人員（app）從中取出檔案給訪客或添加到會議簡報中</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>14 State And The Streamablehttp Transport Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>State and the StreamableHTTP Transport — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (MCP transport 選擇), 2.4 (遠端 server 配置), 2.6 (水平擴展模式)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 03-transports / Lesson 14</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>水平擴展產生協調問題 — 同一 client 的兩個 SSE 連線可能命中不同 server instance，<code>stateless_http=true</code> 透過完全消除狀態來解決此問題，代價是失去主要 MCP 功能。</p>
+<hr />
+<p><img alt="Scaling Tradeoff" src="visuals/scaling-tradeoff-zh-TW.svg" /></p>
+<h2>擴展問題</h2>
+<p>當 MCP server 變得熱門時，需要水平擴展 — 多個 server instance 在 load balancer 後面。這產生根本性的協調問題：</p>
+<pre class="highlight"><code>                    ┌─── Instance A
+Client ──→ LB ─────┤
+                    ├─── Instance B
+                    └─── Instance C
+</code></pre>
+
+<p>回想 Lesson 13：client 維持<strong>兩個連線</strong>：<br />
+1. <strong>GET SSE</strong>（持久，用於 server-initiated 訊息）<br />
+2. <strong>POST request</strong>（每次 tool call）</p>
+<p>Load balancer 可能將它們路由到<strong>不同 instance</strong>：</p>
+<pre class="highlight"><code>Client ── GET /sse ──→ LB ──→ Instance A  （primary SSE 在這）
+Client ── POST /tool ──→ LB ──→ Instance B  （tool call 在這）
+</code></pre>
+
+<p>Instance B 處理 tool call，但 Instance A 持有 SSE 連線。Instance B 如何向 client 發送 progress 更新？</p>
+<blockquote>
+<p>💡 <strong>Key Insight</strong><br />
+讓 SSE 在單一 server 上運作的雙連線架構，在擴展時變成負擔。Load balancer 不理解 MCP session 語義。</p>
+</blockquote>
+<hr />
+<h2>解決方案：<code>stateless_http=true</code></h2>
+<p>終極手段：<strong>消除所有狀態</strong>。啟用後：</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>狀態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Session ID</td>
+<td>停用 — 無追蹤</td>
+</tr>
+<tr>
+<td>Server → Client request</td>
+<td>停用 — 無 CreateMessage、無 ListRoots</td>
+</tr>
+<tr>
+<td>Sampling</td>
+<td>停用</td>
+</tr>
+<tr>
+<td>Progress notification</td>
+<td>停用</td>
+</tr>
+<tr>
+<td>Resource subscription</td>
+<td>停用</td>
+</tr>
+<tr>
+<td>Initialization handshake</td>
+<td><strong>不需要</strong> — 任何 instance 可處理任何請求</td>
+</tr>
+</tbody>
+</table>
+<pre class="highlight"><code class="language-python"># Stateless server — 不需要初始化
+mcp_server = MCPServer(
+    stateless_http=True,  # 每個請求獨立
+    json_response=False,  # 仍可 per-request streaming
+)
+</code></pre>
+
+<h3>關鍵好處</h3>
+<p>不需要初始化。任何 server instance 可以獨立處理任何請求。Load balancer 直接 round-robin — 不需要 sticky session、不需要 session affinity。</p>
+<hr />
+<h2>解決方案：<code>json_response=true</code></h2>
+<p>消除 streaming 的互補旗標：</p>
+<table>
+<thead>
+<tr>
+<th><code>json_response=false</code>（預設）</th>
+<th><code>json_response=true</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Server 透過 SSE 串流結果</td>
+<td>Server 回傳單一 JSON 回應</td>
+</tr>
+<tr>
+<td>Client 即時看到進度</td>
+<td>Client 等待完整結果</td>
+</tr>
+<tr>
+<td>需要保持連線開啟</td>
+<td>標準 HTTP request-response</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>決策矩陣</h2>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th><code>stateless_http</code></th>
+<th><code>json_response</code></th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>完整 MCP 功能，單一 server</td>
+<td><code>false</code></td>
+<td><code>false</code></td>
+<td>透過 SSE 使用所有功能</td>
+</tr>
+<tr>
+<td>水平擴展，保留部分 streaming</td>
+<td><code>true</code></td>
+<td><code>false</code></td>
+<td>Per-request streaming，無 server-initiated</td>
+</tr>
+<tr>
+<td>最大可擴展性，簡單 API</td>
+<td><code>true</code></td>
+<td><code>true</code></td>
+<td>僅基本 request-response</td>
+</tr>
+<tr>
+<td>有 streaming 但需要 session</td>
+<td><code>false</code></td>
+<td><code>false</code></td>
+<td>LB 需要 sticky session</td>
+</tr>
+</tbody>
+</table>
+<h3>根本取捨</h3>
+<pre class="highlight"><code>功能性 ◄─────────────────────► 可擴展性
+
+完整 MCP          SSE workaround      Stateless         Stateless + JSON
+（Stdio）        （單一 server）      （可擴展）        （最簡單）
+</code></pre>
+
+<hr />
+<h2>失去什麼 vs 得到什麼</h2>
+<h3><code>stateless_http=true</code> 失去的</h3>
+<ul>
+<li>無 session ID</li>
+<li>無 server → client request（CreateMessage、ListRoots）</li>
+<li>無 sampling 能力</li>
+<li>無 progress 回報</li>
+<li>無 resource subscription</li>
+</ul>
+<h3><code>stateless_http=true</code> 得到的</h3>
+<ul>
+<li>不需要 initialization handshake</li>
+<li>任何 instance 處理任何請求</li>
+<li>標準 load balancer 即可運作（無需 sticky session）</li>
+<li>更簡單的 server 實作</li>
+<li>更好的容錯性（instance 故障不會遺失 session）</li>
+</ul>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>擴展題</strong>：知道雙連線模型與 load balancer 衝突 → <code>stateless_http</code> 是標準解決方案。</li>
+<li><strong>功能損失矩陣</strong>：記住 <code>stateless_http=true</code> 確切停用什麼 — 這是常考目標。</li>
+<li><strong>無需初始化</strong>：Stateless 模式完全跳過三步 handshake。</li>
+<li><strong>旗標組合</strong>：兩者都 <code>true</code> = 最簡單的 MCP server（基本 HTTP request-response）。</li>
+<li>考試哲學：<strong>可擴展性與功能性在 MCP transport 設計中成反比</strong>。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>StreamableHTTP 面臨什麼擴展問題？</td>
+<td>來自同一 client 的兩個連線（GET SSE + POST）可能命中 load balancer 後面的不同 server instance</td>
+</tr>
+<tr>
+<td><code>stateless_http=true</code> 如何解決擴展問題？</td>
+<td>消除所有狀態 — 無 session、無 SSE，任何 instance 獨立處理任何請求</td>
+</tr>
+<tr>
+<td><code>stateless_http=true</code> 停用哪五個功能？</td>
+<td>Session ID、server→client request、sampling、progress notification、resource subscription</td>
+</tr>
+<tr>
+<td>Stateless 模式的關鍵好處是？</td>
+<td>不需要初始化 — 任何 server instance 無需事先 handshake 即可處理任何請求</td>
+</tr>
+<tr>
+<td><code>json_response=true</code> 做什麼？</td>
+<td>消除 streaming — server 回傳單一最終 JSON 回應而非 SSE 事件</td>
+</tr>
+<tr>
+<td>最簡單的 MCP server 配置是？</td>
+<td>兩者都設為 <code>true</code> — 僅基本 HTTP request-response</td>
+</tr>
+<tr>
+<td>何時應該保持兩個旗標都為 false？</td>
+<td>單一 server 部署且需要完整 MCP 功能（包括 SSE、sampling 和 progress）時</td>
+</tr>
+<tr>
+<td>什麼 load balancer 策略適用於 stateless MCP？</td>
+<td>Round-robin — 不需要 sticky session 或 session affinity</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

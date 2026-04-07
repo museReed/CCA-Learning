@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 Prompts In The Client Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompts in the Client — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP client implementation), 2.6 (prompt consumption patterns), 1.3 (prompt orchestration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 13</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Client-side prompt integration is like installing a "Quick Actions" menu in your product — users see a curated list of expert workflows, pick one, fill in the details, and get consistent results every time.</p>
+<hr />
+<h2>Why PMs Need to Understand Client-Side Prompts</h2>
+<p>This lesson completes the picture of how prompts work end-to-end. As a PM, you need to know:</p>
+<ol>
+<li><strong>How users discover prompts</strong> — through slash commands, buttons, or menus</li>
+<li><strong>How users parameterize prompts</strong> — what inputs they need to provide</li>
+<li><strong>How prompts orchestrate tools</strong> — prompts give instructions, tools do the work</li>
+<li><strong>The three-way control model</strong> — the foundation of all MCP architecture decisions</li>
+</ol>
+<hr />
+<h2>Mental Model: The Self-Service Kiosk</h2>
+<p>Think of the three MCP primitives as different ordering experiences at a fast-food restaurant:</p>
+<table>
+<thead>
+<tr>
+<th>Experience</th>
+<th>MCP Primitive</th>
+<th>Who Decides</th>
+<th>Kiosk Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kitchen decides what to cook</td>
+<td><strong>Tool</strong></td>
+<td>Chef (Claude)</td>
+<td>The kitchen makes whatever they think you need</td>
+</tr>
+<tr>
+<td>Drink dispenser pre-fills</td>
+<td><strong>Resource</strong></td>
+<td>Restaurant system (app)</td>
+<td>Water automatically appears at your table</td>
+</tr>
+<tr>
+<td>Self-service kiosk ordering</td>
+<td><strong>Prompt</strong></td>
+<td>Customer (user)</td>
+<td>You tap "Combo #3," customize toppings, confirm</td>
+</tr>
+</tbody>
+</table>
+<p>The slash command experience is the self-service kiosk. The menu has been carefully designed, the combos are tested, and the user just makes selections.</p>
+<hr />
+<h2>The End-to-End User Journey</h2>
+<p>Here is what a user experiences when using prompts in a product:</p>
+<h3>Step 1: Discovery</h3>
+<p>User types <code>/</code> in the chat. A dropdown appears showing available workflows:<br />
+- <code>/format</code> — Rewrite a document in Markdown<br />
+- <code>/summarize</code> — Create a summary of a document<br />
+- <code>/analyze</code> — Generate an analysis report</p>
+<p>This is powered by <code>list_prompts()</code> behind the scenes.</p>
+<h3>Step 2: Selection and Parameters</h3>
+<p>User selects <code>/format</code>. The system asks for required information:<br />
+- "Which document?" — shows a document picker</p>
+<p>This is the parameter collection phase. Each prompt defines what inputs it needs.</p>
+<h3>Step 3: Execution</h3>
+<p>User confirms. Behind the scenes:<br />
+1. The prompt template is filled with the user's parameters<br />
+2. The instructions are sent to Claude<br />
+3. Claude reads the document (using tools) and reformats it<br />
+4. The result appears in the chat</p>
+<h3>Step 4: Result</h3>
+<p>User sees a professionally formatted markdown document. The same quality every time, regardless of the user's prompt engineering skill.</p>
+<hr />
+<h2>The Three-Way Control Model — The Master Framework</h2>
+<p>This is the single most important concept from Chapters 2-3 and a cornerstone of the CCA exam:</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>Controller</th>
+<th>Exam Keyword</th>
+<th>Product Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>Claude (model-controlled)</td>
+<td>"Claude decides," "autonomously"</td>
+<td>Claude runs a calculation behind the scenes</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>Application (app-controlled)</td>
+<td>"Pre-loaded," "UI context"</td>
+<td>Google Drive document injected into chat</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>User (user-controlled)</td>
+<td>"Slash command," "workflow button"</td>
+<td>User clicks "Summarize" workflow button</td>
+</tr>
+</tbody>
+</table>
+<h3>PM Decision Flowchart</h3>
+<p>When designing a feature, ask:</p>
+<ol>
+<li>"Who should decide when this happens?"</li>
+<li><strong>User explicitly triggers</strong> → Prompt</li>
+<li><strong>Claude decides during reasoning</strong> → Tool</li>
+<li>
+<p><strong>App pre-loads automatically</strong> → Resource</p>
+</li>
+<li>
+<p>"Is this a repeatable workflow with known steps?"</p>
+</li>
+<li><strong>Yes</strong> → Prompt (package the workflow as a slash command)</li>
+<li>
+<p><strong>No, it is ad-hoc</strong> → Let Claude handle it with tools</p>
+</li>
+<li>
+<p>"Does this need data before Claude starts thinking?"</p>
+</li>
+<li><strong>Yes</strong> → Resource (inject context into prompt)</li>
+<li><strong>No, Claude fetches as needed</strong> → Tool</li>
+</ol>
+<hr />
+<h2>Prompts + Tools: The Orchestration Pattern</h2>
+<p>A critical insight for PMs: <strong>prompts do not replace tools — they orchestrate them</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>What Prompts Do</th>
+<th>What Tools Do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provide expert instructions</td>
+<td>Execute specific actions</td>
+</tr>
+<tr>
+<td>Define the "what"</td>
+<td>Handle the "how"</td>
+</tr>
+<tr>
+<td>User-controlled trigger</td>
+<td>Model-controlled execution</td>
+</tr>
+</tbody>
+</table>
+<p>Example: The <code>/format</code> prompt tells Claude "reformat this document using markdown." Claude then uses the <code>edit_document</code> tool to make the actual changes. Both primitives are needed.</p>
+<p><strong>PM implication</strong>: When writing a PRD for a prompt-powered feature, you need to ensure the required tools are also available. A prompt without the necessary tools is like a recipe without ingredients.</p>
+<hr />
+<h2>Product Design Considerations</h2>
+<h3>Prompt Discoverability</h3>
+<ul>
+<li>How do users find available prompts? (Slash menu, toolbar, onboarding)</li>
+<li>Should prompts be categorized? (By task type, frequency of use)</li>
+<li>How prominent should the <code>/</code> hint be for new users?</li>
+</ul>
+<h3>Parameter Experience</h3>
+<ul>
+<li>What parameters does each prompt need?</li>
+<li>Can parameters be auto-filled from context? (Current document, selected text)</li>
+<li>What happens if a required parameter is missing?</li>
+</ul>
+<h3>Result Presentation</h3>
+<ul>
+<li>How is the prompt result displayed? (Inline, new panel, notification)</li>
+<li>Can the user undo or retry with different parameters?</li>
+<li>Should the system show what prompt was used? (Transparency)</li>
+</ul>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Designing prompts as tools</strong> — if the user triggers it, it is a prompt; if Claude decides, it is a tool</li>
+<li><strong>Forgetting tool dependencies</strong> — prompts often need tools to fulfill their instructions; ensure both are available</li>
+<li><strong>Overwhelming users with choices</strong> — curate 5-10 high-value prompts, not 50 rarely-used ones</li>
+<li><strong>No parameter defaults</strong> — reduce friction by pre-filling parameters from context (current document, selected text)</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The three-way control model is the master framework for all MCP architecture decisions: Tools = model-controlled, Resources = app-controlled, Prompts = user-controlled. For PMs, this translates directly to product design: "Who initiates this action?" determines which primitive to use. On the CCA exam, this distinction appears in nearly every D1 and D2 scenario question.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know the two client methods (<code>list_prompts</code> and <code>get_prompt</code>) and the slash command UX pattern.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: The three-way control model is the most-tested concept. Expect scenarios asking "which primitive should be used for X?"</li>
+<li><strong>Key exam signal words</strong>: "slash command" / "workflow button" / "user triggers" → Prompt. "Claude decides" / "autonomously" → Tool. "Pre-loaded context" / "UI data" → Resource.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three MCP control models?</td>
+<td>Tools = model-controlled (Claude decides), Resources = app-controlled (app code decides), Prompts = user-controlled (user decides)</td>
+</tr>
+<tr>
+<td>What is the slash command pattern for prompts?</td>
+<td>User types <code>/</code>, sees available prompts, selects one, provides parameters, system sends interpolated messages to Claude</td>
+</tr>
+<tr>
+<td>How do prompts and tools work together?</td>
+<td>Prompts provide the "what" (instructions), tools provide the "how" (capabilities) — Claude uses tools to fulfill prompt instructions</td>
+</tr>
+<tr>
+<td>What is the self-service kiosk analogy for prompts?</td>
+<td>User selects from a curated menu (prompts), customizes options (parameters), and gets a consistent result — just like ordering at a kiosk</td>
+</tr>
+<tr>
+<td>What should a PM ensure when designing a prompt-powered feature?</td>
+<td>That the required tools are also available — a prompt without necessary tools is like a recipe without ingredients</td>
+</tr>
+<tr>
+<td>How should a PM decide between prompt, tool, and resource?</td>
+<td>Ask "Who should decide when this happens?" — User triggers = Prompt, Claude decides = Tool, App pre-loads = Resource</td>
+</tr>
+<tr>
+<td>What exam signal words indicate a prompt is the answer?</td>
+<td>"Slash command," "workflow button," "user triggers," "predefined workflow"</td>
+</tr>
+<tr>
+<td>In Claude's interface, what are examples of all three primitives?</td>
+<td>Prompts = workflow buttons below chat, Resources = "Add from Google Drive," Tools = code execution behind the scenes</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

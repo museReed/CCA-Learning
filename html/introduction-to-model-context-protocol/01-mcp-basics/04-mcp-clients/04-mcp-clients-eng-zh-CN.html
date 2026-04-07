@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04 Mcp Clients Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>MCP Clients — 工程深度解析</h1>
+<p><img alt="Mcp Message Flow" src="visuals/mcp-message-flow-zh-TW.svg" /></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.2 实现 MCP client-server 通信; T2.4 处理 tool discovery 和执行流程</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 01-mcp-basics / Lesson 04</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>MCP client 是你的应用程序 server 与 MCP server 之间的通信桥梁，通过传输层无关的消息协议处理 tool discovery 和执行。</p>
+<hr />
+<h2>什么是 MCP Client？</h2>
+<p>MCP client 存在于你的应用程序内部，担任 Claude 与 MCP server 之间的中介。它不实现 tools——它发现 tools 并路由执行请求。</p>
+<pre class="highlight"><code>用户  →  你的 Server（包含 MCP Client）  →  MCP Server  →  外部服务
+                    ↕
+                  Claude
+</code></pre>
+
+<p>Client 是<strong>传输层无关</strong>的，意味着它可以通过多种协议与 MCP server 通信：</p>
+<ul>
+<li><strong>stdio</strong> — 标准输入/输出（本地进程）</li>
+<li><strong>HTTP</strong> — 通过 HTTP 请求访问远程 server</li>
+<li><strong>WebSockets</strong> — 持久双向连接</li>
+</ul>
+<p>这个传输层无关性至关重要：无论 MCP server 是本地进程还是远程服务，相同的 client 代码都能运作。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+MCP client 不是你的整个应用程序。它是你 server 内处理 MCP 协议的特定组件。你的 server 协调一切——接收用户查询、与 Claude 对话、使用 MCP client 与 MCP server 交互。</p>
+</blockquote>
+<hr />
+<h2>关键消息类型</h2>
+<p>MCP 通信建立在 request/result 模式上。有两个核心消息对：</p>
+<h3>Tool Discovery</h3>
+<pre class="highlight"><code>ListToolsRequest  →  MCP Server
+ListToolsResult   ←  MCP Server
+</code></pre>
+
+<p><code>ListToolsResult</code> 包含 tool 定义数组，每个定义有名称、描述和输入 schema。这就是 Claude 得知有哪些 tools 可用的方式。</p>
+<h3>Tool Execution</h3>
+<pre class="highlight"><code>CallToolRequest   →  MCP Server（包含 tool_name + tool_input）
+CallToolResult    ←  MCP Server（包含执行输出）
+</code></pre>
+
+<p><code>CallToolRequest</code> 携带 tool 名称和输入参数。<code>CallToolResult</code> 返回执行输出，然后传回给 Claude。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+这四种消息类型（两对 request/result）是 MCP 通信的核心。所有其他东西都建立在这些原语之上。理解了这些，你就理解了 MCP 的通信模型。</p>
+</blockquote>
+<hr />
+<h2>完整的 12 步流程</h2>
+<p>这是从用户查询到最终响应的端到端序列。理解这个流程对于调试和 CCA 考试都至关重要。</p>
+<pre class="highlight"><code> 1. 用户发送问题到你的 server
+ 2. 你的 server 连接到 MCP server(s)
+ 3. MCP client 发送 ListToolsRequest
+ 4. MCP server 返回 ListToolsResult（可用 tools）
+ 5. 你的 server 把用户查询 + tool 定义发送给 Claude
+ 6. Claude 分析查询并决定使用哪些 tools
+ 7. Claude 返回 tool_use 响应（tool 名称 + 输入）
+ 8. 你的 server 从 Claude 响应中提取 tool call
+ 9. MCP client 发送 CallToolRequest 到对应的 MCP server
+10. MCP server 执行 tool 并返回 CallToolResult
+11. 你的 server 把 tool 结果送回 Claude
+12. Claude 生成最终自然语言响应
+</code></pre>
+
+<p>注意两个不同阶段：</p>
+<ul>
+<li><strong>Discovery 阶段</strong>（步骤 2-5）：client 了解有哪些 tools 并告诉 Claude</li>
+<li><strong>Execution 阶段</strong>（步骤 6-12）：Claude 决定使用 tool，client 执行它，Claude 解读结果</li>
+</ul>
+<pre class="highlight"><code class="language-python"># 简化的伪代码
+async def handle_user_query(query: str):
+    # Discovery 阶段
+    tools = await mcp_client.list_tools()          # 步骤 3-4
+    tool_schemas = format_for_claude(tools)
+
+    # 第一次 Claude 调用
+    response = await claude.messages.create(        # 步骤 5-7
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: query}],
+        tools=tool_schemas
+    )
+
+    # Execution 阶段
+    if response.has_tool_use:
+        tool_call = response.tool_use_block
+        result = await mcp_client.call_tool(        # 步骤 9-10
+            tool_call.name, tool_call.input
+        )
+
+        # 第二次 Claude 调用
+        final = await claude.messages.create(       # 步骤 11-12
+            messages=[...previous + tool_result],
+            tools=tool_schemas
+        )
+        return final.text
+
+    return response.text
+</code></pre>
+
+<blockquote>
+<p><strong>Key Insight</strong><br />
+这个流程涉及两次 Claude 调用：一次让 Claude 决定使用哪个 tool，第二次让 Claude 解读 tool 的输出。这个双调用模式是 agentic AI 架构的基础。</p>
+</blockquote>
+<hr />
+<h2>传输层细节</h2>
+<h3>stdio Transport</h3>
+<p>MCP server 作为子进程执行。通信通过 stdin/stdout 管道。</p>
+<p>最适合：本地开发、单机部署、测试。</p>
+<h3>HTTP/SSE Transport</h3>
+<p>MCP server 作为网络服务执行。通信使用 HTTP 请求和 Server-Sent Events 进行流式传输。</p>
+<p>最适合：远程 server、微服务架构、生产环境部署。</p>
+<h3>WebSocket Transport</h3>
+<p>Client 和 server 之间的持久双向连接。</p>
+<p>最适合：高频率 tool 调用、实时应用程序。</p>
+<hr />
+<h2>CCA 考试关联性</h2>
+<p>本课是 <strong>Domain 2 (18%)</strong> 的核心。考试重点：</p>
+<ul>
+<li><strong>12 步流程</strong>：能够追踪从用户查询经过 tool discovery、Claude 决策、tool 执行到最终响应的完整请求</li>
+<li><strong>消息类型</strong>：知道四个关键消息（ListToolsRequest/Result、CallToolRequest/Result）</li>
+<li><strong>传输层无关性</strong>：理解 MCP client 能跨 stdio、HTTP 和 WebSocket 传输运作</li>
+<li><strong>双重 Claude 调用</strong>：识别 agentic 流程需要两次独立的 Claude API 调用</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP client 的角色是什么？</td>
+<td>它是你 server 内的通信桥梁，代表 Claude 从 MCP server 发现 tools 并路由 tool 执行请求。</td>
+</tr>
+<tr>
+<td>MCP 的两个核心消息对是什么？</td>
+<td>ListToolsRequest/ListToolsResult（tool discovery）和 CallToolRequest/CallToolResult（tool execution）。</td>
+</tr>
+<tr>
+<td>MCP client 可以使用哪三种传输协议？</td>
+<td>stdio（本地进程）、HTTP（远程 server）和 WebSockets（持久连接）。</td>
+</tr>
+<tr>
+<td>典型 MCP tool-use 流程需要几次 Claude 调用？</td>
+<td>两次：第一次发送查询和 tool 定义让 Claude 决定用哪个 tool，第二次发送 tool 结果让 Claude 生成最终响应。</td>
+</tr>
+<tr>
+<td>MCP 的"discovery 阶段"发生什么？</td>
+<td>Client 发送 ListToolsRequest 到 MCP server，收到可用 tool 定义，并将它们包含在发给 Claude 的请求中。</td>
+</tr>
+<tr>
+<td>CallToolRequest 包含什么信息？</td>
+<td>Tool 名称和 tool 输入参数（由 Claude 的 tool_use 响应决定）。</td>
+</tr>
+<tr>
+<td>为什么 MCP 被描述为"传输层无关"？</td>
+<td>相同的 client 代码无论通信通过 stdio、HTTP 或 WebSockets 都能运作。协议独立于传输层。</td>
+</tr>
+<tr>
+<td>在 12 步 MCP 流程中，什么触发 execution 阶段？</td>
+<td>Claude 的响应包含 tool_use 块，表示它已决定用特定输入调用特定 tool。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

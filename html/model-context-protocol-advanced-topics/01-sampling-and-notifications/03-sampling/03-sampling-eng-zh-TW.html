@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03 Sampling Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Sampling — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server capabilities), 2.4 (client-server communication patterns)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 01-sampling-and-notifications / Lesson 03</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Sampling 讓 MCP server 透過已連接的 client 呼叫 Claude，反轉了一般的請求流向，使 server 不需要自己管理 API key 或 LLM 基礎設施就能使用 AI 能力。</p>
+<hr />
+<p><img alt="Sampling Flow" src="visuals/sampling-flow-zh-TW.svg" /></p>
+<h2>Sampling 運作方式</h2>
+<p>標準 MCP 流程是 <strong>Client -&gt; Server</strong>（client 要求 server 執行 tool）。Sampling 把這個方向翻轉：</p>
+<pre class="highlight"><code>Server                    Client                   Claude
+  |                         |                        |
+  |-- create_message() ----&gt;|                        |
+  |                         |-- API call -----------&gt;|
+  |                         |&lt;-- response -----------|
+  |&lt;-- SamplingResult ------|                        |
+</code></pre>
+
+<p>Server 從不直接與 Claude 對話，而是請 <strong>client</strong> 代為呼叫。</p>
+<hr />
+<h2>Server 端實作</h2>
+<p>Server 端使用 context 物件的 <code>session.create_message()</code> 方法：</p>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def summarize_research(ctx: Context, topic: str) -&gt; str:
+    # 收集資料（server 自己的邏輯）
+    results = await fetch_research_data(topic)
+
+    # 請 client 幫忙呼叫 Claude 做摘要
+    response = await ctx.session.create_message(
+        messages=[
+            SamplingMessage(
+                role=&quot;user&quot;,
+                content=TextContent(
+                    type=&quot;text&quot;,
+                    text=f&quot;Summarize these research results:\n{results}&quot;
+                )
+            )
+        ],
+        max_tokens=1024
+    )
+
+    return response.content.text
+</code></pre>
+
+<p>重點：<br />
+- <code>SamplingMessage</code> 封裝發送給 client 的 prompt<br />
+- Server 指定 <code>max_tokens</code>，但 client 決定使用哪個 model<br />
+- Server <strong>不需要 API key</strong> — client 負責認證</p>
+<hr />
+<h2>Client 端實作</h2>
+<p>Client 建立 <code>ClientSession</code> 時必須提供 <code>sampling_callback</code>：</p>
+<pre class="highlight"><code class="language-python">async def handle_sampling(message: CreateMessageRequest) -&gt; CreateMessageResult:
+    # Client 決定用哪個 model 並發送 API 呼叫
+    response = await anthropic_client.messages.create(
+        model=&quot;claude-sonnet-4-20250514&quot;,
+        max_tokens=message.params.max_tokens,
+        messages=[
+            {&quot;role&quot;: m.role, &quot;content&quot;: m.content.text}
+            for m in message.params.messages
+        ]
+    )
+    return CreateMessageResult(
+        role=&quot;assistant&quot;,
+        content=TextContent(type=&quot;text&quot;, text=response.content[0].text),
+        model=&quot;claude-sonnet-4-20250514&quot;
+    )
+
+# 在 session 初始化時傳入 callback
+async with ClientSession(read, write, sampling_callback=handle_sampling) as session:
+    await session.initialize()
+</code></pre>
+
+<p>Client 擁有完整控制權：<br />
+- 選擇呼叫哪個 model（可升級或降級）<br />
+- Rate limiting 與成本管理<br />
+- 請求過濾（可拒絕 sampling 請求）</p>
+<hr />
+<h2>架構優勢</h2>
+<table>
+<thead>
+<tr>
+<th>優勢</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Server 不需 API key</strong></td>
+<td>Server 從不直接碰 Claude API</td>
+</tr>
+<tr>
+<td><strong>成本轉移到 client</strong></td>
+<td>執行 client 的一方負擔 AI 費用</td>
+</tr>
+<tr>
+<td><strong>降低 server 複雜度</strong></td>
+<td>Server 專注於 domain logic，不需管 LLM 編排</td>
+</tr>
+<tr>
+<td><strong>適合 public server</strong></td>
+<td>任何人都能連接，各自使用自己的 credentials</td>
+</tr>
+<tr>
+<td><strong>Client 控制 model</strong></td>
+<td>Client 而非 server 選擇 model</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>何時使用 Sampling</h2>
+<p>適合使用 sampling 的情境：<br />
+- 建置 <strong>public MCP server</strong>（如研究工具），不想替每個使用者支付 AI 費用<br />
+- Server 需要 AI 能力但應保持 <strong>stateless 且無需 key</strong><br />
+- 希望 <strong>client 保有控制權</strong> 來選擇 model 和管理支出</p>
+<p>不適合的情境：<br />
+- Server 需要保證特定 model 行為（client 可能換 model）<br />
+- 低延遲至關重要（多一跳增加延遲）<br />
+- Server 需要在內部串聯多次 LLM 呼叫（改用直接 API）</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Sampling 翻轉了 MCP 的經濟模型：由 client 而非 server 承擔 AI 費用。這讓建置開源 MCP server 變得可行，作者不需要負擔 API 成本。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.3</strong>：理解 MCP server capabilities — sampling 是 server 可宣告的進階功能</li>
+<li><strong>D2 Task 2.4</strong>：Client-server communication patterns — sampling 是 server-initiated communication 的主要範例</li>
+<li>預期考試會出現 sampling vs. 直接 API 呼叫的情境題</li>
+<li>核心取捨：便利性和成本轉移 vs. server 端失去 model 控制權</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP sampling 讓 server 可以做什麼？</td>
+<td>請求已連接的 client 代為呼叫 LLM，不需自己的 API key</td>
+</tr>
+<tr>
+<td>Server 用哪個方法發起 sampling？</td>
+<td><code>ctx.session.create_message()</code> 搭配 <code>SamplingMessage</code> 物件</td>
+</tr>
+<tr>
+<td>Sampling 中誰支付 AI 使用費？</td>
+<td>Client，因為實際 API 呼叫由 client 發出</td>
+</tr>
+<tr>
+<td>Client 必須提供什麼 callback 才能支援 sampling？</td>
+<td><code>sampling_callback</code>，在建立 <code>ClientSession</code> 時傳入</td>
+</tr>
+<tr>
+<td>Client 可以拒絕 server 的 sampling 請求嗎？</td>
+<td>可以 — client 擁有完整控制權，可以過濾或拒絕請求</td>
+</tr>
+<tr>
+<td>為什麼 sampling 適合 public MCP server？</td>
+<td>每個連接的 client 使用自己的 API credentials 並支付自己的費用</td>
+</tr>
+<tr>
+<td>Sampling 的主要延遲代價是什麼？</td>
+<td>多一段網路跳轉：Server -&gt; Client -&gt; Claude -&gt; Client -&gt; Server</td>
+</tr>
+<tr>
+<td>Sampling 請求中的 prompt 用什麼資料結構封裝？</td>
+<td><code>SamplingMessage</code>，包含 <code>role</code> 和 <code>content</code>（通常是 <code>TextContent</code>）</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

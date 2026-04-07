@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Defining Resources Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Resources — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server primitives), 2.4 (resource URI design), 2.5 (MIME type handling)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 10</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Resources are the "reference library" of an MCP server — they let your application pull in data for display or context, like a librarian fetching a book when someone asks for it by name.</p>
+<hr />
+<p><img alt="Resources Types" src="visuals/resources-types.svg" /></p>
+<h2>Why PMs Need to Understand Resources</h2>
+<p>As a PM, you shape product requirements that determine whether a feature should use a resource, a tool, or a prompt. Getting this wrong means:</p>
+<ol>
+<li><strong>Wasted engineering cycles</strong> — building a tool when a resource would be simpler</li>
+<li><strong>Poor UX</strong> — forcing users to wait for Claude to "look something up" when the data could be pre-loaded</li>
+<li><strong>Incorrect acceptance criteria</strong> — specifying the wrong interaction pattern in your PRD</li>
+</ol>
+<hr />
+<h2>Mental Model: The Office Filing System</h2>
+<p>Think of an MCP server as an office building with three departments:</p>
+<table>
+<thead>
+<tr>
+<th>Department</th>
+<th>MCP Primitive</th>
+<th>Who Decides to Use It</th>
+<th>Office Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Filing Cabinet</td>
+<td><strong>Resource</strong></td>
+<td>The receptionist (your app)</td>
+<td>Receptionist pulls a file to hand to a visitor</td>
+</tr>
+<tr>
+<td>Action Desk</td>
+<td><strong>Tool</strong></td>
+<td>The executive (Claude)</td>
+<td>Executive decides to call accounting to process a refund</td>
+</tr>
+<tr>
+<td>Workflow Manual</td>
+<td><strong>Prompt</strong></td>
+<td>The employee (user)</td>
+<td>Employee follows a standard procedure checklist</td>
+</tr>
+</tbody>
+</table>
+<p>Resources are the filing cabinet. Your application code opens the drawer, pulls out the file, and either shows it in the UI or hands it to Claude as context. Claude never goes to the filing cabinet on its own — that distinction is critical.</p>
+<hr />
+<h2>Two Types of Resources</h2>
+<h3>1. Direct Resources — "Give Me the Whole Catalog"</h3>
+<p>Like asking a librarian: "Show me all available books." The request is always the same, the URI is fixed.</p>
+<ul>
+<li><strong>Product example</strong>: An autocomplete dropdown showing all available documents</li>
+<li><strong>URI pattern</strong>: <code>docs://documents</code> (no variables)</li>
+</ul>
+<h3>2. Templated Resources — "Give Me This Specific Book"</h3>
+<p>Like asking: "Show me the book with ID plan.md." The request includes a parameter.</p>
+<ul>
+<li><strong>Product example</strong>: When a user types <code>@plan.md</code>, the system fetches that specific document</li>
+<li><strong>URI pattern</strong>: <code>docs://documents/{doc_id}</code> (variable part in braces)</li>
+</ul>
+<hr />
+<h2>The Document Mention Feature — A Product Walkthrough</h2>
+<p>Imagine you are designing a chat interface where users can reference documents:</p>
+<ol>
+<li><strong>User types <code>@</code></strong> — your app calls the "list all documents" resource to populate an autocomplete menu</li>
+<li><strong>User selects <code>plan.md</code></strong> — your app calls the "fetch specific document" resource with <code>doc_id=plan.md</code></li>
+<li><strong>Document content is injected into the prompt</strong> — Claude sees the document contents immediately, no extra step needed</li>
+<li><strong>Claude responds</strong> — with full context about the document, instantly</li>
+</ol>
+<p>This is faster and smoother than the alternative (Claude calling a tool to fetch the document), because the data is already in the prompt before Claude starts thinking.</p>
+<hr />
+<h2>Product Decision Framework</h2>
+<p>When writing a PRD for an AI feature, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes...</th>
+<th>If No...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the data need to appear in the UI (dropdown, sidebar)?</td>
+<td><strong>Resource</strong></td>
+<td>Maybe a tool</td>
+</tr>
+<tr>
+<td>Should the data be pre-loaded as context before Claude responds?</td>
+<td><strong>Resource</strong></td>
+<td>Tool if Claude needs to decide</td>
+</tr>
+<tr>
+<td>Does fetching this data have side effects (write, delete, charge)?</td>
+<td><strong>Tool</strong> (never a resource)</td>
+<td>Resource is safe</td>
+</tr>
+<tr>
+<td>Does Claude need to autonomously decide when to fetch this?</td>
+<td><strong>Tool</strong></td>
+<td>Resource</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Data Format Hints (MIME Types)</h2>
+<p>Resources include a "format hint" that tells the client how to display the data:</p>
+<table>
+<thead>
+<tr>
+<th>Format Hint</th>
+<th>What It Means</th>
+<th>Product Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>application/json</code></td>
+<td>Structured data (lists, tables)</td>
+<td>Can render as rich UI components</td>
+</tr>
+<tr>
+<td><code>text/plain</code></td>
+<td>Raw text</td>
+<td>Display as-is or inject into chat</td>
+</tr>
+<tr>
+<td><code>application/pdf</code></td>
+<td>Binary document</td>
+<td>May need special viewer</td>
+</tr>
+</tbody>
+</table>
+<p>This matters for your UI spec — knowing the data format helps you design the right display component.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Specifying a tool when a resource would suffice</strong> — if the data is read-only and should appear in the UI, a resource is simpler and faster</li>
+<li><strong>Assuming Claude fetches resources</strong> — resources are app-controlled; your app fetches them, not Claude</li>
+<li><strong>Ignoring the autocomplete pattern</strong> — resources naturally support the <code>@mention</code> UX pattern that users find intuitive</li>
+<li><strong>Not considering data freshness</strong> — resources return data at the moment of request; if you need real-time updates, discuss caching strategy with engineering</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The most important thing a PM needs to remember about resources: they are <strong>app-controlled</strong>. Your application code decides when to fetch the data. This means you can guarantee the data is available before Claude starts reasoning, which leads to faster response times and better UX.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Scenario questions will describe a feature and ask which primitive to use. If the scenario involves displaying data in a UI or injecting context into a prompt, the answer is resources.</li>
+<li><strong>Control model is the key differentiator</strong>: Tools = model-controlled, Resources = app-controlled, Prompts = user-controlled. This three-way distinction appears frequently.</li>
+<li>Watch for trick answers that suggest using a tool to "fetch data for the UI" — resources are the correct primitive for that use case.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who controls when MCP resources are accessed — Claude, the app, or the user?</td>
+<td>The application code (app-controlled)</td>
+</tr>
+<tr>
+<td>What are the two types of MCP resources?</td>
+<td>Direct resources (fixed URI, no parameters) and Templated resources (URI with variable placeholders)</td>
+</tr>
+<tr>
+<td>What is the product UX pattern that resources naturally support?</td>
+<td>The <code>@mention</code> autocomplete pattern — type <code>@</code>, see available items, select one, content injected into prompt</td>
+</tr>
+<tr>
+<td>When should a PM specify a resource instead of a tool in a PRD?</td>
+<td>When data is read-only, needs to appear in UI, or should be pre-loaded as context before Claude responds</td>
+</tr>
+<tr>
+<td>What does the MIME type hint do for resources?</td>
+<td>Tells the client application how to interpret and display the returned data</td>
+</tr>
+<tr>
+<td>Why are resources faster than tools for providing context?</td>
+<td>Resource data is injected directly into the prompt before Claude starts reasoning, avoiding an extra round-trip</td>
+</tr>
+<tr>
+<td>Can a resource have side effects (write, delete, charge)?</td>
+<td>No — resources are read-only. If side effects are needed, use a tool instead</td>
+</tr>
+<tr>
+<td>In the office analogy, what is a resource?</td>
+<td>The filing cabinet — the receptionist (app) pulls files from it to hand to visitors or to add to meeting briefings</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

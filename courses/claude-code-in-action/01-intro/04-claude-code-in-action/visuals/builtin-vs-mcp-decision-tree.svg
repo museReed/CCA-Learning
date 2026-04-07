@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 520" font-family="'SF Pro Display', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/>
+    </filter>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EFF6FF"/>
+      <stop offset="100%" stop-color="#DBEAFE"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0FDF4"/>
+      <stop offset="100%" stop-color="#DCFCE7"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FAF5FF"/>
+      <stop offset="100%" stop-color="#F3E8FF"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFF7ED"/>
+      <stop offset="100%" stop-color="#FFEDD5"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94A3B8"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#22C55E"/>
+    </marker>
+    <marker id="arrowPurple" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#8B5CF6"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="780" height="520" fill="white" rx="12"/>
+
+  <!-- Title -->
+  <text x="390" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#64748B" letter-spacing="0.5">BUILT-IN vs MCP — DECISION TREE</text>
+
+  <!-- ===== Start Node ===== -->
+  <g transform="translate(290, 55)">
+    <rect width="200" height="60" rx="14" fill="url(#blueGrad)" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="100" y="28" text-anchor="middle" font-size="20">💡</text>
+    <text x="100" y="48" text-anchor="middle" font-size="12" font-weight="600" fill="#1E40AF">Need a capability?</text>
+  </g>
+
+  <!-- Arrow down to decision -->
+  <line x1="390" y1="115" x2="390" y2="145" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== Decision Diamond ===== -->
+  <g transform="translate(290, 148)">
+    <polygon points="100,0 200,50 100,100 0,50" fill="url(#orangeGrad)" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="100" y="44" text-anchor="middle" font-size="11" font-weight="600" fill="#9A3412">Is it a built-in</text>
+    <text x="100" y="58" text-anchor="middle" font-size="11" font-weight="600" fill="#9A3412">tool?</text>
+  </g>
+
+  <!-- YES branch (left) -->
+  <line x1="290" y1="198" x2="190" y2="198" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="240" y="190" text-anchor="middle" font-size="11" font-weight="700" fill="#22C55E">YES</text>
+
+  <!-- ===== Built-in Tools Box (left) ===== -->
+  <g transform="translate(20, 165)">
+    <rect width="168" height="68" rx="14" fill="url(#greenGrad)" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="84" y="24" text-anchor="middle" font-size="11" font-weight="600" fill="#166534">Built-in Tools</text>
+    <text x="84" y="42" text-anchor="middle" font-size="9" fill="#22C55E" font-family="'SF Mono', monospace">Read · Write · Edit</text>
+    <text x="84" y="56" text-anchor="middle" font-size="9" fill="#22C55E" font-family="'SF Mono', monospace">Bash · Glob · Grep</text>
+  </g>
+
+  <!-- Arrow down from built-in -->
+  <line x1="104" y1="233" x2="104" y2="278" stroke="#22C55E" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- ===== Use Directly ===== -->
+  <g transform="translate(24, 280)">
+    <rect width="160" height="55" rx="14" fill="#22C55E" filter="url(#shadow)"/>
+    <text x="80" y="26" text-anchor="middle" font-size="18">✅</text>
+    <text x="80" y="44" text-anchor="middle" font-size="12" font-weight="600" fill="white">Use Directly</text>
+  </g>
+
+  <!-- NO branch (right) -->
+  <line x1="490" y1="198" x2="530" y2="198" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <text x="510" y="190" text-anchor="middle" font-size="11" font-weight="700" fill="#8B5CF6">NO</text>
+
+  <!-- ===== Add MCP Server ===== -->
+  <g transform="translate(532, 165)">
+    <rect width="220" height="68" rx="14" fill="url(#purpleGrad)" stroke="#8B5CF6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="110" y="24" text-anchor="middle" font-size="11" font-weight="600" fill="#5B21B6">Add MCP Server</text>
+    <text x="110" y="42" text-anchor="middle" font-size="9" fill="#8B5CF6">Browser, Slack, GitHub,</text>
+    <text x="110" y="56" text-anchor="middle" font-size="9" fill="#8B5CF6">Database, Figma, etc.</text>
+  </g>
+
+  <!-- Arrow down from MCP -->
+  <line x1="642" y1="233" x2="642" y2="278" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+
+  <!-- ===== Use Extended Tool ===== -->
+  <g transform="translate(562, 280)">
+    <rect width="160" height="55" rx="14" fill="#8B5CF6" filter="url(#shadow)"/>
+    <text x="80" y="26" text-anchor="middle" font-size="18">🔌</text>
+    <text x="80" y="44" text-anchor="middle" font-size="12" font-weight="600" fill="white">Use Extended Tool</text>
+  </g>
+
+  <!-- ===== Proportionate Response Philosophy Box ===== -->
+  <g transform="translate(140, 375)">
+    <rect width="500" height="100" rx="14" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="250" y="28" text-anchor="middle" font-size="20">🎯</text>
+    <text x="250" y="48" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">Proportionate Response Philosophy</text>
+    <text x="250" y="68" text-anchor="middle" font-size="10" fill="#64748B">Use the simplest tool that gets the job done.</text>
+    <text x="250" y="84" text-anchor="middle" font-size="10" fill="#64748B">Built-in tools are zero-config and instant. Add MCP only when built-ins cannot reach.</text>
+  </g>
+
+  <!-- Bottom note -->
+  <text x="390" y="505" text-anchor="middle" font-size="10" fill="#94A3B8">Claude Code ships with 7 built-in tools — MCP extends to 100+ capabilities via server plugins</text>
+</svg>

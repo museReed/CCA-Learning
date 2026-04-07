@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>22 Summary And Next Steps Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Summary and Next Steps — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试对应</td>
+<td>全部 5 个 Domain（D1-D5）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>复习：1.1、2.1、2.4、3.1、3.2、3.6</td>
+</tr>
+<tr>
+<td>课程来源</td>
+<td>claude-code-in-action / 06-sdk-and-wrap-up / Lesson 22</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>TL;DR</h2>
+<p>课程以三个建议收尾：保持更新、勇于实验、善用自动化。对 PM 来说，这是综合盘点的时刻 — 理解 Claude Code 在整个技术栈上的能力（agentic 执行、tool 集成、配置、CI/CD 自动化），并将其转化为产品决策、团队工作流和自动化策略。</p>
+<hr />
+<p><img alt="Course Review Map" src="visuals/course-review-map-zh-TW.svg" /><br />
+<em>圖：課程章節對應 CCA 考試領域。</em></p>
+<h2>我们学到了什么：逐章节 PM 重点</h2>
+<table>
+<thead>
+<tr>
+<th>章节</th>
+<th>学到什么</th>
+<th>PM 行动项目</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01 — Intro</td>
+<td>Claude Code 是 agentic coding assistant，能自主计划、执行和迭代。与 autocomplete 本质不同。</td>
+<td><strong>撰写定位文档</strong>，在 build-vs-buy 评估时区分 agentic AI 和 autocomplete 工具。</td>
+</tr>
+<tr>
+<td>02 — Getting Started</td>
+<td>通过 <code>CLAUDE.md</code> 进行 project setup，定义 Claude 如何理解你的 codebase。Context window 有限且需要管理。</td>
+<td><strong>定义项目标准</strong>的 <code>CLAUDE.md</code> — 每个团队项目应包含哪些惯例、约束和 context？</td>
+</tr>
+<tr>
+<td>03 — Context &amp; Commands</td>
+<td>Custom commands 创建可重复使用的工作流。Context 可通过 <code>@file</code> 引用精确控制。</td>
+<td><strong>识别团队重复性工作流</strong>（code review、bug triage、release notes）可转为 custom commands。</td>
+</tr>
+<tr>
+<td>04 — Integrations</td>
+<td>MCP servers 扩展 Claude 的能力。GitHub integration 自动化 PR review 和 issue 响应。</td>
+<td><strong>评估</strong> 与你技术栈相关的 MCP servers。<strong>建立自动 PR review</strong> 作为质量门。</td>
+</tr>
+<tr>
+<td>05 — Hooks</td>
+<td>Hooks 在 tool 执行级别强制执行策略。9 种 hook 类型涵盖完整生命周期。</td>
+<td><strong>定义治理策略</strong>（如"禁止直接访问 production DB"）通过 hooks 强制执行。</td>
+</tr>
+<tr>
+<td>06 — SDK &amp; Wrap Up</td>
+<td>SDK 提供 programmatic 集成。课程以三个前瞻性建议收尾。</td>
+<td><strong>规划集成路线图</strong> — Claude Code 在你的 CI/CD pipeline 中的 programmatic 定位在哪？</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>三个建议的 PM 视角</h2>
+<h3>1. Stay Updated — 追踪平台路线图</h3>
+<p>Claude Code 持续活跃演进。新能力会改变什么是可行的。</p>
+<p><strong>PM 行动：</strong><br />
+- 订阅 Claude Code changelog 和 release notes<br />
+- 维护能力清单 — Claude Code 今天能做什么 vs 三个月前不能做什么<br />
+- 每季重新检视"目前不可行"的决策，因为能力在演进</p>
+<h3>2. Experiment — 建立团队肌肉记忆</h3>
+<p>定制化（CLAUDE.md、commands、MCP servers）是让 Claude Code 从通用助手变成团队专用工具的关键。</p>
+<p><strong>PM 行动：</strong><br />
+- 在 sprint 中分配 Claude Code 实验时间（custom commands、MCP server 试用）<br />
+- 为组织项目创建共享的 <code>CLAUDE.md</code> template<br />
+- 记录团队使用哪些 MCP servers 及原因</p>
+<h3>3. Automate — 设计事件驱动工作流</h3>
+<p>GitHub integration 将 Claude Code 从开发者工具转变为团队自动化层。</p>
+<p><strong>PM 行动：</strong><br />
+- 将团队的重复性任务映射到潜在自动化触发条件（PR 创建、Issue 开启、<code>@claude</code> mention）<br />
+- 定义自动响应的 SLA（如"PR 创建后 5 分钟内完成 review"）<br />
+- 建立治理框架，定义 Claude 可以和不可以自主做什么</p>
+<hr />
+<h2>课程 vs 考试 Domain 对照（PM 视角）</h2>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th>权重</th>
+<th>PM 应该知道什么</th>
+<th>对应章节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1 — Agentic Architecture</td>
+<td>27%</td>
+<td>Claude 如何自主计划和执行。为什么有时会失败（context 限制、tool 选择）。</td>
+<td>01、02、06</td>
+</tr>
+<tr>
+<td>D2 — Tool Use &amp; MCP</td>
+<td>20%</td>
+<td>MCP 作为扩展模型。如何评估和集成第三方工具。</td>
+<td>04</td>
+</tr>
+<tr>
+<td>D3 — Configuration</td>
+<td>20%</td>
+<td><code>CLAUDE.md</code> 作为团队标准。Commands 作为可重用工作流。Hooks 作为策略强制。CI/CD 作为自动化。</td>
+<td>02、03、04、05</td>
+</tr>
+<tr>
+<td>D4 — Security &amp; Trust</td>
+<td>15%</td>
+<td>Permission model（3 层）。为什么 CI 需要明确权限。基于 Hook 的访问控制。</td>
+<td>02、04、05</td>
+</tr>
+<tr>
+<td>D5 — Developer Productivity</td>
+<td>18%</td>
+<td>何时使用 Claude Code。自动化如何减少苦力。衡量生产力提升。</td>
+<td>01、04、06</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 决策框架：投资优先顺序</h2>
+<p>根据完整课程内容，以下是优先投资框架：</p>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>投资项目</th>
+<th>成本</th>
+<th>影响</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>CLAUDE.md</code> 标准</td>
+<td>低</td>
+<td>高</td>
+<td>每次互动都受益于清晰的项目 context。零持续成本。</td>
+</tr>
+<tr>
+<td>2</td>
+<td>自动 PR review（GitHub integration）</td>
+<td>中</td>
+<td>高</td>
+<td>100% review 覆盖率。捕捉结构性问题。减少开发者 context switching。</td>
+</tr>
+<tr>
+<td>3</td>
+<td>团队工作流 custom commands</td>
+<td>低</td>
+<td>中</td>
+<td>标准化团队与 Claude 的互动方式。跨项目可重用。</td>
+</tr>
+<tr>
+<td>4</td>
+<td>MCP server 评估</td>
+<td>中</td>
+<td>中</td>
+<td>扩展 Claude 的能力以匹配你的技术栈。</td>
+</tr>
+<tr>
+<td>5</td>
+<td>基于 Hook 的治理</td>
+<td>高</td>
+<td>中</td>
+<td>Tool 级别的策略强制。对安全敏感团队很重要。</td>
+</tr>
+<tr>
+<td>6</td>
+<td>SDK 集成</td>
+<td>高</td>
+<td>视情况</td>
+<td>用于自定工具的 programmatic 访问。ROI 取决于使用案例。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>商业影响总结</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>导入 Claude Code 前</th>
+<th>完整导入后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PR review 覆盖率</td>
+<td>不一致（取决于 reviewer 可用性）</td>
+<td>100% 自动化初步 review</td>
+</tr>
+<tr>
+<td>Bug triage 时间</td>
+<td>数小时（开发者调查）</td>
+<td>几分钟（Issue 中 <code>@claude</code> mention）</td>
+</tr>
+<tr>
+<td>Onboarding 摩擦</td>
+<td>高（手动学习项目惯例）</td>
+<td>较低（<code>CLAUDE.md</code> 编码惯例）</td>
+</tr>
+<tr>
+<td>策略遵循</td>
+<td>人工 review</td>
+<td>自动化（hooks 在 tool 级别强制）</td>
+</tr>
+<tr>
+<td>重复性任务成本</td>
+<td>每次都消耗开发者时间</td>
+<td>一次性 command/automation 设置</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Question 1：策略场景</h3>
+<p>你的团队完成了 Claude Code in Action 课程。CTO 要求你提出分阶段导入计划。哪个顺序最合理？</p>
+<ul>
+<li>A. SDK 集成 → hooks → CLAUDE.md → GitHub integration</li>
+<li>B. CLAUDE.md 标准 → GitHub integration（PR review）→ custom commands → hooks</li>
+<li>C. Custom commands → MCP servers → CLAUDE.md → SDK</li>
+<li>D. 先 Hooks（安全）→ 其他随意</li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**B** — 从最低成本、最高影响开始。`CLAUDE.md` 是基础（每次互动都受益）。GitHub PR review 提供即时自动化价值。Custom commands 标准化团队工作流。Hooks 在治理需求成熟后导入。
+
+- A 从最高成本项目（SDK）开始 — 优先顺序不佳
+- C 跳过基础层（CLAUDE.md）
+- D 安全优先但忽略了需要基本采用后才能做治理
+
+**PM 重点**：基础先行（CLAUDE.md）→ 自动化（GitHub）→ 定制化（commands）→ 治理（hooks）→ programmatic 访问（SDK）。
+</details>
+
+<h3>Question 2：生产力场景</h3>
+<p>团队中一位开发者说"Claude Code 就是个高级 autocomplete"。根据课程，你应该解释什么关键区别？</p>
+<ul>
+<li>A. Claude Code 使用更大的语言模型</li>
+<li>B. Claude Code 在 agentic loop 中运作 — 自主计划、执行工具、观察结果并迭代，不像 autocomplete 只预测下一个 token</li>
+<li>C. Claude Code 可以使用 MCP servers</li>
+<li>D. Claude Code 可以读取 CLAUDE.md 文件</li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**B** — 根本区别在于 agentic loop。Autocomplete 预测行内补全。Claude Code 自主规划多步骤方案、执行工具（文件读写、终端命令）、观察结果并迭代。这是第一章的核心概念（D1 — Agentic Architecture）。
+
+- A 是技术细节，不是架构层面的区分
+- C 和 D 是 agentic 架构中的功能，不是核心差异
+
+**PM 重点**：Agentic loop 是定义性能力。其他一切（MCP、hooks、SDK）都建立在这个自主的 plan-execute-observe 循环之上。
+</details>
+
+<h3>Question 3：自动化场景</h3>
+<p>你的团队想自动化三个任务：(1) PR code review、(2) 强制"production code 中禁止 console.log"策略、(3) 从 PR 描述生成 release notes。哪些 Claude Code 功能对应到每个？</p>
+<ul>
+<li>A. (1) GitHub PR Review Action、(2) PreToolUse hook、(3) Custom command</li>
+<li>B. (1) Custom command、(2) CLAUDE.md 指令、(3) GitHub mention</li>
+<li>C. (1) MCP server、(2) PostToolUse hook、(3) SDK integration</li>
+<li>D. (1) GitHub PR Review Action、(2) PostToolUse hook、(3) Custom command</li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**A** — (1) GitHub PR Review Action 专为自动 code review 设计。(2) PreToolUse hook 可拦截文件写入，检测到 `console.log` 就 block — 这是 blocking 策略强制。(3) Custom command 可模板化 release notes 生成工作流。
+
+- B 用 CLAUDE.md 做策略强制 — 这是指导而非强制（Claude 仍可继续）
+- C 用 PostToolUse 做策略 — PostToolUse 无法 block，只能在事后提供反馈
+- D 用 PostToolUse — 同 C 的问题，无法防止违规
+
+**PM 重点**：Blocking enforcement 需要 PreToolUse（唯一能阻止执行的 tool-level hook）。PostToolUse 是用来观察和反馈的，不是强制的。
+</details>
+</body>
+</html>

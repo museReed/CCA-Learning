@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05 Claude Code Setup Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Claude Code Setup — 工程深度筆記</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D3 — Effective Claude Code Usage (30%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (CLAUDE.md hierarchy — awareness level)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>claude-code-in-action / 02-getting-started / Lesson 05（純文字課程）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><img alt="Installation Methods Platform Grid" src="visuals/installation-methods-platform-grid-zh-TW.svg" /><br />
+<em>圖：各平台安裝方式。</em></p>
+<h2>一句話總結</h2>
+<p>Claude Code 透過單一 CLI 指令即可安裝於 macOS、Linux 或 Windows/WSL，並可選擇性設定 AWS Bedrock 和 Google Cloud Vertex 作為 API provider。</p>
+<hr />
+<h2>安裝方式</h2>
+<p>Claude Code 依作業系統提供多種安裝路徑：</p>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>指令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>macOS (Homebrew)</td>
+<td><code>brew install --cask claude-code</code></td>
+</tr>
+<tr>
+<td>macOS / Linux / WSL</td>
+<td><code>curl -fsSL https://claude.ai/install.sh \| bash</code></td>
+</tr>
+<tr>
+<td>Windows CMD</td>
+<td><code>curl -fsSL https://claude.ai/install.cmd -o install.cmd &amp;&amp; install.cmd &amp;&amp; del install.cmd</code></td>
+</tr>
+</tbody>
+</table>
+<p>安裝完成後，在終端機執行 <code>claude</code>。首次啟動會觸發驗證提示。</p>
+<blockquote>
+<p>💡 <strong>關鍵洞察</strong></p>
+<p>Claude Code 完全在終端機中運行 — 沒有 GUI 應用程式。這是刻意設計：它在開發者已經工作的地方（shell）運作。</p>
+</blockquote>
+<hr />
+<h2>Cloud Provider 設定（選用）</h2>
+<p>如果你的組織透過雲端供應商路由 API 呼叫，而非直接使用 Anthropic API：</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>設定指南</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AWS Bedrock</td>
+<td><a href="https://code.claude.com/docs/en/amazon-bedrock">code.claude.com/docs/en/amazon-bedrock</a></td>
+</tr>
+<tr>
+<td>Google Cloud Vertex</td>
+<td><a href="https://code.claude.com/docs/en/google-vertex-ai">code.claude.com/docs/en/google-vertex-ai</a></td>
+</tr>
+</tbody>
+</table>
+<p>這些適用於有既有雲端合約或資料駐留需求的企業環境。</p>
+<hr />
+<h2>考試重點</h2>
+<table>
+<thead>
+<tr>
+<th>考試概念</th>
+<th>本課教了什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CLAUDE.md hierarchy (3.1)</strong></td>
+<td>認識 Claude Code 是一個 CLI 工具，具有 project-level 設定（CLAUDE.md 在此介紹，Lesson 07 詳述）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>反模式</h2>
+<table>
+<thead>
+<tr>
+<th>反模式</th>
+<th>為何失敗</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>安裝 Claude Code 後期待有 GUI</td>
+<td>Claude Code 設計上就是 CLI-only；它整合進終端機工作流</td>
+</tr>
+<tr>
+<td>首次執行時跳過驗證</td>
+<td><code>claude</code> 指令在驗證前無法使用任何功能</td>
+</tr>
+<tr>
+<td>在企業環境忽略 cloud provider 設定</td>
+<td>如果組織使用 Bedrock/Vertex，直接 API 呼叫可能被阻擋或不合規</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

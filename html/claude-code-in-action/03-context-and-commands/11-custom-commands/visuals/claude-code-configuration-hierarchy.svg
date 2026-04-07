@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 300" font-family="'SF Pro Display', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/>
+    </filter>
+    <linearGradient id="enforcement" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EF4444" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+  <rect width="460" height="300" fill="white" rx="12"/>
+  <text x="230" y="28" text-anchor="middle" font-size="15" font-weight="600" fill="#64748B" letter-spacing="0.5">CONFIGURATION HIERARCHY</text>
+
+  <!-- Enforcement arrow on the left -->
+  <line x1="32" y1="55" x2="32" y2="258" stroke="#CBD5E1" stroke-width="1.5"/>
+  <polygon points="32,52 27,62 37,62" fill="#EF4444"/>
+  <polygon points="32,261 27,251 37,251" fill="#93C5FD"/>
+  <text x="30" y="145" text-anchor="middle" font-size="9" fill="#EF4444" transform="rotate(-90, 30, 145)">STRONGER ENFORCEMENT</text>
+
+  <!-- Layer 1: Hooks (top, strongest) -->
+  <rect x="60" y="48" width="380" height="48" rx="14" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="80" y="77" font-size="20">🛡️</text>
+  <text x="108" y="70" font-size="14" font-weight="700" fill="#DC2626">Hooks</text>
+  <text x="108" y="85" font-size="10" fill="#64748B">Deterministic, code-level enforcement. Runs every time.</text>
+  <rect x="340" y="60" width="85" height="22" rx="11" fill="#DC2626" opacity="0.1"/>
+  <text x="382" y="75" text-anchor="middle" font-size="10" font-weight="600" fill="#DC2626">guaranteed</text>
+
+  <!-- Layer 2: Custom Commands -->
+  <rect x="60" y="104" width="380" height="48" rx="14" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="80" y="133" font-size="20">⚡</text>
+  <text x="108" y="126" font-size="14" font-weight="700" fill="#EA580C">Custom Commands</text>
+  <text x="108" y="141" font-size="10" fill="#64748B">Repeatable workflows, invoked on demand.</text>
+  <rect x="340" y="116" width="85" height="22" rx="11" fill="#EA580C" opacity="0.1"/>
+  <text x="382" y="131" text-anchor="middle" font-size="10" font-weight="600" fill="#EA580C">repeatable</text>
+
+  <!-- Layer 3: CLAUDE.md -->
+  <rect x="60" y="160" width="380" height="48" rx="14" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="80" y="189" font-size="20">📋</text>
+  <text x="108" y="182" font-size="14" font-weight="700" fill="#2563EB">CLAUDE.md</text>
+  <text x="108" y="197" font-size="10" fill="#64748B">Always-on instructions. Loaded every session, best-effort.</text>
+  <rect x="340" y="172" width="85" height="22" rx="11" fill="#2563EB" opacity="0.1"/>
+  <text x="382" y="187" text-anchor="middle" font-size="10" font-weight="600" fill="#2563EB">always-on</text>
+
+  <!-- Layer 4: Memories (bottom, softest) -->
+  <rect x="60" y="216" width="380" height="48" rx="14" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="80" y="245" font-size="20">💡</text>
+  <text x="108" y="238" font-size="14" font-weight="700" fill="#16A34A">Memories</text>
+  <text x="108" y="253" font-size="10" fill="#64748B">Personal corrections, accumulated over time.</text>
+  <rect x="340" y="228" width="85" height="22" rx="11" fill="#16A34A" opacity="0.1"/>
+  <text x="382" y="243" text-anchor="middle" font-size="10" font-weight="600" fill="#16A34A">adaptive</text>
+
+  <text x="230" y="290" text-anchor="middle" font-size="10" fill="#94A3B8">Higher layers override lower layers. Use the lightest tool that gets the job done.</text>
+</svg>

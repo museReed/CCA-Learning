@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>18 Useful Hooks Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Useful Hooks — 工程师视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试对应</td>
+<td>D3 — Claude Code Configuration &amp; Workflows（占 20%）、D1 — Agentic Architecture（占 27%）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.5（Agent SDK hooks：tool call interception &amp; data normalization）、3.2（custom commands &amp; hooks）、1.2（multi-agent coordinator-subagent patterns）</td>
+</tr>
+<tr>
+<td>课程来源</td>
+<td>claude-code-in-action / 05-hooks / Lesson 18</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话理解</h2>
+<p>PostToolUse hook 可以在每次编辑后跑 compiler/linter 检查（type-checking hook），也可以启动另一个 Claude Code instance 来 review 改动是否有重复代码（query deduplication hook）——两者都建立了<strong>不需人工介入的 self-correcting feedback loop</strong>。</p>
+<hr />
+<h2>问题：Claude 看不见的地方就会坏掉</h2>
+<p>当 Claude 修改一个 function signature 时，它会更新定义文件但常常漏掉其他文件的 call site。就像 iOS 开发者改了一个 protocol method 的 signature，如果没有 compiler 帮你检查所有 conformance，坏掉的 call site 就会溜走。</p>
+<p>在 TypeScript 项目里：<br />
+1. <code>schema.ts</code> 定义了 <code>createSchema()</code><br />
+2. <code>main.ts</code> 调用 <code>createSchema()</code><br />
+3. 你请 Claude 在 <code>createSchema()</code> 加一个 <code>verbose: boolean</code> 参数<br />
+4. Claude 更新了 <code>schema.ts</code> 但<strong>没有更新 <code>main.ts</code></strong><br />
+5. 结果：call site 出现 type error，但 Claude 完全没发现</p>
+<blockquote>
+<p>🎬 <strong>视频补充</strong></p>
+<p>讲师现场演示了这个场景——Claude 成功编辑了 function 定义，但留下了坏掉的 <code>main.ts</code>。关键洞察：Claude 不会自动跑 TypeScript compiler，所以它不知道项目其他地方出了问题。</p>
+</blockquote>
+<hr />
+<p><img alt="型別檢查回饋迴路" src="visuals/type-check-feedback-loop-zh-TW.svg" /><br />
+<em>圖：TypeScript 型別檢查回饋迴路 — PostToolUse 執行 tsc，錯誤回饋給 Claude 自動修正。</em></p>
+<h2>Hook 1：TypeScript Type-Checking Hook</h2>
+<h3>运作方式</h3>
+<p>一个 PostToolUse hook，在每次文件编辑后跑 <code>tsc --noEmit</code>：</p>
+<pre class="highlight"><code class="language-json">&quot;PostToolUse&quot;: [
+  {
+    &quot;matcher&quot;: &quot;Write|Edit|MultiEdit&quot;,
+    &quot;hooks&quot;: [
+      {
+        &quot;type&quot;: &quot;command&quot;,
+        &quot;command&quot;: &quot;node hooks/tsc.js&quot;
+      }
+    ]
+  }
+]
+</code></pre>
+
+<p>Hook 脚本：<br />
+1. 执行 <code>tsc --noEmit</code>（只做 type check，不生成输出文件）<br />
+2. 捕获所有 compiler errors<br />
+3. 如果有错误，以 exit code 2 结束并输出错误信息<br />
+4. Claude 收到错误反馈，在下一轮自动修正</p>
+<blockquote>
+<p>💡 <strong>工程类比</strong></p>
+<p>这跟 Xcode 的 build system 一模一样——你编辑了一个 <code>.swift</code> 文件，compiler 就会 incrementally check 所有依赖的文件。这个 hook 替 Claude Code 复制了这个 compiler feedback loop。</p>
+</blockquote>
+<h3>扩展到其他语言</h3>
+<table>
+<thead>
+<tr>
+<th>语言</th>
+<th>Hook 命令</th>
+<th>检查内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TypeScript</td>
+<td><code>tsc --noEmit</code></td>
+<td>整个项目的 type errors</td>
+</tr>
+<tr>
+<td>Python</td>
+<td><code>mypy .</code> 或 <code>pyright</code></td>
+<td>Type annotation 违规</td>
+</tr>
+<tr>
+<td>Rust</td>
+<td><code>cargo check</code></td>
+<td>Borrow checker + type errors</td>
+</tr>
+<tr>
+<td>Go</td>
+<td><code>go vet ./...</code></td>
+<td>Static analysis 问题</td>
+</tr>
+<tr>
+<td>无类型 JS/Python</td>
+<td><code>npm test</code> 或 <code>pytest</code></td>
+<td>用测试当作 type checking 的替代</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>性能考量</strong></p>
+<p>TypeScript hook 算轻量——在中型项目上 <code>tsc --noEmit</code> 大概 2-5 秒。大型项目可以考虑只检查有改动的文件。</p>
+</blockquote>
+<hr />
+<h2>第二个问题：大型项目的代码重复</h2>
+<p>当 Claude 收到复杂的多步骤任务（例如「建一个 Slack 集成，通知 pending 超过时间的订单」），它可能会失焦而写出重复的功能，而不是重用既有代码。</p>
+<h3>场景</h3>
+<ul>
+<li><code>src/queries/orderQueries.ts</code> 已经有 <code>getPendingOrders()</code></li>
+<li>你请 Claude：「创建一个 Slack 集成，通知 pending 超过 3 天的订单」</li>
+<li><strong>聚焦任务</strong>：Claude 找到并重用 <code>getPendingOrders()</code> — 正确</li>
+<li><strong>复杂任务</strong>（<code>/clear</code> 之后）：Claude 写了一个全新的 <code>getOrdersPendingTooLong()</code> — 重复代码</li>
+</ul>
+<blockquote>
+<p>🎬 <strong>视频补充</strong></p>
+<p>讲师展示了当任务简单聚焦（「打印 pending 订单」），Claude 会重用既有的 query。但当同样的需求被包在更大的任务里（Slack 集成），Claude 就建了新的 duplicate。Context window 和任务复杂度直接影响 Claude 发现既有代码的能力。</p>
+</blockquote>
+<hr />
+<h2>Hook 2：Query Duplication Prevention Hook</h2>
+<p><img alt="多 Agent 審查" src="visuals/multi-agent-review-zh-TW.svg" /><br />
+<em>圖：多 Agent 審查模式 — PostToolUse hook 啟動第二個 Claude 實例審查變更。</em></p>
+<h3>架构</h3>
+<p>这个 hook 使用 <strong>multi-agent review pattern</strong> — 一个 Claude instance 审查另一个的工作：</p>
+<pre class="highlight"><code>Claude（主要）写入 queries/ 目录
+    ↓
+PostToolUse hook 触发
+    ↓
+Hook 启动第二个 Claude Code instance（通过 TypeScript SDK）
+    ↓
+第二个 instance 对比既有 queries 审查改动
+    ↓
+发现重复：exit code 2 + 反馈 → 主要 Claude 移除 duplicate
+没有重复：exit code 0 → 主要 Claude 继续
+</code></pre>
+
+<h3>配置</h3>
+<pre class="highlight"><code class="language-json">&quot;PostToolUse&quot;: [
+  {
+    &quot;matcher&quot;: &quot;Write|Edit|MultiEdit&quot;,
+    &quot;hooks&quot;: [
+      {
+        &quot;type&quot;: &quot;command&quot;,
+        &quot;command&quot;: &quot;node hooks/query-hook.js&quot;
+      }
+    ]
+  }
+]
+</code></pre>
+
+<p>Hook 脚本逻辑：<br />
+1. 检查改动的文件是否在 <code>./queries</code> 目录下（不在就 early exit）<br />
+2. 构建一段 prompt，请 Claude review 改动是否有 duplicate<br />
+3. 通过 <strong>TypeScript SDK</strong>（<code>@anthropic-ai/claude-code</code> 包）启动独立的 Claude Code instance<br />
+4. 解析响应——如果找到 duplicate，exit code 2 并附带反馈信息<br />
+5. 主要 Claude 收到反馈后重构，改用既有的 query</p>
+<blockquote>
+<p>💡 <strong>这是 hook 里面的 multi-agent pattern</strong></p>
+<p>Query hook 本质上是 coordinator-subagent pattern（Task Statement 1.2）嵌入 hook 系统（Task Statement 1.5）里。「reviewer」subagent 的 context 是 scoped 的——它只看 queries 目录，不是整个项目。这符合考试的核心哲学：<strong>Scoped context &gt; Full history</strong>。</p>
+</blockquote>
+<h3>权衡</h3>
+<table>
+<thead>
+<tr>
+<th>好处</th>
+<th>代价</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>更干净的 codebase，更少重复</td>
+<td>每次编辑增加 ~10-30 秒</td>
+</tr>
+<tr>
+<td>query 组织更一致</td>
+<td>额外的 API 使用量（第二个 Claude instance）</td>
+</tr>
+<tr>
+<td>抓住 Claude 会遗漏的 duplicate</td>
+<td>只适用于关键目录</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>最佳做法：限制监控范围</strong></p>
+<p>讲师明确建议只监控「少数几个目录，像是项目里真正重要的文件夹，尽量减少额外的工作量。」</p>
+</blockquote>
+<hr />
+<h2>Anti-Patterns（考试常考）</h2>
+<table>
+<thead>
+<tr>
+<th>❌ 错误做法</th>
+<th>✅ 正确做法</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在 system prompt 加「永远跑 type checker」</td>
+<td>PostToolUse hook 跑 <code>tsc --noEmit</code></td>
+<td>Prompt 是 probabilistic；hook 是 deterministic</td>
+</tr>
+<tr>
+<td>叫 Claude「写之前先检查有没有重复」</td>
+<td>PostToolUse hook 搭配独立 reviewer instance</td>
+<td>复杂任务中 Claude 会失焦——视频已演示</td>
+</tr>
+<tr>
+<td>用 duplication hook 监控所有目录</td>
+<td>只 scope 到关键目录</td>
+<td>非关键目录的性能代价大于收益</td>
+</tr>
+<tr>
+<td>用 PreToolUse 阻止 duplicate 写入</td>
+<td>用 PostToolUse review 并提供反馈</td>
+<td>要先看到写了什么才能判断是否 duplicate</td>
+</tr>
+<tr>
+<td>依赖 Claude 自己找到既有代码</td>
+<td>自动化 review 作为安全网</td>
+<td>Claude 发现既有代码的能力会随任务复杂度下降</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA 考试关联</h2>
+<blockquote>
+<p>🎯 <strong>这些概念会出现在哪些考试场景</strong></p>
+<ul>
+<li><strong>S2（Code Generation）</strong>：TypeScript type-checking hook = 确保生成的代码质量</li>
+<li><strong>S4（Developer Productivity）</strong>：两个 hook 都通过自动抓问题改善开发流程</li>
+<li><strong>S5（CI/CD）</strong>：CI pipeline 中的 hook 作为自动化质量关卡</li>
+</ul>
+<p><strong>常见题型</strong>：「Claude 修改了 function 但破坏了其他地方的 call site。最佳做法是什么？」<br />
+答案方向：PostToolUse hook 跑 compiler/type checker — Architecture &gt; Prompt。</p>
+</blockquote>
+<hr />
+<h2>模拟考题</h2>
+<h3>第一题：Code Generation 场景</h3>
+<p>你的团队用 Claude Code 开发一个 200+ 文件的 TypeScript 项目。工程师反馈 Claude 修改 function signature 时，经常破坏其他文件的 call site。最有效的解决方案是什么？</p>
+<ul>
+<li>A. 在 CLAUDE.md 加上指示：「修改任何 function signature 后，搜索并更新所有 call sites」</li>
+<li>B. 配置 PostToolUse hook，在每次编辑后跑 <code>tsc --noEmit</code> 并把 type errors 反馈给 Claude</li>
+<li>C. 改用 <code>--resume</code> flag 让 Claude 保留它看过的所有文件的 context</li>
+<li>D. 用 PreToolUse hook 禁止 Claude 修改 function signatures</li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**B** — PostToolUse hook 跑 TypeScript compiler 提供 deterministic 的反馈。Claude 收到 context 里的 type errors 后会自动修正。
+
+- A 是 prompt-based，有非零失败率，大型项目尤其严重
+- C 无法保证 Claude 会记住或重新检查所有 call sites
+- D 阻止了正当工作——目标不是禁止 signature 修改，而是要抓住下游影响
+
+考试哲学：**Architecture > Prompt**、**Deterministic > Probabilistic**
+</details>
+
+<h3>第二题：Developer Productivity 场景</h3>
+<p>在一个有很多 SQL query 文件的大型项目中，Claude 有时候会创建 duplicate queries，而不是重用既有的。这在 query 相关任务被包在更大的多步骤任务里时最常发生。最佳做法是什么？</p>
+<ul>
+<li>A. 用 few-shot examples 展示 Claude 应该先搜索既有 queries</li>
+<li>B. 配置 PostToolUse hook，启动另一个 Claude instance 来 review query 改动是否有 duplicate</li>
+<li>C. 把所有 queries 合并到一个文件，让 Claude 一次看到全部</li>
+<li>D. 每次给 Claude 新任务前都先用 <code>/clear</code> 避免 context 干扰</li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**B** — 独立的 reviewer instance 提供 independent check（考试哲学：**Independent review > Self-review**）。Hook 抓住主要 instance 因任务复杂度而遗漏的 duplicate。
+
+- A 是 prompt-based，视频已经演示了这个失败模式——复杂任务中 Claude 会漏掉既有代码
+- C 创建了一个巨大的文件，可能超出 Claude 的注意力容量，而且是糟糕的代码组织
+- D 移除了有用的 context，没有解决根本原因
+
+考试哲学：**Architecture > Prompt**、**Independent review > Self-review**、**Scoped context > Full history**
+</details>
+
+<h3>第三题：Multi-Agent 架构场景</h3>
+<p>你在设计一个 PostToolUse hook，会启动另一个 Claude Code instance 来 review 改动。对于 reviewer instance，最重要的考量是什么？</p>
+<ul>
+<li>A. 给它完整的项目 context，让它做出全面的判断</li>
+<li>B. 把它的 context scope 到只看相关目录和正在 review 的具体改动</li>
+<li>C. 让它跟主要 Claude instance 在同一个 session 里跑</li>
+<li>D. 改成 PreToolUse hook，这样可以在改动发生前就阻止</li>
+</ul>
+<details><summary>答案与解析</summary>
+
+**B** — Scoped context 是考试核心原则。Reviewer subagent 只需要看到它需要的东西——相关目录和改动。完整项目 context（A）浪费 token 且可能稀释焦点。同一 session（C）不符合 hook 架构的运作方式——hook 启动的是独立 process。PreToolUse（D）无法 review 一个还没发生的改动。
+
+考试哲学：**Scoped context > Full history**
+</details>
+</body>
+</html>

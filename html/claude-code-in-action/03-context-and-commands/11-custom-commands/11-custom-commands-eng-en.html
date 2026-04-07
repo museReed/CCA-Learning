@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11 Custom Commands Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Custom Commands — Engineering Deep Dive</h1>
+<p><img alt="Custom Commands Scope Architecture" src="visuals/custom-commands-scope-architecture.svg" /><br />
+<em>Figure: Custom commands scope — project vs user level.</em></p>
+<p><img alt="Custom Command Mechanism" src="visuals/custom-command-mechanism.svg" /><br />
+<em>Figure: Custom commands — markdown files become slash commands.</em></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration &amp; Workflows (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 ★★★ (custom commands &amp; skills), 3.1 ★★ (CLAUDE.md config)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>claude-code-in-action / 03-context-and-commands / Lesson 11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Custom commands are reusable prompt templates stored as markdown files in <code>.claude/commands/</code>. They turn repeatable workflows into one-liner slash commands, with <code>$ARGUMENTS</code> as the injection point for dynamic input.</p>
+<hr />
+<h2>How Custom Commands Work</h2>
+<p>Custom commands extend Claude Code's built-in <code>/</code> commands with your own project-specific shortcuts. The mechanism is simple:</p>
+<ol>
+<li>Create a <code>.md</code> file inside <code>.claude/commands/</code></li>
+<li>The filename becomes the command name (e.g., <code>audit.md</code> → <code>/audit</code>)</li>
+<li>The file contents become the prompt sent to Claude</li>
+<li>Use <code>$ARGUMENTS</code> anywhere in the file as a placeholder for runtime input</li>
+<li>Restart Claude Code to pick up new commands</li>
+</ol>
+<blockquote>
+<p>💡 <strong>Key mental model</strong></p>
+<p>Custom commands are <strong>saved prompts with a trigger</strong>, not scripts. They do not execute code directly — they instruct Claude what to do. Think of them as prompt templates, not shell scripts.</p>
+</blockquote>
+<hr />
+<h2>Creating Your First Command</h2>
+<h3>Example 1: Dependency Audit</h3>
+<pre class="highlight"><code># File: .claude/commands/audit.md
+
+
+![Claude Code Configuration Hierarchy](visuals/claude-code-configuration-hierarchy.svg)
+*Figure: Claude Code configuration hierarchy.*
+
+Review all dependencies installed in this project.
+Check for known vulnerabilities and outdated packages.
+If any vulnerabilities are found, update the affected packages.
+After updating, run the test suite to verify nothing broke.
+</code></pre>
+
+<p>Usage: <code>/audit</code></p>
+<h3>Example 2: Write Tests (with Arguments)</h3>
+<pre class="highlight"><code># File: .claude/commands/write_tests.md
+
+Write comprehensive tests for $ARGUMENTS.
+Follow the existing test patterns in this project.
+Run the tests after writing them to make sure they pass.
+</code></pre>
+
+<p>Usage: <code>/write_tests src/auth.ts</code> or <code>/write_tests the validation utilities in src/utils/</code></p>
+<blockquote>
+<p>🎬 <strong>Instructor insight from the video</strong></p>
+<p>The instructor emphasizes that <code>$ARGUMENTS</code> is not limited to file paths. You can pass any string — a description, a feature name, or even natural language instructions. The placeholder is simply text substitution.</p>
+</blockquote>
+<hr />
+<h2>Command Scope: Project vs User</h2>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Path</th>
+<th>Visible To</th>
+<th>In Git?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project</td>
+<td><code>.claude/commands/</code></td>
+<td>Whole team</td>
+<td><strong>Yes</strong> (committed)</td>
+</tr>
+<tr>
+<td>User</td>
+<td><code>~/.claude/commands/</code></td>
+<td>Just you</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>Exam note</strong></p>
+<p>Project-scoped commands in <code>.claude/commands/</code> are the exam-relevant scope. They represent <strong>team conventions codified as commands</strong> — a key concept tested under D3. This follows the exam philosophy of <strong>Architecture &gt; Prompt</strong> — rather than telling each developer how to audit dependencies, you create a command that encodes the process.</p>
+</blockquote>
+<hr />
+<h2>Practical Command Ideas</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+<th>Arguments?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/audit</code></td>
+<td>Check dependencies for vulnerabilities, update, run tests</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>/write_tests</code></td>
+<td>Generate tests for a specific file or module</td>
+<td>Yes — file path or description</td>
+</tr>
+<tr>
+<td><code>/review</code></td>
+<td>Review code changes for common issues</td>
+<td>Yes — file path or PR number</td>
+</tr>
+<tr>
+<td><code>/doc</code></td>
+<td>Generate documentation for a module</td>
+<td>Yes — module name</td>
+</tr>
+<tr>
+<td><code>/migrate</code></td>
+<td>Create a database migration for a schema change</td>
+<td>Yes — description of change</td>
+</tr>
+<tr>
+<td><code>/refactor</code></td>
+<td>Refactor a file following project conventions</td>
+<td>Yes — file path</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Analogies for Engineers</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Custom commands</td>
+<td>Shell aliases or Makefile targets — shortcuts for common workflows</td>
+</tr>
+<tr>
+<td><code>.claude/commands/</code> directory</td>
+<td><code>.github/workflows/</code> — project-level automation config</td>
+</tr>
+<tr>
+<td><code>$ARGUMENTS</code></td>
+<td><code>$1</code> in bash scripts — positional parameter substitution</td>
+</tr>
+<tr>
+<td>Project-scoped commands</td>
+<td>ESLint config committed to repo — team-wide conventions</td>
+</tr>
+<tr>
+<td>Restarting Claude Code after adding</td>
+<td><code>source ~/.zshrc</code> — reload config to pick up changes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Anti-Patterns</h2>
+<table>
+<thead>
+<tr>
+<th>Anti-Pattern</th>
+<th>Problem</th>
+<th>Better Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Putting complex logic in commands</td>
+<td>Commands are prompts, not scripts — Claude may interpret ambiguously</td>
+<td>Keep commands focused; use hooks for deterministic logic</td>
+</tr>
+<tr>
+<td>Not committing commands to the repo</td>
+<td>Team members do not benefit from shared workflows</td>
+<td>Store in <code>.claude/commands/</code> and commit</td>
+</tr>
+<tr>
+<td>Hardcoding file paths in commands</td>
+<td>Breaks when project structure changes</td>
+<td>Use <code>$ARGUMENTS</code> for dynamic paths</td>
+</tr>
+<tr>
+<td>Creating commands for one-off tasks</td>
+<td>Adds clutter without reuse value</td>
+<td>Commands are for <strong>repeatable</strong> workflows</td>
+</tr>
+<tr>
+<td>Forgetting to restart Claude Code</td>
+<td>New commands are not loaded until restart</td>
+<td>Always restart after adding/modifying commands</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Exam Focus: Commands vs Hooks vs CLAUDE.md</h2>
+<p>This is a frequently tested distinction in D3:</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>What It Does</th>
+<th>When to Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Custom Commands</strong></td>
+<td>Reusable prompt templates triggered by <code>/name</code></td>
+<td>Repeatable workflows (audit, test, review)</td>
+</tr>
+<tr>
+<td><strong>CLAUDE.md</strong></td>
+<td>Always-loaded project instructions</td>
+<td>Persistent conventions (coding style, project structure)</td>
+</tr>
+<tr>
+<td><strong>Hooks</strong></td>
+<td>Programmatic middleware on tool execution</td>
+<td>Deterministic enforcement (block writes, auto-format)</td>
+</tr>
+<tr>
+<td><strong>Memories</strong></td>
+<td>Personal persistent notes</td>
+<td>Individual preferences and corrections</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>Decision rule</strong></p>
+<ul>
+<li>"Every time I do X, I type the same long prompt" → <strong>Custom command</strong></li>
+<li>"Claude should always know Y about this project" → <strong>CLAUDE.md</strong></li>
+<li>"Z must never happen / must always happen" → <strong>Hook</strong></li>
+<li>"Claude keeps getting W wrong for me personally" → <strong>Memory</strong></li>
+</ul>
+</blockquote>
+<p>Core exam philosophy: <strong>Architecture &gt; Prompt</strong> — custom commands codify team workflows into the project structure, making them discoverable, versionable, and consistent.</p>
+<hr />
+<h2>Practice Questions</h2>
+<h3>Q1: Code Generation Scenario</h3>
+<p>Your team frequently asks Claude Code to generate API endpoint boilerplate. Each developer types a slightly different prompt, leading to inconsistent code patterns. What is the best way to standardize this workflow?</p>
+<ul>
+<li>A. Add boilerplate instructions to CLAUDE.md</li>
+<li>B. Create a custom command in <code>.claude/commands/endpoint.md</code> with <code>$ARGUMENTS</code> for the endpoint name</li>
+<li>C. Create a PreToolUse hook that enforces boilerplate structure</li>
+<li>D. Share a text file with the recommended prompt for all developers to copy-paste</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — A custom command standardizes the prompt across the team while allowing dynamic input via `$ARGUMENTS`. Since it lives in `.claude/commands/`, it is committed to the repo and available to all team members.
+
+- A would work for always-on conventions but is too heavy for an on-demand workflow
+- C is for deterministic enforcement, not prompt templating
+- D is manual and error-prone — developers will modify it over time
+
+Exam philosophy: **Architecture > Prompt** — encode the workflow in project structure, not in tribal knowledge.
+</details>
+
+<h3>Q2: Developer Productivity Scenario</h3>
+<p>You created a new custom command file at <code>.claude/commands/lint_fix.md</code>, but when you type <code>/lint_fix</code> in Claude Code, the command does not appear. What is the most likely cause?</p>
+<ul>
+<li>A. The file must be named <code>lint-fix.md</code> with a hyphen instead of underscore</li>
+<li>B. You need to restart Claude Code to load new commands</li>
+<li>C. Custom commands only work with <code>$ARGUMENTS</code></li>
+<li>D. The file must be in <code>~/.claude/commands/</code> instead</li>
+</ul>
+<details><summary>Answer</summary>
+
+**B** — Custom commands are loaded at startup. After creating or modifying a command file, you must restart Claude Code for it to appear in the command list.
+
+- A is incorrect — underscores work fine in command names
+- C is incorrect — `$ARGUMENTS` is optional
+- D is incorrect — `.claude/commands/` (project scope) is valid and is the recommended location for team-shared commands
+
+This is a practical knowledge question — the video explicitly mentions the restart requirement.
+</details>
+</body>
+</html>

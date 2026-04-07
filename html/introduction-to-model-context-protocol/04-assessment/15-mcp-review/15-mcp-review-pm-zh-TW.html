@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15 Mcp Review Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>MCP 複習 — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試範疇</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server primitives), 2.4-2.6 (resource/tool/prompt design), 1.1 (agentic architecture)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>introduction-to-model-context-protocol / 04-assessment / Lesson 15</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>MCP 有三個 AI 產品建構模組 — Tools（AI 決定）、Resources（app 決定）、Prompts（使用者決定）— 知道該用哪個是 PM 影響的最重要架構決策。</p>
+<hr />
+<p><img alt="Three Primitives" src="visuals/three-primitives-zh-TW.svg" /></p>
+<h2>三大建構模組：商業類比</h2>
+<p>把 MCP 驅動的產品想像成一間<strong>智慧辦公室</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>建構模組</th>
+<th>辦公室類比</th>
+<th>誰決定</th>
+<th>產品範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>你請的專業顧問 — 他們決定跑什麼分析、何時跑</td>
+<td>Claude（AI）</td>
+<td>Claude 在幕後執行計算</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>研究助理在會議前預先收集簡報資料</td>
+<td>你的 app</td>
+<td>Google Drive 文件注入聊天 context</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>員工遵循的作業手冊 — 他們選擇何時使用</td>
+<td>使用者</td>
+<td>使用者點擊「摘要」工作流程按鈕</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>為什麼 PM 需要理解</h2>
+<p>你規格的每個 AI 功能都歸入三個類別之一，基於<strong>誰應該控制它</strong>：</p>
+<h3>1. Tools — 「讓 AI 決定」</h3>
+<p><strong>何時使用</strong>：AI 需要能力來自主完成任務。</p>
+<table>
+<thead>
+<tr>
+<th>產品場景</th>
+<th>為什麼用 Tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI 在聊天中計算運費</td>
+<td>AI 決定何時需要計算</td>
+</tr>
+<tr>
+<td>AI 查詢庫存資料庫</td>
+<td>AI 根據對話決定檢查庫存</td>
+</tr>
+<tr>
+<td>AI 發送通知 email</td>
+<td>AI 決定發送的正確時機</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM 考量</strong>：Tools 對使用者不可見。使用者不點按鈕；AI 自己決定。</p>
+<h3>2. Resources — 「讓 App 決定」</h3>
+<p><strong>何時使用</strong>：你的應用需要資料用於顯示或預載 context。</p>
+<table>
+<thead>
+<tr>
+<th>產品場景</th>
+<th>為什麼用 Resources</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自動完成下拉顯示可用文件</td>
+<td>App 為 UI 取得列表</td>
+</tr>
+<tr>
+<td>使用者輸入 <code>@report.pdf</code> 引用檔案</td>
+<td>App 將內容注入 prompt</td>
+</tr>
+<tr>
+<td>側邊欄顯示相關文件</td>
+<td>App 決定什麼 context 相關</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM 考量</strong>：Resources 讓體驗感覺即時。資料在 AI 開始思考前就預載好了。</p>
+<h3>3. Prompts — 「讓使用者決定」</h3>
+<p><strong>何時使用</strong>：你想要使用者明確觸發的預定義、可重複工作流程。</p>
+<table>
+<thead>
+<tr>
+<th>產品場景</th>
+<th>為什麼用 Prompts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/format</code> slash command</td>
+<td>使用者決定重新格式化</td>
+</tr>
+<tr>
+<td>「生成週報」按鈕</td>
+<td>使用者按需觸發</td>
+</tr>
+<tr>
+<td>「翻譯成西班牙文」選單選項</td>
+<td>使用者啟動工作流程</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM 考量</strong>：Prompts 封裝專業知識。使用者不需要自己寫指令就能獲得專家級結果。</p>
+<hr />
+<h2>PM 決策框架</h2>
+<p>撰寫 AI 功能的 PRD 時，用這個流程：</p>
+<p><strong>問題 1</strong>：「誰應該決定何時發生？」<br />
+- <strong>AI 自主決定</strong> → Tool<br />
+- <strong>App 預載資料</strong> → Resource<br />
+- <strong>使用者明確觸發</strong> → Prompt</p>
+<p><strong>問題 2</strong>：「這涉及讀取資料還是執行動作？」<br />
+- <strong>讀取資料用於顯示或 context</strong> → Resource<br />
+- <strong>執行有潛在副作用的動作</strong> → Tool<br />
+- <strong>遵循預定義工作流程</strong> → Prompt</p>
+<p><strong>問題 3</strong>：「如果出錯會怎樣？」<br />
+- <strong>嚴重後果（財務、合規）</strong> → Tool + 防護（hooks）<br />
+- <strong>輕微 UX 問題</strong> → 任何 primitive，按控制模型選<br />
+- <strong>工作流程不一致</strong> → Prompt（為了可重複性）</p>
+<hr />
+<h2>它們如何協作：一個產品故事</h2>
+<p>想像一個文件管理 AI 助手：</p>
+<ol>
+<li><strong>Resources</strong> 驅動 <code>@mention</code> 自動完成 — 使用者輸入 <code>@</code> 時，app 從 MCP server 取得可用文件</li>
+<li><strong>Prompts</strong> 驅動 <code>/format</code> 命令 — 使用者選擇文件並觸發格式化工作流程</li>
+<li><strong>Tools</strong> 驅動實際編輯 — Claude 使用 <code>edit_document</code> tool 以 markdown 重寫內容</li>
+</ol>
+<p>三個 primitives 都需要。Resources 處理資料，prompts 處理工作流程，tools 處理動作。</p>
+<hr />
+<h2>PM 在 Primitive 選擇上的常見錯誤</h2>
+<table>
+<thead>
+<tr>
+<th>錯誤</th>
+<th>後果</th>
+<th>正確做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>對唯讀資料顯示指定 tool</td>
+<td>更慢的 UX（tool call 開銷）</td>
+<td>用 resource — 即時 context 注入</td>
+</tr>
+<tr>
+<td>對使用者觸發的工作流程指定 tool</td>
+<td>結果不一致（AI 可能不完全遵循）</td>
+<td>用 prompt — 測試過的模板，一致的輸出</td>
+</tr>
+<tr>
+<td>對有副作用的動作指定 resource</td>
+<td>違反唯讀契約</td>
+<td>用 tool — 只有 tools 該有副作用</td>
+</tr>
+<tr>
+<td>對自主 AI 行為指定 prompt</td>
+<td>使用者每次都要手動觸發</td>
+<td>用 tool — 讓 AI 決定</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>主表格：考試準備總結</h2>
+<table>
+<thead>
+<tr>
+<th>面向</th>
+<th>Tools</th>
+<th>Resources</th>
+<th>Prompts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>控制者</td>
+<td>AI（model）</td>
+<td>App 程式碼</td>
+<td>使用者</td>
+</tr>
+<tr>
+<td>觸發</td>
+<td>AI 推理</td>
+<td>App 邏輯</td>
+<td><code>/</code> 命令或按鈕</td>
+</tr>
+<tr>
+<td>副作用？</td>
+<td>有</td>
+<td>無（唯讀）</td>
+<td>無（只有訊息）</td>
+</tr>
+<tr>
+<td>UX 模式</td>
+<td>不可見</td>
+<td><code>@mention</code></td>
+<td>Slash commands</td>
+</tr>
+<tr>
+<td>產品類比</td>
+<td>顧問</td>
+<td>研究助理</td>
+<td>作業手冊</td>
+</tr>
+<tr>
+<td>考試關鍵字</td>
+<td>「自主地」、「Claude 決定」</td>
+<td>「預載」、「UI 資料」</td>
+<td>「工作流程」、「slash command」</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>三方控制模型是產品設計和 CCA 考試中最重要的單一概念。每個「該用哪個 primitive？」的問題都歸結為：「誰應該控制這個互動？」Model = Tool、App = Resource、User = Prompt。掌握這個框架就能回答任何 D2 情境題。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：這是總結概念。知道三個 primitives、它們的控制模型、以及何時使用。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：控制模型對應架構層 — 模型層（tools）、應用層（resources）、使用者層（prompts）。</li>
+<li><strong>考試策略</strong>：讀情境、辨識控制者（誰決定行動）、選對應的 primitive。這對 90%+ 的 D2 題目有效。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 三個 server primitives 及其控制者是什麼？</td>
+<td>Tools（Claude model-controlled）、Resources（app 程式碼 controlled）、Prompts（使用者 controlled）</td>
+</tr>
+<tr>
+<td>解決大多數「哪個 primitive？」決策的單一問題是什麼？</td>
+<td>「誰應該控制這個互動？」— Model = Tool、App = Resource、User = Prompt</td>
+</tr>
+<tr>
+<td>三個 MCP primitives 的辦公室類比是什麼？</td>
+<td>Tools = 專業顧問（AI 決定）、Resources = 研究助理（app 預先收集）、Prompts = 作業手冊（使用者遵循）</td>
+</tr>
+<tr>
+<td>PM 何時該在 PRD 中指定 Tool？</td>
+<td>AI 需要自主決定執行動作時（計算、API 呼叫、副作用）</td>
+</tr>
+<tr>
+<td>PM 何時該在 PRD 中指定 Resource？</td>
+<td>App 需要唯讀資料用於 UI 顯示或在 AI 推理前預載 context</td>
+</tr>
+<tr>
+<td>PM 何時該在 PRD 中指定 Prompt？</td>
+<td>使用者應明確觸發預定義、可重複工作流程時（slash commands、按鈕）</td>
+</tr>
+<tr>
+<td>PM 在 primitive 選擇中最大的錯誤是什麼？</td>
+<td>該用 Resource 的場景用了 Tool — 為唯讀資料增加延遲和 tool call 開銷</td>
+</tr>
+<tr>
+<td>三個 primitives 在產品中如何協作？</td>
+<td>Resources 供給資料到 UI、Prompts 讓使用者觸發工作流程、Tools 讓 Claude 執行動作完成工作流程</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

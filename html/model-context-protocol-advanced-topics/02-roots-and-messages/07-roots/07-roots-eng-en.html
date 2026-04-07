@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 Roots Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Roots — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (MCP security model), 2.3 (MCP server capabilities)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / Lesson 07</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Roots grant MCP servers access to specific files and directories, solving the file path discovery problem while providing a security boundary that limits what the server can access.</p>
+<hr />
+<p><img alt="Roots Access" src="visuals/roots-access.svg" /></p>
+<h2>The Problem Roots Solve</h2>
+<p>Without roots, an MCP server that works with files faces a fundamental problem: <strong>how does it know where to look?</strong></p>
+<ul>
+<li>Claude cannot search the entire filesystem</li>
+<li>Users should not need to type full paths like <code>/Users/reed/Documents/project/src/main.py</code></li>
+<li>The server has no context about the user's workspace</li>
+</ul>
+<p>Roots solve this by giving the server a list of approved starting points.</p>
+<hr />
+<h2>How Roots Work</h2>
+<p>The flow is straightforward:</p>
+<pre class="highlight"><code>Client                     Server
+  |                          |
+  |-- list_roots() ---------&gt;|  (server asks: &quot;what can I access?&quot;)
+  |&lt;-- [Root(&quot;/projects&quot;),   |
+  |     Root(&quot;/data&quot;)]  -----|  (client answers: &quot;these directories&quot;)
+  |                          |
+  |                          |-- read_dir(&quot;/projects&quot;) --&gt;
+  |                          |-- find target file -------&gt;
+  |                          |-- use tool on file -------&gt;
+</code></pre>
+
+<ol>
+<li>Server calls <code>list_roots()</code> to discover approved directories</li>
+<li>Server reads those directories to find files</li>
+<li>Server operates only within the root boundaries</li>
+</ol>
+<hr />
+<h2>Server-Side: Using Roots</h2>
+<pre class="highlight"><code class="language-python">@mcp.tool()
+async def find_and_read(ctx: Context, filename: str) -&gt; str:
+    # Step 1: Get the approved roots
+    roots = await ctx.session.list_roots()
+
+    # Step 2: Search within roots
+    for root in roots:
+        root_path = Path(root.uri.replace(&quot;file://&quot;, &quot;&quot;))
+        for path in root_path.rglob(filename):
+            if path.is_file():
+                return path.read_text()
+
+    return f&quot;File '{filename}' not found in any root&quot;
+</code></pre>
+
+<p>Key details:<br />
+- Roots are returned as URIs (e.g., <code>file:///Users/reed/project</code>)<br />
+- The server must convert URIs to filesystem paths<br />
+- <code>rglob()</code> searches recursively within each root</p>
+<hr />
+<h2>Client-Side: Declaring Roots</h2>
+<p>The client defines which directories the server may access:</p>
+<pre class="highlight"><code class="language-python">from mcp import Root
+
+roots = [
+    Root(uri=&quot;file:///Users/reed/projects/my-app&quot;, name=&quot;My App&quot;),
+    Root(uri=&quot;file:///Users/reed/data&quot;, name=&quot;Data Directory&quot;),
+]
+
+# Roots are provided during client session setup
+async with ClientSession(read, write) as session:
+    await session.initialize()
+    # Client exposes roots via list_roots handler
+</code></pre>
+
+<p>The client has full control over what is exposed — this is a security feature.</p>
+<hr />
+<h2>Security: SDK Does NOT Auto-Enforce</h2>
+<p>This is the most critical point for the exam:</p>
+<p><strong>The MCP SDK does not automatically enforce root boundaries.</strong> The server receives the root list, but nothing prevents it from accessing files outside those roots. You must implement enforcement yourself:</p>
+<pre class="highlight"><code class="language-python">def is_path_allowed(file_path: str, roots: list[Root]) -&gt; bool:
+    &quot;&quot;&quot;Check if a path falls within an approved root.&quot;&quot;&quot;
+    target = Path(file_path).resolve()
+    for root in roots:
+        root_path = Path(root.uri.replace(&quot;file://&quot;, &quot;&quot;)).resolve()
+        if target.is_relative_to(root_path):
+            return True
+    return False
+
+@mcp.tool()
+async def safe_read(ctx: Context, file_path: str) -&gt; str:
+    roots = await ctx.session.list_roots()
+
+    if not is_path_allowed(file_path, roots):
+        raise PermissionError(f&quot;Access denied: {file_path} is outside approved roots&quot;)
+
+    return Path(file_path).read_text()
+</code></pre>
+
+<p>Always use <code>.resolve()</code> to prevent path traversal attacks (e.g., <code>../../etc/passwd</code>).</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+Roots are a <strong>convention</strong>, not a sandbox. The SDK provides the mechanism to discover approved directories, but the server developer must implement the actual access control. This is a frequent exam topic — the answer is always "implement <code>is_path_allowed()</code> yourself."</p>
+</blockquote>
+<hr />
+<h2>Benefits of Roots</h2>
+<table>
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>User-friendly</strong></td>
+<td>Users say "look in my project" instead of typing full paths</td>
+</tr>
+<tr>
+<td><strong>Focused search</strong></td>
+<td>Server searches specific directories, not the entire filesystem</td>
+</tr>
+<tr>
+<td><strong>Security boundary</strong></td>
+<td>Limits what the server should access (when enforced)</td>
+</tr>
+<tr>
+<td><strong>Flexibility</strong></td>
+<td>Clients can add/remove roots dynamically</td>
+</tr>
+<tr>
+<td><strong>Multi-project support</strong></td>
+<td>Multiple roots can point to different projects</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Path Traversal Prevention</h2>
+<p>When implementing <code>is_path_allowed()</code>, handle these attack vectors:</p>
+<pre class="highlight"><code class="language-python"># Dangerous inputs to guard against:
+&quot;../../../etc/passwd&quot;           # Relative path escape
+&quot;/Users/reed/projects/../.ssh&quot;  # Mid-path traversal
+&quot;./symlink_to_root&quot;             # Symlink escape
+
+# Defense: always resolve to absolute path first
+target = Path(file_path).resolve()  # Resolves symlinks and ..
+</code></pre>
+
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 Task 2.2</strong>: MCP security model — roots are the primary filesystem security mechanism</li>
+<li><strong>D2 Task 2.3</strong>: Server capabilities — <code>list_roots()</code> is a fundamental capability</li>
+<li>Expect questions about enforcement — the answer is always "SDK does not auto-enforce, implement manually"</li>
+<li>Path traversal prevention is a common scenario question</li>
+<li>Key exam philosophy: <strong>Validation &gt; Trust</strong> — never assume the server will stay within bounds</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What problem do MCP roots solve?</td>
+<td>File path discovery — giving servers approved starting directories instead of searching the entire filesystem</td>
+</tr>
+<tr>
+<td>Does the MCP SDK automatically enforce root boundaries?</td>
+<td>No — the server receives the root list but must implement <code>is_path_allowed()</code> enforcement manually</td>
+</tr>
+<tr>
+<td>What method does a server call to discover approved directories?</td>
+<td><code>ctx.session.list_roots()</code></td>
+</tr>
+<tr>
+<td>What format are roots returned in?</td>
+<td>URIs (e.g., <code>file:///Users/reed/project</code>)</td>
+</tr>
+<tr>
+<td>Why must you call <code>.resolve()</code> when checking paths against roots?</td>
+<td>To prevent path traversal attacks using <code>..</code> or symlinks</td>
+</tr>
+<tr>
+<td>Who controls which roots are exposed?</td>
+<td>The client — it defines the root list during session setup</td>
+</tr>
+<tr>
+<td>Can roots be changed dynamically?</td>
+<td>Yes — clients can add or remove roots during the session</td>
+</tr>
+<tr>
+<td>What is the security philosophy behind roots?</td>
+<td>Convention, not sandbox — the mechanism exists but enforcement is the developer's responsibility</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

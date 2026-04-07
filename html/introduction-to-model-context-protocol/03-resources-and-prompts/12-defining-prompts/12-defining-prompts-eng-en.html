@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 Defining Prompts Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Prompts — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP server primitives), 2.6 (prompt template design), 1.3 (prompt engineering for tools)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 12</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP prompts are server-defined, parameterized message templates that return <code>list[base.Message]</code>, providing users with pre-built, tested instructions that outperform ad-hoc user prompts.</p>
+<hr />
+<h2>Why Prompts Exist</h2>
+<p>Users can already ask Claude to do anything directly. The value of MCP prompts is <strong>expertise packaging</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Quality</th>
+<th>Consistency</th>
+<th>Maintenance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User writes their own prompt</td>
+<td>Variable — depends on user skill</td>
+<td>Low — different every time</td>
+<td>None — one-off</td>
+</tr>
+<tr>
+<td>MCP server provides a prompt</td>
+<td>High — tested by the developer</td>
+<td>High — same template every time</td>
+<td>Centralized — update once, all clients benefit</td>
+</tr>
+</tbody>
+</table>
+<p>As the MCP server author, you invest time crafting, testing, and evaluating prompts that handle edge cases. Users get expert-level results without prompt engineering knowledge.</p>
+<hr />
+<h2>The <code>@mcp.prompt()</code> Decorator</h2>
+<p>Prompts follow the same decorator pattern as tools and resources:</p>
+<pre class="highlight"><code class="language-python">@mcp.prompt(
+    name=&quot;format&quot;,
+    description=&quot;Rewrites the contents of the document in Markdown format.&quot;
+)
+def format_document(
+    doc_id: str = Field(description=&quot;Id of the document to format&quot;)
+) -&gt; list[base.Message]:
+    prompt = f&quot;&quot;&quot;
+Your goal is to reformat a document to be written with markdown syntax.
+
+The id of the document you need to reformat is:
+&lt;document_id&gt;
+{doc_id}
+&lt;/document_id&gt;
+
+Add in headers, bullet points, tables, etc as necessary.
+Feel free to add in structure.
+Use the 'edit_document' tool to edit the document.
+After the document has been reformatted...
+&quot;&quot;&quot;
+    return [
+        base.UserMessage(prompt)
+    ]
+</code></pre>
+
+<h3>Key Implementation Details</h3>
+<ol>
+<li><strong><code>name</code> parameter</strong> — becomes the slash command identifier (e.g., <code>/format</code>)</li>
+<li><strong><code>description</code> parameter</strong> — shown to users in the prompt list</li>
+<li><strong><code>Field(description=...)</code></strong> — Pydantic Field for parameter documentation, displayed when user selects the prompt</li>
+<li><strong>Return type <code>list[base.Message]</code></strong> — a list of messages (UserMessage, AssistantMessage) that get sent to Claude</li>
+<li><strong>f-string interpolation</strong> — <code>{doc_id}</code> is replaced with the actual parameter value at runtime</li>
+</ol>
+<hr />
+<h2>Message Types in Prompts</h2>
+<p>Prompts return a list of messages, which can include:</p>
+<pre class="highlight"><code class="language-python"># Single user message (most common)
+return [base.UserMessage(prompt_text)]
+
+# Multi-turn conversation (for complex workflows)
+return [
+    base.UserMessage(&quot;Here is the task...&quot;),
+    base.AssistantMessage(&quot;I understand. Let me...&quot;),
+    base.UserMessage(&quot;Now proceed with step 2...&quot;)
+]
+</code></pre>
+
+<p>Multi-turn prompts are powerful for:<br />
+- <strong>Few-shot examples</strong> — show Claude how to respond before the actual task<br />
+- <strong>Complex workflows</strong> — guide Claude through a multi-step process<br />
+- <strong>Persona setup</strong> — establish Claude's role before the task instruction</p>
+<hr />
+<h2>Prompt vs. Tool vs. Resource: Control Model</h2>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>Controller</th>
+<th>Trigger</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tool</strong></td>
+<td>Claude (model-controlled)</td>
+<td>Claude decides during reasoning</td>
+<td><code>calculate_sqrt(3)</code></td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td>Application code (app-controlled)</td>
+<td>Your code calls <code>read_resource()</code></td>
+<td><code>@plan.md</code> autocomplete</td>
+</tr>
+<tr>
+<td><strong>Prompt</strong></td>
+<td>User (user-controlled)</td>
+<td>User types <code>/format</code> or clicks a button</td>
+<td><code>/format doc_id=plan.md</code></td>
+</tr>
+</tbody>
+</table>
+<p>Prompts are the <strong>user-controlled</strong> primitive. The user explicitly triggers them through UI interactions (slash commands, buttons, menu selections).</p>
+<hr />
+<h2>Testing Prompts with MCP Inspector</h2>
+<pre class="highlight"><code class="language-bash">uv run mcp dev mcp_server.py
+</code></pre>
+
+<p>In the Inspector:<br />
+1. Navigate to the <strong>Prompts</strong> tab<br />
+2. Select a prompt from the list<br />
+3. Fill in parameter values (e.g., <code>doc_id = "plan.md"</code>)<br />
+4. Click "Get Prompt" to see the interpolated messages<br />
+5. Verify the f-string variables are correctly replaced</p>
+<p>The Inspector shows you exactly what messages will be sent to Claude, making it essential for validating prompt templates before deployment.</p>
+<hr />
+<h2>Design Best Practices</h2>
+<ol>
+<li><strong>Use XML tags for variable boundaries</strong> — <code>&lt;document_id&gt;{doc_id}&lt;/document_id&gt;</code> prevents prompt injection and helps Claude identify structured data</li>
+<li><strong>Reference available tools in the prompt</strong> — tell Claude which tools to use (e.g., "Use the 'edit_document' tool")</li>
+<li><strong>Be specific about output format</strong> — if you want markdown, say "written with markdown syntax"</li>
+<li><strong>Test with edge cases</strong> — empty strings, long documents, special characters</li>
+<li><strong>Keep prompts domain-specific</strong> — a document server has formatting prompts, a data server has analysis prompts</li>
+</ol>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Returning a string instead of <code>list[base.Message]</code></strong> — prompts must return a list of Message objects, not raw strings</li>
+<li><strong>Forgetting parameter documentation</strong> — use <code>Field(description=...)</code> so users know what to provide</li>
+<li><strong>Not referencing tools</strong> — if your prompt expects Claude to use specific tools, mention them explicitly in the prompt text</li>
+<li><strong>Overly generic prompts</strong> — prompts should leverage your server's specific capabilities, not just be general instructions</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompts are the <strong>user-controlled</strong> primitive in MCP. Unlike tools (where Claude decides when to act) or resources (where your app decides when to fetch), prompts give users explicit control through slash commands or UI buttons. For the CCA exam, the three-way control model (model / app / user) is a frequently tested concept.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know the <code>@mcp.prompt()</code> decorator pattern, the return type (<code>list[base.Message]</code>), and parameter handling via Pydantic <code>Field</code>.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Prompts represent the user-controlled layer of the MCP control model. Questions may ask when to use prompts vs. tools vs. resources.</li>
+<li>The key exam differentiator: "predefined workflow triggered by user action" = prompt. "Claude decides to act" = tool. "App fetches data" = resource.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does an MCP prompt function return?</td>
+<td><code>list[base.Message]</code> — a list of UserMessage and/or AssistantMessage objects</td>
+</tr>
+<tr>
+<td>Who controls when MCP prompts are triggered?</td>
+<td>The user (user-controlled) — via slash commands, buttons, or menu selections</td>
+</tr>
+<tr>
+<td>What decorator defines an MCP prompt?</td>
+<td><code>@mcp.prompt(name="...", description="...")</code></td>
+</tr>
+<tr>
+<td>How are prompt parameters documented for users?</td>
+<td>Using Pydantic <code>Field(description="...")</code> on function parameters</td>
+</tr>
+<tr>
+<td>Why use XML tags like <code>&lt;document_id&gt;</code> in prompt templates?</td>
+<td>To clearly delimit variable boundaries, prevent prompt injection, and help Claude identify structured data</td>
+</tr>
+<tr>
+<td>What is the difference between prompts and tools in MCP?</td>
+<td>Prompts are user-controlled (user triggers explicitly), tools are model-controlled (Claude decides when to call)</td>
+</tr>
+<tr>
+<td>Can MCP prompts include multi-turn conversations?</td>
+<td>Yes — return multiple UserMessage and AssistantMessage objects for few-shot examples or complex workflows</td>
+</tr>
+<tr>
+<td>How do you test prompts before deployment?</td>
+<td>Use MCP Inspector — navigate to Prompts tab, fill in parameters, verify interpolated messages</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 720" font-family="'PingFang TC', 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/>
+    </filter>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#EFF6FF"/>
+      <stop offset="100%" stop-color="#DBEAFE"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FAF5FF"/>
+      <stop offset="100%" stop-color="#F3E8FF"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFF7ED"/>
+      <stop offset="100%" stop-color="#FFEDD5"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0FDF4"/>
+      <stop offset="100%" stop-color="#DCFCE7"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94A3B8"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#22C55E"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="600" height="720" fill="white" rx="12"/>
+
+  <!-- Title -->
+  <text x="300" y="36" text-anchor="middle" font-size="15" font-weight="600" fill="#64748B" letter-spacing="0.5">TOOL USE：橋接機制</text>
+
+  <!-- Zone labels -->
+  <rect x="20" y="52" width="560" height="240" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="40" y="72" font-size="10" font-weight="600" fill="#94A3B8" letter-spacing="1">文字世界（LLM）</text>
+
+  <rect x="20" y="310" width="560" height="180" rx="10" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="40" y="330" font-size="10" font-weight="600" fill="#D97706" letter-spacing="1">橋接層</text>
+
+  <rect x="20" y="508" width="560" height="140" rx="10" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1" stroke-dasharray="6,3"/>
+  <text x="40" y="528" font-size="10" font-weight="600" fill="#16A34A" letter-spacing="1">真實世界（檔案系統）</text>
+
+  <!-- ===== Node 1: User Question ===== -->
+  <g transform="translate(190, 82)">
+    <rect width="220" height="60" rx="14" fill="url(#blueGrad)" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="36" y="36" font-size="22">💬</text>
+    <text x="62" y="32" font-size="12" font-weight="600" fill="#1E40AF">使用者提問</text>
+    <text x="62" y="48" font-size="10" fill="#3B82F6">「修復 auth.py 的 bug」</text>
+  </g>
+  <line x1="300" y1="142" x2="300" y2="162" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== Node 2: Tool Instructions ===== -->
+  <g transform="translate(190, 165)">
+    <rect width="220" height="60" rx="14" fill="url(#purpleGrad)" stroke="#8B5CF6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="36" y="36" font-size="22">📋</text>
+    <text x="62" y="32" font-size="12" font-weight="600" fill="#5B21B6">Tool 指令說明</text>
+    <text x="62" y="48" font-size="10" fill="#8B5CF6">System prompt 中的可用 tool</text>
+  </g>
+  <line x1="300" y1="225" x2="300" y2="245" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== Node 3: LLM Generates tool_use ===== -->
+  <g transform="translate(150, 248)">
+    <rect width="300" height="60" rx="14" fill="url(#blueGrad)" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="36" y="36" font-size="22">🧠</text>
+    <text x="62" y="28" font-size="12" font-weight="600" fill="#1E40AF">LLM 產生 tool_use</text>
+    <text x="62" y="46" font-size="9" fill="#3B82F6" font-family="'SF Mono', monospace">{"tool": "Read", "path": "auth.py"}</text>
+  </g>
+  <line x1="300" y1="308" x2="300" y2="345" stroke="#D97706" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="316" y="332" font-size="9" font-weight="600" fill="#D97706">stop_reason: tool_use</text>
+
+  <!-- ===== Node 4: System Intercepts ===== -->
+  <g transform="translate(150, 348)">
+    <rect width="300" height="60" rx="14" fill="url(#orangeGrad)" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="36" y="36" font-size="22">🛡️</text>
+    <text x="62" y="28" font-size="12" font-weight="600" fill="#9A3412">系統攔截並執行</text>
+    <text x="62" y="46" font-size="10" fill="#FB923C">解析 JSON、執行 tool、擷取輸出</text>
+  </g>
+  <line x1="300" y1="408" x2="300" y2="428" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== Node 5: Permission Check ===== -->
+  <g transform="translate(190, 431)">
+    <rect width="220" height="52" rx="14" fill="url(#orangeGrad)" stroke="#FB923C" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="36" y="32" font-size="20">🔐</text>
+    <text x="62" y="28" font-size="12" font-weight="600" fill="#9A3412">權限檢查</text>
+    <text x="62" y="44" font-size="10" fill="#FB923C">使用者核准 / hook 閘門</text>
+  </g>
+  <line x1="300" y1="483" x2="300" y2="540" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== Node 6: File System ===== -->
+  <g transform="translate(190, 543)">
+    <rect width="220" height="52" rx="14" fill="url(#greenGrad)" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="36" y="32" font-size="20">📁</text>
+    <text x="62" y="28" font-size="12" font-weight="600" fill="#166534">檔案系統</text>
+    <text x="62" y="44" font-size="10" fill="#22C55E">讀取 / 寫入 / 執行</text>
+  </g>
+
+  <!-- Return path -->
+  <path d="M 410 570 Q 510 570 510 440 Q 510 340 450 308" fill="none" stroke="#22C55E" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowGreen)"/>
+  <text x="524" y="455" font-size="9" fill="#22C55E" font-weight="600" transform="rotate(90, 524, 455)">回傳結果</text>
+
+  <!-- ===== Node 7: Final Answer ===== -->
+  <g transform="translate(190, 610)">
+    <rect width="220" height="52" rx="14" fill="url(#blueGrad)" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="36" y="32" font-size="20">✅</text>
+    <text x="62" y="28" font-size="12" font-weight="600" fill="#1E40AF">最終回答</text>
+    <text x="62" y="44" font-size="10" fill="#3B82F6">stop_reason: end_turn</text>
+  </g>
+  <line x1="300" y1="595" x2="300" y2="608" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Bottom note -->
+  <text x="300" y="695" text-anchor="middle" font-size="10" fill="#94A3B8">LLM 本身永遠不會碰到檔案系統 — 系統層充當文字與動作之間的橋樑</text>
+</svg>

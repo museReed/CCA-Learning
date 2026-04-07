@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 Prompts In The Client Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Client 端的 Prompts — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试范畴</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP client implementation), 2.6 (prompt consumption patterns), 1.3 (prompt orchestration)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 13</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>Client 端的 prompt 集成就像在产品中安装「快速操作」菜单 — 用户看到一个策展过的专家工作流程清单，选一个、填入细节，每次都得到一致的结果。</p>
+<hr />
+<h2>为什么 PM 需要理解 Client 端 Prompts</h2>
+<p>本课完成了 prompts 端到端运作的全貌。PM 需要知道：</p>
+<ol>
+<li><strong>用户如何发现 prompts</strong> — 通过 slash commands、按钮或菜单</li>
+<li><strong>用户如何参数化 prompts</strong> — 需要提供什么输入</li>
+<li><strong>Prompts 如何编排 tools</strong> — prompts 给指令，tools 做工作</li>
+<li><strong>三方控制模型</strong> — 所有 MCP 架构决策的基础</li>
+</ol>
+<hr />
+<h2>心智模型：自助点餐机</h2>
+<p>把三种 MCP primitives 想象成快餐厅的不同点餐体验：</p>
+<table>
+<thead>
+<tr>
+<th>体验</th>
+<th>MCP Primitive</th>
+<th>谁决定</th>
+<th>点餐机类比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>厨房决定做什么</td>
+<td><strong>Tool</strong></td>
+<td>主厨（Claude）</td>
+<td>厨房做他们觉得你需要的东西</td>
+</tr>
+<tr>
+<td>饮料机自动倒水</td>
+<td><strong>Resource</strong></td>
+<td>餐厅系统（app）</td>
+<td>水自动出现在你桌上</td>
+</tr>
+<tr>
+<td>自助点餐机点餐</td>
+<td><strong>Prompt</strong></td>
+<td>顾客（用户）</td>
+<td>你点「3 号套餐」、定制配料、确认</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>端到端用户旅程</h2>
+<h3>步骤 1：发现</h3>
+<p>用户在聊天中输入 <code>/</code>。下拉菜单出现显示可用工作流程：<br />
+- <code>/format</code> — 将文档转写为 Markdown<br />
+- <code>/summarize</code> — 创建文档摘要<br />
+- <code>/analyze</code> — 生成分析报告</p>
+<h3>步骤 2：选择与参数</h3>
+<p>用户选择 <code>/format</code>。系统询问必要信息：<br />
+- 「哪份文档？」— 显示文档选择器</p>
+<h3>步骤 3：执行</h3>
+<p>用户确认。幕后：<br />
+1. Prompt 模板填入用户的参数<br />
+2. 指令发送给 Claude<br />
+3. Claude 读取文档（使用 tools）并重新格式化<br />
+4. 结果出现在聊天中</p>
+<h3>步骤 4：结果</h3>
+<p>用户看到专业格式化的 markdown 文档。每次相同质量，不论用户的 prompt engineering 能力。</p>
+<hr />
+<h2>三方控制模型 — 主框架</h2>
+<p>这是 Chapters 2-3 中最重要的概念，也是 CCA 考试的基石：</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>控制者</th>
+<th>考试关键字</th>
+<th>产品示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>Claude（model-controlled）</td>
+<td>「Claude 决定」、「自主地」</td>
+<td>Claude 在幕后执行计算</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>应用程序（app-controlled）</td>
+<td>「预加载」、「UI context」</td>
+<td>Google Drive 文档注入聊天</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>用户（user-controlled）</td>
+<td>「Slash command」、「workflow 按钮」</td>
+<td>用户点击「摘要」工作流程按钮</td>
+</tr>
+</tbody>
+</table>
+<h3>PM 决策流程</h3>
+<p>设计功能时，问：</p>
+<ol>
+<li>「谁应该决定何时发生这件事？」</li>
+<li><strong>用户明确触发</strong> → Prompt</li>
+<li><strong>Claude 在推理时决定</strong> → Tool</li>
+<li>
+<p><strong>App 自动预加载</strong> → Resource</p>
+</li>
+<li>
+<p>「这是有已知步骤的可重复工作流程吗？」</p>
+</li>
+<li><strong>是</strong> → Prompt</li>
+<li><strong>否，是即兴的</strong> → 让 Claude 用 tools 处理</li>
+</ol>
+<hr />
+<h2>Prompts + Tools：编排模式</h2>
+<p>PM 的关键洞察：<strong>prompts 不取代 tools — 它们编排 tools</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>Prompts 做什么</th>
+<th>Tools 做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提供专家指令</td>
+<td>执行特定动作</td>
+</tr>
+<tr>
+<td>定义「做什么」</td>
+<td>处理「怎么做」</td>
+</tr>
+<tr>
+<td>用户控制的触发</td>
+<td>模型控制的执行</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM 意义</strong>：撰写 prompt 驱动功能的 PRD 时，需确保必要的 tools 也可用。没有必要 tools 的 prompt 就像没有食材的食谱。</p>
+<hr />
+<h2>产品设计考量</h2>
+<h3>Prompt 可发现性</h3>
+<ul>
+<li>用户如何找到可用 prompts？（Slash 菜单、工具栏、新手引导）</li>
+<li>Prompts 是否应分类？（按任务类型、使用频率）</li>
+<li>对新用户，<code>/</code> 提示应多显眼？</li>
+</ul>
+<h3>参数体验</h3>
+<ul>
+<li>每个 prompt 需要什么参数？</li>
+<li>参数能从 context 自动填入吗？（当前文档、选取的文字）</li>
+<li>缺少必要参数时会发生什么？</li>
+</ul>
+<hr />
+<h2>PM 常见错误</h2>
+<ol>
+<li><strong>把 prompts 设计成 tools</strong> — 用户触发的就是 prompt；Claude 决定的就是 tool</li>
+<li><strong>忘记 tool 依赖</strong> — prompts 通常需要 tools 来完成指令；确保两者都可用</li>
+<li><strong>选择过多</strong> — 策展 5-10 个高价值 prompts，而非 50 个很少用的</li>
+<li><strong>没有参数默认值</strong> — 从 context 预填参数（当前文档、选取文字）来减少摩擦</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>三方控制模型是所有 MCP 架构决策的主框架：Tools = model-controlled、Resources = app-controlled、Prompts = user-controlled。对 PM 来说，这直接转化为产品设计：「谁启动这个动作？」决定该用哪个 primitive。CCA 考试中，这个区分几乎出现在每一题 D1 和 D2 场景题中。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：知道两个 client 方法（<code>list_prompts</code> 和 <code>get_prompt</code>）以及 slash command UX 模式。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：三方控制模型是最常考的概念。</li>
+<li><strong>考试信号词</strong>：「slash command」/「workflow button」/「user triggers」→ Prompt。「Claude decides」/「autonomously」→ Tool。「Pre-loaded context」/「UI data」→ Resource。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>三种 MCP 控制模型是什么？</td>
+<td>Tools = model-controlled（Claude 决定）、Resources = app-controlled（app 代码决定）、Prompts = user-controlled（用户决定）</td>
+</tr>
+<tr>
+<td>Prompts 的 slash command 模式是什么？</td>
+<td>用户输入 <code>/</code>、看到可用 prompts、选择一个、提供参数、系统将插值消息发送给 Claude</td>
+</tr>
+<tr>
+<td>Prompts 和 tools 如何协作？</td>
+<td>Prompts 提供「做什么」（指令），tools 提供「怎么做」（能力）— Claude 使用 tools 完成 prompt 指令</td>
+</tr>
+<tr>
+<td>Prompts 的自助点餐机类比是什么？</td>
+<td>用户从策展菜单（prompts）中选择、定制选项（参数），得到一致结果</td>
+</tr>
+<tr>
+<td>PM 设计 prompt 驱动功能时应确保什么？</td>
+<td>必要的 tools 也可用 — 没有必要 tools 的 prompt 就像没有食材的食谱</td>
+</tr>
+<tr>
+<td>PM 如何在 prompt、tool 和 resource 之间做决定？</td>
+<td>问「谁应该决定何时发生？」— 用户触发 = Prompt、Claude 决定 = Tool、App 预加载 = Resource</td>
+</tr>
+<tr>
+<td>什么考试信号词表示答案是 prompt？</td>
+<td>「Slash command」、「workflow button」、「user triggers」、「predefined workflow」</td>
+</tr>
+<tr>
+<td>Claude 界面中三种 primitive 的示例各是什么？</td>
+<td>Prompts = 聊天下方的 workflow 按钮、Resources = 「Add from Google Drive」、Tools = 幕后代码执行</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

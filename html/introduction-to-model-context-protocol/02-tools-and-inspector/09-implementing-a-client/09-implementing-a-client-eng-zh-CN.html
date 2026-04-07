@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>09 Implementing A Client Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Implementing a Client — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>T2.2 实现 MCP client-server 通信; T2.4 处理 tool discovery 和执行流程</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 02-tools-and-inspector / Lesson 09</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>构建 MCP client 端需要 SDK 的 Client 类和 ClientSession，搭配两个核心方法：<code>list_tools()</code> 用于发现、<code>call_tool()</code> 用于执行。</p>
+<hr />
+<h2>Client 架构</h2>
+<p>MCP client 由两个主要 SDK 类组成：</p>
+<pre class="highlight"><code class="language-python">from mcp import ClientSession
+from mcp.client import Client
+</code></pre>
+
+<p><strong>Client</strong> — 管理连接生命周期（连接、断开、传输管理）。</p>
+<p><strong>ClientSession</strong> — 提供与 MCP server 交互的方法（<code>list_tools()</code>、<code>call_tool()</code> 等）。</p>
+<p>这两个类协同运作：Client 建立连接，ClientSession 使用该连接进行通信。</p>
+<pre class="highlight"><code class="language-python">class MCPClient:
+    def __init__(self):
+        self.client = Client()
+        self.session: ClientSession | None = None
+
+    async def connect(self, server_script: str):
+        &quot;&quot;&quot;连接到 MCP server。&quot;&quot;&quot;
+        server_params = StdioServerParameters(
+            command=&quot;python&quot;,
+            args=[server_script]
+        )
+        # 建立连接
+        stdio_transport = await self.client.connect_stdio(server_params)
+        self.session = ClientSession(*stdio_transport)
+        await self.session.initialize()
+</code></pre>
+
+<blockquote>
+<p><strong>Key Insight</strong><br />
+<code>initialize()</code> 调用至关重要。它执行 MCP 握手，client 和 server 协商能力。没有它，后续调用会失败。</p>
+</blockquote>
+<hr />
+<h2>两个核心方法</h2>
+<h3>list_tools() — Discovery</h3>
+<pre class="highlight"><code class="language-python">async def discover_tools(self):
+    &quot;&quot;&quot;从 MCP server 发现可用的 tools。&quot;&quot;&quot;
+    response = await self.session.list_tools()
+
+    # response.tools 是 Tool 对象的列表
+    for tool in response.tools:
+        print(f&quot;Tool: {tool.name}&quot;)
+        print(f&quot;  描述: {tool.description}&quot;)
+        print(f&quot;  Schema: {tool.inputSchema}&quot;)
+
+    return response.tools
+</code></pre>
+
+<p><code>list_tools()</code> 返回 <code>ListToolsResult</code>，包含 tool 定义数组。每个 tool 有：</p>
+<ul>
+<li><code>name</code> — Tool 标识符（例如 "read_doc_contents"）</li>
+<li><code>description</code> — Tool 做什么（来自 server 的 docstring）</li>
+<li><code>inputSchema</code> — Tool 参数的 JSON schema</li>
+</ul>
+<p>这就是你传给 Claude 让它知道有哪些 tools 可用的内容。</p>
+<h3>call_tool() — Execution</h3>
+<pre class="highlight"><code class="language-python">async def execute_tool(self, tool_name: str, tool_input: dict):
+    &quot;&quot;&quot;在 MCP server 上执行 tool。&quot;&quot;&quot;
+    result = await self.session.call_tool(tool_name, tool_input)
+
+    # result.content 包含 tool 输出
+    return result.content
+</code></pre>
+
+<p><code>call_tool()</code> 接受两个参数：</p>
+<ul>
+<li><code>tool_name</code> — 要调用哪个 tool（字符串）</li>
+<li><code>tool_input</code> — tool 的参数（符合 inputSchema 的字典）</li>
+</ul>
+<p>它返回包含 tool 输出的 <code>CallToolResult</code>。</p>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+tool_name 和 tool_input 通常直接来自 Claude 的 tool_use 响应。Claude 决定调用哪个 tool 及用什么参数；你的 client 只是把该决定路由到 MCP server。</p>
+</blockquote>
+<hr />
+<h2>完整的 Client 端流程</h2>
+<p>以下是 client 如何在完整 agentic 循环中与 Claude 集成：</p>
+<pre class="highlight"><code class="language-python">import anthropic
+from mcp import ClientSession
+
+class AgenticMCPClient:
+    def __init__(self):
+        self.claude = anthropic.Anthropic()
+        self.session: ClientSession = None  # 连接时设定
+
+    async def handle_query(self, user_query: str) -&gt; str:
+        # 步骤 1：发现 tools
+        tools_response = await self.session.list_tools()
+        claude_tools = [
+            {
+                &quot;name&quot;: tool.name,
+                &quot;description&quot;: tool.description,
+                &quot;input_schema&quot;: tool.inputSchema
+            }
+            for tool in tools_response.tools
+        ]
+
+        # 步骤 2：发送查询 + tools 给 Claude
+        messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_query}]
+        response = self.claude.messages.create(
+            model=&quot;claude-sonnet-4-20250514&quot;,
+            max_tokens=1024,
+            tools=claude_tools,
+            messages=messages
+        )
+
+        # 步骤 3：检查 Claude 是否要使用 tool
+        if response.stop_reason == &quot;tool_use&quot;:
+            tool_block = next(
+                b for b in response.content
+                if b.type == &quot;tool_use&quot;
+            )
+
+            # 步骤 4：通过 MCP 执行 tool
+            tool_result = await self.session.call_tool(
+                tool_block.name,
+                tool_block.input
+            )
+
+            # 步骤 5：把结果送回 Claude
+            messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: response.content})
+            messages.append({
+                &quot;role&quot;: &quot;user&quot;,
+                &quot;content&quot;: [{
+                    &quot;type&quot;: &quot;tool_result&quot;,
+                    &quot;tool_use_id&quot;: tool_block.id,
+                    &quot;content&quot;: str(tool_result.content)
+                }]
+            })
+
+            final_response = self.claude.messages.create(
+                model=&quot;claude-sonnet-4-20250514&quot;,
+                max_tokens=1024,
+                tools=claude_tools,
+                messages=messages
+            )
+            return final_response.content[0].text
+
+        return response.content[0].text
+</code></pre>
+
+<p>五个关键步骤：</p>
+<ol>
+<li><strong>发现</strong> — <code>list_tools()</code> 获取可用 tools</li>
+<li><strong>呈现</strong> — Tool schema 与用户查询一起传给 Claude</li>
+<li><strong>决定</strong> — Claude 返回 <code>tool_use</code> 块（或直接回答）</li>
+<li><strong>执行</strong> — <code>call_tool()</code> 在 MCP server 上执行 tool</li>
+<li><strong>解读</strong> — Claude 收到结果并生成最终响应</li>
+</ol>
+<hr />
+<h2>运行 Client</h2>
+<pre class="highlight"><code class="language-bash">uv run mcp_client.py
+</code></pre>
+
+<p><code>uv</code> 运行器处理依赖解析和虚拟环境管理。运行时，client：</p>
+<ol>
+<li>连接到指定的 MCP server</li>
+<li>发现可用 tools</li>
+<li>进入交互循环，用户可以提问</li>
+<li>通过 MCP 路由 tool 调用，通过 Claude 路由响应</li>
+</ol>
+<hr />
+<h2>Client 端的错误处理</h2>
+<pre class="highlight"><code class="language-python">async def safe_call_tool(self, tool_name: str, tool_input: dict):
+    try:
+        result = await self.session.call_tool(tool_name, tool_input)
+        if result.isError:
+            return f&quot;Tool 错误: {result.content}&quot;
+        return result.content
+    except Exception as e:
+        return f&quot;MCP 通信错误: {str(e)}&quot;
+</code></pre>
+
+<p>关键错误场景：</p>
+<ul>
+<li><strong>Tool 找不到</strong> — tool 名称不匹配任何已注册的 tool</li>
+<li><strong>无效输入</strong> — tool_input 不符合预期 schema</li>
+<li><strong>Server 错误</strong> — MCP server 遇到内部错误</li>
+<li><strong>传输错误</strong> — 与 MCP server 的连接中断</li>
+</ul>
+<blockquote>
+<p><strong>Key Insight</strong><br />
+<code>call_tool()</code> 后一定要检查 <code>result.isError</code>。成功的 MCP 往返仍可能包含 tool 级别的错误。传输成功了但 tool 执行失败了。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联性</h2>
+<p>本课完成 <strong>Domain 2 (18%)</strong> 的 client-server 全貌：</p>
+<ul>
+<li><strong>两个 SDK 类</strong>：知道 Client 处理连接、ClientSession 处理通信</li>
+<li><strong>两个核心方法</strong>：<code>list_tools()</code> 用于发现、<code>call_tool()</code> 用于执行</li>
+<li><strong>Agentic 循环</strong>：理解从发现经 Claude 决策到最终响应的五步流程</li>
+<li><strong><code>uv run</code></strong>：知道这是 MCP client 的典型执行方式</li>
+<li><strong>错误处理</strong>：理解 <code>result.isError</code> 在传输成功时仍能捕获 tool 级别错误</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>构建 MCP client 的两个主要 SDK 类是什么？</td>
+<td>Client（管理连接生命周期）和 ClientSession（提供 list_tools 和 call_tool 方法）。</td>
+</tr>
+<tr>
+<td><code>list_tools()</code> 返回什么？</td>
+<td>ListToolsResult，包含 tool 定义数组，每个有 name、description 和 inputSchema。</td>
+</tr>
+<tr>
+<td><code>call_tool()</code> 接受哪两个参数？</td>
+<td>tool_name（标识要调用哪个 tool 的字符串）和 tool_input（符合 tool inputSchema 的字典）。</td>
+</tr>
+<tr>
+<td>tool_name 和 tool_input 通常从哪来？</td>
+<td>来自 Claude 的 tool_use 响应块。Claude 决定调用哪个 tool 及用什么参数。</td>
+</tr>
+<tr>
+<td><code>session.initialize()</code> 做什么？</td>
+<td>执行 MCP 握手，client 和 server 协商能力。在任何其他 MCP 调用之前必须执行。</td>
+</tr>
+<tr>
+<td>完整 client 端 agentic 流程的五个步骤是什么？</td>
+<td>1) 发现 tools, 2) 呈现 tools + 查询给 Claude, 3) Claude 决定 tool use, 4) 通过 MCP 执行 tool, 5) 送结果给 Claude 获取最终响应。</td>
+</tr>
+<tr>
+<td>如何运行 MCP client？</td>
+<td><code>uv run mcp_client.py</code> — uv 处理依赖解析和虚拟环境管理。</td>
+</tr>
+<tr>
+<td>为什么 call_tool() 后要检查 <code>result.isError</code>？</td>
+<td>成功的 MCP 传输往返仍可能包含 tool 级别错误。连接成功了但 tool 本身失败了。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

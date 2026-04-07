@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 Prompts In The Client Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompts in the Client — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP client implementation), 2.6 (prompt consumption patterns), 1.3 (prompt orchestration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>introduction-to-model-context-protocol / 03-resources-and-prompts / Lesson 13</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The client implements <code>list_prompts()</code> to discover available prompts and <code>get_prompt(name, args)</code> to retrieve interpolated messages, enabling the slash command (<code>/</code>) UX pattern where users trigger predefined workflows.</p>
+<hr />
+<h2>Two Client-Side Methods</h2>
+<h3>1. <code>list_prompts()</code> — Discovery</h3>
+<pre class="highlight"><code class="language-python">async def list_prompts(self) -&gt; list[types.Prompt]:
+    result = await self.session().list_prompts()
+    return result.prompts
+</code></pre>
+
+<p>This method queries the server for all available prompts. Each <code>types.Prompt</code> object contains:<br />
+- <code>name</code> — the identifier (used in slash commands)<br />
+- <code>description</code> — human-readable explanation<br />
+- <code>arguments</code> — list of required/optional parameters</p>
+<h3>2. <code>get_prompt()</code> — Retrieval with Interpolation</h3>
+<pre class="highlight"><code class="language-python">async def get_prompt(self, prompt_name, args: dict[str, str]):
+    result = await self.session().get_prompt(prompt_name, args)
+    return result.messages
+</code></pre>
+
+<p>This method retrieves a specific prompt with variable interpolation:<br />
+- <code>prompt_name</code> — which prompt to retrieve (e.g., <code>"format"</code>)<br />
+- <code>args</code> — keyword arguments as a string-to-string dict (e.g., <code>{"doc_id": "plan.md"}</code>)<br />
+- Returns <code>result.messages</code> — the list of <code>base.Message</code> objects ready to send to Claude</p>
+<p>The <code>args</code> dict maps directly to the prompt function's parameters. When the server receives <code>{"doc_id": "plan.md"}</code>, it calls <code>format_document(doc_id="plan.md")</code> and returns the interpolated messages.</p>
+<hr />
+<h2>The Complete Prompt Workflow</h2>
+<p>Here is the end-to-end flow from user interaction to Claude response:</p>
+<pre class="highlight"><code>1. User types &quot;/&quot;
+   └── Client calls list_prompts()
+       └── Server returns available prompts
+
+2. User selects &quot;/format&quot;
+   └── Client shows parameter inputs
+       └── User provides doc_id = &quot;plan.md&quot;
+
+3. Client calls get_prompt(&quot;format&quot;, {&quot;doc_id&quot;: &quot;plan.md&quot;})
+   └── Server runs format_document(doc_id=&quot;plan.md&quot;)
+       └── Returns interpolated messages
+
+4. Client sends messages to Claude
+   └── Claude receives expert-crafted instructions
+       └── Claude uses tools (e.g., edit_document) to fulfill
+
+5. Claude responds with formatted document
+</code></pre>
+
+<h3>Key Insight: Prompts Orchestrate Tools</h3>
+<p>When Claude receives the prompt messages, it often needs to use available <strong>tools</strong> to complete the task. In the format example:<br />
+1. The prompt tells Claude to reformat a document<br />
+2. Claude uses the <code>edit_document</code> tool to make changes<br />
+3. The result is a properly formatted document</p>
+<p>This means prompts and tools work together — prompts provide the instructions, tools provide the capabilities.</p>
+<hr />
+<h2>The Three-Way Control Model</h2>
+<p>This is the most important concept across Lessons 10-13 and a core CCA exam topic:</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>Controller</th>
+<th>Trigger Mechanism</th>
+<th>Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>Model-controlled</td>
+<td>Claude decides during reasoning</td>
+<td>Chef decides what ingredients to use</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>App-controlled</td>
+<td>Your code calls <code>read_resource()</code></td>
+<td>Waiter brings water automatically</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>User-controlled</td>
+<td>User types <code>/</code> or clicks a button</td>
+<td>Customer orders from the menu</td>
+</tr>
+</tbody>
+</table>
+<p>This maps to Claude's official interface:<br />
+- <strong>Tools</strong> — when Claude executes code or performs calculations behind the scenes<br />
+- <strong>Resources</strong> — the "Add from Google Drive" feature that injects document context<br />
+- <strong>Prompts</strong> — the workflow buttons below the chat input</p>
+<hr />
+<h2>Slash Commands: The UX Pattern</h2>
+<p>Slash commands (<code>/</code>) are the primary UI pattern for prompts:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>User Action</th>
+<th>Client Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Types <code>/</code></td>
+<td>Calls <code>list_prompts()</code>, shows command menu</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Selects command</td>
+<td>Shows parameter form based on prompt arguments</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Provides parameters</td>
+<td>Validates input, prepares args dict</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Confirms</td>
+<td>Calls <code>get_prompt(name, args)</code>, gets messages</td>
+</tr>
+<tr>
+<td>5</td>
+<td>(Automatic)</td>
+<td>Sends messages to Claude, displays response</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>/</code> trigger is a convention, not a protocol requirement. Clients can also surface prompts as:<br />
+- Buttons in the UI<br />
+- Menu items in a sidebar<br />
+- Contextual actions on selected content</p>
+<hr />
+<h2>Prompt Arguments: Variable Interpolation</h2>
+<p>The <code>args</code> parameter in <code>get_prompt()</code> is always <code>dict[str, str]</code> — all values are strings:</p>
+<pre class="highlight"><code class="language-python"># Client side
+messages = await client.get_prompt(&quot;format&quot;, {&quot;doc_id&quot;: &quot;plan.md&quot;})
+
+# Server side (what happens internally)
+def format_document(doc_id: str = Field(...)):
+    # doc_id = &quot;plan.md&quot; — interpolated from args
+    prompt = f&quot;...{doc_id}...&quot;
+    return [base.UserMessage(prompt)]
+</code></pre>
+
+<p>Even if the parameter represents a number or boolean, it is passed as a string. The server function handles any necessary type conversion.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Confusing <code>list_prompts()</code> with <code>get_prompt()</code></strong> — <code>list_prompts()</code> returns metadata (names, descriptions), <code>get_prompt()</code> returns the actual interpolated messages</li>
+<li><strong>Non-string args values</strong> — the <code>args</code> dict must be <code>dict[str, str]</code>, not <code>dict[str, Any]</code></li>
+<li><strong>Sending prompt messages incorrectly</strong> — the messages from <code>get_prompt()</code> go directly into the conversation as if the user typed them</li>
+<li><strong>Forgetting that prompts use tools</strong> — prompts provide instructions, but Claude often needs tools to fulfill them; both must be available</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The three-way control model (Tools = model-controlled, Resources = app-controlled, Prompts = user-controlled) is the single most important MCP architecture concept for the CCA exam. Every primitive serves a different stakeholder: tools serve Claude, resources serve your application, prompts serve your users.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know both client methods — <code>list_prompts()</code> for discovery, <code>get_prompt(name, args)</code> for retrieval. The <code>args</code> dict is <code>dict[str, str]</code>.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: The three-way control model is a cornerstone concept. Expect scenario questions asking which primitive to use based on who should control the interaction.</li>
+<li>Questions with "slash command," "workflow button," or "user triggers" almost always point to prompts as the answer.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the two client methods for working with MCP prompts?</td>
+<td><code>list_prompts()</code> for discovering available prompts, <code>get_prompt(name, args)</code> for retrieving interpolated messages</td>
+</tr>
+<tr>
+<td>What type is the <code>args</code> parameter in <code>get_prompt()</code>?</td>
+<td><code>dict[str, str]</code> — all keys and values are strings</td>
+</tr>
+<tr>
+<td>What does <code>get_prompt()</code> return?</td>
+<td><code>result.messages</code> — a list of <code>base.Message</code> objects (UserMessage/AssistantMessage) ready to send to Claude</td>
+</tr>
+<tr>
+<td>What UI pattern do MCP prompts map to?</td>
+<td>Slash commands (<code>/</code>) — user types <code>/</code>, sees available commands, selects one, provides parameters</td>
+</tr>
+<tr>
+<td>How do prompts and tools work together?</td>
+<td>Prompts provide instructions (what to do), tools provide capabilities (how to do it) — Claude uses tools to fulfill prompt instructions</td>
+</tr>
+<tr>
+<td>What are the three MCP control models?</td>
+<td>Tools = model-controlled (Claude decides), Resources = app-controlled (your code decides), Prompts = user-controlled (user decides)</td>
+</tr>
+<tr>
+<td>What triggers <code>list_prompts()</code> in a typical client?</td>
+<td>The user typing <code>/</code> in the chat input — the client queries the server for available prompts</td>
+</tr>
+<tr>
+<td>In Claude's official interface, what demonstrates the prompt pattern?</td>
+<td>Workflow buttons below the chat input — predefined, user-triggered workflows</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
