@@ -40,7 +40,7 @@ CCA 考試涵蓋五大領域：
 | **課程文字稿** | 每堂課的完整講稿（Markdown） | `courses/*/[ch]/[lesson].md` |
 | **影片截圖** | 講師投影片截圖（PNG/JPG） | `courses/*/[ch]/images/` |
 | **英文字幕** | 影片 SRT 字幕檔（134 個） | `courses/*/[ch]/*.srt` |
-| **影音檔** | MP4 影片（108 支）| ⚠️ **未上傳**（1.7 GB，見 `.gitignore`）|
+| **影音檔** | MP4 影片（108 支）| 📦 [GitHub Release v1.0.0](https://github.com/museReed/CCA-Learning/releases/tag/v1.0.0)（1.7 GB，按課程分 4 個 zip）|
 
 ### 自製學習筆記
 
@@ -84,7 +84,7 @@ CCA 考試涵蓋五大領域：
 
 **從這裡開始 👇**
 
-#### 1️⃣ Claude Code in Action（CCA 主課程）
+#### 1️⃣ [Claude Code in Action](https://anthropic.skilljar.com/claude-code-in-action)（CCA 主課程）
 > 涵蓋 D1 + D3 + D4，佔考試 62%
 
 | 章節 | 主題 | CCA 領域 | 建議用時 |
@@ -106,7 +106,7 @@ CCA 考試涵蓋五大領域：
 
 ### 第二階段：MCP 深入（建議 1-2 週）
 
-#### 2️⃣ Introduction to MCP（MCP 入門）
+#### 2️⃣ [Introduction to MCP](https://anthropic.skilljar.com/introduction-to-model-context-protocol)（MCP 入門）
 > 核心 D2 內容
 
 | 章節 | 主題 | 重點 |
@@ -116,7 +116,7 @@ CCA 考試涵蓋五大領域：
 | Ch03 Resources & Prompts | 三大 primitive 的定義與使用 | 必讀 |
 | Ch04 Review | Tools vs Resources vs Prompts 決策指南 | 必讀 |
 
-#### 3️⃣ MCP Advanced Topics（MCP 進階）
+#### 3️⃣ [MCP Advanced Topics](https://anthropic.skilljar.com/model-context-protocol-advanced-topics)（MCP 進階）
 > D2 進階 + 部署考量
 
 | 章節 | 主題 | 重點 |
@@ -129,7 +129,7 @@ CCA 考試涵蓋五大領域：
 
 ### 第三階段：API 與進階（建議 2-3 週）
 
-#### 4️⃣ Building with the Claude API（API 大課程）
+#### 4️⃣ [Building with the Claude API](https://anthropic.skilljar.com/claude-with-the-anthropic-api)（API 大課程）
 > 涵蓋 D1 + D2 + D4 + D5
 
 | 章節 | 主題 |
@@ -148,11 +148,23 @@ CCA 考試涵蓋五大領域：
 
 ---
 
+### 官方課程連結
+
+| 課程 | 官方連結 | 本 repo 對應 |
+|------|---------|-------------|
+| Claude Code in Action | [anthropic.skilljar.com/claude-code-in-action](https://anthropic.skilljar.com/claude-code-in-action) | `courses/claude-code-in-action/` |
+| Introduction to MCP | [anthropic.skilljar.com/introduction-to-model-context-protocol](https://anthropic.skilljar.com/introduction-to-model-context-protocol) | `courses/introduction-to-model-context-protocol/` |
+| MCP Advanced Topics | [anthropic.skilljar.com/model-context-protocol-advanced-topics](https://anthropic.skilljar.com/model-context-protocol-advanced-topics) | `courses/model-context-protocol-advanced-topics/` |
+| Building with the Claude API | [anthropic.skilljar.com/claude-with-the-anthropic-api](https://anthropic.skilljar.com/claude-with-the-anthropic-api) | `courses/building-with-the-claude-api/` |
+| Claude 101 | [anthropic.skilljar.com/claude-101](https://anthropic.skilljar.com/claude-101) | `courses/claude-101/`（可跳過） |
+| Introduction to Agent Skills | [anthropic.skilljar.com/introduction-to-agent-skills](https://anthropic.skilljar.com/introduction-to-agent-skills) | `courses/introduction-to-agent-skills/`（可跳過） |
+| Introduction to Subagents | [anthropic.skilljar.com/introduction-to-subagents](https://anthropic.skilljar.com/introduction-to-subagents) | `courses/introduction-to-subagents/`（可跳過） |
+
 ### 官方補充資源
 
 | 資源 | 網址 | 用途 |
 |------|------|------|
-| Anthropic Academy | https://anthropic.skilljar.com | 官方線上課程（含影片） |
+| Anthropic Academy | https://anthropic.skilljar.com | 官方線上課程入口 |
 | CCA 考試指南 | 見 repo 內 PDF | 30 Task Statements + Sample Questions |
 | Claude Code 文檔 | https://docs.anthropic.com/en/docs/claude-code | 官方 CLI 文檔 |
 | MCP 規範 | https://modelcontextprotocol.io | MCP 官方規範 |
@@ -261,10 +273,10 @@ CCA-Learning/
 
 ## ⚠️ 注意事項
 
-- 影片檔（108 支 MP4，共 1.7 GB）因檔案過大**未上傳**至本 repo
+- 影片檔（108 支 MP4，共 1.7 GB）存放於 [GitHub Release](https://github.com/museReed/CCA-Learning/releases/tag/v1.0.0)，按課程分為 4 個 zip 下載
 - 學習筆記為 AI 輔助產出，建議搭配官方教材交叉驗證
 - 本 repo 為**個人學習用途**，課程內容版權屬 Anthropic
 
 ---
 
-*Last updated: 2026-04-07*
+*Last updated: 2026-04-08*
