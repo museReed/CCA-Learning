@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code In Action Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Claude Code in Action — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (Claude Code setup &amp; commands), 3.3 (CLAUDE.md memory), 1.2 (agentic workflow patterns)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 75</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude Code's most effective workflow is "context → plan → implement": load relevant files, ask for a plan without code, then request implementation — with <code>/init</code> producing a <code>CLAUDE.md</code> memory file that persists project context across sessions.</p>
+<hr />
+<h2>The <code>/init</code> Command and CLAUDE.md</h2>
+<p>When you start a new project, run <code>/init</code> first. This triggers Claude Code to:</p>
+<ol>
+<li>Scan the entire codebase</li>
+<li>Infer project structure, dependencies, coding style, and architecture</li>
+<li>Write a summary into a special file named <code>CLAUDE.md</code></li>
+</ol>
+<p><code>CLAUDE.md</code> is automatically included as context in every subsequent conversation in that project. It is the persistent memory that makes the agent "remember" your project between sessions.</p>
+<h3>Three scopes of CLAUDE.md</h3>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Purpose</th>
+<th>Checked into git?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Project</strong></td>
+<td>Shared across all engineers on the project</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Local</strong></td>
+<td>Your personal notes for this project</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>User</strong></td>
+<td>Applied across all your projects</td>
+<td>No (user-global)</td>
+</tr>
+</tbody>
+</table>
+<p>When running <code>/init</code> you can also pass special directions telling Claude what areas to focus on. The generated file typically contains build commands, coding guidelines, and project-specific patterns.</p>
+<h3>The <code>#</code> shortcut for adding notes</h3>
+<p>You can append notes to any <code>CLAUDE.md</code> without opening the file. Typing:</p>
+<pre><code># Always use descriptive variable names
+</code></pre>
+<p>…prompts Claude Code to ask which scope (project / local / user) to add the note to, then appends it automatically.</p>
+<hr />
+<h2>The Canonical Workflow: Context → Plan → Implement</h2>
+<p>The lesson's central claim is that Claude Code is an "effort multiplier" only when you give it enough context and structure. The recommended three-step workflow:</p>
+<h3>Step 1 — Feed context into Claude</h3>
+<p>Before asking for any code, identify the existing files that show your patterns and ask Claude to read them. This gives the agent examples of your coding style and existing functionality to build on.</p>
+<pre><code>&gt; Read the math.py and document.py files
+</code></pre>
+<h3>Step 2 — Tell Claude to plan a solution (explicitly, no code)</h3>
+<p>Ask Claude to think through the problem and write a plan. <strong>Say explicitly not to write code yet</strong> — just the approach and steps.</p>
+<pre><code>&gt; Plan to implement document_path_to_markdown tool:
+1. Create a function that:
+   - Takes a file path parameter
+   - Validates the file exists
+   - Determines file type from extension
+   - Reads binary data from file
+   - Leverages existing binary_document_to_markdown function
+   - Returns markdown string
+2. Add appropriate documentation
+3. Register the tool with MCP server
+4. Add tests
+</code></pre>
+<h3>Step 3 — Ask Claude to implement the plan</h3>
+<p>Only after the plan is agreed, ask for the implementation:</p>
+<pre><code>&gt; Implement the plan
+</code></pre>
+<p>Claude will write code based on the shared context and planning work, update relevant files, add tests, and run the suite to verify.</p>
+<p>This three-step pattern mirrors the "think then act" principle that the exam tests for agent design — it is not a Claude Code–only idiom, it is the general agent best practice.</p>
+<hr />
+<h2>Test-Driven Development Workflow</h2>
+<p>The lesson describes a TDD variant of the workflow that produces more robust code:</p>
+<ol>
+<li><strong>Feed context</strong> — same as above</li>
+<li><strong>Ask Claude to brainstorm test cases</strong> — what would validate this feature?</li>
+<li><strong>Ask Claude to implement the tests</strong> — select the most relevant cases and have Claude write them</li>
+<li><strong>Ask Claude to write code that passes the tests</strong> — it will iterate until all tests pass</li>
+</ol>
+<p>This works because tests give Claude a concrete success criterion. Instead of "write a function that does X", the agent now has a verifiable goal — green tests — and will iterate until it achieves it.</p>
+<hr />
+<h2>The Additional Command Set</h2>
+<p>Beyond the workflow, memorize these commands for the exam:</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/init</code></td>
+<td>Scans the codebase and generates <code>CLAUDE.md</code></td>
+</tr>
+<tr>
+<td><code>/clear</code></td>
+<td>Clears conversation history and resets context</td>
+</tr>
+<tr>
+<td><code>#</code></td>
+<td>Adds a note to a <code>CLAUDE.md</code> (prompts for scope)</td>
+</tr>
+</tbody>
+</table>
+<p>That is the full command surface taught in this lesson. <code>/init</code>, <code>/clear</code>, and <code>#</code> — expect direct recall questions.</p>
+<hr />
+<h2>Routine Tasks Claude Code Handles</h2>
+<p>Once in a session, Claude can also handle routine development tasks that would otherwise require switching between editor and terminal:</p>
+<ul>
+<li>Staging and committing changes to git</li>
+<li>Running tests</li>
+<li>Managing dependencies</li>
+<li>Executing ad-hoc shell commands</li>
+</ul>
+<p>The design goal: you focus on the bigger picture (what to build, what the spec is) while Claude handles the glue work.</p>
+<hr />
+<h2>Why Planning Before Coding Works</h2>
+<p>This section is the "WHY" that goes beyond the source:</p>
+<ul>
+<li><strong>Attention budget</strong> — asking for a plan first keeps the model's reasoning focused on architecture, not syntax. When it later implements, both the architecture and the syntax get model attention.</li>
+<li><strong>Error cost</strong> — plans are cheap to revise; code is expensive. Catching a wrong approach at the plan stage is 10x cheaper than rewriting.</li>
+<li><strong>Human review</strong> — plans are short; code diffs are long. Reviewing a plan takes seconds, reviewing a diff takes minutes.</li>
+<li><strong>Context anchoring</strong> — a plan agreed on in the conversation becomes a reference the agent returns to when generating code.</li>
+</ul>
+<p>This is why the exam treats "context → plan → implement" as the canonical agent workflow, not just a Claude Code tip.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Skipping <code>/init</code> at the start of a project</strong> — you lose persistent context and the agent re-learns your project every session.</li>
+<li><strong>Asking for code before asking for a plan</strong> — removes the cheapest error-correction step.</li>
+<li><strong>Forgetting to feed context</strong> — Claude will guess at your conventions and produce code that fights the codebase.</li>
+<li><strong>Confusing <code>#</code> with Markdown heading syntax</strong> — inside Claude Code, <code>#</code> at the start of a message is a memory-append shortcut, not Markdown formatting.</li>
+<li><strong>Using <code>/clear</code> when you meant <code>/init</code></strong> — <code>/clear</code> wipes current conversation, <code>/init</code> builds project memory. Opposite effects.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The core workflow — <strong>context → plan → implement</strong> — is the one pattern that unlocks 10x value from Claude Code (and from agents in general). Skipping any step degrades output quality dramatically. The exam may phrase this as "what is the recommended Claude Code workflow" or may present a scenario and ask which step is missing.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Claude Code Configuration)</strong>: Direct recall of <code>/init</code>, <code>/clear</code>, <code>#</code>, and <code>CLAUDE.md</code> scopes is very likely.</li>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>: The "context → plan → implement" workflow maps to general agent best practices.</li>
+<li>Expect at least one question about the three CLAUDE.md scopes (project / local / user).</li>
+<li>Expect a question contrasting <code>/init</code> vs <code>/clear</code> — they are easily confused.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does the <code>/init</code> command do in Claude Code?</td>
+<td>Scans the codebase to understand structure, dependencies, style, and architecture, then writes a summary into a <code>CLAUDE.md</code> file</td>
+</tr>
+<tr>
+<td>What is <code>CLAUDE.md</code>?</td>
+<td>A memory file automatically included as context in future Claude Code conversations, holding project-specific information</td>
+</tr>
+<tr>
+<td>What are the three scopes of <code>CLAUDE.md</code>?</td>
+<td>Project (shared, in git), Local (personal, not in git), and User (across all your projects)</td>
+</tr>
+<tr>
+<td>What does the <code>#</code> command do inside Claude Code?</td>
+<td>Adds a note to a <code>CLAUDE.md</code> file, prompting you to choose project, local, or user scope</td>
+</tr>
+<tr>
+<td>What are the three steps of the canonical Claude Code workflow?</td>
+<td>1) Feed context by reading relevant files, 2) Ask for a plan without code, 3) Ask Claude to implement the plan</td>
+</tr>
+<tr>
+<td>What does <code>/clear</code> do?</td>
+<td>Clears conversation history and resets context in the current session</td>
+</tr>
+<tr>
+<td>What is the TDD variant of the Claude Code workflow?</td>
+<td>Feed context → ask Claude to brainstorm test cases → implement the tests → write code that passes the tests</td>
+</tr>
+<tr>
+<td>Why ask for a plan before implementation?</td>
+<td>Plans are cheap to revise, easier to review, and keep the model's attention on architecture before syntax — catching mistakes early</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Overview Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Project Overview: Reminder App — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (tool schema design), 1.2 (agentic loop foundation), 1.1 (feature decomposition)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 33</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A three-word user request ("remind me Thursday") hides three distinct product capability gaps — and the correct AI product architecture is to build one tool per gap, not one giant "magic" function.</p>
+<hr />
+<h2>The Deceptive Simplicity of "Remind Me"</h2>
+<p>The PRD line reads:</p>
+<blockquote>
+<p><em>As a user, I can say "remind me of X a week from Thursday" and the assistant will set the reminder.</em></p>
+</blockquote>
+<p>Every stakeholder nods. Two-sentence story. Must be a two-day ticket, right?</p>
+<p>No. Underneath, the base model cannot:</p>
+<ol>
+<li>Know the exact current time (just the rough date)</li>
+<li>Reliably do date arithmetic (LLMs mis-count weekdays surprisingly often)</li>
+<li>Persist a reminder anywhere</li>
+</ol>
+<p>Each bullet is a different problem. Each needs its own component. This is the single most common trap when PMs scope AI features: the surface is a one-liner, the underlying capability graph is a tree.</p>
+<hr />
+<h2>Mental Model: The LEGO Set vs. the Action Figure</h2>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Analogy</th>
+<th>Shipping velocity</th>
+<th>Long-term leverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One big "do the whole thing" function</td>
+<td>Action figure — molded for one pose</td>
+<td>Fast for v1</td>
+<td>Zero reuse, hard to fix</td>
+</tr>
+<tr>
+<td>Small atomic tools, composed by Claude</td>
+<td>LEGO set — snap-together pieces</td>
+<td>Slightly slower v1</td>
+<td>Any future feature reuses the bricks</td>
+</tr>
+</tbody>
+</table>
+<p>Tool use rewards the LEGO approach. The first time you build <code>add_duration_to_datetime</code>, you pay the cost. Every future feature that touches "remind me in N days", "set deadline for N weeks", "rebook for next quarter" gets to reuse the same brick — for free.</p>
+<hr />
+<h2>The Three Gaps → Three Tools</h2>
+<table>
+<thead>
+<tr>
+<th>User Signal</th>
+<th>Gap It Exposes</th>
+<th>Tool to Build</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"right now"</td>
+<td>Claude does not know precise time</td>
+<td>Get current datetime</td>
+</tr>
+<tr>
+<td>"a week from Thursday"</td>
+<td>Claude cannot do date math reliably</td>
+<td>Add duration to datetime</td>
+</tr>
+<tr>
+<td>"remind me"</td>
+<td>Claude has no reminder system</td>
+<td>Set reminder</td>
+</tr>
+</tbody>
+</table>
+<p>Each row is a decision point in the PRD. Each tool has its own acceptance criteria, its own failure modes, its own telemetry needs.</p>
+<hr />
+<h2>Why This Matters for Roadmap Planning</h2>
+<p>Because the tools are reusable, scoping the reminder feature <strong>simultaneously scopes</strong> a half-dozen future features:</p>
+<ul>
+<li>Birthday reminders (reuses all three tools)</li>
+<li>Deadline tracking (reuses two of three)</li>
+<li>Recurring meetings (reuses two of three)</li>
+<li>Vacation countdowns (reuses two of three)</li>
+<li>"What day is it in N weeks" answers (reuses two of three)</li>
+</ul>
+<p>A PM who recognizes this pattern can sell the feature to stakeholders as "we are building the foundation for the scheduling stack", not "we are building a toy reminder app." The ROI calculation flips completely.</p>
+<hr />
+<h2>Build Order as a Risk-Management Tool</h2>
+<p>The course builds the tools simplest-first:</p>
+<ol>
+<li>Read-only first (get current datetime) — lowest blast radius if it breaks.</li>
+<li>Pure-function second (add duration) — deterministic, unit-testable.</li>
+<li>Write operation last (set reminder) — real-world side effects, real-world risk.</li>
+</ol>
+<p>For a PM, this is also the dogfood order. Ship the first tool internally, then the second, and only ship the write tool once both dependencies are stable. Each phase is releaseable.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When a user story looks "simple", ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the request need the current moment's data?</td>
+<td>Yes</td>
+<td>Plan a tool for it.</td>
+</tr>
+<tr>
+<td>Does the request need math the LLM is bad at (dates, money, distance)?</td>
+<td>Yes</td>
+<td>Plan a tool for it.</td>
+</tr>
+<tr>
+<td>Does the request need to persist state anywhere?</td>
+<td>Yes</td>
+<td>Plan a tool for it.</td>
+</tr>
+<tr>
+<td>Can any of these be reused in other features?</td>
+<td>Yes</td>
+<td>Upgrade the priority — it is foundational.</td>
+</tr>
+<tr>
+<td>Does stakeholder think "this is simple, it's just one call"?</td>
+<td>Yes</td>
+<td>Run this gap analysis with them.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Misreading the scope</strong> — "remind me" sounds like a two-day ticket but is actually three tools and an agent loop. Budget accordingly.</li>
+<li><strong>Bundling under pressure</strong> — stakeholders will ask for "just one function that does it all". Resist. The long-term cost is far worse.</li>
+<li><strong>Not marketing the reuse value</strong> — if you don't sell the foundational work, it looks like over-engineering a trivial feature.</li>
+<li><strong>Skipping the toy project</strong> — building this pattern on a real, high-stakes feature means the learning curve happens in production.</li>
+<li><strong>No loading state for multi-turn loops</strong> — three tool calls plus three API calls means several seconds of latency. Design for it.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The reminder app is the clearest illustration of the "iceberg" problem in AI product management: a trivial-sounding user story sits on top of multiple distinct capability gaps. The correct response is to map one tool to each gap, because each tool you build becomes a reusable asset for future features. In the CCA exam, this shows up as questions asking how to decompose a natural-language feature into tools.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Architecture)</strong>: recognize that one user turn may trigger many tool calls — Claude plans the sequence.</li>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: the "one gap per tool" design rule is tested explicitly.</li>
+<li>Exam pattern: given a feature like "remind me / summarize my day / book the meeting", identify the minimum set of tools required.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the iceberg trap in AI product scoping?</td>
+<td>A one-line user story (like "remind me Thursday") hides multiple distinct capability gaps; correct scoping requires mapping one tool to each gap.</td>
+</tr>
+<tr>
+<td>Why is the reminder app a good first project?</td>
+<td>It shows a realistic multi-tool composition with escalating risk (read-only → pure-function → write) inside a user-friendly story.</td>
+</tr>
+<tr>
+<td>What is the LEGO-vs-action-figure analogy?</td>
+<td>Atomic tools are LEGO bricks (reusable across features); monolithic functions are action figures (one use, zero reuse).</td>
+</tr>
+<tr>
+<td>What future features reuse tools built for the reminder app?</td>
+<td>Birthday reminders, deadline tracking, recurring meetings, vacation countdowns, "what day is it" answers.</td>
+</tr>
+<tr>
+<td>What is the recommended build order for tools in this project?</td>
+<td>Read-only first, pure function second, write/side-effect last — a risk gradient.</td>
+</tr>
+<tr>
+<td>What is the first PM mistake when scoping "remind me"-style features?</td>
+<td>Mis-sizing it — assuming it is a simple ticket instead of three tools plus a multi-turn loop.</td>
+</tr>
+<tr>
+<td>Why budget loading state for this feature?</td>
+<td>Multiple tool calls and API round trips easily reach several seconds of latency.</td>
+</tr>
+<tr>
+<td>How do you sell foundational tool work to stakeholders?</td>
+<td>Frame it as enabling a whole family of future features, not as a toy reminder app.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

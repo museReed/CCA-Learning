@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parallelization Workflows Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Parallelization Workflows — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture(22%)— 主要</td>
+</tr>
+<tr>
+<td>任务陈述</td>
+<td>1.2(agentic 模式 — parallelization)、5.2(production workflow 部署)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 78</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>当质量取决于"每个标准的深度"时, parallelization workflow 就是正确的产品选择: 不要让 Claude 在一个 prompt 里同时应付 10 个标准, 而是并行跑 10 份聚焦的子分析, 再汇总出结论 — 答案更好、延迟差不多, 代价是 API 花费变多。</p>
+<hr />
+<h2>心智模型: 品酒小组</h2>
+<p>想象你要为餐厅菜单挑一支酒。</p>
+<table>
+<thead>
+<tr>
+<th>做法</th>
+<th>长什么样</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一位通才品酒师</td>
+<td>"这支酒好吗?" — 全包一次答</td>
+<td>普通、摇摆的判断</td>
+</tr>
+<tr>
+<td><strong>专家小组(parallelization)</strong></td>
+<td>一位专精酸度、一位 tannin、一位尾韵、一位性价比、一位配餐,加一位主审汇总</td>
+<td>各轴深度足够 + 整合最终裁定</td>
+</tr>
+</tbody>
+</table>
+<p>Parallelization workflow 就是专家小组。每位专家只专注于<em>一个</em>轴向; 一位主审看完所有专家笔记后做最后裁决。决策更好、比按顺序跑还快,但代价是每位专家都要付钱。</p>
+<hr />
+<h2>产品场景</h2>
+<h3>适合 Parallelization 的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么 Parallelization 有效</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>材料推荐(课程示例)</td>
+<td>每种材料都需要深入、专门的评估</td>
+</tr>
+<tr>
+<td>简历筛选(按维度分优缺点)</td>
+<td>技能、经验、文化匹配独立评估</td>
+</tr>
+<tr>
+<td>内容 moderation 投票</td>
+<td>高风险决策跑 N 次安全检查取多数决</td>
+</tr>
+<tr>
+<td>多标准 code review</td>
+<td>安全 reviewer + 风格 reviewer + 性能 reviewer + 可维护性 reviewer</td>
+</tr>
+<tr>
+<td>多视角客户反馈分析</td>
+<td>情感、紧急性、主题、是否要行动 — 各自一个子任务</td>
+</tr>
+<tr>
+<td>跨多维度文档比较</td>
+<td>法律、财务、技术维度并行分析</td>
+</tr>
+</tbody>
+</table>
+<h3>不该用 Parallelization 的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>更好的选择</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>有序列依赖的任务</td>
+<td>用 <strong>chaining</strong>(Lesson 79)</td>
+</tr>
+<tr>
+<td>单纯单一答案的问题</td>
+<td>一个 Claude 调用就够</td>
+</tr>
+<tr>
+<td>成本是首要约束</td>
+<td>单一 prompt + 精心设计的标准</td>
+</tr>
+<tr>
+<td>子任务无法真正独立</td>
+<td>Chaining 或 agent</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>两种变体</h2>
+<table>
+<thead>
+<tr>
+<th>变体</th>
+<th>产品用途</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sectioning</strong></td>
+<td>把一个决策拆成多个维度</td>
+<td>材料推荐(每种材料一个 LLM)</td>
+</tr>
+<tr>
+<td><strong>Voting</strong></td>
+<td>同一评估跑 N 次求可靠性</td>
+<td>Moderation: "这安全吗?" × 5 投票者, 多数决</td>
+</tr>
+</tbody>
+</table>
+<p>Sectioning 靠聚焦注意力提升<em>质量</em>。Voting 靠平均化噪音提升<em>可靠性</em>。有些功能两者都需要(例如 "3 个风险类别各跑 5 次安全投票")。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<p>问自己:</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>是</th>
+<th>动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>决策是否依赖多个独立标准?</td>
+<td>是</td>
+<td>Sectioning 候选</td>
+</tr>
+<tr>
+<td>子任务是否需要彼此的输出?</td>
+<td>是</td>
+<td>不是 parallelization — 用 chaining</td>
+</tr>
+<tr>
+<td>质量 &gt; 成本?</td>
+<td>是</td>
+<td>Parallelization 合适</td>
+</tr>
+<tr>
+<td>延迟是关键 metric?</td>
+<td>是</td>
+<td>并行 N 调用 ≈ 最慢一次(好消息!)</td>
+</tr>
+<tr>
+<td>需要高可靠性的二元决策?</td>
+<td>是</td>
+<td>Voting 变体</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>业务价值翻译</h2>
+<p>把这个架构向工程或财务提案时, 翻成商业语言:</p>
+<ul>
+<li><strong>质量</strong> — "每个标准得到专家级分析, 而不是整体的通才分析"</li>
+<li><strong>延迟</strong> — "用户等的是最慢子任务, 不是所有子任务加总 — 感知速度差不多"</li>
+<li><strong>成本</strong> — "API 账单乘以 N, 但每个子任务通常比单一巨型 prompt 更小更快, 实际成本不一定爆"</li>
+<li><strong>可扩展</strong> — "加一个标准 = 加一个 prompt 文件, 现有标准零回归风险"</li>
+<li><strong>A/B 测试</strong> — "改一个子任务 prompt 不用重测其他"</li>
+</ul>
+<hr />
+<h2>PM 必须要求的 Production Guardrails</h2>
+<p>准备上线 parallelization workflow 时, 要请工程加上:</p>
+<ol>
+<li><strong>Per-task timeout</strong> — 单一慢调用不该拖住整个请求</li>
+<li><strong>部分结果处理</strong> — 6 个子任务成功 5 个失败 1 个时, 能否产生可用汇总?</li>
+<li><strong>Fan-out 上限</strong> — 不让 N 依用户输入无限增长</li>
+<li><strong>成本警报</strong> — parallelization 会乘 token 花费, 异常要看得到</li>
+<li><strong>Aggregator fallback</strong> — aggregator LLM 失败时有没有规则型 fallback?</li>
+</ol>
+<hr />
+<h2>PM 常见错误</h2>
+<ol>
+<li><strong>把 parallelization 和 agent 混淆。</strong> Parallelization 跑的是多个<em>预先决定</em>的子任务, 代码仍然掌握 flow。它仍是 workflow。</li>
+<li><strong>少了 aggregator 步骤。</strong> 把 "这里有 6 份分析" 丢给用户是失败 — 用户要一个答案, 不要陪审团。一定要把 aggregator prompt 排进时间线。</li>
+<li><strong>低估 API 花费。</strong> Parallelization 是最容易不知不觉让 token 账单翻 5-10 倍的模式。一开始就把单位经济模型算好。</li>
+<li><strong>该用 sectioning 却用 voting。</strong> Voting 很贵 — 只用在可靠性比深度重要的高风险二元决策。</li>
+<li><strong>忘了 partial-failure 语义。</strong> 一个子任务错了, 功能会优雅降级还是整个请求崩? 要在 PRD 写清楚。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>Parallelization 是 "专家小组" workflow — 每个 Claude 调用负责一个窄工作, 再由主审汇总结果。决策依赖多个独立标准、每个都值得聚焦分析时, 就是标准产品选择。用质量和延迟的胜利换更高的 API 花费, 而且永远要包含 aggregator 步骤。考试记得两种变体: <strong>sectioning</strong>(不同子任务)求深度, <strong>voting</strong>(同任务 N 次)求可靠性。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1(22%)主要</strong>: Parallelization 是 "Building Effective Agents" 四大 workflow 模式之一, 预期有场景题。</li>
+<li><strong>D5(20%)次要</strong>: Production 部署 — 延迟、成本、部分失败。</li>
+<li>考试信号词: "split into independent evaluations"、"run simultaneously"、"aggregate"、"fan out / fan in"。</li>
+<li>两种变体都要背(sectioning、voting)且各记一个示例。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Parallelization workflow 的产品定义?</td>
+<td>并行跑多个聚焦的子分析, 再汇总成一个答案</td>
+</tr>
+<tr>
+<td>品酒小组的类比是什么?</td>
+<td>专家各评一个标准, 主审把笔记整合成最终裁定</td>
+</tr>
+<tr>
+<td>Parallelization 的两种变体?</td>
+<td>Sectioning(不同子任务求深度)与 voting(同任务重复求可靠)</td>
+</tr>
+<tr>
+<td>PM 什么时候该避免 parallelization?</td>
+<td>子任务互相依赖、或成本是首要约束时</td>
+</tr>
+<tr>
+<td>主要的延迟优势?</td>
+<td>总时间 ≈ 最慢子任务, 而不是所有子任务加总</td>
+</tr>
+<tr>
+<td>主要的成本代价?</td>
+<td>比单一调用多 N 倍 API 花费, token 账单乘 N</td>
+</tr>
+<tr>
+<td>Parallelization 最关键的 production guardrail?</td>
+<td>每任务 timeout 与 partial-failure 处理</td>
+</tr>
+<tr>
+<td>Parallelization 是 workflow 还是 agent?</td>
+<td>Workflow — 代码掌握 fan-out/fan-in, Claude 不决定</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

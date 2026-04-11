@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>11 The Stdio Transport Eng En</title>
+<title>The Stdio Transport Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -65,13 +65,12 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <li>Server writes JSON-RPC messages to its <strong>stdout</strong></li>
 <li>Both sides can send messages <strong>at any time</strong> (fully bidirectional)</li>
 </ul>
-<pre class="highlight"><code>┌────────┐   stdin    ┌────────┐
+<pre><code>┌────────┐   stdin    ┌────────┐
 │ Client │ ─────────→ │ Server │
 │        │ ←───────── │        │
 └────────┘   stdout   └────────┘
      (same machine, subprocess)
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>Key Insight</strong><br />
 Stdio only works when client and server are on the <strong>same machine</strong>. The client must be able to spawn the server process directly. This is a hard constraint — no remote hosting possible.</p>
@@ -110,13 +109,12 @@ Stdio only works when client and server are on the <strong>same machine</strong>
 </tbody>
 </table>
 <p>After step 3, the connection is live and both sides can freely exchange messages.</p>
-<pre class="highlight"><code class="language-python"># Conceptual handshake flow
+<pre><code class="language-python"># Conceptual handshake flow
 client.send({&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: &quot;initialize&quot;, &quot;params&quot;: {...}})
 response = server.receive()  # Initialize Result
 client.send({&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: &quot;notifications/initialized&quot;})
 # Now ready for tool calls
 </code></pre>
-
 <hr />
 <h2>Four Communication Patterns</h2>
 <p>Once initialized, Stdio supports all four MCP communication patterns:</p>

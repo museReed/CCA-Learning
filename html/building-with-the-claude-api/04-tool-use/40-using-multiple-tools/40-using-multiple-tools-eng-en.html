@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Using Multiple Tools Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Using Multiple Tools — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%), D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (tool schema &amp; selection), 1.2 (tool orchestration), 2.4 (multi-turn tool loops)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 40</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude can select and chain multiple tools within a single conversation; once you have a core tool-handling infrastructure (schemas list + router function), adding new tools is a simple four-step pattern that scales linearly.</p>
+<hr />
+<h2>The Core Pattern</h2>
+<p>Extending Claude from one tool to many requires only four steps per new tool:</p>
+<ol>
+<li>Implement the Python function</li>
+<li>Define the JSON schema</li>
+<li>Add the schema to the <code>tools=[...]</code> list</li>
+<li>Add an <code>elif</code> branch in the tool router</li>
+</ol>
+<p>No changes to the outer agentic loop. The existing <code>stop_reason == "tool_use"</code> check and message accumulation logic all continue to work.</p>
+<hr />
+<h2>Example: Reminder Agent With Three Tools</h2>
+<pre><code class="language-python">tools = [
+    get_current_datetime_schema,
+    add_duration_to_datetime_schema,
+    set_reminder_schema,
+]
+
+def run_tool(tool_name: str, tool_input: dict):
+    if tool_name == &quot;get_current_datetime&quot;:
+        return get_current_datetime(**tool_input)
+    elif tool_name == &quot;add_duration_to_datetime&quot;:
+        return add_duration_to_datetime(**tool_input)
+    elif tool_name == &quot;set_reminder&quot;:
+        return set_reminder(**tool_input)
+    else:
+        raise ValueError(f&quot;Unknown tool: {tool_name}&quot;)
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,
+    messages=messages,
+)
+</code></pre>
+<p>The router is effectively a dispatch table; many teams migrate it to a dict registry once the number of tools exceeds ~5:</p>
+<pre><code class="language-python">TOOL_REGISTRY = {
+    &quot;get_current_datetime&quot;: get_current_datetime,
+    &quot;add_duration_to_datetime&quot;: add_duration_to_datetime,
+    &quot;set_reminder&quot;: set_reminder,
+}
+
+def run_tool(tool_name, tool_input):
+    return TOOL_REGISTRY[tool_name](**tool_input)
+</code></pre>
+<hr />
+<h2>How Claude Selects Tools</h2>
+<p>With multiple tools in the list, Claude reads each schema's <code>name</code> + <code>description</code> and uses the surrounding conversation context to decide which tool (if any) to call. Selection factors include:</p>
+<ul>
+<li><strong>Description quality</strong> — a crisp, action-oriented description wins over a vague one</li>
+<li><strong>Input parameter names</strong> — clearly named params reduce ambiguity</li>
+<li><strong>User request phrasing</strong> — "remind me" maps obviously to <code>set_reminder</code></li>
+<li><strong>Chain dependencies</strong> — if a tool needs data it does not have, Claude may first call another tool to acquire it</li>
+</ul>
+<p>This is why tool descriptions matter as much as the implementation.</p>
+<hr />
+<h2>Chained Tool Calls and the Agentic Loop</h2>
+<p>Example prompt: <em>"Set a reminder for my doctor's appointment. It is 177 days after Jan 1st, 2050."</em></p>
+<p>Claude typically handles this as a sequence of tool_use blocks across multiple turns:</p>
+<ol>
+<li><strong>Turn 1</strong> — Claude emits a <code>tool_use</code> block for <code>add_duration_to_datetime(start="2050-01-01", days=177)</code></li>
+<li><strong>Your code</strong> runs the function, returns <code>"2050-06-27"</code> as a <code>tool_result</code></li>
+<li><strong>Turn 2</strong> — Claude receives the result and emits a <code>tool_use</code> block for <code>set_reminder(date="2050-06-27", description="doctor appointment")</code></li>
+<li><strong>Your code</strong> runs the function, returns the confirmation</li>
+<li><strong>Turn 3</strong> — Claude emits a final <code>text</code> block summarizing what it did</li>
+</ol>
+<p>Your agent loop keeps calling the API until <code>stop_reason != "tool_use"</code>.</p>
+<hr />
+<h2>Parallel vs. Sequential Tool Calls</h2>
+<p>A single assistant message can contain <strong>multiple tool_use blocks in parallel</strong> when the tools are independent. For instance, if the user asks "What is the weather in Tokyo AND the current price of AAPL?", Claude may emit both <code>get_weather</code> and <code>get_stock_price</code> tool_use blocks in the same response. You must execute each and return <strong>all</strong> the <code>tool_result</code> blocks in one user message before continuing.</p>
+<pre><code class="language-python"># Collect all tool_use blocks from the assistant turn
+tool_uses = [b for b in response.content if b.type == &quot;tool_use&quot;]
+
+# Execute them and build tool_result blocks
+tool_results = [
+    {
+        &quot;type&quot;: &quot;tool_result&quot;,
+        &quot;tool_use_id&quot;: tu.id,
+        &quot;content&quot;: str(run_tool(tu.name, tu.input)),
+    }
+    for tu in tool_uses
+]
+
+# Send all results in a single user message
+messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: tool_results})
+</code></pre>
+<p>Sequential chaining (Tool A result feeds Tool B) requires multiple round-trips to the API and accumulates in <code>messages</code> as separate turns.</p>
+<hr />
+<h2>Message Structure When Multiple Tools Fire</h2>
+<p>The conversation history for a multi-tool request looks like:</p>
+<pre><code>user:      &quot;Set a reminder 177 days after Jan 1, 2050&quot;
+assistant: [text &quot;I need to calculate the date first&quot;] + [tool_use add_duration_to_datetime]
+user:      [tool_result &quot;2050-06-27&quot;]
+assistant: [text &quot;Now setting the reminder&quot;] + [tool_use set_reminder]
+user:      [tool_result &quot;Reminder set&quot;]
+assistant: [text &quot;Done. Reminder scheduled for June 27, 2050.&quot;]
+</code></pre>
+<p>Notice that assistant messages can mix text blocks and tool_use blocks. Do not strip the text blocks when replaying history — Claude uses them as reasoning context.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Forgetting to register the schema</strong> — implementing the Python function and router case, but not adding it to the <code>tools=[...]</code> list. Claude never learns the tool exists.</li>
+<li><strong>Router silently ignores unknown tools</strong> — always raise on unknown names so typos in the schema surface immediately, instead of silently returning <code>None</code>.</li>
+<li><strong>Only returning one tool_result when Claude sent multiple tool_uses in parallel</strong> — the API returns an error if the tool_use_id set does not match.</li>
+<li><strong>Dropping text blocks from assistant messages</strong> — assistant content can be a list of blocks; when appending to history, keep all blocks intact.</li>
+<li><strong>Ambiguous tool descriptions</strong> — "helper tool" or "utility" descriptions confuse Claude. Write imperative, action-first descriptions: "Adds a duration in days to a starting datetime."</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The agentic loop for N tools is identical to the loop for one tool. Once <code>stop_reason == "tool_use"</code> handling is correct, scaling is purely a matter of registering more schemas and dispatch cases. The architectural cost is constant; the only variable cost is writing high-quality tool descriptions.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>: Know how Claude selects among multiple tools based on schema + description. Expect questions on tool dispatch patterns.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Recognize parallel tool_use emission and the requirement to return all tool_results in a single user turn.</li>
+<li><strong>Task 2.4 (multi-turn tool loops)</strong>: Tracing a chained tool-use sequence and identifying where the loop terminates is a frequent question type.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the four steps to add a new tool to a multi-tool agent?</td>
+<td>1) Implement function 2) Define schema 3) Add to tools list 4) Add router case</td>
+</tr>
+<tr>
+<td>How does Claude choose between multiple tools?</td>
+<td>Based on each tool's name, description, parameter names, and the current conversation context</td>
+</tr>
+<tr>
+<td>Can a single assistant message contain multiple tool_use blocks?</td>
+<td>Yes — parallel tool calls appear as multiple tool_use blocks in one response and must all be answered in one user message</td>
+</tr>
+<tr>
+<td>What must accompany every tool_result you send back?</td>
+<td>The matching <code>tool_use_id</code> from the assistant's tool_use block</td>
+</tr>
+<tr>
+<td>When does the agentic loop terminate?</td>
+<td>When <code>stop_reason</code> is no longer <code>"tool_use"</code> (typically <code>"end_turn"</code>)</td>
+</tr>
+<tr>
+<td>Why keep text blocks from assistant turns in history?</td>
+<td>Claude uses them as reasoning context; dropping them degrades subsequent turns</td>
+</tr>
+<tr>
+<td>What is a scalable replacement for a large <code>if/elif</code> router?</td>
+<td>A dict-based tool registry mapping name to callable</td>
+</tr>
+<tr>
+<td>What is the risk of an overly generic tool description?</td>
+<td>Claude may fail to select the right tool or mis-apply it, leading to bad tool calls</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

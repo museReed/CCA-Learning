@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>13 Github Integration Eng Zh Tw</title>
+<title>Github Integration Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -59,6 +59,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>兩個預設 Workflow</h2>
 <p>整合安裝後會在 <code>.github/workflows/</code> 放兩個 workflow 檔案：</p>
+<!-- diagram: github-integration-workflows — /install-github-app → PR 帶 2 個 workflow 檔 → Merge → (1) @claude Mention Action / (2) PR Review Action -->
 <blockquote>
 <p>📎 流程圖由 nanobanana 產出</p>
 </blockquote>
@@ -128,10 +129,9 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </blockquote>
 <hr />
 <h2>設定流程</h2>
-<pre class="highlight"><code class="language-bash"># 在 Claude Code 裡執行：
+<pre><code class="language-bash"># 在 Claude Code 裡執行：
 /install-github-app
 </code></pre>
-
 <p>三個步驟：<br />
 1. 在 GitHub 上安裝 Claude Code app<br />
 2. 加入 API key<br />
@@ -141,29 +141,27 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>自訂 Workflow</h2>
 <h3>加入專案設定步驟</h3>
 <p>Claude 運行前可以先準備環境：</p>
-<pre class="highlight"><code class="language-yaml">- name: Project Setup
+<pre><code class="language-yaml">- name: Project Setup
   run: |
     npm run setup
     npm run dev:daemon
 </code></pre>
-
 <h3>Custom Instructions</h3>
 <p>提供 Claude 環境的 context：</p>
-<pre class="highlight"><code class="language-yaml">custom_instructions: |
+<pre><code class="language-yaml">custom_instructions: |
   The project is already set up with all dependencies installed.
   The server is already running at localhost:3000. Logs from it
   are being written to logs.txt. If needed, you can query the
   db with the 'sqlite3' cli. If needed, use the mcp__playwright
   set of tools to launch a browser and interact with the app.
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>重要細節</strong></p>
 <p>Custom instructions 告訴 Claude CI 環境裡有什麼。因為 Claude 是以非互動模式運行（<code>-p</code> flag），它無法自行探索，所以這些指示至關重要。</p>
 </blockquote>
 <h3>MCP Server 設定</h3>
 <p>在 GitHub Actions 環境設定 MCP server：</p>
-<pre class="highlight"><code class="language-yaml">mcp_config: |
+<pre><code class="language-yaml">mcp_config: |
   {
     &quot;mcpServers&quot;: {
       &quot;playwright&quot;: {
@@ -177,14 +175,12 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
     }
   }
 </code></pre>
-
 <hr />
 <h2>工具權限：<code>-p</code> Flag 和 <code>allowed_tools</code></h2>
 <p>這是本單元<strong>最重要的考試概念</strong>。</p>
 <p>Claude 在 GitHub Actions 裡以 <code>-p</code> flag（非互動 / print 模式）運行。這個模式沒有人可以核准權限，所以<strong>每個工具都必須明確列出</strong>：</p>
-<pre class="highlight"><code class="language-yaml">allowed_tools: &quot;Bash(npm:*),Bash(sqlite3:*),mcp__playwright__browser_snapshot,mcp__playwright__browser_click,...&quot;
+<pre><code class="language-yaml">allowed_tools: &quot;Bash(npm:*),Bash(sqlite3:*),mcp__playwright__browser_snapshot,mcp__playwright__browser_click,...&quot;
 </code></pre>
-
 <blockquote>
 <p>⚠️ <strong>考試關鍵細節</strong></p>
 <p>跟本地開發不同，在 GitHub Actions 裡<strong>不能用</strong> <code>mcp__playwright</code> 來允許一個 server 的所有工具。每個 MCP 工具都必須逐一列出。講師原話：「There is no shortcut for permissions like we saw previously.」</p>

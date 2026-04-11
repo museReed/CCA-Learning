@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workflows Vs Agents Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Workflows vs Agents — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%); D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (agent vs workflow architecture), 1.2 (agentic loop), 5.1 (production pattern selection)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 83</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Workflows are the reliable, cheap, predictable architecture for AI features you can fully specify; agents are the flexible, expensive, less predictable architecture for ones you cannot — and the PM's job is to match the pattern to the problem instead of picking whichever sounds cooler in a roadmap review.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Every AI feature PRD implicitly chooses between these two architectures. If you do not make the choice consciously, engineering will make it for you — usually by building whichever they find more interesting, which is usually an agent. Six months later you will be debating why cost per ticket is 10x the workflow alternative that would have shipped in a third of the time.</p>
+<p>This is one of those decisions where the right answer for the user is almost always the less glamorous one.</p>
+<hr />
+<h2>Mental Model: The Assembly Line vs the Workshop</h2>
+<p><strong>Workflow = assembly line</strong>. Each station does one job. Inputs come in at the start, products come out at the end. Quality is high, throughput is high, cost is low, and you can measure each station independently. The downside: the line only makes one product. Change the product and you have to retool the line.</p>
+<p><strong>Agent = craftsman's workshop</strong>. The craftsman has tools on the wall and a goal from the customer ("make me a table"). They pick which tool to use and in what order based on the specific request. The output is more flexible — "make me a table with an extra drawer" works the same way. The downside: slower, more expensive per item, harder to measure because each build is different.</p>
+<p>Most products should have an assembly line doing 80 percent of the volume and a workshop handling the 20 percent of requests that need hand-crafting.</p>
+<hr />
+<h2>The Full Comparison Table (PM View)</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Workflow</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Reliability</strong></td>
+<td>High — same result every time</td>
+<td>Lower — occasional off-the-rails behavior</td>
+</tr>
+<tr>
+<td><strong>Cost per task</strong></td>
+<td>Low, predictable</td>
+<td>High, variable (1x-10x workflow cost)</td>
+</tr>
+<tr>
+<td><strong>Latency</strong></td>
+<td>Low, predictable</td>
+<td>Higher, variable</td>
+</tr>
+<tr>
+<td><strong>Eval complexity</strong></td>
+<td>Moderate — test each step</td>
+<td>Hard — must test emergent behavior</td>
+</tr>
+<tr>
+<td><strong>Flexibility</strong></td>
+<td>Low — only what you specified</td>
+<td>High — handles novel requests</td>
+</tr>
+<tr>
+<td><strong>Time to first ship</strong></td>
+<td>Longer upfront (you must design the flow)</td>
+<td>Shorter upfront (design the toolbox)</td>
+</tr>
+<tr>
+<td><strong>Time to handle a new user request</strong></td>
+<td>New ticket + new branch</td>
+<td>Often zero — agent just handles it</td>
+</tr>
+<tr>
+<td><strong>Support tickets for unexpected failures</strong></td>
+<td>Low</td>
+<td>Higher, harder to diagnose</td>
+</tr>
+<tr>
+<td><strong>User trust</strong></td>
+<td>Builds steadily on predictability</td>
+<td>Depends heavily on inspection and guardrails</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>Pick Workflow When</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Summarize this article in 3 bullets"</td>
+<td>Pure transformation, one known input</td>
+</tr>
+<tr>
+<td>"Extract invoice totals"</td>
+<td>Compliance demands deterministic behavior</td>
+</tr>
+<tr>
+<td>"Translate product description"</td>
+<td>Measurable, cacheable, cheap</td>
+</tr>
+<tr>
+<td>"Categorize support tickets"</td>
+<td>Narrow, repeatable, eval-friendly</td>
+</tr>
+<tr>
+<td>Any regulated or audited flow</td>
+<td>Predictability is non-negotiable</td>
+</tr>
+</tbody>
+</table>
+<h3>Pick Agent When</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coding assistant over unknown codebases</td>
+<td>Cannot enumerate what users will ask</td>
+</tr>
+<tr>
+<td>"Help me with my taxes" conversational tool</td>
+<td>Every user's question path is different</td>
+</tr>
+<tr>
+<td>Creative content generation</td>
+<td>Creativity requires tool recombination</td>
+</tr>
+<tr>
+<td>Open-ended debugging helper</td>
+<td>Cannot predict the bug in advance</td>
+</tr>
+<tr>
+<td>Internal "data analyst" across messy schemas</td>
+<td>Each question requires fresh exploration</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Cost and Latency — The Business Math</h2>
+<p>For a typical 3-step task:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Workflow</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tokens per task</td>
+<td>~3,000 (fixed)</td>
+<td>~3,000 - 30,000 (variable)</td>
+</tr>
+<tr>
+<td>Latency per task</td>
+<td>~3-6 seconds</td>
+<td>~5-30 seconds</td>
+</tr>
+<tr>
+<td>Cost multiplier</td>
+<td>1x (baseline)</td>
+<td>1x to 10x</td>
+</tr>
+<tr>
+<td>Support tickets</td>
+<td>1x (baseline)</td>
+<td>1.5x to 3x (debuggability cost)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM rule of thumb</strong>: if a workflow hits 95 percent accuracy and an agent hits 96 percent, the workflow wins. You are paying a 5-10x cost multiplier for a 1-point accuracy bump you can probably eat with better evals or a retry on the workflow.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>Run every AI feature through this sequence:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Question</th>
+<th>If Yes Go To</th>
+<th>If No Go To</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Can I fully list the user flows in advance?</td>
+<td>Workflow</td>
+<td>Step 2</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Is the task a pure transformation (A -&gt; B)?</td>
+<td>Workflow</td>
+<td>Step 3</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Are requests varied and unpredictable?</td>
+<td>Step 4</td>
+<td>Workflow</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Does the action depend on live environment state?</td>
+<td>Agent with inspection</td>
+<td>Step 5</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Can we afford 5-10x cost and eval complexity?</td>
+<td>Agent</td>
+<td>Decompose into smaller workflows</td>
+</tr>
+</tbody>
+</table>
+<p>And always ask a final sanity-check: <strong>would the user notice if we built this as a workflow instead?</strong> If the answer is "no," ship the workflow.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Choosing agents because they sound modern</strong> — "agentic" sells well in roadmap reviews, but most features should be workflows. Ship reliability first.</li>
+<li><strong>Not budgeting for the agent cost multiplier</strong> — cost per request can jump 5-10x with no one forecasting it. Forecast agent cost before committing.</li>
+<li><strong>Forgetting eval complexity in the timeline</strong> — agents need 3-10x more eval cases than workflows. Add that to your estimates, not hope it is free.</li>
+<li><strong>Writing PRDs that hard-code tool sequences</strong> — this forces engineering into workflow mode even when an agent would serve users better. Write goals, not sequences.</li>
+<li><strong>Missing the hybrid option</strong> — production systems are rarely pure agents or pure workflows. A classifier + router is usually the best of both worlds.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The default answer is workflow. Pick an agent only when your user problem genuinely requires it — and when you accept the cost, latency, and eval overhead. Users do not care about your architecture; they care that the feature works reliably, affordably, and predictably. Matching the pattern to the problem is the highest-leverage PM decision in any agentic product.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>: Expect direct "workflow vs agent" scenario questions. The formula: predictable and narrow -&gt; workflow; unpredictable and broad -&gt; agent; always default to workflow.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: Production trade-offs — cost, latency, eval, reliability — all favor workflows for most features. This is directly tested.</li>
+<li>Exam cues: "compliance," "predictable," "cheapest" -&gt; workflow; "varied requests," "creative combinations," "novel situations" -&gt; agent.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is Anthropic's default recommendation for workflow vs agent?</td>
+<td>Default to workflow; use agents only when workflows cannot solve the problem.</td>
+</tr>
+<tr>
+<td>What is the assembly line vs workshop analogy?</td>
+<td>Workflow = assembly line (one product, high throughput, cheap, predictable). Agent = workshop (craftsman with tools, flexible but slow and expensive).</td>
+</tr>
+<tr>
+<td>Name three dimensions where workflows beat agents in production.</td>
+<td>Reliability, cost, latency, debuggability, predictability, eval simplicity (any three).</td>
+</tr>
+<tr>
+<td>When should a PM pick an agent over a workflow?</td>
+<td>When user requests are varied, unpredictable, require creative tool combinations, and workflow accuracy is not acceptable.</td>
+</tr>
+<tr>
+<td>What is the typical cost multiplier of an agent over a workflow for the same task?</td>
+<td>1x to 10x, depending on how many loop iterations the agent takes.</td>
+</tr>
+<tr>
+<td>What PRD mistake forces engineering into the wrong architecture?</td>
+<td>Writing hard-coded tool sequences instead of stating the user goal — forces workflow mode even when an agent fits better.</td>
+</tr>
+<tr>
+<td>What is the hybrid pattern most production systems use?</td>
+<td>A workflow router sending simple cases through workflow branches and hard cases to an agent.</td>
+</tr>
+<tr>
+<td>What is the final sanity-check question before picking an agent?</td>
+<td>Would the user notice if we built this as a workflow instead? If no, ship the workflow.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sending Tool Results Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Sending Tool Results — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) / D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 (tool_result block format), 2.2 (content block handling), 1.2 (closing the tool-use loop)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 37</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Tool results are delivered back to Claude as <code>tool_result</code> content blocks wrapped inside a <strong>user</strong> message, each keyed by a <code>tool_use_id</code> that must exactly match the preceding <code>ToolUseBlock.id</code>.</p>
+<hr />
+<h2>From Tool Request to Execution</h2>
+<p>After Claude returns a <code>ToolUseBlock</code>, you invoke your local function using the block's <code>input</code> dict. Python's <code>**</code> unpacking turns the dict into keyword arguments:</p>
+<pre><code class="language-python">tool_block = response.content[1]  # Example: [TextBlock, ToolUseBlock]
+result = get_current_datetime(**tool_block.input)
+# Equivalent to: get_current_datetime(format=&quot;HH:MM:SS&quot;)
+</code></pre>
+<p>The <code>input</code> dict is guaranteed to match the tool's <code>input_schema</code> (assuming Claude complied with it), so unpacking is the idiomatic bridge between JSON Schema and your function signature.</p>
+<hr />
+<h2>Anatomy of a <code>tool_result</code> Block</h2>
+<p>A <code>tool_result</code> block is a user-role content block with exactly these fields:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>Literal <code>"tool_result"</code></td>
+<td>Tells the API this block is a tool return</td>
+</tr>
+<tr>
+<td><code>tool_use_id</code></td>
+<td>String</td>
+<td>Must match the <code>id</code> from the earlier <code>ToolUseBlock</code></td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>String or list of blocks</td>
+<td>Your tool's output, serialized</td>
+</tr>
+<tr>
+<td><code>is_error</code></td>
+<td>Boolean</td>
+<td><code>True</code> if the tool failed; Claude will handle the error accordingly</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-python">messages.append({
+    &quot;role&quot;: &quot;user&quot;,
+    &quot;content&quot;: [{
+        &quot;type&quot;: &quot;tool_result&quot;,
+        &quot;tool_use_id&quot;: response.content[1].id,
+        &quot;content&quot;: &quot;15:04:22&quot;,
+        &quot;is_error&quot;: False
+    }]
+})
+</code></pre>
+<p>The critical invariant: <strong>every <code>ToolUseBlock</code> in the prior assistant message must be answered by a matching <code>tool_result</code> in the next user message</strong>. The API validates this pairing and will 400 on mismatches.</p>
+<hr />
+<h2>Content Serialization Rules</h2>
+<p>The <code>content</code> field accepts either a plain string or a list of content blocks. For anything non-trivial, serialize to JSON:</p>
+<pre><code class="language-python">import json
+
+tool_output = {&quot;time&quot;: &quot;15:04:22&quot;, &quot;timezone&quot;: &quot;UTC&quot;, &quot;epoch&quot;: 1762978180}
+result_block = {
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;tool_use_id&quot;: tool_block.id,
+    &quot;content&quot;: json.dumps(tool_output),
+    &quot;is_error&quot;: False
+}
+</code></pre>
+<p>Claude is trained to parse stringified JSON in tool results, so <code>json.dumps</code> is the canonical pattern for structured data. Binary data (images, files) must use the list-of-blocks form with image blocks inside.</p>
+<hr />
+<h2>Handling Multiple Tool Calls in One Turn</h2>
+<p>If Claude requests more than one tool in a single response (e.g., "What's 10+10 and 30+30?" produces two <code>ToolUseBlocks</code>), you must return <strong>all</strong> corresponding <code>tool_result</code> blocks in a single user message:</p>
+<pre><code class="language-python">tool_use_blocks = [b for b in response.content if b.type == &quot;tool_use&quot;]
+
+tool_results = []
+for tub in tool_use_blocks:
+    output = run_tool(tub.name, tub.input)
+    tool_results.append({
+        &quot;type&quot;: &quot;tool_result&quot;,
+        &quot;tool_use_id&quot;: tub.id,
+        &quot;content&quot;: json.dumps(output),
+        &quot;is_error&quot;: False
+    })
+
+messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: tool_results})
+</code></pre>
+<p>Ordering of results within the content list does not matter — the <code>tool_use_id</code> is what pairs request and response. But <strong>you cannot skip any</strong>: missing even one result block produces a 400.</p>
+<hr />
+<h2>Error Handling with <code>is_error</code></h2>
+<p>When your tool raises, do not omit the result block. Instead, send <code>is_error: True</code> and put the error message in <code>content</code>:</p>
+<pre><code class="language-python">try:
+    output = run_tool(tub.name, tub.input)
+    block = {
+        &quot;type&quot;: &quot;tool_result&quot;,
+        &quot;tool_use_id&quot;: tub.id,
+        &quot;content&quot;: json.dumps(output),
+        &quot;is_error&quot;: False
+    }
+except Exception as e:
+    block = {
+        &quot;type&quot;: &quot;tool_result&quot;,
+        &quot;tool_use_id&quot;: tub.id,
+        &quot;content&quot;: f&quot;Error: {e}&quot;,
+        &quot;is_error&quot;: True
+    }
+</code></pre>
+<p>Claude will read the error message and either retry with different arguments, report the failure to the user, or choose a different strategy. Silently dropping a failed tool breaks the ID pairing invariant and causes a 400.</p>
+<hr />
+<h2>The Follow-Up API Call</h2>
+<p>The follow-up request must:</p>
+<ol>
+<li>Include the <strong>full conversation history</strong> (original user message + assistant tool-use message + new user tool-result message)</li>
+<li>Still pass <code>tools=[...]</code> — Claude needs the schema to resolve tool references</li>
+<li>Use the same <code>model</code> and <code>max_tokens</code> configuration</li>
+</ol>
+<pre><code class="language-python">client.messages.create(
+    model=model,
+    max_tokens=1000,
+    messages=messages,  # now has 3+ messages including tool-result
+    tools=[get_current_datetime_schema]
+)
+</code></pre>
+<p>Claude's next response integrates the tool output into natural language. If it needs another tool, you repeat the loop.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Putting <code>tool_result</code> in an assistant message</strong> — it must be in a <strong>user</strong> role message. The API rejects assistant-role tool results.</li>
+<li><strong>Omitting <code>tool_use_id</code></strong> or using a wrong value — causes 400 "mismatched tool_use_id".</li>
+<li><strong>Sending a dict/object as <code>content</code></strong> without serializing — <code>content</code> must be a string (or list of blocks); pass <code>json.dumps(data)</code> for structured output.</li>
+<li><strong>Dropping <code>is_error</code></strong> — defaults to <code>False</code>, so forgetting it after a failure tells Claude the tool succeeded, leading to hallucinations.</li>
+<li><strong>Returning only one result when Claude requested multiple tools</strong> — every <code>ToolUseBlock</code> needs a matching <code>tool_result</code> block in the same user turn.</li>
+<li><strong>Forgetting to pass <code>tools=[...]</code> on the follow-up</strong> — Claude rejects history that references tools whose schemas are not present.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The <code>tool_use_id</code> is a contract between your code and Claude. Every <code>ToolUseBlock</code> the assistant emits must be answered by exactly one <code>tool_result</code> block in the next <strong>user</strong> message, keyed by the same ID. Think of it like a request/response pairing at the content-block level, not the message level — and remember that even errors must come back as <code>tool_result</code> blocks with <code>is_error: True</code>, not as missing blocks.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know the four fields of a <code>tool_result</code> block and which role (<code>user</code>) it lives in.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Understand the request/result pairing as the fundamental unit of the agentic loop.</li>
+<li>Expect questions presenting malformed <code>tool_result</code> blocks (wrong role, missing ID, dict content) and asking which error occurs.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In which role's message does a <code>tool_result</code> block live?</td>
+<td>The <code>user</code> role — Claude sees tool results as user-provided context</td>
+</tr>
+<tr>
+<td>Which field on a <code>tool_result</code> block pairs it with a prior tool-use request?</td>
+<td><code>tool_use_id</code> — must exactly match the <code>ToolUseBlock.id</code></td>
+</tr>
+<tr>
+<td>What type must the <code>content</code> field of a <code>tool_result</code> be?</td>
+<td>A string (or a list of blocks for images/files) — use <code>json.dumps</code> for structured data</td>
+</tr>
+<tr>
+<td>What should you set <code>is_error</code> to when a tool raises?</td>
+<td><code>True</code> — and put the error message in <code>content</code>, do not drop the block</td>
+</tr>
+<tr>
+<td>What Python syntax unpacks <code>ToolUseBlock.input</code> into keyword arguments?</td>
+<td><code>my_function(**tool_block.input)</code></td>
+</tr>
+<tr>
+<td>What happens if Claude requests two tools and you only return one result?</td>
+<td>The API rejects the follow-up request with a 400 about missing <code>tool_use_id</code> pairing</td>
+</tr>
+<tr>
+<td>Must the follow-up API call still include <code>tools=[...]</code>?</td>
+<td>Yes — Claude needs the schema to resolve references in conversation history</td>
+</tr>
+<tr>
+<td>How do you handle multiple tool calls in one turn?</td>
+<td>Execute all tools, collect every <code>tool_result</code> block, and send them together in a single user message</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

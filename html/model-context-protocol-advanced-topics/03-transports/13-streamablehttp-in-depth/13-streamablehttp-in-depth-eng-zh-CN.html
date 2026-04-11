@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>13 Streamablehttp In Depth Eng Zh Cn</title>
+<title>Streamablehttp In Depth Eng Zh Cn</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -56,7 +56,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="Streamable Http Sse" src="visuals/streamable-http-sse-zh-TW.svg" /></p>
 <h2>SSE 解决什么问题</h2>
 <p>HTTP 只能由 client 发起。但 MCP 需要 server 推送消息（progress、log、sampling request）。<strong>SSE</strong> 翻转了这个限制：client 开启一个持久连接，server 随时可以通过该连接推送事件。</p>
-<pre class="highlight"><code>传统 HTTP：
+<pre><code>传统 HTTP：
   Client ──request──→ Server
   Client ←──response── Server
   （server 无法发起）
@@ -68,7 +68,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   Client ←──event 3─── Server
   ...
 </code></pre>
-
 <hr />
 <h2>连接建立顺序</h2>
 <table>
@@ -103,7 +102,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </tbody>
 </table>
 <p>Session ID 至关重要 — 它将 GET SSE 连接与同一 client 的 POST 请求链接起来。</p>
-<pre class="highlight"><code class="language-python"># 步骤 1-3：正常 handshake
+<pre><code class="language-python"># 步骤 1-3：正常 handshake
 session_id = initialize_handshake(server_url)
 
 # 步骤 4：开启持久 SSE 连接
@@ -112,7 +111,6 @@ sse_stream = requests.get(f&quot;{server_url}/sse&quot;,
     stream=True
 )
 </code></pre>
-
 <hr />
 <h2>双 SSE 架构</h2>
 <p>这是核心架构概念。有<strong>两种</strong> SSE 连接：</p>
@@ -130,7 +128,7 @@ sse_stream = requests.get(f&quot;{server_url}/sse&quot;,
 <li>传输 <strong>tool 专属消息</strong>：progress 更新、log 条目、最终结果</li>
 <li>把它想成「per-task 频道」</li>
 </ul>
-<pre class="highlight"><code>Client                          Server
+<pre><code>Client                          Server
   │                               │
   │──── GET /sse ────────────────→│  （Primary SSE — 保持开启）
   │←─── server-initiated msgs ───│
@@ -141,7 +139,6 @@ sse_stream = requests.get(f&quot;{server_url}/sse&quot;,
   │──── POST /tools/call ────────→│  （另一个 Tool SSE）
   │←─── progress, logs, result ──│
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>Key Insight</strong><br />
 双 SSE 设计意味着 server 可以通过 tool SSE 推送特定 tool call 的 progress，<strong>同时</strong>通过 primary SSE 推送无关的 server-initiated request。它们是独立的频道。</p>

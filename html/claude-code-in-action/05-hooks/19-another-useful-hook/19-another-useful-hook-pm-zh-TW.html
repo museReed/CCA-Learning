@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>19 Another Useful Hook Pm Zh Tw</title>
+<title>Another Useful Hook Pm Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -252,12 +252,11 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>Debug Hook：PM 應該知道它存在</h2>
 <p>工程師用一個簡單的 debug 技巧來發現每個 hook 收到什麼資料：</p>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;matcher&quot;: &quot;*&quot;,
   &quot;hooks&quot;: [{ &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;jq . &gt; log.json&quot; }]
 }
 </code></pre>
-
 <p><strong>PM 為什麼要在意</strong>：如果工程師說「我們不知道這個生命週期階段有什麼資料可用」，答案是：用 debug hook 去發現。這防止需求因為「我們需要先調查」而被擋住。</p>
 <hr />
 <h2>PM 的 Hook 類型決策框架</h2>

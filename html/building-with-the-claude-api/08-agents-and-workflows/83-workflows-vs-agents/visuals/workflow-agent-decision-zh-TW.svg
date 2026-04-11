@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="900" height="620" fill="white"/>
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">何時該用 Workflow vs Agent</text>
+  <text x="450" y="60" text-anchor="middle" font-size="13" fill="#6B7280">把任務畫在「可預測性」對「彈性」的座標軸上</text>
+
+  <!-- Plot area -->
+  <rect x="120" y="90" width="650" height="460" rx="8" fill="#FAFAFA" stroke="#E2E8F0" stroke-width="1.5"/>
+
+  <!-- Grid lines -->
+  <line x1="120" y1="320" x2="770" y2="320" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="445" y1="90" x2="445" y2="550" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3"/>
+
+  <!-- Axes -->
+  <!-- Y axis -->
+  <line x1="120" y1="90" x2="120" y2="550" stroke="#1E293B" stroke-width="2"/>
+  <polygon points="120,85 115,95 125,95" fill="#1E293B"/>
+  <text x="90" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B" transform="rotate(-90 90 120)">高可預測性</text>
+  <text x="90" y="540" text-anchor="middle" font-size="11" font-weight="600" fill="#6B7280" transform="rotate(-90 90 540)">低可預測性</text>
+
+  <!-- X axis -->
+  <line x1="120" y1="550" x2="770" y2="550" stroke="#1E293B" stroke-width="2"/>
+  <polygon points="775,550 765,545 765,555" fill="#1E293B"/>
+  <text x="170" y="575" text-anchor="middle" font-size="11" font-weight="600" fill="#6B7280">低彈性</text>
+  <text x="720" y="575" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B">高彈性</text>
+
+  <!-- Quadrant labels -->
+  <text x="280" y="115" text-anchor="middle" font-size="14" font-weight="700" fill="#3B82F6">WORKFLOW 區</text>
+  <text x="280" y="133" text-anchor="middle" font-size="10" fill="#6B7280">可預測、便宜、快</text>
+
+  <text x="610" y="115" text-anchor="middle" font-size="14" font-weight="700" fill="#8B5CF6">AGENT 區</text>
+  <text x="610" y="133" text-anchor="middle" font-size="10" fill="#6B7280">彈性高、開放式</text>
+
+  <text x="280" y="535" text-anchor="middle" font-size="11" fill="#94A3B8" font-style="italic">死板又不穩（避免）</text>
+  <text x="610" y="535" text-anchor="middle" font-size="11" fill="#94A3B8" font-style="italic">混亂（難以使用）</text>
+
+  <!-- Example points -->
+  <circle cx="210" cy="180" r="10" fill="#3B82F6" stroke="white" stroke-width="2"/>
+  <text x="226" y="184" font-size="11" fill="#1E293B" font-weight="500">資料抽取</text>
+
+  <circle cx="260" cy="230" r="10" fill="#3B82F6" stroke="white" stroke-width="2"/>
+  <text x="276" y="234" font-size="11" fill="#1E293B" font-weight="500">摘要</text>
+
+  <circle cx="340" cy="200" r="10" fill="#3B82F6" stroke="white" stroke-width="2"/>
+  <text x="356" y="204" font-size="11" fill="#1E293B" font-weight="500">路由分派</text>
+
+  <circle cx="310" cy="275" r="10" fill="#3B82F6" stroke="white" stroke-width="2"/>
+  <text x="326" y="279" font-size="11" fill="#1E293B" font-weight="500">Chaining 串接</text>
+
+  <circle cx="410" cy="250" r="10" fill="#3B82F6" stroke="white" stroke-width="2"/>
+  <text x="350" y="270" font-size="11" fill="#1E293B" font-weight="500">平行審查</text>
+
+  <circle cx="540" cy="230" r="10" fill="#8B5CF6" stroke="white" stroke-width="2"/>
+  <text x="556" y="234" font-size="11" fill="#1E293B" font-weight="500">客服 Agent</text>
+
+  <circle cx="620" cy="310" r="10" fill="#8B5CF6" stroke="white" stroke-width="2"/>
+  <text x="636" y="314" font-size="11" fill="#1E293B" font-weight="500">研究助手</text>
+
+  <circle cx="700" cy="380" r="10" fill="#8B5CF6" stroke="white" stroke-width="2"/>
+  <text x="560" y="395" font-size="11" fill="#1E293B" font-weight="500">Claude Code / 寫程式 Agent</text>
+
+  <circle cx="660" cy="240" r="10" fill="#8B5CF6" stroke="white" stroke-width="2"/>
+  <text x="676" y="244" font-size="11" fill="#1E293B" font-weight="500">多步驟除錯</text>
+
+  <!-- Legend -->
+  <rect x="780" y="120" width="110" height="110" rx="6" fill="white" stroke="#E2E8F0"/>
+  <text x="835" y="140" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">圖例</text>
+  <circle cx="795" cy="160" r="7" fill="#3B82F6" stroke="white" stroke-width="1.5"/>
+  <text x="808" y="164" font-size="10" fill="#1E293B">Workflow</text>
+  <circle cx="795" cy="185" r="7" fill="#8B5CF6" stroke="white" stroke-width="1.5"/>
+  <text x="808" y="189" font-size="10" fill="#1E293B">Agent</text>
+  <text x="835" y="212" text-anchor="middle" font-size="9" fill="#6B7280">圓圈大小 ~ 成本</text>
+
+  <!-- Bottom decision rules -->
+  <text x="450" y="605" text-anchor="middle" font-size="11" fill="#6B7280">先從 workflow 開始。只有當任務真的需要開放式推理時，才升級到 agent。</text>
+</svg>

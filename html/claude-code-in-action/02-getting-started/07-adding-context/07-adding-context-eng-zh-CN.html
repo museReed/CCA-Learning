@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>07 Adding Context Eng Zh Cn</title>
+<title>Adding Context Eng Zh Cn</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -64,14 +64,13 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <li><strong>生成 CLAUDE.md 文件</strong> — 摘要发现内容加上未来 session 的指令</li>
 <li><strong>请求许可</strong> — 你批准文件写入（Enter）或启用自动接受（Shift+Tab）</li>
 </ol>
-<pre class="highlight"><code>$ claude
+<pre><code>$ claude
 &gt; /init
 
 Claude 分析你的代码库...
 → 识别项目目的、架构、关键文件
 → 将 CLAUDE.md 写入项目根目录
 </code></pre>
-
 <blockquote>
 <p>🎬 <strong>讲师视频洞察</strong></p>
 <p>讲师演示在 uigen 项目上执行 <code>/init</code>。Claude 读取整个代码库，识别为使用 Prisma/SQLite 的 Node.js 应用，并生成 CLAUDE.md 摘要架构、重要命令（<code>npm run dev</code>、<code>npm run setup</code>）和编码模式。讲师强调 CLAUDE.md「被包含在每个请求中」— 使其成为持久化的 system prompt。</p>
@@ -81,7 +80,7 @@ Claude 分析你的代码库...
 <p><img alt="Claude Md Hierarchy Priority Stack" src="visuals/claude-md-hierarchy-priority-stack-zh-TW.svg" /><br />
 <em>圖：CLAUDE.md 階層 — local 覆蓋 project 覆蓋 global。</em></p>
 <p>这是本课最重要的考试概念。Claude Code 在三个层级识别 CLAUDE.md 文件：</p>
-<pre class="highlight"><code>优先级（最高 → 最低）：
+<pre><code>优先级（最高 → 最低）：
 ┌─────────────────────────────────────────────┐
 │ ~/.claude/CLAUDE.md          (Global)       │
 │  → 适用于此机器上的所有项目                    │
@@ -96,7 +95,6 @@ Claude 分析你的代码库...
 │  → 此项目的个人覆盖设置                        │
 └─────────────────────────────────────────────┘
 </code></pre>
-
 <p><strong>关键考试规则：越 local = 越高优先级。</strong></p>
 <table>
 <thead>
@@ -135,26 +133,23 @@ Claude 分析你的代码库...
 <hr />
 <h2># Memory 命令</h2>
 <p>要更新 CLAUDE.md 而不手动编辑文件，使用 <code>#</code> 命令：</p>
-<pre class="highlight"><code>&gt; # Use comments sparingly. Only comment complex code.
+<pre><code>&gt; # Use comments sparingly. Only comment complex code.
 </code></pre>
-
 <p>Claude 智能地合并此指令到你的 CLAUDE.md — 不是盲目追加。这称为「memory mode」因为它跨 session 持续有效。</p>
 <hr />
 <h2>@ File Mention：精确 Context 注入（Tasks 5.1, 5.4）</h2>
 <p>需要 Claude 聚焦特定文件时，使用 <code>@</code> 语法：</p>
-<pre class="highlight"><code>&gt; How does the auth system work? @auth
+<pre><code>&gt; How does the auth system work? @auth
 </code></pre>
-
 <p>Claude 显示 auth 相关文件列表让你选择。选中文件的内容被包含在当前请求中。</p>
 <p><strong>两种使用模式：</strong></p>
 <h3>1. 交互式 @ mention（在聊天中）</h3>
 <p>输入 <code>@</code> 后跟部分文件名。Claude 提供自动完成建议。文件内容注入到该单一请求。</p>
 <h3>2. CLAUDE.md 中的 @ mention（持久化）</h3>
-<pre class="highlight"><code class="language-markdown"># CLAUDE.md
+<pre><code class="language-markdown"># CLAUDE.md
 The database schema is defined in @prisma/schema.prisma.
 Reference it when working with data models.
 </code></pre>
-
 <p>当 <code>@</code> 在 CLAUDE.md 中使用，被引用的文件会在<strong>每个请求</strong>中自动包含。强大但昂贵 — 每个 turn 都消耗 context window。</p>
 <blockquote>
 <p>⚠️ <strong>Context Window 警告</strong></p>
@@ -164,7 +159,7 @@ Reference it when working with data models.
 </blockquote>
 <hr />
 <h2>大型代码库的 Context 管理策略（Task 5.4）</h2>
-<pre class="highlight"><code>Context 预算分配：
+<pre><code>Context 预算分配：
 ┌────────────────────────────────────────────┐
 │  CLAUDE.md（始终加载）              ~5-10%  │
 │  CLAUDE.md 中的 @ 引用             ~5-15%  │
@@ -174,7 +169,6 @@ Reference it when working with data models.
 │  Claude 的响应                     ~10-20% │
 └────────────────────────────────────────────┘
 </code></pre>
-
 <p><strong>策略：</strong><br />
 - 只将关键的横切文件放在 CLAUDE.md <code>@</code> 引用中（schema、API 契约）<br />
 - 对任务特定的文件使用交互式 <code>@</code><br />

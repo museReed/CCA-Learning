@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sending Tool Results Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Sending Tool Results — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) / D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 (tool_result block format), 2.2 (content block handling), 1.2 (closing the tool-use loop)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 37</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Sending tool results back to Claude is the "return receipt" step — a strictly-formatted packet that closes the loop between "Claude asked for something" and "Claude has the information to answer the user."</p>
+<hr />
+<h2>Mental Model: The Order Ticket System</h2>
+<p>Think of a busy restaurant kitchen:</p>
+<table>
+<thead>
+<tr>
+<th>Kitchen Step</th>
+<th>Claude Tool-Use Step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Waiter writes ticket #47: "burger, medium"</td>
+<td>Claude emits <code>ToolUseBlock(id="toolu_47", name="cook", input={"item":"burger"})</code></td>
+</tr>
+<tr>
+<td>Cook prepares burger</td>
+<td>Your code runs the function</td>
+</tr>
+<tr>
+<td>Cook attaches ticket #47 to the plate</td>
+<td>You return a <code>tool_result</code> block with <code>tool_use_id="toolu_47"</code></td>
+</tr>
+<tr>
+<td>Plate goes back to ticket #47's table</td>
+<td>Claude uses the result to answer the user</td>
+</tr>
+</tbody>
+</table>
+<p>The ticket number (<code>tool_use_id</code>) is sacred. If the cook forgets to attach it, nobody knows which table gets the burger. If the cook returns two burgers for one ticket, or one burger for two tickets, the whole service breaks down. That is exactly how the Anthropic API treats tool results.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Tool results are the failure surface where most tool-use features break in production:</p>
+<table>
+<thead>
+<tr>
+<th>Failure Mode</th>
+<th>User-Visible Symptom</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backend crashes mid-tool and drops the result</td>
+<td>Claude hangs or replies with "I'm sorry, I can't help with that"</td>
+</tr>
+<tr>
+<td>Backend forgets to mark errors as <code>is_error: True</code></td>
+<td>Claude hallucinates success and gives a confident wrong answer</td>
+</tr>
+<tr>
+<td>Multiple tool calls, backend only returns one result</td>
+<td>400 error shown to user, conversation unrecoverable</td>
+</tr>
+<tr>
+<td>Backend returns raw dict instead of JSON string</td>
+<td>Conversation breaks with cryptic validation error</td>
+</tr>
+</tbody>
+</table>
+<p>Every one of these is a product quality issue. A PM who understands the tool-result contract can write better acceptance criteria and catch these in staging instead of on launch day.</p>
+<hr />
+<h2>Product Use Cases: Error Visibility</h2>
+<p>Tool failures are not just engineering concerns — they are UX decisions:</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>When to Use</th>
+<th>UX Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pass error to Claude via <code>is_error: True</code></td>
+<td>Most cases</td>
+<td>Claude explains the problem naturally ("I couldn't fetch the stock price because the API is down. Would you like to try again?")</td>
+</tr>
+<tr>
+<td>Catch error before Claude sees it</td>
+<td>Rate limits, security errors</td>
+<td>Show a custom UI toast; bypass Claude entirely</td>
+</tr>
+<tr>
+<td>Retry silently with exponential backoff</td>
+<td>Transient network errors</td>
+<td>User never sees a blip, but increases latency</td>
+</tr>
+</tbody>
+</table>
+<p>The default pattern — <code>is_error: True</code> — gives Claude the information to recover gracefully. Skipping this lets Claude hallucinate success, which is the worst possible user experience.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>For any feature that uses tools, your PRD should answer:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Why It Matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the timeout budget for each tool?</td>
+<td>Long tools produce dead UX; you need progress events</td>
+</tr>
+<tr>
+<td>How do we communicate tool errors to the user?</td>
+<td>Via Claude (<code>is_error: True</code>) or via our own UI?</td>
+</tr>
+<tr>
+<td>What happens if Claude calls the same tool twice?</td>
+<td>Caching? Idempotency? Permission escalation?</td>
+</tr>
+<tr>
+<td>Can Claude see sensitive error details?</td>
+<td>Stripping before sending avoids leaking internal stack traces</td>
+</tr>
+<tr>
+<td>How do we log tool_use_id pairs for observability?</td>
+<td>Essential for debugging production conversations</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Not specifying error handling in the PRD</strong> — engineers default to "log and drop," which silently breaks conversations</li>
+<li><strong>Assuming tool results are "just function returns"</strong> — they have a strict format (role=user, content blocks with specific fields) that constrains engineering</li>
+<li><strong>Ignoring the multi-tool case</strong> — "what if Claude calls two tools at once" is a real design question, not an edge case</li>
+<li><strong>Not budgeting for observability</strong> — tool_use_id tracing is crucial for diagnosing production issues, but rarely in initial scope</li>
+<li><strong>Treating <code>is_error</code> as an engineering detail</strong> — it is a product decision: do you want Claude to explain failures, or hide them behind a custom UI?</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Every <code>tool_result</code> is a return receipt keyed by <code>tool_use_id</code>. The PM lesson: tool failures are product features in disguise. The choice between "Claude sees the error and explains it" (use <code>is_error: True</code>) versus "we bypass Claude and show a custom error" is a UX decision with direct impact on user trust and recovery rates. Ship neither by accident — design it deliberately.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know the <code>tool_result</code> block fields and that it lives in a user-role message.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Understand tool_result as the closing half of the agentic request/response pair.</li>
+<li>Exam questions often describe scenarios where a tool fails and ask how to inform Claude — the answer is almost always "send a <code>tool_result</code> block with <code>is_error: True</code>."</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What analogy captures the <code>tool_use_id</code> / <code>tool_result</code> pairing?</td>
+<td>Restaurant order tickets — each ticket number must round-trip from waiter to cook to table</td>
+</tr>
+<tr>
+<td>Why is <code>is_error: True</code> a PM concern, not just an engineering flag?</td>
+<td>It decides whether Claude explains failures to users or the UI hides them — a UX decision with real user-trust impact</td>
+</tr>
+<tr>
+<td>What is the worst failure mode of tool results?</td>
+<td>Silent success — forgetting <code>is_error: True</code>, causing Claude to hallucinate a successful result</td>
+</tr>
+<tr>
+<td>What must the PRD specify for any tool-using feature?</td>
+<td>Timeout budgets, error-handling strategy, multi-tool behavior, observability for tool_use_ids</td>
+</tr>
+<tr>
+<td>Why does sending a raw dict as <code>content</code> break?</td>
+<td>The API requires the <code>content</code> field to be a string (or list of blocks); dicts must be JSON-serialized</td>
+</tr>
+<tr>
+<td>When Claude calls two tools at once, how many results should you return?</td>
+<td>Exactly two — every <code>ToolUseBlock</code> needs a matching <code>tool_result</code> in the same user turn</td>
+</tr>
+<tr>
+<td>Where in the message structure does a <code>tool_result</code> block live?</td>
+<td>Inside a user-role message's <code>content</code> array</td>
+</tr>
+<tr>
+<td>What happens in production if the backend drops a tool result?</td>
+<td>The next API call returns 400; the conversation becomes unrecoverable and the user sees an error</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Routing Workflows Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Routing Workflows — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — PRIMARY</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2 (agentic patterns — routing), 5.2 (production workflow deployment)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 80</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Routing workflows use a classifier LLM call (often with <code>tool_choice="tool"</code> for forced tool use) to categorize incoming requests, then dispatch them to specialized downstream pipelines — it's the "switch statement" of LLM workflows.</p>
+<hr />
+<h2>The Problem Routing Solves</h2>
+<p>A generic prompt is bad at handling diverse inputs. The lesson's example: a social-media script generator that must handle both "Python functions" (educational) and "surfing" (entertainment). A one-size-fits-all script prompt produces mediocre output for both. The fix is to classify first, then dispatch to a category-specific prompt.</p>
+<p>Anthropic describes routing in "Building Effective Agents" as: use it when complex tasks have distinct categories that each benefit from specialized handling, <em>and</em> the classification can be performed accurately by an LLM or deterministic algorithm.</p>
+<hr />
+<h2>Canonical Two-Step Structure</h2>
+<pre><code>user input ──→ [classifier LLM call] ──→ category ──→ [specialized pipeline] ──→ output
+</code></pre>
+<ol>
+<li><strong>Categorize</strong> — send the user's request to Claude with a list of predefined categories, ask for one category label</li>
+<li><strong>Specialized Processing</strong> — use the returned category to look up the appropriate prompt template / tool set / sub-workflow, then generate the final output</li>
+</ol>
+<p>The key insight: user input only goes to <em>one</em> specialized pipeline, not all of them. Each pipeline can be optimized independently for its use case.</p>
+<hr />
+<h2>Example Categories (from the lesson)</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Style</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Entertainment</td>
+<td>High-energy, culturally relevant, trendy language</td>
+</tr>
+<tr>
+<td>Educational</td>
+<td>Clear, engaging explanations with relatable examples</td>
+</tr>
+<tr>
+<td>Comedy</td>
+<td>Sharp, unexpected content with clever observations and timing</td>
+</tr>
+<tr>
+<td>Personal vlog</td>
+<td>Authentic, intimate content with conversational storytelling</td>
+</tr>
+<tr>
+<td>Reviews</td>
+<td>Decisive, experience-based content highlighting strengths and weaknesses</td>
+</tr>
+<tr>
+<td>Storytelling</td>
+<td>Immersive content using vivid details and emotional connection</td>
+</tr>
+</tbody>
+</table>
+<p>Each category has its own specialized prompt. Routing picks the right one.</p>
+<hr />
+<h2>The Lesson's Categorization Prompt</h2>
+<pre><code>Categorize the topic of a video into one of the listed categories:
+&lt;topic&gt;Python functions&lt;/topic&gt;
+
+&lt;categories&gt;
+- Educational
+- Entertainment
+- Comedy
+- Personal vlog
+- Reviews
+- Storytelling
+&lt;/categories&gt;
+</code></pre>
+<p>Claude responds with "Educational", and your code then picks the educational prompt template.</p>
+<hr />
+<h2>Forced-Tool Routing with <code>tool_choice="tool"</code></h2>
+<p>For production, the classifier should return a <em>structured</em> category, not a free-form string that you then parse. The CCA-critical technique is to use tool use with <code>tool_choice</code> set to force a specific tool call:</p>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+ROUTE_TOOL = {
+    &quot;name&quot;: &quot;route_request&quot;,
+    &quot;description&quot;: &quot;Route the user request to a specialized content pipeline.&quot;,
+    &quot;input_schema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;category&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;enum&quot;: [&quot;Educational&quot;, &quot;Entertainment&quot;, &quot;Comedy&quot;,
+                         &quot;Personal vlog&quot;, &quot;Reviews&quot;, &quot;Storytelling&quot;],
+                &quot;description&quot;: &quot;The content category for this topic.&quot;
+            },
+            &quot;confidence&quot;: {
+                &quot;type&quot;: &quot;number&quot;,
+                &quot;description&quot;: &quot;Classifier confidence, 0.0 to 1.0.&quot;
+            }
+        },
+        &quot;required&quot;: [&quot;category&quot;, &quot;confidence&quot;]
+    }
+}
+
+def classify(topic: str) -&gt; dict:
+    resp = client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=512,
+        tools=[ROUTE_TOOL],
+        tool_choice={&quot;type&quot;: &quot;tool&quot;, &quot;name&quot;: &quot;route_request&quot;},  # forced
+        messages=[{&quot;role&quot;: &quot;user&quot;,
+                   &quot;content&quot;: f&quot;Categorize the topic: {topic}&quot;}],
+    )
+    for block in resp.content:
+        if block.type == &quot;tool_use&quot; and block.name == &quot;route_request&quot;:
+            return block.input  # {&quot;category&quot;: &quot;...&quot;, &quot;confidence&quot;: ...}
+    raise RuntimeError(&quot;Classifier did not call the route_request tool&quot;)
+</code></pre>
+<p>Why <code>tool_choice={"type": "tool", "name": "..."}</code> matters:</p>
+<ul>
+<li><strong>Forces</strong> Claude to emit the route_request tool call (no free text)</li>
+<li>Guarantees the response shape via <code>input_schema</code></li>
+<li>The <code>enum</code> constraint prevents hallucinated categories</li>
+<li>The classifier cannot "chat back" or explain — it MUST categorize</li>
+</ul>
+<p><code>tool_choice</code> options:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{"type": "auto"}</code></td>
+<td>Default — Claude decides if it wants to use a tool</td>
+</tr>
+<tr>
+<td><code>{"type": "any"}</code></td>
+<td>Claude must call <em>some</em> tool, but picks which</td>
+</tr>
+<tr>
+<td><code>{"type": "tool", "name": "X"}</code></td>
+<td>Claude must call exactly tool X</td>
+</tr>
+</tbody>
+</table>
+<p>For routing, <code>"tool"</code> is the right choice — you want a <em>specific</em> classifier tool called every time.</p>
+<hr />
+<h2>Full Routing Pipeline</h2>
+<pre><code class="language-python">PROMPTS = {
+    &quot;Educational&quot;: &quot;Write a clear educational script that ...&quot;,
+    &quot;Entertainment&quot;: &quot;Write a high-energy entertainment script that ...&quot;,
+    &quot;Comedy&quot;: &quot;Write a comedy script that ...&quot;,
+    &quot;Personal vlog&quot;: &quot;...&quot;,
+    &quot;Reviews&quot;: &quot;...&quot;,
+    &quot;Storytelling&quot;: &quot;...&quot;,
+}
+
+def generate_script(topic: str) -&gt; str:
+    classification = classify(topic)
+    category = classification[&quot;category&quot;]
+    prompt_template = PROMPTS[category]
+
+    resp = client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=2048,
+        messages=[{&quot;role&quot;: &quot;user&quot;,
+                   &quot;content&quot;: f&quot;{prompt_template}\n\nTopic: {topic}&quot;}],
+    )
+    return resp.content[0].text
+</code></pre>
+<p>Each branch can be optimized independently, and new categories are added by appending a key-value pair to <code>PROMPTS</code> and the enum in <code>ROUTE_TOOL</code>.</p>
+<hr />
+<h2>When Routing Is the Right Pattern</h2>
+<p>Anthropic's guidance: use routing when you can:</p>
+<ol>
+<li><strong>Clearly define categories</strong> — no fuzzy overlap between branches</li>
+<li><strong>Trust the classifier</strong> — Claude (or a cheaper classifier) can reliably categorize</li>
+<li><strong>Benefit from specialized handling</strong> — per-branch optimization beats a generic prompt</li>
+<li><strong>Amortize the classification overhead</strong> — one extra LLM call must be worth it</li>
+</ol>
+<p>If the first LLM call cannot reliably categorize, routing is a mistake — you'll route requests to the wrong pipeline and get worse results than a single generic prompt.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Using free-form text for the classifier.</strong> Without <code>tool_choice="tool"</code> + an <code>enum</code>, Claude can return "Maybe educational?" — now you need to parse. Force the tool call.</li>
+<li><strong>Too many categories.</strong> Routing works when categories are distinct. 20+ categories with overlap will make the classifier unreliable. Keep it under ~10.</li>
+<li><strong>No fallback for misclassification.</strong> What happens when confidence is low? Include a default/generic pipeline.</li>
+<li><strong>Ignoring classification cost.</strong> Every request pays an extra LLM call before the real work. For low-latency apps, use a smaller/cheaper model for classification (e.g., Haiku).</li>
+<li><strong>Confusing routing with agents.</strong> Routing is a <em>workflow</em> — the code dispatches to a specific pipeline. An agent would let Claude pick tools freely during reasoning. They are not the same.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Routing is the "switch statement" of LLM workflows — classify first, then dispatch. The production-grade version uses <code>tool_choice={"type": "tool", "name": "..."}</code> with an <code>enum</code> input schema to force a structured category label. This is the CCA-critical piece: <strong>forced tool use guarantees the classifier returns a valid category and cannot chat back.</strong></p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (22%) PRIMARY</strong>: Routing is one of four core workflow patterns. Expect scenario questions.</li>
+<li><strong>D2 (18%) SECONDARY</strong>: <code>tool_choice</code> options are explicitly tested — know the three values (<code>auto</code>, <code>any</code>, <code>tool</code>).</li>
+<li><strong>D5 (20%) SECONDARY</strong>: Production patterns — cheap classifier model, fallback branches, enum constraints.</li>
+<li>Signal words for routing: "categorize", "classifier", "dispatch", "specialized handling per category".</li>
+<li>Exam trap: routing ≠ agent. Routing uses code-driven dispatch after a classification call.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is a routing workflow?</td>
+<td>A classifier LLM call categorizes the request, then code dispatches to a specialized pipeline</td>
+</tr>
+<tr>
+<td>Why use <code>tool_choice={"type": "tool", "name": "X"}</code> for the classifier?</td>
+<td>To force Claude to emit a structured category via the tool, with no free-form text allowed</td>
+</tr>
+<tr>
+<td>Name the three <code>tool_choice</code> options.</td>
+<td><code>auto</code> (default), <code>any</code> (any tool), <code>tool</code> (force a specific tool)</td>
+</tr>
+<tr>
+<td>How do you prevent the classifier from hallucinating new categories?</td>
+<td>Use a tool input schema with <code>"enum": [...]</code> listing the valid categories</td>
+</tr>
+<tr>
+<td>When should you NOT use routing?</td>
+<td>When categories overlap, when the classifier is unreliable, or when one prompt already works well</td>
+</tr>
+<tr>
+<td>What is a key production optimization for the classifier step?</td>
+<td>Use a smaller/cheaper model (e.g., Haiku) since categorization is simpler than generation</td>
+</tr>
+<tr>
+<td>Is routing a workflow or an agent?</td>
+<td>A workflow — code owns the dispatch after the classification call</td>
+</tr>
+<tr>
+<td>What should the classifier return for low-confidence cases?</td>
+<td>Route to a default/generic pipeline or request human review (fallback path)</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

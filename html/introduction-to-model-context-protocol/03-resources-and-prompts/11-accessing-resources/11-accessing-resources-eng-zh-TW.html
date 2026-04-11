@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>11 Accessing Resources Eng Zh Tw</title>
+<title>Accessing Resources Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -56,7 +56,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>Client 端 Resource 存取模式</h2>
 <p>Lesson 10 介紹了如何在 server 端定義 resources，本課聚焦在消費這些 resources 的 client 端程式碼。核心 function 是 <code>read_resource()</code>。</p>
 <h3>核心實作</h3>
-<pre class="highlight"><code class="language-python">import json
+<pre><code class="language-python">import json
 from pydantic import AnyUrl
 
 async def read_resource(self, uri: str) -&gt; Any:
@@ -69,7 +69,6 @@ async def read_resource(self, uri: str) -&gt; Any:
 
     return resource.text
 </code></pre>
-
 <h3>逐行解析</h3>
 <ol>
 <li><strong><code>AnyUrl(uri)</code></strong> — Pydantic 的 URL 驗證器。接受任何 URI scheme（<code>docs://</code>、<code>file://</code>、自訂 scheme），在解析時驗證格式。</li>
@@ -80,7 +79,7 @@ async def read_resource(self, uri: str) -&gt; Any:
 <hr />
 <h2>回應結構深入解析</h2>
 <p>Server 回傳的 <code>ReadResourceResult</code> 結構如下：</p>
-<pre class="highlight"><code>ReadResourceResult
+<pre><code>ReadResourceResult
   └── contents: list[TextResourceContents | BlobResourceContents]
         └── [0]
               ├── uri: str
@@ -88,7 +87,6 @@ async def read_resource(self, uri: str) -&gt; Any:
               ├── text: str  (TextResourceContents)
               └── blob: bytes (BlobResourceContents)
 </code></pre>
-
 <p>關鍵設計決策：<br />
 - <strong><code>contents</code> 是一個列表</strong> — 雖然通常只有一個項目，但協議支持回傳多個 content block<br />
 - <strong>兩種 content 類型</strong> — <code>TextResourceContents</code> 用於文字資料，<code>BlobResourceContents</code> 用於二進位<br />

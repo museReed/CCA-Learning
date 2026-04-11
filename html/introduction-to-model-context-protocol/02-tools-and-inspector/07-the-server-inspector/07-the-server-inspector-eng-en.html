@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>07 The Server Inspector Eng En</title>
+<title>The Server Inspector Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -55,10 +55,9 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>What Is the MCP Inspector?</h2>
 <p>The MCP Inspector is a development tool provided by the MCP SDK that gives you a browser-based UI for testing MCP servers. Instead of building a complete application with a client, Claude integration, and user interface just to test whether your tools work, you can use the Inspector to directly interact with your MCP server.</p>
-<pre class="highlight"><code class="language-bash"># Launch the Inspector against your MCP server
+<pre><code class="language-bash"># Launch the Inspector against your MCP server
 mcp dev mcp_server.py
 </code></pre>
-
 <p>This single command:</p>
 <ol>
 <li>Starts your MCP server as a subprocess</li>
@@ -111,7 +110,7 @@ The Inspector eliminates the chicken-and-egg problem of MCP development. You do 
 <h2>Testing Workflow</h2>
 <p>The standard development workflow with the Inspector follows this pattern:</p>
 <h3>1. Write Your Tool</h3>
-<pre class="highlight"><code class="language-python">from mcp.server.fastmcp import FastMCP
+<pre><code class="language-python">from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP(&quot;my-tools&quot;)
 
@@ -126,11 +125,9 @@ def calculate_total(prices: list[float], tax_rate: float = 0.1) -&gt; float:
     subtotal = sum(prices)
     return subtotal * (1 + tax_rate)
 </code></pre>
-
 <h3>2. Launch the Inspector</h3>
-<pre class="highlight"><code class="language-bash">mcp dev mcp_server.py
+<pre><code class="language-bash">mcp dev mcp_server.py
 </code></pre>
-
 <h3>3. Connect and Test</h3>
 <ol>
 <li>Open <code>http://localhost:6274</code></li>
@@ -150,7 +147,7 @@ State persists between tool calls in the Inspector. If your first tool call crea
 <hr />
 <h2>State Persistence Between Calls</h2>
 <p>One of the Inspector's most useful features is that state persists across tool calls within a session. This is critical for testing tools that have side effects:</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 def create_note(title: str, content: str) -&gt; str:
     &quot;&quot;&quot;Create a new note.&quot;&quot;&quot;
     notes_db[title] = content
@@ -161,7 +158,6 @@ def read_note(title: str) -&gt; str:
     &quot;&quot;&quot;Read an existing note.&quot;&quot;&quot;
     return notes_db.get(title, &quot;Note not found&quot;)
 </code></pre>
-
 <p>In the Inspector, you can:</p>
 <ol>
 <li>Call <code>create_note(title="meeting", content="Discuss Q3 goals")</code></li>
@@ -179,11 +175,10 @@ def read_note(title: str) -&gt; str:
 <hr />
 <h2>Essential Dev Workflow Position</h2>
 <p>The Inspector fits into the MCP development workflow as follows:</p>
-<pre class="highlight"><code>Write Tool Code  →  Test with Inspector  →  Fix Issues  →  Integrate with Client
+<pre><code>Write Tool Code  →  Test with Inspector  →  Fix Issues  →  Integrate with Client
                           ↑                       |
                           └───────────────────────┘
 </code></pre>
-
 <p>You should not move to client integration until all tools pass Inspector testing. This saves significant debugging time because Inspector issues (schema, parameters, errors) are much easier to diagnose than client-side issues where the problem could be in the client code, the transport layer, or the server.</p>
 <blockquote>
 <p><strong>Key Insight</strong><br />

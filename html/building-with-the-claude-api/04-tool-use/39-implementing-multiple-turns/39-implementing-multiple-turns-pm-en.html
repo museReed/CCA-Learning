@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implementing Multiple Turns Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Implementing Multiple Turns — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) / D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2 (agentic loop implementation), 2.4 (multi-turn tool loops), 1.3 (multi-turn conversation management)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 39</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The agentic loop is the 15-line engine that turns Claude from a chatbot into an agent — and once your team can ship it reliably, every agent-like product you dream up becomes feasible.</p>
+<hr />
+<h2>Mental Model: The Barista and the Order Slip</h2>
+<p>Picture a coffee shop barista working from an order slip:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Coffee Shop</th>
+<th>Agentic Loop</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read the order slip</td>
+<td>User asks question</td>
+<td>Call Claude with messages</td>
+</tr>
+<tr>
+<td>"Do I need anything special?"</td>
+<td>"Does Claude want a tool?"</td>
+<td>Check <code>stop_reason</code></td>
+</tr>
+<tr>
+<td>Yes: grind beans, steam milk, etc.</td>
+<td>Yes: run tools</td>
+<td>Execute tool-use blocks</td>
+</tr>
+<tr>
+<td>Hand step results back to barista</td>
+<td>Add tool results to history</td>
+<td>Loop back to Claude</td>
+</tr>
+<tr>
+<td>No: plate the drink, done</td>
+<td>No: return final text</td>
+<td>Break the loop</td>
+</tr>
+</tbody>
+</table>
+<p>The barista keeps asking themselves "is there another step?" until the drink is ready. That is exactly what the loop does — it keeps asking Claude "do you need another action?" until Claude says "no, I'm done."</p>
+<hr />
+<h2>Why This Unlocks Real Product Value</h2>
+<p>Without the loop, you can ship "Claude answers questions." With the loop, you can ship:</p>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>What It Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coding assistant</td>
+<td>Reads files, runs tests, writes patches, iterates</td>
+</tr>
+<tr>
+<td>Travel planner</td>
+<td>Checks flights, filters by price, books, confirms</td>
+</tr>
+<tr>
+<td>Customer support agent</td>
+<td>Reads ticket, queries CRM, checks knowledge base, drafts reply</td>
+</tr>
+<tr>
+<td>Data analyst</td>
+<td>Runs SQL, interprets results, generates charts, writes summary</td>
+</tr>
+</tbody>
+</table>
+<p>The loop is why "agent" is a category and not just a buzzword. Every real-world Claude agent — from Claude Code to MCP clients — is a variation of this 15-line pattern plus production hardening.</p>
+<hr />
+<h2>Product Use Cases: When to Invest</h2>
+<h3>When The Loop Pays Off</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Product Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Users want "fire and forget" workflows</td>
+<td>The loop lets Claude finish multi-step tasks autonomously</td>
+</tr>
+<tr>
+<td>The answer depends on external data</td>
+<td>Tool calls fetch the data, loop iterates until complete</td>
+</tr>
+<tr>
+<td>Users accept latency in exchange for quality</td>
+<td>Multi-turn loops trade speed for correctness</td>
+</tr>
+<tr>
+<td>Features benefit from iterative refinement</td>
+<td>Loop can retry, filter, compare, converge</td>
+</tr>
+</tbody>
+</table>
+<h3>When The Loop Is Overkill</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Simpler Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single lookup with immediate answer</td>
+<td>One tool call, no loop</td>
+</tr>
+<tr>
+<td>Pure Q&amp;A on static knowledge</td>
+<td>No tools at all</td>
+</tr>
+<tr>
+<td>Real-time conversational UI</td>
+<td>Streaming without the loop complexity</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>Before scoping an agentic-loop feature, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Why It Matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the iteration cap?</td>
+<td>Unbounded loops can hang for minutes and burn tokens</td>
+</tr>
+<tr>
+<td>How do we show progress between iterations?</td>
+<td>Users need to see each step or they assume failure</td>
+</tr>
+<tr>
+<td>Can the user cancel mid-loop?</td>
+<td>Multi-step agents must be interruptible</td>
+</tr>
+<tr>
+<td>What happens if the loop hits the cap with no final answer?</td>
+<td>"Partial result" UX must be designed</td>
+</tr>
+<tr>
+<td>How do we budget tokens per conversation?</td>
+<td>Each iteration grows history; plan for the worst case</td>
+</tr>
+<tr>
+<td>How do we audit what tools ran?</td>
+<td>Essential for debugging and compliance</td>
+</tr>
+<tr>
+<td>What is the retry policy for tool failures?</td>
+<td>Let Claude handle it, or hard-retry at the app layer?</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating the loop as a tech detail</strong> — it is a product feature surface with UX decisions at every turn (progress, cancel, partial results)</li>
+<li><strong>Not setting a visible iteration cap</strong> — runaway loops waste budget and hang users; caps must be tuned and documented</li>
+<li><strong>Hiding tool errors from Claude</strong> — if the tool failed, Claude needs to know via <code>is_error=True</code> so it can recover; hiding causes hallucinations</li>
+<li><strong>No observability story</strong> — production debugging of agent loops requires logging every iteration's tool calls and results</li>
+<li><strong>Shipping before parallelizing</strong> — tools that could run in parallel should not be serialized; doing so doubles or triples latency</li>
+</ol>
+<hr />
+<h2>Cost and Latency Planning</h2>
+<p>Every extra loop iteration adds:</p>
+<table>
+<thead>
+<tr>
+<th>Cost</th>
+<th>Typical Magnitude</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One API round trip</td>
+<td>+300ms to +1s</td>
+</tr>
+<tr>
+<td>Growing conversation history</td>
+<td>+10% to +30% input tokens per iteration</td>
+</tr>
+<tr>
+<td>Tool execution time</td>
+<td>Depends on the tool (milliseconds to seconds)</td>
+</tr>
+<tr>
+<td>Output tokens</td>
+<td>+few hundred per turn</td>
+</tr>
+</tbody>
+</table>
+<p>A 5-iteration loop can easily cost 5x the input tokens of a single call, and take 3-10 seconds of wall time. Prompt caching (covered later) is the standard mitigation for the token cost, but the latency cost is fundamental to the pattern.</p>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The agentic loop is the smallest unit that separates "Claude features" from "Claude agents." Fifteen lines of code unlock a new product category. But every line of that loop corresponds to a product decision: how long do we iterate, how do we show progress, how do we handle failures, how do we cap cost. PMs who treat the loop as "just backend" ship broken agents; PMs who treat it as "a product surface with five knobs" ship great ones.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Architecture)</strong>: The agentic loop is the canonical agent pattern. Expect scenario questions on <code>stop_reason</code> handling and iteration control.</li>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Understand error propagation via <code>is_error=True</code> and why hiding errors breaks Claude's recovery behavior.</li>
+<li>Watch for exam questions that describe "Claude making multiple tool calls in sequence" — the answer is always a loop with stop_reason checking.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What analogy captures the agentic loop?</td>
+<td>A barista working from an order slip — keeps asking "is there another step?" until the drink is done</td>
+</tr>
+<tr>
+<td>What single line of code signals the loop to exit?</td>
+<td><code>if response.stop_reason != "tool_use": break</code></td>
+</tr>
+<tr>
+<td>Why is the agentic loop a product surface, not just engineering?</td>
+<td>Every iteration involves PM decisions: progress UX, cancellation, cost, retries, partial results</td>
+</tr>
+<tr>
+<td>What is the biggest hidden cost of an agentic loop feature?</td>
+<td>Growing conversation history — each iteration adds tokens to every subsequent call</td>
+</tr>
+<tr>
+<td>What must a production agent loop include for safety?</td>
+<td>A max-iterations cap, observability per iteration, and error propagation via <code>is_error=True</code></td>
+</tr>
+<tr>
+<td>Why hide errors from Claude backfire?</td>
+<td>Claude cannot recover if it thinks the tool succeeded — it will hallucinate a result</td>
+</tr>
+<tr>
+<td>What products become possible only with the agentic loop?</td>
+<td>Coding assistants, travel planners, support agents, data analysts — anything requiring multi-step reasoning</td>
+</tr>
+<tr>
+<td>What latency budget should PMs expect for a 5-iteration agentic loop?</td>
+<td>3 to 10 seconds of wall time plus token costs scaled by iteration depth</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

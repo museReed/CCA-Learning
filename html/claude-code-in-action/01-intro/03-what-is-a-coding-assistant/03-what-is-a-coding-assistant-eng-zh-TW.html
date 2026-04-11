@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>03 What Is A Coding Assistant Eng Zh Tw</title>
+<title>What Is A Coding Assistant Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -57,6 +57,8 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="Agentic Loop Cycle" src="visuals/agentic-loop-cycle-zh-TW.svg" /><br />
 <em>圖：Agent 迴圈 — 蒐集上下文、規劃、執行、評估、重複。</em></p>
 <p>每個 coding assistant 都遵循同一個基本循環：</p>
+<!-- diagram: agentic-loop — Task → Gather Context (讀檔、搜尋程式碼) → Plan (拆解步驟) → Take Action (編輯檔案、執行指令) → Evaluate → Loop or Finish -->
+
 <ol>
 <li><strong>蒐集上下文 (Gather context)</strong> — 讀取檔案、搜尋程式碼庫、理解目前狀態</li>
 <li><strong>規劃 (Plan)</strong> — 把任務拆成步驟，決定執行哪些動作</li>
@@ -74,6 +76,8 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <em>圖：工具使用如何連接文本生成與真實世界動作。</em></p>
 <p>核心問題：<strong>language model 只能處理和產生文字</strong>。它無法讀檔、跑指令或修改程式碼。它是純粹的 text-in, text-out 函式。</p>
 <p>Tool use 是彌補這個缺口的機制：</p>
+<!-- diagram: tool-use-flow — 使用者提問 → Coding assistant 把工具說明加入 LM context → LM 用結構化格式回應 (e.g., "ReadFile: main.go") → 助手攔截並執行 → 把檔案內容送回 LM → LM 產生最終回答 -->
+
 <p><strong>以 ReadFile 為例的完整流程：</strong></p>
 <ol>
 <li>你問：「main function 做了什麼？」</li>
@@ -84,7 +88,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <li>LM 現在有了真實程式碼，產生有根據的回答</li>
 </ol>
 <p>LM 從未接觸過檔案系統。助手是將文字請求轉換為真實動作的中介者。</p>
-<pre class="highlight"><code>User: &quot;main.go 做了什麼？&quot;
+<pre><code>User: &quot;main.go 做了什麼？&quot;
      │
      ▼
 ┌─────────────────────────┐
@@ -111,7 +115,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 │  產生最終回答             │
 └─────────────────────────┘
 </code></pre>
-
 <blockquote>
 <p>🎬 <strong>講師影片觀點</strong></p>
 <p>講師強調 coding assistant 會「把指令加入 context」告訴 LM 如何請求工具。LM 並非天生知道怎麼呼叫工具 — 它必須透過 prompt/context 學會用助手能解析並執行的結構化格式回應。</p>

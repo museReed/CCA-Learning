@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>16 Implementing A Hook Eng Zh Cn</title>
+<title>Implementing A Hook Eng Zh Cn</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -67,7 +67,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>逐步实现</h2>
 <h3>1. 配置 <code>settings.local.json</code></h3>
 <p>打开 <code>.claude/settings.local.json</code> 并加入 PreToolUse hook：</p>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;hooks&quot;: {
     &quot;PreToolUse&quot;: [
       {
@@ -83,7 +83,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 }
 </code></pre>
-
 <p>关键配置细节：<br />
 - <strong><code>matcher: "Read|Grep"</code></strong> — 拦截两个能访问文件内容的工具<br />
 - <strong><code>command</code></strong> — 指向实现逻辑的 Node.js 脚本<br />
@@ -94,7 +93,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </blockquote>
 <h3>2. 编写 Hook 脚本</h3>
 <p>脚本从 stdin 读取、解析 JSON、检查文件路径、以适当的 code 结束：</p>
-<pre class="highlight"><code class="language-javascript">async function main() {
+<pre><code class="language-javascript">async function main() {
   const chunks = [];
   for await (const chunk of process.stdin) {
     chunks.push(chunk);
@@ -113,7 +112,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 
 main();
 </code></pre>
-
 <blockquote>
 <p>⚠️ <strong>关键实现细节</strong></p>
 <ol>

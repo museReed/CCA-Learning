@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6B7280"/>
+    </marker>
+  </defs>
+  <rect width="900" height="620" fill="white"/>
+
+  <!-- Title -->
+  <text x="450" y="40" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">The Agentic Loop</text>
+  <text x="450" y="62" text-anchor="middle" font-size="13" fill="#6B7280">while stop_reason == "tool_use": execute and append</text>
+
+  <!-- Start -->
+  <ellipse cx="210" cy="115" rx="75" ry="26" fill="#F1F5F9" stroke="#94A3B8" stroke-width="2" filter="url(#shadow)"/>
+  <text x="210" y="120" text-anchor="middle" font-size="13" font-weight="600" fill="#1E293B">User question</text>
+
+  <!-- Arrow down -->
+  <line x1="210" y1="141" x2="210" y2="175" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Call Claude -->
+  <rect x="135" y="180" width="150" height="56" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="210" y="203" text-anchor="middle" font-size="12" font-weight="600" fill="#3B82F6">Call Claude API</text>
+  <text x="210" y="220" text-anchor="middle" font-size="10" fill="#1E293B">client.messages.create(</text>
+  <text x="210" y="232" text-anchor="middle" font-size="10" fill="#1E293B">messages, tools)</text>
+
+  <!-- Arrow down -->
+  <line x1="210" y1="236" x2="210" y2="270" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Decision diamond -->
+  <polygon points="210,275 340,340 210,405 80,340" fill="#FFF7ED" stroke="#FB923C" stroke-width="2" filter="url(#shadow)"/>
+  <text x="210" y="330" text-anchor="middle" font-size="12" font-weight="600" fill="#FB923C">stop_reason</text>
+  <text x="210" y="348" text-anchor="middle" font-size="12" font-weight="600" fill="#FB923C">== "tool_use"?</text>
+
+  <!-- YES branch (right, loop) -->
+  <line x1="340" y1="340" x2="420" y2="340" stroke="#22C55E" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="380" y="330" text-anchor="middle" font-size="12" font-weight="600" fill="#22C55E">YES</text>
+
+  <!-- Execute tools -->
+  <rect x="430" y="285" width="200" height="56" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <text x="530" y="308" text-anchor="middle" font-size="12" font-weight="600" fill="#22C55E">Execute tools locally</text>
+  <text x="530" y="325" text-anchor="middle" font-size="10" fill="#1E293B">for each ToolUseBlock</text>
+  <text x="530" y="337" text-anchor="middle" font-size="10" fill="#1E293B">in response.content</text>
+
+  <!-- Arrow down -->
+  <line x1="530" y1="341" x2="530" y2="375" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Append tool_result -->
+  <rect x="430" y="380" width="200" height="56" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <text x="530" y="403" text-anchor="middle" font-size="12" font-weight="600" fill="#22C55E">Append tool_result</text>
+  <text x="530" y="420" text-anchor="middle" font-size="10" fill="#1E293B">messages.append(</text>
+  <text x="530" y="432" text-anchor="middle" font-size="10" fill="#1E293B">{role:user, content:[...]})</text>
+
+  <!-- Loop back arrow -->
+  <line x1="430" y1="408" x2="340" y2="408" stroke="#6B7280" stroke-width="2"/>
+  <line x1="340" y1="408" x2="340" y2="208" stroke="#6B7280" stroke-width="2"/>
+  <line x1="340" y1="208" x2="290" y2="208" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="355" y="308" font-size="11" font-weight="600" fill="#6B7280">loop</text>
+
+  <!-- NO branch (down) -->
+  <line x1="210" y1="405" x2="210" y2="445" stroke="#EF4444" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="225" y="428" font-size="12" font-weight="600" fill="#EF4444">NO</text>
+
+  <!-- End -->
+  <rect x="135" y="450" width="150" height="50" rx="25" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <text x="210" y="472" text-anchor="middle" font-size="12" font-weight="600" fill="#EF4444">Return final answer</text>
+  <text x="210" y="488" text-anchor="middle" font-size="10" fill="#1E293B">"end_turn" — done</text>
+
+  <!-- Code snippet callout -->
+  <rect x="660" y="175" width="220" height="300" rx="10" fill="#0F172A" filter="url(#shadow)"/>
+  <rect x="660" y="175" width="220" height="30" rx="10" fill="#1E293B"/>
+  <text x="770" y="195" text-anchor="middle" font-size="11" fill="#94A3B8">Python pattern</text>
+
+  <text x="675" y="230" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">messages = [...]</text>
+  <text x="675" y="250" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">response = client.</text>
+  <text x="675" y="265" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">  messages.create(...)</text>
+  <text x="675" y="290" font-size="11" font-family="Menlo, monospace" fill="#A78BFA">while</text>
+  <text x="710" y="290" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">response.</text>
+  <text x="675" y="305" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">  stop_reason == </text>
+  <text x="675" y="320" font-size="11" font-family="Menlo, monospace" fill="#FDE68A">  "tool_use"</text>
+  <text x="748" y="320" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">:</text>
+  <text x="675" y="345" font-size="11" font-family="Menlo, monospace" fill="#34D399">  results = run_tools(</text>
+  <text x="675" y="360" font-size="11" font-family="Menlo, monospace" fill="#34D399">    response.content)</text>
+  <text x="675" y="385" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">  messages.append(</text>
+  <text x="675" y="400" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">    assistant_msg)</text>
+  <text x="675" y="415" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">  messages.append(</text>
+  <text x="675" y="430" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">    user_tool_result)</text>
+  <text x="675" y="450" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">  response = client.</text>
+  <text x="675" y="465" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">    messages.create(...)</text>
+
+  <!-- Bottom tip -->
+  <rect x="100" y="540" width="700" height="60" rx="8" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="450" y="565" text-anchor="middle" font-size="13" fill="#1E293B" font-weight="500">The agentic loop is the core pattern. Add a max_iterations guard to prevent runaway loops.</text>
+  <text x="450" y="585" text-anchor="middle" font-size="11" fill="#6B7280">Everything else (memory, tools, reasoning) is built on top of this simple control flow.</text>
+</svg>

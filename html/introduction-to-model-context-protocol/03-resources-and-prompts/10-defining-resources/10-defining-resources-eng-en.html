@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>10 Defining Resources Eng En</title>
+<title>Defining Resources Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -97,18 +97,17 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>Two Resource Types</h2>
 <h3>1. Direct Resources — Static URIs</h3>
 <p>Direct resources have fixed URIs with no parameters. They return the same "shape" of data every time.</p>
-<pre class="highlight"><code class="language-python">@mcp.resource(
+<pre><code class="language-python">@mcp.resource(
     &quot;docs://documents&quot;,
     mime_type=&quot;application/json&quot;
 )
 def list_docs() -&gt; list[str]:
     return list(docs.keys())
 </code></pre>
-
 <p>The URI <code>docs://documents</code> is static — no variable parts. This is ideal for listing all available items, returning server metadata, or providing configuration values.</p>
 <h3>2. Templated Resources — Parameterized URIs</h3>
 <p>Templated resources use <code>{param}</code> placeholders in their URI. The Python SDK automatically extracts these values and passes them as keyword arguments.</p>
-<pre class="highlight"><code class="language-python">@mcp.resource(
+<pre><code class="language-python">@mcp.resource(
     &quot;docs://documents/{doc_id}&quot;,
     mime_type=&quot;text/plain&quot;
 )
@@ -117,7 +116,6 @@ def fetch_doc(doc_id: str) -&gt; str:
         raise ValueError(f&quot;Doc with id {doc_id} not found&quot;)
     return docs[doc_id]
 </code></pre>
-
 <p>When a client requests <code>docs://documents/plan.md</code>, the SDK parses <code>plan.md</code> as <code>doc_id</code> and passes it to <code>fetch_doc(doc_id="plan.md")</code>.</p>
 <hr />
 <h2>The <code>mime_type</code> Parameter</h2>
@@ -151,11 +149,10 @@ def fetch_doc(doc_id: str) -&gt; str:
 <p>The SDK handles serialization automatically — return a Python list or dict, and it becomes valid JSON without manual <code>json.dumps()</code>.</p>
 <hr />
 <h2>Request-Response Flow</h2>
-<pre class="highlight"><code>Client Code --&gt; MCP Client --&gt; MCP Server --&gt; Resource Function
+<pre><code>Client Code --&gt; MCP Client --&gt; MCP Server --&gt; Resource Function
                                                     |
 Client Code &lt;-- MCP Client &lt;-- ReadResourceResult &lt;-+
 </code></pre>
-
 <ol>
 <li>Your code calls <code>session.read_resource(AnyUrl(uri))</code></li>
 <li>The MCP client sends a <code>ReadResourceRequest</code> to the server</li>
@@ -166,9 +163,8 @@ Client Code &lt;-- MCP Client &lt;-- ReadResourceResult &lt;-+
 <hr />
 <h2>Testing with MCP Inspector</h2>
 <p>Launch the inspector:</p>
-<pre class="highlight"><code class="language-bash">uv run mcp dev mcp_server.py
+<pre><code class="language-bash">uv run mcp dev mcp_server.py
 </code></pre>
-
 <p>The inspector UI shows two tabs:<br />
 - <strong>Resources</strong> — lists direct/static resources (click to read)<br />
 - <strong>Resource Templates</strong> — lists templated resources (provide parameter values to test)</p>

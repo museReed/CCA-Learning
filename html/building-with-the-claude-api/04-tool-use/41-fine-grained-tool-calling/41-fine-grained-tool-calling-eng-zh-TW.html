@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fine Grained Tool Calling Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Fine-Grained Tool Calling — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)、D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1（tool schema 與選擇）、2.4（多輪 tool loop）、5.2（streaming 與回應速度）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 41</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Fine-grained tool calling 是一個可選的 streaming 模式，會關閉 server 端對 tool 參數的 JSON 驗證，讓你能即時收到 tool_use 的部分 JSON chunk，代價是你必須自己處理不合法的 JSON。</p>
+<hr />
+<h2>背景：Tool Use + Streaming</h2>
+<p>對帶有 tool 的 messages 請求啟用 streaming 時，Claude 會在生成過程中送出事件：</p>
+<ul>
+<li><code>ContentBlockStart</code> / <code>ContentBlockStop</code></li>
+<li><code>ContentBlockDelta</code> — 一般文字生成</li>
+<li><code>InputJsonEvent</code> — 專屬於 tool_use block，傳遞部分 JSON</li>
+</ul>
+<p>每個 <code>InputJsonEvent</code> 都帶兩個關鍵屬性：</p>
+<table>
+<thead>
+<tr>
+<th>屬性</th>
+<th>意義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>partial_json</code></td>
+<td>代表 tool 參數某一段的 JSON chunk</td>
+</tr>
+<tr>
+<td><code>snapshot</code></td>
+<td>到目前為止所有 chunk 累積後的 JSON</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-python">for chunk in stream:
+    if chunk.type == &quot;input_json&quot;:
+        print(chunk.partial_json)     # 增量片段
+        current_args = chunk.snapshot # 目前累積結果
+</code></pre>
+<hr />
+<h2>預設行為：Buffered Validation</h2>
+<p>預設情況下，Anthropic API <strong>不會</strong>把 Claude 生成的每個 token 立刻往 client 推，而是在 server 端將 chunk 先 buffer 起來、對照你的 tool schema 做驗證之後才 flush 出去。驗證的單位是<strong>最上層的 key-value pair</strong>。</p>
+<p>假設 tool schema 預期的結構是：</p>
+<pre><code class="language-json">{
+  &quot;abstract&quot;: &quot;This paper presents a novel...&quot;,
+  &quot;meta&quot;: {
+    &quot;word_count&quot;: 847,
+    &quot;review&quot;: &quot;This paper introduces QuanNet...&quot;
+  }
+}
+</code></pre>
+<p>API 的行為：</p>
+<ol>
+<li>等整段 <code>abstract</code> 的值生成完畢</li>
+<li>對該 key-value pair 做 schema 驗證</li>
+<li>一次送出 <code>abstract</code> 所有 buffer 住的 chunk</li>
+<li>接著處理 <code>meta</code> 物件</li>
+</ol>
+<p>這就是為什麼 tool-use streaming 感覺起來是<strong>延遲後的爆發</strong>，而不是平滑的逐 token 串流。驗證是在保護你，避免把無效或無法使用的部分參數往下游程式碼送。</p>
+<hr />
+<h2>啟用 Fine-Grained Tool Calling</h2>
+<p>Fine-grained tool calling 會<strong>關閉</strong>上述的 server 驗證：</p>
+<pre><code class="language-python">run_conversation(
+    messages,
+    tools=[save_article_schema],
+    fine_grained=True,
+)
+</code></pre>
+<p>對照效果：</p>
+<table>
+<thead>
+<tr>
+<th>面向</th>
+<th>預設</th>
+<th>Fine-Grained</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JSON 驗證</td>
+<td>有（每個最上層 key-value）</td>
+<td>無</td>
+</tr>
+<tr>
+<td>Chunk 送出方式</td>
+<td>每個有效 key 後的 buffered burst</td>
+<td>立即，逐 token</td>
+</tr>
+<tr>
+<td>UX 反應速度</td>
+<td>有延遲感</td>
+<td>即時感</td>
+</tr>
+<tr>
+<td>可能收到無效 JSON？</td>
+<td>不會（server 端處理）</td>
+<td><strong>會 — client 必須處理</strong></td>
+</tr>
+</tbody>
+</table>
+<p>啟用 fine-grained 後，你可能在整個 <code>meta</code> 物件還沒完成之前就先拿到 <code>word_count</code>，可以更早更新 UI 或預處理。</p>
+<hr />
+<h2>處理無效 JSON</h2>
+<p>驗證關閉之後，Claude 可能送出還不合法的 JSON，例如 <code>"word_count": undefined</code> 而不是一個數字。你的 snapshot parser 必須能容忍這種情況：</p>
+<pre><code class="language-python">import json
+
+for chunk in stream:
+    if chunk.type != &quot;input_json&quot;:
+        continue
+    try:
+        parsed_args = json.loads(chunk.snapshot)
+    except json.JSONDecodeError:
+        # 部分 / 無效 JSON — 繼續累積，不要 crash
+        continue
+    # 能 parse 成功後，才能安全地使用 parsed_args
+</code></pre>
+<p>常見的防禦模式：</p>
+<ol>
+<li><strong>累積 + 重試</strong> — 嘗試 parse snapshot，失敗就等下一批 chunk</li>
+<li><strong>逐欄位抽取</strong> — 用寬鬆的 regex 或增量 JSON parser 抽出已完成的 key</li>
+<li><strong>最終驗證</strong> — 當該 tool_use block 的 <code>ContentBlockStop</code> 到來時，做一次嚴格 parse 與 schema check</li>
+</ol>
+<hr />
+<h2>什麼時候用 Fine-Grained</h2>
+<p>以下任一情況可以考慮啟用：</p>
+<ul>
+<li>需要<strong>即時顯示 tool 參數生成進度</strong>（例如把一篇草稿串流到預覽面板）</li>
+<li>想<strong>提早開始處理部分 tool 結果</strong>以壓低端到端延遲</li>
+<li>預設的 buffering 延遲明顯傷害 UX</li>
+<li>團隊有能力投入<strong>完整的 JSON 錯誤處理</strong></li>
+</ul>
+<p>多數應用用預設（驗證）模式就夠好。只有當 buffering 造成使用者可感知的卡頓時才值得上 fine-grained。</p>
+<hr />
+<h2>與 Non-Streaming 的比較</h2>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>延遲特徵</th>
+<th>驗證</th>
+<th>複雜度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Non-streaming</td>
+<td>最後一次回應</td>
+<td>完整 schema 驗證</td>
+<td>最簡單</td>
+</tr>
+<tr>
+<td>Streaming（預設）</td>
+<td>最上層 key 之間的 burst</td>
+<td>逐 key 驗證</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>Streaming（fine-grained）</td>
+<td>平滑逐 token</td>
+<td>無（交由 client）</td>
+<td>最高</td>
+</tr>
+</tbody>
+</table>
+<p>用最簡單、能滿足 UX 的模式。只有 buffering 延遲真的讓使用者感覺卡，才值得付 fine-grained 的複雜度代價。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>啟用 fine-grained 卻沒寫 JSON 錯誤處理</strong> — 串流 consumer 會在第一個無法 parse 的 snapshot 就 crash。</li>
+<li><strong>把 <code>partial_json</code> 當成獨立 JSON 文件直接 parse</strong> — <code>partial_json</code> 是片段，應該 parse <code>snapshot</code>。</li>
+<li><strong>把第一個能 parse 的 snapshot 當成最終結果</strong> — snapshot 還會繼續成長，要等 tool_use block 的 <code>ContentBlockStop</code> 才算結束。</li>
+<li><strong>對不能容忍畸形參數的 tool 啟用 fine-grained</strong> — 如果下游無法處理 malformed 輸入，就保留預設模式。</li>
+<li><strong>結束後沒做最終 schema 驗證</strong> — fine-grained 完全跳過 server 驗證，你必須在執行 tool 前自己驗一次。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Fine-grained tool calling 是延遲與正確性的 trade-off：用「server 端 JSON 驗證」換「更快、更平滑的 streaming」。預設模式更安全；fine-grained 是在「看得見的串流進度值得在 client 端實作完整 JSON 錯誤處理」時才用。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>：理解 tool 參數 streaming 預設是 buffered、逐 key 驗證，並知道如何 opt out。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>：生產環境 UX 的延遲優化——streaming tool_use 是一個具體槓桿。</li>
+<li>題目若描述「tool 參數 streaming 有延遲後爆發的感覺」，答案就是 per-key 驗證造成的 buffering。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>哪一種事件傳遞 streaming 中的部分 tool 參數？</td>
+<td><code>InputJsonEvent</code>，附帶 <code>partial_json</code>（增量）與 <code>snapshot</code>（累積）</td>
+</tr>
+<tr>
+<td>預設 streaming 模式驗證什麼？</td>
+<td>Tool 參數每一個最上層 key-value pair 對照 schema 驗證</td>
+</tr>
+<tr>
+<td><code>fine_grained=True</code> 會關掉什麼？</td>
+<td>Streaming 過程中 server 端對 tool 參數的 JSON 驗證</td>
+</tr>
+<tr>
+<td>為什麼預設的 tool-use streaming 會有「爆發感」？</td>
+<td>API buffer chunk 直到一個完整、有效的最上層 key-value pair 完成</td>
+</tr>
+<tr>
+<td>Fine-grained tool calling 的主要風險？</td>
+<td>Claude 可能送出無效 JSON，client 必須 graceful 地處理 <code>json.JSONDecodeError</code></td>
+</tr>
+<tr>
+<td>什麼時候該啟用 fine-grained tool calling？</td>
+<td>當即時 streaming 進度對使用者重要，且團隊能投入完整 JSON 錯誤處理</td>
+</tr>
+<tr>
+<td>哪一個屬性提供目前累積的 JSON？</td>
+<td><code>InputJsonEvent</code> 的 <code>snapshot</code></td>
+</tr>
+<tr>
+<td>Fine-grained streaming 結束後還必須做什麼？</td>
+<td>做最後一次嚴格 parse 與 schema check，再執行 tool</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

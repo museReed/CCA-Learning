@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>12 The Streamablehttp Transport Eng En</title>
+<title>The Streamablehttp Transport Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -81,13 +81,12 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </tbody>
 </table>
 <p>Both default to <code>false</code> (least restrictive). Enabling either one <strong>removes capabilities</strong>.</p>
-<pre class="highlight"><code class="language-python"># Server configuration example
+<pre><code class="language-python"># Server configuration example
 mcp_server = MCPServer(
     stateless_http=False,  # default: sessions enabled
     json_response=False,   # default: SSE streaming enabled
 )
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>Key Insight</strong><br />
 Think of these flags as <strong>restriction toggles</strong>. The more you enable, the simpler the server becomes — but the fewer MCP features you can use.</p>
@@ -136,7 +135,7 @@ Think of these flags as <strong>restriction toggles</strong>. The more you enabl
 </ul>
 <hr />
 <h2>The Capability Spectrum</h2>
-<pre class="highlight"><code>Full MCP (Stdio)
+<pre><code>Full MCP (Stdio)
     │
     ▼
 StreamableHTTP (defaults)     ← SSE workaround partially restores server→client
@@ -150,7 +149,6 @@ StreamableHTTP + json_response ← No streaming at all
     ▼
 Both flags enabled            ← Maximum restriction, simplest server
 </code></pre>
-
 <p>Each step down <strong>trades functionality for simplicity/scalability</strong>.</p>
 <hr />
 <h2>When to Use StreamableHTTP</h2>

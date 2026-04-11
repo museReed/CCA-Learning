@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Schemas Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Tool Schemas — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试 Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1（tool schema 设计）、2.2（tool function 定义）、1.2（agentic loop 基础）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 35</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Tool schema 是你的 AI 在决定如何帮用户之前会读的产品文案 — 把它的文字当成 app store 描述来对待，因为 Claude 就是这样看它。</p>
+<hr />
+<h2>心智模型：菜单项目描述</h2>
+<p>想象一份餐厅菜单：</p>
+<ul>
+<li>菜名 <strong>name</strong>（「辣味金枪鱼卷」）— 告诉客人这东西存在。</li>
+<li>菜单描述 <strong>description</strong>（「新鲜黄鳍金枪鱼、辣椒蒜泥蛋黄酱、葱、6 贯」）— 告诉客人何时该点、能期待什么。</li>
+<li><strong>过敏原/辣度/价格</strong> 注记 — 限制谁该点。</li>
+</ul>
+<p>Tool schema 对 Claude 来说正是这样：</p>
+<table>
+<thead>
+<tr>
+<th>菜单概念</th>
+<th>Schema 字段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>菜名</td>
+<td><code>name</code></td>
+</tr>
+<tr>
+<td>菜单描述</td>
+<td><code>description</code></td>
+</tr>
+<tr>
+<td>食材/过敏原/辣度</td>
+<td><code>input_schema.properties</code>（含 type、description、enum）</td>
+</tr>
+<tr>
+<td>必选选项（如「请选配菜」）</td>
+<td><code>input_schema.required</code></td>
+</tr>
+</tbody>
+</table>
+<p>描述含糊的菜单（「鱼料理 $12」）点单少、客人疑惑多。描述丰富的菜单能把对的菜送到对的人。Tool schema 也一样。</p>
+<hr />
+<h2>为什么 PM 应该拥有描述文案</h2>
+<p>多数工程师会很乐意写「Gets current time」这种一句话描述然后走人。那句话是<em>Claude 每次调用时会读的产品文案</em>。写一份好描述只花几分钟，可靠度红利却庞大。</p>
+<p>PM 应该：</p>
+<ol>
+<li><strong>每个 tool 的 <code>description</code> 都要 review</strong>，像审 app store 列表或 onboarding 文案一样。</li>
+<li><strong>提供「何时使用」那一句</strong> — 这是描述里最有价值的一句，工程师最常跳过。</li>
+<li><strong>列出相关 tool</strong> 帮 Claude 区分。</li>
+<li><strong>在属性描述里放具体示例</strong>。</li>
+</ol>
+<hr />
+<h2>产品场景：Schema 质量真正改变结果的地方</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>Schema 质量如何帮忙</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>多个类似的 tool（如多个日历动作）</td>
+<td>描述让 Claude 挑对而非用猜的</td>
+</tr>
+<tr>
+<td>用户讲话含糊</td>
+<td>「何时使用」那句把 Claude 引导到对的 tool</td>
+</tr>
+<tr>
+<td>严格的参数格式（ID、日期、SKU）</td>
+<td>属性描述与 enum 避免调用格式错误</td>
+</tr>
+<tr>
+<td>不同语言的用户</td>
+<td>丰富的描述让 Claude 把翻译对应到对的 tool</td>
+</tr>
+<tr>
+<td>高风险动作（支付、删除）</td>
+<td>明确的必填字段避免意外遗漏</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>三个字段的白话解释</h2>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>对 PM 而言的意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>内部 ID。当作 slug。短、无歧义、snake_case。</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>销售话术。告诉 Claude <em>做什么</em>、<em>何时用</em>、<em>返回什么</em>。3-4 句。</td>
+</tr>
+<tr>
+<td><code>input_schema</code></td>
+<td>订单表格。哪些字段必填、哪些值合法、什么单位、什么格式。</td>
+</tr>
+</tbody>
+</table>
+<p>把这三个当成 PRD 的三个字段：身份、价值主张、设置。</p>
+<hr />
+<h2>「何时使用」那一句</h2>
+<p>Schema 文案最常被省略的，就是告诉 Claude<strong>何时</strong>该挑这个 tool 而不是别个。例：</p>
+<ul>
+<li>差：「返回今天的日期。」</li>
+<li>好：「返回今天的日期。<strong>当用户问今天、明天、或任何相对日期时使用此 tool。</strong>」</li>
+</ul>
+<p>PRD 里，每个 tool 都明确写一行：</p>
+<blockquote>
+<p>Claude 应在此时使用此 tool：<em>(一句话)</em></p>
+</blockquote>
+<p>这会迫使 PM 与工程师在写代码前先对齐 tool 的用途，这句话接着就直接写进描述。</p>
+<hr />
+<h2>PM 对 Schema 设计的决策框架</h2>
+<p>对功能中每个 tool 问：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>产出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>什么名字能无歧义地标识这个 tool？</td>
+<td><code>name</code></td>
+</tr>
+<tr>
+<td>「何时使用」的一句话是什么？</td>
+<td><code>description</code> 第一句</td>
+</tr>
+<tr>
+<td>这个 tool 返回什么、什么格式？</td>
+<td><code>description</code> 最后一句</td>
+</tr>
+<tr>
+<td>哪些参数是严格必填？</td>
+<td><code>input_schema.required</code></td>
+</tr>
+<tr>
+<td>每个参数，合法值是什么？（enum？范围？格式？）</td>
+<td>属性 <code>type</code>、<code>enum</code>、<code>description</code> 内示例</td>
+</tr>
+<tr>
+<td>有没有 Claude 可能混淆的相关 tool？</td>
+<td><code>description</code> 内交叉引用</td>
+</tr>
+<tr>
+<td>Claude 传错参数会发生什么？</td>
+<td>定义恢复 UX（链接到 tool function 的错误处理）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 常犯的错</h2>
+<ol>
+<li><strong>让工程把一句话描述出货</strong> — 跳过文案 review，Claude 就会把用户请求导错路。</li>
+<li><strong>写实现细节而非意图</strong> — 「调用 /v1/time endpoint」对 Claude 毫无帮助。</li>
+<li><strong>忘了列举合法值</strong> — 「温度单位」应该是 <code>enum: ["celsius", "fahrenheit"]</code>，不是自由字符串。</li>
+<li><strong>没交叉引用相似 tool</strong> — 在多 tool 系统里，Claude 需要协助区分。「此 tool 返回现在时间；要排期未来事件请用 <code>create_reminder</code>。」</li>
+<li><strong>改代码没改 schema</strong> — 参数改名与新增 optional 字段都必须同步到 schema，否则 Claude 的先验会过期。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Tool schema 描述是你的 AI 会读并据以行动的产品文案。把它当成工程的事后补充，等于 app 上架却留空 app store 描述：下载变少、体验变差。PM 要像拥有 UI 文案那样严格拥有 schema 文案，才能做出感觉明显更能干的功能。CCA 考试 D2 的 tool design 与选择类题目会直接考这点。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：Tool 定义三个必填字段、描述 best practice、<code>required</code> 语意、<code>enum</code> 用于限制值。</li>
+<li><strong>D1（Agentic Architecture）</strong>：描述质量驱动 Claude 在 agent loop 中选 tool。</li>
+<li>预期会出产品框架的题目：「团队有两个类似 tool，Claude 常选错，最可能的修正是？」— 答：改善描述、加入「何时使用」句、在 tool 间交叉引用。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool 定义的三个必填字段是什么？</td>
+<td><code>name</code>、<code>description</code>、<code>input_schema</code>。</td>
+</tr>
+<tr>
+<td>Tool schema 的菜单项目比喻是什么？</td>
+<td>Name 是菜名、description 是菜单描述、properties 是食材/限制、required 是「必选配菜」。</td>
+</tr>
+<tr>
+<td>Schema 描述最常被跳过的一句是？</td>
+<td>「何时使用」那一句 — 告诉 Claude 当多个 tool 可选时该挑哪个。</td>
+</tr>
+<tr>
+<td>为什么 PM 应该 review tool 描述？</td>
+<td>它是 Claude 每次调用时都会读的产品文案；直接影响功能可靠度与用户体验。</td>
+</tr>
+<tr>
+<td>要怎么避免 Claude 混淆两个相似的 tool？</td>
+<td>在每个描述内交叉引用（「若要做 X 请改用 <code>other_tool</code>」）。</td>
+</tr>
+<tr>
+<td>什么时候该在参数描述用 <code>enum</code>？</td>
+<td>当合法值是固定集合（如单位、状态、类别）时 — 消除模糊性。</td>
+</tr>
+<tr>
+<td>Tool schema 的 <code>required</code> 是什么意思？</td>
+<td>它列出 Claude 必须提供的参数名；没列的就是 optional。</td>
+</tr>
+<tr>
+<td>PRD 里哪一行能捕捉 tool 对 Claude 的用途？</td>
+<td>「Claude 应在此时使用此 tool：<em>(一句话)</em>」— 直接写进描述。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

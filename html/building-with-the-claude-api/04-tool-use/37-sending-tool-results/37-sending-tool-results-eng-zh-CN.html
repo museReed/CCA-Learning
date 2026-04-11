@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sending Tool Results Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Sending Tool Results — Engineering Deep Dive（简中）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) / D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4（tool_result block 格式）、2.2（content block 处理）、1.2（收尾 tool-use loop）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 37</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Tool 执行结果要通过 <code>tool_result</code> content block 包在一条 <strong>user</strong> message 里送回 Claude，每个 result 都要用 <code>tool_use_id</code> 精准对应前面 <code>ToolUseBlock.id</code>。</p>
+<hr />
+<h2>从 Tool 请求到执行</h2>
+<p>当 Claude 送回一个 <code>ToolUseBlock</code> 后，你用 block 的 <code>input</code> dict 去调用本地函数。Python 的 <code>**</code> 解包会把 dict 变成关键字参数：</p>
+<pre><code class="language-python">tool_block = response.content[1]  # 例如 [TextBlock, ToolUseBlock]
+result = get_current_datetime(**tool_block.input)
+# 等同 get_current_datetime(format=&quot;HH:MM:SS&quot;)
+</code></pre>
+<p><code>input</code> dict 保证符合 tool 的 <code>input_schema</code>（假设 Claude 遵守规则），所以 unpacking 就是 JSON Schema 和你函数签名之间的标准桥梁。</p>
+<hr />
+<h2><code>tool_result</code> Block 的结构</h2>
+<p><code>tool_result</code> block 是 user role 下的 content block，只有这几个字段：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>字面量 <code>"tool_result"</code></td>
+<td>告诉 API 这个 block 是 tool 返回</td>
+</tr>
+<tr>
+<td><code>tool_use_id</code></td>
+<td>字符串</td>
+<td>必须对应前面 <code>ToolUseBlock</code> 的 <code>id</code></td>
+</tr>
+<tr>
+<td><code>content</code></td>
+<td>字符串或 block list</td>
+<td>你 tool 的输出，序列化后的内容</td>
+</tr>
+<tr>
+<td><code>is_error</code></td>
+<td>布尔</td>
+<td>tool 失败就填 <code>True</code>，Claude 会据此处理错误</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-python">messages.append({
+    &quot;role&quot;: &quot;user&quot;,
+    &quot;content&quot;: [{
+        &quot;type&quot;: &quot;tool_result&quot;,
+        &quot;tool_use_id&quot;: response.content[1].id,
+        &quot;content&quot;: &quot;15:04:22&quot;,
+        &quot;is_error&quot;: False
+    }]
+})
+</code></pre>
+<p>关键不变式：<strong>前一条 assistant message 里的每一个 <code>ToolUseBlock</code> 都必须在下一条 user message 中对应一个 <code>tool_result</code></strong>。API 会严格验证这个配对，不符就报 400。</p>
+<hr />
+<h2>Content 序列化规则</h2>
+<p><code>content</code> 字段可以接字符串或 block list。非 trivial 的数据请序列化成 JSON：</p>
+<pre><code class="language-python">import json
+
+tool_output = {&quot;time&quot;: &quot;15:04:22&quot;, &quot;timezone&quot;: &quot;UTC&quot;, &quot;epoch&quot;: 1762978180}
+result_block = {
+    &quot;type&quot;: &quot;tool_result&quot;,
+    &quot;tool_use_id&quot;: tool_block.id,
+    &quot;content&quot;: json.dumps(tool_output),
+    &quot;is_error&quot;: False
+}
+</code></pre>
+<p>Claude 被训练成能读 tool result 里的 JSON 字符串，所以结构化数据就用 <code>json.dumps</code>。二进制数据（图片、文件）则要用 list-of-blocks 形式，内部放 image block。</p>
+<hr />
+<h2>同一回合处理多个 Tool Call</h2>
+<p>如果 Claude 在一次响应里要了超过一个 tool（例如「10+10 是多少？30+30 是多少？」会产生两个 <code>ToolUseBlock</code>），你必须在<strong>单一一条 user message</strong> 里送回<strong>所有</strong>对应的 <code>tool_result</code> block：</p>
+<pre><code class="language-python">tool_use_blocks = [b for b in response.content if b.type == &quot;tool_use&quot;]
+
+tool_results = []
+for tub in tool_use_blocks:
+    output = run_tool(tub.name, tub.input)
+    tool_results.append({
+        &quot;type&quot;: &quot;tool_result&quot;,
+        &quot;tool_use_id&quot;: tub.id,
+        &quot;content&quot;: json.dumps(output),
+        &quot;is_error&quot;: False
+    })
+
+messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: tool_results})
+</code></pre>
+<p>Result 在 content list 里的顺序不重要——靠 <code>tool_use_id</code> 配对。但<strong>不能漏</strong>：少一个就会 400。</p>
+<hr />
+<h2>用 <code>is_error</code> 处理错误</h2>
+<p>Tool 抛异常时，不能省略 result block。改成填 <code>is_error: True</code>，把错误信息放进 <code>content</code>：</p>
+<pre><code class="language-python">try:
+    output = run_tool(tub.name, tub.input)
+    block = {
+        &quot;type&quot;: &quot;tool_result&quot;,
+        &quot;tool_use_id&quot;: tub.id,
+        &quot;content&quot;: json.dumps(output),
+        &quot;is_error&quot;: False
+    }
+except Exception as e:
+    block = {
+        &quot;type&quot;: &quot;tool_result&quot;,
+        &quot;tool_use_id&quot;: tub.id,
+        &quot;content&quot;: f&quot;Error: {e}&quot;,
+        &quot;is_error&quot;: True
+    }
+</code></pre>
+<p>Claude 会读错误信息，可能重试不同参数、把失败回报给使用者、或选另一种策略。默默丢掉失败的 tool 会破坏 ID 配对，直接 400。</p>
+<hr />
+<h2>Follow-Up API 调用</h2>
+<p>后续 request 必须：</p>
+<ol>
+<li>带完整的对话历史（原始 user message + assistant tool-use message + 新的 user tool-result message）</li>
+<li>仍然要带 <code>tools=[...]</code>——Claude 需要 schema 去解析 tool 引用</li>
+<li>用同一个 <code>model</code> 和 <code>max_tokens</code> 配置</li>
+</ol>
+<pre><code class="language-python">client.messages.create(
+    model=model,
+    max_tokens=1000,
+    messages=messages,  # 已经有 3 条以上的 message，包含 tool-result
+    tools=[get_current_datetime_schema]
+)
+</code></pre>
+<p>Claude 下一个响应会把 tool 输出整合成自然语言。如果它还要调用别的 tool，就再 loop 一次。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>把 <code>tool_result</code> 放在 assistant message</strong>——必须放在 <strong>user</strong> role message，assistant role 的 tool result 会被拒绝。</li>
+<li><strong>漏 <code>tool_use_id</code></strong> 或填错值——API 会报 400「mismatched tool_use_id」。</li>
+<li><strong><code>content</code> 直接塞 dict/object</strong> 而没序列化——<code>content</code> 必须是字符串（或 block list），结构化数据请 <code>json.dumps</code>。</li>
+<li><strong>忘记填 <code>is_error</code></strong>——默认是 <code>False</code>，失败时没填就等于告诉 Claude 成功，会导致 hallucination。</li>
+<li><strong>Claude 要多个 tool 但只回一个结果</strong>——每个 <code>ToolUseBlock</code> 都要在同一回合有对应的 <code>tool_result</code>。</li>
+<li><strong>follow-up 没带 <code>tools=[...]</code></strong>——Claude 会拒绝引用不存在 schema 的历史。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p><code>tool_use_id</code> 是你代码和 Claude 之间的契约。Assistant 送出的每一个 <code>ToolUseBlock</code> 都必须在下一条 <strong>user</strong> message 中有<strong>恰好一个</strong>对应 ID 的 <code>tool_result</code>。把它想成是 content block 层级的请求/响应配对，而不是 message 层级——而且即使是错误也要用 <code>is_error: True</code> 的 <code>tool_result</code> 送回去，不能整个 block 不送。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：记住 <code>tool_result</code> block 的四个字段，以及它在哪个 role（<code>user</code>）里。</li>
+<li><strong>D1（Agentic Architecture）</strong>：把请求/结果配对理解成 agentic loop 的基本单位。</li>
+<li>考题会丢坏掉的 <code>tool_result</code>（错 role、漏 ID、塞 dict）问你会出什么错。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tool_result</code> block 要放在哪个 role 的 message 里？</td>
+<td><code>user</code> role——Claude 把 tool result 看成用户提供的 context</td>
+</tr>
+<tr>
+<td><code>tool_result</code> block 哪个字段用来配对前面的 tool-use 请求？</td>
+<td><code>tool_use_id</code>——必须精准对应 <code>ToolUseBlock.id</code></td>
+</tr>
+<tr>
+<td><code>tool_result</code> 的 <code>content</code> 字段类型是什么？</td>
+<td>字符串（或给图片/文件用的 block list）——结构化数据用 <code>json.dumps</code></td>
+</tr>
+<tr>
+<td>Tool 抛异常时 <code>is_error</code> 要设什么？</td>
+<td><code>True</code>——并把错误信息放进 <code>content</code>，不要直接丢掉 block</td>
+</tr>
+<tr>
+<td>把 <code>ToolUseBlock.input</code> 解包成关键字参数的 Python 语法？</td>
+<td><code>my_function(**tool_block.input)</code></td>
+</tr>
+<tr>
+<td>Claude 要两个 tool 但你只回一个 result 会怎样？</td>
+<td>API 会 400，说 <code>tool_use_id</code> 配对失败</td>
+</tr>
+<tr>
+<td>follow-up API 调用还需要带 <code>tools=[...]</code> 吗？</td>
+<td>需要——Claude 要 schema 才能解析对话历史中的 tool 引用</td>
+</tr>
+<tr>
+<td>一回合有多个 tool call 怎么处理？</td>
+<td>全部执行、收集每个 <code>tool_result</code> block、用<strong>单一</strong>一条 user message 一起送回去</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

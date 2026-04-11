@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Web Search Tool Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Web Search Tool — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%), D4 — AI Safety &amp; Alignment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (built-in server tools), 2.1 (tool schema), 4.2 (grounding &amp; citations)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 43</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The web search tool is a fully managed Anthropic server tool: you provide only a tiny schema stub, and Anthropic handles the search, result retrieval, and citation generation entirely on their infrastructure — no local implementation required.</p>
+<hr />
+<h2>Key Distinction: Server Tool vs. Client-Executed Tool</h2>
+<p>Unlike custom tools (where you write both schema and implementation) or the text editor tool (where Claude knows the schema but you execute commands), the web search tool is a <strong>server tool</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Tool Type</th>
+<th>Who Defines Schema</th>
+<th>Who Executes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Custom tool</td>
+<td>You</td>
+<td>You</td>
+</tr>
+<tr>
+<td>Text editor (built-in)</td>
+<td>Anthropic</td>
+<td>You</td>
+</tr>
+<tr>
+<td>Web search (server tool)</td>
+<td>Anthropic</td>
+<td><strong>Anthropic</strong></td>
+</tr>
+</tbody>
+</table>
+<p>You do nothing at runtime. Claude calls out to Anthropic's web search backend and the results flow back through the API response.</p>
+<hr />
+<h2>Prerequisite: Enable in Console</h2>
+<p>Before using web search, your Anthropic organization must enable it in the privacy settings:</p>
+<pre><code>https://console.anthropic.com/settings/privacy
+</code></pre>
+<p>This is an org-level opt-in. If the setting is off, requests including the web search tool will fail. PMs should treat this as a deployment checklist item for any environment that will use the tool.</p>
+<hr />
+<h2>Declaring the Tool</h2>
+<p>The schema stub has three required fields:</p>
+<pre><code class="language-python">web_search_schema = {
+    &quot;type&quot;: &quot;web_search_20250305&quot;,
+    &quot;name&quot;: &quot;web_search&quot;,
+    &quot;max_uses&quot;: 5,
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>Versioned server tool identifier — must match the version for your model</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>Fixed: <code>web_search</code></td>
+</tr>
+<tr>
+<td><code>max_uses</code></td>
+<td>Upper bound on the number of searches per request</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>max_uses</code> cap matters because Claude may issue <strong>follow-up searches</strong> based on initial results. A single user question can turn into three or four queries as Claude refines its understanding. <code>max_uses</code> is your cost and latency ceiling.</p>
+<hr />
+<h2>Restricting Search Domains</h2>
+<p>You can constrain which domains are searchable with <code>allowed_domains</code>:</p>
+<pre><code class="language-python">web_search_schema = {
+    &quot;type&quot;: &quot;web_search_20250305&quot;,
+    &quot;name&quot;: &quot;web_search&quot;,
+    &quot;max_uses&quot;: 5,
+    &quot;allowed_domains&quot;: [&quot;nih.gov&quot;],
+}
+</code></pre>
+<p>Use cases:</p>
+<ul>
+<li><strong>Medical advice</strong> → restrict to PubMed / NIH for evidence-based sources</li>
+<li><strong>Legal research</strong> → restrict to <code>.gov</code> or <code>.edu</code> domains</li>
+<li><strong>Company-specific data</strong> → restrict to the company's official website</li>
+<li><strong>Academic</strong> → restrict to peer-reviewed sources</li>
+</ul>
+<p>Domain restriction is your primary lever for <strong>content quality and trust</strong>, not just search filtering.</p>
+<hr />
+<h2>Response Block Types</h2>
+<p>A web-search-enabled response can contain several new block types alongside normal text:</p>
+<table>
+<thead>
+<tr>
+<th>Block Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text</code></td>
+<td>Claude's regular explanatory text</td>
+</tr>
+<tr>
+<td><code>ServerToolUseBlock</code></td>
+<td>Shows the exact search query Claude issued</td>
+</tr>
+<tr>
+<td><code>WebSearchToolResultBlock</code></td>
+<td>Contains the full search results returned</td>
+</tr>
+<tr>
+<td><code>WebSearchResultBlock</code></td>
+<td>An individual result (title + URL + snippet)</td>
+</tr>
+<tr>
+<td>Citation blocks</td>
+<td>Text quoted verbatim from sources, supporting Claude's statements</td>
+</tr>
+</tbody>
+</table>
+<p>Because the execution is server-side, the <code>ServerToolUseBlock</code> and <code>WebSearchToolResultBlock</code> are both returned in the same response — you do not do a second round trip.</p>
+<pre><code class="language-python">for block in response.content:
+    if block.type == &quot;text&quot;:
+        render_text(block.text)
+    elif block.type == &quot;server_tool_use&quot;:
+        log_query(block.input[&quot;query&quot;])
+    elif block.type == &quot;web_search_tool_result&quot;:
+        render_source_list(block.content)
+</code></pre>
+<hr />
+<h2>Citations and Grounding</h2>
+<p>Claude annotates its text output with <strong>citation blocks</strong> that include:</p>
+<ul>
+<li>The source domain and page title</li>
+<li>The source URL</li>
+<li>The specific quoted text supporting the claim</li>
+</ul>
+<p>This enables true grounded generation: users can click through to the source and verify any statement. It also gives you a product surface — a "Sources" panel — that increases trust dramatically compared with ungrounded LLM responses.</p>
+<hr />
+<h2>Rendering Pattern</h2>
+<p>The response block types are designed for specific UI elements:</p>
+<ol>
+<li><strong>Text blocks</strong> → regular content in the main answer area</li>
+<li><strong>Web search result blocks</strong> → a "Sources" list, typically above or beside the answer</li>
+<li><strong>Citation blocks</strong> → inline badges or footnotes, showing source domain and page title, linking out</li>
+</ol>
+<p>Treat each block type as a different UI slot; do not merge them into a single string.</p>
+<hr />
+<h2>When to Use the Web Search Tool</h2>
+<p>The lesson calls out four prime use cases:</p>
+<ul>
+<li><strong>Current events</strong> — information after the model's training cutoff</li>
+<li><strong>Specialized information</strong> not in Claude's training data</li>
+<li><strong>Fact-checking</strong> and authoritative sourcing</li>
+<li><strong>Research tasks</strong> requiring up-to-date information</li>
+</ul>
+<p>When you include the schema in your tools array, Claude automatically decides whether a web search would help answer the question. You do not have to instruct Claude to use it; the model chooses based on the question content.</p>
+<hr />
+<h2>Cost and Latency Considerations</h2>
+<ul>
+<li>Each search adds latency (the server has to fetch, parse, and return results)</li>
+<li><code>max_uses</code> bounds the number of searches per request — set it based on use case value</li>
+<li>Domain restriction can speed things up by narrowing the search surface</li>
+<li>Streaming still works; search blocks stream in the same event sequence as text</li>
+</ul>
+<p>For high-volume production use, instrument:</p>
+<ul>
+<li>Average searches per request (watch for drift upward)</li>
+<li>Time to first text token with search enabled vs. disabled</li>
+<li>Citation click-through rate (a signal of user trust in sources)</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Forgetting to enable web search in the console</strong> — requests fail silently or return errors; check the org setting first.</li>
+<li><strong>Setting <code>max_uses</code> too high</strong> — runaway search chains on speculative questions can multiply cost and latency.</li>
+<li><strong>Not rendering citations</strong> — you lose the biggest product advantage of server tools: verifiable, grounded answers.</li>
+<li><strong>Ignoring <code>allowed_domains</code> for sensitive topics</strong> — medical, legal, and financial answers benefit massively from authoritative-source restriction.</li>
+<li><strong>Trying to implement web search yourself when a server tool suffices</strong> — re-implementing means more code, worse citations, and no built-in rendering blocks.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Server tools like web search are the fastest path to shipping production-grade AI features that need fresh or authoritative data. You ship a schema stub; Anthropic ships the entire execution, parsing, and citation pipeline. The only code you own is the UI that renders the response blocks.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>: Know that web search is a "server tool" where Anthropic executes the tool call; you never implement a function.</li>
+<li><strong>D4 (AI Safety &amp; Alignment)</strong>: Citations and grounding are key trust features; the exam tests the distinction between ungrounded LLM output and cited, sourced answers.</li>
+<li>Expect questions contrasting: custom tool (both), text editor (schema only), web search (neither — fully managed).</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What distinguishes a "server tool" from the text editor tool?</td>
+<td>Server tools are executed entirely on Anthropic's infrastructure — you do not provide any local function</td>
+</tr>
+<tr>
+<td>What fields does the web search schema stub require?</td>
+<td><code>type</code> (versioned), <code>name</code> (<code>web_search</code>), and <code>max_uses</code></td>
+</tr>
+<tr>
+<td>What does <code>max_uses</code> control?</td>
+<td>The maximum number of searches Claude can run in a single request (for cost / latency control)</td>
+</tr>
+<tr>
+<td>How do you restrict searches to specific domains?</td>
+<td>Set <code>allowed_domains</code> in the schema, e.g. <code>["nih.gov"]</code></td>
+</tr>
+<tr>
+<td>What must you do in the Anthropic console before using web search?</td>
+<td>Enable the web search tool under privacy settings</td>
+</tr>
+<tr>
+<td>Name three new block types in a web-search response.</td>
+<td><code>ServerToolUseBlock</code>, <code>WebSearchToolResultBlock</code>, <code>WebSearchResultBlock</code>, plus citation blocks</td>
+</tr>
+<tr>
+<td>What is the purpose of citation blocks?</td>
+<td>They quote the specific source text supporting Claude's statements, enabling grounded, verifiable answers</td>
+</tr>
+<tr>
+<td>When should PMs reach for the web search tool over a custom search integration?</td>
+<td>When they need fresh / authoritative data and want automatic citation and grounding without building it themselves</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

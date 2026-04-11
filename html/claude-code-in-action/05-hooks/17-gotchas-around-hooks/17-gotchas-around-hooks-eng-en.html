@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>17 Gotchas Around Hooks Eng En</title>
+<title>Gotchas Around Hooks Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -63,13 +63,12 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>The Core Problem</h2>
 <h3>Why Absolute Paths?</h3>
 <p>Claude Code's security recommendations state that hook commands should use <strong>absolute paths</strong>:</p>
-<pre class="highlight"><code class="language-json">// ❌ Relative path (security risk)
+<pre><code class="language-json">// ❌ Relative path (security risk)
 &quot;command&quot;: &quot;node ./hooks/read_hook.js&quot;
 
 // ✅ Absolute path (secure)
 &quot;command&quot;: &quot;node /Users/alice/projects/queries/hooks/read_hook.js&quot;
 </code></pre>
-
 <p>Absolute paths mitigate two attack vectors:</p>
 <table>
 <thead>
@@ -98,11 +97,10 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </blockquote>
 <h3>Why This Breaks Portability</h3>
 <p>The problem is simple: absolute paths are machine-specific.</p>
-<pre class="highlight"><code>Alice's machine: /Users/alice/projects/queries/hooks/read_hook.js
+<pre><code>Alice's machine: /Users/alice/projects/queries/hooks/read_hook.js
 Bob's machine:   /home/bob/dev/queries/hooks/read_hook.js
 CI server:       /workspace/queries/hooks/read_hook.js
 </code></pre>
-
 <p>If you commit <code>settings.json</code> with Alice's absolute path, it breaks on Bob's machine and in CI.</p>
 <hr />
 <p><img alt="Security vs Portability" src="visuals/security-portability-tradeoff.svg" /><br />
@@ -112,7 +110,7 @@ CI server:       /workspace/queries/hooks/read_hook.js
 <p><img alt="Template Init Pattern" src="visuals/template-init-pattern.svg" /><br />
 <em>Figure: Template → Init → Local pattern — committed template with $PWD placeholders, one-time init generates machine-specific config.</em></p>
 <h3>1. <code>settings.example.json</code> (committed to git)</h3>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;hooks&quot;: {
     &quot;PreToolUse&quot;: [
       {
@@ -128,7 +126,6 @@ CI server:       /workspace/queries/hooks/read_hook.js
   }
 }
 </code></pre>
-
 <p>The <code>$PWD</code> placeholder marks where the absolute path should go.</p>
 <h3>2. <code>scripts/init-claude.js</code> (committed to git)</h3>
 <p>This script:<br />
@@ -138,7 +135,7 @@ CI server:       /workspace/queries/hooks/read_hook.js
 <h3>3. <code>settings.local.json</code> (gitignored, generated)</h3>
 <p>The output file with machine-specific absolute paths. This file is <strong>never committed</strong> — it is regenerated per machine.</p>
 <h3>The Workflow</h3>
-<pre class="highlight"><code>Developer clones repo
+<pre><code>Developer clones repo
         ↓
 Runs `npm run setup` (or `npm run dev`)
         ↓
@@ -150,7 +147,6 @@ settings.local.json generated with absolute paths
         ↓
 Claude Code uses settings.local.json with secure, machine-specific paths
 </code></pre>
-
 <blockquote>
 <p>📝 <strong>Why this matters for teams</strong></p>
 <p>This pattern ensures:<br />

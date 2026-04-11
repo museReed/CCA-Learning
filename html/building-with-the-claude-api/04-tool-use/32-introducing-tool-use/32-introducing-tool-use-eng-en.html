@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing Tool Use Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing Tool Use — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2 (agentic loop foundation), 2.1 (tool schema design), 2.4 (multi-turn tool loops)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 32</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Tool use is a structured request/response protocol that lets Claude ask your application to fetch external data or perform actions, bridging the gap between static training knowledge and live, real-world information.</p>
+<hr />
+<h2>The Problem: Static Knowledge Horizon</h2>
+<p>Without tools, Claude is bounded by its training cutoff. A user asking "What's the weather in San Francisco?" will get:</p>
+<blockquote>
+<p>"I'm sorry, but I don't have access to up-to-date weather information."</p>
+</blockquote>
+<p>This is a capability wall, not a prompt problem. No amount of prompt engineering can conjure real-time data that was never in the training set. The same wall appears for:</p>
+<ul>
+<li>Current stock prices, sports scores, news headlines</li>
+<li>Internal company databases and CRM records</li>
+<li>User-specific state (their calendar, their files, their preferences)</li>
+<li>Any side effect in the real world (sending emails, writing files, triggering workflows)</li>
+</ul>
+<p>Tools are the architectural answer: instead of trying to prompt around the limitation, you <strong>extend</strong> Claude's capabilities by giving it a structured way to request help from your code.</p>
+<hr />
+<h2>The Four-Step Tool Use Flow</h2>
+<pre><code>┌──────────┐   1. user question + tool definitions    ┌─────────┐
+│  Client  │ ─────────────────────────────────────▶ │ Claude  │
+│  (app)   │                                           │   API   │
+│          │ ◀───────────────────────────────────────  │         │
+│          │   2. tool_use request (name + args)      └─────────┘
+│          │
+│          │   3. execute function locally
+│          │
+│          │   4. tool_result with fetched data       ┌─────────┐
+│          │ ─────────────────────────────────────▶ │ Claude  │
+│          │ ◀───────────────────────────────────────  │   API   │
+│          │   5. final natural-language answer       └─────────┘
+└──────────┘
+</code></pre>
+<ol>
+<li><strong>Initial Request</strong> — You POST the user's question plus a list of available tools (name, description, input_schema) to <code>/v1/messages</code>.</li>
+<li><strong>Tool Request</strong> — Claude's <code>stop_reason</code> returns <code>"tool_use"</code> and the response <code>content</code> contains a <code>tool_use</code> block with <code>id</code>, <code>name</code>, and <code>input</code> (the JSON arguments).</li>
+<li><strong>Local Execution</strong> — Your server reads the tool_use block, dispatches to the matching Python function, and captures the result.</li>
+<li><strong>Final Response</strong> — You append the <code>assistant</code> message and a new <code>user</code> message containing a <code>tool_result</code> block (matched by <code>tool_use_id</code>), then call the API again. Claude synthesizes the final answer.</li>
+</ol>
+<hr />
+<h2>Minimal Python Example</h2>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+tools = [{
+    &quot;name&quot;: &quot;get_weather&quot;,
+    &quot;description&quot;: &quot;Returns the current weather for a given city.&quot;,
+    &quot;input_schema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;city&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;City name, e.g. San Francisco&quot;}
+        },
+        &quot;required&quot;: [&quot;city&quot;]
+    }
+}]
+
+messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What's the weather in San Francisco?&quot;}]
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,
+    messages=messages,
+)
+
+if response.stop_reason == &quot;tool_use&quot;:
+    tool_use = next(b for b in response.content if b.type == &quot;tool_use&quot;)
+    result = fetch_weather(tool_use.input[&quot;city&quot;])  # your function
+
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: response.content})
+    messages.append({
+        &quot;role&quot;: &quot;user&quot;,
+        &quot;content&quot;: [{
+            &quot;type&quot;: &quot;tool_result&quot;,
+            &quot;tool_use_id&quot;: tool_use.id,
+            &quot;content&quot;: result,
+        }],
+    })
+
+    final = client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=1024,
+        tools=tools,
+        messages=messages,
+    )
+    print(final.content[0].text)
+</code></pre>
+<p>The critical insight: <strong>tool use is multi-turn</strong>. One user question can span two (or more) API calls.</p>
+<hr />
+<h2>Why Tools Beat Fine-Tuning for Live Data</h2>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Freshness</th>
+<th>Cost</th>
+<th>Maintenance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fine-tune on fresh data</td>
+<td>Hours-to-days stale</td>
+<td>High (retrain cycle)</td>
+<td>Constant retraining</td>
+</tr>
+<tr>
+<td>RAG (vector search)</td>
+<td>Depends on index refresh</td>
+<td>Medium (embedding + storage)</td>
+<td>Index pipeline</td>
+</tr>
+<tr>
+<td><strong>Tool use</strong></td>
+<td>Real-time — hits live source</td>
+<td>Pay-per-call</td>
+<td>Zero — source of truth is upstream</td>
+</tr>
+</tbody>
+</table>
+<p>Tools are the only pattern where Claude reads directly from the system of record. Nothing is cached, nothing is stale.</p>
+<hr />
+<h2>Key Benefits</h2>
+<ul>
+<li><strong>Real-time information</strong> — current data that was not in training</li>
+<li><strong>External system integration</strong> — databases, SaaS APIs, internal services</li>
+<li><strong>Dynamic responses</strong> — each answer grounded in live state</li>
+<li><strong>Structured interaction</strong> — Claude declares exactly what it needs via <code>input_schema</code></li>
+<li><strong>Actionability</strong> — tools can have side effects (not just reads), turning Claude into an agent</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Forgetting the second API call</strong> — returning the <code>tool_use</code> block to the user instead of executing it and calling the API again with the <code>tool_result</code>.</li>
+<li><strong>Mismatched <code>tool_use_id</code></strong> — the <code>tool_result</code> must reference the exact <code>id</code> from the <code>tool_use</code> block; otherwise Claude loses the thread.</li>
+<li><strong>Sending a string when a tool_use is expected</strong> — the assistant message must preserve the full <code>content</code> array, not a flattened text string.</li>
+<li><strong>Treating tool use as optional</strong> — if your use case needs live data, there is no prompt-engineering workaround; you must use tools.</li>
+<li><strong>Not handling <code>stop_reason</code></strong> — you must branch on <code>stop_reason == "tool_use"</code> to know whether to continue the loop or emit the final answer.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Tool use is not a single API call — it is a <strong>loop</strong>. Each turn, you inspect <code>stop_reason</code>, and if it is <code>tool_use</code>, you execute locally, append a <code>tool_result</code>, and call the API again. This loop is the foundation of every agentic pattern in the CCA curriculum. Understanding it well unlocks D1 (agents) and D2 (tool design).</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: tool_use request/response flow, <code>tool_use</code> and <code>tool_result</code> block types, <code>input_schema</code> as JSON Schema.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: the tool use loop IS the minimal agentic loop. Multi-turn tool calls form the basis of more complex agent patterns.</li>
+<li>Watch for exam questions framed as: "Claude needs real-time weather" → answer is always tools, never prompt engineering.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What problem does tool use solve?</td>
+<td>Claude's static training cutoff — it lets Claude access real-time data and external systems it could not otherwise reach.</td>
+</tr>
+<tr>
+<td>What <code>stop_reason</code> indicates Claude wants to call a tool?</td>
+<td><code>"tool_use"</code></td>
+</tr>
+<tr>
+<td>What content block does Claude emit when requesting a tool?</td>
+<td>A <code>tool_use</code> block containing <code>id</code>, <code>name</code>, and <code>input</code> (JSON arguments).</td>
+</tr>
+<tr>
+<td>How does your app return a tool's output to Claude?</td>
+<td>By sending a new user message with a <code>tool_result</code> block that references the original <code>tool_use_id</code>.</td>
+</tr>
+<tr>
+<td>How many API calls does a single tool use round trip require?</td>
+<td>At least two — one to receive the tool_use request, one to submit the tool_result and get the final answer.</td>
+</tr>
+<tr>
+<td>What are the four steps of the tool use flow?</td>
+<td>1) Initial request with tools, 2) Claude returns tool_use, 3) App executes locally, 4) App returns tool_result and Claude emits final response.</td>
+</tr>
+<tr>
+<td>Why can't prompt engineering replace tools for real-time data?</td>
+<td>The data was never in training — no amount of prompting can generate facts the model does not know.</td>
+</tr>
+<tr>
+<td>Can tools have side effects?</td>
+<td>Yes — tools can both read (e.g., weather API) and write (e.g., send email, create record), which is what turns Claude into an agent.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

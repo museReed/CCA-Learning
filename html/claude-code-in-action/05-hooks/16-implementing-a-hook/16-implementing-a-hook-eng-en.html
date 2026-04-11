@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>16 Implementing A Hook Eng En</title>
+<title>Implementing A Hook Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -65,7 +65,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>Step-by-Step Implementation</h2>
 <h3>1. Configure <code>settings.local.json</code></h3>
 <p>Open <code>.claude/settings.local.json</code> and add a PreToolUse hook entry:</p>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;hooks&quot;: {
     &quot;PreToolUse&quot;: [
       {
@@ -81,7 +81,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 }
 </code></pre>
-
 <p>Key configuration details:<br />
 - <strong><code>matcher: "Read|Grep"</code></strong> — catches both tools that can access file contents<br />
 - <strong><code>command</code></strong> — points to the Node.js script that implements the logic<br />
@@ -92,7 +91,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </blockquote>
 <h3>2. Write the Hook Script</h3>
 <p>The script reads stdin, parses JSON, checks the file path, and exits with the appropriate code:</p>
-<pre class="highlight"><code class="language-javascript">async function main() {
+<pre><code class="language-javascript">async function main() {
   // Step 1: Read tool call data from stdin
   const chunks = [];
   for await (const chunk of process.stdin) {
@@ -117,7 +116,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 
 main();
 </code></pre>
-
 <blockquote>
 <p>⚠️ <strong>Critical implementation details</strong></p>
 <ol>
@@ -141,7 +139,7 @@ main();
 </blockquote>
 <hr />
 <h2>Data Flow Diagram</h2>
-<pre class="highlight"><code>User asks Claude to read .env
+<pre><code>User asks Claude to read .env
         ↓
 Claude decides to call Read tool with { file_path: &quot;.env&quot; }
         ↓
@@ -157,7 +155,6 @@ Checks: does file_path include &quot;.env&quot;?
 
   NO  → implicit exit(0) → Read tool executes normally
 </code></pre>
-
 <hr />
 <h2>Common Implementation Mistakes</h2>
 <table>

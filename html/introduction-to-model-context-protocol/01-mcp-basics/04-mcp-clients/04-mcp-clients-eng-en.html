@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>04 Mcp Clients Eng En</title>
+<title>Mcp Clients Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -56,11 +56,10 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="Mcp Message Flow" src="visuals/mcp-message-flow.svg" /></p>
 <h2>What Is an MCP Client?</h2>
 <p>The MCP client lives inside your application and serves as the intermediary between Claude and MCP servers. It does not implement tools — it discovers them and routes execution requests.</p>
-<pre class="highlight"><code>User  →  Your Server (contains MCP Client)  →  MCP Server  →  External Service
+<pre><code>User  →  Your Server (contains MCP Client)  →  MCP Server  →  External Service
                     ↕
                   Claude
 </code></pre>
-
 <p>The client is <strong>transport agnostic</strong>, meaning it can communicate with MCP servers over multiple protocols:</p>
 <ul>
 <li><strong>stdio</strong> — Standard input/output (local processes)</li>
@@ -76,16 +75,14 @@ The MCP client is not your entire application. It is a specific component within
 <h2>Key Message Types</h2>
 <p>MCP communication is built on a request/result pattern. There are two essential message pairs:</p>
 <h3>Tool Discovery</h3>
-<pre class="highlight"><code>ListToolsRequest  →  MCP Server
+<pre><code>ListToolsRequest  →  MCP Server
 ListToolsResult   ←  MCP Server
 </code></pre>
-
 <p>The <code>ListToolsResult</code> contains an array of tool definitions, each with a name, description, and input schema. This is how Claude learns what tools are available.</p>
 <h3>Tool Execution</h3>
-<pre class="highlight"><code>CallToolRequest   →  MCP Server  (includes tool_name + tool_input)
+<pre><code>CallToolRequest   →  MCP Server  (includes tool_name + tool_input)
 CallToolResult    ←  MCP Server  (includes execution output)
 </code></pre>
-
 <p>The <code>CallToolRequest</code> carries the tool name and input arguments. The <code>CallToolResult</code> returns the execution output, which gets fed back to Claude.</p>
 <blockquote>
 <p><strong>Key Insight</strong><br />
@@ -94,7 +91,7 @@ These four message types (two request/result pairs) are the core of MCP communic
 <hr />
 <h2>The Complete 12-Step Flow</h2>
 <p>This is the end-to-end sequence from user query to final response. Understanding this flow is essential for debugging and for the CCA exam.</p>
-<pre class="highlight"><code> 1. User sends a question to your server
+<pre><code> 1. User sends a question to your server
  2. Your server connects to MCP server(s)
  3. MCP client sends ListToolsRequest
  4. MCP server returns ListToolsResult (available tools)
@@ -107,13 +104,12 @@ These four message types (two request/result pairs) are the core of MCP communic
 11. Your server sends the tool result back to Claude
 12. Claude generates a final natural language response
 </code></pre>
-
 <p>Notice the two distinct phases:</p>
 <ul>
 <li><strong>Discovery phase</strong> (steps 2-5): The client learns what tools exist and tells Claude about them</li>
 <li><strong>Execution phase</strong> (steps 6-12): Claude decides to use a tool, the client executes it, and Claude interprets the result</li>
 </ul>
-<pre class="highlight"><code class="language-python"># Simplified pseudocode of the flow
+<pre><code class="language-python"># Simplified pseudocode of the flow
 async def handle_user_query(query: str):
     # Discovery phase
     tools = await mcp_client.list_tools()          # Steps 3-4
@@ -141,7 +137,6 @@ async def handle_user_query(query: str):
 
     return response.text
 </code></pre>
-
 <blockquote>
 <p><strong>Key Insight</strong><br />
 The flow involves TWO calls to Claude: one where Claude decides to use a tool, and a second where Claude interprets the tool's output. This double-call pattern is fundamental to agentic AI architectures.</p>
@@ -150,14 +145,13 @@ The flow involves TWO calls to Claude: one where Claude decides to use a tool, a
 <h2>Transport Layer Details</h2>
 <h3>stdio Transport</h3>
 <p>The MCP server runs as a child process. Communication happens over stdin/stdout pipes.</p>
-<pre class="highlight"><code class="language-python"># Client spawns MCP server as a subprocess
+<pre><code class="language-python"># Client spawns MCP server as a subprocess
 server_process = subprocess.Popen(
     [&quot;python&quot;, &quot;mcp_server.py&quot;],
     stdin=subprocess.PIPE,
     stdout=subprocess.PIPE
 )
 </code></pre>
-
 <p>Best for: local development, single-machine deployments, testing.</p>
 <h3>HTTP/SSE Transport</h3>
 <p>The MCP server runs as a web server. Communication uses HTTP requests and Server-Sent Events for streaming.</p>

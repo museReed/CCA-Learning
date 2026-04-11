@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>20 The Claude Code Sdk Eng Zh Cn</title>
+<title>The Claude Code Sdk Eng Zh Cn</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -72,7 +72,7 @@ SDK 就是没有终端 UI 的 Claude Code。相同引擎、相同配置、相同
 <h2>三种访问方式</h2>
 <p>SDK 通过三种接口提供：</p>
 <h3>1. TypeScript（主要方式）</h3>
-<pre class="highlight"><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
+<pre><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
 
 const messages = await query({
   prompt: &quot;这个项目中有哪些重复的 query？&quot;,
@@ -87,9 +87,8 @@ for await (const message of messages) {
   }
 }
 </code></pre>
-
 <h3>2. Python</h3>
-<pre class="highlight"><code class="language-python">import subprocess
+<pre><code class="language-python">import subprocess
 import json
 
 result = subprocess.run(
@@ -98,11 +97,9 @@ result = subprocess.run(
 )
 response = json.loads(result.stdout)
 </code></pre>
-
 <h3>3. CLI（Pipe 模式）</h3>
-<pre class="highlight"><code class="language-bash">echo &quot;Find duplicate queries&quot; | claude --print --output-format json
+<pre><code class="language-bash">echo &quot;Find duplicate queries&quot; | claude --print --output-format json
 </code></pre>
-
 <blockquote>
 <p>🎬 <strong>讲师视频重点</strong><br />
 讲师先演示 TypeScript SDK，因为它提供最丰富的 API，支持 async iteration 逐条读取消息。Python 和 CLI 则是通过 subprocess 调用 <code>claude</code> CLI binary。</p>
@@ -110,7 +107,7 @@ response = json.loads(result.stdout)
 <hr />
 <h2>权限模型：默认只读</h2>
 <p>这是 SDK 中最重要的安全概念：</p>
-<pre class="highlight"><code class="language-typescript">// 默认：Claude 只能读取文件，不能修改
+<pre><code class="language-typescript">// 默认：Claude 只能读取文件，不能修改
 const messages = await query({
   prompt: &quot;分析这个 codebase&quot;,
 });
@@ -123,7 +120,6 @@ const messages = await query({
   },
 });
 </code></pre>
-
 <p><strong>为什么默认只读？</strong> 编程化执行时没有人类在循环中，没有人可以批准危险操作。SDK 默认采取最安全的姿态。</p>
 <table>
 <thead>
@@ -163,7 +159,7 @@ const messages = await query({
 <hr />
 <h2>基本使用模式</h2>
 <p>核心模式是：<strong>import -&gt; query -&gt; iterate</strong></p>
-<pre class="highlight"><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
+<pre><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
 
 // 1. 发送 prompt（启动 agentic loop）
 const conversation = await query({
@@ -189,7 +185,6 @@ for await (const message of conversation) {
   }
 }
 </code></pre>
-
 <p><code>query()</code> 函数返回一个 async iterable — 消息会随着 Claude 思考和行动流式传入，就像终端体验一样。</p>
 <blockquote>
 <p>💡 <strong>核心洞察</strong><br />
@@ -199,23 +194,21 @@ for await (const message of conversation) {
 <h2>实际使用场景</h2>
 <p>SDK 的真正威力在 pipeline 集成中展现：</p>
 <h3>Git Hooks</h3>
-<pre class="highlight"><code class="language-typescript">// pre-commit hook：检查 secrets
+<pre><code class="language-typescript">// pre-commit hook：检查 secrets
 const result = await query({
   prompt: &quot;检查 staged 文件中是否有硬编码的 secrets 或 API keys&quot;,
   options: { maxTurns: 5 },
 });
 </code></pre>
-
 <h3>Build Scripts</h3>
-<pre class="highlight"><code class="language-typescript">// Post-build：生成 changelog
+<pre><code class="language-typescript">// Post-build：生成 changelog
 const result = await query({
   prompt: &quot;比较 HEAD 与上一个 tag，生成一条 changelog 条目&quot;,
   options: { maxTurns: 10 },
 });
 </code></pre>
-
 <h3>CI/CD Pipelines</h3>
-<pre class="highlight"><code class="language-typescript">// PR review bot
+<pre><code class="language-typescript">// PR review bot
 const result = await query({
   prompt: `Review 这个 PR diff 找出问题:\n${prDiff}`,
   options: {
@@ -224,7 +217,6 @@ const result = await query({
   },
 });
 </code></pre>
-
 <blockquote>
 <p>🎬 <strong>讲师视频重点</strong><br />
 讲师演示了两步骤工作流：先用只读模式调用 SDK 找出重复 query，再用 <code>allowedTools: ["Edit"]</code> 修改 <code>package.json</code>。这展示了渐进式权限提升模式。</p>
@@ -232,14 +224,13 @@ const result = await query({
 <hr />
 <h2>安全性：设置继承</h2>
 <p>SDK 继承 <code>.claude/settings.json</code> 的所有设置：</p>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;permissions&quot;: {
     &quot;allow&quot;: [&quot;Read&quot;, &quot;Glob&quot;, &quot;Grep&quot;],
     &quot;deny&quot;: [&quot;Bash(rm *)&quot;]
   }
 }
 </code></pre>
-
 <p>即使你的 SDK 代码传入 <code>allowedTools: ["Bash"]</code>，settings 中的 deny 规则仍然适用。这是纵深防御：</p>
 <ol>
 <li><strong>第一层</strong>：SDK <code>allowedTools</code> — 调用者授予的权限</li>

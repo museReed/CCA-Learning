@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Web Search Tool Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Web Search Tool — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%), D4 — AI Safety &amp; Alignment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (built-in server tools), 4.2 (grounding &amp; citations)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 43</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Adding web search to your product is now a one-config-line decision: Anthropic handles the searching, the parsing, and the citations — your team only has to render the result blocks in your UI.</p>
+<hr />
+<h2>Mental Model: Research Assistant With a Library Card</h2>
+<p>Before server tools, giving an AI access to the web meant building a search pipeline, scraping, cleaning, ranking, and citation extraction — like hiring a researcher and also setting up their entire library. The web search tool is like handing your research assistant a library card: they know how to use it, they bring back sources, and every claim has a footnote.</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Build It Yourself</th>
+<th>Use Web Search Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Search infrastructure</td>
+<td>Weeks of engineering</td>
+<td>Ships today</td>
+</tr>
+<tr>
+<td>Content parsing</td>
+<td>Custom per source</td>
+<td>Handled</td>
+</tr>
+<tr>
+<td>Citation formatting</td>
+<td>Custom logic</td>
+<td>Built-in blocks</td>
+</tr>
+<tr>
+<td>Domain restriction</td>
+<td>Custom allowlists</td>
+<td><code>allowed_domains</code> field</td>
+</tr>
+<tr>
+<td>Ongoing maintenance</td>
+<td>Your team forever</td>
+<td>Anthropic</td>
+</tr>
+</tbody>
+</table>
+<p>The speed-to-market is typically 10-100x faster.</p>
+<hr />
+<h2>Why Citations Are a Product Feature</h2>
+<p>The web search tool does not just return search results — it returns <strong>citations</strong> that quote the exact source text supporting each statement. For product, this changes everything:</p>
+<ul>
+<li><strong>Trust</strong>: users see where answers come from, not just raw generation</li>
+<li><strong>Compliance</strong>: regulated industries require source traceability</li>
+<li><strong>Auditing</strong>: internal users can verify Claude's reasoning</li>
+<li><strong>Liability reduction</strong>: "Claude said so" becomes "this verifiable source said so"</li>
+</ul>
+<p>Ungrounded LLM output is a hard sell in healthcare, legal, finance, and government. Grounded output with citations unlocks these markets.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>Clear Wins for Web Search Tool</h3>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>News-aware assistant</td>
+<td>Fresh information after model cutoff</td>
+</tr>
+<tr>
+<td>Medical info product</td>
+<td>NIH/PubMed restriction + citations for safety</td>
+</tr>
+<tr>
+<td>Legal research copilot</td>
+<td><code>.gov</code> / <code>.edu</code> restriction + verifiable quotes</td>
+</tr>
+<tr>
+<td>Competitive intelligence</td>
+<td>Current market data, not stale training data</td>
+</tr>
+<tr>
+<td>Financial analyst assistant</td>
+<td>Real-time stock / macro data with sources</td>
+</tr>
+<tr>
+<td>Customer support for rapidly changing docs</td>
+<td>Always-fresh answers</td>
+</tr>
+</tbody>
+</table>
+<h3>When to Not Use It</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Questions fully answerable from training data</td>
+<td>Skip the tool — save cost &amp; latency</td>
+</tr>
+<tr>
+<td>Private / proprietary information</td>
+<td>Use a custom retrieval tool against your own docs</td>
+</tr>
+<tr>
+<td>Offline / air-gapped environments</td>
+<td>Web search requires Anthropic backend connectivity</td>
+</tr>
+<tr>
+<td>High-volume, latency-sensitive endpoints</td>
+<td>Every search adds time; budget carefully</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Key Configuration Levers for PMs</h2>
+<h3>1. <code>max_uses</code> — Cost and Latency Ceiling</h3>
+<p>Claude may run follow-up searches to refine answers. <code>max_uses</code> caps this.</p>
+<ul>
+<li><strong>1-2</strong>: Cheap, fast, may miss nuance</li>
+<li><strong>3-5</strong>: Standard range for research use cases</li>
+<li><strong>10+</strong>: Deep research; budget carefully</li>
+</ul>
+<h3>2. <code>allowed_domains</code> — Content Quality Lever</h3>
+<p>This is the most under-appreciated PM control:</p>
+<ul>
+<li>Restricting to PubMed turns a generic health bot into an evidence-based medical assistant</li>
+<li>Restricting to SEC filings turns a chatbot into a compliant financial info tool</li>
+<li>Restricting to your own docs turns it into a grounded internal knowledge base</li>
+</ul>
+<p>Domain restriction is how you build <strong>trust</strong> into the product.</p>
+<h3>3. Console Privacy Setting</h3>
+<p>Web search must be enabled at the organization level in the Anthropic console under privacy settings. PMs should add this to environment setup checklists.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Do users ask about current events / fresh info?</td>
+<td>Yes</td>
+<td>Enable web search</td>
+</tr>
+<tr>
+<td>Is content quality and trust critical?</td>
+<td>Yes</td>
+<td>Set <code>allowed_domains</code> tightly</td>
+</tr>
+<tr>
+<td>Do answers need citations for compliance?</td>
+<td>Yes</td>
+<td>Render citation blocks prominently</td>
+</tr>
+<tr>
+<td>Is this a latency-sensitive endpoint?</td>
+<td>Yes</td>
+<td>Lower <code>max_uses</code>; consider caching</td>
+</tr>
+<tr>
+<td>Is the data private / internal?</td>
+<td>Yes</td>
+<td>Build a custom retrieval tool instead</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Rendering Matters</h2>
+<p>The response returns several block types — text, search results, citations. These are not interchangeable:</p>
+<ol>
+<li>Show <strong>web search results</strong> as a "Sources" list (trust signal, visible at a glance)</li>
+<li>Show <strong>citation blocks</strong> as inline links within the answer (proof for each claim)</li>
+<li>Show <strong>text blocks</strong> as the main answer content</li>
+</ol>
+<p>Products that merge everything into raw text lose the trust advantage. Products that render the blocks distinctly gain measurable trust and click-through.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating web search as a backend concern</strong> — the citation rendering is a core UX decision; own it.</li>
+<li><strong>Leaving <code>allowed_domains</code> empty for sensitive topics</strong> — medical, legal, and financial products need domain restriction from day one.</li>
+<li><strong>Not measuring citation click-through</strong> — it is the key trust metric; instrument it.</li>
+<li><strong>Setting <code>max_uses</code> too high "just in case"</strong> — cost and latency compound with every follow-up search.</li>
+<li><strong>Forgetting the console privacy toggle</strong> — your staging / production environments silently fail if the org setting is off.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Web search is a fully managed server tool: Anthropic owns the execution, you own the rendering. The product value is <strong>grounded, cited, fresh answers</strong> with almost no engineering investment. Invest the saved time in great citation UI, because that is where trust is earned.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>: Web search is the canonical "server tool" — fully executed by Anthropic. Know the contrast with text editor (local execution).</li>
+<li><strong>D4 (AI Safety &amp; Alignment)</strong>: Citations and grounding are trust mechanisms; questions may ask which tool provides built-in citations.</li>
+<li>Watch for scenario questions comparing self-built search vs. server tool — the server tool is almost always the right answer unless the data is private.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who executes the web search tool?</td>
+<td>Anthropic — it is a fully managed server tool; you write no local code</td>
+</tr>
+<tr>
+<td>What field caps the number of searches per request?</td>
+<td><code>max_uses</code></td>
+</tr>
+<tr>
+<td>What field restricts searches to specific domains?</td>
+<td><code>allowed_domains</code></td>
+</tr>
+<tr>
+<td>What product value comes from citation blocks?</td>
+<td>Grounded, verifiable answers — users can click through to the source of each statement</td>
+</tr>
+<tr>
+<td>What must be enabled in the Anthropic console before using web search?</td>
+<td>The web search tool under organization privacy settings</td>
+</tr>
+<tr>
+<td>Why is <code>allowed_domains</code> important for regulated industries?</td>
+<td>It constrains Claude to authoritative sources (e.g., NIH for medical, <code>.gov</code> for legal), improving trust and compliance</td>
+</tr>
+<tr>
+<td>Name two product scenarios where web search is the wrong choice.</td>
+<td>Private / proprietary data; offline environments</td>
+</tr>
+<tr>
+<td>What is the main UX lever for trust when using web search?</td>
+<td>Rendering citation blocks prominently — inline with answers and as a sources list</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

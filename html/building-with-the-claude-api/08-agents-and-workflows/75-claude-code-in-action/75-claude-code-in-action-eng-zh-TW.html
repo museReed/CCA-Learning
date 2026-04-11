@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code In Action Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Claude Code in Action — Engineering Deep Dive（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試 Domain</td>
+<td>D3 — Claude Code Configuration (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（Claude Code 設定與指令）、3.3（CLAUDE.md memory）、1.2（agentic workflow patterns）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 75</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Claude Code 最有效的 workflow 是「context → plan → implement」：先載入相關檔案，請 Claude 擬計畫（明確不要寫 code），再請它實作；<code>/init</code> 則會產生 <code>CLAUDE.md</code> memory file，跨 session 保留專案 context。</p>
+<hr />
+<h2><code>/init</code> 指令與 CLAUDE.md</h2>
+<p>開始新專案時，先跑 <code>/init</code>。這會觸發 Claude Code：</p>
+<ol>
+<li>掃描整個 codebase</li>
+<li>推斷專案結構、相依性、coding style 與架構</li>
+<li>把總結寫入一個特殊檔案 <code>CLAUDE.md</code></li>
+</ol>
+<p><code>CLAUDE.md</code> 在該專案之後的每一場對話中自動帶入為 context，是讓 agent 跨 session「記得」你專案的持續 memory。</p>
+<h3>CLAUDE.md 的三種 scope</h3>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>用途</th>
+<th>會 commit 進 git 嗎？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Project</strong></td>
+<td>整個專案團隊共享</td>
+<td>會</td>
+</tr>
+<tr>
+<td><strong>Local</strong></td>
+<td>你個人的筆記</td>
+<td>不會</td>
+</tr>
+<tr>
+<td><strong>User</strong></td>
+<td>套用到你所有專案</td>
+<td>不會（user-global）</td>
+</tr>
+</tbody>
+</table>
+<p>跑 <code>/init</code> 時可以加上特別指示，告訴 Claude 要聚焦哪些區域。產生的檔案通常包含 build 指令、coding guideline、專案特定的 pattern。</p>
+<h3><code>#</code> 快捷鍵新增筆記</h3>
+<p>你不用打開檔案就能附加筆記到任一 <code>CLAUDE.md</code>。輸入：</p>
+<pre><code># 永遠使用描述性的變數名稱
+</code></pre>
+<p>…Claude Code 會問你要加到哪個 scope（project / local / user），然後自動附加。</p>
+<hr />
+<h2>標準 Workflow：Context → Plan → Implement</h2>
+<p>Lesson 的核心主張：Claude Code 只有在你提供足夠 context 與結構時，才能成為 effort multiplier。三步建議流程：</p>
+<h3>Step 1 —— 餵 context 給 Claude</h3>
+<p>在請它寫任何 code 之前，先找出能展示你 pattern 的現有檔案，請 Claude 讀。這樣 agent 就有你 coding style 和現有功能的範例可參考。</p>
+<pre><code>&gt; 讀 math.py 和 document.py 這兩個檔案
+</code></pre>
+<h3>Step 2 —— 請 Claude 擬計畫（明確不要寫 code）</h3>
+<p>請 Claude 思考問題並寫出計畫。<strong>明確告訴它先不要寫 code</strong> —— 只給方法與步驟。</p>
+<pre><code>&gt; 請計畫實作 document_path_to_markdown tool：
+1. 建立一個 function：
+   - 接受檔案路徑參數
+   - 驗證檔案存在
+   - 從副檔名判斷檔案類型
+   - 讀取檔案 binary 資料
+   - 利用既有的 binary_document_to_markdown function
+   - 回傳 markdown 字串
+2. 加上適當的 documentation
+3. 向 MCP server 註冊這個 tool
+4. 加入 tests
+</code></pre>
+<h3>Step 3 —— 請 Claude 實作計畫</h3>
+<p>等計畫談好了，才請它實作：</p>
+<pre><code>&gt; 實作上面的計畫
+</code></pre>
+<p>Claude 會根據前面累積的 context 與 plan 寫 code、更新相關檔案、加 test、跑測試套件驗證。</p>
+<p>這個三步 pattern 呼應了考試會測驗的 agent 設計原則「think then act」—— 它不只是 Claude Code 的 idiom，是一般 agent 的 best practice。</p>
+<hr />
+<h2>測試驅動開發 Workflow</h2>
+<p>Lesson 介紹的 TDD 變體能產出更穩健的 code：</p>
+<ol>
+<li><strong>餵 context</strong> —— 同上</li>
+<li><strong>請 Claude 列出 test cases</strong> —— 這個功能要哪些 test 才算驗證完成？</li>
+<li><strong>請 Claude 實作 test</strong> —— 選最相關的那些請它寫出來</li>
+<li><strong>請 Claude 寫出能通過 test 的 code</strong> —— 它會反覆迭代直到全綠</li>
+</ol>
+<p>這招有效的原因：test 給了 Claude 一個具體的成功標準。不是「寫一個做 X 的 function」，而是有可驗證的目標（全綠的 test），agent 會持續迭代直到達成。</p>
+<hr />
+<h2>附加指令列表</h2>
+<p>除了 workflow 之外，考試還要記這些指令：</p>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/init</code></td>
+<td>掃描 codebase 並產生 <code>CLAUDE.md</code></td>
+</tr>
+<tr>
+<td><code>/clear</code></td>
+<td>清空對話歷史並重置 context</td>
+</tr>
+<tr>
+<td><code>#</code></td>
+<td>附加筆記到 <code>CLAUDE.md</code>（會問 scope）</td>
+</tr>
+</tbody>
+</table>
+<p>這就是本 lesson 教的全部指令面。<code>/init</code>、<code>/clear</code>、<code>#</code> —— 預期會考直接記憶題。</p>
+<hr />
+<h2>Claude Code 處理的日常任務</h2>
+<p>進入 session 後，Claude 還能處理本來要在編輯器和終端機之間切換的日常開發事務：</p>
+<ul>
+<li>把改動 stage 並 commit 到 git</li>
+<li>跑測試</li>
+<li>管理相依套件</li>
+<li>執行臨時 shell 指令</li>
+</ul>
+<p>設計目標：你專注在大圖像（要做什麼、spec 長怎樣），Claude 負責 glue work。</p>
+<hr />
+<h2>為什麼「先計畫再寫 code」有效</h2>
+<p>這部分是超出來源的 WHY：</p>
+<ul>
+<li><strong>注意力預算</strong> —— 先要求計畫，model 的推理會集中在架構上，不是語法。之後實作時，架構和語法都會分到模型注意力。</li>
+<li><strong>錯誤成本</strong> —— 計畫修起來便宜，code 改起來貴。在計畫階段抓到方向錯誤，比重寫 code 便宜 10 倍。</li>
+<li><strong>人類 review</strong> —— 計畫很短，code diff 很長。Review 計畫只要幾秒，review diff 要幾分鐘。</li>
+<li><strong>Context 錨定</strong> —— 對話中談定的計畫會變成 agent 生 code 時回頭參考的基準。</li>
+</ul>
+<p>這就是為什麼考試把「context → plan → implement」當成標準 agent workflow，而不是只是 Claude Code 的小技巧。</p>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>專案開始時沒跑 <code>/init</code></strong> —— 失去持續 context，每場 session agent 都得重新學你的專案。</li>
+<li><strong>沒擬計畫就開始要 code</strong> —— 拿掉了最便宜的錯誤修正步驟。</li>
+<li><strong>忘了餵 context</strong> —— Claude 會猜你的慣例，產出跟 codebase 打架的 code。</li>
+<li><strong>把 <code>#</code> 當 Markdown heading</strong> —— 在 Claude Code 裡，訊息開頭的 <code>#</code> 是 memory append 快捷鍵，不是 Markdown 格式。</li>
+<li><strong>想跑 <code>/init</code> 卻打成 <code>/clear</code></strong> —— <code>/clear</code> 清現況對話；<code>/init</code> 建立專案記憶。效果相反。</li>
+</ol>
+<blockquote>
+<p><strong>關鍵洞察</strong></p>
+<p>核心 workflow —— <strong>context → plan → implement</strong> —— 是唯一能讓 Claude Code（以及一般 agent）發揮 10x 價值的 pattern。任何一步被跳過，產出品質都會顯著劣化。考試可能直接問「建議的 Claude Code workflow 是什麼」或給情境問「少了哪一步」。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D3（Claude Code Configuration）</strong>：直接記憶 <code>/init</code>、<code>/clear</code>、<code>#</code>、<code>CLAUDE.md</code> scope 的題目機率很高。</li>
+<li><strong>D1（Agentic Coding &amp; Architecture）</strong>：「context → plan → implement」workflow 對應一般 agent best practice。</li>
+<li>預期至少一題問 CLAUDE.md 三種 scope（project / local / user）。</li>
+<li>預期有一題對比 <code>/init</code> 與 <code>/clear</code> —— 很容易搞混。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/init</code> 指令在 Claude Code 做什麼？</td>
+<td>掃描 codebase 以理解結構、相依、風格與架構，並把總結寫入 <code>CLAUDE.md</code></td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code> 是什麼？</td>
+<td>自動在後續 Claude Code 對話中帶入的 memory 檔，保存專案相關資訊</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code> 的三種 scope 是什麼？</td>
+<td>Project（共享、進 git）、Local（個人、不進 git）、User（跨所有專案）</td>
+</tr>
+<tr>
+<td><code>#</code> 指令在 Claude Code 做什麼？</td>
+<td>附加筆記到 <code>CLAUDE.md</code>，並詢問要用 project、local 還是 user scope</td>
+</tr>
+<tr>
+<td>標準 Claude Code workflow 的三步是什麼？</td>
+<td>1) 讀相關檔案餵 context、2) 請 Claude 擬計畫不寫 code、3) 請 Claude 實作計畫</td>
+</tr>
+<tr>
+<td><code>/clear</code> 做什麼？</td>
+<td>清除當前 session 的對話歷史並重置 context</td>
+</tr>
+<tr>
+<td>Claude Code 的 TDD 變體 workflow 是什麼？</td>
+<td>餵 context → 請 Claude 發想 test cases → 實作 test → 寫出能通過 test 的 code</td>
+</tr>
+<tr>
+<td>為什麼要先擬計畫再實作？</td>
+<td>計畫修改便宜、review 快、能讓 model 先專注架構再顧語法 —— 及早抓錯</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

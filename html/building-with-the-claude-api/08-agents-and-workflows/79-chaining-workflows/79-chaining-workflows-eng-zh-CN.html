@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chaining Workflows Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Chaining Workflows — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture(22%)— 主要</td>
+</tr>
+<tr>
+<td>任务陈述</td>
+<td>1.2(agentic 模式 — chaining)、5.2(production workflow 部署)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 79</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Chaining 是最简单也最实用的 workflow 模式: 把复杂任务拆成顺序的 LLM 调用序列, 每一步的输出喂给下一步 — 与 parallelization 相反, 用在后续步骤<em>依赖</em>前面步骤的场景。</p>
+<hr />
+<h2>什么是 Prompt Chaining</h2>
+<p>出自 Anthropic "Building Effective Agents" 博客, <strong>prompt chaining</strong> 把任务拆成一系列步骤, 每次 LLM 调用处理前一次的输出。当你能干净地拆解任务, 而且每一步都依赖前一步的结果时, 这个模式最适合。</p>
+<p>你需要 chaining 的关键信号: 步骤可以按顺序列出, 而且步骤 N+1 真的需要步骤 N 的输出。</p>
+<hr />
+<h2>课程中的社交媒体示例</h2>
+<p>课程演示一个自动生成并发布视频的社交媒体营销工具:</p>
+<pre><code>1. 从 Twitter 找相关热门话题       (非 LLM)
+2. 选出最吸引人的话题                (Claude)
+3. 研究该话题                        (Claude)
+4. 写短视频脚本                      (Claude)
+5. 用 AI 虚拟人 + TTS 生成视频       (非 LLM)
+6. 发布到社交媒体                    (非 LLM)
+</code></pre>
+<p>重点观察:<br />
+- <strong>不是每步都是 LLM 调用。</strong> Chain 可以混搭 LLM 与非 LLM 处理(步骤 1 是 Twitter API、步骤 5 是视频 pipeline、步骤 6 是发布 API)。<br />
+- <strong>每个 LLM 步骤都聚焦。</strong> Claude 在步骤 2 挑话题、步骤 3 研究、步骤 4 写脚本 — 从不在同一 prompt 里做三件事。<br />
+- <strong>输出向后传。</strong> 选好的话题变成研究步骤的输入; 研究结果变成脚本步骤的输入。</p>
+<hr />
+<h2>为什么要 chain 而不是一个大 prompt</h2>
+<p>Chaining 给你:</p>
+<ol>
+<li><strong>每步都聚焦。</strong> Claude 专心做好一件事, 而不是同时应付全部。</li>
+<li><strong>非 LLM 处理的 hook。</strong> 步骤之间, 你的代码可以验证、转换、抓数据、或短路流程。</li>
+<li><strong>可测试。</strong> 每一步有干净的 input/output contract, 容易 unit test 和 eval。</li>
+<li><strong>可观测。</strong> 失败被定位到特定步骤, 而不是埋在巨型 prompt 里。</li>
+<li><strong>部分重跑。</strong> 5 步里第 3 步失败时, 可以从第 3 步重跑, 不用整个重来。</li>
+</ol>
+<hr />
+<h2>长 Prompt 问题(课程的核心动机)</h2>
+<p>即便你的限制写得很清楚, Claude 有时还是会在长 prompt 中忽略规则。课程示例是写一篇技术文章, 要:</p>
+<ul>
+<li>不能提到是 AI 写的</li>
+<li>不能用 emoji</li>
+<li>不能有过时或过于随意的语言</li>
+<li>要专业、技术语气</li>
+</ul>
+<p>单一 prompt 想一边生好内容、一边满足四个限制, 常常产出违反其中一个以上的结果。</p>
+<h3>Chaining 解法</h3>
+<p>拆成两步:</p>
+<p><strong>步骤 1 — 初稿</strong></p>
+<pre><code class="language-python">draft = claude.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=2048,
+    messages=[{&quot;role&quot;: &quot;user&quot;,
+               &quot;content&quot;: f&quot;写一篇关于 {topic} 的技术文章。&quot;}]
+).content[0].text
+</code></pre>
+<p><strong>步骤 2 — 聚焦修订</strong></p>
+<pre><code class="language-python">final = claude.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=2048,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: f&quot;&quot;&quot;
+请修订下方文章。
+
+按照以下步骤重写:
+1. 找出任何指明作者是 AI 的地方, 删除
+2. 找出并删除所有 emoji
+3. 找出任何尴尬用语, 替换为技术写作者会用的语气
+
+&lt;article&gt;
+{draft}
+&lt;/article&gt;
+&quot;&quot;&quot;}]
+).content[0].text
+</code></pre>
+<p>步骤 2 中, Claude 不是同时在<em>创建</em>好文章<em>并</em>满足限制 — 它只是在已写好的文章上执行限制。聚焦任务能完成组合任务失败的事。</p>
+<hr />
+<h2>标准 Python 实现</h2>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+def call_claude(system: str, user: str) -&gt; str:
+    resp = client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=2048,
+        system=system,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user}],
+    )
+    return resp.content[0].text
+
+def social_media_chain(keyword: str) -&gt; str:
+    # Step 1: 非 LLM — 抓趋势
+    trends = twitter_api.fetch_trends(keyword)
+
+    # Step 2: LLM — 挑最佳话题
+    topic = call_claude(
+        system=&quot;你负责挑选最吸引人的趋势。&quot;,
+        user=f&quot;趋势:\n{trends}\n\n返回单一最佳话题。&quot;,
+    )
+
+    # Step 3: LLM — 研究话题(带错误检查)
+    research = call_claude(
+        system=&quot;你是精简的研究员。&quot;,
+        user=f&quot;研究这个话题: {topic}&quot;,
+    )
+    if len(research) &lt; 100:
+        raise RuntimeError(&quot;研究步骤返回内容过少&quot;)
+
+    # Step 4: LLM — 用研究内容写脚本
+    script = call_claude(
+        system=&quot;你写 60 秒视频脚本。&quot;,
+        user=f&quot;用这份研究写脚本:\n{research}&quot;,
+    )
+
+    # Step 5: 非 LLM — 合成视频
+    video = video_pipeline.synthesize(script)
+
+    # Step 6: 非 LLM — 发布
+    return social_media.post(video)
+</code></pre>
+<p>每一步都有清楚的 contract、错误处理 hook, 可以独立替换。</p>
+<hr />
+<h2>Chain 中的错误传递</h2>
+<p>因为每一步依赖前一步, chain 必须刻意处理错误:</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>说明</th>
+<th>使用时机</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Fail fast</strong></td>
+<td>一失败就抛异常</td>
+<td>早期 prototype、简单流程</td>
+</tr>
+<tr>
+<td><strong>Retry step</strong></td>
+<td>失败步骤用 backoff 重试</td>
+<td>短暂 API 错误</td>
+</tr>
+<tr>
+<td><strong>Validate then branch</strong></td>
+<td>检查步骤输出, 选下一步</td>
+<td>输出质量有变动(例如空研究)</td>
+</tr>
+<tr>
+<td><strong>Graceful degradation</strong></td>
+<td>跳过非关键步骤</td>
+<td>选用的丰富化步骤</td>
+</tr>
+<tr>
+<td><strong>Replay from checkpoint</strong></td>
+<td>持久化步骤输出, 重试时接续</td>
+<td>长 chain、昂贵调用</td>
+</tr>
+</tbody>
+</table>
+<p>Production chain 通常五种都混用, 每一步都包 retry + validation。</p>
+<hr />
+<h2>Chaining vs Parallelization vs Agent</h2>
+<table>
+<thead>
+<tr>
+<th>方面</th>
+<th>Chaining</th>
+<th>Parallelization</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>步骤依赖</td>
+<td>有(顺序)</td>
+<td>无(独立)</td>
+<td>运行期决定</td>
+</tr>
+<tr>
+<td>Control flow</td>
+<td>代码</td>
+<td>代码</td>
+<td>LLM</td>
+</tr>
+<tr>
+<td>延迟</td>
+<td>步骤延迟总和</td>
+<td>步骤延迟最大值</td>
+<td>变动</td>
+</tr>
+<tr>
+<td>成本</td>
+<td>步骤成本总和</td>
+<td>步骤成本总和</td>
+<td>变动</td>
+</tr>
+<tr>
+<td>最适合</td>
+<td>有依赖的多步复杂任务</td>
+<td>跨独立标准的复杂决策</td>
+<td>开放式任务</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>该 chain 却做成 agent。</strong> 如果你能列出步骤, chain 比把流程交给 Claude 更简单可靠。</li>
+<li><strong>Chain 太长。</strong> 每步都是失败点。如果 LLM 调用超过 10 次, 考虑拆成多个 chain 加 checkpoint。</li>
+<li><strong>忘了在步骤间传递 context。</strong> 步骤 4 需要步骤 3 的输出 — 不要以为 Claude 会记得, 要明确注入。</li>
+<li><strong>步骤间没错误处理。</strong> 一个坏步骤可以把垃圾传到最后。要在步骤间验证。</li>
+<li><strong>把该用单一调用的任务做成 chain。</strong> 不是每个任务都该 chain。如果一个 prompt 可靠就用一个 prompt。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>Chaining 是 "长 prompt 问题" 的解法模式。当 Claude 在巨型 prompt 中忽略限制时, 拆开任务: 一个调用负责生, 另一个负责执行限制。这个 "聚焦注意力" 原则延伸到任何下一步需要前一步输出的多步任务。考试记住: <strong>chaining 有序列依赖, parallelization 没有。</strong></p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1(22%)主要</strong>: Chaining 是四大 workflow 模式之一, 预期有场景题要你与 parallelization 和 routing 区分。</li>
+<li><strong>D5(20%)次要</strong>: Production chain 需要错误处理、checkpoint、步骤间验证。</li>
+<li>Chaining 信号词: "sequential"、"output of step N feeds step N+1"、"focus on one aspect at a time"、"break down into steps"。</li>
+<li>关键区分: chaining = 序列依赖; parallelization = 独立子任务。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>什么是 prompt chaining?</td>
+<td>把任务拆成顺序 LLM 调用, 每一步输出喂下一步</td>
+</tr>
+<tr>
+<td>Chaining 和 parallelization 的区别?</td>
+<td>Chaining 有序列依赖; parallelization 是并行独立子任务</td>
+</tr>
+<tr>
+<td>Chaining 解决的 "长 prompt 问题" 是什么?</td>
+<td>Claude 在巨型 prompt 中忽略限制; 拆成 "生成 + 修订" 步骤可靠地强制执行</td>
+</tr>
+<tr>
+<td>Chain 可以包含非 LLM 步骤吗?</td>
+<td>可以 — chain 常常混搭 LLM 调用与 API、验证、数据转换</td>
+</tr>
+<tr>
+<td>强制限制的两步 chaining 解法?</td>
+<td>步骤 1: 生初稿。步骤 2: 专门修订执行每条规则</td>
+</tr>
+<tr>
+<td>列出 chain 的四种错误处理策略。</td>
+<td>Fail-fast、retry-step、validate-then-branch、graceful degradation、replay-from-checkpoint</td>
+</tr>
+<tr>
+<td>Chaining 和 parallelization 的权衡?</td>
+<td>Chaining 延迟总和(较慢)但支持依赖; parallelization 延迟最大值但需独立</td>
+</tr>
+<tr>
+<td>什么时候<em>不</em>该用 chaining?</td>
+<td>当单一 prompt 可靠或子任务可独立执行时(改用 parallelization)</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

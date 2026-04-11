@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agents And Workflows Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Agents 與 Workflows — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D1 — Agentic Coding &amp; Architecture（22%）— 主要</td>
+</tr>
+<tr>
+<td>任務陳述</td>
+<td>1.1（agent 與 workflow 定義）、1.2（agentic 模式）、5.2（production workflow 部署）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 77</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p><strong>Workflow</strong> 是由<em>程式碼</em>透過預先定義的 LLM 呼叫序列來編排；<strong>Agent</strong> 是由 <em>LLM 自己</em>編排，給定目標與工具後由 Claude 決定下一步。選擇哪一種，取決於你能不能事先完整描述任務流程。</p>
+<hr />
+<h2>最關鍵的區別（考試必考）</h2>
+<p>此區別出自 Anthropic 的「Building Effective Agents」部落格文章（2024 年 12 月），是 CCA 考試 D1 領域最常被測的觀念。</p>
+<table>
+<thead>
+<tr>
+<th>面向</th>
+<th>Workflow</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Control flow</strong></td>
+<td>由程式碼事先定義</td>
+<td>由 LLM 即時決定</td>
+</tr>
+<tr>
+<td><strong>誰在編排</strong></td>
+<td>你的 Python/TS 程式碼</td>
+<td>Claude（透過 tool use loop）</td>
+</tr>
+<tr>
+<td><strong>任務形狀</strong></td>
+<td>已知、可重複</td>
+<td>開放式</td>
+</tr>
+<tr>
+<td><strong>步驟數</strong></td>
+<td>固定序列（或固定分支）</td>
+<td>浮現式 — 依執行期 context 而定</td>
+</tr>
+<tr>
+<td><strong>可預測性</strong></td>
+<td>高 — 容易測試與追蹤</td>
+<td>較低 — 需要 evals 與 guardrails</td>
+</tr>
+<tr>
+<td><strong>適合時機</strong></td>
+<td>你畫得出流程圖</td>
+<td>你無法列舉所有路徑</td>
+</tr>
+</tbody>
+</table>
+<p><strong>標準定義（務必背熟）：</strong></p>
+<blockquote>
+<p>Workflow 是一系列對 Claude 的呼叫，透過<em>預先決定</em>的步驟來解決特定問題。Agent 則是給 Claude 一個目標與一組工具，期望 Claude 自己想辦法用這些工具完成目標。</p>
+</blockquote>
+<hr />
+<h2>決策捷思</h2>
+<p>問自己一個問題：<strong>「我能不能在執行前就畫出這個解決方案的流程圖?」</strong></p>
+<ul>
+<li><strong>可以 → workflow。</strong> 把流程圖寫在程式碼裡，你保有控制權。</li>
+<li><strong>不行 → agent。</strong> 給 Claude 工具與目標，然後跑 tool use loop。</li>
+</ul>
+<p>另一個判斷：如果你的 app UX 把使用者限制在一組已知的任務（上傳圖片 → 產出 STEP 檔），幾乎一定是 workflow。如果使用者輸入自由格式請求（coding assistant、research helper），幾乎一定是 agent。</p>
+<hr />
+<h2>實例：Image to CAD Workflow</h2>
+<p>課程示範一個 web app：使用者拖曳金屬零件照片，系統產出 STEP 檔（3D CAD 格式）：</p>
+<pre><code class="language-python">def image_to_cad_workflow(image_bytes: bytes) -&gt; bytes:
+    # Step 1: 描述物件
+    description = claude_describe_image(image_bytes)
+
+    # Step 2: 根據描述產生 CadQuery 程式碼
+    cad_code = claude_write_cadquery(description)
+
+    # Step 3: 執行 CadQuery 產生 rendering
+    rendering = run_cadquery(cad_code)
+
+    # Step 4: Grader 迴圈（evaluator-optimizer）
+    for attempt in range(MAX_ATTEMPTS):
+        grade = claude_grade(image_bytes, rendering)
+        if grade.accepted:
+            return export_step(cad_code)
+        cad_code = claude_fix(cad_code, grade.feedback)
+        rendering = run_cadquery(cad_code)
+
+    raise RuntimeError(&quot;Grader 始終不接受輸出&quot;)
+</code></pre>
+<p>程式碼掌握 control flow,Claude 在每次迭代被當成<em>函式</em>呼叫四次。這就是 workflow 的特徵。</p>
+<hr />
+<h2>Evaluator-Optimizer 模式</h2>
+<p>上面的 CAD 範例是 Anthropic 部落格中 <strong>Evaluator-Optimizer</strong> 模式的實例:</p>
+<ul>
+<li><strong>Producer</strong> — 拿 input 產出 output(CadQuery 建模器)</li>
+<li><strong>Grader / Evaluator</strong> — 依照準則替 output 打分</li>
+<li><strong>Feedback loop</strong> — 如果沒過,把 feedback 回傳給 producer</li>
+<li><strong>Iteration</strong> — 重複直到接受或達到最大次數</li>
+</ul>
+<p>這個模式讓你取得「自我修正」行為,卻<em>不需要</em>把控制權交給 Claude。程式碼決定何時停、何時重試、最多試幾次 — 這些都是 production 系統的關鍵屬性。</p>
+<p>Anthropic 部落格中其他 workflow 模式:</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>核心概念</th>
+<th>課程 Lesson</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt chaining</td>
+<td>循序 LLM 呼叫,前一步 output 餵下一步</td>
+<td>Lesson 79</td>
+</tr>
+<tr>
+<td>Parallelization</td>
+<td>把任務拆成平行子任務並匯總</td>
+<td>Lesson 78</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td>分類器挑選專門處理器</td>
+<td>Lesson 80</td>
+</tr>
+<tr>
+<td>Orchestrator-workers</td>
+<td>中央 LLM 委派給 worker LLM</td>
+<td>後續 Lesson</td>
+</tr>
+<tr>
+<td>Evaluator-optimizer</td>
+<td>Producer + grader feedback loop</td>
+<td>Lesson 77</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>為什麼這個區別在 production 很重要</h2>
+<p>Workflow vs agent 的選擇直接影響:</p>
+<ol>
+<li><strong>可觀測性</strong> — workflow 每一步都好記錄(每個節點一個 span);agent trace 長度變動,跨 run 比較困難。</li>
+<li><strong>成本控制</strong> — workflow 步驟數已知;agent 可能意外迴圈(budget 爆掉是真實的 production 失敗模式)。</li>
+<li><strong>Eval 策略</strong> — workflow 可以 per-step 評估;agent 需要端到端 eval,涵蓋多樣化軌跡。</li>
+<li><strong>失敗模式</strong> — workflow 失敗在<em>你的程式碼</em>;agent 失敗在 <em>Claude 的決策</em>,需要重新設計 prompt 與 tool set。</li>
+<li><strong>上線速度</strong> — workflow 較快能出貨;agent 通常要反覆調整工具組與 system prompt。</li>
+</ol>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>該用 workflow 卻用 agent。</strong> 如果你畫得出流程圖,workflow 更便宜、更可靠、更好除錯。Anthropic 明確建議先從 workflow 開始。</li>
+<li><strong>把什麼都叫「agent」。</strong> 多步驟 prompt chain 但執行期沒有 LLM control flow 的,是 workflow 不是 agent。考試對精確度有要求。</li>
+<li><strong>忘了 evaluator-optimizer loop 要有最大次數上限。</strong> 否則一個爛的 grader 可以跑到地老天荒,把預算燒光。</li>
+<li><strong>誤以為 workflow 不能用 tool。</strong> Workflow 絕對可以呼叫 tool,區別在於<em>誰決定順序</em>,而不是有沒有 tool。</li>
+<li><strong>把 workflow pattern 當成理論。</strong> 你還是得自己寫 code,pattern 是 recipe 不是 framework。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>關鍵洞察</strong></p>
+<p>Workflow 和 agent 的差異在於<strong>誰掌握 control flow</strong>。Workflow 由你的程式碼掌握,agent 由 Claude 掌握。其他一切 — 可觀測性、成本、eval 策略、失敗模式 — 都由這一個問題延伸而來。CCA 考試常常用間接方式問這個觀念(「預先決定的步驟」= workflow,「Claude 決定下一步」= agent)— 訓練自己抓出訊號字。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D1(22%)主要</strong>: Lesson 77 是最常被考的領域的基礎章節。至少會有一題要你分類某情境是 agent 還是 workflow。</li>
+<li><strong>D5(20%)次要</strong>: production 部署考量(可觀測性、成本、eval 策略)都跟這個選擇綁在一起。</li>
+<li>指向 <strong>workflow</strong> 的訊號字: 「predetermined series」、「fixed steps」、「orchestrated by code」、「pipeline」。</li>
+<li>指向 <strong>agent</strong> 的訊號字: 「given a goal and tools」、「Claude decides」、「autonomous」、「open-ended task」。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>題目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Workflow 與 agent 的核心差別?</td>
+<td>誰掌握 control flow — workflow 是程式碼,agent 是 Claude</td>
+</tr>
+<tr>
+<td>寫出 workflow 的標準定義。</td>
+<td>透過預先決定的步驟序列對 Claude 呼叫以解決特定問題的一系列呼叫</td>
+</tr>
+<tr>
+<td>寫出 agent 的標準定義。</td>
+<td>給 Claude 目標與工具,讓 Claude 自己想辦法完成目標</td>
+</tr>
+<tr>
+<td>判斷 workflow vs agent 的捷思?</td>
+<td>執行前能不能畫出流程圖? 能 → workflow,不能 → agent</td>
+</tr>
+<tr>
+<td>Evaluator-optimizer 模式是什麼?</td>
+<td>Producer 產出結果,grader 評分,不過就回饋重做直到接受</td>
+</tr>
+<tr>
+<td>列出 Anthropic「Building Effective Agents」中 4 個 workflow 模式。</td>
+<td>Prompt chaining、parallelization、routing、evaluator-optimizer(還有 orchestrator-workers)</td>
+</tr>
+<tr>
+<td>為什麼 Anthropic 建議先用 workflow?</td>
+<td>比 agent 更便宜、更可觀測、更好測、上線更快</td>
+</tr>
+<tr>
+<td>Agent 獨有的 production 風險?</td>
+<td>步驟數無上限 / budget 爆掉 — 沒有 guardrail 時會無限迴圈</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

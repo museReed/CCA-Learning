@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Routing Workflows Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Routing Workflows — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture(22%)— 主要</td>
+</tr>
+<tr>
+<td>任务陈述</td>
+<td>1.2(agentic 模式 — routing)、5.2(production workflow 部署)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 80</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Routing 是 "分诊台" workflow — 在做真正的工作前, 先用一个快速分类器决定哪个专用 pipeline 处理这个请求。当产品处理截然不同的请求类型、且每类都值得不同处理时, 就是正确的架构。</p>
+<hr />
+<h2>心智模型: 医院分诊台</h2>
+<p>走进急诊室时, 你第一个见到的是分诊护士。他们问几个问题决定你去哪里:</p>
+<table>
+<thead>
+<tr>
+<th>分诊结果</th>
+<th>Pipeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>胸痛</td>
+<td>心内科</td>
+</tr>
+<tr>
+<td>骨折</td>
+<td>骨科</td>
+</tr>
+<tr>
+<td>发烧咳嗽</td>
+<td>普通内科</td>
+</tr>
+<tr>
+<td>精神相关</td>
+<td>身心科</td>
+</tr>
+</tbody>
+</table>
+<p>分诊护士不是心内科或骨科医师 — 他们是分类器。他们把病人送给能真正治疗的专科。每个专科都为自己的案件量优化, 不是为 "什么都做"。</p>
+<p>Routing workflow 就是分诊台。一个小分类器 LLM 调用决定哪个专用 prompt(或子 pipeline)处理请求。每个专科只做一件事做得很好。</p>
+<hr />
+<h2>产品场景</h2>
+<h3>适合 Routing 的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么 Routing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>客服 bot(账务 / 技术 / 退款)</td>
+<td>每类需要不同的工具、KB、语气</td>
+</tr>
+<tr>
+<td>内容生成(教育 / 娱乐 / 评论)— 课程示例</td>
+<td>每类需要不同的风格</td>
+</tr>
+<tr>
+<td>多领域助手(编程 / 写作 / 数学)</td>
+<td>每领域需要不同 context 和 prompt</td>
+</tr>
+<tr>
+<td>意图型 routing(问题 / 任务 / 闲聊)</td>
+<td>不同响应类型、不同延迟预算</td>
+</tr>
+<tr>
+<td>多层级模型选择</td>
+<td>简单请求送 Haiku、复杂请求送 Opus</td>
+</tr>
+<tr>
+<td>本地化 pipeline(英 / 中 / 日)</td>
+<td>不同 prompt、本地特定工具</td>
+</tr>
+</tbody>
+</table>
+<h3>不适合 Routing 的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>更好的选择</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单一请求类型且范围窄</td>
+<td>一个 prompt 就好</td>
+</tr>
+<tr>
+<td>分类器无法区分的重叠类别</td>
+<td>Chaining 或 agent</td>
+</tr>
+<tr>
+<td>对延迟超敏感(每 ms 都要省)</td>
+<td>跳过分类调用, 用一个好 prompt</td>
+</tr>
+<tr>
+<td>类别不断变动</td>
+<td>Routing 很脆 — 考虑 agent</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>两步结构</h2>
+<pre><code>用户输入 ──→ [分诊 LLM 调用] ──→ 类别 ──→ [专科 pipeline] ──→ 输出
+</code></pre>
+<ol>
+<li><strong>分诊调用</strong> — 快速、便宜、结构化输出(一个类别标签)</li>
+<li><strong>专科调用</strong> — 较慢、较贵、为该类优化</li>
+</ol>
+<p>PM 必须在 PRD 明确说明两次调用。各有自己的延迟预算、模型选择、prompt、eval、fallback 行为。</p>
+<hr />
+<h2>PM 必须理解的 <code>tool_choice</code> 技巧</h2>
+<p>工程应该用 Claude tool use 配合 <code>tool_choice</code> 强制特定 tool 调用来实现分类器。PM 不用写代码, 但要懂为什么这很重要:</p>
+<ul>
+<li><strong>可靠性</strong> — 强制结构化 tool call 保证分类器返回有效类别, 不是自由文字 "应该是教育类?"</li>
+<li><strong>安全</strong> — <code>enum</code> 清单防止 Claude 发明你的 pipeline 处理不了的新类别</li>
+<li><strong>Debug</strong> — 结构化输出容易 log 和检查</li>
+</ul>
+<p>如果工程说 "我们会问 Claude 再 parse 响应", 要反推: 那很脆。要求用 <code>tool_choice={"type": "tool", "name": "..."}</code> + enum schema。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>是</th>
+<th>动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>你的产品处理截然不同的请求类型?</td>
+<td>是</td>
+<td>Routing 候选</td>
+</tr>
+<tr>
+<td>类别可以写在一页纸上吗?</td>
+<td>是</td>
+<td>类别够清楚</td>
+</tr>
+<tr>
+<td>每类都能因为专用 prompt 或 tool set 受益?</td>
+<td>是</td>
+<td>Routing</td>
+</tr>
+<tr>
+<td>Claude(或更便宜的分类器)能可靠分类?</td>
+<td>是</td>
+<td>Routing 可行</td>
+</tr>
+<tr>
+<td>多一次 LLM 调用的延迟和成本可接受?</td>
+<td>是</td>
+<td>上线</td>
+</tr>
+<tr>
+<td>类别是否大量重叠?</td>
+<td>否</td>
+<td>Routing 才可靠</td>
+</tr>
+</tbody>
+</table>
+<p>全是 → routing 是对的选择。一个 "否" 通常就否决了。</p>
+<hr />
+<h2>PM 必须要求的 Production 规格</h2>
+<ol>
+<li><strong>Enum 约束的 tool 分类器</strong> — 用 <code>tool_choice</code> 配合预定义 enum, 不用自由文字</li>
+<li><strong>低置信度 fallback</strong> — 分类器不确定时, route 到默认/通用 pipeline 或人工审核</li>
+<li><strong>Per-category 可观测性</strong> — log 类别分布、每类转化率、每类失败率</li>
+<li><strong>便宜分类器模型</strong> — 分类用小模型(例如 Haiku)降成本</li>
+<li><strong>每分支 eval</strong> — 每个专科 pipeline 需要自己的 eval 数据集; 通用 eval 会漏掉 per-category 质量下降</li>
+<li><strong>滥用保护</strong> — 恶意输入可能试图触发错误分支; 要验证类别选择合理</li>
+</ol>
+<hr />
+<h2>业务价值论述</h2>
+<ul>
+<li><strong>质量</strong> — "每种请求类型都有专属、优化的处理器, 而不是一个通用 prompt 应付全部"</li>
+<li><strong>可扩展</strong> — "加一个新请求类型 = 加一个新分支, 现有类型零回归风险"</li>
+<li><strong>成本</strong> — "简单请求送便宜模型, 复杂请求送顶级模型"</li>
+<li><strong>延迟</strong> — "便宜分类 + 聚焦专科常常比慢通用 prompt 还快"</li>
+<li><strong>可观测性</strong> — "我们看得到用户送哪种请求, 哪种表现差"</li>
+</ul>
+<hr />
+<h2>PM 常见错误</h2>
+<ol>
+<li><strong>类别太多。</strong> PM 爱建分类, 分类器讨厌分类太多。控制在 10 以下。超过就 chain 或子分类。</li>
+<li><strong>类别重叠。</strong> 一个请求可以归两类时, 分类器会摇摆。定义类别要让每个请求有唯一归属。</li>
+<li><strong>没有 fallback pipeline。</strong> 不要假设分类器一定对。为低置信度案件准备默认 "通用" pipeline。</li>
+<li><strong>把 routing 和 agent 混淆。</strong> Routing workflow 仍是 workflow — 代码在分类后挑 pipeline。Agent 则是让 Claude 自主挑工具。PM 在设计文档中常搞混。</li>
+<li><strong>忘了 per-category metric。</strong> 有 routing 的产品需要每类一个 dashboard — 否则看不出哪个分支在退化。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>Routing 是 "分诊台" workflow — 先分类, 再分派到专科。当你的 app 处理多样化请求类型、每种都值得聚焦处理时, 就是标准产品选择。Production 关键细节是分类器实现: 用强制 tool use + enum input schema 保证有效类别标签。考试记得: <strong>routing 是 workflow(代码分派), 不是 agent(Claude 决定)。</strong></p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1(22%)主要</strong>: Routing 是四大 workflow 模式之一, 预期有场景题。</li>
+<li><strong>D2(18%)次要</strong>: <code>tool_choice="tool"</code> 强制工具使用会被明确测试。</li>
+<li><strong>D5(20%)次要</strong>: Production 模式 — 便宜分类器模型、每分支 eval、fallback pipeline。</li>
+<li>信号词: "categorize"、"classifier"、"dispatch"、"different types of requests"、"specialized pipeline"。</li>
+<li>陷阱: routing ≠ agent。Routing 是一次分类调用后的预定分派。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Routing 的产品定义?</td>
+<td>分诊步骤分类请求, 再由代码分派到专用 pipeline</td>
+</tr>
+<tr>
+<td>分诊台的类比是什么?</td>
+<td>护士问几个问题后把病人送去心内科、骨科或普通内科</td>
+</tr>
+<tr>
+<td>为什么分类器要用强制 tool use?</td>
+<td>从 enum 保证结构化类别标签, 不用 parse 自由文字</td>
+</tr>
+<tr>
+<td>PM 设计 routing 功能的关键错误?</td>
+<td>类别太多或重叠 — 分类器会不可靠</td>
+</tr>
+<tr>
+<td>Routing 最必要的 production guardrail?</td>
+<td>低置信度分类器输出的 fallback/默认 pipeline</td>
+</tr>
+<tr>
+<td>Routing 是 workflow 还是 agent?</td>
+<td>Workflow — 代码在分类后掌握分派决策</td>
+</tr>
+<tr>
+<td>PM 应该要求的成本优化?</td>
+<td>分类器步骤用更小/便宜的模型(分类比生成简单)</td>
+</tr>
+<tr>
+<td>Routing 产品除了整体质量还需要什么 metric?</td>
+<td>Per-category metric — 类别分布与每分支失败率</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

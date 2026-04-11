@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Schemas Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Tool Schemas — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (tool schema design), 2.2 (tool function definition), 1.2 (agentic loop foundation)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 35</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A tool schema is the product copy your AI reads before deciding how to help the user — treat its words like app-store descriptions, because Claude does.</p>
+<hr />
+<h2>Mental Model: The Menu Item Description</h2>
+<p>Think of a restaurant menu:</p>
+<ul>
+<li>The menu item <strong>name</strong> ("Spicy Tuna Roll") — tells the customer this exists.</li>
+<li>The menu item <strong>description</strong> ("Fresh yellowfin tuna, sriracha aioli, scallions, 6 pieces") — tells them when to order it and what to expect.</li>
+<li>The <strong>allergen / spice / price</strong> annotations — constrain who should order it.</li>
+</ul>
+<p>A tool schema is exactly this for Claude:</p>
+<table>
+<thead>
+<tr>
+<th>Menu concept</th>
+<th>Schema field</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Item name</td>
+<td><code>name</code></td>
+</tr>
+<tr>
+<td>Item description</td>
+<td><code>description</code></td>
+</tr>
+<tr>
+<td>Ingredients / allergens / spice level</td>
+<td><code>input_schema.properties</code> with type, description, enum</td>
+</tr>
+<tr>
+<td>Required choices (e.g., "pick a side")</td>
+<td><code>input_schema.required</code></td>
+</tr>
+</tbody>
+</table>
+<p>A menu with vague descriptions ("Fish Thing, $12") gets fewer orders and more confused customers. A menu with rich descriptions gets the right dishes to the right people. Same for tool schemas.</p>
+<hr />
+<h2>Why PMs Should Own the Description Copy</h2>
+<p>Most engineers will happily write a one-line description like "Gets current time" and move on. That line is <em>product copy Claude reads on every invocation</em>. The engineering time to write a good description is minutes; the reliability dividend is enormous.</p>
+<p>PMs should:</p>
+<ol>
+<li><strong>Review every tool's <code>description</code></strong> the same way they review app-store listings or onboarding copy.</li>
+<li><strong>Provide the "when to use" sentence</strong> — this is the single most valuable sentence in the description and engineers often skip it.</li>
+<li><strong>List related tools</strong> to help Claude disambiguate.</li>
+<li><strong>Include concrete parameter examples</strong> in the property descriptions.</li>
+</ol>
+<hr />
+<h2>Product Use Cases: Where Schema Quality Moves the Needle</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>How schema quality helps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multiple similar tools (e.g., several calendar actions)</td>
+<td>Descriptions let Claude pick the right one instead of guessing</td>
+</tr>
+<tr>
+<td>Ambiguous user phrasing</td>
+<td>"When to use" sentence guides Claude toward the right tool</td>
+</tr>
+<tr>
+<td>Strict parameter formats (IDs, dates, SKUs)</td>
+<td>Property descriptions and enums prevent malformed calls</td>
+</tr>
+<tr>
+<td>Users in different languages</td>
+<td>Rich descriptions let Claude map translations to correct tools</td>
+</tr>
+<tr>
+<td>High-stakes actions (payments, deletions)</td>
+<td>Explicit required fields avoid accidental omissions</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Three Fields in Plain English</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>What it means to a PM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>The internal ID. Think of it like a slug. Short, unambiguous, snake_case.</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>The sales pitch. Tell Claude <em>what</em> it does, <em>when</em> to use it, and <em>what it returns</em>. 3–4 sentences.</td>
+</tr>
+<tr>
+<td><code>input_schema</code></td>
+<td>The order form. What fields are required, what values are allowed, what units, what format.</td>
+</tr>
+</tbody>
+</table>
+<p>Think of these three as the three columns of a product requirements doc: identity, value proposition, and configuration.</p>
+<hr />
+<h2>The "When to Use" Sentence</h2>
+<p>The most frequently skipped piece of schema copy is the sentence that tells Claude <strong>when</strong> to pick this tool over others. Examples:</p>
+<ul>
+<li>Bad: "Returns the current date."</li>
+<li>Good: "Returns the current date. <strong>Use this when the user asks about today, tomorrow, or any relative date reference.</strong>"</li>
+</ul>
+<p>In a PRD, literally include a line for each tool that reads:</p>
+<blockquote>
+<p>Claude should use this tool when: <em>(one sentence)</em></p>
+</blockquote>
+<p>This forces the PM and engineer to agree on the tool's purpose before writing code, and the sentence goes straight into the description.</p>
+<hr />
+<h2>PM Decision Framework for Schema Design</h2>
+<p>For each tool in your feature, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What name will non-ambiguously identify this tool?</td>
+<td>The <code>name</code></td>
+</tr>
+<tr>
+<td>What is the one-sentence "when to use" statement?</td>
+<td>First sentence of <code>description</code></td>
+</tr>
+<tr>
+<td>What does this tool return and in what format?</td>
+<td>Last sentence of <code>description</code></td>
+</tr>
+<tr>
+<td>Which parameters are strictly required?</td>
+<td><code>input_schema.required</code></td>
+</tr>
+<tr>
+<td>For each param, what values are legal? (enum? range? format?)</td>
+<td>Property <code>type</code>, <code>enum</code>, examples in <code>description</code></td>
+</tr>
+<tr>
+<td>Are there related tools Claude might confuse this with?</td>
+<td>Cross-reference in <code>description</code></td>
+</tr>
+<tr>
+<td>What happens if Claude sends malformed arguments?</td>
+<td>Define recovery UX (ties to tool function error handling)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Letting engineering ship one-line descriptions</strong> — skipping copy review means Claude misroutes user requests.</li>
+<li><strong>Describing implementation instead of intent</strong> — "Calls the /v1/time endpoint" tells Claude nothing about when to use it.</li>
+<li><strong>Forgetting to enumerate valid values</strong> — "temperature unit" should be an <code>enum: ["celsius", "fahrenheit"]</code>, not a freeform string.</li>
+<li><strong>Not cross-referencing similar tools</strong> — in a system with many tools, Claude needs help disambiguating. "This tool returns the current time; to schedule something in the future, use <code>create_reminder</code>."</li>
+<li><strong>Updating code without updating the schema</strong> — parameter renames and new optional fields must be reflected in the schema, or Claude's priors go stale.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Tool schema descriptions are product copy that your AI reads and acts on. Treating them as an engineering afterthought is like shipping an app with a blank app-store listing: you'll get lower usage and worse user experiences. PMs who own schema copy as rigorously as they own UI copy ship features that feel dramatically more capable. On the CCA exam, this shows up under D2 questions about tool design and selection.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: three required fields of a tool definition, description best practices, <code>required</code> semantics, <code>enum</code> for constrained values.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: description quality is what drives Claude's tool selection in the agent loop.</li>
+<li>Expect product-framed questions: "A team has two similar tools and Claude often picks the wrong one. What is the most likely fix?" — answer: improve descriptions, add 'when to use' sentences, cross-reference between tools.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three required fields of a tool definition?</td>
+<td><code>name</code>, <code>description</code>, and <code>input_schema</code>.</td>
+</tr>
+<tr>
+<td>What is the menu-item analogy for tool schemas?</td>
+<td>Name is the dish name; description is the menu description; properties are the ingredients/constraints; required fields are the "must pick a side" choices.</td>
+</tr>
+<tr>
+<td>What is the most frequently skipped sentence in a schema description?</td>
+<td>The "when to use" sentence — it tells Claude which tool to pick when several are available.</td>
+</tr>
+<tr>
+<td>Why should PMs review tool descriptions?</td>
+<td>They are product copy Claude reads on every invocation; they directly influence feature reliability and user experience.</td>
+</tr>
+<tr>
+<td>How do you prevent Claude from confusing two similar tools?</td>
+<td>Cross-reference them in each description ("for X instead, use the <code>other_tool</code> tool").</td>
+</tr>
+<tr>
+<td>When should you use <code>enum</code> in a parameter description?</td>
+<td>When there is a fixed set of valid values (e.g., units, statuses, categories) — it eliminates ambiguity.</td>
+</tr>
+<tr>
+<td>What does <code>required</code> mean in a tool schema?</td>
+<td>It lists the parameter names Claude must supply; anything not listed is optional.</td>
+</tr>
+<tr>
+<td>What PRD line item captures the tool's purpose for Claude?</td>
+<td>"Claude should use this tool when: <em>(one sentence)</em>" — goes straight into the description.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

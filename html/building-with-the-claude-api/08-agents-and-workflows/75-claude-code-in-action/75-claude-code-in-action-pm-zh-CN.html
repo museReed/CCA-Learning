@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code In Action Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Claude Code in Action — PM Perspective（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试 Domain</td>
+<td>D3 — Claude Code Configuration (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（Claude Code 命令）、3.3（CLAUDE.md memory）、1.2（agentic workflow patterns）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 75</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Claude Code 的真实价值只有在团队采用"context → plan → implement" workflow 并共享 <code>CLAUDE.md</code> 后才能解锁 —— 这是 PM 必须主导的产品/流程决策，不是留给开发者各自为政的工程选项。</p>
+<hr />
+<h2>心智模型：新伙伴的第一天</h2>
+<p>把 Claude Code 进项目当成新工程师入职：</p>
+<table>
+<thead>
+<tr>
+<th>入职步骤</th>
+<th>人类工程师</th>
+<th>Claude Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>代码库导览</td>
+<td>读 README + 问问题</td>
+<td><code>/init</code> 扫描并写 <code>CLAUDE.md</code></td>
+</tr>
+<tr>
+<td>团队惯例小抄</td>
+<td>写在 wiki</td>
+<td><code>CLAUDE.md</code>（project scope）</td>
+</tr>
+<tr>
+<td>个人笔记偏好</td>
+<td>写在自己的笔记本</td>
+<td><code>CLAUDE.md</code>（local scope）</td>
+</tr>
+<tr>
+<td>通用工作风格</td>
+<td>靠职业养成</td>
+<td><code>CLAUDE.md</code>（user scope）</td>
+</tr>
+<tr>
+<td>我们怎么干活</td>
+<td>"先规划再写代码"</td>
+<td>context → plan → implement workflow</td>
+</tr>
+</tbody>
+</table>
+<p>新工程师没 context 会写几周 mediocre 代码，Claude Code 没 <code>CLAUDE.md</code> 也一样。Memory 文件不是可选功能，它就是入职文档。</p>
+<hr />
+<h2>为什么这 lesson 对 PM 重要</h2>
+<p>大多数团队装了 Claude Code 却用错 —— 把它当 autocomplete 而不是 agent。本 lesson 是这个产品的 workflow 契约：照做得到 10x 价值，略过则只是漂亮点的 search-and-replace。</p>
+<p>PM 的任务：</p>
+<ol>
+<li><strong>把 <code>/init</code> + <code>CLAUDE.md</code> 定为团队规范</strong> —— 不是建议。</li>
+<li><strong>把三步 workflow 写进团队文档</strong> —— context → plan → implement。</li>
+<li><strong>定义哪些东西放进 project-scope CLAUDE.md</strong> —— 不是所有偏好，只放共享的。</li>
+<li><strong>把 CLAUDE.md 当成产品产物</strong> —— 像 spec 一样 review、像 spec 一样更新。</li>
+</ol>
+<hr />
+<h2>产品使用场景</h2>
+<h3>配合正确 workflow 时 Claude Code 最闪光</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么合适</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在既有代码库上加新功能</td>
+<td>Context-first 流程避免 agent 重新发明你的 pattern</td>
+</tr>
+<tr>
+<td>在已有完整 test 的情况下重构</td>
+<td>TDD 变体大显身手 —— test 就是成功标准</td>
+</tr>
+<tr>
+<td>新工程师 ramp up 旧项目</td>
+<td><code>CLAUDE.md</code> 把 tribal knowledge 装好</td>
+</tr>
+<tr>
+<td>跨团队协作</td>
+<td>Project <code>CLAUDE.md</code> 把惯例带给每一个贡献者</td>
+</tr>
+</tbody>
+</table>
+<h3>单靠 Claude Code 不够的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>要搭配什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>需要生产环境实时数据</td>
+<td>加 MCP server（lesson 76）</td>
+</tr>
+<tr>
+<td>需要 UI 设计决策</td>
+<td>还是要 product spec</td>
+</tr>
+<tr>
+<td>需要合规批准</td>
+<td>人类 review in the loop</td>
+</tr>
+<tr>
+<td>需要跨 repo 知识</td>
+<td><code>CLAUDE.md</code> user scope + 纪律</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CLAUDE.md 的三种 Scope（PM 视角）</h2>
+<p>这是 lesson 中最与产品相关的概念：</p>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>拥有者</th>
+<th>该放什么</th>
+<th>不该放什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Project</strong></td>
+<td>Team lead / PM</td>
+<td>Build 命令、团队惯例、架构规则</td>
+<td>个人快捷键、机器特定设置</td>
+</tr>
+<tr>
+<td><strong>Local</strong></td>
+<td>个别工程师</td>
+<td>个人快捷键、工作笔记、实验 flag</td>
+<td>团队共享惯例、别人要遵守的规则</td>
+</tr>
+<tr>
+<td><strong>User</strong></td>
+<td>个别工程师</td>
+<td>通用工作风格（"先说明再改"）</td>
+<td>项目特定 pattern</td>
+</tr>
+</tbody>
+</table>
+<p>PM 应该把 project-scope <code>CLAUDE.md</code> 当一等公民 deliverable —— 在 code review 时 review、在重大架构变更时更新、在 PR 描述里引用。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<p>要把 Claude Code rollout 给团队时，回答：</p>
+<ol>
+<li><strong>谁拥有 project <code>CLAUDE.md</code>？</strong> 必须有人 curate。通常是 tech lead 或 PM。</li>
+<li><strong>里面放什么？</strong> 从 build 命令、代码风格、测试要求、架构概览开始。</li>
+<li><strong><code>CLAUDE.md</code> 的改动怎么 review？</strong> 跟引发改动的代码放同一个 PR。</li>
+<li><strong>如何强制"先计划"workflow？</strong> 团队共识、PR template 或内部工具。</li>
+<li><strong>量什么指标？</strong> 新工程师 time-to-first-working-PR；PR 中包含"Plan:"段落的比例。</li>
+</ol>
+<hr />
+<h2>Workflow 作为产品标准</h2>
+<p>"context → plan → implement" pattern 不是 Claude Code 的特殊怪癖 —— 而是现代 agent UX pattern。其他 agent 工具（Cursor、Windsurf、自研产品）都收敛到同一形状。PM 层级：</p>
+<table>
+<thead>
+<tr>
+<th>Workflow 步骤</th>
+<th>可要求的产品产物</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Context</td>
+<td>文件清单、相关文档、过去的 PR</td>
+</tr>
+<tr>
+<td>Plan</td>
+<td>PR 里在 code 之前贴出的书面计划</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>实际的 PR</td>
+</tr>
+</tbody>
+</table>
+<p>标准化后，code review 更快、onboarding 更便宜、质量下限提升 —— 同时消耗的 senior engineering 时数变少。</p>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>把 <code>CLAUDE.md</code> 当选配</strong> —— 没它，每场新 session 都得重学项目。复利优势全没。</li>
+<li><strong>让工程师把所有东西塞 user-scope</strong> —— 共享惯例必须放 project scope，否则团队受益不到。</li>
+<li><strong>为了"省时间"跳过 plan 步骤</strong> —— 省了分钟却浪费小时修方向错的实现。</li>
+<li><strong>没把 <code>CLAUDE.md</code> 列入 code review checklist</strong> —— 它是活文档，过时条目会产出坏结果。</li>
+<li><strong>混淆 <code>/clear</code> 与 <code>/init</code></strong> —— 教学入门经典错误。文档里要清楚告诉团队何时用哪个。</li>
+</ol>
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>Claude Code 是 <strong>团队协议</strong>，不只是开发者工具。PM 真正的 deliverable 不是"我们装好了"，而是"我们有共用的 <code>CLAUDE.md</code>、我们遵守 context → plan → implement、我们 review agent memory 的改动像 review code 一样"。做到的团队拿到 agent 优势；没做到的没有。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D3（Claude Code Configuration）</strong>：直接考 <code>/init</code>、<code>/clear</code>、<code>#</code>、<code>CLAUDE.md</code> scope 的题目概率很高。</li>
+<li><strong>D1（Agentic Coding &amp; Architecture）</strong>：context → plan → implement workflow 就是 agent 的标准 pattern。</li>
+<li>预期会出场景题："某团队装了 Claude Code 但产能没提升 —— 缺了什么？"答案通常是 <code>CLAUDE.md</code> + workflow。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PM 应该强制的三步 Claude Code workflow 是什么？</td>
+<td>1) 读相关文件喂 context、2) 要求书面计划不写代码、3) 请 Claude 实现计划</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code> 的三种 scope 与各自拥有者是什么？</td>
+<td>Project（团队/PM 拥有、进 git）、Local（个别工程师、不进 git）、User（个别工程师、跨所有项目）</td>
+</tr>
+<tr>
+<td>为什么 PM 该把 project-scope <code>CLAUDE.md</code> 当一等 deliverable？</td>
+<td>它是所有未来 Claude Code session 继承的入职文档、风格指南、架构摘要 —— 过时内容会产出坏结果</td>
+</tr>
+<tr>
+<td><code>/init</code> 做什么？何时该跑？</td>
+<td>扫描代码库并把总结写入 <code>CLAUDE.md</code>；项目启动时跑一次，重大架构改动后重跑</td>
+</tr>
+<tr>
+<td><code>#</code> 快捷键做什么？</td>
+<td>追加笔记到 <code>CLAUDE.md</code> 并询问 project、local 或 user scope</td>
+</tr>
+<tr>
+<td>Claude Code 的 TDD 变体 workflow 是什么？</td>
+<td>喂 context → 请 Claude 头脑风暴 test cases → 实现 test → 写代码直到全绿</td>
+</tr>
+<tr>
+<td>PM rollout Claude Code 的头号错误？</td>
+<td>把 <code>CLAUDE.md</code> 当选配 —— 这会消除持久项目记忆的复利优势</td>
+</tr>
+<tr>
+<td>怎么量化团队是否遵守"plan first"规则？</td>
+<td>PR 中在 code diff 前包含书面计划的比例</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

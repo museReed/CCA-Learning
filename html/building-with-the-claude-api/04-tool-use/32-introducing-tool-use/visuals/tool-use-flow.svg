@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6B7280"/>
+    </marker>
+  </defs>
+  <rect width="900" height="540" fill="white"/>
+
+  <!-- Title -->
+  <text x="450" y="40" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">The Tool Use Request / Response Cycle</text>
+  <text x="450" y="62" text-anchor="middle" font-size="13" fill="#6B7280">Four steps from user query to final answer</text>
+
+  <!-- Lane labels -->
+  <text x="70" y="110" text-anchor="middle" font-size="12" font-weight="600" fill="#6B7280">USER</text>
+  <text x="70" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#6B7280">APP</text>
+  <text x="70" y="300" text-anchor="middle" font-size="12" font-weight="600" fill="#6B7280">CLAUDE</text>
+  <text x="70" y="400" text-anchor="middle" font-size="12" font-weight="600" fill="#6B7280">EXTERNAL API</text>
+
+  <!-- Lane dividers -->
+  <line x1="130" y1="130" x2="870" y2="130" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="130" y1="230" x2="870" y2="230" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="130" y1="330" x2="870" y2="330" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- Step 1: User query -->
+  <rect x="150" y="85" width="160" height="50" rx="8" fill="#F1F5F9" stroke="#94A3B8" stroke-width="2" filter="url(#shadow)"/>
+  <text x="230" y="108" text-anchor="middle" font-size="12" font-weight="600" fill="#1E293B">1. User Query</text>
+  <text x="230" y="124" text-anchor="middle" font-size="11" fill="#6B7280">"What's the weather?"</text>
+
+  <!-- Arrow down to Claude -->
+  <line x1="230" y1="140" x2="230" y2="260" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 2: Claude requests tool -->
+  <rect x="150" y="265" width="200" height="80" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="250" y="286" text-anchor="middle" font-size="12" font-weight="600" fill="#3B82F6">2. Claude Requests Tool</text>
+  <text x="250" y="305" text-anchor="middle" font-size="10" fill="#1E293B">stop_reason:</text>
+  <text x="250" y="320" text-anchor="middle" font-size="10" font-weight="600" fill="#3B82F6">"tool_use"</text>
+  <text x="250" y="335" text-anchor="middle" font-size="10" fill="#6B7280">get_weather(city="SF")</text>
+
+  <!-- Arrow up to app -->
+  <line x1="370" y1="305" x2="430" y2="305" stroke="#6B7280" stroke-width="2"/>
+  <line x1="430" y1="305" x2="430" y2="210" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 3: App executes -->
+  <rect x="360" y="160" width="200" height="70" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <text x="460" y="183" text-anchor="middle" font-size="12" font-weight="600" fill="#22C55E">3. App Executes Tool</text>
+  <text x="460" y="200" text-anchor="middle" font-size="10" fill="#1E293B">extract tool_use block</text>
+  <text x="460" y="215" text-anchor="middle" font-size="10" fill="#1E293B">call local function</text>
+
+  <!-- Arrow down to external API -->
+  <line x1="460" y1="230" x2="460" y2="360" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- External API -->
+  <rect x="360" y="365" width="200" height="60" rx="8" fill="#FFF7ED" stroke="#FB923C" stroke-width="2" filter="url(#shadow)"/>
+  <text x="460" y="388" text-anchor="middle" font-size="12" font-weight="600" fill="#FB923C">External API / DB</text>
+  <text x="460" y="406" text-anchor="middle" font-size="10" fill="#6B7280">weather.example.com</text>
+  <text x="460" y="420" text-anchor="middle" font-size="10" fill="#6B7280">returns: "72°F, sunny"</text>
+
+  <!-- Arrow back up to app -->
+  <line x1="540" y1="395" x2="590" y2="395" stroke="#6B7280" stroke-width="2"/>
+  <line x1="590" y1="395" x2="590" y2="210" stroke="#6B7280" stroke-width="2"/>
+  <line x1="590" y1="210" x2="620" y2="210" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 4: App sends tool_result back -->
+  <rect x="620" y="160" width="200" height="70" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <text x="720" y="183" text-anchor="middle" font-size="12" font-weight="600" fill="#22C55E">Append tool_result</text>
+  <text x="720" y="200" text-anchor="middle" font-size="10" fill="#1E293B">add to messages[]</text>
+  <text x="720" y="215" text-anchor="middle" font-size="10" fill="#1E293B">call API again</text>
+
+  <!-- Arrow down to Claude final -->
+  <line x1="720" y1="230" x2="720" y2="260" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 5: Claude synthesizes -->
+  <rect x="620" y="265" width="200" height="80" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="720" y="286" text-anchor="middle" font-size="12" font-weight="600" fill="#3B82F6">4. Claude Synthesizes</text>
+  <text x="720" y="305" text-anchor="middle" font-size="10" fill="#1E293B">stop_reason:</text>
+  <text x="720" y="320" text-anchor="middle" font-size="10" font-weight="600" fill="#3B82F6">"end_turn"</text>
+  <text x="720" y="335" text-anchor="middle" font-size="10" fill="#6B7280">"It's 72°F and sunny"</text>
+
+  <!-- Arrow up to user -->
+  <line x1="720" y1="265" x2="720" y2="140" stroke="#6B7280" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Final response -->
+  <rect x="640" y="85" width="160" height="50" rx="8" fill="#F1F5F9" stroke="#94A3B8" stroke-width="2" filter="url(#shadow)"/>
+  <text x="720" y="108" text-anchor="middle" font-size="12" font-weight="600" fill="#1E293B">Final Answer</text>
+  <text x="720" y="124" text-anchor="middle" font-size="11" fill="#6B7280">displayed to user</text>
+
+  <!-- Bottom summary -->
+  <rect x="100" y="460" width="700" height="60" rx="8" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="450" y="485" text-anchor="middle" font-size="13" fill="#1E293B" font-weight="500">Claude never calls tools directly — your app is the executor.</text>
+  <text x="450" y="505" text-anchor="middle" font-size="11" fill="#6B7280">Claude decides WHICH tool and WHAT arguments; your code runs it and returns the result.</text>
+</svg>

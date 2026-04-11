@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 780" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="900" height="780" fill="white"/>
+
+  <!-- Title -->
+  <text x="450" y="40" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Multi-Turn Conversation with Tools</text>
+  <text x="450" y="62" text-anchor="middle" font-size="13" fill="#6B7280">messages[] grows each turn — every call resends the full history</text>
+
+  <!-- Timeline vertical line -->
+  <line x1="100" y1="100" x2="100" y2="720" stroke="#CBD5E1" stroke-width="2"/>
+
+  <!-- Turn 1 -->
+  <circle cx="100" cy="130" r="16" fill="#3B82F6" stroke="white" stroke-width="3"/>
+  <text x="100" y="135" text-anchor="middle" font-size="11" font-weight="600" fill="white">1</text>
+  <text x="130" y="125" font-size="13" font-weight="600" fill="#1E293B">Turn 1 — initial user question</text>
+  <rect x="130" y="135" width="700" height="70" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="145" y="155" font-size="11" font-family="Menlo, monospace" fill="#6B7280">messages = [</text>
+  <text x="165" y="172" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">{"role": </text>
+  <text x="225" y="172" font-size="11" font-family="Menlo, monospace" fill="#22C55E">"user"</text>
+  <text x="265" y="172" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">, "content": </text>
+  <text x="345" y="172" font-size="11" font-family="Menlo, monospace" fill="#FB923C">"Compare weather in SF and NYC"</text>
+  <text x="565" y="172" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">}</text>
+  <text x="145" y="192" font-size="11" font-family="Menlo, monospace" fill="#6B7280">]</text>
+
+  <!-- Turn 2 -->
+  <circle cx="100" cy="240" r="16" fill="#8B5CF6" stroke="white" stroke-width="3"/>
+  <text x="100" y="245" text-anchor="middle" font-size="11" font-weight="600" fill="white">2</text>
+  <text x="130" y="235" font-size="13" font-weight="600" fill="#1E293B">Turn 2 — Claude requests first tool</text>
+  <rect x="130" y="245" width="700" height="100" rx="8" fill="#FAF5FF" stroke="#8B5CF6" stroke-width="1"/>
+  <text x="145" y="265" font-size="11" font-family="Menlo, monospace" fill="#6B7280">messages.append({</text>
+  <text x="165" y="283" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">"role": </text>
+  <text x="220" y="283" font-size="11" font-family="Menlo, monospace" fill="#22C55E">"assistant"</text>
+  <text x="290" y="283" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">, "content": [</text>
+  <text x="185" y="301" font-size="11" font-family="Menlo, monospace" fill="#1E293B">ToolUseBlock(id=</text>
+  <text x="295" y="301" font-size="11" font-family="Menlo, monospace" fill="#EF4444">"toolu_01"</text>
+  <text x="360" y="301" font-size="11" font-family="Menlo, monospace" fill="#1E293B">, name=</text>
+  <text x="410" y="301" font-size="11" font-family="Menlo, monospace" fill="#FB923C">"get_weather"</text>
+  <text x="490" y="301" font-size="11" font-family="Menlo, monospace" fill="#1E293B">, input={</text>
+  <text x="550" y="301" font-size="11" font-family="Menlo, monospace" fill="#FB923C">"city":"SF"</text>
+  <text x="620" y="301" font-size="11" font-family="Menlo, monospace" fill="#1E293B">})</text>
+  <text x="145" y="320" font-size="11" font-family="Menlo, monospace" fill="#6B7280">]})</text>
+  <text x="145" y="338" font-size="10" fill="#8B5CF6" font-weight="600">stop_reason: "tool_use"</text>
+
+  <!-- Turn 3 -->
+  <circle cx="100" cy="380" r="16" fill="#22C55E" stroke="white" stroke-width="3"/>
+  <text x="100" y="385" text-anchor="middle" font-size="11" font-weight="600" fill="white">3</text>
+  <text x="130" y="375" font-size="13" font-weight="600" fill="#1E293B">Turn 3 — app returns first tool_result</text>
+  <rect x="130" y="385" width="700" height="85" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1"/>
+  <text x="145" y="405" font-size="11" font-family="Menlo, monospace" fill="#6B7280">messages.append({</text>
+  <text x="165" y="423" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">"role": </text>
+  <text x="220" y="423" font-size="11" font-family="Menlo, monospace" fill="#22C55E">"user"</text>
+  <text x="255" y="423" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">, "content": [{</text>
+  <text x="165" y="441" font-size="11" font-family="Menlo, monospace" fill="#1E293B">  type: </text>
+  <text x="210" y="441" font-size="11" font-family="Menlo, monospace" fill="#FB923C">"tool_result"</text>
+  <text x="290" y="441" font-size="11" font-family="Menlo, monospace" fill="#1E293B">, tool_use_id: </text>
+  <text x="390" y="441" font-size="11" font-family="Menlo, monospace" fill="#EF4444">"toolu_01"</text>
+  <text x="455" y="441" font-size="11" font-family="Menlo, monospace" fill="#1E293B">, content: </text>
+  <text x="525" y="441" font-size="11" font-family="Menlo, monospace" fill="#FB923C">"72°F"</text>
+  <text x="560" y="441" font-size="11" font-family="Menlo, monospace" fill="#1E293B">}]})</text>
+
+  <!-- Turn 4 -->
+  <circle cx="100" cy="500" r="16" fill="#8B5CF6" stroke="white" stroke-width="3"/>
+  <text x="100" y="505" text-anchor="middle" font-size="11" font-weight="600" fill="white">4</text>
+  <text x="130" y="495" font-size="13" font-weight="600" fill="#1E293B">Turn 4 — Claude requests second tool</text>
+  <rect x="130" y="505" width="700" height="85" rx="8" fill="#FAF5FF" stroke="#8B5CF6" stroke-width="1"/>
+  <text x="145" y="525" font-size="11" font-family="Menlo, monospace" fill="#6B7280">messages.append({</text>
+  <text x="165" y="543" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">"role": </text>
+  <text x="220" y="543" font-size="11" font-family="Menlo, monospace" fill="#22C55E">"assistant"</text>
+  <text x="290" y="543" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">, "content": [</text>
+  <text x="165" y="561" font-size="11" font-family="Menlo, monospace" fill="#1E293B">ToolUseBlock(id=</text>
+  <text x="275" y="561" font-size="11" font-family="Menlo, monospace" fill="#EF4444">"toolu_02"</text>
+  <text x="340" y="561" font-size="11" font-family="Menlo, monospace" fill="#1E293B">, input={</text>
+  <text x="400" y="561" font-size="11" font-family="Menlo, monospace" fill="#FB923C">"city":"NYC"</text>
+  <text x="480" y="561" font-size="11" font-family="Menlo, monospace" fill="#1E293B">})]})</text>
+  <text x="145" y="580" font-size="10" fill="#8B5CF6" font-weight="600">stop_reason: "tool_use" — loop again!</text>
+
+  <!-- Turn 5 -->
+  <circle cx="100" cy="620" r="16" fill="#22C55E" stroke="white" stroke-width="3"/>
+  <text x="100" y="625" text-anchor="middle" font-size="11" font-weight="600" fill="white">5</text>
+  <text x="130" y="615" font-size="13" font-weight="600" fill="#1E293B">Turn 5 — app returns second tool_result</text>
+  <rect x="130" y="625" width="700" height="45" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1"/>
+  <text x="145" y="650" font-size="11" font-family="Menlo, monospace" fill="#1E293B">messages.append(tool_result for toolu_02 = </text>
+  <text x="430" y="650" font-size="11" font-family="Menlo, monospace" fill="#FB923C">"58°F rain"</text>
+  <text x="500" y="650" font-size="11" font-family="Menlo, monospace" fill="#1E293B">)</text>
+
+  <!-- Turn 6 -->
+  <circle cx="100" cy="700" r="16" fill="#3B82F6" stroke="white" stroke-width="3"/>
+  <text x="100" y="705" text-anchor="middle" font-size="11" font-weight="600" fill="white">6</text>
+  <text x="130" y="695" font-size="13" font-weight="600" fill="#1E293B">Turn 6 — final synthesized answer</text>
+  <rect x="130" y="705" width="700" height="45" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1"/>
+  <text x="145" y="723" font-size="11" font-family="Menlo, monospace" fill="#1E293B">TextBlock("SF is 72°F sunny, NYC is 58°F rainy...")</text>
+  <text x="145" y="740" font-size="10" fill="#3B82F6" font-weight="600">stop_reason: "end_turn" — exit loop</text>
+</svg>

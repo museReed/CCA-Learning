@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Routing Workflows Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Routing Workflows — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — PRIMARY</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2 (agentic patterns — routing), 5.2 (production workflow deployment)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 80</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Routing is the "triage desk" workflow — before doing the work, a quick classifier decides which specialized pipeline should handle the request. It's the right architecture when your product handles distinctly different request types that each deserve different treatment.</p>
+<hr />
+<h2>Mental Model: The Hospital Triage Desk</h2>
+<p>When you walk into an emergency room, the first person you meet is the triage nurse. They ask a few questions and decide where you go:</p>
+<table>
+<thead>
+<tr>
+<th>Triage result</th>
+<th>Pipeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chest pain</td>
+<td>Cardiology unit</td>
+</tr>
+<tr>
+<td>Broken bone</td>
+<td>Orthopedics</td>
+</tr>
+<tr>
+<td>Fever and cough</td>
+<td>General medicine</td>
+</tr>
+<tr>
+<td>Psychiatric concern</td>
+<td>Mental health unit</td>
+</tr>
+</tbody>
+</table>
+<p>The triage nurse is not a cardiologist or an orthopedic surgeon — they are a classifier. They route patients to the specialist who can actually treat them. Each specialist unit is optimized for its case load, not for "everything".</p>
+<p>Routing workflows are the triage desk. A small classifier LLM call decides which specialized prompt (or sub-pipeline) handles the request. Each specialist does one thing really well.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When Routing Fits</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Routing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Customer support bot (billing / technical / refund)</td>
+<td>Each type needs different tools, KB, and tone</td>
+</tr>
+<tr>
+<td>Content generation (educational / entertainment / review) — lesson example</td>
+<td>Each genre needs a different style</td>
+</tr>
+<tr>
+<td>Multi-domain assistant (coding / writing / math)</td>
+<td>Each domain needs different context and prompts</td>
+</tr>
+<tr>
+<td>Intent-based routing (question / task / small talk)</td>
+<td>Different response types, different latency budgets</td>
+</tr>
+<tr>
+<td>Multi-tier model selection</td>
+<td>Route simple requests to Haiku, complex ones to Opus</td>
+</tr>
+<tr>
+<td>Localized pipelines (English / Chinese / Japanese)</td>
+<td>Different prompts, locale-specific tools</td>
+</tr>
+</tbody>
+</table>
+<h3>When Routing Does Not Fit</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single request type with narrow scope</td>
+<td>Just one prompt</td>
+</tr>
+<tr>
+<td>Overlapping categories the classifier cannot distinguish</td>
+<td>Chaining or agent</td>
+</tr>
+<tr>
+<td>Latency ultra-sensitive (every ms matters)</td>
+<td>Skip the classification call, use one good prompt</td>
+</tr>
+<tr>
+<td>Categories constantly change</td>
+<td>Routing is brittle — consider an agent</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Two-Step Shape</h2>
+<pre><code>user input ──→ [triage LLM call] ──→ category ──→ [specialist pipeline] ──→ output
+</code></pre>
+<ol>
+<li><strong>Triage call</strong> — fast, cheap, structured output (one category label)</li>
+<li><strong>Specialist call</strong> — slower, expensive, optimized for that category</li>
+</ol>
+<p>PMs must be explicit about both calls in the PRD. Each has its own latency budget, model choice, prompt, eval, and fallback behavior.</p>
+<hr />
+<h2>The <code>tool_choice</code> Trick PMs Must Understand</h2>
+<p>Engineering should implement the classifier using Claude's tool use with <code>tool_choice</code> set to force a specific tool. PMs do not need to write the code, but must understand why it matters:</p>
+<ul>
+<li><strong>Reliability</strong> — forcing a structured tool call guarantees the classifier returns a valid category, not a free-form "maybe educational?"</li>
+<li><strong>Safety</strong> — an <code>enum</code> list prevents Claude from inventing new categories your pipeline cannot handle</li>
+<li><strong>Debugging</strong> — structured outputs are trivial to log and inspect</li>
+</ul>
+<p>If engineering says "we'll ask Claude and parse the response", push back: that is fragile. Ask for <code>tool_choice={"type": "tool", "name": "..."}</code> with an enum schema.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does your product handle distinctly different request types?</td>
+<td>Yes</td>
+<td>Routing candidate</td>
+</tr>
+<tr>
+<td>Can you list the categories on one page?</td>
+<td>Yes</td>
+<td>Categories are clear enough</td>
+</tr>
+<tr>
+<td>Does each category benefit from a specialized prompt or tool set?</td>
+<td>Yes</td>
+<td>Routing</td>
+</tr>
+<tr>
+<td>Can Claude (or a cheaper classifier) reliably categorize?</td>
+<td>Yes</td>
+<td>Routing is viable</td>
+</tr>
+<tr>
+<td>Is one extra LLM call acceptable in latency and cost?</td>
+<td>Yes</td>
+<td>Ship it</td>
+</tr>
+<tr>
+<td>Do categories overlap a lot?</td>
+<td>No</td>
+<td>Routing is reliable</td>
+</tr>
+</tbody>
+</table>
+<p>If you answer yes to all, routing is the right move. One "no" usually kills the case.</p>
+<hr />
+<h2>Production Requirements PMs Must Ask For</h2>
+<ol>
+<li><strong>Enum-constrained tool classifier</strong> — use <code>tool_choice</code> with a predefined enum, not free-form text</li>
+<li><strong>Low-confidence fallback</strong> — when the classifier is uncertain, route to a default/generic pipeline or human review</li>
+<li><strong>Per-category observability</strong> — log category distribution, conversion by category, failure rate by category</li>
+<li><strong>Cheap classifier model</strong> — use a smaller model (e.g., Haiku) for classification to keep costs low</li>
+<li><strong>Eval per branch</strong> — each specialist pipeline needs its own eval dataset; generic evals miss per-category quality drops</li>
+<li><strong>Abuse protection</strong> — malicious inputs could try to trigger the wrong branch; sanity-check category selections</li>
+</ol>
+<hr />
+<h2>Business Value Framing</h2>
+<ul>
+<li><strong>Quality</strong> — "Each request type gets a dedicated, optimized handler instead of a one-size-fits-all prompt"</li>
+<li><strong>Scalability</strong> — "Adding a new request type = adding a new branch; no regression on existing types"</li>
+<li><strong>Cost</strong> — "We can send simple requests to cheaper models and complex ones to the top-tier model"</li>
+<li><strong>Latency</strong> — "Cheap classification + focused specialist is often faster than a slow generic prompt"</li>
+<li><strong>Observability</strong> — "We can see exactly which request types our users send and which ones perform poorly"</li>
+</ul>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Too many categories.</strong> PMs love taxonomies; classifiers hate them. Keep categories to 10 or fewer. If you need more, chain or sub-classify.</li>
+<li><strong>Overlapping categories.</strong> If a request can belong to two categories, the classifier will flip-flop. Define categories so each request has one obvious home.</li>
+<li><strong>No fallback pipeline.</strong> Never assume the classifier is always right. Ship a default "general" pipeline for low-confidence cases.</li>
+<li><strong>Confusing routing with agents.</strong> A routing workflow is still a workflow — the code picks the pipeline after classification. An agent would let Claude pick tools autonomously. PMs sometimes mix these up in design docs.</li>
+<li><strong>Forgetting per-category metrics.</strong> A product with routing needs a dashboard per category — otherwise you cannot see which branch is degrading.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Routing is the "triage desk" workflow — classify first, then dispatch to a specialist. It is the standard product move when your app handles diverse request types that each deserve focused handling. The production-critical detail is the classifier implementation: use forced tool use with an enum input schema to guarantee a valid category label. For the exam, remember: <strong>routing is a workflow (code dispatches), not an agent (Claude decides).</strong></p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (22%) PRIMARY</strong>: Routing is one of four core workflow patterns. Expect scenario questions.</li>
+<li><strong>D2 (18%) SECONDARY</strong>: <code>tool_choice="tool"</code> forced tool use is explicitly tested.</li>
+<li><strong>D5 (20%) SECONDARY</strong>: Production patterns — cheap classifier model, per-branch eval, fallback pipeline.</li>
+<li>Signal words: "categorize", "classifier", "dispatch", "different types of requests", "specialized pipeline".</li>
+<li>Trap: routing ≠ agent. Routing is a predetermined dispatch after one classification call.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is routing in product terms?</td>
+<td>A triage step classifies the request, then code dispatches to a specialized pipeline</td>
+</tr>
+<tr>
+<td>What is the triage desk analogy?</td>
+<td>A nurse asks a few questions and sends the patient to cardiology, orthopedics, or general medicine</td>
+</tr>
+<tr>
+<td>Why use forced tool use for the classifier?</td>
+<td>Guarantees a structured category label from an enum, no free-form parsing required</td>
+</tr>
+<tr>
+<td>What is a key PM mistake when designing routing features?</td>
+<td>Too many or overlapping categories — classifiers become unreliable</td>
+</tr>
+<tr>
+<td>What production guardrail is essential for routing?</td>
+<td>A fallback/default pipeline for low-confidence classifier output</td>
+</tr>
+<tr>
+<td>Is routing a workflow or an agent?</td>
+<td>A workflow — code owns the dispatch decision after classification</td>
+</tr>
+<tr>
+<td>What is one cost optimization PMs should ask for?</td>
+<td>Use a smaller/cheaper model for the classifier step (classification is simpler than generation)</td>
+</tr>
+<tr>
+<td>What metric does a routing product need beyond overall quality?</td>
+<td>Per-category metrics — category distribution and failure rate by branch</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

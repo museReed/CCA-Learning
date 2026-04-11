@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sending Tool Results Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Sending Tool Results — PM Perspective（简中）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) / D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4（tool_result block 格式）、2.2（content block 处理）、1.2（收尾 tool-use loop）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 37</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>把 tool 结果送回 Claude 是「收件回执」的动作——一个格式严格的数据包，用来收掉「Claude 要了一个东西」和「Claude 有足够信息可以回答」之间的循环。</p>
+<hr />
+<h2>心智模型：餐厅点餐票系统</h2>
+<p>想象一间忙碌的餐厅厨房：</p>
+<table>
+<thead>
+<tr>
+<th>厨房流程</th>
+<th>Claude tool-use 流程</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>前厅写票 #47：「汉堡，五分熟」</td>
+<td>Claude 发出 <code>ToolUseBlock(id="toolu_47", name="cook", input={"item":"burger"})</code></td>
+</tr>
+<tr>
+<td>厨师做汉堡</td>
+<td>你的代码执行函数</td>
+</tr>
+<tr>
+<td>厨师把票 #47 夹在盘子上</td>
+<td>你送回 <code>tool_result</code> block，<code>tool_use_id="toolu_47"</code></td>
+</tr>
+<tr>
+<td>盘子送到票 #47 对应的桌子</td>
+<td>Claude 用结果回答用户</td>
+</tr>
+</tbody>
+</table>
+<p>票号（<code>tool_use_id</code>）是神圣的。厨师忘了夹票，没人知道汉堡要送哪一桌。一张票回两个汉堡、或两张票只回一个，整个出餐流程就会垮。Anthropic API 处理 tool result 的方式就是这样。</p>
+<hr />
+<h2>为什么 PM 要在乎</h2>
+<p>Tool result 是大多数 tool-use 功能在生产环境坏掉的故障面：</p>
+<table>
+<thead>
+<tr>
+<th>故障模式</th>
+<th>用户看到的症状</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>后端在 tool 执行到一半 crash、丢掉结果</td>
+<td>Claude 整个卡住或回「抱歉我无法协助」</td>
+</tr>
+<tr>
+<td>后端忘了用 <code>is_error: True</code> 标错误</td>
+<td>Claude 自信地给出错误答案（hallucinate 成功）</td>
+</tr>
+<tr>
+<td>多个 tool call 但后端只回一个结果</td>
+<td>用户看到 400，整段对话救不回来</td>
+</tr>
+<tr>
+<td>后端直接塞 dict 而没 serialize</td>
+<td>对话坏在看不懂的 validation error</td>
+</tr>
+</tbody>
+</table>
+<p>每一个都是产品质量问题。懂 tool-result 契约的 PM 可以写出更好的 acceptance criteria，在 staging 就拦下来，不要等到上线日。</p>
+<hr />
+<h2>产品应用场景：错误可见度</h2>
+<p>Tool 失败不只是工程问题——它是 UX 决策：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>什么时候用</th>
+<th>UX 影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通过 <code>is_error: True</code> 把错误丢给 Claude</td>
+<td>大多数情况</td>
+<td>Claude 会自然解释问题（「我抓不到股价，API 好像挂了，要再试一次吗？」）</td>
+</tr>
+<tr>
+<td>在 Claude 看到前就拦下错误</td>
+<td>Rate limit、安全错误</td>
+<td>自己做 UI toast，完全绕过 Claude</td>
+</tr>
+<tr>
+<td>静默指数退避重试</td>
+<td>暂时性网络错误</td>
+<td>用户看不到，但会增加延迟</td>
+</tr>
+</tbody>
+</table>
+<p>默认模式——<code>is_error: True</code>——会给 Claude 足够信息优雅降级。跳过这个会让 Claude 幻觉出成功，这是最糟的用户体验。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<p>任何使用 tool 的功能，PRD 都应该回答：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>为什么重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每个 tool 的 timeout 预算是多少？</td>
+<td>慢 tool 会让 UX 出现死区，需要 progress event</td>
+</tr>
+<tr>
+<td>如何把 tool 错误传达给用户？</td>
+<td>通过 Claude（<code>is_error: True</code>）还是通过自己的 UI？</td>
+</tr>
+<tr>
+<td>Claude 如果连调同一个 tool 两次怎么办？</td>
+<td>Cache？幂等性？权限升级？</td>
+</tr>
+<tr>
+<td>Claude 可以看到敏感的错误细节吗？</td>
+<td>送进 Claude 前要剥掉内部 stack trace</td>
+</tr>
+<tr>
+<td>如何记录 tool_use_id 配对以便观测？</td>
+<td>Debug 生产对话时非常关键</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>PRD 没写错误处理</strong>——工程默认「log 然后丢掉」，会默默坏掉对话</li>
+<li><strong>以为 tool result 就是函数返回值</strong>——它有严格格式（role=user、content block 有特定字段），会限制工程做法</li>
+<li><strong>忽略多 tool 同时调用的情况</strong>——「Claude 一次叫两个 tool 怎么办」是真的设计问题，不是 edge case</li>
+<li><strong>没编观测性预算</strong>——tool_use_id 跟踪对 debug 生产环境很重要，但通常一开始没排进 scope</li>
+<li><strong>把 <code>is_error</code> 当工程细节</strong>——它其实是产品决策：要让 Claude 解释失败，还是用自己的 UI 挡掉？</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>每一个 <code>tool_result</code> 都是用 <code>tool_use_id</code> 做 key 的回执。PM 教训：tool 失败其实是伪装的产品功能。选「Claude 看到错误并解释」（<code>is_error: True</code>）还是「绕过 Claude 自己显示错误」是 UX 决策，直接影响用户信任和恢复率。不要随便上线——要刻意设计。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：记住 <code>tool_result</code> block 的字段，以及它住在 user role message 里。</li>
+<li><strong>D1（Agentic Architecture）</strong>：理解 tool_result 是 agentic 请求/响应配对的后半段。</li>
+<li>考题会描述 tool 失败的情境，问你如何告知 Claude——答案几乎永远是「送一个 <code>is_error: True</code> 的 <code>tool_result</code> block」。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用什么比喻来理解 <code>tool_use_id</code> / <code>tool_result</code> 配对？</td>
+<td>餐厅点餐票——每张票号都要从前厅送到厨房再送回桌子</td>
+</tr>
+<tr>
+<td>为什么 <code>is_error: True</code> 是 PM 要在乎的事，不只是工程 flag？</td>
+<td>它决定 Claude 要不要跟用户解释失败，或是 UI 自己挡掉——这是影响信任的 UX 决策</td>
+</tr>
+<tr>
+<td>Tool result 最糟的故障模式是什么？</td>
+<td>静默成功——忘了填 <code>is_error: True</code>，让 Claude 幻觉出成功结果</td>
+</tr>
+<tr>
+<td>任何使用 tool 的功能 PRD 必须写什么？</td>
+<td>Timeout 预算、错误处理策略、多 tool 行为、tool_use_id 的观测性</td>
+</tr>
+<tr>
+<td>为什么 <code>content</code> 直接塞 dict 会坏？</td>
+<td>API 要求 <code>content</code> 是字符串（或 block list），dict 要 JSON serialize</td>
+</tr>
+<tr>
+<td>Claude 一次叫两个 tool，要回几个结果？</td>
+<td>恰好两个——每个 <code>ToolUseBlock</code> 都要在同回合有对应的 <code>tool_result</code></td>
+</tr>
+<tr>
+<td><code>tool_result</code> block 放在 message 结构的哪里？</td>
+<td>放在 user role message 的 <code>content</code> 数组里</td>
+</tr>
+<tr>
+<td>生产中后端丢了一个 tool result 会怎样？</td>
+<td>下一次 API 调用回 400，对话救不回来，用户会看到错误</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>15 Mcp Review Eng Zh Cn</title>
+<title>Mcp Review Eng Zh Cn</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -57,12 +57,11 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>三大 Primitives：完整参考</h2>
 <h3>1. Tools — Model-Controlled</h3>
 <p>Claude 在推理过程中决定何时、如何调用 tools。</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 def calculate_sqrt(number: float) -&gt; float:
     &quot;&quot;&quot;Calculate the square root of a number.&quot;&quot;&quot;
     return math.sqrt(number)
 </code></pre>
-
 <p><strong>何时使用</strong>：给 Claude 原生没有的能力 — 数据库查询、API 调用、文件操作、计算、代码执行。</p>
 <p><strong>关键特性</strong>：<br />
 - Claude 自主决定调用时机<br />
@@ -70,11 +69,10 @@ def calculate_sqrt(number: float) -&gt; float:
 - 可以有副作用（写入、删除、发送）</p>
 <h3>2. Resources — App-Controlled</h3>
 <p>你的应用代码决定何时获取 resource 数据。</p>
-<pre class="highlight"><code class="language-python">@mcp.resource(&quot;docs://documents/{doc_id}&quot;, mime_type=&quot;text/plain&quot;)
+<pre><code class="language-python">@mcp.resource(&quot;docs://documents/{doc_id}&quot;, mime_type=&quot;text/plain&quot;)
 def fetch_doc(doc_id: str) -&gt; str:
     return docs[doc_id]
 </code></pre>
-
 <p><strong>何时使用</strong>：为 UI 显示获取数据或将 context 注入 prompt — 自动补全列表、文档引用、侧边栏面板。</p>
 <p><strong>关键特性</strong>：<br />
 - 应用代码调用 <code>read_resource()</code>，不是 Claude<br />
@@ -82,11 +80,10 @@ def fetch_doc(doc_id: str) -&gt; str:
 - 只读 — 无副作用</p>
 <h3>3. Prompts — User-Controlled</h3>
 <p>用户通过 UI 交互明确触发预定义工作流程。</p>
-<pre class="highlight"><code class="language-python">@mcp.prompt(name=&quot;format&quot;, description=&quot;Rewrite document in Markdown&quot;)
+<pre><code class="language-python">@mcp.prompt(name=&quot;format&quot;, description=&quot;Rewrite document in Markdown&quot;)
 def format_document(doc_id: str = Field(...)) -&gt; list[base.Message]:
     return [base.UserMessage(f&quot;Reformat document {doc_id} to markdown...&quot;)]
 </code></pre>
-
 <p><strong>何时使用</strong>：用户按需触发的预定义、可重复工作流程 — slash commands、工作流程按钮。</p>
 <p><strong>关键特性</strong>：<br />
 - 用户通过 <code>/command</code>、按钮点击或菜单选择触发<br />
@@ -95,7 +92,7 @@ def format_document(doc_id: str = Field(...)) -&gt; list[base.Message]:
 <hr />
 <h2>决策指南</h2>
 <p>这是 CCA 考试最重要的决策框架：</p>
-<pre class="highlight"><code>需要给 Claude 新能力？
+<pre><code>需要给 Claude 新能力？
   → TOOLS（model-controlled）
 
 需要为 UI 显示或 prompt context 获取数据？
@@ -104,7 +101,6 @@ def format_document(doc_id: str = Field(...)) -&gt; list[base.Message]:
 想要用户可触发的预定义工作流程？
   → PROMPTS（user-controlled）
 </code></pre>
-
 <h3>扩展决策矩阵</h3>
 <table>
 <thead>

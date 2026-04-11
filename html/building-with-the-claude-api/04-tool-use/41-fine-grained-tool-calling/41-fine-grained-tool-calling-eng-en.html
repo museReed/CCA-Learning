@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fine Grained Tool Calling Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Fine-Grained Tool Calling — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%), D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (tool schema &amp; selection), 2.4 (multi-turn tool loops), 5.2 (streaming &amp; responsiveness)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 41</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Fine-grained tool calling is an opt-in streaming mode that disables server-side JSON validation of tool arguments, letting you receive partial tool_use JSON chunks in real time at the cost of having to handle invalid JSON yourself.</p>
+<hr />
+<h2>Background: Tool Use + Streaming</h2>
+<p>When you enable streaming on a messages request with tools, Claude emits events as the response is generated:</p>
+<ul>
+<li><code>ContentBlockStart</code> / <code>ContentBlockStop</code></li>
+<li><code>ContentBlockDelta</code> — for regular text generation</li>
+<li><code>InputJsonEvent</code> — specific to tool_use blocks, delivering partial JSON</li>
+</ul>
+<p>Each <code>InputJsonEvent</code> carries two key properties:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>partial_json</code></td>
+<td>A chunk of JSON representing part of the tool arguments</td>
+</tr>
+<tr>
+<td><code>snapshot</code></td>
+<td>The cumulative JSON built up from all chunks received so far</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-python">for chunk in stream:
+    if chunk.type == &quot;input_json&quot;:
+        print(chunk.partial_json)     # incremental piece
+        current_args = chunk.snapshot # accumulated so far
+</code></pre>
+<hr />
+<h2>Default Behavior: Buffered Validation</h2>
+<p>By default, the Anthropic API does <strong>not</strong> forward every token of tool JSON the moment Claude generates it. Instead, the server buffers chunks and validates them against your tool schema before flushing them to the client. The unit of validation is the <strong>top-level key-value pair</strong>.</p>
+<p>Given a tool schema that expects:</p>
+<pre><code class="language-json">{
+  &quot;abstract&quot;: &quot;This paper presents a novel...&quot;,
+  &quot;meta&quot;: {
+    &quot;word_count&quot;: 847,
+    &quot;review&quot;: &quot;This paper introduces QuanNet...&quot;
+  }
+}
+</code></pre>
+<p>The API will:</p>
+<ol>
+<li>Wait until the entire <code>abstract</code> value is complete</li>
+<li>Validate that key-value pair against the schema</li>
+<li>Send all buffered chunks for <code>abstract</code> at once</li>
+<li>Repeat for the <code>meta</code> object</li>
+</ol>
+<p>This is why tool-use streaming feels like <strong>delays followed by bursts</strong>, not a smooth token-by-token stream. Validation is protecting you from emitting invalid or unusable partial arguments to your downstream code.</p>
+<hr />
+<h2>Enabling Fine-Grained Tool Calling</h2>
+<p>Fine-grained tool calling turns <strong>off</strong> this server-side validation:</p>
+<pre><code class="language-python">run_conversation(
+    messages,
+    tools=[save_article_schema],
+    fine_grained=True,
+)
+</code></pre>
+<p>The effect:</p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Default</th>
+<th>Fine-Grained</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JSON validation</td>
+<td>On (per top-level key-value)</td>
+<td>Off</td>
+</tr>
+<tr>
+<td>Chunk delivery</td>
+<td>Buffered bursts after each valid key</td>
+<td>Immediate, token-by-token</td>
+</tr>
+<tr>
+<td>UX responsiveness</td>
+<td>Delayed feel</td>
+<td>Real-time feel</td>
+</tr>
+<tr>
+<td>Invalid JSON possible?</td>
+<td>No (rejected/coerced server-side)</td>
+<td><strong>Yes — client must handle</strong></td>
+</tr>
+</tbody>
+</table>
+<p>With fine-grained enabled, you may receive a <code>word_count</code> value well before the rest of the <code>meta</code> object is complete, unlocking early UI updates or pre-processing.</p>
+<hr />
+<h2>Handling Invalid JSON</h2>
+<p>Because validation is disabled, Claude might emit values that are not yet legal JSON, for example <code>"word_count": undefined</code> rather than a number. Your snapshot parser must tolerate this:</p>
+<pre><code class="language-python">import json
+
+for chunk in stream:
+    if chunk.type != &quot;input_json&quot;:
+        continue
+    try:
+        parsed_args = json.loads(chunk.snapshot)
+    except json.JSONDecodeError:
+        # Partial / invalid JSON — keep accumulating, do not crash
+        continue
+    # Once parseable, you can safely act on parsed_args
+</code></pre>
+<p>Typical defensive patterns:</p>
+<ol>
+<li><strong>Accumulate and retry</strong> — try to parse the snapshot; on failure, wait for more chunks</li>
+<li><strong>Per-field extraction</strong> — parse out completed keys with a lenient regex or incremental JSON parser</li>
+<li><strong>Final validation</strong> — when <code>ContentBlockStop</code> arrives for the tool_use block, perform one last strict parse and schema-check</li>
+</ol>
+<hr />
+<h2>When to Use Fine-Grained Tool Calling</h2>
+<p>Enable it when any of these apply:</p>
+<ul>
+<li>You need to <strong>show users real-time progress</strong> on tool argument generation (e.g., streaming a draft article into a preview pane)</li>
+<li>You want to <strong>start processing partial tool results</strong> to reduce end-to-end latency</li>
+<li>The default buffering delays negatively impact your UX</li>
+<li>You can invest in <strong>robust JSON error handling</strong> throughout the streaming pipeline</li>
+</ul>
+<p>For most applications, the default (validated) behavior is adequate. Only reach for fine-grained when the buffering pauses are visibly harmful to the user experience.</p>
+<hr />
+<h2>Comparison With Non-Streaming Tool Use</h2>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Latency Profile</th>
+<th>Validation</th>
+<th>Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Non-streaming</td>
+<td>One response at the end</td>
+<td>Full schema validation</td>
+<td>Simplest</td>
+</tr>
+<tr>
+<td>Streaming (default)</td>
+<td>Bursts between top-level keys</td>
+<td>Per-key validation</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Streaming (fine-grained)</td>
+<td>Smooth token-by-token</td>
+<td>None (client's responsibility)</td>
+<td>Highest</td>
+</tr>
+</tbody>
+</table>
+<p>Use the simplest mode that meets your UX needs. The added complexity of fine-grained is only justified when buffering delays are actually causing user-visible pauses.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Enabling fine-grained without adding JSON error handling</strong> — your stream consumer will crash on the first partial snapshot that fails <code>json.loads</code>.</li>
+<li><strong>Parsing <code>partial_json</code> directly as a standalone JSON document</strong> — <code>partial_json</code> is a fragment; parse the <code>snapshot</code> instead.</li>
+<li><strong>Treating the first parseable snapshot as final</strong> — the snapshot keeps growing; only treat it as final when <code>ContentBlockStop</code> fires for that tool_use block.</li>
+<li><strong>Using fine-grained for tools that depend on fully validated inputs</strong> — if your downstream code cannot tolerate malformed arguments, stay with the default.</li>
+<li><strong>Not final-validating against the schema</strong> — fine-grained skips server validation entirely, so you must validate before executing the tool.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Fine-grained tool calling is a latency/correctness tradeoff: you trade server-side JSON validation for faster, smoother streaming. The default mode is safer; fine-grained is for cases where visible streaming progress is worth the cost of implementing robust JSON error handling on the client.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>: Understand that tool argument streaming is buffered by default and validated per top-level key. Know how to opt out.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: Latency optimization for production UX — streaming tool_use is a concrete lever.</li>
+<li>Watch for questions that describe "delayed bursts" in tool argument streaming — the answer is that per-key validation is causing the buffering.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What event type delivers partial tool arguments during streaming?</td>
+<td><code>InputJsonEvent</code>, with <code>partial_json</code> (chunk) and <code>snapshot</code> (cumulative)</td>
+</tr>
+<tr>
+<td>What does the default streaming mode validate?</td>
+<td>Each top-level key-value pair of the tool arguments against the schema</td>
+</tr>
+<tr>
+<td>What does <code>fine_grained=True</code> disable?</td>
+<td>Server-side JSON validation of tool arguments during streaming</td>
+</tr>
+<tr>
+<td>Why does default tool-use streaming feel "bursty"?</td>
+<td>The API buffers chunks until a complete, valid top-level key-value pair is ready</td>
+</tr>
+<tr>
+<td>What is the main risk of fine-grained tool calling?</td>
+<td>Claude may emit invalid JSON; the client must handle <code>json.JSONDecodeError</code> gracefully</td>
+</tr>
+<tr>
+<td>When should you enable fine-grained tool calling?</td>
+<td>When real-time streaming progress matters and you can implement robust JSON error handling</td>
+</tr>
+<tr>
+<td>What property gives the accumulated JSON so far?</td>
+<td><code>snapshot</code> on the <code>InputJsonEvent</code></td>
+</tr>
+<tr>
+<td>What must you still do after fine-grained streaming finishes?</td>
+<td>Perform a final strict parse and schema check before executing the tool</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing Tool Use Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>介绍 Tool Use — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试 Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2（agentic loop 基础）、2.1（tool schema 设计）、2.4（multi-turn tool loop）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 32</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Tool use 是让 Claude 从「博学的聊天机器人」变成「能干的队友」的功能 — 也是任何依赖实时数据或真实动作的产品，想把 AI 功能做成商业可行的关键。</p>
+<hr />
+<h2>心智模型：酒店礼宾</h2>
+<p>想象一位酒店礼宾读过所有旅游书，但被规定永远不能离开大厅。</p>
+<ul>
+<li>问这座城市的历史 — 答得完美。</li>
+<li>问「那家餐厅现在还开着吗？」— 礼宾只能耸肩。</li>
+</ul>
+<p>Tool use 就像给这位礼宾一部<strong>电话和一份可拨打的电话清单</strong>。现在你问那家餐厅，他拿起电话打过去问，拿到答案再回你。从客人角度看，礼宾突然变得超级有用 — 可是他并没有变聪明，只是<strong>能接触到外面的世界了</strong>。</p>
+<p>这是 Claude API 对 PM 最大的那一把钥匙。</p>
+<hr />
+<h2>PM 为什么要关心</h2>
+<p>过去一年出货的 AI 功能，几乎没有哪个不依赖 tool use。下面这些需求都在暗示「你需要 tools」：</p>
+<ul>
+<li>「显示这位客户最新的订单」</li>
+<li>「帮我周二下午三点约个会」</li>
+<li>「总结这张 Jira 工单目前的状态」</li>
+<li>「发一封提醒邮件给团队」</li>
+<li>「我用户要去的城市现在天气怎样？」</li>
+</ul>
+<p>没有 tools，上面每一题的答案都是「我不知道」。有 tools 就能拿到实时、可信、可执行的答案。</p>
+<hr />
+<h2>产品使用场景</h2>
+<h3>非用 Tool Use 不可的场景</h3>
+<table>
+<thead>
+<tr>
+<th>用户需求</th>
+<th>为什么只有 tools 能解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>实时数据（股价、天气、比分）</td>
+<td>不在训练数据里 — 必须 live fetch</td>
+</tr>
+<tr>
+<td>私有/内部数据（CRM、内部 wiki）</td>
+<td>训练时从未看过</td>
+</tr>
+<tr>
+<td>用户个人状态（我的日程、邮箱）</td>
+<td>因人而异 — 不可能 pre-train</td>
+</tr>
+<tr>
+<td>需要副作用的动作（发邮件、开工单）</td>
+<td>必须在现实世界真的发生</td>
+</tr>
+<tr>
+<td>实时计算（查数据库、算实时数字）</td>
+<td>必须执行代码，不能幻觉</td>
+</tr>
+</tbody>
+</table>
+<h3>Tool Use 过度设计的场景</h3>
+<table>
+<thead>
+<tr>
+<th>用户需求</th>
+<th>更好的替代方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通用知识问答</td>
+<td>基础模型就够</td>
+</tr>
+<tr>
+<td>创意写作/头脑风暴</td>
+<td>不需要外部数据</td>
+</tr>
+<tr>
+<td>重写/总结用户粘贴的内容</td>
+<td>文字已经在 prompt 里</td>
+</tr>
+<tr>
+<td>解释概念</td>
+<td>训练数据就足够</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>四步骤流程（白话版）</h2>
+<ol>
+<li><strong>App 问 Claude</strong> — 「这是用户的问题，你可以用的工具在这。」</li>
+<li><strong>Claude 举手</strong> — 「我要旧金山的天气。帮我调用那个工具。」</li>
+<li><strong>App 帮忙做</strong> — 去调真正的天气 API，拿到真数据。</li>
+<li><strong>App 回 Claude</strong> — 「天气数据给你。」然后 Claude 综合所有东西，回给用户最终答案。</li>
+</ol>
+<p>同一个用户问题会产生两次 API call。这有成本、延迟、可靠性的代价，排期时要考虑进去。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<p>规划 AI 功能时问自己：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>若是</th>
+<th>意味着</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>答案依赖比模型训练日期更新的数据吗？</td>
+<td>是</td>
+<td>需要 tools</td>
+</tr>
+<tr>
+<td>这功能需要真的执行动作，不只是聊？</td>
+<td>是</td>
+<td>需要 tools</td>
+</tr>
+<tr>
+<td>这功能需要单个用户/租户的数据？</td>
+<td>是</td>
+<td>需要 tools</td>
+</tr>
+<tr>
+<td>用户会因为数据过期而抱怨？</td>
+<td>是</td>
+<td>需要 tools</td>
+</tr>
+<tr>
+<td>功能纯粹是语言处理（翻译、总结、改写）？</td>
+<td>是</td>
+<td>大概不需要 tools</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>成本、延迟、可靠性的取舍</h2>
+<p>Tool use 强大但不是白吃的午餐。要先规划：</p>
+<ul>
+<li><strong>延迟加倍</strong> — 每一轮 tool-using turn 至少两次 API round trip 加上工具本身的延迟。</li>
+<li><strong>Token 成本提高</strong> — 对话历史每轮增长；tool 定义每次 call 都算 input token。</li>
+<li><strong>新的失败模式</strong> — 上游 API 可能 fail、timeout、返回坏数据。app 必须优雅处理。</li>
+<li><strong>可观测性负担</strong> — 必须 log 每次 tool call 的参数与结果，才能 debug 生产问题。</li>
+</ul>
+<p>好的 PM 习惯：在 PRD 里加一条「tool reliability SLA」以及「tool 失败时的 fallback 行为」。</p>
+<hr />
+<h2>PM 常犯的错</h2>
+<ol>
+<li><strong>相信 prompt engineering 能取代 tools</strong> — 数据不在训练里，再神的 prompt 也变不出来。早点找工程师 escalate。</li>
+<li><strong>低估延迟</strong> — 两次 API call 加一次工具调用轻松吃掉 3 到 5 秒。记得设计 loading state。</li>
+<li><strong>没预算处理 tool 错误</strong> — 上游 API 会挂。要定义挂掉时用户看到什么。</li>
+<li><strong>一次塞太多 tools</strong> — 从一两个高价值工具开始。每多一个 tool 就多一条 bug 与模型混淆的路径。</li>
+<li><strong>忘了 tool call 是可审计的</strong> — 每一个 Claude 采取的动作都该被 log，尤其是写入操作。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Tool use 是决定你的 AI 产品是「花哨的 autocomplete」还是「真正助手」的那个功能。任何需要实时信息、个人数据或真实动作的产品需求，都暗示着要用 tool use。这个区别是 AI PM 的入门门槛，也是 CCA 考试 D1（agentic architecture）与 D2（tool design）重复出现的考点。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：认识 tool_use request/response 模式；知道 <code>tool_result</code> 必须指回 <code>tool_use_id</code>。</li>
+<li><strong>D1（Agentic Architecture）</strong>：tool use loop 是所有 agent pattern 的基础。Multi-turn reasoning with tools 是标准 agent 范例。</li>
+<li>考题常见模式：场景问「Claude 该如何回答关于现在 X 的问题？」— 答案永远是「定义一个 tool 让 Claude 调用」。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool use 的「酒店礼宾」比喻是什么？</td>
+<td>礼宾读遍所有书但不能离开大厅。Tools 就是给他一部电话，让他可以打给外面的世界。</td>
+</tr>
+<tr>
+<td>什么情况下 tool use 不是对的答案？</td>
+<td>纯语言处理（翻译、总结、改写、头脑风暴）且不需要外部数据时。</td>
+</tr>
+<tr>
+<td>加上 tool use 后延迟会怎样？</td>
+<td>通常至少加倍 — 每个用户问题至少两次 API call 加上工具本身的延迟。</td>
+</tr>
+<tr>
+<td>需要 tool use 的五大产品场景？</td>
+<td>实时数据、私有/内部数据、用户个人状态、有副作用的动作、实时计算。</td>
+</tr>
+<tr>
+<td>为什么 tool use 是 AI 产品的关键解锁？</td>
+<td>它让 Claude 能获取实时数据、执行真实动作，从博学聊天机器人变成能干队友。</td>
+</tr>
+<tr>
+<td>任何用 tool 的功能在 PRD 里一定要包含什么？</td>
+<td>Tool reliability SLA、tool 失败时的 fallback、loading state UX、log/审计需求。</td>
+</tr>
+<tr>
+<td>Prompt engineering 能替代 tools 抓实时数据吗？</td>
+<td>不能 — 训练里没有的数据，再怎么巧妙的 prompt 也生不出来。</td>
+</tr>
+<tr>
+<td>一次用到 tool 的用户问题要几次 API call？</td>
+<td>至少两次 — 一次收 tool_use 请求，一次送 tool_result 拿最终答案。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anthropic Apps Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Anthropic Apps — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (Claude Code overview), 1.2 (agentic patterns), 1.4 (Computer Use as agent case study)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 73</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude Code and Computer Use are Anthropic's two flagship "agent" products — they are your reference point for the user experience, trust model, and value proposition you should aim for when building your own AI-powered workflows.</p>
+<hr />
+<h2>Mental Model: The Intern Analogy</h2>
+<p>Think of the three surfaces as three different kinds of helper:</p>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Helper equivalent</th>
+<th>What you can ask for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude.ai</td>
+<td>A bright friend you text</td>
+<td>Quick answers, drafts, brainstorming</td>
+</tr>
+<tr>
+<td>Anthropic API</td>
+<td>A toolbox on a workbench</td>
+<td>Parts you assemble into something of your own</td>
+</tr>
+<tr>
+<td><strong>Claude Code</strong></td>
+<td>An engineering intern at your keyboard</td>
+<td>"Fix this bug, run the tests, open the PR"</td>
+</tr>
+<tr>
+<td><strong>Computer Use</strong></td>
+<td>A virtual operator driving a PC</td>
+<td>"Log into the dashboard, export the report, email it"</td>
+</tr>
+</tbody>
+</table>
+<p>PM takeaway: Claude.ai is a product, the API is infrastructure, and Claude Code + Computer Use are <em>agent products</em> — they do work, not just answer questions.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Most AI features today are chat interfaces. The interesting product category — and the one the industry is moving toward — is agents. Claude Code and Computer Use are the best studied examples of each major agent archetype:</p>
+<table>
+<thead>
+<tr>
+<th>Archetype</th>
+<th>Example</th>
+<th>Works best when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Domain-native agent</td>
+<td>Claude Code (terminal, file tools)</td>
+<td>Target domain has clean, typed tools</td>
+</tr>
+<tr>
+<td>GUI-driving agent</td>
+<td>Computer Use (desktop via screenshots)</td>
+<td>Target domain has no API, only a UI</td>
+</tr>
+</tbody>
+</table>
+<p>When you are scoping an AI feature, you should first decide which archetype applies. A native agent is cheaper, faster, and more reliable. A GUI-driving agent unlocks things that no other approach can reach.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When to Build a Domain-Native Agent (Claude Code archetype)</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why the archetype fits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Developer tooling inside your IDE or CLI</td>
+<td>Clean tool integrations exist (filesystem, git, language servers)</td>
+</tr>
+<tr>
+<td>Data analyst assistant over a SQL database</td>
+<td>You can expose typed tools for query, schema, metric catalog</td>
+</tr>
+<tr>
+<td>Customer support operator over your ticketing API</td>
+<td>First-class APIs give reliable, auditable actions</td>
+</tr>
+</tbody>
+</table>
+<h3>When to Build a GUI-Driving Agent (Computer Use archetype)</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why the archetype fits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Automating a legacy desktop app without an API</td>
+<td>Only UI exists — agent must see and click</td>
+</tr>
+<tr>
+<td>QA testing across third-party web apps</td>
+<td>Visual regression + interaction flows</td>
+</tr>
+<tr>
+<td>Enterprise RPA replacing brittle macro scripts</td>
+<td>Agent adapts to layout changes using vision</td>
+</tr>
+</tbody>
+</table>
+<h3>When NOT to Use Either</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simple Q&amp;A inside an app</td>
+<td>Plain chat with the API, not an agent</td>
+</tr>
+<tr>
+<td>Fixed deterministic flow with no ambiguity</td>
+<td>A classic workflow / RPA script, no LLM</td>
+</tr>
+<tr>
+<td>Real-time ultra-low-latency requirement</td>
+<td>Deterministic code path — agent loops are too slow</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When you see a proposal for a new "AI feature," ask:</p>
+<ol>
+<li><strong>Is it really an agent?</strong> Does it need multi-step tool execution, environmental interaction, and autonomous decision-making? If not, it is a chat feature — lower risk, lower ceiling.</li>
+<li><strong>Which archetype fits?</strong> Native tools (Claude Code style) or GUI driving (Computer Use style)?</li>
+<li><strong>What is the trust boundary?</strong> Agents act on your behalf. Where does the human approve?</li>
+<li><strong>What is the failure mode?</strong> File corruption, wrong click, irreversible action — design safeguards before building.</li>
+<li><strong>What does the reference implementation teach us?</strong> Both apps ship with permission prompts, memory (CLAUDE.md), and iterative workflows — lift those patterns.</li>
+</ol>
+<hr />
+<h2>The Trust and Control Tradeoff</h2>
+<p>Agents are powerful because they act. That same property makes them risky. Claude Code and Computer Use both illustrate the spectrum:</p>
+<table>
+<thead>
+<tr>
+<th>Control level</th>
+<th>Claude Code behavior</th>
+<th>User experience</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read-only</td>
+<td>Show a plan, ask permission</td>
+<td>Safe, slow</td>
+</tr>
+<tr>
+<td>Confirm per action</td>
+<td>Ask before each file edit or shell command</td>
+<td>Balanced</td>
+</tr>
+<tr>
+<td>Auto-approve</td>
+<td>Run a batch of changes autonomously</td>
+<td>Fast, risky</td>
+</tr>
+</tbody>
+</table>
+<p>As a PM, your job is to pick a default and expose the right escape hatches. The course is clear: good agents are <strong>collaborative partners</strong>, not autonomous actors.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Pitching "an agent" without defining which archetype</strong> — "native-tool agent" and "GUI-driving agent" have very different cost and reliability curves.</li>
+<li><strong>Assuming Claude.ai UX translates to agents</strong> — agents need planning surfaces, permission prompts, and recovery affordances that a chat UI does not.</li>
+<li><strong>Ignoring the context problem</strong> — Claude Code invests heavily in CLAUDE.md because context management is half the battle. Ad-hoc prompting does not scale.</li>
+<li><strong>Treating Computer Use as a cheap workaround for missing APIs</strong> — it works, but it is slower, more fragile, and costs more tokens. Build an API first if you can.</li>
+<li><strong>Skipping the human approval step to feel "more autonomous"</strong> — for anything destructive, approval is not optional.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Claude Code and Computer Use are not just products — they are <strong>PM reference designs</strong> for the two dominant agent archetypes: native-tool agents and GUI-driving agents. Study their UX choices (permission prompts, persistent memory files, plan-then-execute workflows) and you have a template for your own agent feature.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>: Be ready to identify "is this an agent?" scenarios by mapping onto the four properties.</li>
+<li><strong>D3 (Claude Code Configuration)</strong>: This lesson sets up the Claude Code-heavy section of the exam; know the app-category vocabulary.</li>
+<li>Questions often contrast chat, API, and agent — know which role each plays.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are Anthropic's two flagship agent applications?</td>
+<td>Claude Code and Computer Use</td>
+</tr>
+<tr>
+<td>In the intern analogy, what is Claude Code equivalent to?</td>
+<td>An engineering intern sitting at your keyboard, doing the actual work</td>
+</tr>
+<tr>
+<td>What are the two dominant agent archetypes from this lesson?</td>
+<td>Domain-native agents (Claude Code style) and GUI-driving agents (Computer Use style)</td>
+</tr>
+<tr>
+<td>When should a PM prefer a native-tool agent over a GUI-driving one?</td>
+<td>Whenever the target domain has clean APIs or typed tools — it is cheaper and more reliable</td>
+</tr>
+<tr>
+<td>When is a GUI-driving agent the right call?</td>
+<td>When the target app has no API, only a UI (legacy desktop apps, third-party dashboards)</td>
+</tr>
+<tr>
+<td>What is the trust tradeoff PMs must manage with agents?</td>
+<td>Agents act on behalf of the user — you must choose between read-only, confirm-per-action, and auto-approve defaults</td>
+</tr>
+<tr>
+<td>Why is CLAUDE.md relevant to PMs?</td>
+<td>It is the product pattern for persistent context — a reminder that agent UX includes memory, not just prompts</td>
+</tr>
+<tr>
+<td>Is Computer Use a replacement for building proper APIs?</td>
+<td>No — it is a fallback when no API exists; it is slower, more fragile, and more expensive</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

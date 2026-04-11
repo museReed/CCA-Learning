@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>08 Making Changes Eng Zh Tw</title>
+<title>Making Changes Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -78,10 +78,9 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p>Planning Mode 是 Claude Code 處理複雜、多檔案變更的機制。它將<strong>規劃</strong>與<strong>執行</strong>分離。</p>
 <h3>如何啟用</h3>
 <p>按 <code>Shift+Tab</code> 兩次（如果已經自動接受編輯則按一次）：</p>
-<pre class="highlight"><code>一般模式：  提問 → Claude 立即執行
+<pre><code>一般模式：  提問 → Claude 立即執行
 Plan Mode：提問 → Claude 規劃 → 你審核 → Claude 執行
 </code></pre>
-
 <h3>Planning Mode 做什麼</h3>
 <ol>
 <li><strong>讀取更多檔案</strong> — Claude 更廣泛地探索你的程式碼庫</li>
@@ -89,7 +88,7 @@ Plan Mode：提問 → Claude 規劃 → 你審核 → Claude 執行
 <li><strong>等待核准</strong> — 你在任何變更前審核並可以重新導向</li>
 <li><strong>執行計畫</strong> — 只在你確認後</li>
 </ol>
-<pre class="highlight"><code>┌──────────┐    ┌─────────────────┐    ┌──────────────┐
+<pre><code>┌──────────┐    ┌─────────────────┐    ┌──────────────┐
 │ 你提問   │───→│ Claude 探索     │───→│ Claude 規劃  │
 └──────────┘    │（讀取檔案、     │    │（逐步        │
                 │  搜尋程式碼）   │    │  行動清單）   │
@@ -108,7 +107,6 @@ Plan Mode：提問 → Claude 規劃 → 你審核 → Claude 執行
                               │ → 執行   │        │ → 重新規劃│
                               └──────────┘        └──────────┘
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>關鍵洞察</strong></p>
 <p>Planning Mode 不只是「較慢的執行」。它是根本不同的工作流，在行動前蒐集更多 context。規劃階段的額外檔案讀取通常能捕捉到直接執行會遺漏的相依性和邊界情況。</p>
@@ -240,7 +238,7 @@ Plan Mode：提問 → Claude 規劃 → 你審核 → Claude 執行
 </tr>
 </tbody>
 </table>
-<pre class="highlight"><code>複雜度矩陣：
+<pre><code>複雜度矩陣：
                         低推理            高推理
                         複雜度            複雜度
                     ┌─────────────────┬─────────────────┐
@@ -251,7 +249,6 @@ Plan Mode：提問 → Claude 規劃 → 你審核 → Claude 執行
 複雜度              │   Mode           │   Thinking Mode │
                     └─────────────────┴─────────────────┘
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>關鍵洞察</strong></p>
 <p>你可以組合兩種模式。對於需要理解多個檔案（廣度）又要解決複雜演算法（深度）的任務，使用 Planning Mode 加上 "think" 或 "ultrathink" 關鍵字。這讓 Claude 同時獲得廣泛 context 和深度推理。</p>

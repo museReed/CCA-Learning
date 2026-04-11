@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workflows Vs Agents Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Workflows vs Agents — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%); D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (agent vs workflow architecture), 1.2 (agentic loop), 5.1 (production pattern selection)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 83</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p><strong>Default to workflows, escalate to agents only when unavoidable</strong> — workflows give reliability and predictability for known problems, agents give flexibility for open-ended ones, and the engineer's job is to pick the cheapest pattern that actually solves the user's problem.</p>
+<hr />
+<h2>Definitions</h2>
+<h3>Workflow</h3>
+<p>A <strong>predefined sequence of Claude calls</strong> that solves a known problem. The developer writes the control flow explicitly: "call model A to classify, then call model B to draft, then call model C to review." Each call has a narrow job.</p>
+<pre><code class="language-python">def summarize_ticket(ticket):
+    category = classify(ticket)               # Step 1
+    summary = summarize(ticket, category)     # Step 2
+    priority = score_priority(summary)        # Step 3
+    return {&quot;category&quot;: category, &quot;summary&quot;: summary, &quot;priority&quot;: priority}
+</code></pre>
+<h3>Agent</h3>
+<p>A <strong>goal + tool set</strong> handed to Claude, which decides at runtime what to call and in what order. No hard-coded sequence.</p>
+<pre><code class="language-python">messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_goal}]
+while True:
+    response = client.messages.create(model=&quot;claude-sonnet-4-5&quot;, tools=tools, messages=messages)
+    if response.stop_reason == &quot;end_turn&quot;: break
+    # handle tool_use, loop continues
+</code></pre>
+<p>The difference is <strong>who owns the control flow</strong>: developer (workflow) or Claude (agent).</p>
+<hr />
+<h2>The Full Comparison Table</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Workflow</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Flexibility</strong></td>
+<td>Low — handles only the shapes you hard-coded</td>
+<td>High — combines tools for novel requests</td>
+</tr>
+<tr>
+<td><strong>Reliability</strong></td>
+<td>High — each step is narrow and well-tested</td>
+<td>Lower — open-ended planning can fail unexpectedly</td>
+</tr>
+<tr>
+<td><strong>Cost per task</strong></td>
+<td>Low — predictable token count, cacheable</td>
+<td>High — multiple loop iterations, more tokens</td>
+</tr>
+<tr>
+<td><strong>Latency</strong></td>
+<td>Low — fixed number of sequential calls</td>
+<td>Variable — depends on how many loops Claude takes</td>
+</tr>
+<tr>
+<td><strong>Debuggability</strong></td>
+<td>High — you know the step that failed</td>
+<td>Low — non-deterministic trajectory, harder to reproduce</td>
+</tr>
+<tr>
+<td><strong>Predictability</strong></td>
+<td>High — same input, same sequence every time</td>
+<td>Low — Claude may choose different tool chains for similar inputs</td>
+</tr>
+<tr>
+<td><strong>Eval effort</strong></td>
+<td>Moderate — test each step in isolation</td>
+<td>Hard — must eval emergent behavior, more test cases</td>
+</tr>
+<tr>
+<td><strong>Upfront design cost</strong></td>
+<td>High — you must enumerate the flow</td>
+<td>Lower — design the toolbox, not the flow</td>
+</tr>
+<tr>
+<td><strong>Best use cases</strong></td>
+<td>Summarization, classification, extraction, translation, compliance flows</td>
+<td>Coding assistants, creative content, open Q&amp;A over messy data</td>
+</tr>
+<tr>
+<td><strong>Worst use cases</strong></td>
+<td>Open-ended or varied user requests</td>
+<td>Narrow repeatable tasks with a known sequence</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Benefits and Downsides from the Source</h2>
+<h3>Workflow Benefits</h3>
+<ul>
+<li>Claude focuses on one subtask at a time, generally leading to higher accuracy</li>
+<li>Far easier to evaluate and test — you know each step</li>
+<li>More predictable and reliable execution</li>
+<li>Better suited for well-defined problems</li>
+</ul>
+<h3>Workflow Downsides</h3>
+<ul>
+<li>Far less flexible — dedicated to specific task types</li>
+<li>More constrained UX — you need to know the exact inputs</li>
+<li>Requires more upfront planning and design</li>
+</ul>
+<h3>Agent Benefits</h3>
+<ul>
+<li>More flexible UX</li>
+<li>Can combine tools in unexpected ways</li>
+<li>Handles novel situations not anticipated at design time</li>
+<li>Can ask users for additional input when needed</li>
+</ul>
+<h3>Agent Downsides</h3>
+<ul>
+<li>Lower task completion rate vs workflows</li>
+<li>Harder to instrument, test, and evaluate</li>
+<li>Less predictable behavior</li>
+</ul>
+<hr />
+<h2>The Decision Framework</h2>
+<p>The Anthropic guidance is explicit: <strong>default to workflows. Reach for agents only when workflows genuinely cannot solve the problem.</strong></p>
+<p>Walk through this checklist for every AI feature:</p>
+<pre><code>1. Can I enumerate every user flow in advance?
+   YES -&gt; workflow
+   NO  -&gt; continue
+
+2. Is the task a pure transformation (input -&gt; output) with no branching?
+   YES -&gt; workflow
+   NO  -&gt; continue
+
+3. Does the user phrase requests in varied, unpredictable ways?
+   YES -&gt; continue evaluating agent
+   NO  -&gt; workflow
+
+4. Does the correct action depend on the current environment state?
+   YES -&gt; agent (with environment inspection)
+   NO  -&gt; workflow
+
+5. Can I afford the cost, latency, and eval complexity of an agent?
+   YES -&gt; agent
+   NO  -&gt; decompose into smaller workflows
+</code></pre>
+<p>This is not a purity test — hybrid systems exist. Common pattern: an outer workflow that routes to an inner agent for the flexible steps, with workflow guardrails on the rest.</p>
+<hr />
+<h2>The Cost and Latency Math</h2>
+<p>A workflow with 3 fixed model calls at ~1000 tokens each:</p>
+<ul>
+<li><strong>Tokens</strong>: ~3000 per task (deterministic)</li>
+<li><strong>Latency</strong>: 3 sequential calls, ~3-6 seconds total</li>
+<li><strong>Cost</strong>: predictable, cacheable with prompt caching</li>
+</ul>
+<p>An agent solving the same task with 3-10 loop iterations:</p>
+<ul>
+<li><strong>Tokens</strong>: ~3000 to ~30000 per task (variable)</li>
+<li><strong>Latency</strong>: 3-10 round trips, ~5-30 seconds total</li>
+<li><strong>Cost</strong>: 1x to 10x the workflow cost for the same output quality</li>
+</ul>
+<p>If your eval shows the workflow achieves 95 percent accuracy and the agent achieves 96 percent, the agent's flexibility is probably not worth the 5-10x cost multiplier. Pick the cheapest pattern that hits your quality bar.</p>
+<hr />
+<h2>Hybrid Patterns in Practice</h2>
+<p>Real production systems rarely pick one or the other. Common hybrids:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>How It Works</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Workflow routing to agents</strong></td>
+<td>A cheap classifier workflow decides if the request needs agent-level flexibility</td>
+<td>Support ticket router: FAQ -&gt; workflow, novel bug -&gt; agent</td>
+</tr>
+<tr>
+<td><strong>Agent with workflow sub-steps</strong></td>
+<td>The agent calls a workflow as one of its tools</td>
+<td>Coding agent that calls a deterministic "run_tests" workflow</td>
+</tr>
+<tr>
+<td><strong>Agent with workflow safety gate</strong></td>
+<td>The agent proposes actions, a workflow validates them before execution</td>
+<td>AI trader proposes trades, workflow checks compliance rules</td>
+</tr>
+<tr>
+<td><strong>Retry escalation</strong></td>
+<td>Start with workflow, escalate to agent on failure</td>
+<td>Extract structured data; fall back to agent when schema varies</td>
+</tr>
+</tbody>
+</table>
+<p>These patterns let you keep the reliability of workflows for 80 percent of traffic while reserving agent flexibility for the hard 20 percent.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Agent-washing</strong> — building everything as an agent because it sounds modern, then fighting cost and eval for the rest of the project lifetime.</li>
+<li><strong>Workflow rigidity</strong> — forcing every variation into a branch of an if-tree, eventually producing unmaintainable spaghetti. This is when to escalate to an agent.</li>
+<li><strong>Skipping eval on agents</strong> — because agents have variable trajectories, you need larger, more diverse eval sets than workflows, not smaller.</li>
+<li><strong>Ignoring the latency tax</strong> — each agent loop is a round trip. Chatty agents feel sluggish even if each call is fast.</li>
+<li><strong>Not measuring the cost per successful task</strong> — "tokens per call" is the wrong metric; "cost per verified success" is what matters.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The Anthropic recommendation is crisp: default to workflows, pick agents only when you cannot predetermine the steps. Users do not care whether you built a clever agent — they care that the product works reliably. Matching the pattern to the problem (and being honest about which you actually have) is the highest-leverage architectural decision in any agentic product.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>: Expect direct questions on "when to use an agent vs a workflow." Memorize the trade-off table.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: Cost, latency, eval complexity, and debuggability are the production-facing trade-offs. Know which pattern wins on each axis.</li>
+<li>Exam phrasing cues: "varied requests," "unpredictable," "combine tools creatively" -&gt; agent; "well-defined steps," "known flow," "compliance," "cheapest predictable" -&gt; workflow.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the Anthropic default recommendation?</td>
+<td>Default to workflows; reach for agents only when workflows cannot solve the problem.</td>
+</tr>
+<tr>
+<td>Who owns the control flow in a workflow vs an agent?</td>
+<td>Workflow: the developer hard-codes the sequence. Agent: Claude decides the sequence at runtime.</td>
+</tr>
+<tr>
+<td>Name three dimensions where workflows beat agents.</td>
+<td>Reliability, cost, latency, debuggability, predictability (any three).</td>
+</tr>
+<tr>
+<td>Name three dimensions where agents beat workflows.</td>
+<td>Flexibility, novel-case coverage, user-driven conversational UX, lower upfront design cost (any three).</td>
+</tr>
+<tr>
+<td>Why are agents harder to evaluate than workflows?</td>
+<td>Agents have non-deterministic trajectories — you cannot test each fixed step in isolation; you must test emergent behavior over many cases.</td>
+</tr>
+<tr>
+<td>What is a hybrid pattern that combines both?</td>
+<td>A workflow router that sends easy cases to workflow branches and hard cases to an agent.</td>
+</tr>
+<tr>
+<td>What cost metric matters more than "tokens per call"?</td>
+<td>Cost per verified successful task — agents may use more tokens but still be cheaper per success if they handle cases workflows cannot.</td>
+</tr>
+<tr>
+<td>In the decision framework, what is the first question to ask?</td>
+<td>Can I enumerate every user flow in advance? If yes -&gt; workflow.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

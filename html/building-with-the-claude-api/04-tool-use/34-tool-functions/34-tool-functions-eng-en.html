@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Functions Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Tool Functions — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (tool function definition), 2.1 (tool schema design), 1.2 (agentic loop foundation)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 34</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A tool function is just a plain Python function — but one whose inputs, error messages, and behavior are intentionally designed to be read and recovered from by an LLM, not only by human developers.</p>
+<hr />
+<h2>What Is a Tool Function?</h2>
+<p>A tool function is a normal Python callable that your application will invoke when Claude emits a <code>tool_use</code> block requesting it. There is nothing magical on the Python side — the magic is in the <strong>contract</strong> between the function and the LLM:</p>
+<ul>
+<li>Clear name → Claude picks the right function</li>
+<li>Clear parameter names → Claude fills the right arguments</li>
+<li>Validation + descriptive errors → Claude can self-correct on the next turn</li>
+<li>Predictable return types → Claude can reason about the result</li>
+</ul>
+<p>The tool function is the bottom of the stack. The JSON schema (Lesson 35) is the documentation Claude reads. The agentic loop calls the function with the arguments Claude supplied.</p>
+<hr />
+<h2>The First Tool: <code>get_current_datetime</code></h2>
+<pre><code class="language-python">from datetime import datetime
+
+def get_current_datetime(date_format: str = &quot;%Y-%m-%d %H:%M:%S&quot;) -&gt; str:
+    if not date_format:
+        raise ValueError(&quot;date_format cannot be empty&quot;)
+    return datetime.now().strftime(date_format)
+</code></pre>
+<p>Three things worth unpacking:</p>
+<ol>
+<li><strong>Default argument</strong> (<code>date_format="%Y-%m-%d %H:%M:%S"</code>) — lets Claude call the function with zero arguments in the common case. The schema declares the parameter optional.</li>
+<li><strong>Validation before use</strong> — <code>if not date_format: raise ValueError(...)</code> protects against a degenerate value that Python would otherwise silently accept (empty string is "truthy" enough that <code>strftime("")</code> returns <code>""</code>).</li>
+<li><strong><code>strftime</code> format pass-through</strong> — you delegate date formatting to Python's battle-tested <code>datetime</code> module rather than reimplementing.</li>
+</ol>
+<h3>Usage examples</h3>
+<pre><code class="language-python">get_current_datetime()           # &quot;2026-04-11 14:30:25&quot;
+get_current_datetime(&quot;%H:%M&quot;)     # &quot;14:30&quot;
+get_current_datetime(&quot;%A&quot;)        # &quot;Saturday&quot;
+</code></pre>
+<hr />
+<h2>Best Practices for Tool Functions</h2>
+<h3>1. Descriptive Names</h3>
+<p>Function name: <code>get_current_datetime</code> — a human immediately understands the intent. Contrast with <code>gcdt</code> or <code>datetime_fn</code>. Claude uses the name as a strong prior when deciding whether to call this function.</p>
+<p>Parameter names: <code>date_format</code> — not <code>fmt</code> or <code>d</code>. Every character is documentation that Claude reads.</p>
+<h3>2. Validate Inputs</h3>
+<pre><code class="language-python">def get_current_datetime(date_format=&quot;%Y-%m-%d %H:%M:%S&quot;):
+    if not date_format:
+        raise ValueError(&quot;date_format cannot be empty&quot;)
+    return datetime.now().strftime(date_format)
+</code></pre>
+<p>Common validation patterns:</p>
+<ul>
+<li>Empty strings (<code>if not s</code>) — surprisingly easy for an LLM to emit</li>
+<li>Wrong types (<code>if not isinstance(x, int)</code>) — especially after JSON deserialization</li>
+<li>Out-of-range values (<code>if not 0 &lt;= p &lt;= 100</code>)</li>
+<li>Format mismatches (regex, enum membership)</li>
+</ul>
+<p>The key question to ask for each parameter: "what is the worst input an LLM might generate that would silently produce a wrong answer?" Validate against that.</p>
+<h3>3. Meaningful Error Messages</h3>
+<p><strong>Bad</strong>: <code>raise ValueError("invalid input")</code><br />
+<strong>Good</strong>: <code>raise ValueError("date_format cannot be empty")</code><br />
+<strong>Better</strong>: <code>raise ValueError("date_format cannot be empty; use a valid strftime pattern like '%Y-%m-%d'")</code></p>
+<p>Error messages are Claude's only feedback channel. Every error message is a mini-prompt telling the next turn how to recover. If you write "invalid input", Claude might retry with the same invalid input. If you write "expected an ISO-8601 date like 2026-01-15, got 'next Friday'", Claude knows exactly how to fix it.</p>
+<p>This is the biggest shift from traditional error-message design: your errors are no longer just for humans — they are LLM recovery signals.</p>
+<hr />
+<h2>How Tool Functions Integrate with the Loop</h2>
+<pre><code class="language-python"># pseudo-code for the agent loop
+while True:
+    response = client.messages.create(..., tools=tool_schemas, messages=messages)
+
+    if response.stop_reason != &quot;tool_use&quot;:
+        break  # final text response is in response.content
+
+    for block in response.content:
+        if block.type != &quot;tool_use&quot;:
+            continue
+        fn = TOOL_REGISTRY[block.name]
+        try:
+            result = fn(**block.input)
+            tool_result_content = str(result)
+            is_error = False
+        except Exception as e:
+            tool_result_content = f&quot;Error: {e}&quot;
+            is_error = True
+
+        messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: response.content})
+        messages.append({
+            &quot;role&quot;: &quot;user&quot;,
+            &quot;content&quot;: [{
+                &quot;type&quot;: &quot;tool_result&quot;,
+                &quot;tool_use_id&quot;: block.id,
+                &quot;content&quot;: tool_result_content,
+                &quot;is_error&quot;: is_error,
+            }],
+        })
+</code></pre>
+<p>Key observations:</p>
+<ul>
+<li>Catch exceptions and surface them as <code>tool_result</code> with <code>is_error: True</code>. Do not let exceptions break your loop — Claude can recover if told.</li>
+<li><code>**block.input</code> unpacks the JSON arguments. Type mismatches get caught at the Python call site.</li>
+<li>The <code>TOOL_REGISTRY</code> is a simple dict from tool name to function pointer. Keeps dispatch trivial.</li>
+</ul>
+<hr />
+<h2>Type Hints Help Both Humans and Schemas</h2>
+<p>Python type hints are optional at runtime but extremely useful at design time:</p>
+<pre><code class="language-python">def get_current_datetime(date_format: str = &quot;%Y-%m-%d %H:%M:%S&quot;) -&gt; str:
+    ...
+</code></pre>
+<ul>
+<li>They make the schema (Lesson 35) trivial to derive.</li>
+<li>They catch developer bugs before runtime.</li>
+<li>They signal intent to teammates reviewing code.</li>
+<li>Libraries like <code>inspect</code> and <code>pydantic</code> can auto-generate JSON Schema from type-hinted functions.</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Ambiguous function names</strong> — <code>process</code>, <code>run</code>, <code>do_it</code>. Claude cannot infer purpose from a vague name.</li>
+<li><strong>Silent failure on bad input</strong> — accepting <code>None</code> or empty string without validating, producing garbage output.</li>
+<li><strong>Cryptic error messages</strong> — "error 42" tells Claude nothing; "radius must be positive, got -3" tells Claude exactly how to fix it.</li>
+<li><strong>Not catching exceptions at the loop level</strong> — letting a tool exception crash the entire conversation instead of feeding it back as a <code>tool_result</code> error.</li>
+<li><strong>Hidden side effects</strong> — a tool that silently writes to a database without making it clear in the name is dangerous; prefer <code>create_reminder</code> over <code>reminder</code>.</li>
+<li><strong>Returning complex objects without <code>str()</code></strong> — <code>tool_result.content</code> must be serializable text; convert rich objects to strings or JSON explicitly.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Tool functions are not "internal helpers" — they are part of the public API you are exposing to Claude. Every parameter name, every error message, every return type is read by the model. Treat tool functions like a well-documented SDK, because that is how Claude sees them. This is a frequent exam angle for D2 on the CCA.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: naming, validation, error messages as LLM-readable recovery signals, default arguments.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: exception handling inside the tool loop; how errors turn into tool_result blocks.</li>
+<li>Expect questions like: "why should tool functions raise descriptive errors?" — answer: so Claude can self-correct on the next turn.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is a tool function?</td>
+<td>A plain Python callable that Claude invokes when it emits a <code>tool_use</code> block; the function must validate inputs and return a serializable result.</td>
+</tr>
+<tr>
+<td>Why do tool function error messages matter so much?</td>
+<td>Because they are Claude's only feedback channel — Claude reads them and uses them to self-correct its next <code>tool_use</code> call.</td>
+</tr>
+<tr>
+<td>What is a bad tool function name?</td>
+<td>Anything vague like <code>process</code>, <code>run</code>, or <code>do_it</code> — Claude cannot infer the function's purpose.</td>
+</tr>
+<tr>
+<td>What happens if a tool function raises an exception inside the agent loop?</td>
+<td>The caller should catch it and return a <code>tool_result</code> with <code>is_error: True</code> — do not let it break the loop.</td>
+</tr>
+<tr>
+<td>Why use default arguments in a tool function?</td>
+<td>So Claude can call it with minimal input in the common case and only supply parameters when needed.</td>
+</tr>
+<tr>
+<td>What does <code>get_current_datetime</code> validate and why?</td>
+<td>It rejects empty <code>date_format</code> so <code>strftime("")</code> does not silently return an empty string.</td>
+</tr>
+<tr>
+<td>How should a tool function return rich objects?</td>
+<td>Convert them to strings or JSON — <code>tool_result.content</code> must be serializable text.</td>
+</tr>
+<tr>
+<td>What is the relationship between type hints and schemas?</td>
+<td>Type hints enable auto-generation of JSON Schema and give Claude (via the schema) and humans clear intent.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

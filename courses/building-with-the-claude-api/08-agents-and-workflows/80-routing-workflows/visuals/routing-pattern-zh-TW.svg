@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrowO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#FB923C"/>
+    </marker>
+  </defs>
+  <rect width="900" height="520" fill="white"/>
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Routing 路由工作流</text>
+  <text x="450" y="60" text-anchor="middle" font-size="13" fill="#6B7280">分類器從 N 個專用處理器中挑一個（tool_choice 強制分類）</text>
+
+  <!-- Input -->
+  <rect x="370" y="90" width="160" height="60" rx="8" fill="#F1F5F9" stroke="#94A3B8" stroke-width="2" filter="url(#shadow)"/>
+  <text x="450" y="118" text-anchor="middle" font-size="14" font-weight="600" fill="#1E293B">使用者輸入</text>
+  <text x="450" y="138" text-anchor="middle" font-size="11" fill="#6B7280">支援請求</text>
+
+  <line x1="450" y1="150" x2="450" y2="175" stroke="#FB923C" stroke-width="2" marker-end="url(#arrowO)"/>
+
+  <!-- Router diamond -->
+  <polygon points="450,180 560,255 450,330 340,255" fill="#FFF7ED" stroke="#FB923C" stroke-width="2" filter="url(#shadow)"/>
+  <text x="450" y="240" text-anchor="middle" font-size="14" font-weight="700" fill="#FB923C">Router</text>
+  <text x="450" y="258" text-anchor="middle" font-size="11" fill="#1E293B">分類器 LLM</text>
+  <text x="450" y="275" text-anchor="middle" font-size="10" fill="#6B7280">tool_choice="tool"</text>
+
+  <!-- Fanout to handlers -->
+  <line x1="370" y1="295" x2="140" y2="370" stroke="#FB923C" stroke-width="2" marker-end="url(#arrowO)"/>
+  <line x1="420" y1="325" x2="330" y2="370" stroke="#FB923C" stroke-width="2" marker-end="url(#arrowO)"/>
+  <line x1="480" y1="325" x2="570" y2="370" stroke="#FB923C" stroke-width="2" marker-end="url(#arrowO)"/>
+  <line x1="530" y1="295" x2="760" y2="370" stroke="#FB923C" stroke-width="2" marker-end="url(#arrowO)"/>
+
+  <!-- Handler 1: Billing -->
+  <rect x="50" y="378" width="180" height="100" rx="8" fill="white" stroke="#FB923C" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="50" y="378" width="180" height="26" rx="8" fill="#FB923C"/>
+  <rect x="50" y="396" width="180" height="8" fill="#FB923C"/>
+  <text x="140" y="396" text-anchor="middle" font-size="12" font-weight="600" fill="white">帳單處理</text>
+  <text x="140" y="425" text-anchor="middle" font-size="10" fill="#1E293B">專用 prompt</text>
+  <text x="140" y="443" text-anchor="middle" font-size="10" fill="#6B7280">退款、發票、</text>
+  <text x="140" y="458" text-anchor="middle" font-size="10" fill="#6B7280">訂閱</text>
+
+  <!-- Handler 2: Technical -->
+  <rect x="245" y="378" width="180" height="100" rx="8" fill="white" stroke="#FB923C" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="245" y="378" width="180" height="26" rx="8" fill="#FB923C"/>
+  <rect x="245" y="396" width="180" height="8" fill="#FB923C"/>
+  <text x="335" y="396" text-anchor="middle" font-size="12" font-weight="600" fill="white">技術處理</text>
+  <text x="335" y="425" text-anchor="middle" font-size="10" fill="#1E293B">專用 prompt</text>
+  <text x="335" y="443" text-anchor="middle" font-size="10" fill="#6B7280">Bug、整合、</text>
+  <text x="335" y="458" text-anchor="middle" font-size="10" fill="#6B7280">錯誤</text>
+
+  <!-- Handler 3: Account -->
+  <rect x="475" y="378" width="180" height="100" rx="8" fill="white" stroke="#FB923C" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="475" y="378" width="180" height="26" rx="8" fill="#FB923C"/>
+  <rect x="475" y="396" width="180" height="8" fill="#FB923C"/>
+  <text x="565" y="396" text-anchor="middle" font-size="12" font-weight="600" fill="white">帳號處理</text>
+  <text x="565" y="425" text-anchor="middle" font-size="10" fill="#1E293B">專用 prompt</text>
+  <text x="565" y="443" text-anchor="middle" font-size="10" fill="#6B7280">登入、密碼、</text>
+  <text x="565" y="458" text-anchor="middle" font-size="10" fill="#6B7280">個人資料</text>
+
+  <!-- Handler 4: General -->
+  <rect x="670" y="378" width="180" height="100" rx="8" fill="white" stroke="#FB923C" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="670" y="378" width="180" height="26" rx="8" fill="#FB923C"/>
+  <rect x="670" y="396" width="180" height="8" fill="#FB923C"/>
+  <text x="760" y="396" text-anchor="middle" font-size="12" font-weight="600" fill="white">一般處理</text>
+  <text x="760" y="425" text-anchor="middle" font-size="10" fill="#1E293B">備援 prompt</text>
+  <text x="760" y="443" text-anchor="middle" font-size="10" fill="#6B7280">其他問題</text>
+  <text x="760" y="458" text-anchor="middle" font-size="10" fill="#6B7280">或升級至人工</text>
+
+  <!-- Note box about tool_choice -->
+  <rect x="580" y="180" width="280" height="90" rx="8" fill="#FFEDD5" stroke="#FB923C" stroke-width="1.5"/>
+  <text x="720" y="203" text-anchor="middle" font-size="11" font-weight="700" fill="#FB923C">tool_choice = { type: "tool" }</text>
+  <text x="720" y="222" text-anchor="middle" font-size="10" fill="#1E293B">強制 Claude 呼叫</text>
+  <text x="720" y="236" text-anchor="middle" font-size="10" fill="#1E293B">分類工具</text>
+  <text x="720" y="254" text-anchor="middle" font-size="9" fill="#6B7280">保證路由結果為結構化輸出</text>
+</svg>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>03 What Is A Coding Assistant Eng En</title>
+<title>What Is A Coding Assistant Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -57,6 +57,8 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="Agentic Loop Cycle" src="visuals/agentic-loop-cycle.svg" /><br />
 <em>Figure: The agentic loop — gather context, plan, act, evaluate, repeat.</em></p>
 <p>Every coding assistant follows the same fundamental cycle:</p>
+<!-- diagram: agentic-loop — Task → Gather Context (read files, search code) → Plan (break into steps) → Take Action (edit files, run commands) → Evaluate → Loop or Finish -->
+
 <ol>
 <li><strong>Gather context</strong> — Read files, search the codebase, understand the current state</li>
 <li><strong>Plan</strong> — Break the task into steps, decide which actions to take</li>
@@ -72,6 +74,8 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>Tool Use: Bridging Text and Action</h2>
 <p>Here is the core problem: <strong>language models can only process and generate text</strong>. They cannot read files, run commands, or modify code on their own. They are pure text-in, text-out functions.</p>
 <p>Tool use is the mechanism that bridges this gap. Here is how it works:</p>
+<!-- diagram: tool-use-flow — User asks question → Coding assistant adds tool instructions to LM context → LM responds with structured request (e.g., "ReadFile: main.go") → Assistant intercepts and executes → Sends file contents back to LM → LM generates final answer -->
+
 <p><strong>Step-by-step with the ReadFile example:</strong></p>
 <ol>
 <li>You ask: "What does the main function do?"</li>
@@ -82,7 +86,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <li>The LM now has the real code and generates an informed answer</li>
 </ol>
 <p>The LM never touches the filesystem. The assistant is the intermediary that translates text requests into real actions.</p>
-<pre class="highlight"><code>User: &quot;What does main.go do?&quot;
+<pre><code>User: &quot;What does main.go do?&quot;
      │
      ▼
 ┌─────────────────────────┐
@@ -113,7 +117,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 │  context                │
 └─────────────────────────┘
 </code></pre>
-
 <blockquote>
 <p>🎬 <strong>Instructor insight from the video</strong></p>
 <p>The instructor emphasizes that the coding assistant "adds instructions to the context" telling the LM how to request tools. The LM does not inherently know how to call tools — it must be taught through the prompt/context to respond in a structured format that the assistant can parse and execute.</p>

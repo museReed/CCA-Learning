@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Functions Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Tool Functions — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試 Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要;D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2(tool function 定義)、2.1(tool schema 設計)、1.2(agentic loop 基礎)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 34</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Tool function 是 Claude 實際執行的程式碼 — 你工程團隊怎麼寫它(命名、驗證、錯誤訊息)直接決定你的 AI 功能對使用者而言有多可靠。</p>
+<hr />
+<h2>心智模型:廚房出餐線</h2>
+<p>把你的 AI 產品想像成一間餐廳:</p>
+<ul>
+<li><strong>Claude</strong> = 跟客人點餐、決定把每道任務丟給哪個廚檯的服務生。</li>
+<li><strong>Tool function</strong> = 真正做菜的線上廚師。</li>
+<li><strong>Schema</strong> = 服務生讀的食譜卡。</li>
+<li><strong>錯誤訊息</strong> = 廚師出事時喊回去的話(「香菇不夠!」vs.「出事了!」)。</li>
+</ul>
+<p>食譜卡清楚、廚師喊具體可行動內容的餐廳,運作順暢。廚師只會對服務生哼哼的餐廳,一片混亂。Tool function 就是你的出餐廚師 — PM 的職責是確保他們講話清楚。</p>
+<hr />
+<h2>PM 為何要關心 Tool Function 設計</h2>
+<p>Tool function 設計看起來像工程細節,卻直接出現在使用者體驗上:</p>
+<table>
+<thead>
+<tr>
+<th>Tool function 品質</th>
+<th>使用者會看到的症狀</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>名字含糊</td>
+<td>Claude 挑錯 tool — 功能做錯事</td>
+</tr>
+<tr>
+<td>沒輸入驗證</td>
+<td>Tool 回垃圾 — 使用者看到自信的胡說八道</td>
+</tr>
+<tr>
+<td>錯誤訊息沒用</td>
+<td>Claude 無法復原 — 使用者看到「抱歉,我做不到」</td>
+</tr>
+<tr>
+<td>錯誤訊息豐富可行動</td>
+<td>Claude 自我修正 — 使用者只看到正確答案</td>
+</tr>
+</tbody>
+</table>
+<p>第三、第四列是重點。AI 功能「感覺可靠」與「感覺壞了」的差別,常常就在你的錯誤訊息能不能讓 Claude 自己復原。</p>
+<hr />
+<h2>設計好 Tool Function 的產品情境</h2>
+<h3>投資會回本的情境</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>為何好設計很重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>高流量的使用者面向功能</td>
+<td>微小的可靠度改善會在使用者間複利疊加</td>
+</tr>
+<tr>
+<td>多步驟 workflow</td>
+<td>鏈中每個 tool 都是潛在失敗點</td>
+</tr>
+<tr>
+<td>不可逆動作的功能</td>
+<td>驗證能避免真實世界的損害</td>
+</tr>
+<tr>
+<td>複雜參數(日期、ID、金額)</td>
+<td>LLM 在沒有護欄時超容易出錯</td>
+</tr>
+</tbody>
+</table>
+<h3>過度設計的情境</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>內部開發工具</td>
+<td>工程師能忍受粗糙的邊緣</td>
+</tr>
+<tr>
+<td>一次性 prototype</td>
+<td>先出貨再補強</td>
+</tr>
+<tr>
+<td>唯讀 debug 工具</td>
+<td>Blast radius 小</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>驗證 → 復原的 Loop</h2>
+<p>這是本課最重要的產品概念:</p>
+<pre><code>Claude 用壞輸入呼叫 tool
+       ↓
+Tool 丟出描述性錯誤
+       ↓
+錯誤變成 tool_result(is_error=True)
+       ↓
+Claude 下一輪讀到錯誤
+       ↓
+Claude 帶著修正後的輸入重試
+       ↓
+成功 — 使用者從未看到失敗
+</code></pre>
+<p>從使用者角度看,這個 loop 是隱形的。他們只看到「成功了」。但鏈上任何一環斷掉(錯誤訊息含糊、沒有捕捉例外、靜默失敗),整段就會塌成可見的錯誤。</p>
+<p>PM 應該把「tool 錯誤復原」明確寫進 AI 功能的 PRD acceptance criteria。</p>
+<hr />
+<h2>PM 決策框架</h2>
+<p>規劃 tool-using 功能時,文件上要寫清楚:</p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>為何重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool 名稱與清楚的用途描述</td>
+<td>影響 Claude 選 tool 的準確度</td>
+</tr>
+<tr>
+<td>每個參數的允許值與格式</td>
+<td>避免默默的垃圾輸出</td>
+</tr>
+<tr>
+<td>非法輸入會發生什麼事</td>
+<td>定義復原 UX</td>
+</tr>
+<tr>
+<td>若復原失敗,會給使用者看什麼訊息</td>
+<td>使用者面向的文字需要 PM 審核</td>
+</tr>
+<tr>
+<td>副作用與 idempotency</td>
+<td>決定重試是否安全</td>
+</tr>
+<tr>
+<td>可觀測性 hook(log、metric)</td>
+<td>為生產 debug 做準備</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 常犯的錯</h2>
+<ol>
+<li><strong>把 tool function 當成「純工程」</strong> — 跳過設計 review 導致命名、驗證、錯誤訊息不一致。</li>
+<li><strong>沒在 PRD 寫錯誤訊息</strong> — 工程師最後寫給開發者看的錯誤,Claude(與使用者)都無法用來復原。</li>
+<li><strong>忽略 idempotency</strong> — 若 Claude 因錯誤重試 create-reminder,你會多一筆提醒。PRD 應指定去重行為。</li>
+<li><strong>低估名字的影響</strong> — 「set_reminder」vs.「create_reminder」vs.「reminder」看似互換,實際上會改變 Claude 選對 tool 的機率。</li>
+<li><strong>沒有可觀測性</strong> — 沒 log tool call 與結果,生產失敗無法 debug、功能可靠度也無從測量。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Tool function 品質不是實作細節 — 它直接決定你 AI 功能的可靠度與 UX。你工程團隊寫的錯誤訊息,Claude 每次重試都會讀到,所以實際上是你產品文案的一部分。把 tool function review 當成 PRD 等級的事情來處理的 PM,會做出明顯更可靠的功能。CCA D2 直接測這一點。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D2(Tool Design &amp; MCP Integration)</strong>:Tool 命名、驗證、錯誤處理作為復原訊號、idempotency 顧慮。</li>
+<li><strong>D1(Agentic Architecture)</strong>:錯誤如何透過 agent loop 流回並讓 Claude 自我修正。</li>
+<li>預期會出「含糊錯誤」vs.「描述性錯誤」結果的對比題 — 描述性永遠勝出。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool function 的餐廳比喻是什麼?</td>
+<td>Tool function 是線上廚師、Claude 是服務生、schema 是食譜卡、錯誤訊息是廚師對服務生喊回去的話。</td>
+</tr>
+<tr>
+<td>為何錯誤訊息對 PM 而不只是工程師重要?</td>
+<td>因為 Claude 重試時會讀它 — 錯誤訊息的品質決定使用者是看到可見失敗還是無感復原。</td>
+</tr>
+<tr>
+<td>Tool-using 功能的 PRD 應該寫什麼?</td>
+<td>Tool 名稱與用途、參數驗證規則、錯誤復原 UX、使用者面向的錯誤文案、副作用/idempotency 規則、可觀測性 hook。</td>
+</tr>
+<tr>
+<td>什麼是驗證-復原 loop?</td>
+<td>壞輸入 → 描述性錯誤 → tool_result with is_error → Claude 重新規劃 → 修正後重試 → 使用者從未看到失敗。</td>
+</tr>
+<tr>
+<td>為何寫入型 tool 的 idempotency 是 PM 的事?</td>
+<td>Claude 可能在錯誤後重試;沒有 idempotency 就會重複寫入,例如一次請求產生兩筆同樣的提醒。</td>
+</tr>
+<tr>
+<td>含糊的 tool 名字會造成什麼使用者可見症狀?</td>
+<td>Claude 挑錯 tool,功能做錯事 — 使用者看到自信的胡說八道。</td>
+</tr>
+<tr>
+<td>PM 在 tool function 設計 review 的角色是什麼?</td>
+<td>確保命名、驗證、錯誤文案、復原 UX 都在 PRD 裡明確定義並於實作前 review。</td>
+</tr>
+<tr>
+<td>什麼時候投入大量 tool function 設計是過度設計?</td>
+<td>內部開發工具、一次性 prototype、唯讀 debug 工具,blast radius 小。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

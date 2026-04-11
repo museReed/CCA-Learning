@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Setup Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Claude Code Setup — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (Claude Code installation &amp; setup), 3.2 (authentication), 1.1 (Claude Code overview)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 74</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude Code is a terminal-native coding agent installed via <code>npm install -g @anthropic-ai/claude-code</code>, launched with the <code>claude</code> command, and extensible through MCP — three commands total from clean machine to working agent.</p>
+<hr />
+<h2>What Claude Code Provides Out of the Box</h2>
+<p>Before we touch the installer, know what the agent ships with so you can answer "which of these does Claude Code support?" exam questions:</p>
+<table>
+<thead>
+<tr>
+<th>Tool category</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>File operations</strong></td>
+<td>Search, read, and edit files anywhere in your project</td>
+</tr>
+<tr>
+<td><strong>Terminal access</strong></td>
+<td>Run shell commands directly from the conversation</td>
+</tr>
+<tr>
+<td><strong>Web access</strong></td>
+<td>Fetch documentation pages, search the web, pull code examples</td>
+</tr>
+<tr>
+<td><strong>MCP server support</strong></td>
+<td>Extend tools with any MCP server you register</td>
+</tr>
+</tbody>
+</table>
+<p>The MCP integration is the most important category for the exam — it is the official extension point. "Built-in tools + MCP" is the mental model to carry in.</p>
+<hr />
+<h2>Supported Platforms</h2>
+<p>Claude Code is a cross-platform CLI. Per the lesson it runs on:</p>
+<ul>
+<li><strong>macOS</strong> — native</li>
+<li><strong>Windows</strong> — via WSL (Windows Subsystem for Linux)</li>
+<li><strong>Linux</strong> — native</li>
+</ul>
+<p>On Windows, raw PowerShell/cmd is not the supported path; you must be inside WSL. Expect at least one exam question that drops "Windows" into a setup scenario.</p>
+<hr />
+<h2>The Three-Step Installation</h2>
+<p>The entire flow is three steps. Memorize them in order:</p>
+<h3>Step 1 — Install Node.js</h3>
+<p>Claude Code is distributed as an npm package, so you need Node + npm. The lesson suggests checking first:</p>
+<pre><code class="language-bash">npm help
+</code></pre>
+<p>If that works, you already have Node. Otherwise download from <code>nodejs.org/en/download</code>.</p>
+<h3>Step 2 — Install Claude Code globally</h3>
+<pre><code class="language-bash">npm install -g @anthropic-ai/claude-code
+</code></pre>
+<p>Key things to note about this command (common exam traps):</p>
+<ul>
+<li>The <code>-g</code> flag (global) — required, because <code>claude</code> needs to be on your PATH.</li>
+<li>The package name is <code>@anthropic-ai/claude-code</code> (scoped under the <code>@anthropic-ai</code> org) — not <code>claude</code> or <code>anthropic-claude-code</code>.</li>
+<li>It is an npm package, not a <code>pip install</code>, not a standalone binary download.</li>
+</ul>
+<h3>Step 3 — Launch and authenticate</h3>
+<pre><code class="language-bash">claude
+</code></pre>
+<p>On first launch Claude Code prompts you to log in to your Anthropic account. After login, you are dropped into the interactive agent session in the current working directory.</p>
+<hr />
+<h2>Authentication Model</h2>
+<p>The lesson describes browser-style login tied to your Anthropic account. Important points:</p>
+<ul>
+<li>Login is tied to your <strong>Anthropic account</strong>, not a raw API key that you paste into a config file.</li>
+<li>The first <code>claude</code> invocation triggers the login flow.</li>
+<li>Once authenticated, subsequent sessions reuse credentials automatically.</li>
+<li>Billing and usage flow through your account — this is distinct from using the Anthropic API directly with an <code>ANTHROPIC_API_KEY</code> environment variable.</li>
+</ul>
+<p>For the exam, remember the distinction: <strong>Anthropic API billing uses an API key; Claude Code uses account-based login</strong>.</p>
+<hr />
+<h2>A Full Setup Session on a Fresh Mac</h2>
+<pre><code class="language-bash"># 1. Check if Node exists
+npm help
+# If not installed, download from nodejs.org/en/download and install
+
+# 2. Install Claude Code globally
+npm install -g @anthropic-ai/claude-code
+
+# 3. Verify it is on PATH
+which claude
+# /usr/local/bin/claude  (or similar)
+
+# 4. Launch, authenticate, and enter project
+cd ~/projects/my-app
+claude
+# First run: login flow opens
+# After login: interactive agent prompt
+</code></pre>
+<p>After these four commands you have a working terminal agent scoped to the current working directory. The current directory becomes the agent's default project root.</p>
+<hr />
+<h2>What You Can Do Immediately After Setup</h2>
+<p>Once <code>claude</code> is running you can issue natural language requests and the agent will use its built-in tools. Example first-session moves:</p>
+<ul>
+<li><code>Read the README.md and summarize the project</code></li>
+<li><code>Find every file that references the old API endpoint</code></li>
+<li><code>Run the test suite and report failures</code></li>
+</ul>
+<p>These just work — no further configuration needed. Advanced setup (CLAUDE.md, MCP servers, custom commands) comes in the next lessons.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Omitting the <code>-g</code> flag</strong> — a local-only install will not put <code>claude</code> on your PATH.</li>
+<li><strong>Wrong package name</strong> — the correct scoped name is <code>@anthropic-ai/claude-code</code>.</li>
+<li><strong>Running on Windows without WSL</strong> — the lesson specifies Windows WSL, not native PowerShell.</li>
+<li><strong>Trying to set <code>ANTHROPIC_API_KEY</code> instead of logging in</strong> — Claude Code uses account login, not raw API keys.</li>
+<li><strong>Skipping the <code>npm help</code> check</strong> — installs fail silently on machines without Node.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The CCA exam treats the Claude Code install path as a "trivia-level" fact you must memorize exactly: <strong>Node.js → <code>npm install -g @anthropic-ai/claude-code</code> → <code>claude</code> → account login</strong>. There are no optional steps, and Windows explicitly means WSL. Mastering this sentence is worth easy points.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Claude Code Configuration)</strong>: This lesson is the foundation for ~20% of the exam. Expect direct questions on the install command and platform support.</li>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>: You must know that Claude Code is an agent application, not a chat app, and that MCP is its extension mechanism.</li>
+<li>Expect at least one question asking the exact npm package name — <code>@anthropic-ai/claude-code</code>.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three installation steps for Claude Code?</td>
+<td>1) Install Node.js, 2) <code>npm install -g @anthropic-ai/claude-code</code>, 3) run <code>claude</code> and log in</td>
+</tr>
+<tr>
+<td>What is the exact npm package name for Claude Code?</td>
+<td><code>@anthropic-ai/claude-code</code></td>
+</tr>
+<tr>
+<td>Why does the install command use the <code>-g</code> flag?</td>
+<td>Global install puts the <code>claude</code> executable on your PATH so it can be launched from any directory</td>
+</tr>
+<tr>
+<td>Which operating systems does Claude Code support?</td>
+<td>macOS, Windows (via WSL), and Linux</td>
+</tr>
+<tr>
+<td>What authentication model does Claude Code use?</td>
+<td>Account-based login through your Anthropic account, not a raw <code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td>What are the four built-in tool categories in Claude Code?</td>
+<td>File operations, terminal access, web access, and MCP server support</td>
+</tr>
+<tr>
+<td>What command can you run to check whether Node.js is already installed?</td>
+<td><code>npm help</code></td>
+</tr>
+<tr>
+<td>What command launches Claude Code for the first time?</td>
+<td><code>claude</code> — this triggers the login flow</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agents And Tools Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Agents and Tools — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (agent architecture), 1.2 (agentic loop), 1.3 (tool use in agents), 5.1 (production pattern selection)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 81</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Agents let you ship one feature that handles many unpredictable user requests — you hand Claude a goal plus a simple toolbox, and Claude figures out the rest instead of your team hard-coding every user flow in advance.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>As a PM, the agent-vs-workflow decision is really a product strategy question: "Are user requests narrow and predictable, or wide and open-ended?"</p>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>What Workflows Give You</th>
+<th>What Agents Give You</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bounded, repeat use cases</td>
+<td>Highest reliability</td>
+<td>Unnecessary complexity</td>
+</tr>
+<tr>
+<td>Creative, open-ended requests</td>
+<td>Brittle, frustrating UX</td>
+<td>Flexibility, delight</td>
+</tr>
+<tr>
+<td>"We know the 5 things users will ask"</td>
+<td>Workflow wins</td>
+<td>Over-engineering</td>
+</tr>
+<tr>
+<td>"Users ask things we never imagined"</td>
+<td>Endless PM backlog patching</td>
+<td>Agent wins</td>
+</tr>
+</tbody>
+</table>
+<p>Agents let you ship <strong>one coherent capability</strong> instead of N feature flags.</p>
+<hr />
+<h2>Mental Model: The Swiss Army Knife vs the Kitchen Gadget Drawer</h2>
+<p>A specialized workflow is like the kitchen drawer of single-purpose gadgets:</p>
+<ul>
+<li>Avocado slicer — works great for avocados, useless for apples</li>
+<li>Egg separator — works great for eggs, useless for anything else</li>
+<li>Garlic press — works great for garlic, useless for ginger</li>
+</ul>
+<p>An agent is the Swiss Army knife:</p>
+<ul>
+<li>Knife, scissors, screwdriver, can opener — each tool is simple</li>
+<li>The <strong>user's creativity</strong> decides what to do with them</li>
+<li>One tool covers scenarios the manufacturer never imagined</li>
+</ul>
+<p>In product terms: if your PRD has a long list of "feature X, feature Y, feature Z" all solving related problems, you might actually be shipping the gadget drawer when a Swiss Army knife would be better.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When to Choose an Agent</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why an Agent Wins</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Help me with my taxes" assistant</td>
+<td>Users will ask wildly different questions you cannot enumerate in advance</td>
+</tr>
+<tr>
+<td>AI coding assistant (Claude Code)</td>
+<td>Any codebase in any language — impossible to pre-build a workflow per case</td>
+</tr>
+<tr>
+<td>Creative content studio</td>
+<td>"Make me a promo video" can mean a thousand different things</td>
+</tr>
+<tr>
+<td>Support copilot over messy internal data</td>
+<td>Different customers have different questions about different systems</td>
+</tr>
+</tbody>
+</table>
+<h3>When to Choose a Workflow Instead</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why a Workflow Wins</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Summarize this meeting transcript"</td>
+<td>One known input, one known output</td>
+</tr>
+<tr>
+<td>"Translate this product description"</td>
+<td>Deterministic, measurable, cheap to evaluate</td>
+</tr>
+<tr>
+<td>"Extract invoice fields"</td>
+<td>Compliance/audit requires predictable behavior</td>
+</tr>
+<tr>
+<td>Regulated workflows (legal, medical)</td>
+<td>You need to certify each step</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The "Combinable Tools" Principle (for PMs)</h2>
+<p>Your engineers will ask: "Should I build tools like <code>refactor_function</code> or like <code>edit_file</code>?" The right answer is almost always the more generic one. Here is why it matters for your roadmap:</p>
+<ol>
+<li><strong>Scope expands for free</strong> — one generic tool covers dozens of user requests you would otherwise each ticket separately.</li>
+<li><strong>Roadmap survives surprise</strong> — when users ask for something unexpected (they will), the agent already handles it.</li>
+<li><strong>Fewer features to maintain</strong> — every narrow tool is a feature you have to eval, monitor, and deprecate.</li>
+<li><strong>Ships faster</strong> — five primitives beat fifty specialists to first release.</li>
+</ol>
+<p><strong>Red flag in specs</strong>: if your PRD lists 20 narrowly scoped AI actions, your engineering team will probably spend 6 months and still miss user requests. Re-frame as "what is the smallest toolbox that covers 80 percent of these?"</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When scoping an AI feature, walk through these questions:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Points To</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Can you list every user flow in advance?</td>
+<td>Yes</td>
+<td>Workflow</td>
+</tr>
+<tr>
+<td>Do users phrase requests in varied, unpredictable ways?</td>
+<td>Yes</td>
+<td>Agent</td>
+</tr>
+<tr>
+<td>Is "wrong answer" a compliance or safety risk?</td>
+<td>Yes</td>
+<td>Workflow (predictable)</td>
+</tr>
+<tr>
+<td>Do you need to handle creative combinations?</td>
+<td>Yes</td>
+<td>Agent</td>
+</tr>
+<tr>
+<td>Does each extra scenario cost you another sprint?</td>
+<td>Yes</td>
+<td>Probably agent — you are fighting the wrong pattern</td>
+</tr>
+<tr>
+<td>Is cost per request extremely sensitive?</td>
+<td>Yes</td>
+<td>Workflow (cheaper, fewer tokens)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Specifying the flow instead of the goal</strong> — writing PRDs that say "call tool A then tool B" forces engineering into workflow mode even when an agent would serve users better.</li>
+<li><strong>Adding tools to an agent every time a user complains</strong> — you should be improving system prompts and tool descriptions, not bolting on <code>handle_edge_case_47</code>.</li>
+<li><strong>Picking agents for a narrow problem</strong> — "Summarize this article" does not need an agent. You pay 3x the cost for zero flexibility benefit.</li>
+<li><strong>Not budgeting for eval complexity</strong> — agents are 3-10x harder to evaluate than workflows. Plan for it or your release cycle will stall.</li>
+<li><strong>Ignoring latency impact</strong> — each agent loop iteration is another round trip. Chatty agents feel slow to users.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Pick an agent when you cannot enumerate the user flows in advance — and pick a workflow the rest of the time. Most production AI features are workflows masquerading as agents, or agents drowning under a workflow-style PRD. Matching the pattern to the problem is the highest-leverage PM decision in any agentic product.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>: Expect questions framed as "a user wants to do X — should you build a workflow or an agent?" The pattern is unpredictability = agent, predictability = workflow.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: Know that agents are more expensive and harder to evaluate. This is the main production trade-off.</li>
+<li>Exam flag words: "varied requests" or "novel combinations" -&gt; agent; "well-defined steps" or "known sequence" -&gt; workflow.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>When should a PM choose an agent over a workflow?</td>
+<td>When user requests are varied, unpredictable, and cannot be enumerated in advance.</td>
+</tr>
+<tr>
+<td>What is the product analogy for abstract tools vs specialized tools?</td>
+<td>Swiss Army knife (general primitives) vs kitchen gadget drawer (one tool per use case).</td>
+</tr>
+<tr>
+<td>Give two product scenarios where a workflow beats an agent.</td>
+<td>Summarizing transcripts, extracting invoice fields, translating descriptions, regulated legal flows (any two).</td>
+</tr>
+<tr>
+<td>Why are agents more expensive to run than workflows?</td>
+<td>Each loop iteration is another API call and more tokens; open-ended reasoning uses more compute per task.</td>
+</tr>
+<tr>
+<td>What is the red flag in a PRD that hints you should build an agent instead?</td>
+<td>A long list of narrowly scoped AI actions all solving related problems.</td>
+</tr>
+<tr>
+<td>Name three downsides of agents PMs must plan for.</td>
+<td>Higher cost, lower reliability, harder to evaluate, slower latency, less predictable behavior (any three).</td>
+</tr>
+<tr>
+<td>Why should PMs avoid over-specifying the tool sequence in PRDs?</td>
+<td>It forces engineering into workflow mode even when agents would serve users better, eliminating the flexibility benefit.</td>
+</tr>
+<tr>
+<td>What is the most important PM trade-off in agent design?</td>
+<td>Flexibility vs predictability — agents handle novel requests but are harder to test, eval, and control.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

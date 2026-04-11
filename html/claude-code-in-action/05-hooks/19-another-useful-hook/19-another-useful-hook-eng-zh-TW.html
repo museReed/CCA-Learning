@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>19 Another Useful Hook Eng Zh Tw</title>
+<title>Another Useful Hook Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -137,7 +137,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>令人困惑的部分：不同的 stdin 輸入結構</h2>
 <p>每種 hook 類型收到的 <strong>stdin JSON 結構不同</strong>。而且對 <code>PreToolUse</code>/<code>PostToolUse</code> 來說，<code>tool_input</code> 欄位會因被呼叫的工具而異。</p>
 <h3>範例 1：PostToolUse on TodoWrite</h3>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;session_id&quot;: &quot;9ecf22fa-edf8-4332-ae85-b6d5456eda64&quot;,
   &quot;transcript_path&quot;: &quot;&lt;path_to_transcript&gt;&quot;,
   &quot;hook_event_name&quot;: &quot;PostToolUse&quot;,
@@ -151,20 +151,18 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 }
 </code></pre>
-
 <p>PostToolUse 的關鍵欄位：<br />
 - <code>tool_name</code> — 使用了哪個工具<br />
 - <code>tool_input</code> — Claude 傳給工具的輸入（每個工具不同）<br />
 - <code>tool_response</code> — 工具回傳的結果（每個工具不同）</p>
 <h3>範例 2：Stop Hook</h3>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;session_id&quot;: &quot;af9f50b6-f042-4773-b3e2-c3a4814765ce&quot;,
   &quot;transcript_path&quot;: &quot;&lt;path_to_transcript&gt;&quot;,
   &quot;hook_event_name&quot;: &quot;Stop&quot;,
   &quot;stop_hook_active&quot;: false
 }
 </code></pre>
-
 <p>注意：沒有 <code>tool_name</code>、沒有 <code>tool_input</code>、沒有 <code>tool_response</code>。結構完全不同。</p>
 <blockquote>
 <p>⚠️ <strong>寫 hook 最大的陷阱</strong></p>
@@ -175,7 +173,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="除錯 Hook 模式" src="visuals/debug-hook-pattern-zh-TW.svg" /><br />
 <em>圖：除錯 Hook 模式 — 先用 jq 觀察 stdin，再建構正式邏輯，如同寫 HTTP client 前先用 curl -v。</em></p>
 <p>這節課最實用的技巧是一個通用 debug hook，把 stdin 寫到檔案：</p>
-<pre class="highlight"><code class="language-json">&quot;PostToolUse&quot;: [
+<pre><code class="language-json">&quot;PostToolUse&quot;: [
   {
     &quot;matcher&quot;: &quot;*&quot;,
     &quot;hooks&quot;: [
@@ -187,7 +185,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 ]
 </code></pre>
-
 <p>它做了什麼：<br />
 1. <code>*</code> matcher 捕捉<strong>所有</strong>工具使用<br />
 2. <code>jq .</code> 把 JSON stdin 格式化<br />
@@ -205,7 +202,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p>這跟用 <code>curl -v</code> 檢查 HTTP response 後再寫 API client 是一樣的模式。</p>
 </blockquote>
 <p>任何 hook 類型都適用——只要換 key：</p>
-<pre class="highlight"><code class="language-json">&quot;Stop&quot;: [
+<pre><code class="language-json">&quot;Stop&quot;: [
   {
     &quot;matcher&quot;: &quot;*&quot;,
     &quot;hooks&quot;: [
@@ -217,7 +214,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 ]
 </code></pre>
-
 <hr />
 <h2>各 Hook 類型的常見 stdin 欄位</h2>
 <table>

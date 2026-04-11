@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>12 Defining Prompts Eng Zh Tw</title>
+<title>Defining Prompts Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -82,7 +82,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2><code>@mcp.prompt()</code> Decorator</h2>
 <p>Prompts 遵循與 tools 和 resources 相同的 decorator 模式：</p>
-<pre class="highlight"><code class="language-python">@mcp.prompt(
+<pre><code class="language-python">@mcp.prompt(
     name=&quot;format&quot;,
     description=&quot;Rewrites the contents of the document in Markdown format.&quot;
 )
@@ -106,7 +106,6 @@ After the document has been reformatted...
         base.UserMessage(prompt)
     ]
 </code></pre>
-
 <h3>關鍵實作細節</h3>
 <ol>
 <li><strong><code>name</code> 參數</strong> — 成為 slash command 識別碼（如 <code>/format</code>）</li>
@@ -118,7 +117,7 @@ After the document has been reformatted...
 <hr />
 <h2>Prompt 中的訊息類型</h2>
 <p>Prompts 回傳訊息列表，可以包含：</p>
-<pre class="highlight"><code class="language-python"># 單一使用者訊息（最常見）
+<pre><code class="language-python"># 單一使用者訊息（最常見）
 return [base.UserMessage(prompt_text)]
 
 # 多輪對話（用於複雜工作流程）
@@ -128,7 +127,6 @@ return [
     base.UserMessage(&quot;Now proceed with step 2...&quot;)
 ]
 </code></pre>
-
 <p>多輪 prompts 適用於：<br />
 - <strong>Few-shot 範例</strong> — 在實際任務前示範 Claude 如何回應<br />
 - <strong>複雜工作流程</strong> — 引導 Claude 完成多步驟流程<br />
@@ -167,9 +165,8 @@ return [
 </table>
 <hr />
 <h2>使用 MCP Inspector 測試</h2>
-<pre class="highlight"><code class="language-bash">uv run mcp dev mcp_server.py
+<pre><code class="language-bash">uv run mcp dev mcp_server.py
 </code></pre>
-
 <p>在 Inspector 中：<br />
 1. 切換到 <strong>Prompts</strong> 分頁<br />
 2. 從列表中選擇 prompt<br />

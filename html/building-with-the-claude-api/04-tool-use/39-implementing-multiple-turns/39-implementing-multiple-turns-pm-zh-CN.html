@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implementing Multiple Turns Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Implementing Multiple Turns — PM Perspective（简中）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) / D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2（agentic loop 实现）、2.4（multi-turn tool loops）、1.3（multi-turn 对话管理）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 39</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Agentic loop 是那个把 Claude 从 chatbot 变成 agent 的 15 行引擎——一旦你的团队能可靠地 ship 它，所有你脑中想得到的 agent 产品就都可行了。</p>
+<hr />
+<h2>心智模型：咖啡师和点单</h2>
+<p>想象一个咖啡师看着点单做饮料：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>咖啡店</th>
+<th>Agentic Loop</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>读点单</td>
+<td>用户问问题</td>
+<td>用 messages 调用 Claude</td>
+</tr>
+<tr>
+<td>「还需要做什么吗？」</td>
+<td>「Claude 要 tool 吗？」</td>
+<td>检查 <code>stop_reason</code></td>
+</tr>
+<tr>
+<td>要：磨豆、打奶泡……</td>
+<td>要：执行 tool</td>
+<td>执行 tool-use block</td>
+</tr>
+<tr>
+<td>把每个步骤的结果交回咖啡师</td>
+<td>把 tool result 加到历史</td>
+<td>Loop 回 Claude</td>
+</tr>
+<tr>
+<td>不要：完成饮料、结束</td>
+<td>不要：返回最终文字</td>
+<td>Break loop</td>
+</tr>
+</tbody>
+</table>
+<p>咖啡师会一直问自己「还有下一步吗？」直到饮料完成。Loop 做的就是这件事——一直问 Claude「你还要做什么动作吗？」直到 Claude 说「不用了，我做完了」。</p>
+<hr />
+<h2>为什么这解锁了真正的产品价值</h2>
+<p>没有 loop，你只能 ship「Claude 回答问题」。有了 loop，你可以 ship：</p>
+<table>
+<thead>
+<tr>
+<th>产品</th>
+<th>做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coding assistant</td>
+<td>读文件、跑测试、写 patch、迭代</td>
+</tr>
+<tr>
+<td>旅行规划</td>
+<td>查机票、筛价格、订、确认</td>
+</tr>
+<tr>
+<td>客服 agent</td>
+<td>读 ticket、查 CRM、查知识库、草拟回复</td>
+</tr>
+<tr>
+<td>数据分析师</td>
+<td>跑 SQL、解读结果、生成图、写摘要</td>
+</tr>
+</tbody>
+</table>
+<p>Loop 是「agent」之所以是一个类别而不只是 buzzword 的原因。所有真实世界的 Claude agent——从 Claude Code 到 MCP client——都是这 15 行 pattern 加上生产加固的变体。</p>
+<hr />
+<h2>产品应用场景：何时该投资</h2>
+<h3>Loop 会回报成本的时候</h3>
+<table>
+<thead>
+<tr>
+<th>信号</th>
+<th>产品含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户想要「fire and forget」的工作流</td>
+<td>Loop 让 Claude 自主完成多步骤任务</td>
+</tr>
+<tr>
+<td>答案依赖外部数据</td>
+<td>Tool 调用抓数据，loop 迭代直到完成</td>
+</tr>
+<tr>
+<td>用户愿意用延迟换质量</td>
+<td>Multi-turn loop 用速度换正确性</td>
+</tr>
+<tr>
+<td>功能受益于迭代优化</td>
+<td>Loop 可以重试、筛选、比较、收敛</td>
+</tr>
+</tbody>
+</table>
+<h3>Loop 是大材小用的时候</h3>
+<table>
+<thead>
+<tr>
+<th>信号</th>
+<th>更简单的做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单次查询立即答案</td>
+<td>一次 tool call，不用 loop</td>
+</tr>
+<tr>
+<td>纯静态知识 Q&amp;A</td>
+<td>完全不用 tool</td>
+</tr>
+<tr>
+<td>实时对话 UI</td>
+<td>直接 streaming，不用 loop 那么复杂</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 决策框架</h2>
+<p>规划 agentic loop 功能前问：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>为什么重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>迭代上限是多少？</td>
+<td>无限 loop 会卡好几分钟、烧 token</td>
+</tr>
+<tr>
+<td>迭代之间怎么显示进度？</td>
+<td>用户要看得到每一步，不然会以为坏了</td>
+</tr>
+<tr>
+<td>用户可以中途取消吗？</td>
+<td>多步骤 agent 必须可以被打断</td>
+</tr>
+<tr>
+<td>Loop 撞到上限但没有最终答案怎么办？</td>
+<td>「部分结果」UX 要设计</td>
+</tr>
+<tr>
+<td>单一对话的 token 预算怎么算？</td>
+<td>每次迭代都让历史变长，要规划最糟情况</td>
+</tr>
+<tr>
+<td>如何审计跑过哪些 tool？</td>
+<td>Debug 和 compliance 都需要</td>
+</tr>
+<tr>
+<td>Tool 失败的重试策略是什么？</td>
+<td>交给 Claude 处理、还是应用层硬重试？</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>把 loop 当成技术细节</strong>——它是产品功能界面，每一回合都有 UX 决策（进度、取消、部分结果）</li>
+<li><strong>没设可见的迭代上限</strong>——失控 loop 浪费预算、把用户卡住；上限要调参数并写进文档</li>
+<li><strong>把 tool 错误藏起来不给 Claude 看</strong>——tool 失败的话 Claude 要用 <code>is_error=True</code> 知道，这样才能恢复；藏起来会 hallucinate</li>
+<li><strong>没有观测性计划</strong>——生产 debug agent loop 需要 log 每次迭代的 tool call 和结果</li>
+<li><strong>没并行化就上线</strong>——能并行跑的 tool 不要串行，否则延迟翻倍或翻三倍</li>
+</ol>
+<hr />
+<h2>成本与延迟规划</h2>
+<p>每多一次迭代就增加：</p>
+<table>
+<thead>
+<tr>
+<th>成本</th>
+<th>典型量级</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一趟 API round trip</td>
+<td>+300ms 到 +1s</td>
+</tr>
+<tr>
+<td>历史变长</td>
+<td>每次迭代 +10% 到 +30% input token</td>
+</tr>
+<tr>
+<td>Tool 执行时间</td>
+<td>看 tool 而定（毫秒到秒）</td>
+</tr>
+<tr>
+<td>Output token</td>
+<td>每回合 +几百</td>
+</tr>
+</tbody>
+</table>
+<p>一个 5 次迭代的 loop 很容易就用掉单次调用 5 倍的 input token，wall time 要 3-10 秒。Prompt caching（课程后面会讲）是 token 成本的标准缓解方式，但延迟成本是这个 pattern 的本质。</p>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Agentic loop 是分开「Claude 功能」和「Claude agent」的最小单位。15 行代码解锁一个新的产品类别。但那 loop 的每一行都对应一个产品决策：要迭代多久、进度怎么显示、失败怎么处理、成本上限在哪。把 loop 当「后端的事」的 PM 会 ship 坏掉的 agent；把它当「有五个旋钮的产品界面」的 PM 会 ship 好的 agent。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：Agentic loop 是标准的 agent pattern。考题会问 <code>stop_reason</code> 处理和迭代控制。</li>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：理解错误如何用 <code>is_error=True</code> 传递，以及藏错误为什么会破坏 Claude 的恢复能力。</li>
+<li>考题描述「Claude 连续做多个 tool 调用」——答案永远是一个有 stop_reason 检查的 loop。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用什么比喻来理解 agentic loop？</td>
+<td>咖啡师看点单——一直问「还有下一步吗？」直到饮料完成</td>
+</tr>
+<tr>
+<td>哪一行代码是 loop 退出的信号？</td>
+<td><code>if response.stop_reason != "tool_use": break</code></td>
+</tr>
+<tr>
+<td>为什么 agentic loop 是产品界面而不只是工程？</td>
+<td>每次迭代都有 PM 决策：进度 UX、取消、成本、重试、部分结果</td>
+</tr>
+<tr>
+<td>Agentic loop 功能最大的隐藏成本是什么？</td>
+<td>历史变长——每次迭代都加 token 到后续调用</td>
+</tr>
+<tr>
+<td>生产 agent loop 必须包含哪些安全机制？</td>
+<td>Max iteration 上限、每次迭代的观测性、用 <code>is_error=True</code> 传递错误</td>
+</tr>
+<tr>
+<td>为什么藏错误不给 Claude 看会适得其反？</td>
+<td>Claude 以为 tool 成功就无法恢复，会 hallucinate 出结果</td>
+</tr>
+<tr>
+<td>哪些产品是靠 agentic loop 才有可能？</td>
+<td>Coding assistant、旅行规划、客服 agent、数据分析师——任何需要多步推理的功能</td>
+</tr>
+<tr>
+<td>PM 应该为 5 次迭代的 agentic loop 算多少延迟预算？</td>
+<td>3 到 10 秒 wall time，加上随迭代深度放大的 token 成本</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

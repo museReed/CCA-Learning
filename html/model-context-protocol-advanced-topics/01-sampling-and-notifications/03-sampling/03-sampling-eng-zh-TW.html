@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>03 Sampling Eng Zh Tw</title>
+<title>Sampling Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -56,19 +56,18 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="Sampling Flow" src="visuals/sampling-flow-zh-TW.svg" /></p>
 <h2>Sampling 運作方式</h2>
 <p>標準 MCP 流程是 <strong>Client -&gt; Server</strong>（client 要求 server 執行 tool）。Sampling 把這個方向翻轉：</p>
-<pre class="highlight"><code>Server                    Client                   Claude
+<pre><code>Server                    Client                   Claude
   |                         |                        |
   |-- create_message() ----&gt;|                        |
   |                         |-- API call -----------&gt;|
   |                         |&lt;-- response -----------|
   |&lt;-- SamplingResult ------|                        |
 </code></pre>
-
 <p>Server 從不直接與 Claude 對話，而是請 <strong>client</strong> 代為呼叫。</p>
 <hr />
 <h2>Server 端實作</h2>
 <p>Server 端使用 context 物件的 <code>session.create_message()</code> 方法：</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 async def summarize_research(ctx: Context, topic: str) -&gt; str:
     # 收集資料（server 自己的邏輯）
     results = await fetch_research_data(topic)
@@ -89,7 +88,6 @@ async def summarize_research(ctx: Context, topic: str) -&gt; str:
 
     return response.content.text
 </code></pre>
-
 <p>重點：<br />
 - <code>SamplingMessage</code> 封裝發送給 client 的 prompt<br />
 - Server 指定 <code>max_tokens</code>，但 client 決定使用哪個 model<br />
@@ -97,7 +95,7 @@ async def summarize_research(ctx: Context, topic: str) -&gt; str:
 <hr />
 <h2>Client 端實作</h2>
 <p>Client 建立 <code>ClientSession</code> 時必須提供 <code>sampling_callback</code>：</p>
-<pre class="highlight"><code class="language-python">async def handle_sampling(message: CreateMessageRequest) -&gt; CreateMessageResult:
+<pre><code class="language-python">async def handle_sampling(message: CreateMessageRequest) -&gt; CreateMessageResult:
     # Client 決定用哪個 model 並發送 API 呼叫
     response = await anthropic_client.messages.create(
         model=&quot;claude-sonnet-4-20250514&quot;,
@@ -117,7 +115,6 @@ async def summarize_research(ctx: Context, topic: str) -&gt; str:
 async with ClientSession(read, write, sampling_callback=handle_sampling) as session:
     await session.initialize()
 </code></pre>
-
 <p>Client 擁有完整控制權：<br />
 - 選擇呼叫哪個 model（可升級或降級）<br />
 - Rate limiting 與成本管理<br />

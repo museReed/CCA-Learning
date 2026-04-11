@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>05 Log And Progress Notifications Eng En</title>
+<title>Log And Progress Notifications Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -83,7 +83,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>Logging: Server-Side Implementation</h2>
 <p>The Context object exposes standard log-level methods:</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 async def analyze_data(ctx: Context, dataset_url: str) -&gt; str:
     ctx.info(&quot;Starting data analysis...&quot;)
 
@@ -104,12 +104,11 @@ async def analyze_data(ctx: Context, dataset_url: str) -&gt; str:
     ctx.info(&quot;Analysis complete&quot;)
     return result
 </code></pre>
-
 <p>Log levels follow standard conventions: <code>debug</code> &lt; <code>info</code> &lt; <code>warning</code> &lt; <code>error</code>.</p>
 <hr />
 <h2>Progress: Server-Side Implementation</h2>
 <p>Use <code>report_progress()</code> within loops to show completion:</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 async def batch_process(ctx: Context, items: list[str]) -&gt; str:
     total = len(items)
     results = []
@@ -124,7 +123,6 @@ async def batch_process(ctx: Context, items: list[str]) -&gt; str:
 
     return format_results(results)
 </code></pre>
-
 <p>Key details:<br />
 - <code>current</code> is the current step (0-indexed start)<br />
 - <code>total</code> is the total number of steps<br />
@@ -132,7 +130,7 @@ async def batch_process(ctx: Context, items: list[str]) -&gt; str:
 <hr />
 <h2>Client-Side: Receiving Notifications</h2>
 <p>The client provides callbacks when initializing <code>ClientSession</code>:</p>
-<pre class="highlight"><code class="language-python">def handle_logging(message: LoggingMessageNotification) -&gt; None:
+<pre><code class="language-python">def handle_logging(message: LoggingMessageNotification) -&gt; None:
     level = message.params.level    # &quot;info&quot;, &quot;debug&quot;, &quot;warning&quot;, &quot;error&quot;
     data = message.params.data      # The log message content
     print(f&quot;[{level.upper()}] {data}&quot;)
@@ -154,7 +152,6 @@ async with ClientSession(
 ) as session:
     await session.initialize()
 </code></pre>
-
 <p>Important distinction:<br />
 - <code>logging_callback</code> is set at <strong>session level</strong> (in <code>ClientSession</code> init)<br />
 - <code>progress_callback</code> is set <strong>per tool call</strong> (when invoking a specific tool)</p>
@@ -209,7 +206,7 @@ Logging and progress notifications are the MCP equivalent of UX polish. They do 
 <hr />
 <h2>Common Patterns</h2>
 <h3>Pattern 1: Multi-Step Pipeline</h3>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 async def research(ctx: Context, query: str) -&gt; str:
     ctx.info(&quot;Step 1/3: Searching databases...&quot;)
     ctx.report_progress(0, 3)
@@ -227,9 +224,8 @@ async def research(ctx: Context, query: str) -&gt; str:
     ctx.info(&quot;Research complete&quot;)
     return summary
 </code></pre>
-
 <h3>Pattern 2: Error Recovery with Logging</h3>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 async def fetch_with_retry(ctx: Context, url: str) -&gt; str:
     for attempt in range(3):
         try:
@@ -240,7 +236,6 @@ async def fetch_with_retry(ctx: Context, url: str) -&gt; str:
     ctx.error(&quot;All attempts failed&quot;)
     raise RuntimeError(&quot;Failed after 3 retries&quot;)
 </code></pre>
-
 <hr />
 <h2>CCA Exam Relevance</h2>
 <ul>

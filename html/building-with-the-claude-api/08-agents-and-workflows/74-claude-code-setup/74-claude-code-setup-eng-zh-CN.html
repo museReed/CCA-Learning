@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Setup Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Claude Code Setup — Engineering Deep Dive（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试 Domain</td>
+<td>D3 — Claude Code Configuration (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（Claude Code 安装与配置）、3.2（认证）、1.1（Claude Code 概览）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 74</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Claude Code 是终端原生的 coding agent，用 <code>npm install -g @anthropic-ai/claude-code</code> 安装，用 <code>claude</code> 命令启动，可通过 MCP 扩展 —— 从全新机器到可用 agent 总共三条命令。</p>
+<hr />
+<h2>Claude Code 开箱自带什么</h2>
+<p>安装前先记住 agent 默认带了什么，这样"下列哪项 Claude Code 支持？"的题目才能答对：</p>
+<table>
+<thead>
+<tr>
+<th>工具类别</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>文件操作</strong></td>
+<td>搜索、读取、编辑项目中任意文件</td>
+</tr>
+<tr>
+<td><strong>终端访问</strong></td>
+<td>在对话中直接执行 shell 命令</td>
+</tr>
+<tr>
+<td><strong>Web 访问</strong></td>
+<td>抓取文档页、搜索网络、拉取代码示例</td>
+</tr>
+<tr>
+<td><strong>MCP server 支持</strong></td>
+<td>通过注册 MCP server 扩展工具</td>
+</tr>
+</tbody>
+</table>
+<p>MCP 集成是考试最重要的类别 —— 它是官方扩展点。心智模型就是"内置工具 + MCP"。</p>
+<hr />
+<h2>支持平台</h2>
+<p>Claude Code 是跨平台 CLI，lesson 明确支持：</p>
+<ul>
+<li><strong>macOS</strong> —— 原生</li>
+<li><strong>Windows</strong> —— 通过 WSL（Windows Subsystem for Linux）</li>
+<li><strong>Linux</strong> —— 原生</li>
+</ul>
+<p>在 Windows 上，原生 PowerShell/cmd <strong>不是</strong>受支持的路径，必须在 WSL 里跑。考题至少会有一题把 Windows 丢进安装场景。</p>
+<hr />
+<h2>三步安装流程</h2>
+<p>整个流程就三步，按顺序背下来：</p>
+<h3>Step 1 —— 安装 Node.js</h3>
+<p>Claude Code 以 npm 包形式发布，所以需要 Node 与 npm。Lesson 建议先检查：</p>
+<pre><code class="language-bash">npm help
+</code></pre>
+<p>能跑就说明已装；没装就去 <code>nodejs.org/en/download</code> 下载。</p>
+<h3>Step 2 —— 全局安装 Claude Code</h3>
+<pre><code class="language-bash">npm install -g @anthropic-ai/claude-code
+</code></pre>
+<p>这条命令常见的考试陷阱：</p>
+<ul>
+<li><code>-g</code> flag（global）—— 必要，因为 <code>claude</code> 要在 PATH 上。</li>
+<li>包名是 <code>@anthropic-ai/claude-code</code>（在 <code>@anthropic-ai</code> 组织 scope 下）—— 不是 <code>claude</code>，也不是 <code>anthropic-claude-code</code>。</li>
+<li>它是 npm 包，不是 <code>pip install</code>，也不是独立二进制。</li>
+</ul>
+<h3>Step 3 —— 启动并认证</h3>
+<pre><code class="language-bash">claude
+</code></pre>
+<p>第一次启动时 Claude Code 会要求登录 Anthropic 账号。登录后直接进入当前工作目录的交互式 agent session。</p>
+<hr />
+<h2>认证模型</h2>
+<p>Lesson 描述的是类似浏览器的登录流程，绑定 Anthropic 账号。重点：</p>
+<ul>
+<li>登录绑的是 <strong>Anthropic 账号</strong>，不是贴在 config 文件里的 API key。</li>
+<li>第一次跑 <code>claude</code> 会触发登录流程。</li>
+<li>认证完后后续 session 自动复用凭证。</li>
+<li>计费与用量走你的账号 —— 这跟直接用 <code>ANTHROPIC_API_KEY</code> 环境变量调 Anthropic API 不同。</li>
+</ul>
+<p>考试重点差异：<strong>Anthropic API 计费用 API key；Claude Code 用账号登录</strong>。</p>
+<hr />
+<h2>全新 Mac 的完整安装 Session</h2>
+<pre><code class="language-bash"># 1. 检查是否已有 Node
+npm help
+# 若未安装，到 nodejs.org/en/download 下载并安装
+
+# 2. 全局安装 Claude Code
+npm install -g @anthropic-ai/claude-code
+
+# 3. 验证已在 PATH 上
+which claude
+# /usr/local/bin/claude  （或类似）
+
+# 4. 启动、认证、进入项目
+cd ~/projects/my-app
+claude
+# 首次执行：打开登录流程
+# 登录后：进入交互式 agent prompt
+</code></pre>
+<p>四条命令跑完就得到一个以当前目录为默认 project root 的终端 agent。</p>
+<hr />
+<h2>装完立即能做什么</h2>
+<p><code>claude</code> 跑起来后，就可以直接用自然语言下命令，agent 会自动使用内置工具。第一个 session 可以试：</p>
+<ul>
+<li><code>读 README.md 并总结这个项目</code></li>
+<li><code>找出所有引用旧 API endpoint 的文件</code></li>
+<li><code>跑测试套件并汇报失败项</code></li>
+</ul>
+<p>这些命令直接可用，不需额外配置。进阶配置（CLAUDE.md、MCP server、自定义命令）会在后续 lesson 讲。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>漏掉 <code>-g</code> flag</strong> —— 本地安装不会把 <code>claude</code> 放到 PATH 上。</li>
+<li><strong>包名写错</strong> —— 正确的 scoped 名称是 <code>@anthropic-ai/claude-code</code>。</li>
+<li><strong>Windows 上没装 WSL 就直接跑</strong> —— Lesson 明确 Windows 需要 WSL，不是原生 PowerShell。</li>
+<li><strong>试图设置 <code>ANTHROPIC_API_KEY</code> 而不是登录</strong> —— Claude Code 用账号登录，不用 raw API key。</li>
+<li><strong>跳过 <code>npm help</code> 检查</strong> —— 没装 Node 的机器会安装失败。</li>
+</ol>
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>CCA 考试把 Claude Code 的安装流程当成"常识题"，必须一字不差背下来：<strong>Node.js → <code>npm install -g @anthropic-ai/claude-code</code> → <code>claude</code> → 账号登录</strong>。没有可选步骤，Windows 明确指 WSL。背熟这句话就是稳拿分。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D3（Claude Code Configuration）</strong>：这 lesson 是约 20% 考题的基础，会出直接问安装命令和平台支持的题。</li>
+<li><strong>D1（Agentic Coding &amp; Architecture）</strong>：要知道 Claude Code 是 agent application，不是 chat app，MCP 是它的扩展机制。</li>
+<li>预期至少一题问 npm 包的精确名称 —— <code>@anthropic-ai/claude-code</code>。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code 的三个安装步骤是什么？</td>
+<td>1) 安装 Node.js、2) <code>npm install -g @anthropic-ai/claude-code</code>、3) 跑 <code>claude</code> 并登录</td>
+</tr>
+<tr>
+<td>Claude Code 的精确 npm 包名是什么？</td>
+<td><code>@anthropic-ai/claude-code</code></td>
+</tr>
+<tr>
+<td>为什么安装命令要用 <code>-g</code> flag？</td>
+<td>全局安装会把 <code>claude</code> 可执行文件放到 PATH 上，任何目录都能启动</td>
+</tr>
+<tr>
+<td>Claude Code 支持哪些操作系统？</td>
+<td>macOS、Windows（通过 WSL）、Linux</td>
+</tr>
+<tr>
+<td>Claude Code 的认证模型是什么？</td>
+<td>通过 Anthropic 账号做账号登录，不是 raw <code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td>Claude Code 内置的四类工具是什么？</td>
+<td>文件操作、终端访问、Web 访问、MCP server 支持</td>
+</tr>
+<tr>
+<td>如何检查 Node.js 是否已安装？</td>
+<td>跑 <code>npm help</code></td>
+</tr>
+<tr>
+<td>首次启动 Claude Code 的命令是什么？</td>
+<td><code>claude</code> —— 会触发登录流程</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

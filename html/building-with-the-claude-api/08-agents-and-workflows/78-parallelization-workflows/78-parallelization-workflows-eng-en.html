@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parallelization Workflows Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Parallelization Workflows — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — PRIMARY</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2 (agentic patterns — parallelization), 5.2 (production workflow deployment)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 78</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Parallelization workflows split one complex task into independent sub-tasks that run concurrently (typically via <code>asyncio.gather</code>), then aggregate the results in a final LLM call — it's the "fan-out / fan-in" pattern applied to LLM reasoning.</p>
+<hr />
+<h2>The Problem This Pattern Solves</h2>
+<p>Single-prompt complex decisions force Claude to juggle many criteria simultaneously. The lesson's canonical example: a material recommender that must choose between metal, polymer, ceramic, composite, elastomer, and wood for a given part image.</p>
+<p>Naive approach (one prompt):</p>
+<pre><code>&quot;Look at this part and pick the best material from: metal, polymer, ceramic, composite, elastomer, wood. Consider strength, weight, cost, manufacturability, corrosion resistance...&quot;
+</code></pre>
+<p>Problems:<br />
+1. Claude splits attention across 6 materials × 5+ criteria = 30+ considerations<br />
+2. No independent deep-dive on any single material<br />
+3. Hard to optimize — you cannot A/B-test the "metal prompt" in isolation<br />
+4. Impossible to add a 7th material without rewriting the whole prompt</p>
+<hr />
+<h2>The Parallelization Pattern</h2>
+<p>From Anthropic's "Building Effective Agents" blog post, parallelization comes in two flavors:</p>
+<table>
+<thead>
+<tr>
+<th>Flavor</th>
+<th>Purpose</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sectioning</strong></td>
+<td>Split a task into independent sub-tasks, each focusing on one aspect</td>
+<td>Material recommender (one LLM per material)</td>
+</tr>
+<tr>
+<td><strong>Voting</strong></td>
+<td>Run the <em>same</em> task multiple times and take a majority/consensus</td>
+<td>Moderation ("is this content safe?") with N voters</td>
+</tr>
+</tbody>
+</table>
+<p>Both run N LLM calls in parallel and aggregate results. The difference is whether each sub-task has <em>different</em> inputs/prompts (sectioning) or the <em>same</em> (voting).</p>
+<hr />
+<h2>Canonical Structure</h2>
+<pre><code>       ┌─→ sub-task 1 ──┐
+input ─┼─→ sub-task 2 ──┼─→ aggregator ─→ final output
+       └─→ sub-task N ──┘
+</code></pre>
+<ol>
+<li><strong>Split</strong> — transform one input into N focused sub-tasks</li>
+<li><strong>Fan-out</strong> — run all N sub-tasks concurrently (<code>asyncio.gather</code>)</li>
+<li><strong>Fan-in / Aggregate</strong> — feed all sub-task results into a final LLM call for a single decision</li>
+<li><strong>Return</strong> — send the aggregated answer back to the user</li>
+</ol>
+<hr />
+<h2>Python Implementation (asyncio.gather)</h2>
+<pre><code class="language-python">import asyncio
+from anthropic import AsyncAnthropic
+
+client = AsyncAnthropic()
+
+MATERIALS = [&quot;metal&quot;, &quot;polymer&quot;, &quot;ceramic&quot;, &quot;composite&quot;, &quot;elastomer&quot;, &quot;wood&quot;]
+
+async def evaluate_material(image_b64: str, material: str) -&gt; dict:
+    &quot;&quot;&quot;One specialized LLM call per material.&quot;&quot;&quot;
+    prompt = f&quot;&quot;&quot;
+You are a materials engineer evaluating whether {material} is a good fit
+for the pictured part. Focus ONLY on {material} criteria:
+
+&lt;criteria&gt;
+{MATERIAL_CRITERIA[material]}
+&lt;/criteria&gt;
+
+Return JSON: {{&quot;material&quot;: &quot;{material}&quot;, &quot;score&quot;: 0-10, &quot;rationale&quot;: &quot;...&quot;}}
+&quot;&quot;&quot;
+    resp = await client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=512,
+        messages=[{
+            &quot;role&quot;: &quot;user&quot;,
+            &quot;content&quot;: [
+                {&quot;type&quot;: &quot;image&quot;, &quot;source&quot;: {&quot;type&quot;: &quot;base64&quot;,
+                                             &quot;media_type&quot;: &quot;image/jpeg&quot;,
+                                             &quot;data&quot;: image_b64}},
+                {&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: prompt},
+            ],
+        }],
+    )
+    return parse_json(resp.content[0].text)
+
+async def aggregate(evaluations: list[dict]) -&gt; str:
+    &quot;&quot;&quot;Fan-in: combine all specialized evaluations into a final pick.&quot;&quot;&quot;
+    prompt = f&quot;&quot;&quot;
+Here are 6 independent material evaluations for the same part:
+
+{json.dumps(evaluations, indent=2)}
+
+Pick the single best material and justify your choice.
+&quot;&quot;&quot;
+    resp = await client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=1024,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}],
+    )
+    return resp.content[0].text
+
+async def material_recommender(image_b64: str) -&gt; str:
+    # fan-out
+    tasks = [evaluate_material(image_b64, m) for m in MATERIALS]
+    evaluations = await asyncio.gather(*tasks)
+    # fan-in
+    return await aggregate(evaluations)
+</code></pre>
+<p>Key implementation notes:<br />
+- <code>AsyncAnthropic</code> (not <code>Anthropic</code>) so calls are awaitable<br />
+- <code>asyncio.gather(*tasks)</code> runs the fan-out stage in true concurrency<br />
+- Each sub-task is small, focused, and independently testable<br />
+- The aggregator sees all structured results at once</p>
+<hr />
+<h2>Benefits</h2>
+<ol>
+<li><strong>Focused attention</strong> — each Claude call concentrates on one aspect, improving accuracy.</li>
+<li><strong>Independent optimization</strong> — refine the metal prompt without touching others; A/B test per-material.</li>
+<li><strong>Scalability</strong> — add a 7th material by appending a prompt file; no regression risk on the other six.</li>
+<li><strong>Reliability</strong> — lower cognitive load per call produces more consistent outputs.</li>
+<li><strong>Latency</strong> — N calls in parallel take roughly the time of the slowest call, not N × average.</li>
+</ol>
+<hr />
+<h2>When NOT to Use Parallelization</h2>
+<ul>
+<li>Tasks where later steps <em>depend on</em> earlier outputs (use chaining instead — lesson 79).</li>
+<li>When the sub-tasks cannot be meaningfully separated (e.g., "summarize this article" is not parallelizable).</li>
+<li>When cost matters more than latency: parallelization runs <em>more</em> LLM calls, not fewer. You multiply token spend by N.</li>
+</ul>
+<hr />
+<h2>Voting Variant</h2>
+<p>The same infrastructure supports a voting pattern: run the <em>identical</em> prompt N times and aggregate by majority rule. Useful for safety-critical decisions:</p>
+<pre><code class="language-python">async def moderation_vote(text: str, n: int = 5) -&gt; bool:
+    tasks = [is_safe(text) for _ in range(n)]
+    votes = await asyncio.gather(*tasks)
+    return sum(votes) &gt; n / 2  # majority
+</code></pre>
+<p>Voting trades cost for reliability — classical ensemble technique applied to LLMs.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Forgetting the aggregation step.</strong> Parallel sub-tasks alone do not produce a decision. You still need a final LLM (or rule-based) aggregator.</li>
+<li><strong>Making sub-tasks depend on each other.</strong> If sub-task 2 needs sub-task 1's output, it's a chain, not a parallel — using <code>asyncio.gather</code> will race or deadlock.</li>
+<li><strong>Using <code>Anthropic</code> instead of <code>AsyncAnthropic</code>.</strong> Sync clients block; you'll serialize instead of parallelize.</li>
+<li><strong>Ignoring per-task timeouts.</strong> One slow call can stall the whole gather. Wrap each with <code>asyncio.wait_for</code> or use <code>gather(return_exceptions=True)</code>.</li>
+<li><strong>Exploding token costs.</strong> Each parallel call is a separate API bill. Cap N and cache where possible.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Parallelization is the "focused attention" workflow — by giving each Claude call a single narrow responsibility, you get better analysis per call <em>and</em> lower total latency. The cost is N× API spend, so use it when quality matters more than cost, or when latency is the bottleneck. Remember both flavors for the exam: <strong>sectioning</strong> (different sub-tasks) and <strong>voting</strong> (same task N times).</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (22%) PRIMARY</strong>: Expect a scenario question asking you to identify parallelization (keywords: "split", "run simultaneously", "fan out", "aggregate").</li>
+<li><strong>D5 (20%) SECONDARY</strong>: Production patterns — <code>asyncio.gather</code>, latency/cost trade-offs.</li>
+<li>Signal words: "split into multiple independent evaluations", "run simultaneously", "aggregate results", "fan-out / fan-in".</li>
+<li>Know both variants (sectioning vs voting).</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is a parallelization workflow?</td>
+<td>Split one task into independent sub-tasks, run them concurrently, then aggregate the results</td>
+</tr>
+<tr>
+<td>Name the two flavors of parallelization.</td>
+<td>Sectioning (different sub-tasks on the same input) and voting (same task run N times)</td>
+</tr>
+<tr>
+<td>What Python primitive executes the fan-out stage?</td>
+<td><code>asyncio.gather(*tasks)</code> with the <code>AsyncAnthropic</code> client</td>
+</tr>
+<tr>
+<td>Why is parallelization better than one mega-prompt?</td>
+<td>Focused attention per call, independent optimization, scalable, more reliable</td>
+</tr>
+<tr>
+<td>What is the cost trade-off of parallelization?</td>
+<td>N× API spend vs one call — you pay more tokens in exchange for quality and latency</td>
+</tr>
+<tr>
+<td>When should you NOT use parallelization?</td>
+<td>When sub-tasks depend on each other (use chaining) or when cost matters more than quality</td>
+</tr>
+<tr>
+<td>What is the "voting" parallelization pattern used for?</td>
+<td>Safety/consensus decisions — run the same prompt N times and take majority (e.g., moderation)</td>
+</tr>
+<tr>
+<td>What client class enables concurrent Anthropic calls in Python?</td>
+<td><code>AsyncAnthropic</code> — the async variant of the Anthropic SDK client</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anthropic Apps Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Anthropic Apps — PM Perspective（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试 Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1（Claude Code 概览）、1.2（agentic patterns）、1.4（Computer Use 作为 agent 案例）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 73</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Claude Code 与 Computer Use 是 Anthropic 的两款旗舰 agent 产品 —— 它们是你设计 AI workflow 功能时的 UX、信任模型与价值主张的参考基准。</p>
+<hr />
+<h2>心智模型：实习生类比</h2>
+<p>把三种接口想成三种不同的助手：</p>
+<table>
+<thead>
+<tr>
+<th>接口</th>
+<th>对应的助手</th>
+<th>可以让它做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude.ai</td>
+<td>聪明的朋友，用消息问他</td>
+<td>快速解答、草稿、头脑风暴</td>
+</tr>
+<tr>
+<td>Anthropic API</td>
+<td>工作台上的零件盒</td>
+<td>你自己组装成产品</td>
+</tr>
+<tr>
+<td><strong>Claude Code</strong></td>
+<td>坐在你键盘旁的工程实习生</td>
+<td>"修这个 bug、跑测试、开 PR"</td>
+</tr>
+<tr>
+<td><strong>Computer Use</strong></td>
+<td>操作电脑的虚拟操作员</td>
+<td>"登入 dashboard、导出报表、发邮件"</td>
+</tr>
+</tbody>
+</table>
+<p>PM 视角：Claude.ai 是产品，API 是基础设施，而 Claude Code 和 Computer Use 是 <em>agent 产品</em> —— 它们会做事，而不只是回答问题。</p>
+<hr />
+<h2>为什么 PM 要关心</h2>
+<p>现今大部分 AI 功能还是聊天界面。真正有趣的产品类别（也是整个行业正在前进的方向）是 agent。Claude Code 与 Computer Use 正是两种主要 agent 原型的最佳案例：</p>
+<table>
+<thead>
+<tr>
+<th>原型</th>
+<th>示例</th>
+<th>最适合的场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Domain-native agent</td>
+<td>Claude Code（终端、文件工具）</td>
+<td>目标领域有干净、typed 的工具</td>
+</tr>
+<tr>
+<td>GUI-driving agent</td>
+<td>Computer Use（通过截图操作桌面）</td>
+<td>目标领域没有 API，只有 UI</td>
+</tr>
+</tbody>
+</table>
+<p>规划 AI 功能时，先决定属于哪种原型。Native agent 更便宜、更快、更可靠；GUI-driving agent 能解锁其他方法搞不定的场景。</p>
+<hr />
+<h2>产品使用场景</h2>
+<h3>何时用 Domain-Native Agent（Claude Code 原型）</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么合适</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在 IDE 或 CLI 里的开发者工具</td>
+<td>已有干净的工具集成（文件系统、git、language server）</td>
+</tr>
+<tr>
+<td>SQL 数据库的数据分析助手</td>
+<td>可以暴露 typed 工具 —— query、schema、metric catalog</td>
+</tr>
+<tr>
+<td>对接工单 API 的客服 operator</td>
+<td>有一等公民的 API，动作可靠、可审计</td>
+</tr>
+</tbody>
+</table>
+<h3>何时用 GUI-Driving Agent（Computer Use 原型）</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么合适</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自动化没有 API 的旧桌面软件</td>
+<td>只剩 UI 可用，agent 必须"看得懂并点得对"</td>
+</tr>
+<tr>
+<td>跨第三方 Web 应用的 QA 测试</td>
+<td>需要视觉回归与交互流程</td>
+</tr>
+<tr>
+<td>取代脆弱 macro 的企业 RPA</td>
+<td>Agent 能用 vision 适应 layout 变化</td>
+</tr>
+</tbody>
+</table>
+<h3>不适合的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>更好的替代</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>应用内的简单问答</td>
+<td>直接用 API 做 chat，不需要 agent</td>
+</tr>
+<tr>
+<td>完全确定的固定流程</td>
+<td>传统 workflow / RPA 脚本即可，不用 LLM</td>
+</tr>
+<tr>
+<td>极低延迟的实时需求</td>
+<td>走固定代码路径 —— agent loop 太慢</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 决策框架</h2>
+<p>看到一个新的"AI 功能"提案时，问这些问题：</p>
+<ol>
+<li><strong>这真的是 agent 吗？</strong> 是否需要多步工具执行、环境交互、自主决策？如果不需要，那是 chat 功能 —— 风险小、天花板也低。</li>
+<li><strong>适合哪种原型？</strong> Native tool 风格（Claude Code）还是 GUI-driving 风格（Computer Use）？</li>
+<li><strong>信任边界在哪？</strong> Agent 代替用户行动。人类在哪一步批准？</li>
+<li><strong>失败模式是什么？</strong> 文件损坏、误点、不可逆动作 —— 先设计保险再动工。</li>
+<li><strong>参考实现教了我们什么？</strong> 两个 app 都有 permission prompt、memory（CLAUDE.md）、迭代式 workflow —— 直接借用这些模式。</li>
+</ol>
+<hr />
+<h2>信任与控制的权衡</h2>
+<p>Agent 的强大在于会"行动"，这同时是风险来源。Claude Code 与 Computer Use 都展示了这个光谱：</p>
+<table>
+<thead>
+<tr>
+<th>控制层级</th>
+<th>Claude Code 行为</th>
+<th>用户体验</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>只读</td>
+<td>先显示计划，要求批准</td>
+<td>安全但慢</td>
+</tr>
+<tr>
+<td>逐步确认</td>
+<td>每次编辑或 shell 命令前询问</td>
+<td>平衡</td>
+</tr>
+<tr>
+<td>自动批准</td>
+<td>一次执行一整批变更</td>
+<td>快但风险高</td>
+</tr>
+</tbody>
+</table>
+<p>PM 的任务是挑一个默认值并提供合理的逃生出口。课程讲得很清楚：好的 agent 是 <strong>协作伙伴</strong>，不是完全自主的行动者。</p>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>只说"做一个 agent"却没定义原型</strong> —— native-tool agent 与 GUI-driving agent 的成本和可靠度差很大。</li>
+<li><strong>以为 Claude.ai 的 UX 可以直接套到 agent</strong> —— agent 需要计划界面、权限确认、恢复机制，而 chat UI 没有这些。</li>
+<li><strong>忽略 context 问题</strong> —— Claude Code 大量投资在 CLAUDE.md，因为 context 管理占了一半工作。临时 prompt 无法 scale。</li>
+<li><strong>把 Computer Use 当成"省下做 API 的便宜替代"</strong> —— 它可行，但更慢、更脆弱、更费 token。能做 API 就先做 API。</li>
+<li><strong>为了"更自主"跳过人类批准步骤</strong> —— 对任何破坏性动作，批准不是可选项。</li>
+</ol>
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>Claude Code 与 Computer Use 不只是产品，而是 <strong>PM 层级的参考设计</strong> —— 对应两种主流 agent 原型：native-tool agent 与 GUI-driving agent。研究它们的 UX 选择（权限确认、持久 memory 文件、"先规划再执行"流程），你就有了自己 agent 功能的设计模板。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D1（Agentic Coding &amp; Architecture）</strong>：看到"这是不是 agent"的场景时，要能映射到四项特性。</li>
+<li><strong>D3（Claude Code Configuration）</strong>：这 lesson 是后续 Claude Code 重头戏题组的入口，先记住应用分类术语。</li>
+<li>题目常对比 chat、API、agent —— 要知道每种扮演什么角色。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anthropic 的两款旗舰 agent 应用是什么？</td>
+<td>Claude Code 和 Computer Use</td>
+</tr>
+<tr>
+<td>实习生类比中，Claude Code 等同什么角色？</td>
+<td>坐在你键盘旁、实际动手做事的工程实习生</td>
+</tr>
+<tr>
+<td>本 lesson 提出的两种主流 agent 原型是什么？</td>
+<td>Domain-native agent（Claude Code 风格）与 GUI-driving agent（Computer Use 风格）</td>
+</tr>
+<tr>
+<td>PM 何时应优先选 native-tool agent 而非 GUI-driving？</td>
+<td>只要目标领域有干净 API 或 typed 工具 —— 便宜且可靠</td>
+</tr>
+<tr>
+<td>GUI-driving agent 适合什么时候用？</td>
+<td>目标 app 没有 API 只有 UI（旧桌面软件、第三方 dashboard）</td>
+</tr>
+<tr>
+<td>PM 必须管理的信任权衡是什么？</td>
+<td>Agent 代替用户行动 —— 必须在只读、逐步确认、自动批准之间选择默认值</td>
+</tr>
+<tr>
+<td>为什么 CLAUDE.md 对 PM 有意义？</td>
+<td>它展示了"持久 context"这个产品模式 —— 提醒 agent UX 不只是 prompt，还包括记忆</td>
+</tr>
+<tr>
+<td>Computer Use 能取代搭建正式 API 吗？</td>
+<td>不行 —— 它只是没 API 时的 fallback，更慢、更脆弱、更贵</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

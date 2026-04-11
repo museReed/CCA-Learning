@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Overview Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Project Overview: Reminder App — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (tool schema design), 1.2 (agentic loop foundation), 1.1 (breaking features into tool compositions)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 33</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The reminder-app project demonstrates a core design principle of tool use: decompose capability gaps into small, single-purpose tools and let Claude compose them at reasoning time — rather than building one monolithic "do everything" function.</p>
+<hr />
+<h2>The Target User Experience</h2>
+<pre><code>User:  &quot;Set a reminder for my doctor's appointment.
+        It's a week from Thursday.&quot;
+
+Claude: &quot;OK, I will remind you.&quot;
+</code></pre>
+<p>Trivially simple on the surface — but hiding three distinct capability gaps that a base model cannot solve.</p>
+<hr />
+<h2>Three Gaps Between Claude and the Goal</h2>
+<table>
+<thead>
+<tr>
+<th>Gap</th>
+<th>Why It Matters</th>
+<th>Tool That Fixes It</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Limited time awareness</strong></td>
+<td>Claude may know the current date roughly but not the exact time at the moment of the call</td>
+<td><code>get_current_datetime</code></td>
+</tr>
+<tr>
+<td><strong>Date arithmetic is error-prone</strong></td>
+<td>"A week from Thursday" requires adding durations to dates; LLMs regularly miscount weekdays and mis-handle month boundaries</td>
+<td><code>add_duration_to_datetime</code></td>
+</tr>
+<tr>
+<td><strong>No reminder capability</strong></td>
+<td>Claude has no native way to persist a scheduled reminder in any system</td>
+<td><code>set_reminder</code></td>
+</tr>
+</tbody>
+</table>
+<p>Each gap is addressed by exactly one tool. This is not accidental — it is the design principle.</p>
+<hr />
+<h2>Design Principle: One Tool per Capability Gap</h2>
+<pre><code>┌────────────────────────────────────────┐
+│          User Goal: set reminder        │
+└────────────────────────────────────────┘
+             │
+   decompose into atomic steps
+             │
+ ┌───────────┼────────────┐
+ ▼           ▼            ▼
+get_current_  add_duration_  set_reminder
+datetime      to_datetime
+(now)         (now + 1 week) (persist)
+</code></pre>
+<p>Why atomic tools beat a monolithic "parse_and_set_reminder":</p>
+<ol>
+<li><strong>Composability</strong> — Claude can reuse <code>add_duration_to_datetime</code> for other date-math tasks (birthdays, deadlines, renewals).</li>
+<li><strong>Testability</strong> — each tool has one job and is trivially unit-testable.</li>
+<li><strong>Observability</strong> — logs show exactly which step failed, not "the big function returned wrong thing".</li>
+<li><strong>Model-side reasoning</strong> — Claude's strength is planning sequences. If you pre-bake the sequence into one function, you waste that strength.</li>
+<li><strong>Graceful degradation</strong> — a failure in <code>set_reminder</code> doesn't lose the already-computed timestamp.</li>
+</ol>
+<hr />
+<h2>The Agentic Loop Implicit in This Project</h2>
+<p>Even though each tool is simple, combining three tools means the conversation may need <strong>three</strong> tool-use turns before Claude emits the final answer:</p>
+<pre><code>Turn 1: user → &quot;remind me next Thursday&quot;
+Turn 2: Claude → tool_use get_current_datetime
+Turn 3: app   → tool_result &quot;2026-04-11 14:30:00&quot;
+Turn 4: Claude → tool_use add_duration_to_datetime(now, +7 days)
+Turn 5: app   → tool_result &quot;2026-04-18 14:30:00&quot;
+Turn 6: Claude → tool_use set_reminder(when=&quot;2026-04-18 14:30:00&quot;, ...)
+Turn 7: app   → tool_result &quot;ok, reminder created&quot;
+Turn 8: Claude → &quot;OK, I will remind you.&quot;  (stop_reason=end_turn)
+</code></pre>
+<p>This is the minimal working example of an <strong>agent loop</strong>: Claude plans the sequence of tool calls itself, based on the user's natural language request. Your code does not hard-code the order — it simply runs whatever tool Claude asks for next, until <code>stop_reason != "tool_use"</code>.</p>
+<hr />
+<h2>Incremental Build Order</h2>
+<p>The course builds these tools one at a time, simplest first. This mirrors best practice for any new tool-use project:</p>
+<ol>
+<li><strong>Start with the read-only tool</strong> (<code>get_current_datetime</code>) — no side effects, easiest to test.</li>
+<li><strong>Add the pure-function tool</strong> (<code>add_duration_to_datetime</code>) — deterministic, still no external side effects.</li>
+<li><strong>Add the side-effecting tool last</strong> (<code>set_reminder</code>) — persistence, failure modes, audit trails.</li>
+</ol>
+<p>This order is also the safety gradient. Read-only tools are low-risk to misuse; write tools demand more validation and testing.</p>
+<hr />
+<h2>What This Project Teaches About Scoping</h2>
+<p>The underlying lesson is about <strong>scoping AI features</strong>. A naive engineer might write:</p>
+<pre><code class="language-python">def handle_reminder_request(user_text: str) -&gt; str:
+    # parse the text, do everything, return a confirmation
+    ...
+</code></pre>
+<p>...and then try to prompt Claude to call that one giant function. This fails because:</p>
+<ul>
+<li>You have moved all the hard work (parsing, date math, persistence) back into imperative code.</li>
+<li>Claude never gets to reason; it becomes a text-to-function-call classifier.</li>
+<li>You lose the ability to reuse those capabilities in any other feature.</li>
+</ul>
+<p>The tool-use paradigm <strong>inverts</strong> that: give Claude small primitives and let it orchestrate. This is the bridge from "LLM as a smart string function" to "LLM as a planner."</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Bundling multiple capabilities into one tool</strong> — e.g., a single <code>schedule_reminder(natural_language_time)</code> that parses strings internally. Decompose it.</li>
+<li><strong>Hard-coding the tool call order</strong> — let Claude decide. Your code's job is to dispatch whatever tool it asks for.</li>
+<li><strong>Starting with the write tool</strong> — build read-only tools first; they are safer to iterate on.</li>
+<li><strong>Skipping the project phase</strong> — jumping straight into production code without a toy project means you learn the failure modes on real users.</li>
+<li><strong>Not planning for multi-turn loops</strong> — even a simple feature can require 3+ tool calls; your message loop must handle an arbitrary number of turns.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The reminder project is a case study in <strong>capability decomposition</strong>: each native limitation of the model becomes exactly one atomic tool, and Claude composes them at reasoning time. This inversion — "give the model primitives, let it plan" — is the mental shift the CCA exam tests repeatedly under D1 (agentic architecture). Recognize it whenever you see a multi-step natural language goal.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Architecture)</strong>: understanding that a single user request can require a loop of multiple tool calls, all planned by the model.</li>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: the decomposition principle — one capability gap = one tool.</li>
+<li>Exam pattern: question describes a feature (e.g., "remind me in a week") and asks how many tools or what kind of tool design — answer emphasizes atomic tools Claude can compose.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the target user interaction in the reminder project?</td>
+<td><code>"Set a reminder for my doctor's appointment. It's a week from Thursday."</code> → <code>"OK, I will remind you."</code></td>
+</tr>
+<tr>
+<td>What three capability gaps does the reminder project identify?</td>
+<td>Limited time awareness, unreliable date arithmetic, and no built-in reminder mechanism.</td>
+</tr>
+<tr>
+<td>What are the three tools built in the project?</td>
+<td><code>get_current_datetime</code>, <code>add_duration_to_datetime</code>, <code>set_reminder</code>.</td>
+</tr>
+<tr>
+<td>Why build three small tools instead of one big one?</td>
+<td>Composability, testability, observability, model-side reasoning, and graceful degradation.</td>
+</tr>
+<tr>
+<td>In what order are the tools introduced and why?</td>
+<td>Simplest and read-only first (<code>get_current_datetime</code>), then pure function, then side-effecting (<code>set_reminder</code>) — a safety gradient.</td>
+</tr>
+<tr>
+<td>How many tool-use turns may one reminder request take?</td>
+<td>Up to three — one per tool invocation — before Claude emits the final natural-language confirmation.</td>
+</tr>
+<tr>
+<td>What is the design principle this project illustrates?</td>
+<td>One capability gap = one atomic tool; let Claude plan the composition.</td>
+</tr>
+<tr>
+<td>What is the "LLM as planner" framing?</td>
+<td>Instead of treating the LLM as a text classifier into one big function, give it small primitives and let it orchestrate them.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

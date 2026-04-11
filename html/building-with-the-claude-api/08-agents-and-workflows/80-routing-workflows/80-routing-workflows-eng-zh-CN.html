@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Routing Workflows Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Routing Workflows — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture(22%)— 主要</td>
+</tr>
+<tr>
+<td>任务陈述</td>
+<td>1.2(agentic 模式 — routing)、5.2(production workflow 部署)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 80</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Routing workflow 用一个分类器 LLM 调用(通常配合 <code>tool_choice="tool"</code> 强制工具调用)把进来的请求分类, 再分派到专用下游 pipeline — 它是 LLM workflow 版的 "switch statement"。</p>
+<hr />
+<h2>Routing 解决的问题</h2>
+<p>通用 prompt 处理多样化输入时表现不佳。课程示例: 一个社交媒体脚本生成器, 要同时处理 "Python functions"(教育类)和 "surfing"(娱乐类)。单一 script prompt 对两者都产出普通结果。解法是先分类, 再分派到特定类别的 prompt。</p>
+<p>Anthropic 在 "Building Effective Agents" 中描述 routing 的适用时机: 当复杂任务有明显类别, 每类都能因为专用处理而受益, <em>并且</em>分类可以被 LLM 或确定性算法准确完成。</p>
+<hr />
+<h2>标准两步结构</h2>
+<pre><code>用户输入 ──→ [分类器 LLM 调用] ──→ 类别 ──→ [专用 pipeline] ──→ 输出
+</code></pre>
+<ol>
+<li><strong>分类</strong> — 把用户请求送给 Claude, 附带预定义类别清单, 要求返回一个类别标签</li>
+<li><strong>专用处理</strong> — 用返回的类别查出对应的 prompt template / tool set / 子 workflow, 再产出最终输出</li>
+</ol>
+<p>核心观念: 用户输入只会进<em>一个</em>专用 pipeline, 不是全部。每个 pipeline 可以独立优化。</p>
+<hr />
+<h2>示例类别(课程)</h2>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>风格</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Entertainment</td>
+<td>高能量、有文化梗、用流行语</td>
+</tr>
+<tr>
+<td>Educational</td>
+<td>清楚吸引人的解释配易懂示例</td>
+</tr>
+<tr>
+<td>Comedy</td>
+<td>犀利意外的内容, 聪明观察与节奏</td>
+</tr>
+<tr>
+<td>Personal vlog</td>
+<td>真诚亲密的对话式叙事</td>
+</tr>
+<tr>
+<td>Reviews</td>
+<td>果断、基于体验, 强调优缺点</td>
+</tr>
+<tr>
+<td>Storytelling</td>
+<td>沉浸式, 用鲜活细节与情感连接</td>
+</tr>
+</tbody>
+</table>
+<p>每个类别有自己的专用 prompt, routing 挑对的那个。</p>
+<hr />
+<h2>课程的分类 Prompt</h2>
+<pre><code>Categorize the topic of a video into one of the listed categories:
+&lt;topic&gt;Python functions&lt;/topic&gt;
+
+&lt;categories&gt;
+- Educational
+- Entertainment
+- Comedy
+- Personal vlog
+- Reviews
+- Storytelling
+&lt;/categories&gt;
+</code></pre>
+<p>Claude 回 "Educational", 你的代码就去挑教育类 prompt template。</p>
+<hr />
+<h2>用 <code>tool_choice="tool"</code> 强制分类</h2>
+<p>Production 场景中, 分类器应该返回<em>结构化</em>类别, 而不是自由文字再自己 parse。CCA 会考的关键技巧是用 tool use 并设 <code>tool_choice</code> 强制调用特定 tool:</p>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+ROUTE_TOOL = {
+    &quot;name&quot;: &quot;route_request&quot;,
+    &quot;description&quot;: &quot;把用户请求 route 到专用内容 pipeline。&quot;,
+    &quot;input_schema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;category&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;enum&quot;: [&quot;Educational&quot;, &quot;Entertainment&quot;, &quot;Comedy&quot;,
+                         &quot;Personal vlog&quot;, &quot;Reviews&quot;, &quot;Storytelling&quot;],
+                &quot;description&quot;: &quot;这个主题的内容类别。&quot;
+            },
+            &quot;confidence&quot;: {
+                &quot;type&quot;: &quot;number&quot;,
+                &quot;description&quot;: &quot;分类器置信度, 0.0 到 1.0。&quot;
+            }
+        },
+        &quot;required&quot;: [&quot;category&quot;, &quot;confidence&quot;]
+    }
+}
+
+def classify(topic: str) -&gt; dict:
+    resp = client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=512,
+        tools=[ROUTE_TOOL],
+        tool_choice={&quot;type&quot;: &quot;tool&quot;, &quot;name&quot;: &quot;route_request&quot;},  # 强制
+        messages=[{&quot;role&quot;: &quot;user&quot;,
+                   &quot;content&quot;: f&quot;Categorize the topic: {topic}&quot;}],
+    )
+    for block in resp.content:
+        if block.type == &quot;tool_use&quot; and block.name == &quot;route_request&quot;:
+            return block.input  # {&quot;category&quot;: &quot;...&quot;, &quot;confidence&quot;: ...}
+    raise RuntimeError(&quot;分类器没调用 route_request tool&quot;)
+</code></pre>
+<p>为什么 <code>tool_choice={"type": "tool", "name": "..."}</code> 很重要:</p>
+<ul>
+<li><strong>强制</strong> Claude 发出 route_request tool call(不允许自由文字)</li>
+<li>通过 <code>input_schema</code> 保证响应 shape</li>
+<li><code>enum</code> 限制防止幻觉类别</li>
+<li>分类器不能 "闲聊" 或解释 — 只能分类</li>
+</ul>
+<p><code>tool_choice</code> 的选项:</p>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{"type": "auto"}</code></td>
+<td>默认 — Claude 自己决定要不要用 tool</td>
+</tr>
+<tr>
+<td><code>{"type": "any"}</code></td>
+<td>Claude 必须调用<em>某个</em> tool, 但选哪个</td>
+</tr>
+<tr>
+<td><code>{"type": "tool", "name": "X"}</code></td>
+<td>Claude 必须调用指定的 tool X</td>
+</tr>
+</tbody>
+</table>
+<p>Routing 要用 <code>"tool"</code> — 你要每次都调用<em>特定</em>分类器 tool。</p>
+<hr />
+<h2>完整 Routing Pipeline</h2>
+<pre><code class="language-python">PROMPTS = {
+    &quot;Educational&quot;: &quot;写一份清楚的教育脚本……&quot;,
+    &quot;Entertainment&quot;: &quot;写一份高能量的娱乐脚本……&quot;,
+    &quot;Comedy&quot;: &quot;写一份喜剧脚本……&quot;,
+    &quot;Personal vlog&quot;: &quot;...&quot;,
+    &quot;Reviews&quot;: &quot;...&quot;,
+    &quot;Storytelling&quot;: &quot;...&quot;,
+}
+
+def generate_script(topic: str) -&gt; str:
+    classification = classify(topic)
+    category = classification[&quot;category&quot;]
+    prompt_template = PROMPTS[category]
+
+    resp = client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=2048,
+        messages=[{&quot;role&quot;: &quot;user&quot;,
+                   &quot;content&quot;: f&quot;{prompt_template}\n\nTopic: {topic}&quot;}],
+    )
+    return resp.content[0].text
+</code></pre>
+<p>每个分支可以独立优化, 新增类别只要在 <code>PROMPTS</code> 和 <code>ROUTE_TOOL</code> 的 enum 加一条。</p>
+<hr />
+<h2>什么时候 Routing 是对的模式</h2>
+<p>Anthropic 建议, routing 适用于:</p>
+<ol>
+<li><strong>可以清楚定义类别</strong> — 分支之间没有模糊重叠</li>
+<li><strong>信任分类器</strong> — Claude(或更便宜的分类器)能可靠分类</li>
+<li><strong>专用处理真的有好处</strong> — 每分支优化优于通用 prompt</li>
+<li><strong>分类开销值得分摊</strong> — 多一次 LLM 调用是值得的</li>
+</ol>
+<p>如果第一次 LLM 调用无法可靠分类, routing 反而是错误 — 你会把请求送到错的 pipeline, 结果比单一通用 prompt 还糟。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>分类器用自由文字。</strong> 没有 <code>tool_choice="tool"</code> + <code>enum</code>, Claude 可能回 "应该是教育类?" — 你就要 parse。强制 tool call。</li>
+<li><strong>类别太多。</strong> Routing 适合类别明显时。20+ 类别又有重叠会让分类器不可靠。控制在 10 以下。</li>
+<li><strong>没有误分类的 fallback。</strong> 置信度低时怎么办? 要有默认/通用 pipeline。</li>
+<li><strong>忽略分类成本。</strong> 每个请求都多付一次 LLM 调用。对低延迟 app, 分类用更小/便宜的模型(例如 Haiku)。</li>
+<li><strong>把 routing 和 agent 混淆。</strong> Routing 是 <em>workflow</em> — 代码分派到特定 pipeline。Agent 则是让 Claude 在推理时自由挑工具。不一样。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>Routing 是 LLM workflow 版的 "switch statement" — 先分类, 再分派。Production 级别的版本用 <code>tool_choice={"type": "tool", "name": "..."}</code> 配合 <code>enum</code> input schema, 强制出结构化类别标签。这是 CCA 关键重点: <strong>强制 tool use 保证分类器返回有效类别, 且无法闲聊。</strong></p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1(22%)主要</strong>: Routing 是四大 workflow 模式之一, 预期有场景题。</li>
+<li><strong>D2(18%)次要</strong>: <code>tool_choice</code> 选项被明确测试 — 记三个值(<code>auto</code>、<code>any</code>、<code>tool</code>)。</li>
+<li><strong>D5(20%)次要</strong>: Production 模式 — 便宜分类器模型、fallback 分支、enum 约束。</li>
+<li>Routing 信号词: "categorize"、"classifier"、"dispatch"、"specialized handling per category"。</li>
+<li>考试陷阱: routing ≠ agent。Routing 是分类调用后由代码驱动分派。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>什么是 routing workflow?</td>
+<td>分类器 LLM 调用分类请求, 再由代码分派到专用 pipeline</td>
+</tr>
+<tr>
+<td>为什么分类器要用 <code>tool_choice={"type": "tool", "name": "X"}</code>?</td>
+<td>强制 Claude 通过 tool 返回结构化类别, 不允许自由文字</td>
+</tr>
+<tr>
+<td>列出 <code>tool_choice</code> 的三个选项。</td>
+<td><code>auto</code>(默认)、<code>any</code>(任一 tool)、<code>tool</code>(强制特定 tool)</td>
+</tr>
+<tr>
+<td>如何防止分类器幻觉出新类别?</td>
+<td>Tool input schema 用 <code>"enum": [...]</code> 列出有效类别</td>
+</tr>
+<tr>
+<td>什么时候<em>不</em>该用 routing?</td>
+<td>类别重叠、分类器不可靠、或单一 prompt 已经可靠时</td>
+</tr>
+<tr>
+<td>分类器步骤的关键 production 优化?</td>
+<td>用更小/便宜的模型(例如 Haiku), 因为分类比生成简单</td>
+</tr>
+<tr>
+<td>Routing 是 workflow 还是 agent?</td>
+<td>Workflow — 代码掌握分类调用后的分派</td>
+</tr>
+<tr>
+<td>置信度低时分类器该返回什么?</td>
+<td>Route 到默认/通用 pipeline 或请求人工审核(fallback 路径)</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Web Search Tool Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Web Search Tool — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)、D4 — AI Safety &amp; Alignment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（built-in server tools）、2.1（tool schema）、4.2（grounding 与 citation）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 43</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Web search tool 是 Anthropic 完全托管的 server tool:你只需要给一个很小的 schema stub,Anthropic 会在他们的服务器上处理整个搜索、结果抓取、citation 生成——完全不需要你的本地实现。</p>
+<hr />
+<h2>关键区分：Server Tool vs. Client-Executed Tool</h2>
+<p>不同于自定义 tool（schema 与实现都你写）或 text editor tool（Claude 知 schema、你执行指令）,web search tool 是 <strong>server tool</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>Tool 类型</th>
+<th>谁定义 Schema</th>
+<th>谁执行</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自定义 tool</td>
+<td>你</td>
+<td>你</td>
+</tr>
+<tr>
+<td>Text editor（built-in）</td>
+<td>Anthropic</td>
+<td>你</td>
+</tr>
+<tr>
+<td>Web search（server tool）</td>
+<td>Anthropic</td>
+<td><strong>Anthropic</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Runtime 你什么都不用做。Claude 向 Anthropic 的 web search 后端发出调用,结果通过 API response 回来。</p>
+<hr />
+<h2>前置条件：在 Console 启用</h2>
+<p>使用 web search 前,你的 Anthropic 组织必须在 privacy 设置启用它：</p>
+<pre><code>https://console.anthropic.com/settings/privacy
+</code></pre>
+<p>这是 org level 的 opt-in。若设置是关的,包含 web search tool 的请求会失败。PM 请把它视为任何会用到此 tool 的环境 deployment checklist 的一项。</p>
+<hr />
+<h2>声明 Tool</h2>
+<p>Schema stub 有三个必填字段：</p>
+<pre><code class="language-python">web_search_schema = {
+    &quot;type&quot;: &quot;web_search_20250305&quot;,
+    &quot;name&quot;: &quot;web_search&quot;,
+    &quot;max_uses&quot;: 5,
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>Versioned 的 server tool 标识符,必须对应你使用的模型版本</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>固定为 <code>web_search</code></td>
+</tr>
+<tr>
+<td><code>max_uses</code></td>
+<td>每个请求的搜索次数上限</td>
+</tr>
+</tbody>
+</table>
+<p><code>max_uses</code> 上限很重要,因为 Claude 可能会根据初步结果发<strong>后续搜索</strong>。一个用户问题可能随着 Claude 精炼理解而变成三、四次查询。<code>max_uses</code> 就是你的成本与延迟天花板。</p>
+<hr />
+<h2>限制搜索域名</h2>
+<p>可以用 <code>allowed_domains</code> 限制哪些域名可搜索：</p>
+<pre><code class="language-python">web_search_schema = {
+    &quot;type&quot;: &quot;web_search_20250305&quot;,
+    &quot;name&quot;: &quot;web_search&quot;,
+    &quot;max_uses&quot;: 5,
+    &quot;allowed_domains&quot;: [&quot;nih.gov&quot;],
+}
+</code></pre>
+<p>使用场景：</p>
+<ul>
+<li><strong>医疗建议</strong> → 限 PubMed / NIH 获得循证来源</li>
+<li><strong>法律研究</strong> → 限 <code>.gov</code> 或 <code>.edu</code> 域名</li>
+<li><strong>公司专属数据</strong> → 限公司官网</li>
+<li><strong>学术</strong> → 限同行评审来源</li>
+</ul>
+<p>Domain 限制不只是过滤搜索,更是你控制<strong>内容质量与信任</strong>的主要杠杆。</p>
+<hr />
+<h2>Response Block 类型</h2>
+<p>启用 web search 的 response 除了一般 text,还会包含几种新的 block：</p>
+<table>
+<thead>
+<tr>
+<th>Block 类型</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text</code></td>
+<td>Claude 的普通解释文本</td>
+</tr>
+<tr>
+<td><code>ServerToolUseBlock</code></td>
+<td>显示 Claude 实际下的搜索 query</td>
+</tr>
+<tr>
+<td><code>WebSearchToolResultBlock</code></td>
+<td>包含完整搜索结果</td>
+</tr>
+<tr>
+<td><code>WebSearchResultBlock</code></td>
+<td>单条结果（title + URL + snippet）</td>
+</tr>
+<tr>
+<td>Citation block</td>
+<td>来自来源、支撑 Claude 陈述的逐字引用</td>
+</tr>
+</tbody>
+</table>
+<p>因为执行是 server-side 的,<code>ServerToolUseBlock</code> 与 <code>WebSearchToolResultBlock</code> 会在同一个 response 中一并返回——不需要做第二次 round trip。</p>
+<pre><code class="language-python">for block in response.content:
+    if block.type == &quot;text&quot;:
+        render_text(block.text)
+    elif block.type == &quot;server_tool_use&quot;:
+        log_query(block.input[&quot;query&quot;])
+    elif block.type == &quot;web_search_tool_result&quot;:
+        render_source_list(block.content)
+</code></pre>
+<hr />
+<h2>Citation 与 Grounding</h2>
+<p>Claude 会用 <strong>citation block</strong> 标注文本输出,内容包括：</p>
+<ul>
+<li>来源域名与页面标题</li>
+<li>来源 URL</li>
+<li>支撑该陈述的具体引用文字</li>
+</ul>
+<p>这让 grounded generation 真正可行:用户可以点击到来源验证任何陈述。它也给你一个产品界面——"来源"面板——相较于没有 grounding 的 LLM 回应,信任感大幅提升。</p>
+<hr />
+<h2>渲染模式</h2>
+<p>Response 的 block 类型对应特定 UI 元件：</p>
+<ol>
+<li><strong>Text block</strong> → 主回答区的常规内容</li>
+<li><strong>Web search result block</strong> → "来源列表",通常放在回答上方或侧边</li>
+<li><strong>Citation block</strong> → 行内徽章或 footnote,显示来源域名与页面标题,可外链</li>
+</ol>
+<p>把每种 block 视为不同的 UI 槽,不要合并成一个字符串。</p>
+<hr />
+<h2>什么时候用 Web Search Tool</h2>
+<p>Lesson 指出四个主要场景：</p>
+<ul>
+<li><strong>时事</strong> — 超出模型训练 cutoff 的信息</li>
+<li><strong>专门信息</strong> — 不在 Claude 训练数据中的</li>
+<li><strong>事实核查</strong>与权威来源</li>
+<li><strong>研究工作</strong>需要最新信息</li>
+</ul>
+<p>你只要把 schema 加入 tools 数组,Claude 会自动判断是否要搜索。不需要特别指示 Claude 用它,模型会根据问题内容自己决定。</p>
+<hr />
+<h2>成本与延迟</h2>
+<ul>
+<li>每次搜索都会增加延迟（服务器要 fetch、parse、返回结果）</li>
+<li><code>max_uses</code> 决定每个请求的搜索次数上限——按使用场景价值设置</li>
+<li>Domain 限制可以缩小搜索面、加快速度</li>
+<li>Streaming 依然可用;search block 会沿同一个事件序列 stream</li>
+</ul>
+<p>高流量 production 使用时请埋点：</p>
+<ul>
+<li>每请求的平均搜索次数（注意是否上漂）</li>
+<li>启用 search vs. 不启用的首个 text token 时间</li>
+<li>Citation 点击率（用户对来源的信任信号）</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>忘记在 console 启用 web search</strong> — 请求会静默失败或报错;请先检查 org 设置。</li>
+<li><strong><code>max_uses</code> 设太高</strong> — 在推测性问题上的失控搜索链会让成本与延迟翻倍。</li>
+<li><strong>没渲染 citation</strong> — 失去 server tool 最大的产品优势:可验证、有 grounding 的答案。</li>
+<li><strong>敏感主题没用 <code>allowed_domains</code></strong> — 医疗、法律、财务主题从权威来源限制中受益极大。</li>
+<li><strong>当 server tool 就够用时还自己实现 web search</strong> — 重新实现意味着更多代码、更差的 citation、也没有内置的 rendering block。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>像 web search 这样的 server tool 是最快把"需要新鲜或权威数据"的 production 级 AI 功能上线的路径。你出一个 schema stub,Anthropic 出整个执行、解析、citation pipeline。你唯一要写的代码是渲染 response block 的 UI。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>：理解 web search 是"server tool"——Anthropic 执行调用,你不提供任何本地函数。</li>
+<li><strong>D4 (AI Safety &amp; Alignment)</strong>：Citation 与 grounding 是关键的信任功能,考题会测"无 grounding 的 LLM 输出"vs."带 citation 的答案"。</li>
+<li>题目常对比:自定义 tool（两者都要）、text editor（只给 schema）、web search（什么都不用——完全托管）。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"server tool"与 text editor tool 的差别？</td>
+<td>Server tool 完全由 Anthropic 的基础设施执行——你不提供任何本地函数</td>
+</tr>
+<tr>
+<td>Web search schema stub 需要哪些字段？</td>
+<td><code>type</code>（versioned）、<code>name</code>（<code>web_search</code>）、<code>max_uses</code></td>
+</tr>
+<tr>
+<td><code>max_uses</code> 控制什么？</td>
+<td>单一请求中 Claude 能执行的最大搜索次数（控成本 / 延迟）</td>
+</tr>
+<tr>
+<td>如何限定搜索到特定域名？</td>
+<td>在 schema 里设 <code>allowed_domains</code>,比如 <code>["nih.gov"]</code></td>
+</tr>
+<tr>
+<td>使用 web search 前必须在 Anthropic console 做什么？</td>
+<td>在 privacy 设置中启用 web search tool</td>
+</tr>
+<tr>
+<td>列出 web-search response 中的三种新 block 类型。</td>
+<td><code>ServerToolUseBlock</code>、<code>WebSearchToolResultBlock</code>、<code>WebSearchResultBlock</code>,以及 citation block</td>
+</tr>
+<tr>
+<td>Citation block 的目的是什么？</td>
+<td>引用支撑 Claude 陈述的具体来源文字,实现 grounded、可验证的答案</td>
+</tr>
+<tr>
+<td>什么时候 PM 会选 web search tool 而不是自定义搜索集成？</td>
+<td>需要新鲜 / 权威数据、又想不自己实现就拿到自动 citation 与 grounding 时</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

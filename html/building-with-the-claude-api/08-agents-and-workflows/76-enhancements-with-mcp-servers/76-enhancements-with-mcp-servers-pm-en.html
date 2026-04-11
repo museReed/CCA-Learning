@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enhancements With Mcp Servers Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Enhancements with MCP Servers — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration (20%) / D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (MCP integration in Claude Code), 2.3 (MCP primitives), 1.1 (Claude Code extension model)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 76</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP servers are the "app store" for Claude Code — they let a PM compose an agent from modular capabilities (Sentry, Jira, Slack, Figma, custom internal APIs) without asking Anthropic or engineering to build anything, using one command: <code>claude mcp add</code>.</p>
+<hr />
+<h2>Mental Model: Plug-in Architecture for Agents</h2>
+<p>Think of Claude Code as a power strip and MCP servers as the devices you plug in:</p>
+<table>
+<thead>
+<tr>
+<th>Power strip analogy</th>
+<th>Claude Code reality</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The strip (base device)</td>
+<td>Claude Code with built-in file, shell, and web tools</td>
+</tr>
+<tr>
+<td>Each socket</td>
+<td>An MCP client connection</td>
+</tr>
+<tr>
+<td>Devices you plug in</td>
+<td>MCP servers (sentry-mcp, playwright-mcp, your internal server)</td>
+</tr>
+<tr>
+<td>Adding a device</td>
+<td><code>claude mcp add [name] [command]</code></td>
+</tr>
+</tbody>
+</table>
+<p>The key insight: the strip was designed so you could plug in anything. You do not need to return the strip to the factory to add a new device.</p>
+<hr />
+<h2>Why This Lesson Matters for PMs</h2>
+<p>Up to lesson 75, Claude Code looks like a coding assistant. Lesson 76 reveals what it actually is — a <strong>workflow orchestration platform</strong>. With MCP servers, Claude Code can span your entire tool chain:</p>
+<table>
+<thead>
+<tr>
+<th>Before MCP</th>
+<th>After MCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reads and edits code</td>
+<td>Reads Jira tickets, edits code, checks Sentry, updates Slack</td>
+</tr>
+<tr>
+<td>Terminal-scoped</td>
+<td>Crosses your whole SaaS stack</td>
+</tr>
+<tr>
+<td>Helps an individual</td>
+<td>Can drive a full team workflow</td>
+</tr>
+</tbody>
+</table>
+<p>For a PM evaluating where Claude Code fits in the product org, this is the moment it graduates from "a nice dev tool" to "a platform choice."</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When to invest in MCP servers</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>MCP servers to add</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Production bug triage</td>
+<td>sentry-mcp + mcp-atlassian + slack-mcp</td>
+</tr>
+<tr>
+<td>Spec-driven feature development</td>
+<td>mcp-atlassian + figma-context-mcp</td>
+</tr>
+<tr>
+<td>QA automation</td>
+<td>playwright-mcp + (internal fixture server)</td>
+</tr>
+<tr>
+<td>Research and scraping</td>
+<td>firecrawl-mcp-server</td>
+</tr>
+<tr>
+<td>Internal system access</td>
+<td>Custom MCP server for your APIs</td>
+</tr>
+</tbody>
+</table>
+<h3>When an MCP server is overkill</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One-off script that calls your API</td>
+<td>Have Claude write a Python script and run it</td>
+</tr>
+<tr>
+<td>Read-only documentation</td>
+<td>Use Claude Code's built-in web fetch</td>
+</tr>
+<tr>
+<td>Action you only do once a month</td>
+<td>Manual work still cheaper than the integration</td>
+</tr>
+</tbody>
+</table>
+<p>A good rule of thumb: build or install an MCP server only if the integration will be used weekly or is safety-critical.</p>
+<hr />
+<h2>The Six Named Ecosystem Servers</h2>
+<p>PMs should memorize these so they can answer "does the ecosystem already have this?" questions fast:</p>
+<table>
+<thead>
+<tr>
+<th>Server</th>
+<th>Business use case</th>
+<th>Decision framing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>sentry-mcp</strong></td>
+<td>Automated bug discovery and fixes</td>
+<td>"Connect Claude to our monitoring platform"</td>
+</tr>
+<tr>
+<td><strong>playwright-mcp</strong></td>
+<td>Browser automation for testing</td>
+<td>"Let Claude run end-to-end tests"</td>
+</tr>
+<tr>
+<td><strong>figma-context-mcp</strong></td>
+<td>Claude reads design files</td>
+<td>"Let Claude implement designs"</td>
+</tr>
+<tr>
+<td><strong>mcp-atlassian</strong></td>
+<td>Claude reads Jira/Confluence</td>
+<td>"Let Claude see spec and tickets"</td>
+</tr>
+<tr>
+<td><strong>firecrawl-mcp-server</strong></td>
+<td>Claude scrapes the web</td>
+<td>"Let Claude do competitive research"</td>
+</tr>
+<tr>
+<td><strong>slack-mcp</strong></td>
+<td>Claude posts to Slack</td>
+<td>"Let Claude talk to the team"</td>
+</tr>
+</tbody>
+</table>
+<p>If a stakeholder asks "can Claude do X?", first check this list before scoping a custom build.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When a team proposes "let's add an MCP server", ask:</p>
+<ol>
+<li><strong>Does an ecosystem server already exist?</strong> Check the six named servers and the wider MCP ecosystem first.</li>
+<li><strong>What primitive does the workflow actually need?</strong> Tool (action), prompt (template), or resource (data)? Most times it is a tool.</li>
+<li><strong>What is the trust boundary?</strong> Each MCP server is a separate process — does the integration touch production? Require an approval step.</li>
+<li><strong>Who owns the server?</strong> Internal servers need an owner team. External servers need a version pin and update plan.</li>
+<li><strong>What is the fallback if the server is down?</strong> Claude Code's agent loop degrades — plan for it.</li>
+</ol>
+<hr />
+<h2>The Composition Story: Stacking Servers Into Workflows</h2>
+<p>The biggest PM-relevant concept in this lesson is that you combine multiple MCP servers to cover an entire workflow. Example — production bug workflow:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What happens</th>
+<th>MCP server used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. New error lands</td>
+<td>Claude is told: "fix the latest Sentry P1"</td>
+<td>sentry-mcp</td>
+</tr>
+<tr>
+<td>2. Read ticket</td>
+<td>Claude finds the linked Jira ticket</td>
+<td>mcp-atlassian</td>
+</tr>
+<tr>
+<td>3. Read related code</td>
+<td>Claude uses built-in file ops</td>
+<td>(built-in)</td>
+</tr>
+<tr>
+<td>4. Implement fix</td>
+<td>Claude edits files, runs tests</td>
+<td>(built-in)</td>
+</tr>
+<tr>
+<td>5. Browser verify</td>
+<td>Claude runs Playwright tests</td>
+<td>playwright-mcp</td>
+</tr>
+<tr>
+<td>6. Notify team</td>
+<td>Claude posts a summary in Slack</td>
+<td>slack-mcp</td>
+</tr>
+</tbody>
+</table>
+<p>Four MCP servers plus Claude Code's built-in tools cover the entire production hotfix workflow. A PM's job is to notice which of these stacks is valuable to the org and approve the rollout.</p>
+<hr />
+<h2>The Pricing and Operational Lens</h2>
+<p>Adding an MCP server has real operational costs. PMs should budget for:</p>
+<table>
+<thead>
+<tr>
+<th>Cost</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Token cost</td>
+<td>More tools = more context window used per turn</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>Each MCP server is a subprocess — slow servers slow the agent</td>
+</tr>
+<tr>
+<td>Failure surface</td>
+<td>Any server can crash and break the agent mid-workflow</td>
+</tr>
+<tr>
+<td>Security review</td>
+<td>Each integration is a new data path — review it</td>
+</tr>
+<tr>
+<td>Updates</td>
+<td>Servers get versioned; stale versions break silently</td>
+</tr>
+</tbody>
+</table>
+<p>None of these are deal-breakers; they are just items your rollout plan must account for.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Building custom when an ecosystem server exists</strong> — check the six named servers first.</li>
+<li><strong>Adding every server you can think of</strong> — each server costs context and latency; curate.</li>
+<li><strong>Not defining ownership</strong> — internal MCP servers without owners rot fast.</li>
+<li><strong>Ignoring the trust boundary</strong> — an MCP server that can post to Slack can post the wrong thing. Add confirmation steps for destructive actions.</li>
+<li><strong>Confusing MCP servers with API keys</strong> — MCP is a protocol, not credentials. Auth is still your problem.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>MCP turns Claude Code from a dev tool into a <strong>workflow orchestration platform</strong>. The command <code>claude mcp add</code> is the PM-visible moment where your agent graduates from "helps with code" to "runs a cross-system workflow." Treat MCP adoption as a platform decision, not a developer whim.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Claude Code Configuration)</strong>: Know the <code>claude mcp add</code> command and that Claude Code has an MCP client built in.</li>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know the three primitives (tools, prompts, resources).</li>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>: Be ready for scenario questions composing multiple servers into a workflow.</li>
+<li>Recognition questions for the named servers (sentry, playwright, figma, atlassian, firecrawl, slack) are very likely.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What command does a PM need to authorize/document for adding MCP servers to Claude Code?</td>
+<td><code>claude mcp add [server-name] [command-to-start-server]</code></td>
+</tr>
+<tr>
+<td>What are the three MCP primitives that can be exposed through a server?</td>
+<td>Tools (take action), Prompts (reusable templates), Resources (access data)</td>
+</tr>
+<tr>
+<td>Which MCP server lets Claude automatically work on bugs logged in a monitoring platform?</td>
+<td><code>sentry-mcp</code></td>
+</tr>
+<tr>
+<td>Which MCP server lets Claude read Jira tickets and Confluence pages?</td>
+<td><code>mcp-atlassian</code></td>
+</tr>
+<tr>
+<td>Which MCP server lets Claude post messages to team channels?</td>
+<td><code>slack-mcp</code></td>
+</tr>
+<tr>
+<td>What is the PM test for whether to build a custom MCP server?</td>
+<td>Will the integration be used weekly or is it safety-critical? If yes, build; otherwise defer</td>
+</tr>
+<tr>
+<td>Name a four-server stack that covers a production hotfix workflow.</td>
+<td>sentry-mcp (triage) + mcp-atlassian (ticket) + playwright-mcp (verify) + slack-mcp (notify), plus Claude Code built-in tools</td>
+</tr>
+<tr>
+<td>What operational costs must a PM budget when adopting MCP servers?</td>
+<td>Token cost, latency, failure surface, security review, and version/update maintenance</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

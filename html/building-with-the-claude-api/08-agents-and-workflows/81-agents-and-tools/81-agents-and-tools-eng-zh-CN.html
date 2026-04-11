@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agents And Tools Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Agents 与 Tools — Engineering 深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (agent 架构)、1.2 (agentic loop)、1.3 (agent 中的 tool use)、5.1 (production pattern 选型)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 81</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Agent = Claude + 一组抽象、可组合的 tools,跑在 agentic loop 里面;相较于 workflow 预先写死的步骤顺序,agent 让 Claude 自己在执行时决定该调用哪些 tool、以什么顺序调用,以完成用户给的目标。</p>
+<hr />
+<h2>Workflow vs Agent:核心差异</h2>
+<p>在 workflow 里,开发者把 tool 调用顺序写死在代码中:"先 A,再 B,再 C"。控制流由开发者拥有。</p>
+<p>在 agent 里,你只给 Claude 一个目标 + 一个工具箱,控制流由 Claude 决定。同一份 agent 代码可以处理"现在几点?"和"下周三早上七点提醒我去健身房",你的 Python 代码里完全没有 if/else 分支。</p>
+<pre><code class="language-python"># Workflow:由开发者控制顺序
+def schedule_reminder(task, when):
+    now = get_current_datetime()
+    target = add_duration_to_datetime(now, when)
+    return set_reminder(task, target)
+
+# Agent:由 Claude 控制顺序
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=[get_current_datetime, add_duration_to_datetime, set_reminder],
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;下周三提醒我去健身房&quot;}]
+)
+# Claude 自己决定:get_current_datetime -&gt; add_duration_to_datetime -&gt; set_reminder
+</code></pre>
+<hr />
+<h2>Datetime 例子 — Emergent Tool Chaining</h2>
+<p>三个简单的 tools:</p>
+<ul>
+<li><code>get_current_datetime</code> — 返回当前日期时间</li>
+<li><code>add_duration_to_datetime</code> — 返回 <code>datetime + duration</code></li>
+<li><code>set_reminder</code> — 在指定时间创建提醒</li>
+</ul>
+<p>看 Claude 怎么把这三个 tool 组合成不同行为:</p>
+<table>
+<thead>
+<tr>
+<th>用户请求</th>
+<th>Tool 序列</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"现在几点?"</td>
+<td><code>get_current_datetime</code></td>
+</tr>
+<tr>
+<td>"11 天后是星期几?"</td>
+<td><code>get_current_datetime</code> -&gt; <code>add_duration_to_datetime</code></td>
+</tr>
+<tr>
+<td>"下周三提醒我去健身房"</td>
+<td><code>get_current_datetime</code> -&gt; <code>add_duration_to_datetime</code> -&gt; <code>set_reminder</code></td>
+</tr>
+<tr>
+<td>"我的 90 天保修什么时候到期?"</td>
+<td>先问用户购买日期,再串接 tools</td>
+</tr>
+</tbody>
+</table>
+<p>这个 agent 并没有被明确编程去识别"下周三"或"90 天保修"——是 Claude 的推理能力把自然语言转成正确的 tool 链。这叫做 <strong>emergent composition</strong>,也是 agent 存在的全部理由。</p>
+<hr />
+<h2>设计原则:抽象的 Tool 胜过专用的 Tool</h2>
+<p>在 agent 系统中,tool 设计的首要原则是:<strong>选择 primitive、抽象的 tool,不要选窄、专门的 tool</strong>。Claude Code 是最佳示范:</p>
+<table>
+<thead>
+<tr>
+<th>有的 tool</th>
+<th>没有的 tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bash</code>(执行任何 shell 命令)</td>
+<td><code>install_npm_dependency</code></td>
+</tr>
+<tr>
+<td><code>read</code>(读任何文件)</td>
+<td><code>read_python_imports</code></td>
+</tr>
+<tr>
+<td><code>write</code>(写任何文件)</td>
+<td><code>create_react_component</code></td>
+</tr>
+<tr>
+<td><code>edit</code>(修改文件)</td>
+<td><code>refactor_function</code></td>
+</tr>
+<tr>
+<td><code>glob</code> / <code>grep</code></td>
+<td><code>find_unused_variables</code></td>
+</tr>
+</tbody>
+</table>
+<p>六个 primitive 让 Claude 可以重构代码、安装依赖、跑测试、写 migration、做 security audit——这些是 Claude Code 开发团队从来没明确规划过的情境。如果换成 <code>refactor_function</code> 这种专用 tool,只能处理一种窄情境,其他场景全部失效。</p>
+<p><strong>心法</strong>:如果一个 tool 可以用 Unix 动词描述,那它大概就在对的抽象层级。</p>
+<hr />
+<h2>设计可组合的 Tool Set</h2>
+<p>一个设计良好的 agent tool set,是少量可以 <strong>组合</strong> 的 primitive。例子:social media video agent。</p>
+<pre><code class="language-python">tools = [
+    {
+        &quot;name&quot;: &quot;bash&quot;,
+        &quot;description&quot;: &quot;执行 shell 命令,包括 FFMPEG 视频处理&quot;,
+        &quot;input_schema&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;command&quot;: {&quot;type&quot;: &quot;string&quot;}}}
+    },
+    {
+        &quot;name&quot;: &quot;generate_image&quot;,
+        &quot;description&quot;: &quot;从 text prompt 生成图片&quot;,
+        &quot;input_schema&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;prompt&quot;: {&quot;type&quot;: &quot;string&quot;}}}
+    },
+    {
+        &quot;name&quot;: &quot;text_to_speech&quot;,
+        &quot;description&quot;: &quot;把文字转成音频文件&quot;,
+        &quot;input_schema&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;text&quot;: {&quot;type&quot;: &quot;string&quot;}, &quot;voice&quot;: {&quot;type&quot;: &quot;string&quot;}}}
+    },
+    {
+        &quot;name&quot;: &quot;post_media&quot;,
+        &quot;description&quot;: &quot;把媒体文件上传到社交平台&quot;,
+        &quot;input_schema&quot;: {&quot;type&quot;: &quot;object&quot;, &quot;properties&quot;: {&quot;file_path&quot;: {&quot;type&quot;: &quot;string&quot;}, &quot;platform&quot;: {&quot;type&quot;: &quot;string&quot;}}}
+    }
+]
+</code></pre>
+<p>这组 tool 可以支持:</p>
+<ul>
+<li>"发一条做菜视频" -&gt; image + TTS + bash(FFMPEG) + post_media</li>
+<li>"先生成一个示例图给我看,等我确认再继续" -&gt; image,暂停等 feedback,再继续</li>
+<li>"再好笑一点" -&gt; 用不同的 prompt 重新生成</li>
+</ul>
+<p>这些流程都没有被写死。它们是 agent 针对同一组四个 tool 推理出来的结果。</p>
+<hr />
+<h2>Agentic Loop(Runtime 视角)</h2>
+<pre><code class="language-python">messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user_goal}]
+while True:
+    response = client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=4096,
+        tools=tools,
+        messages=messages
+    )
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: response.content})
+
+    if response.stop_reason == &quot;end_turn&quot;:
+        break
+
+    if response.stop_reason == &quot;tool_use&quot;:
+        tool_results = []
+        for block in response.content:
+            if block.type == &quot;tool_use&quot;:
+                result = execute_tool(block.name, block.input)
+                tool_results.append({
+                    &quot;type&quot;: &quot;tool_result&quot;,
+                    &quot;tool_use_id&quot;: block.id,
+                    &quot;content&quot;: result
+                })
+        messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: tool_results})
+</code></pre>
+<p>这个 loop 就是 agent 的全部。你不需要预先决定会跑几轮—— Claude 通过 <code>stop_reason == "end_turn"</code> 自己决定何时结束。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>Tool 过度专用化</strong> — 写 <code>refactor_python_class</code> 而不是 <code>edit</code>。你用一个可用场景换来几十个破损场景。</li>
+<li><strong>没有 loop 终止保护</strong> — 让 agent 无限跑下去。永远要设最大迭代数(例如 25)避免失控的 cost。</li>
+<li><strong>把 agent 当伪装的 workflow 使用</strong> — 如果你发现自己在写 <code>if tool_name == X: 强制调用 Y</code>,那你要的是 workflow,不是 agent。</li>
+<li><strong>Tool 描述太模糊</strong> — Claude 只能选它看得懂的 tool。把描述写得像在 onboard 新工程师一样清楚。</li>
+<li><strong>忘记 tool_results 是 user role 的消息</strong> — 在 Anthropic API 里,tool result 是用 <code>role: "user"</code> 发回去的,不是独立的 role。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Agent 适合在"你没办法事先列出步骤"的情境。给 Claude 小、抽象、可组合的 tool 加上清楚的目标,然后让 agentic loop 去组合。开发者的工作从"写控制流"变成"设计对的工具箱"。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>:会考"agent 跟 workflow 差在哪"、"哪个 tool 设计支持 agent"。答案几乎永远是比较抽象的 primitive。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>:Agent 比较难做 eval 而且每个任务成本较高——这些 trade-off 要记住。</li>
+<li>题目里看到这些关键字:"unpredictable requests""varied tasks""creative combination" -&gt; agent;"known sequence""repeatable""reliable" -&gt; workflow。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent 跟 workflow 最关键的差别是什么?</td>
+<td>Workflow 里开发者把 tool 顺序写死;Agent 里 Claude 在 runtime 根据目标决定 tool 顺序。</td>
+</tr>
+<tr>
+<td>为什么 agent tool 要设计成抽象而不是专用?</td>
+<td>抽象 tool(bash、read、edit)可以组合出开发者从没预期的情境;专用 tool(refactor_function)只对一种情境有效。</td>
+</tr>
+<tr>
+<td>举三个 Claude Code 的 primitive tool。</td>
+<td>bash、read、write、edit、glob、grep(任选三个)。</td>
+</tr>
+<tr>
+<td>Agent 收到"我的 90 天保修什么时候到期?"会怎么处理?</td>
+<td>它会识别出缺少信息,先问用户购买日期,然后串接 get_current_datetime 和 add_duration_to_datetime。</td>
+</tr>
+<tr>
+<td>哪个 stop_reason 表示 agent 想调用 tool?</td>
+<td><code>tool_use</code></td>
+</tr>
+<tr>
+<td>哪个 stop_reason 表示 agentic loop 该结束?</td>
+<td><code>end_turn</code></td>
+</tr>
+<tr>
+<td>在 Anthropic API 里,tool_result content block 是用哪个 role 发回给 Claude?</td>
+<td><code>user</code></td>
+</tr>
+<tr>
+<td>每个 production agent loop 都该有什么保护?</td>
+<td>最大迭代数限制,避免失控的 cost 和无限循环。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

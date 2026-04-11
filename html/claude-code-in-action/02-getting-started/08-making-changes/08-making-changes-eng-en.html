@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>08 Making Changes Eng En</title>
+<title>Making Changes Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -64,11 +64,10 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <li><strong>Paste with Ctrl+V</strong> (not Cmd+V on macOS) into the Claude Code chat</li>
 <li><strong>Describe the change</strong> you want relative to the screenshot</li>
 </ol>
-<pre class="highlight"><code>[paste screenshot of login form]
+<pre><code>[paste screenshot of login form]
 &gt; Move the &quot;Forgot Password&quot; link below the submit button
 &gt; and make it a lighter gray color
 </code></pre>
-
 <blockquote>
 <p>🎬 <strong>Instructor insight from the video</strong></p>
 <p>The instructor demonstrates pasting a screenshot of the uigen app and asking Claude to modify the UI. He emphasizes using Ctrl+V specifically — "it's Ctrl+V, not Cmd+V" — because this is the keybinding Claude Code uses for image pasting.</p>
@@ -81,10 +80,9 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p>Planning Mode is Claude Code's mechanism for handling complex, multi-file changes. It separates <strong>planning</strong> from <strong>execution</strong>.</p>
 <h3>How to Enable</h3>
 <p>Press <code>Shift+Tab</code> twice (or once if already auto-accepting edits):</p>
-<pre class="highlight"><code>Normal Mode:  Ask → Claude executes immediately
+<pre><code>Normal Mode:  Ask → Claude executes immediately
 Plan Mode:    Ask → Claude plans → You review → Claude executes
 </code></pre>
-
 <h3>What Planning Mode Does</h3>
 <ol>
 <li><strong>Reads more files</strong> — Claude explores your codebase more broadly</li>
@@ -92,7 +90,9 @@ Plan Mode:    Ask → Claude plans → You review → Claude executes
 <li><strong>Waits for approval</strong> — You review and can redirect before any changes</li>
 <li><strong>Executes the plan</strong> — Only after your confirmation</li>
 </ol>
-<pre class="highlight"><code>┌──────────┐    ┌─────────────────┐    ┌──────────────┐
+<!-- diagram: plan-mode-flow — Ask → Claude Explores Codebase → Claude Creates Plan → User Reviews Plan → Approve/Redirect → Claude Executes -->
+
+<pre><code>┌──────────┐    ┌─────────────────┐    ┌──────────────┐
 │ You Ask  │───→│ Claude Explores │───→│ Claude Plans │
 └──────────┘    │ (reads files,   │    │ (step-by-step│
                 │  searches code) │    │  action list) │
@@ -111,7 +111,6 @@ Plan Mode:    Ask → Claude plans → You review → Claude executes
                               │ → Execute│        │ → Replan │
                               └──────────┘        └──────────┘
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>Key Insight</strong></p>
 <p>Planning Mode is not just "slower execution." It is a fundamentally different workflow that gathers more context before acting. The extra file reading in the planning phase often catches dependencies and edge cases that direct execution would miss.</p>
@@ -201,11 +200,10 @@ Plan Mode:    Ask → Claude plans → You review → Claude executes
 </blockquote>
 <h3>How to Invoke</h3>
 <p>Simply include the thinking keyword in your prompt:</p>
-<pre class="highlight"><code>&gt; Think about how to refactor the authentication module
+<pre><code>&gt; Think about how to refactor the authentication module
 &gt; Think more about the edge cases in the payment flow
 &gt; Ultrathink about the database migration strategy
 </code></pre>
-
 <hr />
 <h2>Planning Mode vs Thinking Mode (Critical Exam Distinction)</h2>
 <p>This is one of the most important distinctions for the exam:</p>
@@ -250,7 +248,7 @@ Plan Mode:    Ask → Claude plans → You review → Claude executes
 </tr>
 </tbody>
 </table>
-<pre class="highlight"><code>Complexity Matrix:
+<pre><code>Complexity Matrix:
                         Low Reasoning    High Reasoning
                         Complexity       Complexity
                     ┌─────────────────┬─────────────────┐
@@ -261,7 +259,6 @@ High Codebase       │   Planning      │   Planning +    │
 Complexity          │   Mode          │   Thinking Mode │
                     └─────────────────┴─────────────────┘
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>Key Insight</strong></p>
 <p>You can combine both modes. For a task that requires understanding many files (breadth) AND solving a complex algorithm (depth), use Planning Mode with a "think" or "ultrathink" keyword. This gives Claude both broad context and deep reasoning.</p>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anthropic Apps Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Anthropic Apps — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (Claude Code overview), 1.2 (agentic patterns), 1.4 (Computer Use as agent case study)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 73</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Anthropic ships two flagship agent applications — Claude Code (terminal coding assistant) and Computer Use (desktop-interaction tool suite) — both serve as canonical reference implementations of the agentic loop: tool integration, multi-step execution, environmental interaction, and autonomous problem-solving.</p>
+<hr />
+<h2>The Anthropic Application Surfaces</h2>
+<p>Anthropic exposes Claude through several surfaces. The module focuses on two that exemplify agent design:</p>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Form Factor</th>
+<th>Agentic?</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude.ai</td>
+<td>Web chat UI</td>
+<td>Conversational, limited tools</td>
+<td>Consumer assistant</td>
+</tr>
+<tr>
+<td>Anthropic API</td>
+<td>HTTP endpoint</td>
+<td>Primitive — you build the agent</td>
+<td>Developer platform</td>
+</tr>
+<tr>
+<td><strong>Claude Code</strong></td>
+<td>Terminal CLI</td>
+<td><strong>Yes — full agent</strong></td>
+<td>Agentic coding assistant</td>
+</tr>
+<tr>
+<td><strong>Computer Use</strong></td>
+<td>Desktop tool suite</td>
+<td><strong>Yes — full agent</strong></td>
+<td>GUI-interacting agent</td>
+</tr>
+</tbody>
+</table>
+<p>Claude Code and Computer Use are not just "products that happen to use Claude" — they are demonstrations of what a well-constructed agent looks like, and they map directly to patterns you will build yourself on the API.</p>
+<hr />
+<h2>What Makes These Applications Agents</h2>
+<p>The course defines an agent as a system that exhibits four properties. Both Claude Code and Computer Use demonstrate all four:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Claude Code example</th>
+<th>Computer Use example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tool integration</strong></td>
+<td>File edit, shell exec, web fetch, MCP</td>
+<td>Screenshot, mouse click, keyboard input</td>
+</tr>
+<tr>
+<td><strong>Multi-step task execution</strong></td>
+<td>Plan → read → edit → test → commit</td>
+<td>Open browser → navigate → fill form → submit</td>
+</tr>
+<tr>
+<td><strong>Environmental interaction</strong></td>
+<td>Reads and mutates the filesystem + shell</td>
+<td>Reads and mutates the desktop GUI</td>
+</tr>
+<tr>
+<td><strong>Autonomous problem-solving</strong></td>
+<td>Debugs a failing test by iterating</td>
+<td>Retries a click after a page reload</td>
+</tr>
+</tbody>
+</table>
+<p>Each cycle feeds the result of the tool call back into the next model turn — the canonical tool-use loop — until a natural stopping condition is reached (<code>end_turn</code> stop_reason, or a max-turns guard in the host application).</p>
+<hr />
+<h2>Claude Code: Terminal-Native Agent</h2>
+<p>Claude Code runs as a persistent process in your terminal. Key characteristics:</p>
+<ul>
+<li><strong>Surface</strong>: CLI, not a web chat</li>
+<li><strong>Tools available by default</strong>: file read/write, grep/glob, bash execution, web fetch, to-do planning</li>
+<li><strong>Extension point</strong>: MCP servers (we cover this in lesson 76)</li>
+<li><strong>Context window strategy</strong>: project-scoped <code>CLAUDE.md</code> memory file for persistent context</li>
+<li><strong>Authentication</strong>: <code>claude</code> command + Anthropic account login</li>
+</ul>
+<p>It is useful to think of Claude Code as "an IDE where the human types English and Claude types code." The agent is responsible for:<br />
+1. Understanding the request<br />
+2. Reading enough of the codebase to form a plan<br />
+3. Editing files<br />
+4. Running tests/scripts to verify<br />
+5. Reporting back</p>
+<p>This is the exact loop we will later replicate when we build our own agents on the raw API.</p>
+<hr />
+<h2>Computer Use: GUI-Level Agent</h2>
+<p>Computer Use extends Claude beyond text-only environments. It provides tools that let the model drive a real desktop:</p>
+<ul>
+<li>Take a screenshot (vision input → reasoning)</li>
+<li>Move/click the mouse at pixel coordinates</li>
+<li>Type text with the keyboard</li>
+<li>Navigate the filesystem through GUI applications</li>
+</ul>
+<p>Why this matters: most enterprise software does not expose a clean API. Computer Use lets Claude interact with whatever ships in the UI — legacy desktop apps, web dashboards, VDI environments — by treating the pixel plane as the interface.</p>
+<p>The model receives screenshots back between actions, inspects them, and decides the next mouse/keyboard action. This is a concrete example of the multimodal tool-use loop.</p>
+<hr />
+<h2>Why Use These as Case Studies</h2>
+<p>For agent builders, these apps are reference implementations. They answer:</p>
+<ul>
+<li>What does a good tool schema look like at scale? (Read their exposed tools.)</li>
+<li>How should I structure multi-turn context? (Watch CLAUDE.md behavior in Claude Code.)</li>
+<li>How do I bound autonomy without neutering the agent? (Observe permission prompts and confirmation steps.)</li>
+<li>What gets hard at the edges? (Error recovery, context management, tool choice under ambiguity.)</li>
+</ul>
+<p>When you build on the API, you are essentially building your own Claude Code for your specific domain.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Treating Claude Code as a black box</strong> — the exam expects you to know it is an <em>agent</em>, not a chat app, and to identify its loop structure.</li>
+<li><strong>Confusing Claude.ai with Claude Code</strong> — Claude.ai is a chat UI with limited tools; Claude Code is a terminal agent with full filesystem/shell access.</li>
+<li><strong>Thinking Computer Use is a replacement for API-based agents</strong> — it is one specific tool suite, not a general pattern. Most production agents use typed tools, not screenshots.</li>
+<li><strong>Forgetting MCP extensibility</strong> — the default toolset is only the starting point; both apps can be extended via MCP servers.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Claude Code and Computer Use are not "products" from an exam standpoint — they are <strong>canonical agent implementations</strong> demonstrating the four properties (tool integration, multi-step execution, environmental interaction, autonomous problem-solving). CCA questions frequently frame scenarios as "is this an agent?" and expect you to map the scenario onto these four properties.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>: Know the definition of an agent and that Claude Code is Anthropic's reference agent. Expect questions asking "which of the following is a characteristic of an agent."</li>
+<li><strong>D3 (Claude Code Configuration)</strong>: Lesson 73 is the gateway to the Claude Code-focused questions (~20% of the exam). Subsequent lessons drill into CLI commands and config.</li>
+<li>Watch for questions that contrast Claude.ai, the API, and Claude Code — know which is a chat, which is a primitive, and which is an agent.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which two Anthropic apps are highlighted as reference agent implementations?</td>
+<td>Claude Code and Computer Use</td>
+</tr>
+<tr>
+<td>What are the four properties that define an agent per this lesson?</td>
+<td>Tool integration, multi-step task execution, environmental interaction, autonomous problem-solving</td>
+</tr>
+<tr>
+<td>What surface does Claude Code run on?</td>
+<td>The terminal / command line — a CLI-based agent</td>
+</tr>
+<tr>
+<td>What does Computer Use let Claude interact with?</td>
+<td>A full desktop environment via screenshots, mouse, and keyboard</td>
+</tr>
+<tr>
+<td>Why are these apps used as case studies?</td>
+<td>They demonstrate the key principles that make agents effective in real-world implementations</td>
+</tr>
+<tr>
+<td>How does Claude Code differ from Claude.ai?</td>
+<td>Claude.ai is a web chat with limited tools; Claude Code is a terminal agent with filesystem/shell access and MCP extensibility</td>
+</tr>
+<tr>
+<td>What makes Computer Use valuable for enterprise use cases?</td>
+<td>It can drive applications that do not expose APIs by interacting with the GUI directly</td>
+</tr>
+<tr>
+<td>What is the relationship between Claude Code and MCP?</td>
+<td>Claude Code has an MCP client built in, allowing users to extend its tool set with custom MCP servers</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enhancements With Mcp Servers Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Enhancements with MCP Servers — PM Perspective（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試 Domain</td>
+<td>D3 — Claude Code Configuration (20%) / D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2（Claude Code MCP 整合）、2.3（MCP primitives）、1.1（Claude Code 擴充模型）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 76</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>MCP server 是 Claude Code 的「app store」—— 讓 PM 能用模組化能力（Sentry、Jira、Slack、Figma、內部自訂 API）組合 agent，不用拜託 Anthropic 或工程師開發，只要一條指令：<code>claude mcp add</code>。</p>
+<hr />
+<h2>心智模型：Agent 的外掛架構</h2>
+<p>把 Claude Code 想成延長線、MCP server 想成你插上去的電器：</p>
+<table>
+<thead>
+<tr>
+<th>延長線比喻</th>
+<th>Claude Code 實際對應</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>延長線本體</td>
+<td>Claude Code 與它內建的檔案、shell、web 工具</td>
+</tr>
+<tr>
+<td>每個插座</td>
+<td>一個 MCP client 連線</td>
+</tr>
+<tr>
+<td>插上去的電器</td>
+<td>MCP server（sentry-mcp、playwright-mcp、內部自建 server）</td>
+</tr>
+<tr>
+<td>新增電器</td>
+<td><code>claude mcp add [name] [command]</code></td>
+</tr>
+</tbody>
+</table>
+<p>關鍵洞察：延長線從設計上就是要你能插任何東西。你不用把延長線寄回工廠才能加新電器。</p>
+<hr />
+<h2>為什麼這 lesson 對 PM 重要</h2>
+<p>Lesson 75 為止，Claude Code 看起來像 coding assistant。Lesson 76 揭露它實際是什麼 —— <strong>workflow orchestration 平台</strong>。有了 MCP server，Claude Code 能橫跨你整條工具鏈：</p>
+<table>
+<thead>
+<tr>
+<th>沒 MCP 之前</th>
+<th>有 MCP 之後</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>讀寫 code</td>
+<td>讀 Jira ticket、寫 code、查 Sentry、更新 Slack</td>
+</tr>
+<tr>
+<td>侷限在終端機</td>
+<td>橫跨整個 SaaS stack</td>
+</tr>
+<tr>
+<td>幫個人</td>
+<td>能驅動整個團隊的 workflow</td>
+</tr>
+</tbody>
+</table>
+<p>對 PM 評估 Claude Code 在組織中的定位來說，這是它從「不錯的開發工具」升級為「平台決策」的關鍵 moment。</p>
+<hr />
+<h2>產品使用情境</h2>
+<h3>何時投資 MCP server</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>要加的 MCP server</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>生產環境 bug triage</td>
+<td>sentry-mcp + mcp-atlassian + slack-mcp</td>
+</tr>
+<tr>
+<td>Spec-driven 功能開發</td>
+<td>mcp-atlassian + figma-context-mcp</td>
+</tr>
+<tr>
+<td>QA 自動化</td>
+<td>playwright-mcp +（內部 fixture server）</td>
+</tr>
+<tr>
+<td>研究與爬蟲</td>
+<td>firecrawl-mcp-server</td>
+</tr>
+<tr>
+<td>內部系統存取</td>
+<td>為你的 API 自建 MCP server</td>
+</tr>
+</tbody>
+</table>
+<h3>何時 MCP server 是過度工程</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>替代方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一次性呼叫你 API 的腳本</td>
+<td>請 Claude 寫 Python 腳本跑一次</td>
+</tr>
+<tr>
+<td>唯讀文件</td>
+<td>用 Claude Code 內建 web fetch</td>
+</tr>
+<tr>
+<td>一個月才做一次的動作</td>
+<td>手動仍比建整合便宜</td>
+</tr>
+</tbody>
+</table>
+<p>好的判斷原則：只有每週都會用或是關鍵安全流程，才值得建或裝 MCP server。</p>
+<hr />
+<h2>六個生態 Server（PM 必記）</h2>
+<p>PM 要能快速回答「生態裡已經有這個了嗎？」的問題：</p>
+<table>
+<thead>
+<tr>
+<th>Server</th>
+<th>商業用例</th>
+<th>決策框架</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>sentry-mcp</strong></td>
+<td>自動發現與修復 bug</td>
+<td>「接 Claude 到我們的監控平台」</td>
+</tr>
+<tr>
+<td><strong>playwright-mcp</strong></td>
+<td>瀏覽器自動化做測試</td>
+<td>「讓 Claude 跑 end-to-end 測試」</td>
+</tr>
+<tr>
+<td><strong>figma-context-mcp</strong></td>
+<td>Claude 讀設計檔</td>
+<td>「讓 Claude 實作設計稿」</td>
+</tr>
+<tr>
+<td><strong>mcp-atlassian</strong></td>
+<td>Claude 讀 Jira/Confluence</td>
+<td>「讓 Claude 看 spec 和 ticket」</td>
+</tr>
+<tr>
+<td><strong>firecrawl-mcp-server</strong></td>
+<td>Claude 爬網頁</td>
+<td>「讓 Claude 做競品研究」</td>
+</tr>
+<tr>
+<td><strong>slack-mcp</strong></td>
+<td>Claude 發 Slack 訊息</td>
+<td>「讓 Claude 跟團隊溝通」</td>
+</tr>
+</tbody>
+</table>
+<p>利害關係人問「Claude 能不能做 X？」時，先查這份清單，再談自建。</p>
+<hr />
+<h2>PM 決策框架</h2>
+<p>團隊提議「加一個 MCP server」時，問：</p>
+<ol>
+<li><strong>生態裡已經有了嗎？</strong> 先查上面六個加廣義的 MCP ecosystem。</li>
+<li><strong>這個 workflow 實際需要哪種 primitive？</strong> Tool（動作）、prompt（模板）還是 resource（資料）？多半是 tool。</li>
+<li><strong>信任邊界在哪？</strong> 每個 MCP server 是獨立 process —— 整合會觸及生產環境嗎？要加核准步驟。</li>
+<li><strong>誰擁有這個 server？</strong> 內部 server 要有 owner team。外部 server 要 pin 版本並有更新計畫。</li>
+<li><strong>Server 掛掉時的 fallback 是什麼？</strong> Claude Code 的 agent loop 會退化 —— 要預先規劃。</li>
+</ol>
+<hr />
+<h2>組合故事：把 Server 疊成 Workflow</h2>
+<p>本 lesson 對 PM 最重要的概念是：你可以組合多個 MCP server 涵蓋完整 workflow。範例 —— 生產環境 bug workflow：</p>
+<table>
+<thead>
+<tr>
+<th>步驟</th>
+<th>發生什麼</th>
+<th>使用的 MCP server</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 新 error 進來</td>
+<td>告訴 Claude：「修最新的 Sentry P1」</td>
+<td>sentry-mcp</td>
+</tr>
+<tr>
+<td>2. 讀 ticket</td>
+<td>Claude 找出關聯 Jira ticket</td>
+<td>mcp-atlassian</td>
+</tr>
+<tr>
+<td>3. 讀相關 code</td>
+<td>Claude 用內建檔案工具</td>
+<td>（內建）</td>
+</tr>
+<tr>
+<td>4. 實作修復</td>
+<td>Claude 改檔、跑 test</td>
+<td>（內建）</td>
+</tr>
+<tr>
+<td>5. 瀏覽器驗證</td>
+<td>Claude 跑 Playwright 測試</td>
+<td>playwright-mcp</td>
+</tr>
+<tr>
+<td>6. 通知團隊</td>
+<td>Claude 在 Slack 貼總結</td>
+<td>slack-mcp</td>
+</tr>
+</tbody>
+</table>
+<p>四個 MCP server 加上 Claude Code 內建工具，就涵蓋整個生產 hotfix workflow。PM 的任務是辨認哪些這類 stack 對組織有價值，然後核准 rollout。</p>
+<hr />
+<h2>定價與運維視角</h2>
+<p>加 MCP server 有真實的運維成本。PM 要編預算：</p>
+<table>
+<thead>
+<tr>
+<th>成本</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Token 成本</td>
+<td>工具越多，每回合吃的 context window 越大</td>
+</tr>
+<tr>
+<td>延遲</td>
+<td>每個 MCP server 是子 process —— 慢的 server 拖慢 agent</td>
+</tr>
+<tr>
+<td>失敗面</td>
+<td>任何 server 掛掉都可能在 workflow 中斷 agent</td>
+</tr>
+<tr>
+<td>安全審查</td>
+<td>每個整合都是新資料路徑 —— 要 review</td>
+</tr>
+<tr>
+<td>更新</td>
+<td>Server 有版本；過時版本會靜默掛掉</td>
+</tr>
+</tbody>
+</table>
+<p>這些都不是 deal-breaker，只是 rollout 計畫要涵蓋的項目。</p>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>生態已有時還自建</strong> —— 先查六個 named server。</li>
+<li><strong>想到什麼 server 都加</strong> —— 每個都耗 context 和延遲；要 curate。</li>
+<li><strong>沒定義 owner</strong> —— 沒 owner 的內部 MCP server 會快速腐爛。</li>
+<li><strong>忽略信任邊界</strong> —— 能發 Slack 訊息的 server 也能發錯訊息。破壞性動作要加確認步驟。</li>
+<li><strong>混淆 MCP server 與 API key</strong> —— MCP 是 protocol，不是憑證。Auth 仍然是你的問題。</li>
+</ol>
+<blockquote>
+<p><strong>關鍵洞察</strong></p>
+<p>MCP 把 Claude Code 從開發工具變成 <strong>workflow orchestration 平台</strong>。<code>claude mcp add</code> 這條指令是 PM 視角中 agent 從「幫忙寫 code」畢業到「驅動跨系統 workflow」的 moment。把 MCP 採用視為平台決策，不是開發者個人喜好。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D3（Claude Code Configuration）</strong>：要記得 <code>claude mcp add</code> 指令和 Claude Code 內建 MCP client 的事實。</li>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：要知道三種 primitive（tool、prompt、resource）。</li>
+<li><strong>D1（Agentic Coding &amp; Architecture）</strong>：準備好情境題 —— 組合多個 server 成 workflow。</li>
+<li>對 named server 的辨認題（sentry、playwright、figma、atlassian、firecrawl、slack）機率很高。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PM 需要核准/文件化、用來加 MCP server 的指令是什麼？</td>
+<td><code>claude mcp add [server-name] [command-to-start-server]</code></td>
+</tr>
+<tr>
+<td>MCP server 可暴露的三種 primitive 是什麼？</td>
+<td>Tools（執行動作）、Prompts（可重用模板）、Resources（存取資料）</td>
+</tr>
+<tr>
+<td>讓 Claude 自動處理 monitoring 平台記錄的 bug，用哪個 MCP server？</td>
+<td><code>sentry-mcp</code></td>
+</tr>
+<tr>
+<td>讓 Claude 讀 Jira ticket 和 Confluence 頁面用哪個 MCP server？</td>
+<td><code>mcp-atlassian</code></td>
+</tr>
+<tr>
+<td>讓 Claude 在團隊頻道發訊息用哪個 MCP server？</td>
+<td><code>slack-mcp</code></td>
+</tr>
+<tr>
+<td>決定是否自建 MCP server 的 PM 判斷標準？</td>
+<td>整合是否每週都會用或是關鍵安全流程？是則建；否則延後</td>
+</tr>
+<tr>
+<td>舉一個涵蓋生產 hotfix workflow 的四 server stack。</td>
+<td>sentry-mcp（triage）+ mcp-atlassian（ticket）+ playwright-mcp（驗證）+ slack-mcp（通知），加上 Claude Code 內建工具</td>
+</tr>
+<tr>
+<td>採用 MCP server 時 PM 要編的運維成本有哪些？</td>
+<td>Token 成本、延遲、失敗面、安全審查、版本/更新維護</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

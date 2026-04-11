@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>17 Gotchas Around Hooks Eng Zh Cn</title>
+<title>Gotchas Around Hooks Eng Zh Cn</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -62,13 +62,12 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>核心问题</h2>
 <h3>为什么要绝对路径？</h3>
-<pre class="highlight"><code class="language-json">// ❌ 相对路径（安全风险）
+<pre><code class="language-json">// ❌ 相对路径（安全风险）
 &quot;command&quot;: &quot;node ./hooks/read_hook.js&quot;
 
 // ✅ 绝对路径（安全）
 &quot;command&quot;: &quot;node /Users/alice/projects/queries/hooks/read_hook.js&quot;
 </code></pre>
-
 <p>绝对路径缓解两种攻击向量：</p>
 <table>
 <thead>
@@ -105,7 +104,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="Template Init Pattern" src="visuals/template-init-pattern-zh-TW.svg" /><br />
 <em>圖：Template → Init → Local 模式 — 提交含 $PWD 佔位符的 template，一次性 init 產生機器專屬設定。</em></p>
 <h3>1. <code>settings.example.json</code>（commit 到 git）</h3>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;hooks&quot;: {
     &quot;PreToolUse&quot;: [
       {
@@ -121,7 +120,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 }
 </code></pre>
-
 <h3>2. <code>scripts/init-claude.js</code>（commit 到 git）</h3>
 <p>读取模板 → 替换 <code>$PWD</code> → 写入 <code>settings.local.json</code></p>
 <h3>3. <code>settings.local.json</code>（gitignored，自动生成）</h3>

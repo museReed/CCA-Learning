@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>13 Streamablehttp In Depth Pm En</title>
+<title>Streamablehttp In Depth Pm En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -73,7 +73,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <li>Server pushes <strong>task progress</strong>: "50% done", "Found 3 results", "Here's the final answer"</li>
 <li>Business analogy: a dedicated phone line for a specific project meeting</li>
 </ul>
-<pre class="highlight"><code>General Broadcast (always on)
+<pre><code>General Broadcast (always on)
 ├── &quot;I need approval for this action&quot;
 ├── &quot;What workspace files do you have?&quot;
 └── (stays open...)
@@ -89,7 +89,6 @@ Task Channel #2 (tool call B)
 ├── &quot;Complete - here's your report&quot;
 └── (auto-closes)
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>Key Insight</strong><br />
 This dual-channel design is why a remote MCP server can show progress bars for individual tasks AND handle approval requests simultaneously. Without SSE, neither would be possible over HTTP.</p>

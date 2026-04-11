@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>20 The Claude Code Sdk Eng En</title>
+<title>The Claude Code Sdk Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -72,7 +72,7 @@ The SDK is Claude Code without the terminal UI. Same engine, same configuration,
 <h2>Three Access Methods</h2>
 <p>The SDK is available through three interfaces:</p>
 <h3>1. TypeScript (Primary)</h3>
-<pre class="highlight"><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
+<pre><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
 
 const messages = await query({
   prompt: &quot;What duplicate queries exist in this project?&quot;,
@@ -87,9 +87,8 @@ for await (const message of messages) {
   }
 }
 </code></pre>
-
 <h3>2. Python</h3>
-<pre class="highlight"><code class="language-python">import subprocess
+<pre><code class="language-python">import subprocess
 import json
 
 result = subprocess.run(
@@ -98,11 +97,9 @@ result = subprocess.run(
 )
 response = json.loads(result.stdout)
 </code></pre>
-
 <h3>3. CLI (Pipe mode)</h3>
-<pre class="highlight"><code class="language-bash">echo &quot;Find duplicate queries&quot; | claude --print --output-format json
+<pre><code class="language-bash">echo &quot;Find duplicate queries&quot; | claude --print --output-format json
 </code></pre>
-
 <blockquote>
 <p>🎬 <strong>Instructor insight from the video</strong><br />
 The instructor demonstrates the TypeScript SDK first because it provides the richest API with async iteration over messages. Python and CLI work via subprocess calls to the <code>claude</code> CLI binary.</p>
@@ -110,7 +107,7 @@ The instructor demonstrates the TypeScript SDK first because it provides the ric
 <hr />
 <h2>The Permission Model: Read-Only by Default</h2>
 <p>This is the most important security concept in the SDK:</p>
-<pre class="highlight"><code class="language-typescript">// DEFAULT: Claude can only READ files, not modify them
+<pre><code class="language-typescript">// DEFAULT: Claude can only READ files, not modify them
 const messages = await query({
   prompt: &quot;Analyze this codebase&quot;,
 });
@@ -123,7 +120,6 @@ const messages = await query({
   },
 });
 </code></pre>
-
 <p><strong>Why read-only by default?</strong> When running programmatically (no human in the loop), there is no one to approve risky actions. The SDK defaults to the safest posture.</p>
 <table>
 <thead>
@@ -163,7 +159,7 @@ The principle of least privilege applies: grant only the tools the SDK invocatio
 <hr />
 <h2>Basic Usage Pattern</h2>
 <p>The core pattern is: <strong>import -&gt; query -&gt; iterate</strong></p>
-<pre class="highlight"><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
+<pre><code class="language-typescript">import { query } from &quot;@anthropic-ai/claude-code&quot;;
 
 // 1. Send a prompt (starts an agentic loop)
 const conversation = await query({
@@ -189,7 +185,6 @@ for await (const message of conversation) {
   }
 }
 </code></pre>
-
 <p>The <code>query()</code> function returns an async iterable — messages stream in as Claude thinks and acts, just like the terminal experience.</p>
 <blockquote>
 <p>💡 <strong>Key Insight</strong><br />
@@ -199,24 +194,22 @@ for await (const message of conversation) {
 <h2>Practical Use Cases</h2>
 <p>The SDK's real power emerges in pipeline integration:</p>
 <h3>Git Hooks</h3>
-<pre class="highlight"><code class="language-typescript">// pre-commit hook: check for secrets
+<pre><code class="language-typescript">// pre-commit hook: check for secrets
 const result = await query({
   prompt: &quot;Check staged files for hardcoded secrets or API keys&quot;,
   options: { maxTurns: 5 },
 });
 // Parse result, exit 1 if secrets found
 </code></pre>
-
 <h3>Build Scripts</h3>
-<pre class="highlight"><code class="language-typescript">// Post-build: generate changelog
+<pre><code class="language-typescript">// Post-build: generate changelog
 const result = await query({
   prompt: &quot;Compare HEAD with last tag, generate a changelog entry&quot;,
   options: { maxTurns: 10 },
 });
 </code></pre>
-
 <h3>CI/CD Pipelines</h3>
-<pre class="highlight"><code class="language-typescript">// PR review bot
+<pre><code class="language-typescript">// PR review bot
 const result = await query({
   prompt: `Review this PR diff for issues:\n${prDiff}`,
   options: {
@@ -225,7 +218,6 @@ const result = await query({
   },
 });
 </code></pre>
-
 <blockquote>
 <p>🎬 <strong>Instructor insight from the video</strong><br />
 The instructor demos a two-step workflow: first calling the SDK in read-only mode to find duplicate queries, then calling it again with <code>allowedTools: ["Edit"]</code> to modify <code>package.json</code>. This illustrates the progressive permission escalation pattern.</p>
@@ -233,14 +225,13 @@ The instructor demos a two-step workflow: first calling the SDK in read-only mod
 <hr />
 <h2>Security: Settings Inheritance</h2>
 <p>The SDK inherits all settings from <code>.claude/settings.json</code>:</p>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;permissions&quot;: {
     &quot;allow&quot;: [&quot;Read&quot;, &quot;Glob&quot;, &quot;Grep&quot;],
     &quot;deny&quot;: [&quot;Bash(rm *)&quot;]
   }
 }
 </code></pre>
-
 <p>Even if your SDK code passes <code>allowedTools: ["Bash"]</code>, the deny rules in settings still apply. This is defense in depth:</p>
 <ol>
 <li><strong>Layer 1</strong>: SDK <code>allowedTools</code> — what the caller grants</li>

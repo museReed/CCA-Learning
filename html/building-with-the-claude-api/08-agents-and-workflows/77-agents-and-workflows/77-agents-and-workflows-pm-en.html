@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agents And Workflows Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Agents and Workflows — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — PRIMARY</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (agent vs workflow definition), 1.2 (agentic patterns), 5.2 (production workflow deployment)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 77</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>As a PM, your single most important AI architecture call is <strong>workflow vs agent</strong> — workflows give you predictable, shippable features, while agents unlock open-ended capabilities at the cost of testing effort, cost variance, and eval complexity.</p>
+<hr />
+<h2>Mental Model: The Assembly Line vs The Detective</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Assembly Line (Workflow)</th>
+<th>Detective (Agent)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Job posting</strong></td>
+<td>"Do step A, then B, then C on every unit"</td>
+<td>"Solve the crime. Here are your tools: badge, phone, car."</td>
+</tr>
+<tr>
+<td><strong>Predictability</strong></td>
+<td>Every unit comes out the same</td>
+<td>Every case is different</td>
+</tr>
+<tr>
+<td><strong>Failure shape</strong></td>
+<td>Broken conveyor belt (fix your code)</td>
+<td>Bad judgment call (retrain the detective)</td>
+</tr>
+<tr>
+<td><strong>Hiring criteria</strong></td>
+<td>You know the flowchart</td>
+<td>You trust the detective's reasoning</td>
+</tr>
+<tr>
+<td><strong>Cost</strong></td>
+<td>Predictable per unit</td>
+<td>Varies wildly per case</td>
+</tr>
+<tr>
+<td><strong>Scaling</strong></td>
+<td>Add more lines</td>
+<td>Hire better detectives</td>
+</tr>
+</tbody>
+</table>
+<p>Most production AI products are assembly lines (workflows) with occasional detective stations (agents) for the cases the line cannot handle. Anthropic's guidance: <strong>start with the assembly line.</strong></p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When a Workflow Fits</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Workflow</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PDF invoice → structured data</td>
+<td>Fixed inputs and outputs, known fields</td>
+</tr>
+<tr>
+<td>Customer ticket → draft reply</td>
+<td>Predefined steps: classify → retrieve → draft → review</td>
+</tr>
+<tr>
+<td>Image of a part → 3D CAD file</td>
+<td>Sequential deterministic pipeline (the lesson example)</td>
+</tr>
+<tr>
+<td>Translate doc preserving formatting</td>
+<td>Known transformation, testable per step</td>
+</tr>
+<tr>
+<td>Daily report from SaaS metrics</td>
+<td>Repeatable schedule, fixed data sources</td>
+</tr>
+</tbody>
+</table>
+<h3>When an Agent Fits</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coding assistant that reads/writes files</td>
+<td>Cannot predict which files the user needs</td>
+</tr>
+<tr>
+<td>Research helper that browses and cites</td>
+<td>Search path depends on what it finds</td>
+</tr>
+<tr>
+<td>DevOps incident responder</td>
+<td>Next action depends on live system state</td>
+</tr>
+<tr>
+<td>Custom data analyst chatbot</td>
+<td>User asks open-ended questions</td>
+</tr>
+</tbody>
+</table>
+<h3>When to Avoid Both (Just Use Single-Turn Claude)</h3>
+<ul>
+<li>The task fits in one prompt</li>
+<li>There's no tool use required</li>
+<li>The output is short and final</li>
+</ul>
+<p>Not everything needs orchestration. Over-engineering a single-turn task into a workflow is a common PM mistake.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>Ask these questions <em>in order</em>:</p>
+<ol>
+<li><strong>Can you draw the flowchart?</strong> If yes → workflow.</li>
+<li><strong>Do you have evals for end-to-end behavior?</strong> If not → workflow (you cannot ship an agent without evals).</li>
+<li><strong>Is per-request cost variance acceptable to finance?</strong> If not → workflow (agents can loop).</li>
+<li><strong>Can ops teams debug a variable-length trace?</strong> If not → workflow (traces get messy fast).</li>
+<li><strong>Only reached here?</strong> You may have a real agent use case. Budget for 2–3× the workflow timeline.</li>
+</ol>
+<hr />
+<h2>The Four Hidden Costs of "Just Build an Agent"</h2>
+<p>PMs often underestimate how much harder an agent is to ship than a workflow:</p>
+<ol>
+<li><strong>Eval cost</strong> — workflows can be tested per-step with small datasets; agents need end-to-end trajectories across diverse inputs.</li>
+<li><strong>Cost variance</strong> — a workflow has a predictable token bill per run; an agent can loop, spike, and blow budgets.</li>
+<li><strong>Observability cost</strong> — workflows map to clean spans; agents need replayable trajectories that are expensive to build.</li>
+<li><strong>Support cost</strong> — when a workflow breaks, engineers fix code; when an agent makes a bad call, PMs debate whether it's a prompt issue, a tool issue, or a model issue.</li>
+</ol>
+<p>These costs show up <em>after</em> launch, which is why Anthropic advises starting with workflows.</p>
+<hr />
+<h2>The Evaluator-Optimizer Pattern (A PM Favorite)</h2>
+<p>The lesson's CAD example introduces the <strong>evaluator-optimizer</strong> pattern: a producer creates output, a grader evaluates it, and a feedback loop repeats until the grader accepts.</p>
+<p>From a PM lens, this pattern gives you:</p>
+<ul>
+<li><strong>Quality control inside the feature</strong> — the grader is your automated QA</li>
+<li><strong>Bounded iteration</strong> — you cap attempts, so cost is predictable</li>
+<li><strong>Self-correction without handing control to Claude</strong> — stays a workflow</li>
+</ul>
+<p>Great candidate for features where "first draft" is acceptable input but "publishable version" is required output: generated marketing copy, auto-edited images, auto-written SQL.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Calling a multi-step prompt chain "our agent."</strong> It's a workflow. Using the wrong word sets wrong expectations with stakeholders and investors.</li>
+<li><strong>Shipping an agent without evals.</strong> Agents are only as reliable as the evals you build to measure them. No evals = no ship.</li>
+<li><strong>Promising flat-rate pricing on an agent feature.</strong> Without guardrails, one bad query can cost 50× the average. Either gate by tier or enforce max-step budgets.</li>
+<li><strong>Assuming "agent" means "smart."</strong> Agents are <em>autonomous</em>, not necessarily more capable. A well-designed workflow often outperforms a naive agent.</li>
+<li><strong>Not planning for the evaluator-optimizer pattern.</strong> Many product requirements ("draft must be publishable, not just okay") are solved elegantly by this pattern — but only if you explicitly design it.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The workflow-vs-agent decision is the single biggest architecture call a PM makes on an AI feature. Workflows give you predictability, shippability, and cost control — but require you to know the flow upfront. Agents give you flexibility — but cost you eval work, cost variance, and debuggability. Anthropic's own advice is: <strong>start with the workflow</strong>, and only move to an agent when the task genuinely cannot be expressed as a flowchart. Most "we need an agent" conversations end up as "actually, a workflow works."</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (22%) PRIMARY</strong>: This is the most-tested domain. Expect to classify scenarios — memorize the flowchart heuristic.</li>
+<li><strong>D5 (20%) SECONDARY</strong>: The reason the distinction matters is production — observability, cost, eval.</li>
+<li>Exam signal words for workflow: "predefined steps", "predetermined series", "orchestrated", "pipeline".</li>
+<li>Exam signal words for agent: "given a goal", "Claude decides", "autonomous", "open-ended".</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the core PM question that decides workflow vs agent?</td>
+<td>Can you draw the flowchart before runtime?</td>
+</tr>
+<tr>
+<td>Why does Anthropic advise starting with workflows?</td>
+<td>They are cheaper, more predictable, more testable, and faster to ship</td>
+</tr>
+<tr>
+<td>What is the assembly-line analogy for workflows?</td>
+<td>Known steps on every unit, breakdowns mean fix the code</td>
+</tr>
+<tr>
+<td>What is the detective analogy for agents?</td>
+<td>Given a goal and tools, figures out the next step, failures are judgment calls</td>
+</tr>
+<tr>
+<td>Name four hidden costs of agents vs workflows.</td>
+<td>Eval cost, cost variance, observability cost, support cost</td>
+</tr>
+<tr>
+<td>What is the evaluator-optimizer pattern in PM terms?</td>
+<td>Automated quality control — producer drafts, grader reviews, loop until accepted</td>
+</tr>
+<tr>
+<td>When should you AVOID both a workflow and an agent?</td>
+<td>When the task fits in a single prompt with no tool use</td>
+</tr>
+<tr>
+<td>What is the biggest PM mistake with agents?</td>
+<td>Shipping them without end-to-end evals and without capping step counts</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

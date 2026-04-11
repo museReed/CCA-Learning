@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>03 Introducing Mcp Eng En</title>
+<title>Introducing Mcp Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -57,7 +57,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>What MCP Actually Is</h2>
 <p>Model Context Protocol (MCP) is a <strong>communication protocol</strong> that sits between your application and external services. Rather than writing bespoke tool schemas and API integration code for every service Claude needs to access, MCP delegates that responsibility to specialized MCP servers.</p>
 <p>The core architecture follows a simple pattern:</p>
-<pre class="highlight"><code>Your Application (MCP Client)
+<pre><code>Your Application (MCP Client)
         |
         v
     MCP Server (e.g., GitHub MCP Server)
@@ -65,7 +65,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
         v
     External Service (e.g., GitHub API)
 </code></pre>
-
 <p>Each MCP server exposes a standardized interface containing <strong>tools</strong>, <strong>prompts</strong>, and <strong>resources</strong>. Your application only needs to know how to speak MCP — the server handles all service-specific details.</p>
 <blockquote>
 <p><strong>Key Insight</strong><br />
@@ -81,7 +80,7 @@ MCP is to AI tool integration what USB is to hardware peripherals. Instead of a 
 <li><strong>Handle authentication</strong> — OAuth tokens, rate limiting, pagination</li>
 <li><strong>Maintain everything</strong> — GitHub API changes, deprecations, new features</li>
 </ol>
-<pre class="highlight"><code class="language-python"># WITHOUT MCP: You write and maintain all of this
+<pre><code class="language-python"># WITHOUT MCP: You write and maintain all of this
 tools = [
     {
         &quot;name&quot;: &quot;get_pull_requests&quot;,
@@ -104,7 +103,6 @@ def handle_get_pull_requests(state, repo):
                           headers={&quot;Authorization&quot;: f&quot;token {token}&quot;})
     # ... more code
 </code></pre>
-
 <p>With MCP, the GitHub MCP server provides all of this out of the box. Your code simply connects to the MCP server and passes tool calls through.</p>
 <blockquote>
 <p><strong>Key Insight</strong><br />

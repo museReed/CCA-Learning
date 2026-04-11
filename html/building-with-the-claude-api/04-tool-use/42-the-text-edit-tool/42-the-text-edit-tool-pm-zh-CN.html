@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Text Edit Tool Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Text Editor Tool — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)、D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（built-in / server tools）、1.2（tool 编排）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 42</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Text editor tool 让你的产品可以在任意 workflow 中嵌入一个"迷你版 Claude Code"——Claude 已经知道怎么编辑文件,你只要提供一个可以写入的沙箱环境。</p>
+<hr />
+<h2>Mental Model：宜家家具组</h2>
+<p>从零买 tool 像是用原木打造一把椅子——每一处接合都得自己设计。Text editor tool 则像一套宜家组合包:Anthropic 出所有零件（schema + 指令词汇）,你只要提供工作空间（你的文件系统或沙箱）。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>自定义 Tool</th>
+<th>Text Editor Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Schema 定义</td>
+<td>你写</td>
+<td>Claude 内置</td>
+</tr>
+<tr>
+<td>指令词汇</td>
+<td>你设计</td>
+<td>预先定义（view、create、str_replace、insert、undo_edit）</td>
+</tr>
+<tr>
+<td>执行代码</td>
+<td>你写</td>
+<td><strong>还是你写</strong></td>
+</tr>
+<tr>
+<td>沙箱 / 安全模型</td>
+<td>你负责</td>
+<td><strong>还是你负责</strong></td>
+</tr>
+</tbody>
+</table>
+<p>加速效果真实存在,但安全责任完全没变。</p>
+<hr />
+<h2>你的产品得到什么</h2>
+<p>Text editor tool 立刻解锁以下能力：</p>
+<ul>
+<li><strong>读文件</strong>（任意粒度——整个文件或特定行范围）</li>
+<li><strong>列目录</strong></li>
+<li><strong>创建新文件</strong></li>
+<li><strong>在文件中替换字符串</strong></li>
+<li><strong>在指定行插入文字</strong></li>
+<li><strong>还原最近的编辑</strong></li>
+</ul>
+<p>这是一个 code editor 的完整词汇。你可以构建的产品：</p>
+<ul>
+<li>接收 repo 与 style guide、自动重写代码的 PR refactoring bot</li>
+<li>把 Markdown 文件改写成新 schema 的内容迁移 agent</li>
+<li>让 README 与 code 同步的文档自动更新器</li>
+<li>为用户沙箱设置 config 的 onboarding assistant</li>
+</ul>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>Text Editor Tool 发光发热的时机</h3>
+<table>
+<thead>
+<tr>
+<th>产品</th>
+<th>适合度</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>代码重构工具</td>
+<td>强</td>
+<td>核心 loop 就是 view → edit → save</td>
+</tr>
+<tr>
+<td>文档生成器</td>
+<td>强</td>
+<td>Claude 可以读 code、创建文档文件</td>
+</tr>
+<tr>
+<td>模板 scaffolder</td>
+<td>强</td>
+<td>Claude 按标准结构创建多个文件</td>
+</tr>
+<tr>
+<td>内部 developer agent</td>
+<td>强</td>
+<td>聚焦于受控的 repo 沙箱</td>
+</tr>
+<tr>
+<td>无头自动化（CI）</td>
+<td>强</td>
+<td>文件是通用接口</td>
+</tr>
+</tbody>
+</table>
+<h3>不适合的情况</h3>
+<table>
+<thead>
+<tr>
+<th>产品</th>
+<th>更好的替代</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>结构化数据编辑（DB 记录）</td>
+<td>用你的 DB schema 自己建 tool</td>
+</tr>
+<tr>
+<td>UI / 视觉编辑</td>
+<td>用专门的设计工具</td>
+</tr>
+<tr>
+<td>单一原子内容编辑</td>
+<td>直接生成文字,不走文件 I/O</td>
+</tr>
+<tr>
+<td>协作实时文档编辑</td>
+<td>改用 document-sync 服务</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>沙箱问题</h2>
+<p>既然由你的代码执行 Claude 的文件指令,blast radius 就是你决定。这是 PM 的关键决策：</p>
+<table>
+<thead>
+<tr>
+<th>沙箱范围</th>
+<th>风险</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>整个文件系统</td>
+<td>极高——Claude 可写任何地方</td>
+<td>绝对不要上 production</td>
+</tr>
+<tr>
+<td>项目目录</td>
+<td>中等——有范围但仍然不小</td>
+<td>内部 developer 工具</td>
+</tr>
+<tr>
+<td>独立 workspace 目录</td>
+<td>低——边界清楚</td>
+<td>面向用户的产品</td>
+</tr>
+<tr>
+<td>只读</td>
+<td>极低</td>
+<td>分析 / review agent</td>
+</tr>
+<tr>
+<td>虚拟文件系统（内存）</td>
+<td>最低</td>
+<td>Preview-only 体验</td>
+</tr>
+</tbody>
+</table>
+<p>先用最严格的沙箱满足产品价值,只有在明确理由下才放宽。</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>如果 Yes</th>
+<th>行动</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>产品的核心 workflow 是编辑文件吗？</td>
+<td>Yes</td>
+<td>Text editor tool 很适合</td>
+</tr>
+<tr>
+<td>能定义严格的沙箱目录吗？</td>
+<td>Yes</td>
+<td>可上 production</td>
+</tr>
+<tr>
+<td>Claude 需要创建多个相关文件吗？</td>
+<td>Yes</td>
+<td>Text editor 天然支持</td>
+</tr>
+<tr>
+<td>用户期待 undo 功能吗？</td>
+<td>Yes</td>
+<td>在 handler 中实现 <code>undo_edit</code></td>
+</tr>
+<tr>
+<td>产品需要写入关键系统路径吗？</td>
+<td>Yes</td>
+<td><strong>停下来</strong>——重新设计成沙箱化</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Hybrid 责任模型</h2>
+<p>这是 built-in tool 最重要的 PM insight：<strong>Anthropic 拥有 schema,你拥有 runtime</strong>。也就是说：</p>
+<ul>
+<li>你决定"文件"的定义（可以是 S3 对象、Git blob、内存字符串）</li>
+<li>你决定 <code>create</code> 的成本（比如按文件计费的产品）</li>
+<li>你决定保留与 undo 行为</li>
+<li>你决定 logging、审计、合规</li>
+</ul>
+<p>PM 有时以为 built-in = fully managed,其实不是。Built-in 只代表"schema 预先接好了";所有运营面你还是要自己出。</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>以为 text editor tool 是 fully managed</strong> — Anthropic 给 schema,但沙箱、安全、文件操作都要你的团队建。</li>
+<li><strong>没实现 <code>undo_edit</code></strong> — 编辑器类型的产品用户期待 undo,忽略它会破坏心智模型。</li>
+<li><strong>沙箱开太大就上线</strong> — "只有内部用"会扩散到 production;一开始就严格。</li>
+<li><strong>忽略 audit logging</strong> — Claude 的编辑必须可追踪,才好 debug、合规、rollback。</li>
+<li><strong>忘记 <code>view</code> 也能看目录</strong> — 这个 tool 是关于导航,不只是编辑;list 与 read 都要支持。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Built-in tool 是 hybrid：Anthropic 出 schema,你出 runtime 与安全模型。Text editor tool 的产品价值是省去几周的 schema / 指令设计工作,但没省掉沙箱、审计、undo 这些运营面工作。预算要抓好。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>：Text editor tool 是 built-in（schema 内置）tool 且需要开发者执行的典型。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：文件操作是天然的多轮模式——view、edit、verify、重复。</li>
+<li>考题常区分"built-in 但本地执行"（text editor）与"built-in 且托管执行"（web search）。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Text editor tool 中 Anthropic 提供什么？</td>
+<td>Schema 与指令词汇——Claude 已经知道怎么用</td>
+</tr>
+<tr>
+<td>开发者还要提供什么？</td>
+<td>执行代码——真正在磁盘上读、写、创建、还原文件</td>
+</tr>
+<tr>
+<td>这个 tool 支持哪些文件操作？</td>
+<td>view、create、str_replace、insert、undo_edit</td>
+</tr>
+<tr>
+<td>上线前 PM 最关键的决策是什么？</td>
+<td>沙箱——Claude 被允许动哪个目录、路径或虚拟文件系统</td>
+</tr>
+<tr>
+<td>为什么这是 hybrid 责任模型？</td>
+<td>Schema 由 Anthropic 完全 managed,runtime 与安全完全由开发者负责</td>
+</tr>
+<tr>
+<td>列出三个 text editor tool 很适合的产品。</td>
+<td>重构 bot、文档生成器、模板 scaffolder</td>
+</tr>
+<tr>
+<td>Tool 集成之外 PM 还要编哪些预算？</td>
+<td>沙箱、审计 logging、undo 行为、路径校验</td>
+</tr>
+<tr>
+<td>如果 handler 没实现 <code>undo_edit</code> 会怎样？</td>
+<td>Claude 的 undo 尝试静默失败,用户心智模型被破坏</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>11 Accessing Resources Eng En</title>
+<title>Accessing Resources Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -56,7 +56,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>The Client-Side Resource Pattern</h2>
 <p>While Lesson 10 covered how to define resources on the server, this lesson focuses on the client code that consumes those resources. The key function is <code>read_resource()</code>.</p>
 <h3>Core Implementation</h3>
-<pre class="highlight"><code class="language-python">import json
+<pre><code class="language-python">import json
 from pydantic import AnyUrl
 
 async def read_resource(self, uri: str) -&gt; Any:
@@ -69,7 +69,6 @@ async def read_resource(self, uri: str) -&gt; Any:
 
     return resource.text
 </code></pre>
-
 <h3>Line-by-Line Breakdown</h3>
 <ol>
 <li><strong><code>AnyUrl(uri)</code></strong> — Pydantic's URL validator. Accepts any URI scheme (<code>docs://</code>, <code>file://</code>, custom schemes). Validates format at parse time.</li>
@@ -80,7 +79,7 @@ async def read_resource(self, uri: str) -&gt; Any:
 <hr />
 <h2>Response Structure Deep Dive</h2>
 <p>The <code>ReadResourceResult</code> returned by the server has this shape:</p>
-<pre class="highlight"><code>ReadResourceResult
+<pre><code>ReadResourceResult
   └── contents: list[TextResourceContents | BlobResourceContents]
         └── [0]
               ├── uri: str
@@ -88,7 +87,6 @@ async def read_resource(self, uri: str) -&gt; Any:
               ├── text: str  (for TextResourceContents)
               └── blob: bytes (for BlobResourceContents)
 </code></pre>
-
 <p>Key design decisions:<br />
 - <strong><code>contents</code> is a list</strong> — though typically one item, the protocol supports returning multiple content blocks<br />
 - <strong>Two content types</strong> — <code>TextResourceContents</code> for text-based data, <code>BlobResourceContents</code> for binary<br />
@@ -96,7 +94,7 @@ async def read_resource(self, uri: str) -&gt; Any:
 <hr />
 <h2>MIME Type Handling Strategy</h2>
 <p>A production-ready client should handle more MIME types than the minimal example:</p>
-<pre class="highlight"><code class="language-python">async def read_resource(self, uri: str) -&gt; Any:
+<pre><code class="language-python">async def read_resource(self, uri: str) -&gt; Any:
     result = await self.session().read_resource(AnyUrl(uri))
     resource = result.contents[0]
 
@@ -112,7 +110,6 @@ async def read_resource(self, uri: str) -&gt; Any:
     # BlobResourceContents for binary data
     return resource.blob
 </code></pre>
-
 <table>
 <thead>
 <tr>

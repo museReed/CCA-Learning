@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>09 Implementing A Client Eng Zh Tw</title>
+<title>Implementing A Client Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -55,14 +55,13 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>Client 架構</h2>
 <p>MCP client 由兩個主要 SDK 類別組成：</p>
-<pre class="highlight"><code class="language-python">from mcp import ClientSession
+<pre><code class="language-python">from mcp import ClientSession
 from mcp.client import Client
 </code></pre>
-
 <p><strong>Client</strong> — 管理連線生命週期（連接、斷開、傳輸管理）。</p>
 <p><strong>ClientSession</strong> — 提供與 MCP server 互動的方法（<code>list_tools()</code>、<code>call_tool()</code> 等）。</p>
 <p>這兩個類別協同運作：Client 建立連線，ClientSession 使用該連線進行通訊。</p>
-<pre class="highlight"><code class="language-python">class MCPClient:
+<pre><code class="language-python">class MCPClient:
     def __init__(self):
         self.client = Client()
         self.session: ClientSession | None = None
@@ -78,7 +77,6 @@ from mcp.client import Client
         self.session = ClientSession(*stdio_transport)
         await self.session.initialize()
 </code></pre>
-
 <blockquote>
 <p><strong>Key Insight</strong><br />
 <code>initialize()</code> 呼叫至關重要。它執行 MCP 握手，client 和 server 協商能力。沒有它，後續呼叫會失敗。</p>
@@ -86,7 +84,7 @@ from mcp.client import Client
 <hr />
 <h2>兩個核心方法</h2>
 <h3>list_tools() — Discovery</h3>
-<pre class="highlight"><code class="language-python">async def discover_tools(self):
+<pre><code class="language-python">async def discover_tools(self):
     &quot;&quot;&quot;從 MCP server 探索可用的 tools。&quot;&quot;&quot;
     response = await self.session.list_tools()
 
@@ -98,7 +96,6 @@ from mcp.client import Client
 
     return response.tools
 </code></pre>
-
 <p><code>list_tools()</code> 回傳 <code>ListToolsResult</code>，包含 tool 定義陣列。每個 tool 有：</p>
 <ul>
 <li><code>name</code> — Tool 識別碼（例如 "read_doc_contents"）</li>
@@ -107,14 +104,13 @@ from mcp.client import Client
 </ul>
 <p>這就是你傳給 Claude 讓它知道有哪些 tools 可用的內容。</p>
 <h3>call_tool() — Execution</h3>
-<pre class="highlight"><code class="language-python">async def execute_tool(self, tool_name: str, tool_input: dict):
+<pre><code class="language-python">async def execute_tool(self, tool_name: str, tool_input: dict):
     &quot;&quot;&quot;在 MCP server 上執行 tool。&quot;&quot;&quot;
     result = await self.session.call_tool(tool_name, tool_input)
 
     # result.content 包含 tool 輸出
     return result.content
 </code></pre>
-
 <p><code>call_tool()</code> 接受兩個引數：</p>
 <ul>
 <li><code>tool_name</code> — 要呼叫哪個 tool（字串）</li>
@@ -128,7 +124,7 @@ tool_name 和 tool_input 通常直接來自 Claude 的 tool_use 回應。Claude 
 <hr />
 <h2>完整的 Client 端流程</h2>
 <p>以下是 client 如何在完整 agentic 迴圈中與 Claude 整合：</p>
-<pre class="highlight"><code class="language-python">import anthropic
+<pre><code class="language-python">import anthropic
 from mcp import ClientSession
 
 class AgenticMCPClient:
@@ -191,7 +187,6 @@ class AgenticMCPClient:
 
         return response.content[0].text
 </code></pre>
-
 <p>五個關鍵步驟：</p>
 <ol>
 <li><strong>探索</strong> — <code>list_tools()</code> 取得可用 tools</li>
@@ -202,9 +197,8 @@ class AgenticMCPClient:
 </ol>
 <hr />
 <h2>執行 Client</h2>
-<pre class="highlight"><code class="language-bash">uv run mcp_client.py
+<pre><code class="language-bash">uv run mcp_client.py
 </code></pre>
-
 <p><code>uv</code> 執行器處理依賴解析和虛擬環境管理。執行時，client：</p>
 <ol>
 <li>連接到指定的 MCP server</li>
@@ -214,7 +208,7 @@ class AgenticMCPClient:
 </ol>
 <hr />
 <h2>Client 端的錯誤處理</h2>
-<pre class="highlight"><code class="language-python">async def safe_call_tool(self, tool_name: str, tool_input: dict):
+<pre><code class="language-python">async def safe_call_tool(self, tool_name: str, tool_input: dict):
     try:
         result = await self.session.call_tool(tool_name, tool_input)
         if result.isError:
@@ -223,7 +217,6 @@ class AgenticMCPClient:
     except Exception as e:
         return f&quot;MCP 通訊錯誤: {str(e)}&quot;
 </code></pre>
-
 <p>關鍵錯誤場景：</p>
 <ul>
 <li><strong>Tool 找不到</strong> — tool 名稱不符合任何已註冊的 tool</li>

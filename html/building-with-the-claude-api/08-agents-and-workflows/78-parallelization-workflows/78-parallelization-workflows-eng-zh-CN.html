@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parallelization Workflows Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Parallelization Workflows — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture(22%)— 主要</td>
+</tr>
+<tr>
+<td>任务陈述</td>
+<td>1.2(agentic 模式 — parallelization)、5.2(production workflow 部署)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 78</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Parallelization workflow 把一个复杂任务拆成多个独立子任务并行执行(通常用 <code>asyncio.gather</code>),再用最后一次 LLM 调用汇总结果 — 这是 LLM 推理版的 "fan-out / fan-in" 模式。</p>
+<hr />
+<h2>这个模式解决什么问题</h2>
+<p>单一 prompt 处理复杂决策时,会逼 Claude 同时兼顾很多标准。课程的标准示例: 材料推荐系统, 要从 metal、polymer、ceramic、composite、elastomer、wood 六种材料中挑一个适合某零件图片的。</p>
+<p>朴素做法(一个 prompt):</p>
+<pre><code>&quot;看这个零件, 从以下材料挑最好的: metal、polymer、ceramic、composite、elastomer、wood。
+考虑强度、重量、成本、可制造性、抗腐蚀……&quot;
+</code></pre>
+<p>问题:<br />
+1. Claude 要把注意力分散到 6 种材料 × 5+ 个标准 = 30+ 个考量<br />
+2. 没有任何单一材料被深入分析<br />
+3. 难以优化 — 你没办法单独 A/B 测 "metal prompt"<br />
+4. 想加第 7 种材料得重写整个 prompt</p>
+<hr />
+<h2>Parallelization 模式</h2>
+<p>出自 Anthropic "Building Effective Agents" 博客, parallelization 有两种变体:</p>
+<table>
+<thead>
+<tr>
+<th>变体</th>
+<th>用途</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sectioning</strong></td>
+<td>把任务拆成独立子任务, 每个聚焦一个方面</td>
+<td>材料推荐(每种材料一个 LLM)</td>
+</tr>
+<tr>
+<td><strong>Voting</strong></td>
+<td>跑<em>同一个</em>任务多次, 取多数决</td>
+<td>Moderation("这内容安全吗?") N 个投票者</td>
+</tr>
+</tbody>
+</table>
+<p>两者都是并行跑 N 个 LLM 调用再汇总。区别在于每个子任务的输入/prompt 是<em>不同</em>(sectioning)还是<em>相同</em>(voting)。</p>
+<hr />
+<h2>标准结构</h2>
+<pre><code>       ┌─→ 子任务 1 ──┐
+input ─┼─→ 子任务 2 ──┼─→ aggregator ─→ 最终输出
+       └─→ 子任务 N ──┘
+</code></pre>
+<ol>
+<li><strong>Split</strong> — 把一个输入转成 N 个聚焦子任务</li>
+<li><strong>Fan-out</strong> — 并行跑 N 个子任务(<code>asyncio.gather</code>)</li>
+<li><strong>Fan-in / Aggregate</strong> — 把所有子任务结果喂给最后一次 LLM 调用做单一决策</li>
+<li><strong>Return</strong> — 把汇总结果返回给用户</li>
+</ol>
+<hr />
+<h2>Python 实现(asyncio.gather)</h2>
+<pre><code class="language-python">import asyncio
+from anthropic import AsyncAnthropic
+
+client = AsyncAnthropic()
+
+MATERIALS = [&quot;metal&quot;, &quot;polymer&quot;, &quot;ceramic&quot;, &quot;composite&quot;, &quot;elastomer&quot;, &quot;wood&quot;]
+
+async def evaluate_material(image_b64: str, material: str) -&gt; dict:
+    &quot;&quot;&quot;每种材料一个专用的 LLM 调用。&quot;&quot;&quot;
+    prompt = f&quot;&quot;&quot;
+你是材料工程师, 评估 {material} 是否适合图中零件。
+只聚焦在 {material} 的标准:
+
+&lt;criteria&gt;
+{MATERIAL_CRITERIA[material]}
+&lt;/criteria&gt;
+
+返回 JSON: {{&quot;material&quot;: &quot;{material}&quot;, &quot;score&quot;: 0-10, &quot;rationale&quot;: &quot;...&quot;}}
+&quot;&quot;&quot;
+    resp = await client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=512,
+        messages=[{
+            &quot;role&quot;: &quot;user&quot;,
+            &quot;content&quot;: [
+                {&quot;type&quot;: &quot;image&quot;, &quot;source&quot;: {&quot;type&quot;: &quot;base64&quot;,
+                                             &quot;media_type&quot;: &quot;image/jpeg&quot;,
+                                             &quot;data&quot;: image_b64}},
+                {&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: prompt},
+            ],
+        }],
+    )
+    return parse_json(resp.content[0].text)
+
+async def aggregate(evaluations: list[dict]) -&gt; str:
+    &quot;&quot;&quot;Fan-in: 把所有专门评估合并成最终选择。&quot;&quot;&quot;
+    prompt = f&quot;&quot;&quot;
+以下是同一个零件的 6 份独立材料评估:
+
+{json.dumps(evaluations, indent=2, ensure_ascii=False)}
+
+挑出最佳材料并说明理由。
+&quot;&quot;&quot;
+    resp = await client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=1024,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}],
+    )
+    return resp.content[0].text
+
+async def material_recommender(image_b64: str) -&gt; str:
+    # fan-out
+    tasks = [evaluate_material(image_b64, m) for m in MATERIALS]
+    evaluations = await asyncio.gather(*tasks)
+    # fan-in
+    return await aggregate(evaluations)
+</code></pre>
+<p>实现要点:<br />
+- 用 <code>AsyncAnthropic</code>(不是 <code>Anthropic</code>), 调用才能 await<br />
+- <code>asyncio.gather(*tasks)</code> 让 fan-out 阶段真正并行<br />
+- 每个子任务小、聚焦、可独立测试<br />
+- Aggregator 一次看到所有结构化结果</p>
+<hr />
+<h2>好处</h2>
+<ol>
+<li><strong>聚焦注意力</strong> — 每次 Claude 调用专注一个方面, 准确度提升</li>
+<li><strong>独立优化</strong> — 改 metal prompt 不会影响其他; per-material A/B 测试</li>
+<li><strong>可扩展</strong> — 加第 7 种材料只要多加一个 prompt 文件, 其他六个零风险</li>
+<li><strong>可靠性</strong> — 每次调用认知负担低, 输出更一致</li>
+<li><strong>延迟</strong> — N 次并行调用 ≈ 最慢那一次的时间, 而不是 N × 平均</li>
+</ol>
+<hr />
+<h2>不该用 Parallelization 的时机</h2>
+<ul>
+<li>后续步骤<em>依赖</em>前面输出的任务(改用 chaining — Lesson 79)</li>
+<li>子任务无法有意义地分开("总结这篇文章" 无法并行化)</li>
+<li>成本比延迟更重要: parallelization 是<em>增加</em>调用次数, 不是减少, token 花费会乘以 N</li>
+</ul>
+<hr />
+<h2>Voting 变体</h2>
+<p>同样的基础设施也能跑 voting: 让<em>同一个</em> prompt 跑 N 次, 用多数决汇总。适合安全关键决策:</p>
+<pre><code class="language-python">async def moderation_vote(text: str, n: int = 5) -&gt; bool:
+    tasks = [is_safe(text) for _ in range(n)]
+    votes = await asyncio.gather(*tasks)
+    return sum(votes) &gt; n / 2  # 多数决
+</code></pre>
+<p>Voting 用成本换可靠度 — 经典的 ensemble 技术套到 LLM 上。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>忘了 aggregation 步骤。</strong> 并行子任务本身不会产生决策, 你还需要一个最后的 LLM(或规则)aggregator。</li>
+<li><strong>让子任务互相依赖。</strong> 如果子任务 2 需要子任务 1 的输出, 那是 chain 不是 parallel, <code>asyncio.gather</code> 会 race 或 deadlock。</li>
+<li><strong>用 <code>Anthropic</code> 而不是 <code>AsyncAnthropic</code>。</strong> Sync client 会 block, 结果变成串行而非并行。</li>
+<li><strong>忽略每个任务的 timeout。</strong> 一个慢调用会拖住整个 gather。用 <code>asyncio.wait_for</code> 或 <code>gather(return_exceptions=True)</code>。</li>
+<li><strong>Token 成本爆炸。</strong> 每个并行调用都是独立 API 账单。控制 N, 可以 cache 就 cache。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>Parallelization 是 "聚焦注意力" 的 workflow — 每次 Claude 调用只负责一个窄责任, 单次分析更好, 总延迟也更低。代价是 N 倍 API 花费, 所以适用于质量比成本重要、或延迟是瓶颈时。考试记得两种变体: <strong>sectioning</strong>(不同子任务)与 <strong>voting</strong>(同一任务跑 N 次)。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1(22%)主要</strong>: 预期有场景题要你识别 parallelization(关键词: "split"、"run simultaneously"、"fan out"、"aggregate")。</li>
+<li><strong>D5(20%)次要</strong>: Production 模式 — <code>asyncio.gather</code>、延迟/成本权衡。</li>
+<li>信号词: "split into multiple independent evaluations"、"run simultaneously"、"aggregate results"、"fan-out / fan-in"。</li>
+<li>两种变体都要懂(sectioning vs voting)。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>什么是 parallelization workflow?</td>
+<td>把一个任务拆成独立子任务并行执行, 再汇总结果</td>
+</tr>
+<tr>
+<td>Parallelization 的两种变体?</td>
+<td>Sectioning(不同子任务同一输入)与 voting(同一任务跑 N 次)</td>
+</tr>
+<tr>
+<td>执行 fan-out 阶段的 Python 原语?</td>
+<td><code>asyncio.gather(*tasks)</code> 配 <code>AsyncAnthropic</code> client</td>
+</tr>
+<tr>
+<td>为什么 parallelization 比一个 mega-prompt 好?</td>
+<td>聚焦注意力、可独立优化、可扩展、更可靠</td>
+</tr>
+<tr>
+<td>Parallelization 的成本取舍?</td>
+<td>N 倍 API 花费换取质量与延迟</td>
+</tr>
+<tr>
+<td>什么时候<em>不</em>该用 parallelization?</td>
+<td>子任务互相依赖时(改用 chaining)、或成本比质量更重要时</td>
+</tr>
+<tr>
+<td>Voting 模式用来做什么?</td>
+<td>安全/共识决策 — 同一 prompt 跑 N 次取多数决(例如 moderation)</td>
+</tr>
+<tr>
+<td>能让 Anthropic 调用并行的 client class?</td>
+<td><code>AsyncAnthropic</code> — Anthropic SDK 的 async 版 client</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

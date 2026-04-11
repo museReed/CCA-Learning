@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>19 Another Useful Hook Pm En</title>
+<title>Another Useful Hook Pm En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -252,12 +252,11 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>The Debug Hook: A PM Should Know It Exists</h2>
 <p>Engineers use a simple debug technique to discover what data each hook receives:</p>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;matcher&quot;: &quot;*&quot;,
   &quot;hooks&quot;: [{ &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;jq . &gt; log.json&quot; }]
 }
 </code></pre>
-
 <p><strong>Why PMs should care</strong>: If engineers say "we don't know what data is available at this lifecycle stage," the answer is: use a debug hook to discover it. This prevents requirements from being blocked by "we'd need to investigate."</p>
 <hr />
 <h2>Hook Type Decision Framework for PMs</h2>

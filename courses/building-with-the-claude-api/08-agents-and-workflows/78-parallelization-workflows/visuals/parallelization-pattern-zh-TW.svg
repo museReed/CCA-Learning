@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#22C55E"/>
+    </marker>
+  </defs>
+  <rect width="900" height="540" fill="white"/>
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Parallelization 平行化工作流</text>
+  <text x="450" y="60" text-anchor="middle" font-size="13" fill="#6B7280">Sectioning（切分任務）+ Voting（執行 N 次）透過 asyncio.gather</text>
+
+  <!-- Input node -->
+  <rect x="370" y="90" width="160" height="60" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <text x="450" y="118" text-anchor="middle" font-size="14" font-weight="600" fill="#1E293B">輸入任務</text>
+  <text x="450" y="138" text-anchor="middle" font-size="11" fill="#6B7280">例如：審查一個 PR</text>
+
+  <!-- Fanout label -->
+  <rect x="375" y="165" width="150" height="24" rx="12" fill="#DCFCE7"/>
+  <text x="450" y="182" text-anchor="middle" font-size="11" font-weight="600" fill="#22C55E">asyncio.gather(...)</text>
+
+  <!-- Fanout lines -->
+  <line x1="450" y1="195" x2="150" y2="230" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowG)"/>
+  <line x1="450" y1="195" x2="340" y2="230" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowG)"/>
+  <line x1="450" y1="195" x2="560" y2="230" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowG)"/>
+  <line x1="450" y1="195" x2="750" y2="230" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowG)"/>
+
+  <!-- Parallel workers -->
+  <rect x="60" y="240" width="180" height="110" rx="8" fill="white" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="60" y="240" width="180" height="28" rx="8" fill="#22C55E"/>
+  <rect x="60" y="260" width="180" height="8" fill="#22C55E"/>
+  <text x="150" y="260" text-anchor="middle" font-size="12" font-weight="600" fill="white">LLM 呼叫 1</text>
+  <text x="150" y="290" text-anchor="middle" font-size="11" fill="#1E293B" font-weight="500">檢查：安全性</text>
+  <text x="150" y="310" text-anchor="middle" font-size="10" fill="#6B7280">平行執行</text>
+  <text x="150" y="328" text-anchor="middle" font-size="10" fill="#6B7280">獨立的 context</text>
+
+  <rect x="250" y="240" width="180" height="110" rx="8" fill="white" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="250" y="240" width="180" height="28" rx="8" fill="#22C55E"/>
+  <rect x="250" y="260" width="180" height="8" fill="#22C55E"/>
+  <text x="340" y="260" text-anchor="middle" font-size="12" font-weight="600" fill="white">LLM 呼叫 2</text>
+  <text x="340" y="290" text-anchor="middle" font-size="11" fill="#1E293B" font-weight="500">檢查：風格</text>
+  <text x="340" y="310" text-anchor="middle" font-size="10" fill="#6B7280">平行執行</text>
+  <text x="340" y="328" text-anchor="middle" font-size="10" fill="#6B7280">獨立的 context</text>
+
+  <rect x="470" y="240" width="180" height="110" rx="8" fill="white" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="470" y="240" width="180" height="28" rx="8" fill="#22C55E"/>
+  <rect x="470" y="260" width="180" height="8" fill="#22C55E"/>
+  <text x="560" y="260" text-anchor="middle" font-size="12" font-weight="600" fill="white">LLM 呼叫 3</text>
+  <text x="560" y="290" text-anchor="middle" font-size="11" fill="#1E293B" font-weight="500">檢查：測試</text>
+  <text x="560" y="310" text-anchor="middle" font-size="10" fill="#6B7280">平行執行</text>
+  <text x="560" y="328" text-anchor="middle" font-size="10" fill="#6B7280">獨立的 context</text>
+
+  <rect x="670" y="240" width="180" height="110" rx="8" fill="white" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="670" y="240" width="180" height="28" rx="8" fill="#22C55E"/>
+  <rect x="670" y="260" width="180" height="8" fill="#22C55E"/>
+  <text x="760" y="260" text-anchor="middle" font-size="12" font-weight="600" fill="white">LLM 呼叫 N</text>
+  <text x="760" y="290" text-anchor="middle" font-size="11" fill="#1E293B" font-weight="500">檢查：文件</text>
+  <text x="760" y="310" text-anchor="middle" font-size="10" fill="#6B7280">平行執行</text>
+  <text x="760" y="328" text-anchor="middle" font-size="10" fill="#6B7280">獨立的 context</text>
+
+  <!-- Merge lines -->
+  <line x1="150" y1="355" x2="450" y2="395" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowG)"/>
+  <line x1="340" y1="355" x2="450" y2="395" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowG)"/>
+  <line x1="560" y1="355" x2="450" y2="395" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowG)"/>
+  <line x1="760" y1="355" x2="450" y2="395" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowG)"/>
+
+  <!-- Merge / aggregator -->
+  <rect x="330" y="400" width="240" height="60" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <text x="450" y="427" text-anchor="middle" font-size="14" font-weight="600" fill="#1E293B">彙整器 Aggregator</text>
+  <text x="450" y="447" text-anchor="middle" font-size="11" fill="#6B7280">合併 / 投票 / 總結</text>
+
+  <!-- Two modes legend -->
+  <rect x="60" y="480" width="360" height="40" rx="6" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="240" y="497" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B">Sectioning（切分）</text>
+  <text x="240" y="513" text-anchor="middle" font-size="10" fill="#6B7280">不同子任務平行執行</text>
+
+  <rect x="480" y="480" width="360" height="40" rx="6" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="660" y="497" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B">Voting（投票）</text>
+  <text x="660" y="513" text-anchor="middle" font-size="10" fill="#6B7280">同一任務執行 N 次，多數決勝出</text>
+</svg>

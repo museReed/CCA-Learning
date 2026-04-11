@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Handling Message Blocks Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Handling Message Blocks — PM Perspective（简中）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) / D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2（content block 处理）、2.1（tool schema 集成）、1.2（agentic loop 基础）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 36</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>一旦你的产品让 Claude 可以调用 tool，每一条 assistant 回复就会变成一个<strong>结构化的数据包</strong>——一部分是对用户讲的说明，一部分是给机器读的动作请求——系统的工作就是把每一块路由到正确的地方（UI vs 后端执行器）。</p>
+<hr />
+<h2>心智模型：无线电调度通信</h2>
+<p>把启用 tool 后的 Claude 回应想成<strong>警用无线电调度</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>部分</th>
+<th>无线电通话</th>
+<th>Claude 回应</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>开场说明</td>
+<td>「12 号车注意…」</td>
+<td>Text block——人类可读的上下文</td>
+</tr>
+<tr>
+<td>可执行指令</td>
+<td>「请前往 5 街和 Main 街口」</td>
+<td>ToolUseBlock——机器可读的函数调用</td>
+</tr>
+<tr>
+<td>呼号</td>
+<td>12 号车</td>
+<td><code>tool_use_id</code>——配对请求与响应</td>
+</tr>
+</tbody>
+</table>
+<p>调度员（你的后端）必须听完整段通信、把说明转述给用户、并把动作派给正确的单位。丢掉任何一块对话就断了。</p>
+<hr />
+<h2>为什么产品要在乎这件事</h2>
+<p>启用 tool 之前，Claude 回应「就是一句话」，可以直接塞进 UI。启用 tool 后，回应是一个<strong>混合 payload</strong>，需要解析：</p>
+<ul>
+<li>有些部分是给用户看的文字（「我来帮你查时间…」）</li>
+<li>有些部分是后端动作（「调用 <code>get_current_datetime</code> 并带这些参数」）</li>
+<li>有些部分是看不见的 ID，必须来回送回 Claude</li>
+</ul>
+<p>不懂这件事的 PM 会严重低估工程成本：看起来很简单的功能（例如「让 Claude 抓股价」）实际上需要新建一整套 block iteration、ID 跟踪、state 保留的管道。</p>
+<hr />
+<h2>产品应用场景</h2>
+<h3>Multi-Block 处理很重要的时候</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么 block 重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>会查实时数据的助理（天气、股价、日历）</td>
+<td>Text block = 用户看到的；ToolUseBlock = 后端调用</td>
+</tr>
+<tr>
+<td>需要串联多个操作的 agentic workflow</td>
+<td>每一回合可能产生多个 ToolUseBlock，你得并行执行</td>
+</tr>
+<tr>
+<td>会一边讲话一边动作的语音/视频助理</td>
+<td>Text block 驱动 TTS，tool-use block 触发实体动作</td>
+</tr>
+<tr>
+<td>Debug 或审计功能</td>
+<td>要给用户看「Claude 正在做什么」就必须把 tool-use intent 暴露出来</td>
+</tr>
+</tbody>
+</table>
+<h3>可以保持简单的时候</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>更简单的做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>纯静态知识问答</td>
+<td>不用 tool——单一 text block 就好</td>
+</tr>
+<tr>
+<td>分类／情感分析</td>
+<td>不用 tool——用结构化 JSON 输出</td>
+</tr>
+<tr>
+<td>创意写作</td>
+<td>不用 tool——只要 text block</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 决策框架</h2>
+<p>在承诺做一个使用 tool 的功能之前，确认团队能回答：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>为什么重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>谁负责把 text-block 的说明露给用户？</td>
+<td>跳过的话体感会是 Claude「沉默思考」</td>
+</tr>
+<tr>
+<td>如何在回合之间保留完整的 block list？</td>
+<td>丢 block 会在后续回合引发看不懂的 API 错误</td>
+</tr>
+<tr>
+<td>谁负责 tool_use 和 tool_result 的 ID 配对？</td>
+<td>必须有一个专职的 layer 来配对请求和响应</td>
+</tr>
+<tr>
+<td>一次响应回来多个 tool call 怎么办？</td>
+<td>可能要并行执行，不是顺序</td>
+</tr>
+<tr>
+<td>tool 执行中间的加载/进度状态如何呈现？</td>
+<td>长时间工具会让 UX 出现空窗期，没有 progress event 很难收尾</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>把 tool-use 当成「另一个 API」规划</strong>——它其实是一套新协议：multi-block message、ID 配对、stop_reason dispatch</li>
+<li><strong>设计稿忽略说明 block</strong>——设计师常常只画最终答案，漏掉「我正在查…」的前言</li>
+<li><strong>假设一回合只会有一个 tool call</strong>——一个问题可能产生 2、3 个 tool-use block，UI 和后端都要能处理并行执行</li>
+<li><strong>把 tool-use ID 当成工程内部细节</strong>——它们是与 Claude 的契约。丢了就会坏、会报 400，最后用户会看到</li>
+<li><strong>没预算改 helper function</strong>——旧的「加消息到历史」代码通常假设字符串，必须升级</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>当你把 tool 加进一个由 Claude 驱动的功能，assistant 回复就不再是「一条消息」，而是「一个通信数据包」。产品现在需要一个调度员：能朗读说明、能把动作送给执行器、还能记住呼号。低估这个转变是 tool-use 项目最常见的 overrun 来源。Kickoff 就要跟工程讲清楚：「一旦启用 tool，每一条消息都会变成 typed block list。」</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：知道启用 tool 会把 response shape 从字符串变 block list；记得 ToolUseBlock 的四个字段。</li>
+<li><strong>D1（Agentic Architecture）</strong>：<code>stop_reason == "tool_use"</code> 是 agentic 模式里标准的 loop 继续信号。</li>
+<li>考题会给一段把 <code>response.content</code> 当字符串的代码，问你下一回合为什么会坏。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>启用 tool 后 Claude 回应的形状变成什么？</td>
+<td>一个 typed block 的 list（TextBlock、ToolUseBlock），而不是单一字符串</td>
+</tr>
+<tr>
+<td>用什么无线电比喻来理解 multi-block 消息？</td>
+<td>警用调度通信——开场说明 + 动作指令 + 呼号（ID）</td>
+</tr>
+<tr>
+<td>PM 规划 tool-use 功能时最大的风险是什么？</td>
+<td>低估协议转变——multi-block 解析、ID 配对、历史保留</td>
+</tr>
+<tr>
+<td>为什么一定要把说明 text block 显示给用户？</td>
+<td>否则 Claude 推理时 UX 会沉默，前言上下文也会被丢掉</td>
+</tr>
+<tr>
+<td>哪个 stop_reason 告诉后端要执行 tool 并继续 loop？</td>
+<td><code>"tool_use"</code></td>
+</tr>
+<tr>
+<td>一个 Claude 响应可以有多个 tool-use block 吗？</td>
+<td>可以——一个问题可能需要多个 tool，系统要全部处理</td>
+</tr>
+<tr>
+<td>tool_use_id 为什么不只是工程细节？</td>
+<td>它们跨 API 调用配对请求与响应，丢了会让后续回合坏掉</td>
+</tr>
+<tr>
+<td>不升级旧 helper function 的产品代价是什么？</td>
+<td>后续回合会出看不懂的 400，因为先前的 block 被扁平化成字符串</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

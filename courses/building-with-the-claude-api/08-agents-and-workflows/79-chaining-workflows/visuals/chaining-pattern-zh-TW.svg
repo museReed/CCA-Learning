@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrowB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#3B82F6"/>
+    </marker>
+    <marker id="arrowR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#EF4444"/>
+    </marker>
+  </defs>
+  <rect width="960" height="440" fill="white"/>
+
+  <!-- Title -->
+  <text x="480" y="38" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Chaining 串接工作流 (Prompt Chaining)</text>
+  <text x="480" y="60" text-anchor="middle" font-size="13" fill="#6B7280">前一個 LLM 呼叫的輸出餵給下一個；步驟間可加上 gate 驗證</text>
+
+  <!-- Input -->
+  <rect x="30" y="180" width="100" height="70" rx="8" fill="#F1F5F9" stroke="#94A3B8" stroke-width="2" filter="url(#shadow)"/>
+  <text x="80" y="210" text-anchor="middle" font-size="13" font-weight="600" fill="#1E293B">輸入</text>
+  <text x="80" y="228" text-anchor="middle" font-size="10" fill="#6B7280">原始主題</text>
+
+  <line x1="130" y1="215" x2="168" y2="215" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowB)"/>
+
+  <!-- LLM 1 -->
+  <rect x="170" y="175" width="130" height="80" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="170" y="175" width="130" height="26" rx="8" fill="#3B82F6"/>
+  <rect x="170" y="193" width="130" height="8" fill="#3B82F6"/>
+  <text x="235" y="193" text-anchor="middle" font-size="12" font-weight="600" fill="white">LLM 1</text>
+  <text x="235" y="220" text-anchor="middle" font-size="11" fill="#1E293B" font-weight="500">大綱</text>
+  <text x="235" y="238" text-anchor="middle" font-size="10" fill="#6B7280">產生結構</text>
+
+  <line x1="300" y1="215" x2="340" y2="215" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowB)"/>
+
+  <!-- Gate diamond -->
+  <polygon points="395,180 445,215 395,250 345,215" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <text x="395" y="210" text-anchor="middle" font-size="11" font-weight="600" fill="#EF4444">Gate</text>
+  <text x="395" y="225" text-anchor="middle" font-size="9" fill="#6B7280">驗證？</text>
+
+  <!-- Gate fail path -->
+  <path d="M 395 180 Q 395 135 450 135" stroke="#EF4444" stroke-width="2" fill="none" stroke-dasharray="4 3" marker-end="url(#arrowR)"/>
+  <text x="400" y="128" font-size="10" fill="#EF4444" font-weight="600">失敗 → 重試</text>
+
+  <line x1="445" y1="215" x2="483" y2="215" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowB)"/>
+  <text x="460" y="205" text-anchor="middle" font-size="10" fill="#22C55E" font-weight="600">通過</text>
+
+  <!-- LLM 2 -->
+  <rect x="485" y="175" width="130" height="80" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="485" y="175" width="130" height="26" rx="8" fill="#3B82F6"/>
+  <rect x="485" y="193" width="130" height="8" fill="#3B82F6"/>
+  <text x="550" y="193" text-anchor="middle" font-size="12" font-weight="600" fill="white">LLM 2</text>
+  <text x="550" y="220" text-anchor="middle" font-size="11" fill="#1E293B" font-weight="500">草稿</text>
+  <text x="550" y="238" text-anchor="middle" font-size="10" fill="#6B7280">展開大綱</text>
+
+  <line x1="615" y1="215" x2="653" y2="215" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowB)"/>
+
+  <!-- LLM 3 -->
+  <rect x="655" y="175" width="130" height="80" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="655" y="175" width="130" height="26" rx="8" fill="#3B82F6"/>
+  <rect x="655" y="193" width="130" height="8" fill="#3B82F6"/>
+  <text x="720" y="193" text-anchor="middle" font-size="12" font-weight="600" fill="white">LLM 3</text>
+  <text x="720" y="220" text-anchor="middle" font-size="11" fill="#1E293B" font-weight="500">潤飾</text>
+  <text x="720" y="238" text-anchor="middle" font-size="10" fill="#6B7280">編輯與排版</text>
+
+  <line x1="785" y1="215" x2="823" y2="215" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowB)"/>
+
+  <!-- Output -->
+  <rect x="825" y="180" width="105" height="70" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <text x="877" y="210" text-anchor="middle" font-size="13" font-weight="600" fill="#1E293B">輸出</text>
+  <text x="877" y="228" text-anchor="middle" font-size="10" fill="#6B7280">成品文章</text>
+
+  <!-- Notes -->
+  <rect x="60" y="320" width="840" height="90" rx="8" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="480" y="345" text-anchor="middle" font-size="12" font-weight="600" fill="#1E293B">為何要串接？每一步都比單一巨型 prompt 更簡單、便宜、好除錯。</text>
+  <text x="480" y="368" text-anchor="middle" font-size="11" fill="#6B7280">每個 LLM 呼叫只收到自己需要的資訊；中間的 gate 可以及早攔截錯誤。</text>
+  <text x="480" y="388" text-anchor="middle" font-size="11" fill="#6B7280">取捨：延遲較高（循序執行），但幻覺較少、失敗模式更清楚。</text>
+</svg>

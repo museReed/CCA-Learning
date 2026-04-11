@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agents And Tools Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Agents 与 Tools — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (agent 架构)、1.2 (agentic loop)、1.3 (agent 中的 tool use)、5.1 (production pattern 选型)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 81</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Agent 让你只出一个功能就能处理许多不可预期的用户需求——你把目标和一个简单的工具箱交给 Claude,剩下的 Claude 自己搞定,不用你们团队把每一种用户流程预先写死。</p>
+<hr />
+<h2>PM 为什么该关心</h2>
+<p>对 PM 来说,"要做 agent 还是 workflow"其实是一个产品策略问题:"用户请求是窄而可预测,还是宽而开放?"</p>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>Workflow 给你</th>
+<th>Agent 给你</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>有限、重复使用场景</td>
+<td>最高可靠度</td>
+<td>不必要的复杂度</td>
+</tr>
+<tr>
+<td>创意、开放式请求</td>
+<td>脆弱、让用户受挫</td>
+<td>灵活与惊喜</td>
+</tr>
+<tr>
+<td>"我们知道用户会问的 5 件事"</td>
+<td>Workflow 胜</td>
+<td>过度工程</td>
+</tr>
+<tr>
+<td>"用户问的我们都没想过"</td>
+<td>PM backlog 补不完</td>
+<td>Agent 胜</td>
+</tr>
+</tbody>
+</table>
+<p>Agent 让你出"一个完整能力",而不是 N 个 feature flag。</p>
+<hr />
+<h2>心智模型:瑞士军刀 vs 厨房小工具抽屉</h2>
+<p>一个专用化的 workflow 就像厨房那个放满单功能小工具的抽屉:</p>
+<ul>
+<li>牛油果切片器——切牛油果很好,苹果不能用</li>
+<li>分蛋器——只能分蛋</li>
+<li>压蒜器——压蒜很好,姜就不行</li>
+</ul>
+<p>Agent 则是瑞士军刀:</p>
+<ul>
+<li>刀、剪刀、螺丝刀、开罐器——每个工具都很单纯</li>
+<li>由 <strong>用户的创意</strong> 决定怎么组合</li>
+<li>一支工具覆盖制造商从没想过的情境</li>
+</ul>
+<p>用产品术语讲:如果你的 PRD 里列了一大串"功能 X、功能 Y、功能 Z"都在解相关问题,那你可能在做厨房小工具抽屉,其实该做瑞士军刀。</p>
+<hr />
+<h2>产品使用场景</h2>
+<h3>什么时候选 Agent</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>为什么 Agent 胜出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"帮我搞税务"助手</td>
+<td>用户会问五花八门的问题,不可能事先列完</td>
+</tr>
+<tr>
+<td>AI 写代码助手(Claude Code)</td>
+<td>任何语言、任何 codebase——不可能每个情境都预先做 workflow</td>
+</tr>
+<tr>
+<td>创意内容工作室</td>
+<td>"帮我做个宣传片"可以有一千种意思</td>
+</tr>
+<tr>
+<td>跨内部混乱数据的客服 copilot</td>
+<td>不同客户对不同系统有不同问题</td>
+</tr>
+</tbody>
+</table>
+<h3>什么时候选 Workflow</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>为什么 Workflow 胜出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"这份会议记录帮我摘要"</td>
+<td>已知输入、已知输出</td>
+</tr>
+<tr>
+<td>"把这段产品描述翻译"</td>
+<td>Deterministic、可测量、eval 便宜</td>
+</tr>
+<tr>
+<td>"抽取发票字段"</td>
+<td>合规/审计要求行为可预测</td>
+</tr>
+<tr>
+<td>受管制流程(法律、医疗)</td>
+<td>每一步都需要可验证</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>"可组合工具"原则(PM 版)</h2>
+<p>工程师会问你:"要做 <code>refactor_function</code> 这种 tool 还是 <code>edit_file</code> 这种?"答案几乎永远是比较通用的那个。为什么这对 roadmap 很重要:</p>
+<ol>
+<li><strong>范围自动扩大</strong> — 一个通用 tool 覆盖了原本要开一堆 ticket 才能处理的用户请求。</li>
+<li><strong>Roadmap 抗意外</strong> — 当用户要求你没想过的事情(一定会),agent 已经能处理。</li>
+<li><strong>要维护的 feature 变少</strong> — 每个窄 tool 都是一个要做 eval、要监控、要下架的 feature。</li>
+<li><strong>出货更快</strong> — 五个 primitive 比五十个专用 tool 早半年上线。</li>
+</ol>
+<p><strong>PRD 红旗</strong>:如果你的 PRD 列了 20 个窄 AI 动作,工程团队可能花 6 个月还是覆盖不到用户需求。改问:"覆盖 80% 情境的最小工具箱是什么?"</p>
+<hr />
+<h2>PM 决策框架</h2>
+<p>规划 AI 功能时,走这串问题:</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>如果 Yes</th>
+<th>方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>你能事先列出所有用户流程吗?</td>
+<td>Yes</td>
+<td>Workflow</td>
+</tr>
+<tr>
+<td>用户的请求变化大、不可预测?</td>
+<td>Yes</td>
+<td>Agent</td>
+</tr>
+<tr>
+<td>"答错"会有合规或安全风险?</td>
+<td>Yes</td>
+<td>Workflow(可预测)</td>
+</tr>
+<tr>
+<td>需要处理创意组合?</td>
+<td>Yes</td>
+<td>Agent</td>
+</tr>
+<tr>
+<td>每多一个情境就多一个 sprint?</td>
+<td>Yes</td>
+<td>大概是 agent——你在跟错的 pattern 打架</td>
+</tr>
+<tr>
+<td>每次请求的成本非常敏感?</td>
+<td>Yes</td>
+<td>Workflow(便宜、token 少)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 常见错误</h2>
+<ol>
+<li><strong>写死流程而不是目标</strong> — PRD 写"先调用 tool A 再调用 tool B",即使 agent 更适合也把工程团队逼进 workflow 模式。</li>
+<li><strong>用户一抱怨就加新 tool</strong> — 正确做法是改进 system prompt 跟 tool 描述,不是硬塞 <code>handle_edge_case_47</code>。</li>
+<li><strong>窄问题硬上 agent</strong> — "摘要这篇文章"不需要 agent。你付 3 倍 cost 换不到任何灵活性。</li>
+<li><strong>没预留 eval 复杂度</strong> — Agent 的 eval 难度是 workflow 的 3–10 倍。不先规划,release cycle 会卡住。</li>
+<li><strong>忽略 latency 影响</strong> — 每次 agent loop 都多一次 round trip,话多的 agent 对用户来说就是慢。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>无法事先列出用户流程时选 agent,其他时候选 workflow。大部分 production AI 功能要么是假装成 agent 的 workflow,要么是被 workflow 式 PRD 淹死的 agent。把 pattern 对齐到问题,是 agentic 产品里最高杠杆的 PM 决策。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>:题目常问"用户想做 X,你要做 workflow 还是 agent?"口诀:不可预测 = agent,可预测 = workflow。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>:要记得 agent 比较贵、比较难 eval,这是主要 production trade-off。</li>
+<li>考题关键字:"varied requests""novel combinations" -&gt; agent;"well-defined steps""known sequence" -&gt; workflow。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PM 什么时候该选 agent 而不是 workflow?</td>
+<td>用户请求多元、不可预测、无法事先列完时。</td>
+</tr>
+<tr>
+<td>抽象 tool vs 专用 tool 的产品类比是什么?</td>
+<td>瑞士军刀(通用 primitive) vs 厨房小工具抽屉(每种情境一支工具)。</td>
+</tr>
+<tr>
+<td>列出两个 workflow 胜 agent 的产品情境。</td>
+<td>摘要会议记录、抽发票字段、翻译描述、受管制法律流程(任两个)。</td>
+</tr>
+<tr>
+<td>为什么 agent 比 workflow 贵?</td>
+<td>每次 loop 迭代都是一次 API 调用和更多 token,开放式推理每个任务用更多 compute。</td>
+</tr>
+<tr>
+<td>PRD 出现什么红旗代表你该做 agent?</td>
+<td>一长串窄 AI 动作,都在解相关问题。</td>
+</tr>
+<tr>
+<td>举三个 PM 必须规划的 agent 缺点。</td>
+<td>Cost 高、可靠度低、eval 难、latency 慢、行为不可预测(任三)。</td>
+</tr>
+<tr>
+<td>PM 为什么不该在 PRD 里过度指定 tool 顺序?</td>
+<td>会把工程团队逼进 workflow 模式,即使 agent 更适合,结果失去灵活性优势。</td>
+</tr>
+<tr>
+<td>Agent 设计最重要的 PM trade-off 是什么?</td>
+<td>灵活性 vs 可预测性——Agent 能处理新情境但比较难测、难 eval、难控制。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

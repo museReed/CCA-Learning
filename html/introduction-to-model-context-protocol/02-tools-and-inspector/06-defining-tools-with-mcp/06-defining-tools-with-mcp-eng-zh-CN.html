@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>06 Defining Tools With Mcp Eng Zh Cn</title>
+<title>Defining Tools With Mcp Eng Zh Cn</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -56,12 +56,11 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>FastMCP：Python SDK</h2>
 <p>FastMCP 是构建 MCP server 的官方 Python SDK。它利用 Python 的类型系统，消除了手动编写 JSON tool schema 的繁琐过程。</p>
-<pre class="highlight"><code class="language-python">from mcp.server.fastmcp import FastMCP
+<pre><code class="language-python">from mcp.server.fastmcp import FastMCP
 
 # 创建 MCP server 实例
 mcp = FastMCP(&quot;document-tools&quot;)
 </code></pre>
-
 <p><code>FastMCP</code> 构造函数接受 server 名称字符串。此名称在连接握手时向 client 标识你的 MCP server。</p>
 <blockquote>
 <p><strong>Key Insight</strong><br />
@@ -70,7 +69,7 @@ Server 名称不只是标签——它会出现在 client 的 log 和调试输出
 <hr />
 <h2>用 @mcp.tool() 定义 Tools</h2>
 <p>Tools 定义为标准 Python 函数，加上 <code>@mcp.tool()</code> 装饰器。FastMCP 检查函数签名来自动生成 tool 的 JSON schema。</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 def read_doc_contents(file_path: str) -&gt; str:
     &quot;&quot;&quot;读取并返回文档内容。
 
@@ -80,7 +79,6 @@ def read_doc_contents(file_path: str) -&gt; str:
     with open(file_path, &quot;r&quot;) as f:
         return f.read()
 </code></pre>
-
 <p>幕后发生的事：</p>
 <ol>
 <li><strong>函数名称</strong>变成 tool 名称：<code>read_doc_contents</code></li>
@@ -89,7 +87,7 @@ def read_doc_contents(file_path: str) -&gt; str:
 <li><strong>返回类型</strong>定义输出格式</li>
 </ol>
 <p>自动生成的 JSON schema 看起来像：</p>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
     &quot;name&quot;: &quot;read_doc_contents&quot;,
     &quot;description&quot;: &quot;读取并返回文档内容。&quot;,
     &quot;inputSchema&quot;: {
@@ -104,7 +102,6 @@ def read_doc_contents(file_path: str) -&gt; str:
     }
 }
 </code></pre>
-
 <blockquote>
 <p><strong>Key Insight</strong><br />
 Docstring 对 Claude 的 tool 选择准确度至关重要。模糊的 docstring 意味着 Claude 可能选错 tool 或完全忽略它。写清楚说明 tool 做什么、何时使用、返回什么的 docstring。</p>
@@ -112,7 +109,7 @@ Docstring 对 Claude 的 tool 选择准确度至关重要。模糊的 docstring 
 <hr />
 <h2>用 Annotated Types 添加字段描述</h2>
 <p>要更精确的参数描述，使用 Pydantic 的 <code>Field</code>：</p>
-<pre class="highlight"><code class="language-python">from pydantic import Field
+<pre><code class="language-python">from pydantic import Field
 from typing import Annotated
 
 @mcp.tool()
@@ -135,7 +132,6 @@ def edit_document(
 
     return f&quot;文档 {file_path} 更新成功&quot;
 </code></pre>
-
 <p>关键模式：</p>
 <ul>
 <li><strong><code>Annotated[type, Field(...)]</code></strong> — 为单个参数添加丰富描述</li>
@@ -145,7 +141,7 @@ def edit_document(
 <hr />
 <h2>错误处理</h2>
 <p>MCP tools 使用标准 Python 异常处理错误。FastMCP 捕获异常并作为错误响应返回给 client。</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 def read_doc_contents(file_path: str) -&gt; str:
     &quot;&quot;&quot;读取并返回文档内容。&quot;&quot;&quot;
     try:
@@ -156,7 +152,6 @@ def read_doc_contents(file_path: str) -&gt; str:
     except PermissionError:
         raise ValueError(f&quot;权限被拒：{file_path}&quot;)
 </code></pre>
-
 <p>MCP tool 错误处理最佳实践：</p>
 <ul>
 <li><strong>抛出 <code>ValueError</code></strong> 用于面向用户的错误（无效输入、找不到等）</li>
@@ -202,15 +197,13 @@ def read_doc_contents(file_path: str) -&gt; str:
 <p>自动验证特别强大。如果 Claude 发送 <code>file_path: 42</code> 而不是字符串，FastMCP 在你的函数执行前就捕获类型错误。</p>
 <hr />
 <h2>运行 Server</h2>
-<pre class="highlight"><code class="language-python">if __name__ == &quot;__main__&quot;:
+<pre><code class="language-python">if __name__ == &quot;__main__&quot;:
     mcp.run()
 </code></pre>
-
 <p><code>mcp.run()</code> 启动 MCP server，默认使用 stdio transport。使用 HTTP transport：</p>
-<pre class="highlight"><code class="language-python">if __name__ == &quot;__main__&quot;:
+<pre><code class="language-python">if __name__ == &quot;__main__&quot;:
     mcp.run(transport=&quot;sse&quot;)  # HTTP 上的 Server-Sent Events
 </code></pre>
-
 <hr />
 <h2>CCA 考试关联性</h2>
 <p>本课是 <strong>Domain 2 (18%)</strong> 的核心。重点考试领域：</p>

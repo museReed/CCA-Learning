@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Text Edit Tool Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Text Editor Tool — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)、D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（built-in / server tools）、2.1（tool schema 与选择）、1.2（tool 编排）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 42</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Text editor tool 是 Anthropic 内置的 tool:Claude 本身已经知道完整 schema,你只需要声明一个很小的 stub（<code>type</code> + <code>name</code>）,然后自己写执行 Claude 指令用的文件操作实现。</p>
+<hr />
+<h2>为什么叫"内置" Tool</h2>
+<p>大部分 tool 需要你准备两件事：</p>
+<ol>
+<li>描述每个参数的完整 JSON schema</li>
+<li>实际执行的 Python 函数</li>
+</ol>
+<p>Text editor tool 不一样。Anthropic 在模型内部<strong>预先定义好完整 schema</strong>,涵盖所有支持的文件操作。你：</p>
+<ul>
+<li><strong>不需要</strong>定义 <code>path</code>、<code>command</code>、<code>old_str</code>、<code>new_str</code> 这些参数</li>
+<li><strong>不需要</strong>写完整 JSON schema</li>
+<li><strong>需要</strong>声明一个小 stub 告诉 Claude "启用这个内置 tool"</li>
+<li><strong>需要</strong>写实际操作文件的本地函数</li>
+</ul>
+<p>Claude 那一侧是黑箱;你这一侧依然重要。</p>
+<hr />
+<h2>支持的操作</h2>
+<p>Text editor tool 让 Claude 能像使用本地编辑器的软件工程师一样工作：</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>view</strong></td>
+<td>读取文件或列出目录;可以看特定行范围</td>
+</tr>
+<tr>
+<td><strong>create</strong></td>
+<td>创建新文件并写入初始内容</td>
+</tr>
+<tr>
+<td><strong>str_replace</strong></td>
+<td>将文件中某个字符串换成另一个（最常见的编辑）</td>
+</tr>
+<tr>
+<td><strong>insert</strong></td>
+<td>在指定行号插入文字</td>
+</tr>
+<tr>
+<td><strong>undo_edit</strong></td>
+<td>撤销最近一次的编辑</td>
+</tr>
+</tbody>
+</table>
+<p>这些合起来涵盖核心编辑能力——读、写、创建、修改、还原。</p>
+<hr />
+<h2>声明 Stub</h2>
+<p>Stub 内容依 Claude 模型系列而异。Lesson 给的 helper：</p>
+<pre><code class="language-python">def get_text_edit_schema(model: str) -&gt; dict:
+    if model.startswith(&quot;claude-3-7-sonnet&quot;):
+        return {
+            &quot;type&quot;: &quot;text_editor_20250124&quot;,
+            &quot;name&quot;: &quot;str_replace_editor&quot;,
+        }
+    elif model.startswith(&quot;claude-3-5-sonnet&quot;):
+        return {
+            &quot;type&quot;: &quot;text_editor_20241022&quot;,
+            &quot;name&quot;: &quot;str_replace_editor&quot;,
+        }
+    # 最新的 version string 请查 Anthropic 官方文档
+</code></pre>
+<p>重点：</p>
+<ul>
+<li><code>type</code> 是<strong>按模型系列 versioned</strong> 的,字符串必须跟你使用的模型对得上。Anthropic 把对应表放在 <code>docs.anthropic.com/en/docs/agents-and-tools/tool-use/text-editor-tool</code>。</li>
+<li><code>name</code> 对应每个 version 是固定的（比如上面两个版本都是 <code>str_replace_editor</code>）。</li>
+<li>Claude 会在内部把 stub 展开成完整 schema,你看不到参数定义。</li>
+</ul>
+<hr />
+<h2>当成普通 Tool 传进去</h2>
+<pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+model = &quot;claude-3-5-sonnet-20241022&quot;
+
+response = client.messages.create(
+    model=model,
+    max_tokens=2048,
+    tools=[get_text_edit_schema(model)],
+    messages=[
+        {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Open ./main.py 并总结内容&quot;},
+    ],
+)
+</code></pre>
+<p>Claude 会返回一个 <code>tool_use</code> block,<code>name</code> 是 <code>str_replace_editor</code>,<code>input</code> 包含 Claude 想执行的指令（比如 <code>{"command": "view", "path": "./main.py"}</code>）。你的代码要根据 <code>input["command"]</code> dispatch 并执行动作。</p>
+<hr />
+<h2>提供实现</h2>
+<p>你负责真正操作文件系统。最小版本的 dispatcher：</p>
+<pre><code class="language-python">def run_text_editor(tool_input: dict) -&gt; str:
+    command = tool_input[&quot;command&quot;]
+    path = tool_input[&quot;path&quot;]
+
+    if command == &quot;view&quot;:
+        with open(path) as f:
+            return f.read()
+
+    elif command == &quot;create&quot;:
+        with open(path, &quot;w&quot;) as f:
+            f.write(tool_input[&quot;file_text&quot;])
+        return f&quot;已创建 {path}&quot;
+
+    elif command == &quot;str_replace&quot;:
+        with open(path) as f:
+            content = f.read()
+        new_content = content.replace(
+            tool_input[&quot;old_str&quot;],
+            tool_input[&quot;new_str&quot;],
+            1,
+        )
+        with open(path, &quot;w&quot;) as f:
+            f.write(new_content)
+        return &quot;替换完成&quot;
+
+    elif command == &quot;insert&quot;:
+        # 在 tool_input[&quot;insert_line&quot;] 插入文字
+        ...
+
+    elif command == &quot;undo_edit&quot;:
+        # 还原前一版本
+        ...
+
+    else:
+        return f&quot;未知 command: {command}&quot;
+</code></pre>
+<p>你决定：</p>
+<ul>
+<li>什么算 Claude 的文件系统沙箱</li>
+<li>是否允许写入、只读、或限制路径</li>
+<li>是否维护 undo stack 供 <code>undo_edit</code> 使用</li>
+</ul>
+<hr />
+<h2>示例 Workflow</h2>
+<p>Prompt：<em>"Open ./main.py,添加一个计算 pi 到小数第 5 位的函数,然后创建 ./test.py 并写单元测试。"</em></p>
+<p>Claude 的 turn 序列：</p>
+<ol>
+<li><code>tool_use</code>：<code>view ./main.py</code></li>
+<li>你的代码返回文件内容</li>
+<li><code>tool_use</code>：<code>str_replace</code> 注入新函数</li>
+<li>你的代码执行替换并回报</li>
+<li><code>tool_use</code>：<code>create ./test.py</code> 含单元测试内容</li>
+<li>你的代码创建文件并回报</li>
+<li>最后 assistant text："完成——已新增 <code>compute_pi</code> 并写好测试。"</li>
+</ol>
+<p>每个 <code>tool_use</code> 都是 agentic loop 中的一次往返。</p>
+<hr />
+<h2>为什么需要 Text Editor Tool</h2>
+<p>既然现代编辑器已经内置 AI 助手,为什么要通过 API 暴露这个？因为它可以：</p>
+<ul>
+<li>为需要<strong>以程序方式</strong>编辑文件的应用服务（如 codemod 服务、迁移 bot）</li>
+<li>在<strong>没有完整编辑器</strong>的 agent 环境中使用</li>
+<li>让 <strong>Claude 驱动的应用</strong>原生嵌入文件编辑能力</li>
+<li>在 CI pipeline 中做<strong>无头自动化</strong></li>
+</ul>
+<p>简言之,它让你可以在自家产品中复制"AI code editor"的功能,并能对文件系统接口做细致控制。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>模型与 version string 对不上</strong> — <code>text_editor_20241022</code> 配 3.7 Sonnet 或反过来。请一律查 Anthropic 官方文档最新对应。</li>
+<li><strong>试图写完整 JSON schema</strong> — 只需要 stub,Claude 已经知道参数。</li>
+<li><strong>没实现 <code>undo_edit</code></strong> — Claude 尝试还原时,你的 handler 若忽略,workflow 就坏了。</li>
+<li><strong>没做沙箱就执行</strong> — Claude 可以写任意文件,必须限定目录并校验路径。</li>
+<li><strong>忘了 <code>view</code> 也能针对目录</strong> — 你必须支持列目录,不只是读文件。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>"内置"形容的是 <strong>schema</strong>,不是 <strong>执行</strong>。Anthropic 把 schema 知识放在模型里,但你还是要自己写真正操作文件系统的 Python 代码。Text editor tool 是一种 hybrid：Anthropic 懂 API,你拥有 runtime。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>：Text editor tool 是 built-in（schema 内置）tool 的典型代表,由开发者提供执行逻辑。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：文件操作链（view → edit → create → test）是典型的多轮 agentic 模式。</li>
+<li>题目可能对比 built-in tool（如 text editor）与 server tool（如 web search）,后者由 Anthropic 完全处理执行。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用 text editor tool 要声明什么？</td>
+<td>一个小 stub,包含 <code>type</code>（versioned）与 <code>name</code>（比如 <code>str_replace_editor</code>）</td>
+</tr>
+<tr>
+<td>Text editor tool 的 schema 由谁提供？</td>
+<td>Anthropic — Claude 已经知道参数,你不需要定义</td>
+</tr>
+<tr>
+<td>Text editor tool 的执行由谁提供？</td>
+<td>开发者 — 你写执行 Claude 指令的文件操作函数</td>
+</tr>
+<tr>
+<td>Text editor tool 支持哪些操作？</td>
+<td>view、create、str_replace、insert、undo_edit</td>
+</tr>
+<tr>
+<td>为什么 <code>type</code> 字符串带日期（如 <code>text_editor_20241022</code>）？</td>
+<td>因为 schema 按 Claude 模型系列 versioned,version 必须对应你的模型</td>
+</tr>
+<tr>
+<td>Claude 能不能用这个 tool 看目录？</td>
+<td>可以——<code>view</code> 对文件和目录都有效</td>
+</tr>
+<tr>
+<td>没沙箱跑 text editor tool 有什么风险？</td>
+<td>Claude 可以写任意文件,路径校验与沙箱目录是必要的</td>
+</tr>
+<tr>
+<td>既然编辑器已经有 AI,为什么还需要这个 tool？</td>
+<td>让 Claude 驱动的应用嵌入程序化文件编辑能力,适合 codemod、agent、无头自动化</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

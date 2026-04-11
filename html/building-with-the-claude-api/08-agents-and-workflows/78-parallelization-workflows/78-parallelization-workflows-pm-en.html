@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parallelization Workflows Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Parallelization Workflows — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — PRIMARY</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2 (agentic patterns — parallelization), 5.2 (production workflow deployment)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 78</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Parallelization workflows are the product move when quality depends on depth per criterion: instead of asking Claude to juggle 10 criteria in one prompt, you run 10 focused sub-analyses in parallel and aggregate the verdict — better answers, similar latency, at the cost of more API spend.</p>
+<hr />
+<h2>Mental Model: The Tasting Panel</h2>
+<p>Imagine choosing a wine for a restaurant menu.</p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>What It Looks Like</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One generalist taster</td>
+<td>"Is this wine good?" — answers everything at once</td>
+<td>Average, wobbly judgment</td>
+</tr>
+<tr>
+<td><strong>Specialist panel (parallelization)</strong></td>
+<td>One taster for acidity, one for tannins, one for finish, one for value, one for food pairing, one head judge to aggregate</td>
+<td>Focused depth + integrated final verdict</td>
+</tr>
+</tbody>
+</table>
+<p>Parallelization workflows are the specialist panel. Each expert concentrates on <em>one</em> axis; a head judge reads all expert notes and makes the final call. Better decisions, faster than running them sequentially, at the cost of paying every expert.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When to Use Parallelization</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Parallelization Helps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Material recommender (lesson example)</td>
+<td>Each material needs deep, specialized evaluation</td>
+</tr>
+<tr>
+<td>Resume screening (pro/con per dimension)</td>
+<td>Evaluate candidates on skills, experience, culture fit independently</td>
+</tr>
+<tr>
+<td>Content moderation voting</td>
+<td>Run N safety checks and take majority vote for high-stakes decisions</td>
+</tr>
+<tr>
+<td>Code review across multiple rubrics</td>
+<td>Security reviewer + style reviewer + performance reviewer + maintainability reviewer</td>
+</tr>
+<tr>
+<td>Multi-lens customer feedback analysis</td>
+<td>Sentiment, urgency, topic, action-required — each as its own sub-task</td>
+</tr>
+<tr>
+<td>Document comparison across multiple criteria</td>
+<td>Legal, financial, technical analysis in parallel</td>
+</tr>
+</tbody>
+</table>
+<h3>When NOT to Use Parallelization</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Task with sequential dependencies</td>
+<td>Use <strong>chaining</strong> (lesson 79)</td>
+</tr>
+<tr>
+<td>Simple single-answer question</td>
+<td>Just one Claude call</td>
+</tr>
+<tr>
+<td>Cost is the top constraint</td>
+<td>Single prompt with well-engineered criteria</td>
+</tr>
+<tr>
+<td>Sub-tasks cannot be truly independent</td>
+<td>Chaining or agent</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Two Flavors</h2>
+<table>
+<thead>
+<tr>
+<th>Flavor</th>
+<th>Product Use</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sectioning</strong></td>
+<td>Break a decision into multiple dimensions</td>
+<td>Material recommender (one LLM per material)</td>
+</tr>
+<tr>
+<td><strong>Voting</strong></td>
+<td>Run the same evaluation N times for reliability</td>
+<td>Moderation: "is this safe?" × 5 voters, majority wins</td>
+</tr>
+</tbody>
+</table>
+<p>Sectioning improves <em>quality</em> by giving each dimension focused attention. Voting improves <em>reliability</em> by averaging out noise. Some features benefit from both (e.g., "5 safety votes for each of 3 risk categories").</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>Ask these questions:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the decision depend on multiple independent criteria?</td>
+<td>Yes</td>
+<td>Sectioning candidate</td>
+</tr>
+<tr>
+<td>Do sub-tasks need each other's outputs?</td>
+<td>Yes</td>
+<td>NOT parallelization — use chaining</td>
+</tr>
+<tr>
+<td>Is quality &gt; cost for this feature?</td>
+<td>Yes</td>
+<td>Parallelization is a fit</td>
+</tr>
+<tr>
+<td>Is latency a key metric?</td>
+<td>Yes</td>
+<td>Parallel N calls ≈ slowest single call (good!)</td>
+</tr>
+<tr>
+<td>Do you need high reliability on a binary decision?</td>
+<td>Yes</td>
+<td>Voting variant</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Business Value Translation</h2>
+<p>When pitching this architecture to engineering or finance, translate it into business-speak:</p>
+<ul>
+<li><strong>Quality</strong> — "We get specialist-level analysis per criterion instead of generalist analysis across all criteria"</li>
+<li><strong>Latency</strong> — "The user waits for the slowest sub-task, not the sum of all sub-tasks — roughly the same perceived speed"</li>
+<li><strong>Cost</strong> — "API bill multiplies by N, but each sub-task is typically smaller and faster than a monolithic prompt; real cost varies"</li>
+<li><strong>Scalability</strong> — "Adding a new criterion = adding a prompt file. No regression on existing criteria."</li>
+<li><strong>A/B testing</strong> — "We can iterate on one sub-task's prompt without re-testing the others"</li>
+</ul>
+<hr />
+<h2>Production Guardrails PMs Must Request</h2>
+<p>When shipping a parallelization workflow, ask engineering to build:</p>
+<ol>
+<li><strong>Per-task timeouts</strong> — one slow call should not stall the whole request</li>
+<li><strong>Partial-result handling</strong> — if 5 of 6 sub-tasks finish and one fails, can you still produce a useful aggregate?</li>
+<li><strong>Fan-out cap</strong> — never let N grow unbounded based on user input</li>
+<li><strong>Cost alerts</strong> — parallelization multiplies token spend; watch for anomalies</li>
+<li><strong>Aggregator fallback</strong> — if the aggregator LLM fails, do you have a rule-based fallback?</li>
+</ol>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Confusing parallelization with agents.</strong> Parallelization runs multiple <em>predetermined</em> sub-tasks. The code still owns the flow. It is still a workflow.</li>
+<li><strong>Missing the aggregator step.</strong> Shipping "here are 6 analyses" to the user is a failure — users want one answer, not a jury. Always budget time for the aggregator prompt.</li>
+<li><strong>Under-budgeting API spend.</strong> Parallelization is the easiest way to 5–10× your token bill without realizing it. Model the unit economics upfront.</li>
+<li><strong>Using voting when sectioning would do.</strong> Voting is expensive — use it only for high-stakes binary decisions where reliability matters more than depth.</li>
+<li><strong>Forgetting partial-failure semantics.</strong> If one sub-task errors, does the feature degrade gracefully or crash the whole request? Specify in the PRD.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Parallelization is the "specialist panel" workflow — each Claude call gets a single narrow job, then a head judge aggregates the results. It is the standard product move whenever a decision depends on multiple independent criteria, each deserving focused analysis. Trade quality and latency wins for higher API spend, and always include an aggregator step. For the exam, remember both flavors: <strong>sectioning</strong> (different sub-tasks) for depth, <strong>voting</strong> (same task N times) for reliability.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (22%) PRIMARY</strong>: Parallelization is one of the four core workflow patterns from "Building Effective Agents". Expect a scenario question.</li>
+<li><strong>D5 (20%) SECONDARY</strong>: Production deployment — latency, cost, partial failure.</li>
+<li>Exam signal words: "split into independent evaluations", "run simultaneously", "aggregate", "fan out / fan in".</li>
+<li>Memorize both variants (sectioning and voting) and one example of each.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is a parallelization workflow in product terms?</td>
+<td>Run multiple focused sub-analyses in parallel and aggregate them into one answer</td>
+</tr>
+<tr>
+<td>What is the "tasting panel" analogy?</td>
+<td>Specialists each evaluate one criterion, a head judge combines their notes into a final verdict</td>
+</tr>
+<tr>
+<td>Name the two flavors of parallelization.</td>
+<td>Sectioning (different sub-tasks for depth) and voting (same task repeated for reliability)</td>
+</tr>
+<tr>
+<td>When should a PM avoid parallelization?</td>
+<td>When sub-tasks depend on each other's outputs, or when cost is the top constraint</td>
+</tr>
+<tr>
+<td>What is the key latency benefit?</td>
+<td>Total time ≈ slowest sub-task, not sum of sub-tasks</td>
+</tr>
+<tr>
+<td>What is the key cost cost?</td>
+<td>N× API spend vs one call — token bill multiplies</td>
+</tr>
+<tr>
+<td>What production guardrail is critical for parallelization?</td>
+<td>Per-task timeouts and partial-failure handling</td>
+</tr>
+<tr>
+<td>Is parallelization a workflow or an agent?</td>
+<td>A workflow — the code owns the fan-out/fan-in structure, Claude does not decide</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

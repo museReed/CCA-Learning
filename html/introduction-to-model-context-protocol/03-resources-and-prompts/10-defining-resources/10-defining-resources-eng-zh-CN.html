@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>10 Defining Resources Eng Zh Cn</title>
+<title>Defining Resources Eng Zh Cn</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -97,18 +97,17 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>两种 Resource 类型</h2>
 <h3>1. Direct Resources — 静态 URI</h3>
 <p>Direct resource 的 URI 是固定的，没有参数。每次返回相同"形状"的数据。</p>
-<pre class="highlight"><code class="language-python">@mcp.resource(
+<pre><code class="language-python">@mcp.resource(
     &quot;docs://documents&quot;,
     mime_type=&quot;application/json&quot;
 )
 def list_docs() -&gt; list[str]:
     return list(docs.keys())
 </code></pre>
-
 <p>URI <code>docs://documents</code> 是静态的，适合用于列出所有可用项目、返回 server metadata 或提供配置值。</p>
 <h3>2. Templated Resources — 参数化 URI</h3>
 <p>Templated resource 在 URI 中使用 <code>{param}</code> 占位符。Python SDK 会自动提取这些值并作为 keyword arguments 传入。</p>
-<pre class="highlight"><code class="language-python">@mcp.resource(
+<pre><code class="language-python">@mcp.resource(
     &quot;docs://documents/{doc_id}&quot;,
     mime_type=&quot;text/plain&quot;
 )
@@ -117,7 +116,6 @@ def fetch_doc(doc_id: str) -&gt; str:
         raise ValueError(f&quot;Doc with id {doc_id} not found&quot;)
     return docs[doc_id]
 </code></pre>
-
 <p>当 client 请求 <code>docs://documents/plan.md</code> 时，SDK 将 <code>plan.md</code> 解析为 <code>doc_id</code> 并传入 <code>fetch_doc(doc_id="plan.md")</code>。</p>
 <hr />
 <h2><code>mime_type</code> 参数</h2>
@@ -151,11 +149,10 @@ def fetch_doc(doc_id: str) -&gt; str:
 <p>SDK 自动处理序列化 — 返回 Python list 或 dict 就会变成有效 JSON，不需要手动 <code>json.dumps()</code>。</p>
 <hr />
 <h2>Request-Response 流程</h2>
-<pre class="highlight"><code>Client Code --&gt; MCP Client --&gt; MCP Server --&gt; Resource Function
+<pre><code>Client Code --&gt; MCP Client --&gt; MCP Server --&gt; Resource Function
                                                     |
 Client Code &lt;-- MCP Client &lt;-- ReadResourceResult &lt;-+
 </code></pre>
-
 <ol>
 <li>你的代码调用 <code>session.read_resource(AnyUrl(uri))</code></li>
 <li>MCP client 发送 <code>ReadResourceRequest</code> 到 server</li>
@@ -166,9 +163,8 @@ Client Code &lt;-- MCP Client &lt;-- ReadResourceResult &lt;-+
 <hr />
 <h2>使用 MCP Inspector 测试</h2>
 <p>启动 inspector：</p>
-<pre class="highlight"><code class="language-bash">uv run mcp dev mcp_server.py
+<pre><code class="language-bash">uv run mcp dev mcp_server.py
 </code></pre>
-
 <p>Inspector UI 显示两个标签页：<br />
 - <strong>Resources</strong> — 列出 direct/static resources（点击即可读取）<br />
 - <strong>Resource Templates</strong> — 列出 templated resources（需提供参数值来测试）</p>

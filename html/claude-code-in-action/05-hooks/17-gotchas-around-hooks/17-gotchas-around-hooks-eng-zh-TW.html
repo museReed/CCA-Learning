@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>17 Gotchas Around Hooks Eng Zh Tw</title>
+<title>Gotchas Around Hooks Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -63,13 +63,12 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>核心問題</h2>
 <h3>為什麼要絕對路徑？</h3>
 <p>Claude Code 的安全建議指出 hook command 應使用<strong>絕對路徑</strong>：</p>
-<pre class="highlight"><code class="language-json">// ❌ 相對路徑（安全風險）
+<pre><code class="language-json">// ❌ 相對路徑（安全風險）
 &quot;command&quot;: &quot;node ./hooks/read_hook.js&quot;
 
 // ✅ 絕對路徑（安全）
 &quot;command&quot;: &quot;node /Users/alice/projects/queries/hooks/read_hook.js&quot;
 </code></pre>
-
 <p>絕對路徑緩解兩種攻擊向量：</p>
 <table>
 <thead>
@@ -100,18 +99,17 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="Security vs Portability" src="visuals/security-portability-tradeoff-zh-TW.svg" /><br />
 <em>圖：安全性與可攜性的取捨 — 絕對路徑安全但綁定機器；Template + init script 可兩全其美。</em></p>
 <p>問題很簡單：絕對路徑是機器特定的。</p>
-<pre class="highlight"><code>Alice 的機器: /Users/alice/projects/queries/hooks/read_hook.js
+<pre><code>Alice 的機器: /Users/alice/projects/queries/hooks/read_hook.js
 Bob 的機器:   /home/bob/dev/queries/hooks/read_hook.js
 CI server:    /workspace/queries/hooks/read_hook.js
 </code></pre>
-
 <hr />
 <h2>解法：模板 + Init Script</h2>
 <p>課程專案用三檔案模式解決：</p>
 <p><img alt="Template Init Pattern" src="visuals/template-init-pattern-zh-TW.svg" /><br />
 <em>圖：Template → Init → Local 模式 — 提交含 $PWD 佔位符的 template，一次性 init 產生機器專屬設定。</em></p>
 <h3>1. <code>settings.example.json</code>（commit 到 git）</h3>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;hooks&quot;: {
     &quot;PreToolUse&quot;: [
       {
@@ -127,7 +125,6 @@ CI server:    /workspace/queries/hooks/read_hook.js
   }
 }
 </code></pre>
-
 <p><code>$PWD</code> 佔位符標記絕對路徑應放的位置。</p>
 <h3>2. <code>scripts/init-claude.js</code>（commit 到 git）</h3>
 <p>此腳本：讀取模板 → 替換 <code>$PWD</code> → 寫入 <code>settings.local.json</code></p>

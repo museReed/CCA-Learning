@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Schemas Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Tool Schemas — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试 Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1（tool schema 设计）、2.2（tool function 定义）、1.2（agentic loop 基础）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 35</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Tool schema 是一份 JSON Schema 文档，包含三个顶层字段（<code>name</code>、<code>description</code>、<code>input_schema</code>）— 它是你的 Python 函数对 Claude 公开的 API contract，文字质量直接决定 Claude 会不会挑对 tool、会不会带对参数。</p>
+<hr />
+<h2>三个必填字段</h2>
+<p>每一个发送到 Anthropic API 的 tool 定义都必须包含：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Claude 引用 tool 的标识名称，必须与 function registry 的 key 一致。</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td>3-4 句，告诉 Claude tool 做什么、何时用、返回什么。</td>
+</tr>
+<tr>
+<td><code>input_schema</code></td>
+<td>JSON Schema object</td>
+<td>描述函数参数的 JSON Schema。</td>
+</tr>
+</tbody>
+</table>
+<p>这三个字段组成 Claude 每次决定是否调用 tool 时会读的 contract。</p>
+<hr />
+<h2>完整示例：<code>get_current_datetime</code></h2>
+<pre><code class="language-python">from datetime import datetime
+from anthropic.types import ToolParam
+
+def get_current_datetime(date_format: str = &quot;%Y-%m-%d %H:%M:%S&quot;) -&gt; str:
+    if not date_format:
+        raise ValueError(&quot;date_format cannot be empty&quot;)
+    return datetime.now().strftime(date_format)
+
+get_current_datetime_schema: ToolParam = {
+    &quot;name&quot;: &quot;get_current_datetime&quot;,
+    &quot;description&quot;: (
+        &quot;Returns the current date and time formatted according to &quot;
+        &quot;the specified format string. Use this whenever you need to &quot;
+        &quot;know the current moment in time, for example when a user &quot;
+        &quot;asks what time it is or you need to timestamp a reminder. &quot;
+        &quot;Returns a string formatted per Python's strftime codes.&quot;
+    ),
+    &quot;input_schema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;date_format&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;description&quot;: (
+                    &quot;A strftime format string such as '%Y-%m-%d %H:%M:%S'. &quot;
+                    &quot;Defaults to ISO-style date and time if not provided.&quot;
+                ),
+                &quot;default&quot;: &quot;%Y-%m-%d %H:%M:%S&quot;,
+            }
+        },
+        &quot;required&quot;: [],
+    },
+}
+</code></pre>
+<p>注意<strong>命名约定</strong>：函数叫 <code>get_current_datetime</code>，schema 变量叫 <code>get_current_datetime_schema</code>。镜像命名让你很容易把实现与 schema 对起来。</p>
+<hr />
+<h2><code>input_schema</code> 的结构解析</h2>
+<p><code>input_schema</code> 就是标准的 JSON Schema 片段。三个最重要的部分：</p>
+<h3>1. <code>type: "object"</code></h3>
+<p>Tool 的输入永远是 object（命名参数的 key-value map）。因为 API 会把 <code>input</code> 以 JSON object 传入，你的代码用 <code>**block.input</code> 展开。</p>
+<h3>2. <code>properties</code></h3>
+<p><code>properties</code> 中的每个 key 是一个参数名。每个 value 是描述该参数类型、约束，以及<strong>最重要的 description</strong> 的子 schema。</p>
+<pre><code class="language-python">&quot;properties&quot;: {
+    &quot;date_format&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;description&quot;: &quot;A strftime format string...&quot;,
+        &quot;default&quot;: &quot;%Y-%m-%d %H:%M:%S&quot;
+    }
+}
+</code></pre>
+<p>每个属性的 <code>description</code> 是你告诉 Claude「该传什么样的值」的机会。把它当成写给 LLM 看的 docstring。</p>
+<h3>3. <code>required</code></h3>
+<p>一个数组，列出哪些参数是必填的。没列在这里的就是 optional，Claude 可以省略不填。因为 <code>date_format</code> 有 default，所以是 optional，<code>required</code> 是空数组。</p>
+<pre><code class="language-python">&quot;required&quot;: []              # 全部 optional
+&quot;required&quot;: [&quot;city&quot;]         # city 必填，其他 optional
+&quot;required&quot;: [&quot;city&quot;, &quot;date&quot;] # 都必填
+</code></pre>
+<hr />
+<h2>为什么描述质量决定一切</h2>
+<p>两个代码一模一样但 description 不同的 tool，表现会天差地别：</p>
+<table>
+<thead>
+<tr>
+<th>描述</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「Gets the time」</td>
+<td>Claude 可能跟其他时间 tool 混淆；使用不稳定。</td>
+</tr>
+<tr>
+<td>「Returns the current date and time formatted per strftime codes. Use when the user asks 'what time is it' or when you need to timestamp a new record. Returns a formatted string.」</td>
+<td>Claude 正确选中、带对格式、合理解读结果。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>描述的 best practices：</strong></p>
+<ul>
+<li>3-4 句（足够 context，不要写小说）。</li>
+<li>说明<strong>做什么</strong>与<strong>返回什么</strong>。</li>
+<li>说明 Claude <strong>何时</strong>该用它（「何时」这句最常被省略，但最有价值）。</li>
+<li>提到相关 tool 避免混淆（例如「要把日期字符串转时间戳，请用 <code>parse_datetime</code>」）。</li>
+<li>对参数，用具体示例描述合法值、单位、格式。</li>
+</ul>
+<hr />
+<h2>生成 Schema：让 Claude 自己写</h2>
+<p>与其手写 schema，你可以让 Claude 帮你生成：</p>
+<ol>
+<li>复制 tool function 的代码。</li>
+<li>问 Claude 类似：「请为这个函数写一份合法的 JSON schema 用于 tool calling。遵循附件文档的 best practices。」</li>
+<li>把 Anthropic 的 tool-use 文档当作 context 附上。</li>
+<li>把生成的 schema 粘到代码，用 <code>{function_name}_schema</code> 命名约定。</li>
+</ol>
+<p>这本身就是 tool-use 原则的 meta 应用：用 AI 来打造 AI 自己的输入。</p>
+<hr />
+<h2>用 <code>ToolParam</code> 做类型安全</h2>
+<p><code>anthropic</code> SDK 暴露了一个 <code>ToolParam</code> TypedDict，可用于静态分析：</p>
+<pre><code class="language-python">from anthropic.types import ToolParam
+
+get_current_datetime_schema = ToolParam(
+    name=&quot;get_current_datetime&quot;,
+    description=&quot;Returns the current date and time...&quot;,
+    input_schema={
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;date_format&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;description&quot;: &quot;...&quot;,
+                &quot;default&quot;: &quot;%Y-%m-%d %H:%M:%S&quot;,
+            }
+        },
+        &quot;required&quot;: [],
+    },
+)
+</code></pre>
+<p>好处：</p>
+<ul>
+<li>IDE 对三个必填字段有自动补全。</li>
+<li>Mypy/pyright 可以在 runtime 前抓到像 <code>descripton</code> 这种拼错。</li>
+<li>代码自我文档化。</li>
+</ul>
+<p>非强制 — API 也接受一般 dict — 但生产环境强烈建议用。</p>
+<hr />
+<h2>Tool 定义常用的 JSON Schema 功能</h2>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>示例</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td><code>"string"</code>、<code>"integer"</code>、<code>"boolean"</code>、<code>"array"</code>、<code>"object"</code>、<code>"number"</code></td>
+<td>声明 JSON 类型</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>自由文字</td>
+<td>给 LLM 读的逐参数指引</td>
+</tr>
+<tr>
+<td><code>default</code></td>
+<td>字面值</td>
+<td>Claude 省略 optional 参数时使用</td>
+</tr>
+<tr>
+<td><code>enum</code></td>
+<td><code>["celsius", "fahrenheit"]</code></td>
+<td>限制在固定允许值集合</td>
+</tr>
+<tr>
+<td><code>items</code></td>
+<td>schema</td>
+<td>描述数组元素类型</td>
+</tr>
+<tr>
+<td><code>minimum</code> / <code>maximum</code></td>
+<td>数值</td>
+<td>数值范围</td>
+</tr>
+<tr>
+<td><code>pattern</code></td>
+<td>regex</td>
+<td>字符串格式验证</td>
+</tr>
+<tr>
+<td><code>required</code></td>
+<td>名称数组</td>
+<td>必填属性名</td>
+</tr>
+</tbody>
+</table>
+<p><code>enum</code> 特别强大：强迫 Claude 从定义好的集合里挑，消除模糊性。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>缺 <code>type: "object"</code></strong> — 每个 <code>input_schema</code> 都必须从 <code>type: "object"</code> 开始，不能只放 <code>properties</code>。</li>
+<li><strong>空的或含糊的 description</strong> — 「Gets data」对 Claude 等于没说。要投资文字。</li>
+<li><strong>忘了写 <code>required</code></strong> — 省略不代表「全部必填」，代表「全部 optional」。要明确。</li>
+<li><strong>Schema 与函数不一致</strong> — schema 写 <code>city</code>，函数用 <code>location</code>。Claude 会传 <code>city</code>，代码直接炸。</li>
+<li><strong>Pattern 过度限制</strong> — 正则拒绝了你没预期到的合法输入，卡住正当使用。</li>
+<li><strong>把实现细节放进 description</strong> — Claude 不需要知道你打的是 SQLite；它需要知道 tool 在概念上做什么。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Tool schema 不是接线 — 它是<strong>LLM 可读的 API contract</strong>。描述里的每个字、每个参数注解都会改变 Claude 调用 tool 的决策。你花在 schema 描述上的工程时间，会变成更少的误选 tool、更少的错误参数、更少的挫折用户。CCA 考试 D2 反复出 <code>input_schema</code> 结构与 description best practice 的题目。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：Tool 定义结构（<code>name</code>、<code>description</code>、<code>input_schema</code>）、JSON Schema 基础、<code>required</code> 语意、enum 用法。</li>
+<li><strong>D1（Agentic Architecture）</strong>：Schema 质量直接影响 Claude 在 agent loop 中选 tool。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：生产代码用 <code>ToolParam</code> 做类型安全。</li>
+<li>预期题型：「Tool 定义的三个必填字段是什么？」或「两个 tool 存在时 Claude 如何决定调用哪个？」— 答：description 质量与名称清晰度。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool 定义的三个必填字段是什么？</td>
+<td><code>name</code>、<code>description</code>、<code>input_schema</code>。</td>
+</tr>
+<tr>
+<td><code>input_schema</code> 最上层的 <code>type</code> 永远必须是什么？</td>
+<td><code>"object"</code> — tool 输入永远是 JSON object。</td>
+</tr>
+<tr>
+<td><code>input_schema</code> 里的 <code>required</code> 是什么意思？</td>
+<td>一个数组列出必填的属性名；没列的就是 optional。</td>
+</tr>
+<tr>
+<td>为什么 tool schema 的 description 质量这么关键？</td>
+<td>Claude 读 description 来决定何时调用 tool 与如何填参数 — 文字质量直接影响正确性。</td>
+</tr>
+<tr>
+<td>课程建议 schema 用什么命名约定？</td>
+<td><code>{function_name}_schema</code> — 镜像函数名称，让实现与 schema 对得起来。</td>
+</tr>
+<tr>
+<td><code>ToolParam</code> 是什么、何时用？</td>
+<td><code>anthropic.types</code> 中的 TypedDict，让 tool schema 可做静态类型检查；生产代码建议用，支持 IDE 与 mypy。</td>
+</tr>
+<tr>
+<td>不手写 JSON Schema 怎么生成 schema？</td>
+<td>让 Claude 帮你生成 — 粘贴函数代码与 tool-use 文档，请它写格式正确的 schema。</td>
+</tr>
+<tr>
+<td>为什么 property schema 要用 <code>enum</code>？</td>
+<td>把 Claude 限制在固定合法值集合（如 <code>["celsius", "fahrenheit"]</code>），消除模糊性。</td>
+</tr>
+<tr>
+<td>Schema 的参数名若与 Python 函数的参数名不一致会怎样？</td>
+<td>函数调用会失败 — Claude 传 schema 的名字、<code>**block.input</code> 展开到函数，Python 会抛 <code>TypeError</code>。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

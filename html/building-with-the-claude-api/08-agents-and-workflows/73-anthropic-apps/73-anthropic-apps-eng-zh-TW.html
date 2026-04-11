@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anthropic Apps Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Anthropic Apps — Engineering Deep Dive（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試 Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1（Claude Code 概觀）、1.2（agentic patterns）、1.4（Computer Use 作為 agent 案例）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 73</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Anthropic 推出兩款旗艦 agent 應用程式 —— Claude Code（終端機編碼助手）與 Computer Use（桌面互動工具組），兩者都是 agentic loop 的標準參考實作：tool integration、多步驟執行、環境互動與自主解題。</p>
+<hr />
+<h2>Anthropic 的應用程式介面</h2>
+<p>Anthropic 透過多個介面提供 Claude，本模組聚焦在兩個展現 agent 設計精髓的介面：</p>
+<table>
+<thead>
+<tr>
+<th>介面</th>
+<th>形式</th>
+<th>是否為 agent</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude.ai</td>
+<td>網頁聊天介面</td>
+<td>對話式、工具有限</td>
+<td>一般消費者助手</td>
+</tr>
+<tr>
+<td>Anthropic API</td>
+<td>HTTP endpoint</td>
+<td>基礎建材 —— 由你來組 agent</td>
+<td>開發者平台</td>
+</tr>
+<tr>
+<td><strong>Claude Code</strong></td>
+<td>終端機 CLI</td>
+<td><strong>是 —— 完整 agent</strong></td>
+<td>編碼 agent</td>
+</tr>
+<tr>
+<td><strong>Computer Use</strong></td>
+<td>桌面工具組</td>
+<td><strong>是 —— 完整 agent</strong></td>
+<td>操作 GUI 的 agent</td>
+</tr>
+</tbody>
+</table>
+<p>Claude Code 和 Computer Use 並不只是「剛好用到 Claude 的產品」，它們示範了一個建構良好的 agent 長什麼樣子，而且直接對應到你之後要在 API 上自行建立的 pattern。</p>
+<hr />
+<h2>為什麼這些應用程式算是 Agent</h2>
+<p>課程將 agent 定義為同時具備四項特性的系統。Claude Code 與 Computer Use 都符合全部四項：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Claude Code 範例</th>
+<th>Computer Use 範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tool integration</strong></td>
+<td>檔案編輯、shell 執行、web fetch、MCP</td>
+<td>截圖、滑鼠點擊、鍵盤輸入</td>
+</tr>
+<tr>
+<td><strong>多步驟任務執行</strong></td>
+<td>Plan → 讀檔 → 編輯 → 測試 → commit</td>
+<td>開瀏覽器 → 導覽 → 填表 → 送出</td>
+</tr>
+<tr>
+<td><strong>環境互動</strong></td>
+<td>讀寫檔案系統和 shell</td>
+<td>讀寫桌面 GUI 狀態</td>
+</tr>
+<tr>
+<td><strong>自主解題</strong></td>
+<td>測試失敗時反覆除錯</td>
+<td>頁面重載後自動重試點擊</td>
+</tr>
+</tbody>
+</table>
+<p>每一輪都會把 tool 回傳結果餵回下一輪給 model，形成標準的 tool-use loop，直到達成自然停止條件為止（<code>end_turn</code> stop_reason，或主程式端設的最大輪數保險絲）。</p>
+<hr />
+<h2>Claude Code：終端機原生 Agent</h2>
+<p>Claude Code 在終端機裡跑成一個持續 process。主要特性：</p>
+<ul>
+<li><strong>介面</strong>：CLI，不是網頁聊天室</li>
+<li><strong>內建工具</strong>：檔案讀寫、grep/glob、bash 執行、web fetch、to-do 規劃</li>
+<li><strong>擴充點</strong>：MCP servers（Lesson 76 會講）</li>
+<li><strong>Context 策略</strong>：專案層級的 <code>CLAUDE.md</code> memory file，提供持續 context</li>
+<li><strong>認證</strong>：跑 <code>claude</code> 指令並登入 Anthropic 帳號</li>
+</ul>
+<p>你可以把 Claude Code 想成「由人類打英文、Claude 打程式碼」的 IDE。Agent 負責：<br />
+1. 理解需求<br />
+2. 讀足夠多的 codebase 來擬計畫<br />
+3. 編輯檔案<br />
+4. 跑測試/腳本驗證<br />
+5. 回報結果</p>
+<p>這正是之後我們在 raw API 上要自建的 loop。</p>
+<hr />
+<h2>Computer Use：GUI 層 Agent</h2>
+<p>Computer Use 把 Claude 延伸到純文字之外的環境。它提供的工具能讓 model 實際驅動桌面：</p>
+<ul>
+<li>截圖（vision 輸入 → 推理）</li>
+<li>把滑鼠移動/點擊到指定像素座標</li>
+<li>用鍵盤打字</li>
+<li>透過 GUI 應用程式操作檔案系統</li>
+</ul>
+<p>為何重要：大多數企業軟體沒有乾淨的 API。Computer Use 讓 Claude 能跟任何 UI 互動 —— 老舊桌面軟體、網頁 dashboard、VDI 環境 —— 把像素平面當作介面。</p>
+<p>每次操作後 model 會收到新的螢幕截圖，判讀後決定下一步的滑鼠/鍵盤動作。這就是多模態 tool-use loop 的具體範例。</p>
+<hr />
+<h2>為什麼用這些作為案例</h2>
+<p>對 agent 開發者來說，這兩個 app 是參考實作，可回答以下問題：</p>
+<ul>
+<li>大規模的 tool schema 長什麼樣？（讀它們公開的 tool 定義）</li>
+<li>多輪 context 該怎麼組？（觀察 Claude Code 的 CLAUDE.md 行為）</li>
+<li>如何限制自主性又不會廢掉 agent？（看 permission prompt 與確認步驟）</li>
+<li>邊界情境哪裡難？（錯誤復原、context 管理、模糊狀況下的 tool choice）</li>
+</ul>
+<p>當你在 API 上自建，本質就是為特定領域打造自己的 Claude Code。</p>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>把 Claude Code 當黑盒子</strong> —— 考試預期你知道它是 <em>agent</em>，不是聊天 app，而且能辨認其 loop 結構。</li>
+<li><strong>混淆 Claude.ai 和 Claude Code</strong> —— Claude.ai 是工具有限的聊天介面；Claude Code 是擁有完整檔案/shell 存取的終端機 agent。</li>
+<li><strong>以為 Computer Use 可以取代 API-based agent</strong> —— 它是特定工具組，不是通用 pattern。大多數 production agent 使用 typed tool，不用螢幕截圖。</li>
+<li><strong>忘了 MCP 擴充性</strong> —— 預設工具只是起點，兩者都可透過 MCP server 擴充。</li>
+</ol>
+<blockquote>
+<p><strong>關鍵洞察</strong></p>
+<p>從考試觀點看，Claude Code 與 Computer Use 不是「產品」，而是 <strong>標準 agent 實作</strong>，示範 agent 的四項特性（tool integration、多步驟執行、環境互動、自主解題）。CCA 題目常把情境描述成「這算不算 agent？」並期望你能對應到這四項特性。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D1（Agentic Coding &amp; Architecture）</strong>：熟記 agent 定義，知道 Claude Code 是 Anthropic 的參考 agent。會出「下列何者為 agent 特性」這類題。</li>
+<li><strong>D3（Claude Code Configuration）</strong>：Lesson 73 是進入 Claude Code 題組（佔考題約 20%）的起點，後續 lesson 會深入 CLI 指令與 config。</li>
+<li>留意題目對比 Claude.ai、API、Claude Code 的差異 —— 要知道哪個是聊天室、哪個是基礎建材、哪個是 agent。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本 lesson 強調哪兩個 Anthropic app 是 agent 的參考實作？</td>
+<td>Claude Code 與 Computer Use</td>
+</tr>
+<tr>
+<td>Agent 的四項特性是什麼？</td>
+<td>Tool integration、多步驟執行、環境互動、自主解題</td>
+</tr>
+<tr>
+<td>Claude Code 跑在哪個介面？</td>
+<td>終端機 / command line —— CLI agent</td>
+</tr>
+<tr>
+<td>Computer Use 讓 Claude 互動的對象是什麼？</td>
+<td>完整桌面環境（透過截圖、滑鼠、鍵盤）</td>
+</tr>
+<tr>
+<td>為什麼要用這兩個 app 作為案例？</td>
+<td>它們示範了讓 agent 在真實世界中有效運作的關鍵原則</td>
+</tr>
+<tr>
+<td>Claude Code 與 Claude.ai 有何差異？</td>
+<td>Claude.ai 是工具有限的聊天室；Claude Code 是擁有檔案/shell 存取與 MCP 擴充能力的終端 agent</td>
+</tr>
+<tr>
+<td>為什麼 Computer Use 對企業用例有價值？</td>
+<td>它能驅動沒有開放 API 的應用程式，直接用 GUI 互動</td>
+</tr>
+<tr>
+<td>Claude Code 與 MCP 的關係？</td>
+<td>Claude Code 內建 MCP client，可透過自訂 MCP server 擴充工具組</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

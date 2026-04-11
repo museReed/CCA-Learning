@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi Turn Conversations With Tools Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Multi-Turn Conversations with Tools — Engineering Deep Dive（繁中）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) / D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3（multi-turn conversation management）、1.2（agentic loop 實作）、2.4（multi-turn tool loops）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 38</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>當 Claude 需要串連多個 tool call 才能回答一個使用者問題時，就會出現 multi-turn tool 對話；唯一的實作方式是一個<strong>迴圈</strong>，不斷往返打 API，直到 Claude 不再要求 tool 為止。</p>
+<hr />
+<h2>為什麼需要 Multi-Turn</h2>
+<p>有些問題沒辦法用一次 tool 呼叫回答。「103 天之後是幾號？」會拆解成：</p>
+<ol>
+<li><code>get_current_datetime()</code> → 今天日期</li>
+<li><code>add_duration_to_datetime(date, +103 days)</code> → 目標日期</li>
+</ol>
+<p>Claude 沒辦法事先把兩次呼叫都打包好，因為第二次依賴第一次的輸出。每次呼叫都變成獨立回合，伺服器端（你的程式）負責推動這個迴圈。</p>
+<pre><code>使用者問題
+  ↓
+Claude → tool_use: get_current_datetime
+  ↓
+Server 執行 tool → tool_result
+  ↓
+Claude → tool_use: add_duration_to_datetime(date=..., days=103)
+  ↓
+Server 執行 tool → tool_result
+  ↓
+Claude → 最終文字答案（stop_reason=&quot;end_turn&quot;）
+</code></pre>
+<hr />
+<h2>對話 Loop 骨架</h2>
+<p>標準模式是一個 <code>while True</code> loop，當 Claude 不再要求 tool 時 break：</p>
+<pre><code class="language-python">def run_conversation(messages):
+    while True:
+        response = chat(messages)
+        add_assistant_message(messages, response)
+
+        # 虛擬碼——Lesson 39 會看到真正的 stop_reason 檢查
+        if not response_is_asking_for_a_tool(response):
+            break
+
+        tool_result_blocks = run_tools(response)
+        add_user_message(messages, tool_result_blocks)
+
+    return messages
+</code></pre>
+<p>三個重點：</p>
+<ol>
+<li><strong><code>add_assistant_message</code> 保留完整 block list</strong>（text + tool-use blocks）</li>
+<li><strong><code>run_tools</code> 執行每一個 tool-use block</strong> 並一次回傳所有結果</li>
+<li><strong><code>add_user_message</code> 吃 tool result</strong> 把結果包成單一則 user-role message 送回去</li>
+</ol>
+<hr />
+<h2>重構 Helper Function 支援 Multi-Block</h2>
+<p>Lesson 強調：實作 loop 之前，你的 helper 必須升級成能接 <code>Message</code> 物件，不只是字串。</p>
+<h3><code>add_user_message</code>——接字串、block list 或 Message</h3>
+<pre><code class="language-python">from anthropic.types import Message
+
+def add_user_message(messages, message):
+    content = message.content if isinstance(message, Message) else message
+    messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: content})
+</code></pre>
+<p>這種多型讓你可以用這些方式呼叫：<br />
+- 純字串（<code>"現在幾點？"</code>）<br />
+- content block list（tool result blocks）<br />
+- API 回傳的完整 <code>Message</code> 物件</p>
+<h3><code>add_assistant_message</code>——同樣的多型</h3>
+<pre><code class="language-python">def add_assistant_message(messages, message):
+    content = message.content if isinstance(message, Message) else message
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: content})
+</code></pre>
+<h3><code>chat</code>——接受 tools、回傳完整 Message 物件</h3>
+<pre><code class="language-python">def chat(messages, system=None, temperature=1.0, stop_sequences=[], tools=None):
+    params = {
+        &quot;model&quot;: model,
+        &quot;max_tokens&quot;: 1000,
+        &quot;messages&quot;: messages,
+        &quot;temperature&quot;: temperature,
+        &quot;stop_sequences&quot;: stop_sequences,
+    }
+    if tools:
+        params[&quot;tools&quot;] = tools
+    if system:
+        params[&quot;system&quot;] = system
+
+    message = client.messages.create(**params)
+    return message
+</code></pre>
+<p>一旦有 tool 介入，回傳整個 <code>Message</code>（而不是 <code>.content[0].text</code>）是<strong>必要的</strong>——你需要 block list、<code>stop_reason</code> 和 usage data 來驅動 loop。</p>
+<h3><code>text_from_message</code>——需要時抽出顯示用的文字</h3>
+<pre><code class="language-python">def text_from_message(message):
+    return &quot;\n&quot;.join(
+        [block.text for block in message.content if block.type == &quot;text&quot;]
+    )
+</code></pre>
+<p>用 <code>block.type == "text"</code> 過濾是從混合 block 回應中拉出使用者可見說明的標準做法。</p>
+<hr />
+<h2>對話累積的語意</h2>
+<p>每個回合至少會在歷史中多加一則訊息：</p>
+<table>
+<thead>
+<tr>
+<th>回合</th>
+<th>加到 <code>messages</code> 的內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>使用者問題</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Assistant message：<code>text + tool_use_1</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>User message：<code>tool_result_1</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Assistant message：<code>text + tool_use_2</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>User message：<code>tool_result_2</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Assistant message：最終文字（<code>stop_reason=end_turn</code>）</td>
+</tr>
+</tbody>
+</table>
+<p>注意 assistant 和 user message <strong>嚴格交替</strong>——tool result 永遠是 user message 送回來，絕對不能是 assistant message。這保留了 API 強制的交替不變式。</p>
+<hr />
+<h2>Context Window 考量</h2>
+<p>每次迭代會讓 <code>messages</code> 成長一條（有時兩條）訊息。長 tool 鏈會讓你撞到 context window 上限。緩解策略：</p>
+<ol>
+<li><strong>用 <code>max_iterations</code> 計數器卡住 loop</strong>，防止 agent 失控</li>
+<li><strong>摘要中間 tool 結果</strong>，如果裡面有不再需要的冗長資料</li>
+<li><strong>用 prompt caching</strong>（課程後面會講），分攤歷史成長的成本</li>
+<li><strong>讓 tool 回應短一點</strong>——回簡潔 JSON 的 tool 比回整個網頁的 tool 好太多</li>
+</ol>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>只 append <code>.content[0].text</code> 到歷史</strong>——會掉 tool-use block，下一回合 <code>tool_use_id</code> 就配對不上</li>
+<li><strong>忘了每次 loop 都要帶 <code>tools=[...]</code></strong>——Claude 每次都需要 schema，即使只是在回應 tool result</li>
+<li><strong>用字串呼叫 <code>add_user_message</code> 來送 tool result</strong>——tool result 必須是 content-block list</li>
+<li><strong>沒有 loop 上限</strong>——壞掉的 tool 或搞混的 Claude 會產生無限 tool-use loop，燒光 token</li>
+<li><strong>用「有沒有 text content」當 break 條件</strong>——Claude 可以同一回合吐 text 加 tool_use；永遠檢查 <code>stop_reason</code></li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Multi-turn tool 對話不是特例——它是通例。單回合 tool use 只是「loop 跑完一次就結束」的情況。即使你第一個 tool-use 功能只需要單一 tool，也把它寫成標準 loop 形式，將來產品需要 tool 串接時就不用重寫。前期投資在 helper function 的多型處理，就是讓 loop 實作變輕鬆的關鍵。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：這是核心的 agentic loop 問題。考題會問「什麼信號讓 loop 繼續」、「Claude 怎麼知道要串接 tool」。</li>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：理解 tool schema 必須在每次 loop 迭代都帶上。</li>
+<li>考試提示：問 multi-turn tool 對話的題目幾乎都在考 loop 結構——把 <code>while</code> 模式背熟。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>題目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>為什麼有些問題需要 multi-turn tool 對話？</td>
+<td>因為第二個 tool call 依賴第一個的輸出（例如「103 天後」要先知道今天）</td>
+</tr>
+<tr>
+<td>用什麼控制結構實作 multi-turn tool 對話？</td>
+<td><code>while</code> loop，持續呼叫 API 直到 Claude 不再要 tool</td>
+</tr>
+<tr>
+<td><code>add_assistant_message</code> 除了字串還要接什麼？</td>
+<td>完整 <code>Message</code> 物件——才能保留包含 tool-use block 的整個 block list</td>
+</tr>
+<tr>
+<td>為什麼 <code>chat</code> 要回傳整個 <code>Message</code> 而不只是 text？</td>
+<td>因為你需要 <code>content</code>（block list）、<code>stop_reason</code> 和 usage data 來驅動 loop</td>
+</tr>
+<tr>
+<td>哪個 helper 從混合 block 訊息中抽出使用者可見文字？</td>
+<td><code>text_from_message</code>——用 <code>block.type == "text"</code> 過濾再合併</td>
+</tr>
+<tr>
+<td>為什麼要用 <code>max_iterations</code> 卡住 loop？</td>
+<td>防止失控的 agent 或壞掉的 tool 產生無限 loop</td>
+</tr>
+<tr>
+<td>Multi-turn tool 對話的交替不變式是什麼？</td>
+<td>Assistant 和 user message 必須嚴格交替；tool result 永遠放在 user message</td>
+</tr>
+<tr>
+<td>為什麼不能用「有 text 就 break」？</td>
+<td>Claude 可以同回合吐 text 加 tool_use——永遠改用 <code>stop_reason</code> 檢查</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

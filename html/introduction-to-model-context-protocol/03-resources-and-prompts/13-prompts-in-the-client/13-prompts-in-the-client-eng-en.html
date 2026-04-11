@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>13 Prompts In The Client Eng En</title>
+<title>Prompts In The Client Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -55,21 +55,19 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>Two Client-Side Methods</h2>
 <h3>1. <code>list_prompts()</code> — Discovery</h3>
-<pre class="highlight"><code class="language-python">async def list_prompts(self) -&gt; list[types.Prompt]:
+<pre><code class="language-python">async def list_prompts(self) -&gt; list[types.Prompt]:
     result = await self.session().list_prompts()
     return result.prompts
 </code></pre>
-
 <p>This method queries the server for all available prompts. Each <code>types.Prompt</code> object contains:<br />
 - <code>name</code> — the identifier (used in slash commands)<br />
 - <code>description</code> — human-readable explanation<br />
 - <code>arguments</code> — list of required/optional parameters</p>
 <h3>2. <code>get_prompt()</code> — Retrieval with Interpolation</h3>
-<pre class="highlight"><code class="language-python">async def get_prompt(self, prompt_name, args: dict[str, str]):
+<pre><code class="language-python">async def get_prompt(self, prompt_name, args: dict[str, str]):
     result = await self.session().get_prompt(prompt_name, args)
     return result.messages
 </code></pre>
-
 <p>This method retrieves a specific prompt with variable interpolation:<br />
 - <code>prompt_name</code> — which prompt to retrieve (e.g., <code>"format"</code>)<br />
 - <code>args</code> — keyword arguments as a string-to-string dict (e.g., <code>{"doc_id": "plan.md"}</code>)<br />
@@ -78,7 +76,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>The Complete Prompt Workflow</h2>
 <p>Here is the end-to-end flow from user interaction to Claude response:</p>
-<pre class="highlight"><code>1. User types &quot;/&quot;
+<pre><code>1. User types &quot;/&quot;
    └── Client calls list_prompts()
        └── Server returns available prompts
 
@@ -96,7 +94,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 
 5. Claude responds with formatted document
 </code></pre>
-
 <h3>Key Insight: Prompts Orchestrate Tools</h3>
 <p>When Claude receives the prompt messages, it often needs to use available <strong>tools</strong> to complete the task. In the format example:<br />
 1. The prompt tells Claude to reformat a document<br />
@@ -186,7 +183,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>Prompt Arguments: Variable Interpolation</h2>
 <p>The <code>args</code> parameter in <code>get_prompt()</code> is always <code>dict[str, str]</code> — all values are strings:</p>
-<pre class="highlight"><code class="language-python"># Client side
+<pre><code class="language-python"># Client side
 messages = await client.get_prompt(&quot;format&quot;, {&quot;doc_id&quot;: &quot;plan.md&quot;})
 
 # Server side (what happens internally)
@@ -195,7 +192,6 @@ def format_document(doc_id: str = Field(...)):
     prompt = f&quot;...{doc_id}...&quot;
     return [base.UserMessage(prompt)]
 </code></pre>
-
 <p>Even if the parameter represents a number or boolean, it is passed as a string. The server function handles any necessary type conversion.</p>
 <hr />
 <h2>Common Mistakes</h2>

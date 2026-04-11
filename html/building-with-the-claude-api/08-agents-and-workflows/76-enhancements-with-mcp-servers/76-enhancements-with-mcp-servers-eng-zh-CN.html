@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enhancements With Mcp Servers Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Enhancements with MCP Servers — Engineering Deep Dive（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试 Domain</td>
+<td>D3 — Claude Code Configuration (20%) / D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2（Claude Code MCP 集成）、2.3（MCP primitives）、1.1（Claude Code 扩展模型）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 76</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Claude Code 内建 MCP client，可通过 <code>claude mcp add [server-name] [command-to-start-server]</code> 注册任意 MCP server 扩展能力 —— 这是官方扩展点，也是 Claude Code 能跟随你的 workflow 成长的原因。</p>
+<hr />
+<h2>MCP 扩展模型</h2>
+<p>Claude Code 默认工具涵盖文件操作、终端、Web 访问。其他所有东西 —— 你的数据库、内部 API、第三方 SaaS —— 都通过 MCP server 进来。架构：</p>
+<pre><code>┌────────────────────────────────────────┐
+│          Claude Code (CLI)             │
+│  ┌──────────────────────────────────┐  │
+│  │      内置工具                     │  │
+│  │  File / Bash / Web / To-do       │  │
+│  └──────────────────────────────────┘  │
+│  ┌──────────────────────────────────┐  │
+│  │      MCP Client（内建）           │  │
+│  └────────┬─────────┬──────────┬────┘  │
+└───────────┼─────────┼──────────┼───────┘
+            │         │          │
+       ┌────▼──┐ ┌────▼──┐  ┌────▼──┐
+       │Sentry │ │Jira   │  │自建   │
+       │MCP    │ │MCP    │  │MCP    │
+       │Server │ │Server │  │Server │
+       └───────┘ └───────┘  └───────┘
+</code></pre>
+<p>每个 MCP server 可以提供三种 primitive：</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>用途</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>执行动作</td>
+<td><code>document_path_to_markdown(path)</code></td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>可复用模板</td>
+<td>一个 <code>/summarize</code> slash 命令</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>访问数据</td>
+<td>Fixture 文件或 DB row</td>
+</tr>
+</tbody>
+</table>
+<p>这对应到 MCP 课程已经学过的通用 MCP 控制模型：tool 由 model 控制、prompt 由 user 控制、resource 由 app 控制。</p>
+<hr />
+<h2><code>claude mcp add</code> 命令</h2>
+<p>注册语法就一条：</p>
+<pre><code class="language-bash">claude mcp add [server-name] [command-to-start-server]
+</code></pre>
+<h3>参数</h3>
+<ul>
+<li><strong><code>server-name</code></strong> —— 你自选的简短标识符（如 <code>documents</code>）。Claude Code 内部用这个名字。</li>
+<li><strong><code>command-to-start-server</code></strong> —— 启动 MCP server 进程的精确 shell 命令。Claude Code 把它 spawn 成子进程，通过 stdio 通信。</li>
+</ul>
+<h3>具体示例</h3>
+<p>如果你的文档处理 server 在项目目录下用 <code>uv run main.py</code> 启动，注册命令是：</p>
+<pre><code class="language-bash">claude mcp add documents uv run main.py
+</code></pre>
+<p>之后 Claude Code 每次启动会自动 spawn 这个 server 并连上。该 server 提供的 tool、prompt、resource 都会纳入 agent 可用范围。</p>
+<p>考试重点：注册是一次性动作 —— <code>claude mcp add</code> 跑一次后，Claude Code 会记住，每次启动自动重连。</p>
+<hr />
+<h2>实例：文档处理</h2>
+<p>Lesson 示范的标准案例：一个自建 MCP server，提供 <code>document_path_to_markdown</code> tool，能读 PDF 和 Word 文档并返回 markdown。</p>
+<p>流程：</p>
+<ol>
+<li>写好有 <code>document_path_to_markdown</code> tool 的 MCP server。</li>
+<li>注册：<code>claude mcp add documents uv run main.py</code>。</li>
+<li>在 Claude Code session 里问："把 tests/fixtures/mcp_docs.docx 文件转成 markdown"。</li>
+<li>Claude Code 识别意图、挑到自定义 tool、调用、拿回 markdown 内容。</li>
+</ol>
+<p>用户完全没明说 tool 名称。Claude 从 request 推断该用哪个 tool，示范 MCP tool 的 model-controlled 特性。</p>
+<hr />
+<h2>热门 MCP 集成（考试清单）</h2>
+<p>Lesson 明确点名以下 server —— 预期会考辨认题：</p>
+<table>
+<thead>
+<tr>
+<th>Server</th>
+<th>解锁什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>sentry-mcp</strong></td>
+<td>自动发现并修复 Sentry 里记录的 bug</td>
+</tr>
+<tr>
+<td><strong>playwright-mcp</strong></td>
+<td>给 Claude 浏览器自动化能力做测试与排错</td>
+</tr>
+<tr>
+<td><strong>figma-context-mcp</strong></td>
+<td>把 Figma 设计稿暴露给 Claude</td>
+</tr>
+<tr>
+<td><strong>mcp-atlassian</strong></td>
+<td>让 Claude 访问 Confluence 和 Jira</td>
+</tr>
+<tr>
+<td><strong>firecrawl-mcp-server</strong></td>
+<td>加上网页爬取能力</td>
+</tr>
+<tr>
+<td><strong>slack-mcp</strong></td>
+<td>让 Claude 在 Slack 发消息或回复特定 thread</td>
+</tr>
+</tbody>
+</table>
+<p>要记对配对 —— 例如"哪个 MCP server 能让 Claude Code 修复 monitoring 平台记录的 bug？"答案是 <code>sentry-mcp</code>。</p>
+<hr />
+<h2>组合多个 MCP Server</h2>
+<p>真正的威力来自组合多个 server 配合你的开发流程：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>MCP server</th>
+<th>Claude 做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Triage</td>
+<td>sentry-mcp</td>
+<td>拉生产环境错误细节</td>
+</tr>
+<tr>
+<td>Context</td>
+<td>mcp-atlassian</td>
+<td>读 Jira ticket 需求</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>（内置文件工具）</td>
+<td>改代码</td>
+</tr>
+<tr>
+<td>Verify</td>
+<td>playwright-mcp</td>
+<td>跑浏览器测试</td>
+</tr>
+<tr>
+<td>Notify</td>
+<td>slack-mcp</td>
+<td>在团队频道发完成消息</td>
+</tr>
+</tbody>
+</table>
+<p>每个 server 加上一片垂直能力。堆起来后，Claude Code 从 coding assistant 变成横跨整个工具链的 workflow orchestrator。</p>
+<p>这个组合 pattern —— <strong>每个专业化 server 只做一件事，由 agent 编排</strong> —— 正是 MCP 的架构理想，也会出现在考题里。</p>
+<hr />
+<h2>为什么用 MCP 而非"把更多工具写死进 Claude Code"</h2>
+<p>设计动机（超出来源的补充）：</p>
+<ol>
+<li><strong>解耦</strong> —— Anthropic 不用维护所有可能的 tool。长尾需求由生态处理。</li>
+<li><strong>安全边界</strong> —— 每个 MCP server 是独立进程，有自己的权限和生命周期。</li>
+<li><strong>社区贡献</strong> —— 任何人都能发布 MCP server；生态不靠 Anthropic 工程资源扩张。</li>
+<li><strong>组合性</strong> —— 堆叠多个小型 server 比一个塞 200 个工具、互抢 context window 的巨兽 agent 干净得多。</li>
+</ol>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>命令语法错</strong> —— 是 <code>claude mcp add [name] [command]</code>，不是 <code>claude mcp install</code> 或 <code>claude add-server</code>。</li>
+<li><strong>忘记 server 必须能跑</strong> —— Claude Code 会把 MCP server spawn 成子进程，传的命令必须实际启动有效的 MCP server。</li>
+<li><strong>把 MCP 混为一般 HTTP API</strong> —— MCP 讲的是通过 stdio 或 SSE 的特定 protocol，不是 raw REST。</li>
+<li><strong>以为 server 会自动安装</strong> —— Claude Code 不会从 registry 拉 MCP server；你要先自己装好再注册。</li>
+<li><strong>每次 session 都跑 <code>claude mcp add</code></strong> —— 注册会持久化，每台机器每个 server 只要做一次。</li>
+</ol>
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>MCP 扩展点是 Claude Code 最重要的架构事实：它的强大不是靠 Anthropic 加功能，而是靠你（或社区）接上 MCP server。考试必背那句：<strong><code>claude mcp add [server-name] [command-to-start-server]</code></strong> —— 精确语法要背熟。题目常会同时考这条命令和 primitive 三元组（tool、prompt、resource）。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D3（Claude Code Configuration）</strong>：直接考 <code>claude mcp add</code> 语法，以及 Claude Code 内建 MCP client 的事实。</li>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：要知道 MCP server 可提供 tool、prompt、resource 三种 primitive。</li>
+<li><strong>D1（Agentic Coding &amp; Architecture）</strong>：预期会出"组合多个 MCP server 成 workflow"的场景题。</li>
+<li>预期会考上述生态 server 的辨认题（sentry-mcp、playwright-mcp、figma-context-mcp、mcp-atlassian、firecrawl-mcp-server、slack-mcp）。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>注册 MCP server 到 Claude Code 的命令是什么？</td>
+<td><code>claude mcp add [server-name] [command-to-start-server]</code></td>
+</tr>
+<tr>
+<td>Claude Code 靠什么内建组件才能扩展 MCP？</td>
+<td>一个 MCP client —— 它可连到任一你注册的 MCP server</td>
+</tr>
+<tr>
+<td>MCP server 可暴露给 Claude Code 的三种 primitive 是什么？</td>
+<td>Tools（动作）、Prompts（模板）、Resources（数据）</td>
+</tr>
+<tr>
+<td>如何注册一个用 <code>uv run main.py</code> 启动、名叫 <code>documents</code> 的 server？</td>
+<td><code>claude mcp add documents uv run main.py</code></td>
+</tr>
+<tr>
+<td>Claude Code 会自动重连注册过的 MCP server 吗？</td>
+<td>会 —— 注册会持久化，每次 Claude Code 启动都会自动 spawn</td>
+</tr>
+<tr>
+<td>想让 Claude 自动从 monitoring 平台找 bug 并修，该用哪个 MCP server？</td>
+<td><code>sentry-mcp</code></td>
+</tr>
+<tr>
+<td>想给 Claude 浏览器自动化能力用哪个 MCP server？</td>
+<td><code>playwright-mcp</code></td>
+</tr>
+<tr>
+<td>想读 Jira ticket 或 Confluence 页面用哪个 MCP server？</td>
+<td><code>mcp-atlassian</code></td>
+</tr>
+<tr>
+<td>为什么 Claude Code 选 MCP 而不是把所有 tool 写死？</td>
+<td>MCP 解耦生态、支持社区贡献、提供进程级安全边界、维持 Claude Code 内置表面精简</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

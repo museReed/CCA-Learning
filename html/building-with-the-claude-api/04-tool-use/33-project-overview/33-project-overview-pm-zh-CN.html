@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Overview Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>项目概览：提醒应用 — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试 Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1（tool schema 设计）、1.2（agentic loop 基础）、1.1（功能拆解）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 33</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>三个字的用户需求（「下周四提醒我」）底下藏着三个不同的产品能力缺口 — 正确的 AI 产品架构是<strong>每个缺口配一个 tool</strong>，而不是做一个「全能魔法函数」。</p>
+<hr />
+<h2>「提醒我」的假性简单</h2>
+<p>PRD 上可能这样写：</p>
+<blockquote>
+<p><em>作为用户，我可以说「下下个星期四提醒我某件事」，助手会帮我设好提醒。</em></p>
+</blockquote>
+<p>所有 stakeholder 点头。两句话的 user story。两天的 ticket 吧？</p>
+<p>不是。底层模型不会：</p>
+<ol>
+<li>知道此刻精确时间（只知道大概日期）</li>
+<li>可靠地做日期运算（LLM 算星期几出错频率超乎想象）</li>
+<li>把提醒存到任何地方</li>
+</ol>
+<p>每一条都是不同的问题，都要自己的组件。这是 PM 在 scope AI 功能时最常踩的雷：表面是一句话，底下的能力图是一棵树。</p>
+<hr />
+<h2>心智模型：乐高 vs. 手办</h2>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>比喻</th>
+<th>v1 出货速度</th>
+<th>长期杠杆</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一个「全做完」的大函数</td>
+<td>手办 — 塑到固定的姿势</td>
+<td>快</td>
+<td>零复用、难修</td>
+</tr>
+<tr>
+<td>小小的原子 tool，由 Claude 组合</td>
+<td>乐高 — 积木</td>
+<td>稍慢</td>
+<td>未来任何功能都能复用</td>
+</tr>
+</tbody>
+</table>
+<p>Tool use 奖励乐高派。第一次做 <code>add_duration_to_datetime</code> 时你付出成本。之后任何碰到「提醒我 N 天后」「N 周后截止」「下季再订」的功能都能免费复用同一块积木。</p>
+<hr />
+<h2>三个缺口 → 三个 Tool</h2>
+<table>
+<thead>
+<tr>
+<th>用户信号</th>
+<th>暴露的缺口</th>
+<th>该做的 tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「现在」</td>
+<td>Claude 不知道精确时间</td>
+<td>Get current datetime</td>
+</tr>
+<tr>
+<td>「下下个星期四」</td>
+<td>Claude 日期运算不可靠</td>
+<td>Add duration to datetime</td>
+</tr>
+<tr>
+<td>「提醒我」</td>
+<td>Claude 没有提醒系统</td>
+<td>Set reminder</td>
+</tr>
+</tbody>
+</table>
+<p>每一行都是 PRD 里的决策点。每个 tool 都有自己的 acceptance criteria、失败模式、遥测需求。</p>
+<hr />
+<h2>为什么这对 Roadmap 规划很重要</h2>
+<p>因为 tool 可以复用，所以帮提醒功能做 scoping 的同时，你也帮<strong>未来好几个功能</strong>做了 scoping：</p>
+<ul>
+<li>生日提醒（三个 tool 全部复用）</li>
+<li>截止日追踪（复用其中两个）</li>
+<li>周期性会议（复用其中两个）</li>
+<li>假期倒数（复用其中两个）</li>
+<li>「N 周后是几号」类的问答（复用其中两个）</li>
+</ul>
+<p>看到这个模式的 PM 可以把功能卖给 stakeholder 说「我们是在打排期系统的地基」，而不是「我们做了个玩具提醒 app」。ROI 算盘完全翻转。</p>
+<hr />
+<h2>把构建顺序当作风险管理工具</h2>
+<p>课程是最简单的先做：</p>
+<ol>
+<li>Read-only 先做（get current datetime）— 坏了影响最小。</li>
+<li>Pure function 第二（add duration）— 确定性、可单测。</li>
+<li>Write operation 最后（set reminder）— 有真实世界副作用，有真实风险。</li>
+</ol>
+<p>对 PM 而言，这也是 dogfood 的顺序。先内部出第一个 tool、再第二个，只有两个依赖都稳了才出写入型 tool。每个阶段都可上线。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<p>看到「听起来很简单」的 user story 就问：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>若是</th>
+<th>行动</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>需要此刻的数据吗？</td>
+<td>是</td>
+<td>规划一个 tool。</td>
+</tr>
+<tr>
+<td>需要 LLM 不擅长的运算（日期、金额、距离）吗？</td>
+<td>是</td>
+<td>规划一个 tool。</td>
+</tr>
+<tr>
+<td>需要把状态持久化？</td>
+<td>是</td>
+<td>规划一个 tool。</td>
+</tr>
+<tr>
+<td>这几个 tool 在其他功能用得到？</td>
+<td>是</td>
+<td>提升优先级 — 是地基。</td>
+</tr>
+<tr>
+<td>Stakeholder 以为「这很简单、一个 call 就够」？</td>
+<td>是</td>
+<td>跟他一起跑这个 gap 分析。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 常犯的错</h2>
+<ol>
+<li><strong>误判 scope</strong> — 「提醒我」听起来两天的 ticket，实际上是三个 tool 加一个 agent loop。排期要对应调整。</li>
+<li><strong>在压力下 bundling</strong> — stakeholder 会说「做一个全包函数就好」。抗住，长期成本远高。</li>
+<li><strong>没营销复用价值</strong> — 没把地基工作包装好，会让人觉得是过度工程一个小功能。</li>
+<li><strong>跳过玩具项目</strong> — 把这个 pattern 直接用在高风险功能上，等于把学习曲线推到生产环境。</li>
+<li><strong>没为 multi-turn loop 设计 loading state</strong> — 三次 tool call 加三次 API call 会叠出好几秒的延迟，得先设计好。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>提醒项目是 AI 产品管理「冰山」问题最清楚的范例：听起来琐碎的 user story 底下坐着多个截然不同的能力缺口。正确的回应是每个缺口配一个 tool — 因为每个 tool 都会变成未来功能的可复用资产。CCA 考试会出「如何把自然语言功能拆成 tool」类型的题目。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：认知一次用户输入可能触发多次 tool call，顺序由 Claude 规划。</li>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：「一个缺口一个 tool」的设计原则会被直接测。</li>
+<li>考题常见模式：给一个功能（「提醒我」「总结今天」「订会议」），要你辨认出最少需要的 tool 集合。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI 产品 scoping 的「冰山」陷阱是什么？</td>
+<td>一句话的 user story（「下周四提醒我」）底下藏多个不同的能力缺口；正确 scope 是每个缺口配一个 tool。</td>
+</tr>
+<tr>
+<td>为什么提醒 app 是好的首个项目？</td>
+<td>它用一个友善的故事示范实际的多 tool 组合，风险逐步升级（read-only → pure function → write）。</td>
+</tr>
+<tr>
+<td>乐高 vs. 手办的比喻是什么？</td>
+<td>原子 tool 像乐高积木（跨功能复用）；大函数像手办（一次性、无复用）。</td>
+</tr>
+<tr>
+<td>提醒 app 的 tool 可以在哪些未来功能被复用？</td>
+<td>生日提醒、截止日追踪、周期性会议、假期倒数、「N 周后是几号」问答。</td>
+</tr>
+<tr>
+<td>这个项目建议的 tool 构建顺序是？</td>
+<td>Read-only 先、pure function 第二、write/有副作用最后 — 风险梯度。</td>
+</tr>
+<tr>
+<td>Scoping「提醒我」类功能时 PM 第一个常犯的错是？</td>
+<td>估错大小 — 以为是简单 ticket，实际上是三个 tool 加 multi-turn loop。</td>
+</tr>
+<tr>
+<td>为什么要替这类功能预算 loading state？</td>
+<td>多次 tool call 加 API round trip 很容易叠出好几秒延迟。</td>
+</tr>
+<tr>
+<td>如何把地基 tool 工作卖给 stakeholder？</td>
+<td>包装成「为一整家族的未来功能打地基」，而不是「做玩具提醒 app」。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

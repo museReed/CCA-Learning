@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>06 Defining Tools With Mcp Eng Zh Tw</title>
+<title>Defining Tools With Mcp Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -56,12 +56,11 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="Tools Decorator" src="visuals/tools-decorator-zh-TW.svg" /></p>
 <h2>FastMCP：Python SDK</h2>
 <p>FastMCP 是建置 MCP server 的官方 Python SDK。它利用 Python 的型別系統，消除了手動撰寫 JSON tool schema 的繁瑣過程。</p>
-<pre class="highlight"><code class="language-python">from mcp.server.fastmcp import FastMCP
+<pre><code class="language-python">from mcp.server.fastmcp import FastMCP
 
 # 建立 MCP server 實例
 mcp = FastMCP(&quot;document-tools&quot;)
 </code></pre>
-
 <p><code>FastMCP</code> 建構子接受 server 名稱字串。此名稱在連線握手時向 client 識別你的 MCP server。</p>
 <blockquote>
 <p><strong>Key Insight</strong><br />
@@ -70,7 +69,7 @@ Server 名稱不只是標籤——它會出現在 client 的 log 和除錯輸出
 <hr />
 <h2>用 @mcp.tool() 定義 Tools</h2>
 <p>Tools 定義為標準 Python 函式，加上 <code>@mcp.tool()</code> 裝飾器。FastMCP 檢查函式簽章來自動產生 tool 的 JSON schema。</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 def read_doc_contents(file_path: str) -&gt; str:
     &quot;&quot;&quot;讀取並回傳文件內容。
 
@@ -80,7 +79,6 @@ def read_doc_contents(file_path: str) -&gt; str:
     with open(file_path, &quot;r&quot;) as f:
         return f.read()
 </code></pre>
-
 <p>幕後發生的事：</p>
 <ol>
 <li><strong>函式名稱</strong>變成 tool 名稱：<code>read_doc_contents</code></li>
@@ -89,7 +87,7 @@ def read_doc_contents(file_path: str) -&gt; str:
 <li><strong>回傳型別</strong>定義輸出格式</li>
 </ol>
 <p>自動產生的 JSON schema 看起來像：</p>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
     &quot;name&quot;: &quot;read_doc_contents&quot;,
     &quot;description&quot;: &quot;讀取並回傳文件內容。&quot;,
     &quot;inputSchema&quot;: {
@@ -104,7 +102,6 @@ def read_doc_contents(file_path: str) -&gt; str:
     }
 }
 </code></pre>
-
 <blockquote>
 <p><strong>Key Insight</strong><br />
 Docstring 對 Claude 的 tool 選擇準確度至關重要。模糊的 docstring 意味著 Claude 可能選錯 tool 或完全忽略它。寫清楚說明 tool 做什麼、何時使用、回傳什麼的 docstring。</p>
@@ -112,7 +109,7 @@ Docstring 對 Claude 的 tool 選擇準確度至關重要。模糊的 docstring 
 <hr />
 <h2>用 Annotated Types 添加欄位描述</h2>
 <p>要更精確的參數描述，使用 Pydantic 的 <code>Field</code>：</p>
-<pre class="highlight"><code class="language-python">from pydantic import Field
+<pre><code class="language-python">from pydantic import Field
 from typing import Annotated
 
 @mcp.tool()
@@ -135,7 +132,6 @@ def edit_document(
 
     return f&quot;文件 {file_path} 更新成功&quot;
 </code></pre>
-
 <p>關鍵模式：</p>
 <ul>
 <li><strong><code>Annotated[type, Field(...)]</code></strong> — 為個別參數添加豐富描述</li>
@@ -145,7 +141,7 @@ def edit_document(
 <hr />
 <h2>錯誤處理</h2>
 <p>MCP tools 使用標準 Python 例外處理錯誤。FastMCP 捕獲例外並作為錯誤回應回傳給 client。</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 def read_doc_contents(file_path: str) -&gt; str:
     &quot;&quot;&quot;讀取並回傳文件內容。&quot;&quot;&quot;
     try:
@@ -156,7 +152,6 @@ def read_doc_contents(file_path: str) -&gt; str:
     except PermissionError:
         raise ValueError(f&quot;權限被拒：{file_path}&quot;)
 </code></pre>
-
 <p>MCP tool 錯誤處理最佳實踐：</p>
 <ul>
 <li><strong>拋出 <code>ValueError</code></strong> 用於面向使用者的錯誤（無效輸入、找不到等）</li>
@@ -202,15 +197,13 @@ def read_doc_contents(file_path: str) -&gt; str:
 <p>自動驗證特別強大。如果 Claude 發送 <code>file_path: 42</code> 而不是字串，FastMCP 在你的函式執行前就捕獲型別錯誤。</p>
 <hr />
 <h2>執行 Server</h2>
-<pre class="highlight"><code class="language-python">if __name__ == &quot;__main__&quot;:
+<pre><code class="language-python">if __name__ == &quot;__main__&quot;:
     mcp.run()
 </code></pre>
-
 <p><code>mcp.run()</code> 啟動 MCP server，預設使用 stdio transport。使用 HTTP transport：</p>
-<pre class="highlight"><code class="language-python">if __name__ == &quot;__main__&quot;:
+<pre><code class="language-python">if __name__ == &quot;__main__&quot;:
     mcp.run(transport=&quot;sse&quot;)  # HTTP 上的 Server-Sent Events
 </code></pre>
-
 <hr />
 <h2>CCA 考試關聯性</h2>
 <p>本課是 <strong>Domain 2 (18%)</strong> 的核心。重點考試領域：</p>

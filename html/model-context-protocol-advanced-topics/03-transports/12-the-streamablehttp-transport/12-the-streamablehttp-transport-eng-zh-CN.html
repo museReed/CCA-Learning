@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>12 The Streamablehttp Transport Eng Zh Cn</title>
+<title>The Streamablehttp Transport Eng Zh Cn</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -81,13 +81,12 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </tbody>
 </table>
 <p>两者默认为 <code>false</code>（最少限制）。启用任一个都会<strong>移除能力</strong>。</p>
-<pre class="highlight"><code class="language-python"># Server 配置示例
+<pre><code class="language-python"># Server 配置示例
 mcp_server = MCPServer(
     stateless_http=False,  # 默认：启用 session
     json_response=False,   # 默认：启用 SSE streaming
 )
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>Key Insight</strong><br />
 把这些标志想成<strong>限制开关</strong>。启用越多，server 越简单 — 但可用的 MCP 功能越少。</p>
@@ -136,7 +135,7 @@ mcp_server = MCPServer(
 </ul>
 <hr />
 <h2>能力光谱</h2>
-<pre class="highlight"><code>完整 MCP（Stdio）
+<pre><code>完整 MCP（Stdio）
     │
     ▼
 StreamableHTTP（默认值）      ← SSE workaround 部分恢复 server→client
@@ -150,7 +149,6 @@ StreamableHTTP + json_response ← 完全无 streaming
     ▼
 两个标志都启用               ← 最大限制，最简单的 server
 </code></pre>
-
 <p>每往下一步都是<strong>用功能换取简洁/可扩展性</strong>。</p>
 <hr />
 <h2>何时使用 StreamableHTTP</h2>

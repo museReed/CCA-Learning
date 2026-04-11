@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Environment Inspection Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Environment Inspection — Engineering 深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (agent 架构)、1.2 (agentic loop)、1.3 (agent 中的 tool use)、5.1 (production pattern 选型)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 82</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Claude 默认是"盲"的——有效的 agent 必须提供让它 <strong>在行动前观察环境当前状态</strong> 的 tools,而且每次变更后要重新观察,否则 Claude 会根据过时或想象出来的世界做决策。</p>
+<hr />
+<h2>为什么 Environment Inspection 重要</h2>
+<p>Agent 在自己看不见的 state 上做决策。LLM 没长眼睛看不到你的文件系统、没 hook 进数据库、也不知道按了按钮后到底发生什么事。没有 inspection tool,Claude 就是在猜现实。</p>
+<p>Computer Use 是教科书级别的例子:<strong>每次</strong> Claude 执行动作(打字、点按钮),Anthropic runtime 立刻返回一张 screenshot。那个 screenshot 不是装饰——它是 Claude 把下一步"接地"到屏幕实际状态的方法。点一下可能开了 modal、可能切页、可能出错、也可能什么都没发生。没有 screenshot,Claude 根本没 signal。</p>
+<p>这个 pattern 可以推广:如果你的 agent 对任何 state 做动作,它就必须有能力读到那个 state。</p>
+<hr />
+<h2>铁律:Read Before Write</h2>
+<p>Claude 变更任何东西之前,必须先读当前状态。听起来很明显,但一直有人违反。</p>
+<p><strong>例子:在 Python 文件加一条 route</strong></p>
+<pre><code class="language-python"># BAD — Claude 凭空猜结构
+edit_file(&quot;app.py&quot;, replace=&quot;last_line&quot;, with=&quot;@app.route('/new')...&quot;)
+
+# GOOD — Claude 先读再编辑
+current = read_file(&quot;app.py&quot;)
+# Claude 推理:&quot;这是 FastAPI,routes 在 20-45 行,imports 在最上面&quot;
+edit_file(&quot;app.py&quot;, old_string=&quot;...existing_route_block...&quot;, new_string=&quot;...with new route...&quot;)
+</code></pre>
+<p>Claude Code 把这条规则写进设计里:<code>Edit</code> tool 拒绝对"本次 session 没 <code>Read</code> 过的文件"操作。这不是礼貌——这是防止 Claude 用可能错误的假设去改文件。</p>
+<hr />
+<h2>System Prompt Pattern for Inspection</h2>
+<p>你通过明确的 system prompt 指令引导 Claude 去做 inspection。以 video generation agent 为例:</p>
+<pre><code class="language-python">system_prompt = &quot;&quot;&quot;
+你是 video production agent。把任务视为完成前,你 **必须** 验证你的输出:
+
+1. 用 `bash` 执行 whisper.cpp 对生成的视频产出带时间戳的 caption 文件。确认对白出现在预期时间点。
+2. 用 `ffmpeg` 从视频每秒截一张图。逐张检查视觉元素是否符合 spec。
+3. 把截图和 caption 对比原始需求。
+4. 任何元素缺漏或错误,回去重生成该段再重新验证。
+
+未完成这些验证步骤,绝对不能宣告任务完成。
+&quot;&quot;&quot;
+</code></pre>
+<p>System prompt 把"验证输出"从模糊建议变成强制的 tool-calling 协议。没有这个,Claude 会按它 <strong>预期</strong> tool 产出什么就宣告成功。</p>
+<hr />
+<h2>Inspection 的四大好处</h2>
+<table>
+<thead>
+<tr>
+<th>好处</th>
+<th>带来什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Progress tracking</strong></td>
+<td>Claude 能衡量距离目标还有多远,而不只是执行步骤</td>
+</tr>
+<tr>
+<td><strong>Error handling</strong></td>
+<td>非预期输出当轮就能侦测并修正</td>
+</tr>
+<tr>
+<td><strong>Quality assurance</strong></td>
+<td>Agent 在宣告"完成"前自我验证,抓出静默失败</td>
+</tr>
+<tr>
+<td><strong>Adaptive behavior</strong></td>
+<td>Claude 根据观察到的结果调整策略,不只是按原计划走</td>
+</tr>
+</tbody>
+</table>
+<p>没有 inspection = 盲眼执行器。有 inspection = feedback 驱动的 agent。</p>
+<hr />
+<h2>实作 Checklist</h2>
+<p>设计任何 agent tool 时,问:<strong>"Claude 怎么知道这个动作成功了?"</strong></p>
+<table>
+<thead>
+<tr>
+<th>动作类型</th>
+<th>Inspection Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文件写入/编辑</td>
+<td>写入后 <code>read_file</code>;diff 对照预期输出</td>
+</tr>
+<tr>
+<td>UI 点击 / Computer Use</td>
+<td>每次动作自动 screenshot</td>
+</tr>
+<tr>
+<td>HTTP API 调用</td>
+<td>返回完整 response body + status code,不要只回 "ok"</td>
+</tr>
+<tr>
+<td>数据库写入</td>
+<td>Insert/update 后 read-back query</td>
+</tr>
+<tr>
+<td>Shell 命令</td>
+<td>返回 stdout + stderr + exit code</td>
+</tr>
+<tr>
+<td>影音生成</td>
+<td>Metadata 抽取 + keyframe screenshot + 转文字</td>
+</tr>
+</tbody>
+</table>
+<p>Rule of thumb:<strong>每个会变更状态的 tool 都该搭配一个观察 tool</strong>,而且 system prompt 要明确叫 agent 两个都用。</p>
+<hr />
+<h2>Code Pattern:Before and After Inspection</h2>
+<pre><code class="language-python">system = &quot;&quot;&quot;
+你是 code refactoring agent。每次改文件都要:
+
+1. 调用 `read_file` 加载当前内容。
+2. 分析结构,找出该改什么。
+3. 调用 `edit_file`,提供精确的 old_string / new_string。
+4. **再次** 调用 `read_file` 验证改动应用正确。
+5. 调用 `run_tests` 确认没弄坏东西。
+
+步骤 4 或 5 失败就不要继续下一个改动——先把 regression 修好。
+&quot;&quot;&quot;
+
+tools = [read_file, edit_file, run_tests]
+</code></pre>
+<p>现在这个 agent 是 <strong>grounded</strong> 的——每个决策都基于新鲜的观察,不是基于三轮前对文件内容的假设。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>Write-only tool</strong> — 只给 <code>edit_file</code> 不给 <code>read_file</code>。Claude 没办法对看不到的文件做推理。</li>
+<li><strong>Tool 响应过于精简</strong> — API call 只回 <code>"ok"</code> 不回 response body。Claude 没数据可以用。</li>
+<li><strong>依赖计划而非观察</strong> — Claude 把自己之前的计划当成 ground truth。System prompt 必须强迫重新观察。</li>
+<li><strong>变更后没 inspection</strong> — Tool 没抛 exception 就当成功,用过时 state 继续跑。</li>
+<li><strong>Computer Use 关掉 screenshot</strong> — 为了省 cost 关掉自动截图,等于让 Computer Use 蒙眼操作。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Environment inspection 是把 Claude 从盲眼执行器变成 grounded agent 的关键。每个变更 tool 都要搭配观察 tool,system prompt 要让 inspection 变成强制而非可选。"Read before write, verify after write"是 agentic 系统里单一杠杆最高的可靠度 pattern。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>:会考"为什么 Claude Code 改文件前要先读"、"为什么 Computer Use 自动回 screenshot"。答案是 grounding。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>:Production agent 的可靠度和 error handling 靠 inspection 内建在 tool set 里,而不是事后补。</li>
+<li>考题关键字:"grounding""verify""observe""blindly execute"都指向 environment inspection。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>为什么 Computer Use 每次动作后都回 screenshot?</td>
+<td>Claude 对环境是盲的—— screenshot 是它观察自己动作结果、把下一步接地的方法。</td>
+</tr>
+<tr>
+<td>Agent 变更 state 时该遵守什么规则?</td>
+<td>Read before write——变更前先检视当前状态,变更后再检视一次验证。</td>
+</tr>
+<tr>
+<td>为什么 Claude Code 要求 <code>Edit</code> 前先 <code>Read</code>?</td>
+<td>防止 Claude 根据假设改文件——它必须先观察真实内容。</td>
+</tr>
+<tr>
+<td>举三个支持 environment inspection 的 tool response pattern。</td>
+<td>返回完整 HTTP response + status、返回 stdout + stderr + exit code、DB 变更后 read-back query(任三)。</td>
+</tr>
+<tr>
+<td>怎么在 agent 里强制 environment inspection?</td>
+<td>用 system prompt 指令明确要求每次变更动作前后都要调用特定 inspection tool。</td>
+</tr>
+<tr>
+<td>Environment inspection 的四大好处是什么?</td>
+<td>Progress tracking、error handling、quality assurance、adaptive behavior。</td>
+</tr>
+<tr>
+<td>设计 agent tool 时该问的唯一设计问题是什么?</td>
+<td>"Claude 怎么知道这个动作成功了?"</td>
+</tr>
+<tr>
+<td>为什么 API tool 只回 <code>"ok"</code> 是烂设计?</td>
+<td>Claude 没数据可以用——agent 没办法验证或调整,没有实际 response 内容。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>06 Defining Tools With Mcp Eng En</title>
+<title>Defining Tools With Mcp Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -56,12 +56,11 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="Tools Decorator" src="visuals/tools-decorator.svg" /></p>
 <h2>FastMCP: The Python SDK</h2>
 <p>FastMCP is the official Python SDK for building MCP servers. It eliminates the tedious process of manually writing JSON tool schemas by leveraging Python's type system.</p>
-<pre class="highlight"><code class="language-python">from mcp.server.fastmcp import FastMCP
+<pre><code class="language-python">from mcp.server.fastmcp import FastMCP
 
 # Create an MCP server instance
 mcp = FastMCP(&quot;document-tools&quot;)
 </code></pre>
-
 <p>The <code>FastMCP</code> constructor takes a server name string. This name identifies your MCP server to clients during the connection handshake.</p>
 <blockquote>
 <p><strong>Key Insight</strong><br />
@@ -70,7 +69,7 @@ The server name is not just a label — it appears in client logs and debugging 
 <hr />
 <h2>Defining Tools with @mcp.tool()</h2>
 <p>Tools are defined as regular Python functions decorated with <code>@mcp.tool()</code>. FastMCP inspects the function signature to auto-generate the tool's JSON schema.</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 def read_doc_contents(file_path: str) -&gt; str:
     &quot;&quot;&quot;Read and return the contents of a document.
 
@@ -80,7 +79,6 @@ def read_doc_contents(file_path: str) -&gt; str:
     with open(file_path, &quot;r&quot;) as f:
         return f.read()
 </code></pre>
-
 <p>What happens behind the scenes:</p>
 <ol>
 <li><strong>Function name</strong> becomes the tool name: <code>read_doc_contents</code></li>
@@ -89,7 +87,7 @@ def read_doc_contents(file_path: str) -&gt; str:
 <li><strong>Return type</strong> defines the output format</li>
 </ol>
 <p>The auto-generated JSON schema looks like:</p>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
     &quot;name&quot;: &quot;read_doc_contents&quot;,
     &quot;description&quot;: &quot;Read and return the contents of a document.&quot;,
     &quot;inputSchema&quot;: {
@@ -104,7 +102,6 @@ def read_doc_contents(file_path: str) -&gt; str:
     }
 }
 </code></pre>
-
 <blockquote>
 <p><strong>Key Insight</strong><br />
 The docstring is critical for Claude's tool selection accuracy. A vague docstring means Claude may choose the wrong tool or miss it entirely. Write docstrings that clearly state what the tool does, when to use it, and what it returns.</p>
@@ -112,7 +109,7 @@ The docstring is critical for Claude's tool selection accuracy. A vague docstrin
 <hr />
 <h2>Field Descriptions with Annotated Types</h2>
 <p>For more precise parameter descriptions, use <code>Field</code> from Pydantic:</p>
-<pre class="highlight"><code class="language-python">from pydantic import Field
+<pre><code class="language-python">from pydantic import Field
 from typing import Annotated
 
 @mcp.tool()
@@ -135,7 +132,6 @@ def edit_document(
 
     return f&quot;Document {file_path} updated successfully&quot;
 </code></pre>
-
 <p>Key patterns:</p>
 <ul>
 <li><strong><code>Annotated[type, Field(...)]</code></strong> — Adds rich descriptions to individual parameters</li>
@@ -145,7 +141,7 @@ def edit_document(
 <hr />
 <h2>Error Handling</h2>
 <p>MCP tools handle errors using standard Python exceptions. FastMCP catches exceptions and returns them as error responses to the client.</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 def read_doc_contents(file_path: str) -&gt; str:
     &quot;&quot;&quot;Read and return the contents of a document.&quot;&quot;&quot;
     try:
@@ -156,7 +152,6 @@ def read_doc_contents(file_path: str) -&gt; str:
     except PermissionError:
         raise ValueError(f&quot;Permission denied: {file_path}&quot;)
 </code></pre>
-
 <p>Best practices for MCP tool errors:</p>
 <ul>
 <li><strong>Raise <code>ValueError</code></strong> for user-facing errors (invalid input, not found, etc.)</li>
@@ -202,15 +197,13 @@ Good error messages are part of tool design. When Claude receives an error like 
 <p>The auto-validation is particularly powerful. If Claude sends <code>file_path: 42</code> instead of a string, FastMCP catches the type error before your function runs.</p>
 <hr />
 <h2>Running the Server</h2>
-<pre class="highlight"><code class="language-python">if __name__ == &quot;__main__&quot;:
+<pre><code class="language-python">if __name__ == &quot;__main__&quot;:
     mcp.run()
 </code></pre>
-
 <p>The <code>mcp.run()</code> method starts the MCP server, defaulting to stdio transport. For HTTP transport:</p>
-<pre class="highlight"><code class="language-python">if __name__ == &quot;__main__&quot;:
+<pre><code class="language-python">if __name__ == &quot;__main__&quot;:
     mcp.run(transport=&quot;sse&quot;)  # Server-Sent Events over HTTP
 </code></pre>
-
 <hr />
 <h2>CCA Exam Relevance</h2>
 <p>This lesson is central to <strong>Domain 2 (18%)</strong>. Key exam areas:</p>

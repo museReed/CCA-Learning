@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>13 Github Integration Eng En</title>
+<title>Github Integration Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -57,6 +57,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>Two Default Workflows</h2>
 <p>The integration installs two GitHub Actions workflow files in <code>.github/workflows/</code>:</p>
+<!-- diagram: github-integration-workflows — /install-github-app → PR with 2 workflow files → Merge → (1) @claude Mention Action (issues + PRs) / (2) PR Review Action (automatic on PR create) -->
 <blockquote>
 <p>Diagram produced by nanobanana</p>
 </blockquote>
@@ -126,10 +127,9 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </blockquote>
 <hr />
 <h2>Setup Process</h2>
-<pre class="highlight"><code class="language-bash"># Inside Claude Code, run:
+<pre><code class="language-bash"># Inside Claude Code, run:
 /install-github-app
 </code></pre>
-
 <p>This walks you through three steps:<br />
 1. Install the Claude Code app on GitHub<br />
 2. Add your API key<br />
@@ -139,29 +139,27 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>Customizing Workflows</h2>
 <h3>Adding Project Setup Steps</h3>
 <p>Before Claude runs, you can add environment preparation:</p>
-<pre class="highlight"><code class="language-yaml">- name: Project Setup
+<pre><code class="language-yaml">- name: Project Setup
   run: |
     npm run setup
     npm run dev:daemon
 </code></pre>
-
 <h3>Custom Instructions</h3>
 <p>Provide Claude with context about the running environment:</p>
-<pre class="highlight"><code class="language-yaml">custom_instructions: |
+<pre><code class="language-yaml">custom_instructions: |
   The project is already set up with all dependencies installed.
   The server is already running at localhost:3000. Logs from it
   are being written to logs.txt. If needed, you can query the
   db with the 'sqlite3' cli. If needed, use the mcp__playwright
   set of tools to launch a browser and interact with the app.
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>Key detail</strong></p>
 <p>Custom instructions tell Claude what is already available in the CI environment. Since Claude cannot interactively discover this (it runs non-interactively with <code>-p</code>), these instructions are critical for Claude to know what tools and services are accessible.</p>
 </blockquote>
 <h3>MCP Server Configuration</h3>
 <p>Configure MCP servers for the GitHub Actions environment:</p>
-<pre class="highlight"><code class="language-yaml">mcp_config: |
+<pre><code class="language-yaml">mcp_config: |
   {
     &quot;mcpServers&quot;: {
       &quot;playwright&quot;: {
@@ -175,16 +173,14 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
     }
   }
 </code></pre>
-
 <hr />
 <h2>Tool Permissions: The <code>-p</code> Flag and <code>allowed_tools</code></h2>
 <p><img alt="Permission Model Local Vs Ci" src="visuals/permission-model-local-vs-ci.svg" /><br />
 <em>Figure: Permission model — local interactive vs CI non-interactive.</em></p>
 <p>This is the <strong>most exam-critical</strong> concept in this unit.</p>
 <p>When Claude runs in GitHub Actions, it uses the <code>-p</code> flag (non-interactive / "print" mode). In this mode, there is no human to approve permissions, so <strong>every tool must be explicitly listed</strong>:</p>
-<pre class="highlight"><code class="language-yaml">allowed_tools: &quot;Bash(npm:*),Bash(sqlite3:*),mcp__playwright__browser_snapshot,mcp__playwright__browser_click,...&quot;
+<pre><code class="language-yaml">allowed_tools: &quot;Bash(npm:*),Bash(sqlite3:*),mcp__playwright__browser_snapshot,mcp__playwright__browser_click,...&quot;
 </code></pre>
-
 <blockquote>
 <p>⚠️ <strong>Critical exam detail</strong></p>
 <p>Unlike local development where you can use <code>mcp__playwright</code> to allow all tools from a server, in GitHub Actions <strong>each MCP tool must be individually listed</strong>. There is no shortcut. The instructor explicitly says: "There is no shortcut for permissions like we saw previously."</p>

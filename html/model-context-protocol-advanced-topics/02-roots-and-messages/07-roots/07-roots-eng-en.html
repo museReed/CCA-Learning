@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>07 Roots Eng En</title>
+<title>Roots Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -65,7 +65,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>How Roots Work</h2>
 <p>The flow is straightforward:</p>
-<pre class="highlight"><code>Client                     Server
+<pre><code>Client                     Server
   |                          |
   |-- list_roots() ---------&gt;|  (server asks: &quot;what can I access?&quot;)
   |&lt;-- [Root(&quot;/projects&quot;),   |
@@ -75,7 +75,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   |                          |-- find target file -------&gt;
   |                          |-- use tool on file -------&gt;
 </code></pre>
-
 <ol>
 <li>Server calls <code>list_roots()</code> to discover approved directories</li>
 <li>Server reads those directories to find files</li>
@@ -83,7 +82,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </ol>
 <hr />
 <h2>Server-Side: Using Roots</h2>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 async def find_and_read(ctx: Context, filename: str) -&gt; str:
     # Step 1: Get the approved roots
     roots = await ctx.session.list_roots()
@@ -97,7 +96,6 @@ async def find_and_read(ctx: Context, filename: str) -&gt; str:
 
     return f&quot;File '{filename}' not found in any root&quot;
 </code></pre>
-
 <p>Key details:<br />
 - Roots are returned as URIs (e.g., <code>file:///Users/reed/project</code>)<br />
 - The server must convert URIs to filesystem paths<br />
@@ -105,7 +103,7 @@ async def find_and_read(ctx: Context, filename: str) -&gt; str:
 <hr />
 <h2>Client-Side: Declaring Roots</h2>
 <p>The client defines which directories the server may access:</p>
-<pre class="highlight"><code class="language-python">from mcp import Root
+<pre><code class="language-python">from mcp import Root
 
 roots = [
     Root(uri=&quot;file:///Users/reed/projects/my-app&quot;, name=&quot;My App&quot;),
@@ -117,13 +115,12 @@ async with ClientSession(read, write) as session:
     await session.initialize()
     # Client exposes roots via list_roots handler
 </code></pre>
-
 <p>The client has full control over what is exposed — this is a security feature.</p>
 <hr />
 <h2>Security: SDK Does NOT Auto-Enforce</h2>
 <p>This is the most critical point for the exam:</p>
 <p><strong>The MCP SDK does not automatically enforce root boundaries.</strong> The server receives the root list, but nothing prevents it from accessing files outside those roots. You must implement enforcement yourself:</p>
-<pre class="highlight"><code class="language-python">def is_path_allowed(file_path: str, roots: list[Root]) -&gt; bool:
+<pre><code class="language-python">def is_path_allowed(file_path: str, roots: list[Root]) -&gt; bool:
     &quot;&quot;&quot;Check if a path falls within an approved root.&quot;&quot;&quot;
     target = Path(file_path).resolve()
     for root in roots:
@@ -141,7 +138,6 @@ async def safe_read(ctx: Context, file_path: str) -&gt; str:
 
     return Path(file_path).read_text()
 </code></pre>
-
 <p>Always use <code>.resolve()</code> to prevent path traversal attacks (e.g., <code>../../etc/passwd</code>).</p>
 <blockquote>
 <p><strong>Key Insight</strong><br />
@@ -182,7 +178,7 @@ Roots are a <strong>convention</strong>, not a sandbox. The SDK provides the mec
 <hr />
 <h2>Path Traversal Prevention</h2>
 <p>When implementing <code>is_path_allowed()</code>, handle these attack vectors:</p>
-<pre class="highlight"><code class="language-python"># Dangerous inputs to guard against:
+<pre><code class="language-python"># Dangerous inputs to guard against:
 &quot;../../../etc/passwd&quot;           # Relative path escape
 &quot;/Users/reed/projects/../.ssh&quot;  # Mid-path traversal
 &quot;./symlink_to_root&quot;             # Symlink escape
@@ -190,7 +186,6 @@ Roots are a <strong>convention</strong>, not a sandbox. The SDK provides the mec
 # Defense: always resolve to absolute path first
 target = Path(file_path).resolve()  # Resolves symlinks and ..
 </code></pre>
-
 <hr />
 <h2>CCA Exam Relevance</h2>
 <ul>

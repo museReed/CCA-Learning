@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Functions Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Tool Functions — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试 Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2（tool function 定义）、2.1（tool schema 设计）、1.2（agentic loop 基础）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 34</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Tool function 就是一个普通的 Python 函数 — 但它的输入、错误消息、行为是刻意设计成<strong>给 LLM 读、给 LLM 自我修复</strong>，而不只是给人类工程师看。</p>
+<hr />
+<h2>什么是 Tool Function</h2>
+<p>Tool function 就是你的应用在 Claude 输出 <code>tool_use</code> block 时会执行的一般 Python callable。Python 这端没有魔法 — 魔法在于 function 与 LLM 之间的<strong>契约</strong>：</p>
+<ul>
+<li>名字清楚 → Claude 挑得到正确的函数</li>
+<li>参数名字清楚 → Claude 填得到正确的参数</li>
+<li>验证 + 描述性的错误 → Claude 下一轮可以自我修正</li>
+<li>返回类型可预测 → Claude 可以对结果推理</li>
+</ul>
+<p>Tool function 是技术栈的底层。JSON schema（Lesson 35）是 Claude 读的文档。Agentic loop 用 Claude 给的参数调用函数。</p>
+<hr />
+<h2>第一个 Tool：<code>get_current_datetime</code></h2>
+<pre><code class="language-python">from datetime import datetime
+
+def get_current_datetime(date_format: str = &quot;%Y-%m-%d %H:%M:%S&quot;) -&gt; str:
+    if not date_format:
+        raise ValueError(&quot;date_format cannot be empty&quot;)
+    return datetime.now().strftime(date_format)
+</code></pre>
+<p>三个值得拆开来看的地方：</p>
+<ol>
+<li><strong>默认参数</strong>（<code>date_format="%Y-%m-%d %H:%M:%S"</code>）— 让 Claude 在常见场景下不用传参数就能调用。Schema 会标这个参数为 optional。</li>
+<li><strong>使用前验证</strong> — <code>if not date_format: raise ValueError(...)</code> 挡掉 Python 原本会默默接受的退化值（空字符串够 falsy，<code>strftime("")</code> 会返回空字符串）。</li>
+<li><strong><code>strftime</code> 格式透传</strong> — 把日期格式化交给 Python 身经百战的 <code>datetime</code> 模块，而不是自己重造轮子。</li>
+</ol>
+<h3>使用示例</h3>
+<pre><code class="language-python">get_current_datetime()           # &quot;2026-04-11 14:30:25&quot;
+get_current_datetime(&quot;%H:%M&quot;)     # &quot;14:30&quot;
+get_current_datetime(&quot;%A&quot;)        # &quot;Saturday&quot;
+</code></pre>
+<hr />
+<h2>Tool Function 的 Best Practices</h2>
+<h3>1. 描述性的名字</h3>
+<p>Function 名字：<code>get_current_datetime</code> — 人类一眼看懂意图。对比 <code>gcdt</code> 或 <code>datetime_fn</code>。Claude 会把名字当成决定是否调用这个函数的强先验。</p>
+<p>参数名字：<code>date_format</code>，不是 <code>fmt</code> 或 <code>d</code>。每个字符都是 Claude 会读的文档。</p>
+<h3>2. 验证输入</h3>
+<pre><code class="language-python">def get_current_datetime(date_format=&quot;%Y-%m-%d %H:%M:%S&quot;):
+    if not date_format:
+        raise ValueError(&quot;date_format cannot be empty&quot;)
+    return datetime.now().strftime(date_format)
+</code></pre>
+<p>常见的验证 pattern：</p>
+<ul>
+<li>空字符串（<code>if not s</code>）— LLM 意外频繁会出这种。</li>
+<li>类型错（<code>if not isinstance(x, int)</code>）— 尤其是 JSON 反序列化之后。</li>
+<li>超出范围（<code>if not 0 &lt;= p &lt;= 100</code>）。</li>
+<li>格式不符（regex、enum 成员）。</li>
+</ul>
+<p>每个参数要问自己：「LLM 可能输出什么最糟糕的输入，会让我静默产出错答案？」针对那个验证。</p>
+<h3>3. 有意义的错误消息</h3>
+<p><strong>差</strong>：<code>raise ValueError("invalid input")</code><br />
+<strong>好</strong>：<code>raise ValueError("date_format cannot be empty")</code><br />
+<strong>更好</strong>：<code>raise ValueError("date_format cannot be empty; use a valid strftime pattern like '%Y-%m-%d'")</code></p>
+<p>错误消息是 Claude 唯一的反馈通道。每一条错误消息都是一段迷你 prompt，告诉下一轮怎么修正。如果你写「invalid input」，Claude 可能用同样的错输入再试一次。如果你写「expected an ISO-8601 date like 2026-01-15, got 'next Friday'」，Claude 就知道该怎么修。</p>
+<p>这是与传统错误消息设计最大的转变：<strong>错误消息不再只是给人看，而是 LLM 的修复信号</strong>。</p>
+<hr />
+<h2>Tool Function 如何跟 Loop 集成</h2>
+<pre><code class="language-python"># agent loop 的 pseudo-code
+while True:
+    response = client.messages.create(..., tools=tool_schemas, messages=messages)
+
+    if response.stop_reason != &quot;tool_use&quot;:
+        break  # 最终文字响应在 response.content 里
+
+    for block in response.content:
+        if block.type != &quot;tool_use&quot;:
+            continue
+        fn = TOOL_REGISTRY[block.name]
+        try:
+            result = fn(**block.input)
+            tool_result_content = str(result)
+            is_error = False
+        except Exception as e:
+            tool_result_content = f&quot;Error: {e}&quot;
+            is_error = True
+
+        messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: response.content})
+        messages.append({
+            &quot;role&quot;: &quot;user&quot;,
+            &quot;content&quot;: [{
+                &quot;type&quot;: &quot;tool_result&quot;,
+                &quot;tool_use_id&quot;: block.id,
+                &quot;content&quot;: tool_result_content,
+                &quot;is_error&quot;: is_error,
+            }],
+        })
+</code></pre>
+<p>关键观察：</p>
+<ul>
+<li>捕捉异常并以 <code>is_error: True</code> 的 <code>tool_result</code> 返回。不要让异常把 loop 打断 — 告诉 Claude 它就能恢复。</li>
+<li><code>**block.input</code> 把 JSON 参数展开给 Python。类型不符会在 Python 调用点被挡下。</li>
+<li><code>TOOL_REGISTRY</code> 就是个「tool 名字 → function 指针」的 dict。让 dispatch 超简单。</li>
+</ul>
+<hr />
+<h2>Type Hint 对人与 Schema 都有帮助</h2>
+<p>Python type hint 在 runtime 是可有可无，但在设计阶段极有价值：</p>
+<pre><code class="language-python">def get_current_datetime(date_format: str = &quot;%Y-%m-%d %H:%M:%S&quot;) -&gt; str:
+    ...
+</code></pre>
+<ul>
+<li>让推导 schema（Lesson 35）变得超简单。</li>
+<li>在 runtime 前就抓到开发者 bug。</li>
+<li>对 review code 的同事传达意图。</li>
+<li><code>inspect</code>、<code>pydantic</code> 之类的 library 可以从有 type hint 的函数自动生成 JSON Schema。</li>
+</ul>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>名字暧昧的函数</strong> — <code>process</code>、<code>run</code>、<code>do_it</code>。Claude 从含糊的名字推不出用途。</li>
+<li><strong>输入坏的也默默吃下去</strong> — 接受 <code>None</code> 或空字符串却不验证，产出垃圾结果。</li>
+<li><strong>神秘的错误消息</strong> — 「error 42」告诉 Claude 什么都没有；「radius must be positive, got -3」告诉它要怎么修。</li>
+<li><strong>没在 loop 层级捕捉异常</strong> — 让 tool 异常把整段对话炸掉，而不是包成 tool_result error 喂回去。</li>
+<li><strong>隐藏的副作用</strong> — 名字没写清楚就静默写 DB 的 tool 很危险；用 <code>create_reminder</code> 取代 <code>reminder</code>。</li>
+<li><strong>返回复杂对象没 <code>str()</code></strong> — <code>tool_result.content</code> 必须是可序列化的文字；把对象显式转字符串或 JSON。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Tool function 不是「内部工具」 — 它是你对 Claude 暴露的 <strong>public API</strong>。每个参数名、每个错误消息、每个返回类型都会被模型读到。把 tool function 当成文档完整的 SDK 设计，因为 Claude 就是这样看它的。CCA D2 常出这个角度的题目。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：命名、验证、错误消息作为 LLM 可读的修复信号、默认参数。</li>
+<li><strong>D1（Agentic Architecture）</strong>：Tool loop 内的异常处理；错误如何转成 tool_result block。</li>
+<li>预期会出：「为什么 tool function 要 raise 描述性的错误？」— 答：让 Claude 在下一轮能自我修正。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool function 是什么？</td>
+<td>一般的 Python callable，Claude 输出 <code>tool_use</code> block 时会被调用；函数必须验证输入并返回可序列化的结果。</td>
+</tr>
+<tr>
+<td>为什么 tool function 的错误消息很重要？</td>
+<td>因为它是 Claude 唯一的反馈通道 — Claude 会读它并用来自我修正下一次 <code>tool_use</code> 调用。</td>
+</tr>
+<tr>
+<td>什么是差的 tool function 名字？</td>
+<td>任何像 <code>process</code>、<code>run</code>、<code>do_it</code> 这类含糊的名字 — Claude 推不出用途。</td>
+</tr>
+<tr>
+<td>若 tool function 在 agent loop 内抛异常会怎样？</td>
+<td>调用方应该捕捉并以 <code>is_error: True</code> 的 <code>tool_result</code> 返回 — 不要让它炸掉 loop。</td>
+</tr>
+<tr>
+<td>为什么 tool function 要用默认参数？</td>
+<td>让 Claude 在常见场景下能用最少的输入调用，只在必要时才带参数。</td>
+</tr>
+<tr>
+<td><code>get_current_datetime</code> 验证了什么、为什么？</td>
+<td>它拒绝空的 <code>date_format</code>，这样 <code>strftime("")</code> 才不会默默返回空字符串。</td>
+</tr>
+<tr>
+<td>Tool function 要怎么返回复杂对象？</td>
+<td>转成字符串或 JSON — <code>tool_result.content</code> 必须是可序列化文字。</td>
+</tr>
+<tr>
+<td>Type hint 与 schema 有什么关系？</td>
+<td>Type hint 让 JSON Schema 可以自动生成，并让 Claude（透过 schema）与人类都看到清楚意图。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>14 State And The Streamablehttp Transport Eng En</title>
+<title>State And The Streamablehttp Transport Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -56,20 +56,18 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="Scaling Tradeoff" src="visuals/scaling-tradeoff.svg" /></p>
 <h2>The Scaling Problem</h2>
 <p>When an MCP server becomes popular, you need to scale horizontally — multiple server instances behind a load balancer. This creates a fundamental coordination problem:</p>
-<pre class="highlight"><code>                    ┌─── Instance A
+<pre><code>                    ┌─── Instance A
 Client ──→ LB ─────┤
                     ├─── Instance B
                     └─── Instance C
 </code></pre>
-
 <p>Remember from Lesson 13: a client maintains <strong>two connections</strong>:<br />
 1. <strong>GET SSE</strong> (persistent, for server-initiated messages)<br />
 2. <strong>POST requests</strong> (per tool call)</p>
 <p>The load balancer may route these to <strong>different instances</strong>:</p>
-<pre class="highlight"><code>Client ── GET /sse ──→ LB ──→ Instance A  (primary SSE here)
+<pre><code>Client ── GET /sse ──→ LB ──→ Instance A  (primary SSE here)
 Client ── POST /tool ──→ LB ──→ Instance B  (tool call here)
 </code></pre>
-
 <p>Instance B processes the tool call but Instance A holds the SSE connection. How does Instance B send progress updates to the client?</p>
 <blockquote>
 <p>💡 <strong>Key Insight</strong><br />
@@ -112,13 +110,12 @@ The two-connection architecture that makes SSE work on a single server becomes a
 </tr>
 </tbody>
 </table>
-<pre class="highlight"><code class="language-python"># Stateless server — no initialization needed
+<pre><code class="language-python"># Stateless server — no initialization needed
 mcp_server = MCPServer(
     stateless_http=True,  # Each request is independent
     json_response=False,  # Can still stream per-request
 )
 </code></pre>
-
 <h3>The Key Benefit</h3>
 <p>No initialization required. Any server instance can handle any request independently. The load balancer just round-robins — no sticky sessions, no session affinity needed.</p>
 <hr />
@@ -146,13 +143,12 @@ mcp_server = MCPServer(
 </tr>
 </tbody>
 </table>
-<pre class="highlight"><code class="language-python"># Maximum simplicity — stateless + JSON
+<pre><code class="language-python"># Maximum simplicity — stateless + JSON
 mcp_server = MCPServer(
     stateless_http=True,
     json_response=True,   # Just return final JSON
 )
 </code></pre>
-
 <hr />
 <h2>The Decision Matrix</h2>
 <table>
@@ -192,12 +188,11 @@ mcp_server = MCPServer(
 </tbody>
 </table>
 <h3>The Fundamental Trade-off</h3>
-<pre class="highlight"><code>Functionality ◄─────────────────────► Scalability
+<pre><code>Functionality ◄─────────────────────► Scalability
 
 Full MCP          SSE workaround       Stateless         Stateless + JSON
 (Stdio)           (single server)      (scales out)      (simplest)
 </code></pre>
-
 <hr />
 <h2>What You Lose vs. What You Gain</h2>
 <h3><code>stateless_http=true</code> Losses</h3>
@@ -219,14 +214,12 @@ Full MCP          SSE workaround       Stateless         Stateless + JSON
 <hr />
 <h2>Architectural Patterns</h2>
 <h3>Pattern 1: Sticky Sessions (Keep State)</h3>
-<pre class="highlight"><code>Client ──→ LB (session affinity) ──→ Always Instance A
+<pre><code>Client ──→ LB (session affinity) ──→ Always Instance A
 </code></pre>
-
 <p>Keeps full MCP features but limits scaling and fault tolerance.</p>
 <h3>Pattern 2: Stateless (Scale Out)</h3>
-<pre class="highlight"><code>Client ──→ LB (round robin) ──→ Any Instance
+<pre><code>Client ──→ LB (round robin) ──→ Any Instance
 </code></pre>
-
 <p>Maximum scalability but loses server-initiated features.</p>
 <h3>Pattern 3: Hybrid (Advanced)</h3>
 <p>Use stateless for most requests, separate stateful service for sampling/subscriptions. Complex but gets the best of both worlds.</p>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>13 Prompts In The Client Eng Zh Tw</title>
+<title>Prompts In The Client Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -55,21 +55,19 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>兩個 Client 端方法</h2>
 <h3>1. <code>list_prompts()</code> — 發現</h3>
-<pre class="highlight"><code class="language-python">async def list_prompts(self) -&gt; list[types.Prompt]:
+<pre><code class="language-python">async def list_prompts(self) -&gt; list[types.Prompt]:
     result = await self.session().list_prompts()
     return result.prompts
 </code></pre>
-
 <p>此方法向 server 查詢所有可用 prompts。每個 <code>types.Prompt</code> 物件包含：<br />
 - <code>name</code> — 識別碼（用於 slash commands）<br />
 - <code>description</code> — 人類可讀的說明<br />
 - <code>arguments</code> — 必要/可選參數列表</p>
 <h3>2. <code>get_prompt()</code> — 帶插值的取得</h3>
-<pre class="highlight"><code class="language-python">async def get_prompt(self, prompt_name, args: dict[str, str]):
+<pre><code class="language-python">async def get_prompt(self, prompt_name, args: dict[str, str]):
     result = await self.session().get_prompt(prompt_name, args)
     return result.messages
 </code></pre>
-
 <p>此方法取得特定 prompt 並進行變數插值：<br />
 - <code>prompt_name</code> — 要取得哪個 prompt（如 <code>"format"</code>）<br />
 - <code>args</code> — 字串對字串的 dict（如 <code>{"doc_id": "plan.md"}</code>）<br />
@@ -77,7 +75,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>完整的 Prompt 工作流程</h2>
 <p>從使用者互動到 Claude 回應的端到端流程：</p>
-<pre class="highlight"><code>1. 使用者輸入 &quot;/&quot;
+<pre><code>1. 使用者輸入 &quot;/&quot;
    └── Client 呼叫 list_prompts()
        └── Server 回傳可用 prompts
 
@@ -95,7 +93,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 
 5. Claude 回應格式化後的文件
 </code></pre>
-
 <h3>關鍵洞察：Prompts 編排 Tools</h3>
 <p>Claude 收到 prompt 訊息後，通常需要使用可用的 <strong>tools</strong> 來完成任務。Prompts 提供指令，tools 提供能力。</p>
 <hr />
@@ -176,7 +173,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>Prompt Arguments：變數插值</h2>
 <p><code>get_prompt()</code> 中的 <code>args</code> 參數始終是 <code>dict[str, str]</code> — 所有值都是字串：</p>
-<pre class="highlight"><code class="language-python"># Client 端
+<pre><code class="language-python"># Client 端
 messages = await client.get_prompt(&quot;format&quot;, {&quot;doc_id&quot;: &quot;plan.md&quot;})
 
 # Server 端（內部發生的事）
@@ -185,7 +182,6 @@ def format_document(doc_id: str = Field(...)):
     prompt = f&quot;...{doc_id}...&quot;
     return [base.UserMessage(prompt)]
 </code></pre>
-
 <p>即使參數代表數字或布林值，也以字串傳遞。Server function 處理必要的類型轉換。</p>
 <hr />
 <h2>常見錯誤</h2>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>10 Json Message Types Eng En</title>
+<title>Json Message Types Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -133,7 +133,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </tr>
 </tbody>
 </table>
-<pre class="highlight"><code class="language-json">// Example: CallToolRequest
+<pre><code class="language-json">// Example: CallToolRequest
 {
   &quot;jsonrpc&quot;: &quot;2.0&quot;,
   &quot;id&quot;: 1,
@@ -160,7 +160,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 }
 </code></pre>
-
 <p>Note the <code>id</code> field — it correlates the request with its result (JSON-RPC 2.0 standard).</p>
 <hr />
 <h2>Notifications</h2>
@@ -202,7 +201,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </tr>
 </tbody>
 </table>
-<pre class="highlight"><code class="language-json">// Example: ProgressNotification (no &quot;id&quot; field)
+<pre><code class="language-json">// Example: ProgressNotification (no &quot;id&quot; field)
 {
   &quot;jsonrpc&quot;: &quot;2.0&quot;,
   &quot;method&quot;: &quot;notifications/progress&quot;,
@@ -213,12 +212,11 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 }
 </code></pre>
-
 <p>Key difference from requests: <strong>no <code>id</code> field</strong> = notification.</p>
 <hr />
 <h2>Bidirectional Protocol</h2>
 <p>MCP is bidirectional — both sides can initiate communication:</p>
-<pre class="highlight"><code>Client                          Server
+<pre><code>Client                          Server
   |                               |
   |-- InitializeRequest ---------&gt;|  (Client initiates)
   |&lt;-- InitializeResult ----------|
@@ -233,7 +231,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   |                               |
   |-- RootsListChanged ----------&gt;|  (Client pushes notification)
 </code></pre>
-
 <p>This is different from a simple HTTP API where only the client initiates. Both sides are peers in MCP.</p>
 <hr />
 <h2>The Specification</h2>
@@ -244,7 +241,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <li>Servers can be written in any language (Python, Go, Rust, etc.)</li>
 <li>The TypeScript types serve as the canonical reference for all implementations</li>
 </ul>
-<pre class="highlight"><code class="language-typescript">// From the spec — defines the shape, not runtime code
+<pre><code class="language-typescript">// From the spec — defines the shape, not runtime code
 interface CallToolRequest {
   method: &quot;tools/call&quot;;
   params: {
@@ -253,7 +250,6 @@ interface CallToolRequest {
   };
 }
 </code></pre>
-
 <hr />
 <h2>Client vs. Server Messages</h2>
 <p>Understanding which side sends what:</p>

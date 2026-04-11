@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrowP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8B5CF6"/>
+    </marker>
+    <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#22C55E"/>
+    </marker>
+  </defs>
+  <rect width="900" height="520" fill="white"/>
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Environment Inspection</text>
+  <text x="450" y="60" text-anchor="middle" font-size="13" fill="#6B7280">Agent inspects environment before acting to ground decisions in reality</text>
+
+  <!-- Agent box (left) -->
+  <rect x="40" y="180" width="180" height="120" rx="8" fill="#FAF5FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="180" width="180" height="32" rx="8" fill="#8B5CF6"/>
+  <rect x="40" y="202" width="180" height="10" fill="#8B5CF6"/>
+  <text x="130" y="202" text-anchor="middle" font-size="13" font-weight="600" fill="white">Agent (Claude)</text>
+  <circle cx="130" cy="240" r="18" fill="white" stroke="#8B5CF6" stroke-width="2"/>
+  <text x="130" y="246" text-anchor="middle" font-size="13" font-weight="700" fill="#8B5CF6">AI</text>
+  <text x="130" y="280" text-anchor="middle" font-size="10" fill="#6B7280">receives task</text>
+
+  <!-- Arrow: agent -> inspection -->
+  <line x1="220" y1="240" x2="275" y2="240" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrowP)"/>
+  <text x="247" y="230" text-anchor="middle" font-size="10" font-weight="600" fill="#8B5CF6">inspect</text>
+
+  <!-- Inspection tools column -->
+  <rect x="280" y="100" width="260" height="300" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="280" y="100" width="260" height="32" rx="8" fill="#22C55E"/>
+  <rect x="280" y="122" width="260" height="10" fill="#22C55E"/>
+  <text x="410" y="122" text-anchor="middle" font-size="13" font-weight="600" fill="white">Inspection Tools</text>
+
+  <rect x="300" y="148" width="220" height="40" rx="6" fill="white" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="410" y="165" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B">list_files(path)</text>
+  <text x="410" y="180" text-anchor="middle" font-size="9" fill="#6B7280">see what exists</text>
+
+  <rect x="300" y="198" width="220" height="40" rx="6" fill="white" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="410" y="215" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B">read_file(name)</text>
+  <text x="410" y="230" text-anchor="middle" font-size="9" fill="#6B7280">load current content</text>
+
+  <rect x="300" y="248" width="220" height="40" rx="6" fill="white" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="410" y="265" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B">get_state()</text>
+  <text x="410" y="280" text-anchor="middle" font-size="9" fill="#6B7280">check runtime config</text>
+
+  <rect x="300" y="298" width="220" height="40" rx="6" fill="white" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="410" y="315" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B">git_status()</text>
+  <text x="410" y="330" text-anchor="middle" font-size="9" fill="#6B7280">uncommitted changes</text>
+
+  <text x="410" y="370" text-anchor="middle" font-size="10" fill="#6B7280" font-style="italic">read-only observations</text>
+  <text x="410" y="386" text-anchor="middle" font-size="10" fill="#6B7280" font-style="italic">no side effects yet</text>
+
+  <!-- Arrow: inspection -> decision -->
+  <line x1="540" y1="240" x2="595" y2="240" stroke="#22C55E" stroke-width="2" marker-end="url(#arrowG)"/>
+  <text x="567" y="230" text-anchor="middle" font-size="10" font-weight="600" fill="#22C55E">ground</text>
+
+  <!-- Grounded decision -->
+  <rect x="600" y="180" width="260" height="120" rx="8" fill="#FFF7ED" stroke="#FB923C" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="600" y="180" width="260" height="32" rx="8" fill="#FB923C"/>
+  <rect x="600" y="202" width="260" height="10" fill="#FB923C"/>
+  <text x="730" y="202" text-anchor="middle" font-size="13" font-weight="600" fill="white">Grounded Decision</text>
+  <text x="730" y="238" text-anchor="middle" font-size="11" fill="#1E293B" font-weight="500">"The file already exists</text>
+  <text x="730" y="255" text-anchor="middle" font-size="11" fill="#1E293B" font-weight="500">and imports X. I should</text>
+  <text x="730" y="272" text-anchor="middle" font-size="11" fill="#1E293B" font-weight="500">edit instead of rewrite."</text>
+
+  <!-- Arrow down to action -->
+  <line x1="730" y1="300" x2="730" y2="340" stroke="#FB923C" stroke-width="2" marker-end="url(#arrowG)"/>
+
+  <!-- Action box -->
+  <rect x="620" y="348" width="220" height="60" rx="8" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <text x="730" y="375" text-anchor="middle" font-size="12" font-weight="600" fill="#EF4444">Mutating Action</text>
+  <text x="730" y="393" text-anchor="middle" font-size="10" fill="#6B7280">write_file / run_command</text>
+
+  <!-- Bottom note -->
+  <rect x="60" y="440" width="780" height="60" rx="8" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <text x="450" y="464" text-anchor="middle" font-size="12" font-weight="600" fill="#1E293B">Inspection tools turn a blind agent into a grounded one.</text>
+  <text x="450" y="484" text-anchor="middle" font-size="11" fill="#6B7280">Without them: Claude guesses. With them: Claude verifies first, then acts.</text>
+</svg>

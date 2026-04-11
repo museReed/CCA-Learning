@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implementing Multiple Turns Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Implementing Multiple Turns — Engineering Deep Dive（简中）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) / D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2（agentic loop 实现）、2.4（multi-turn tool loops）、1.3（multi-turn 对话管理）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 39</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Agentic loop 就是一个 <code>while True</code>：调用 Claude、检查 <code>response.stop_reason != "tool_use"</code> 就 break，否则执行每一个 <code>tool_use</code> block、把每个结果包成 <code>tool_result</code> block、再 loop 一次。</p>
+<hr />
+<h2>标准 Agentic Loop</h2>
+<p>这就是整个 agentic 生态系统建立其上的那个 pattern：</p>
+<pre><code class="language-python">def run_conversation(messages):
+    while True:
+        response = chat(messages, tools=[get_current_datetime_schema])
+        add_assistant_message(messages, response)
+        print(text_from_message(response))
+
+        if response.stop_reason != &quot;tool_use&quot;:
+            break
+
+        tool_results = run_tools(response)
+        add_user_message(messages, tool_results)
+
+    return messages
+</code></pre>
+<p><strong>每次迭代五个步骤：</strong></p>
+<ol>
+<li>用当前的历史和 tool schema 调用 Claude</li>
+<li>把完整的 assistant message append 到历史</li>
+<li>把 text block 显示给用户（进度指示）</li>
+<li>检查 <code>stop_reason</code>——不是 <code>"tool_use"</code> 就 break</li>
+<li>执行所有 tool-use block，把结果以 user message 的形式 append 回去</li>
+</ol>
+<p>Loop 会在 <code>stop_reason</code> 不是 <code>"tool_use"</code> 时结束——通常是 <code>"end_turn"</code>，但也可能是 <code>"max_tokens"</code> 或 <code>"stop_sequence"</code>。</p>
+<hr />
+<h2><code>stop_reason</code> 是权威信号</h2>
+<p>Response 上的 <code>stop_reason</code> 是<strong>唯一</strong>可靠的信号，用来判断 Claude 还想不想用 tool：</p>
+<table>
+<thead>
+<tr>
+<th><code>stop_reason</code> 值</th>
+<th>意思</th>
+<th>Loop 动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"tool_use"</code></td>
+<td>Claude 想跑一或多个 tool</td>
+<td>执行并 loop</td>
+</tr>
+<tr>
+<td><code>"end_turn"</code></td>
+<td>Claude 已经完成答案</td>
+<td>Break，返回最终响应</td>
+</tr>
+<tr>
+<td><code>"max_tokens"</code></td>
+<td>撞到输出长度上限</td>
+<td>Break，警告用户，可能要加 token 重试</td>
+</tr>
+<tr>
+<td><code>"stop_sequence"</code></td>
+<td>匹配到 stop sequence</td>
+<td>Break</td>
+</tr>
+</tbody>
+</table>
+<p>不要试着从 block 内容推断。Claude 可以同一回合送出 text block <strong>和</strong> tool-use block；靠「response 里有 text 所以应该结束了」是经典 bug。</p>
+<hr />
+<h2><code>run_tools</code>——过滤再执行</h2>
+<p><code>run_tools</code> 遍历 response content，挑出 <code>tool_use</code> block，执行每一个，并返回一个 <code>tool_result</code> block 的 list：</p>
+<pre><code class="language-python">import json
+
+def run_tools(message):
+    tool_requests = [
+        block for block in message.content if block.type == &quot;tool_use&quot;
+    ]
+    tool_result_blocks = []
+
+    for tool_request in tool_requests:
+        try:
+            tool_output = run_tool(tool_request.name, tool_request.input)
+            tool_result_blocks.append({
+                &quot;type&quot;: &quot;tool_result&quot;,
+                &quot;tool_use_id&quot;: tool_request.id,
+                &quot;content&quot;: json.dumps(tool_output),
+                &quot;is_error&quot;: False
+            })
+        except Exception as e:
+            tool_result_blocks.append({
+                &quot;type&quot;: &quot;tool_result&quot;,
+                &quot;tool_use_id&quot;: tool_request.id,
+                &quot;content&quot;: f&quot;Error: {e}&quot;,
+                &quot;is_error&quot;: True
+            })
+
+    return tool_result_blocks
+</code></pre>
+<p>这个函数保留两个不变式：</p>
+<ol>
+<li><strong>每个 tool-use block 都有对应的 result block</strong>（即使失败也有）</li>
+<li><strong><code>tool_use_id</code> 精准回填</strong>，让 API 能配对请求和响应</li>
+</ol>
+<hr />
+<h2><code>run_tool</code>——可扩展的 Tool Routing</h2>
+<p><code>run_tool</code> 把 tool name 对应到实际函数。最简单是 <code>if/elif</code>，但生产系统通常用 dict-based registry：</p>
+<pre><code class="language-python">TOOL_REGISTRY = {
+    &quot;get_current_datetime&quot;: get_current_datetime,
+    &quot;add_duration_to_datetime&quot;: add_duration_to_datetime,
+    # 这里注册更多 tool
+}
+
+def run_tool(tool_name, tool_input):
+    if tool_name not in TOOL_REGISTRY:
+        raise ValueError(f&quot;Unknown tool: {tool_name}&quot;)
+    return TOOL_REGISTRY[tool_name](**tool_input)
+</code></pre>
+<p>Registry pattern 让「加新 tool」变成纯数据改动——不用动 loop 逻辑本身。搭配 <code>run_tools</code>，你就有一个能扩展到几十个 tool 而不用重写结构的 agent。</p>
+<hr />
+<h2>Loop 内的错误处理</h2>
+<p>Lesson 强调<strong>tool 层</strong>要做好错误处理，而不是 loop 层。当 tool 抛异常：</p>
+<ol>
+<li>在 <code>run_tools</code> 里面 catch 住</li>
+<li>建一个 <code>tool_result</code> block，<code>is_error=True</code>，错误字符串放 <code>content</code></li>
+<li>继续 loop——让 Claude 决定下一步</li>
+</ol>
+<p>Claude 处理错误的能力很强：它可能用修正后的参数重试、换别的 tool、或把失败回报给用户。你代码的工作只是忠实地把「发生什么事」传达出来。</p>
+<p><strong>不要</strong>试着隐藏错误或跳过失败的 block——那会破坏 <code>tool_use_id</code> 配对不变式，API 直接 400。</p>
+<hr />
+<h2>完整工作流程</h2>
+<pre><code>┌────────────────────────────────┐
+│ 用户送出问题                      │
+└──────────────┬─────────────────┘
+               ▼
+┌────────────────────────────────┐
+│ chat(messages, tools=[...])    │◀───────────┐
+└──────────────┬─────────────────┘            │
+               ▼                              │
+┌────────────────────────────────┐            │
+│ add_assistant_message          │            │
+│ print text_from_message        │            │
+└──────────────┬─────────────────┘            │
+               ▼                              │
+         stop_reason                          │
+        == &quot;tool_use&quot;?                        │
+        /           \                         │
+       否            是                       │
+       ▼              ▼                       │
+   ┌───────┐   ┌───────────────┐              │
+   │ break │   │ run_tools     │              │
+   └───────┘   │ (exec + wrap) │              │
+               └──────┬────────┘              │
+                      ▼                       │
+               ┌──────────────────┐           │
+               │ add_user_message │           │
+               │ (tool_results)   │───────────┘
+               └──────────────────┘
+</code></pre>
+<p>每次迭代严格交替 assistant/user message。历史会一直增长，直到 Claude 收敛到最终答案。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>用 <code>block.type == "tool_use"</code> 检查取代 <code>stop_reason</code></strong>——平时会动，但如果 Claude 送了你不想执行的 tool_use block 就会坏</li>
+<li><strong>执行 tool 前忘了 append assistant message</strong>——会破坏历史顺序，下次 API 调用会被拒</li>
+<li><strong>返回错误数量的 <code>tool_result</code> block</strong>——每个 <code>tool_use</code> 都要对应一个 result，失败也要</li>
+<li><strong>每次 loop 没带 <code>tools=[...]</code></strong>——Claude 需要 schema 才能解析历史中的 tool 引用</li>
+<li><strong>把可以并行的 tool 串行跑</strong>——IO-bound 的 tool 用 <code>asyncio.gather</code> 或 thread pool 可以大幅降延迟</li>
+<li><strong>没有 max iterations</strong>——搞混的 Claude 会无限 loop 烧 token，永远要加上限</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Agentic loop 出奇地小——大概 15 行 Python——但它是所有 agent framework（LangChain、AutoGPT、Claude Code、MCP client）的原子单位。掌握这个 pattern，你就懂所有 tool-using agent 的运作原理。信号永远是 <code>stop_reason != "tool_use"</code>；动作永远是「执行 tool 并 loop」。其他都是生产加固：并行化、缓存、观测性、迭代上限。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：这就是 THE agentic loop。<code>stop_reason</code> 检查和 loop 结构一定会考好几题。</li>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：理解 <code>run_tools</code> 如何过滤 block 并建 <code>tool_result</code> block。</li>
+<li>主要考试情境：「怎么知道何时停止 loop」、「tool 中途失败怎么办」、「一个 response 多个 tool 调用怎么处理」。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>退出 agentic loop 的确切条件是什么？</td>
+<td><code>response.stop_reason != "tool_use"</code>——不是 tool_use 就 break</td>
+</tr>
+<tr>
+<td><code>run_tools</code> 做什么？</td>
+<td>过滤 content 中的 <code>tool_use</code> block、用 <code>run_tool</code> 执行每一个、返回 <code>tool_result</code> block 的 list</td>
+</tr>
+<tr>
+<td><code>run_tools</code> 怎么处理异常？</td>
+<td>Catch 住、建一个 <code>is_error=True</code>、错误信息在 <code>content</code> 的 <code>tool_result</code> block，继续 loop</td>
+</tr>
+<tr>
+<td>为什么要用 <code>TOOL_REGISTRY</code> dict 而不是 if/elif？</td>
+<td>可扩展 routing——加新 tool 变成数据改动而非逻辑改动</td>
+</tr>
+<tr>
+<td>把 <code>tool_input</code> dict 解包成函数关键字参数的 Python 语法？</td>
+<td><code>tool_function(**tool_input)</code></td>
+</tr>
+<tr>
+<td>如果 <code>tool_result</code> block 比 <code>tool_use</code> block 少会怎样？</td>
+<td>API 会 400，说 <code>tool_use_id</code> 配对少了</td>
+</tr>
+<tr>
+<td>为什么 <code>add_assistant_message</code> 要在执行 tool 之前？</td>
+<td>保持历史顺序——assistant message 必须先存在，user tool-result message 才能引用它</td>
+</tr>
+<tr>
+<td>生产 agentic loop 必须加的最低限度安全机制是什么？</td>
+<td><code>max_iterations</code> 上限，防止 Claude 失控产生无限 loop</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

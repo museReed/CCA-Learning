@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>15 Defining Hooks Eng Zh Tw</title>
+<title>Defining Hooks Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -96,11 +96,10 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </blockquote>
 <h3>第二步 — 選擇要監控的 Tools（Matcher）</h3>
 <p><code>matcher</code> 欄位使用類似 regex 的語法來指定觸發 hook 的工具：</p>
-<pre class="highlight"><code class="language-json">&quot;matcher&quot;: &quot;Read&quot;          // 單一工具
+<pre><code class="language-json">&quot;matcher&quot;: &quot;Read&quot;          // 單一工具
 &quot;matcher&quot;: &quot;Read|Grep&quot;     // 多個工具（OR）
 &quot;matcher&quot;: &quot;.*&quot;            // 所有工具（萬用字元）
 </code></pre>
-
 <p>可以匹配的內建工具：</p>
 <table>
 <thead>
@@ -150,7 +149,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </blockquote>
 <h3>第三步 — 撰寫 Command（stdin JSON）</h3>
 <p>你的 hook command 會從 standard input 收到一個 JSON 物件：</p>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;session_id&quot;: &quot;2d6a1e4d-6...&quot;,
   &quot;transcript_path&quot;: &quot;/Users/sg/...&quot;,
   &quot;hook_event_name&quot;: &quot;PreToolUse&quot;,
@@ -160,7 +159,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 }
 </code></pre>
-
 <p>你的 command 應檢查的關鍵欄位：</p>
 <table>
 <thead>
@@ -226,7 +224,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </blockquote>
 <hr />
 <h2>完整配置範例</h2>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;hooks&quot;: {
     &quot;PreToolUse&quot;: [
       {
@@ -242,7 +240,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 }
 </code></pre>
-
 <p>這個配置的意思是：「在 Claude 呼叫 Read 或 Grep 之前，執行 <code>read_hook.js</code>。腳本從 stdin 讀取 tool call JSON，決定允許或封鎖，然後以 exit code 0 或 2 結束。」</p>
 <hr />
 <h2>反模式（考試常考）</h2>

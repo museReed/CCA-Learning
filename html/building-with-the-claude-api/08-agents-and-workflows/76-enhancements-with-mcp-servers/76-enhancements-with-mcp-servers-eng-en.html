@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enhancements With Mcp Servers Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Enhancements with MCP Servers — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration (20%) / D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (MCP integration in Claude Code), 2.3 (MCP primitives), 1.1 (Claude Code extension model)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 76</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude Code ships with a built-in MCP client, letting you extend its capabilities by registering any MCP server via <code>claude mcp add [server-name] [command-to-start-server]</code> — this is the official extension point and the reason Claude Code can grow with your workflow.</p>
+<hr />
+<h2>The MCP Extension Model</h2>
+<p>Claude Code's default toolset covers file operations, terminal, and web access. Everything else — your databases, your internal APIs, your third-party SaaS — comes in through MCP servers. The architecture:</p>
+<pre><code>┌────────────────────────────────────────┐
+│          Claude Code (CLI)             │
+│  ┌──────────────────────────────────┐  │
+│  │      Built-in tools              │  │
+│  │  File / Bash / Web / To-do       │  │
+│  └──────────────────────────────────┘  │
+│  ┌──────────────────────────────────┐  │
+│  │      MCP Client (built in)       │  │
+│  └────────┬─────────┬──────────┬────┘  │
+└───────────┼─────────┼──────────┼───────┘
+            │         │          │
+       ┌────▼──┐ ┌────▼──┐  ┌────▼──┐
+       │Sentry │ │Jira   │  │Custom │
+       │MCP    │ │MCP    │  │MCP    │
+       │Server │ │Server │  │Server │
+       └───────┘ └───────┘  └───────┘
+</code></pre>
+<p>Each MCP server can expose three types of primitives:</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>Purpose</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>Take actions</td>
+<td><code>document_path_to_markdown(path)</code></td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>Reusable templates</td>
+<td>A <code>/summarize</code> slash command</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>Access data</td>
+<td>A fixture file or a DB row</td>
+</tr>
+</tbody>
+</table>
+<p>This matches the general MCP control model you already know from the MCP course: tools are model-controlled, prompts are user-controlled, resources are app-controlled.</p>
+<hr />
+<h2>The <code>claude mcp add</code> Command</h2>
+<p>The entire registration syntax is one line:</p>
+<pre><code class="language-bash">claude mcp add [server-name] [command-to-start-server]
+</code></pre>
+<h3>Arguments</h3>
+<ul>
+<li><strong><code>server-name</code></strong> — a short identifier you choose (e.g., <code>documents</code>). This is the name Claude Code uses internally.</li>
+<li><strong><code>command-to-start-server</code></strong> — the exact shell command that starts the MCP server process. Claude Code runs it as a child process and talks to it over stdio.</li>
+</ul>
+<h3>Concrete example</h3>
+<p>If your document-processing server is started by running <code>uv run main.py</code> in its project directory, registration is:</p>
+<pre><code class="language-bash">claude mcp add documents uv run main.py
+</code></pre>
+<p>After this, the next time Claude Code starts, it automatically spawns the server and connects to it. The tools, prompts, and resources that server exposes become available to the agent.</p>
+<p>Key fact for the exam: registration is a one-time operation — after <code>claude mcp add</code>, Claude Code remembers the server and reconnects on every subsequent launch.</p>
+<hr />
+<h2>Practical Example: Document Processing</h2>
+<p>A canonical example the lesson builds: a custom MCP server exposing a <code>document_path_to_markdown</code> tool that reads PDF and Word documents and returns markdown.</p>
+<p>Workflow:</p>
+<ol>
+<li>Write the MCP server with the <code>document_path_to_markdown</code> tool.</li>
+<li>Register it: <code>claude mcp add documents uv run main.py</code>.</li>
+<li>In a Claude Code session, ask: "Convert the tests/fixtures/mcp_docs.docx file to markdown."</li>
+<li>Claude Code recognizes the intent, picks the custom tool, invokes it, and receives the markdown text.</li>
+</ol>
+<p>The user never explicitly names the tool. Claude infers which tool to use from the request, demonstrating the model-controlled nature of MCP tools.</p>
+<hr />
+<h2>Popular MCP Integrations (Exam-Relevant Catalog)</h2>
+<p>The lesson names these servers explicitly — expect recognition questions:</p>
+<table>
+<thead>
+<tr>
+<th>Server</th>
+<th>What it unlocks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>sentry-mcp</strong></td>
+<td>Automatically discover and fix bugs logged in Sentry</td>
+</tr>
+<tr>
+<td><strong>playwright-mcp</strong></td>
+<td>Gives Claude browser automation capabilities for testing and troubleshooting</td>
+</tr>
+<tr>
+<td><strong>figma-context-mcp</strong></td>
+<td>Exposes Figma designs to Claude</td>
+</tr>
+<tr>
+<td><strong>mcp-atlassian</strong></td>
+<td>Allows Claude to access Confluence and Jira</td>
+</tr>
+<tr>
+<td><strong>firecrawl-mcp-server</strong></td>
+<td>Adds web scraping capabilities to Claude</td>
+</tr>
+<tr>
+<td><strong>slack-mcp</strong></td>
+<td>Allows Claude to post messages or reply to specific threads</td>
+</tr>
+</tbody>
+</table>
+<p>Memorize the pairings — you may be asked "which MCP server would let Claude Code fix bugs logged in a monitoring platform?" and the answer is <code>sentry-mcp</code>.</p>
+<hr />
+<h2>Composing Multiple MCP Servers</h2>
+<p>The real power is combining servers to match your development process:</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>MCP server</th>
+<th>What Claude does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Triage</td>
+<td>sentry-mcp</td>
+<td>Fetch production error details</td>
+</tr>
+<tr>
+<td>Context</td>
+<td>mcp-atlassian</td>
+<td>Read the Jira ticket requirements</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>(built-in file tools)</td>
+<td>Edit the code</td>
+</tr>
+<tr>
+<td>Verify</td>
+<td>playwright-mcp</td>
+<td>Run browser tests</td>
+</tr>
+<tr>
+<td>Notify</td>
+<td>slack-mcp</td>
+<td>Post completion message in the team channel</td>
+</tr>
+</tbody>
+</table>
+<p>Each server adds a vertical slice of capability. Stacking them turns Claude Code from a coding assistant into a workflow orchestrator that can span your entire toolchain.</p>
+<p>This composition pattern — <strong>specialized servers, each doing one thing, orchestrated by the agent</strong> — is the MCP architectural ideal and shows up on the exam.</p>
+<hr />
+<h2>Why MCP Instead of "Just Add More Built-In Tools"</h2>
+<p>Design rationale (beyond the source):</p>
+<ol>
+<li><strong>Decoupling</strong> — Anthropic does not need to ship and maintain every possible tool. The ecosystem handles long-tail needs.</li>
+<li><strong>Security boundaries</strong> — Each MCP server is a separate process with its own permissions and lifetime.</li>
+<li><strong>Community contribution</strong> — Anyone can publish an MCP server; ecosystem grows without Anthropic engineering bandwidth.</li>
+<li><strong>Composition</strong> — Stacking multiple small servers is cleaner than a monolithic agent with 200 built-in tools fighting for context window space.</li>
+</ol>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Wrong command syntax</strong> — it is <code>claude mcp add [name] [command]</code>, not <code>claude mcp install</code> or <code>claude add-server</code>.</li>
+<li><strong>Forgetting that the server must be runnable</strong> — Claude Code starts the MCP server as a subprocess; the command you pass must actually launch a valid MCP server.</li>
+<li><strong>Confusing MCP with generic HTTP APIs</strong> — MCP speaks a specific protocol over stdio or SSE, not raw REST.</li>
+<li><strong>Assuming servers auto-install</strong> — Claude Code does not fetch MCP servers from a registry; you must install them yourself first, then register.</li>
+<li><strong>Re-running <code>claude mcp add</code> on every session</strong> — registration persists; you only do it once per server per machine.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The MCP extension point is the single most important architectural fact about Claude Code: its power grows not through Anthropic adding features, but through you (or the community) plugging in MCP servers. The exam-critical sentence: <strong><code>claude mcp add [server-name] [command-to-start-server]</code></strong> — memorize the exact syntax. Questions frequently test both the command and the primitive triad (tools, prompts, resources).</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Claude Code Configuration)</strong>: Direct question likely on <code>claude mcp add</code> syntax and the fact that Claude Code has an MCP client built in.</li>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know that MCP servers expose tools, prompts, and resources (the three primitives).</li>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>: Expect "compose multiple MCP servers into a workflow" scenario questions.</li>
+<li>Expect recognition questions for the named ecosystem servers (sentry-mcp, playwright-mcp, figma-context-mcp, mcp-atlassian, firecrawl-mcp-server, slack-mcp).</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What command registers an MCP server with Claude Code?</td>
+<td><code>claude mcp add [server-name] [command-to-start-server]</code></td>
+</tr>
+<tr>
+<td>What does Claude Code have built in that makes MCP extension possible?</td>
+<td>An MCP client — it can connect to any MCP server you register</td>
+</tr>
+<tr>
+<td>What are the three types of primitives an MCP server can expose to Claude Code?</td>
+<td>Tools (actions), Prompts (templates), Resources (data)</td>
+</tr>
+<tr>
+<td>How would you register a document-processing server started by <code>uv run main.py</code> and called <code>documents</code>?</td>
+<td><code>claude mcp add documents uv run main.py</code></td>
+</tr>
+<tr>
+<td>Does Claude Code reconnect to a registered MCP server automatically?</td>
+<td>Yes — registration persists, so the server is spawned automatically on every Claude Code launch</td>
+</tr>
+<tr>
+<td>Which MCP server would you use to let Claude automatically find and fix bugs from a monitoring platform?</td>
+<td><code>sentry-mcp</code></td>
+</tr>
+<tr>
+<td>Which MCP server gives Claude browser automation capabilities?</td>
+<td><code>playwright-mcp</code></td>
+</tr>
+<tr>
+<td>Which MCP server would you use to read Jira tickets or Confluence pages?</td>
+<td><code>mcp-atlassian</code></td>
+</tr>
+<tr>
+<td>Why does Claude Code use MCP instead of shipping every possible tool built in?</td>
+<td>MCP decouples the ecosystem, enables community contributions, adds process-level security boundaries, and keeps Claude Code's built-in surface small</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

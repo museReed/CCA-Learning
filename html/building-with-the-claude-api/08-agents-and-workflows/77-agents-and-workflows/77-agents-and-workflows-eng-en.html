@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agents And Workflows Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Agents and Workflows — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — PRIMARY</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (agent vs workflow definition), 1.2 (agentic patterns), 5.2 (production workflow deployment)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 77</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p><strong>Workflows</strong> are orchestrated by <em>code</em> through a predefined sequence of LLM calls; <strong>agents</strong> are orchestrated by the <em>LLM itself</em>, which decides the next step given a goal and a set of tools. The choice between them comes down to how well you can specify the task flow in advance.</p>
+<hr />
+<h2>The Fundamental Distinction (ALWAYS TESTED)</h2>
+<p>This distinction is from Anthropic's "Building Effective Agents" blog post (December 2024) and is the single most-tested concept in D1 of the CCA exam.</p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Workflow</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Control flow</strong></td>
+<td>Predefined in code</td>
+<td>LLM decides dynamically</td>
+</tr>
+<tr>
+<td><strong>Who orchestrates</strong></td>
+<td>Your Python/TS code</td>
+<td>Claude (via tool use loop)</td>
+</tr>
+<tr>
+<td><strong>Task shape</strong></td>
+<td>Known and repeatable</td>
+<td>Open-ended</td>
+</tr>
+<tr>
+<td><strong>Steps</strong></td>
+<td>Fixed sequence (or fixed branching)</td>
+<td>Emergent — depends on runtime context</td>
+</tr>
+<tr>
+<td><strong>Predictability</strong></td>
+<td>High — easy to test and trace</td>
+<td>Lower — requires evals + guardrails</td>
+</tr>
+<tr>
+<td><strong>Best when</strong></td>
+<td>You can draw the flowchart</td>
+<td>You cannot enumerate all paths</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Canonical definition (memorize this):</strong></p>
+<blockquote>
+<p>Workflows are a series of calls to Claude meant to solve a specific problem through a <em>predetermined</em> series of steps. Agents give Claude a goal and a set of tools, expecting Claude to figure out how to complete the goal through the provided tools.</p>
+</blockquote>
+<hr />
+<h2>Decision Heuristic</h2>
+<p>Ask yourself: <strong>"Can I draw a flowchart of the solution before runtime?"</strong></p>
+<ul>
+<li><strong>Yes → workflow.</strong> Encode the flowchart in code. You stay in control.</li>
+<li><strong>No → agent.</strong> Give Claude tools and a goal, then run a tool-use loop.</li>
+</ul>
+<p>A related test: if your app's UX constrains users to a known set of tasks (upload image → get STEP file), it's almost always a workflow. If users type freeform requests (a coding assistant, a research helper), it's almost always an agent.</p>
+<hr />
+<h2>Worked Example: Image to CAD Workflow</h2>
+<p>The lesson walks through a web app where users drop an image of a metal part and receive a STEP file (3D CAD format):</p>
+<pre><code class="language-python">def image_to_cad_workflow(image_bytes: bytes) -&gt; bytes:
+    # Step 1: describe the object
+    description = claude_describe_image(image_bytes)
+
+    # Step 2: generate CadQuery code from description
+    cad_code = claude_write_cadquery(description)
+
+    # Step 3: execute code to produce a rendering
+    rendering = run_cadquery(cad_code)
+
+    # Step 4: grader loop (evaluator-optimizer)
+    for attempt in range(MAX_ATTEMPTS):
+        grade = claude_grade(image_bytes, rendering)
+        if grade.accepted:
+            return export_step(cad_code)
+        cad_code = claude_fix(cad_code, grade.feedback)
+        rendering = run_cadquery(cad_code)
+
+    raise RuntimeError(&quot;Grader never accepted output&quot;)
+</code></pre>
+<p>The code owns the control flow. Claude is called as a <em>function</em> four times per iteration. This is the hallmark of a workflow.</p>
+<hr />
+<h2>The Evaluator-Optimizer Pattern</h2>
+<p>The CAD example above is an instance of the <strong>Evaluator-Optimizer</strong> pattern from Anthropic's blog:</p>
+<ul>
+<li><strong>Producer</strong> — takes input, creates output (the CadQuery modeler)</li>
+<li><strong>Grader / Evaluator</strong> — scores the output against criteria</li>
+<li><strong>Feedback loop</strong> — if not accepted, send feedback back to producer</li>
+<li><strong>Iteration</strong> — repeat until accepted or max attempts</li>
+</ul>
+<p>This pattern gives you self-correcting behavior <em>without</em> handing control to Claude. The code decides when to stop, when to retry, and how many attempts are allowed — all critical properties for production systems.</p>
+<p>Other named workflow patterns from the same blog post:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Core Idea</th>
+<th>Lesson Coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt chaining</td>
+<td>Sequential LLM calls, output feeds input</td>
+<td>Lesson 79</td>
+</tr>
+<tr>
+<td>Parallelization</td>
+<td>Split a task into parallel sub-tasks and aggregate</td>
+<td>Lesson 78</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td>Classifier picks a specialized handler</td>
+<td>Lesson 80</td>
+</tr>
+<tr>
+<td>Orchestrator-workers</td>
+<td>Central LLM delegates to worker LLMs</td>
+<td>Later lessons</td>
+</tr>
+<tr>
+<td>Evaluator-optimizer</td>
+<td>Producer + grader feedback loop</td>
+<td>Lesson 77</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Why the Distinction Matters in Production</h2>
+<p>The workflow-vs-agent choice has direct consequences on:</p>
+<ol>
+<li><strong>Observability</strong> — workflow steps are trivial to log (one span per node); agent traces are variable-length and harder to compare across runs.</li>
+<li><strong>Cost control</strong> — workflows have known step counts; agents can loop unexpectedly (budget-exhaustion is a real production failure mode).</li>
+<li><strong>Eval strategy</strong> — workflows can be evaluated per-step; agents need end-to-end evals on diverse trajectories.</li>
+<li><strong>Failure modes</strong> — workflow failures are in <em>your code</em>; agent failures are in <em>Claude's decisions</em> and require prompt + tool redesign.</li>
+<li><strong>Time to first success</strong> — workflows are faster to ship; agents usually require iteration on the tool set and system prompt.</li>
+</ol>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Reaching for an agent when a workflow would do.</strong> If you can draw the flowchart, a workflow is cheaper, more reliable, and easier to debug. Anthropic explicitly recommends starting with workflows.</li>
+<li><strong>Calling everything an "agent."</strong> Multi-step prompt chains with no runtime LLM control flow are workflows, not agents. Precision matters on the exam.</li>
+<li><strong>Forgetting the evaluator-optimizer loop has a max-attempts cap.</strong> Without it, a bad grader can run forever and exhaust your budget.</li>
+<li><strong>Assuming workflows cannot use tools.</strong> Workflows can absolutely call tools — the distinction is about who decides the <em>sequence</em>, not whether tools exist.</li>
+<li><strong>Treating workflow patterns as theory.</strong> You still have to write the code. The patterns are recipes, not frameworks.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The difference between a workflow and an agent is <strong>who owns the control flow</strong>. In a workflow, your code owns it. In an agent, Claude owns it. Everything else — observability, cost, eval strategy, failure mode — flows from that one question. The CCA exam will often phrase this indirectly ("predetermined steps" = workflow, "Claude decides next action" = agent) — train yourself to spot the signal words.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (22%) PRIMARY</strong>: Lesson 77 is the foundational chapter for the most-tested domain. Expect at least one question that asks you to classify a scenario as agent vs workflow.</li>
+<li><strong>D5 (20%) SECONDARY</strong>: Production deployment considerations (observability, cost, eval strategy) are tied to the choice.</li>
+<li>Signal words that point to a <strong>workflow</strong>: "predetermined series", "fixed steps", "orchestrated by code", "pipeline".</li>
+<li>Signal words that point to an <strong>agent</strong>: "given a goal and tools", "Claude decides", "autonomous", "open-ended task".</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the core difference between a workflow and an agent?</td>
+<td>Who owns control flow — workflow = code; agent = Claude</td>
+</tr>
+<tr>
+<td>Give the canonical one-line definition of a workflow.</td>
+<td>A series of calls to Claude that solves a problem through a predetermined series of steps</td>
+</tr>
+<tr>
+<td>Give the canonical one-line definition of an agent.</td>
+<td>Give Claude a goal and a set of tools, and let Claude figure out how to complete the goal</td>
+</tr>
+<tr>
+<td>What heuristic decides workflow vs agent?</td>
+<td>Can you draw the flowchart before runtime? Yes → workflow, No → agent</td>
+</tr>
+<tr>
+<td>What is the evaluator-optimizer pattern?</td>
+<td>Producer creates output, grader evaluates it, feedback loops back until accepted</td>
+</tr>
+<tr>
+<td>Name 4 workflow patterns from Anthropic's "Building Effective Agents".</td>
+<td>Prompt chaining, parallelization, routing, evaluator-optimizer (also orchestrator-workers)</td>
+</tr>
+<tr>
+<td>Why does Anthropic recommend starting with workflows?</td>
+<td>They are cheaper, more observable, easier to test, and faster to ship than agents</td>
+</tr>
+<tr>
+<td>What production risk is unique to agents vs workflows?</td>
+<td>Unbounded step counts / budget exhaustion — agents can loop indefinitely if guardrails are missing</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Text Edit Tool Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Text Editor Tool — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%), D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (built-in / server tools), 2.1 (tool schema &amp; selection), 1.2 (tool orchestration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 42</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The text editor tool is a built-in Anthropic tool where Claude already knows the full schema — you only declare a tiny stub (<code>type</code> + <code>name</code>) and provide the local file-operation implementations that execute Claude's commands.</p>
+<hr />
+<h2>What Makes It a "Built-In" Tool</h2>
+<p>Most tools require you to author two things:</p>
+<ol>
+<li>A full JSON schema describing every parameter</li>
+<li>The Python function that executes the tool</li>
+</ol>
+<p>The text editor tool is different. Anthropic ships a <strong>predefined tool schema</strong> inside the model, covering all the file operations Claude supports. You:</p>
+<ul>
+<li>Do <strong>not</strong> define parameters like <code>path</code>, <code>command</code>, <code>old_str</code>, <code>new_str</code></li>
+<li>Do <strong>not</strong> write the full JSON schema</li>
+<li><strong>Do</strong> declare a small stub telling Claude "enable this built-in tool"</li>
+<li><strong>Do</strong> write the local functions that actually manipulate files when Claude invokes a command</li>
+</ul>
+<p>Claude's side is hidden; your side still matters.</p>
+<hr />
+<h2>Supported Operations</h2>
+<p>The text editor tool gives Claude the ability to behave like a local software engineer with a real editor:</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>What It Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>view</strong></td>
+<td>Read a file or list a directory; can view specific line ranges</td>
+</tr>
+<tr>
+<td><strong>create</strong></td>
+<td>Create a new file with initial contents</td>
+</tr>
+<tr>
+<td><strong>str_replace</strong></td>
+<td>Replace one string in a file with another (the most common edit)</td>
+</tr>
+<tr>
+<td><strong>insert</strong></td>
+<td>Insert text at a specific line number</td>
+</tr>
+<tr>
+<td><strong>undo_edit</strong></td>
+<td>Undo the most recent edit to a file</td>
+</tr>
+</tbody>
+</table>
+<p>Together these cover the core editing vocabulary — read, write, create, modify, revert.</p>
+<hr />
+<h2>Declaring the Stub</h2>
+<p>The exact stub depends on the Claude model family you are using. The lesson shows a helper:</p>
+<pre><code class="language-python">def get_text_edit_schema(model: str) -&gt; dict:
+    if model.startswith(&quot;claude-3-7-sonnet&quot;):
+        return {
+            &quot;type&quot;: &quot;text_editor_20250124&quot;,
+            &quot;name&quot;: &quot;str_replace_editor&quot;,
+        }
+    elif model.startswith(&quot;claude-3-5-sonnet&quot;):
+        return {
+            &quot;type&quot;: &quot;text_editor_20241022&quot;,
+            &quot;name&quot;: &quot;str_replace_editor&quot;,
+        }
+    # Check Anthropic docs for the latest version string for your model
+</code></pre>
+<p>Important notes:</p>
+<ul>
+<li><code>type</code> is <strong>versioned</strong> per model family. The version string must match your model. Anthropic publishes the mapping at <code>docs.anthropic.com/en/docs/agents-and-tools/tool-use/text-editor-tool</code>.</li>
+<li><code>name</code> is fixed per version (e.g., <code>str_replace_editor</code> for the above versions).</li>
+<li>Claude expands this stub internally into the full schema — you never see the parameter definitions.</li>
+</ul>
+<hr />
+<h2>Pass It Like Any Other Tool</h2>
+<pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+model = &quot;claude-3-5-sonnet-20241022&quot;
+
+response = client.messages.create(
+    model=model,
+    max_tokens=2048,
+    tools=[get_text_edit_schema(model)],
+    messages=[
+        {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Open ./main.py and summarize its contents&quot;},
+    ],
+)
+</code></pre>
+<p>Claude will respond with a <code>tool_use</code> block whose <code>name</code> is <code>str_replace_editor</code> and whose <code>input</code> contains the command Claude wants to run (e.g., <code>{"command": "view", "path": "./main.py"}</code>). Your code must dispatch on <code>input["command"]</code> and perform the operation.</p>
+<hr />
+<h2>Providing the Implementation</h2>
+<p>You are responsible for actually touching the filesystem. A minimal dispatcher:</p>
+<pre><code class="language-python">def run_text_editor(tool_input: dict) -&gt; str:
+    command = tool_input[&quot;command&quot;]
+    path = tool_input[&quot;path&quot;]
+
+    if command == &quot;view&quot;:
+        with open(path) as f:
+            return f.read()
+
+    elif command == &quot;create&quot;:
+        with open(path, &quot;w&quot;) as f:
+            f.write(tool_input[&quot;file_text&quot;])
+        return f&quot;Created {path}&quot;
+
+    elif command == &quot;str_replace&quot;:
+        with open(path) as f:
+            content = f.read()
+        new_content = content.replace(
+            tool_input[&quot;old_str&quot;],
+            tool_input[&quot;new_str&quot;],
+            1,
+        )
+        with open(path, &quot;w&quot;) as f:
+            f.write(new_content)
+        return &quot;Replacement complete&quot;
+
+    elif command == &quot;insert&quot;:
+        # Insert text at tool_input[&quot;insert_line&quot;]
+        ...
+
+    elif command == &quot;undo_edit&quot;:
+        # Restore the previous version
+        ...
+
+    else:
+        return f&quot;Unknown command: {command}&quot;
+</code></pre>
+<p>You decide:</p>
+<ul>
+<li>What filesystem counts as Claude's sandbox</li>
+<li>Whether to allow writes, reads only, or restricted paths</li>
+<li>Whether to keep an undo stack for <code>undo_edit</code></li>
+</ul>
+<hr />
+<h2>Example Workflow</h2>
+<p>Prompt: <em>"Open ./main.py, add a function to compute pi to the 5th digit, then create ./test.py with unit tests."</em></p>
+<p>Claude's turn sequence:</p>
+<ol>
+<li><code>tool_use</code>: <code>view ./main.py</code></li>
+<li>Your code returns the file contents</li>
+<li><code>tool_use</code>: <code>str_replace</code> to inject the new function</li>
+<li>Your code applies the replacement and confirms</li>
+<li><code>tool_use</code>: <code>create ./test.py</code> with unit test contents</li>
+<li>Your code creates the file and confirms</li>
+<li>Final assistant text: "Done — added <code>compute_pi</code> and wrote tests."</li>
+</ol>
+<p>Each <code>tool_use</code> is a separate round trip through your agentic loop.</p>
+<hr />
+<h2>Why the Text Editor Tool Exists</h2>
+<p>Given that modern editors already have AI assistants built in, why expose this from the API? Because it enables:</p>
+<ul>
+<li><strong>Applications</strong> that need to programmatically edit files (e.g., codemod services, migration bots)</li>
+<li><strong>Agent environments</strong> without access to a full-featured editor</li>
+<li><strong>Claude-powered applications</strong> that want to embed file editing capabilities natively</li>
+<li><strong>Headless automation</strong> in CI pipelines</li>
+</ul>
+<p>In short, it lets you replicate "AI code editor" functionality inside your own product, with fine-grained control over the file system surface.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Using the wrong version string for your model</strong> — <code>text_editor_20241022</code> with a 3.7 Sonnet model, or vice versa. Always look up the current mapping in Anthropic's docs.</li>
+<li><strong>Trying to write a full JSON schema</strong> — you only provide the stub; Claude already knows the parameters.</li>
+<li><strong>Not implementing <code>undo_edit</code></strong> — if Claude tries to revert and your handler ignores it, the workflow breaks.</li>
+<li><strong>Running the tool without a sandbox</strong> — the text editor lets Claude write arbitrary files on disk. Scope it to a directory and validate paths.</li>
+<li><strong>Forgetting that <code>view</code> can target directories</strong> — you must support listing directories, not only reading files.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>"Built-in" describes the <strong>schema</strong>, not the <strong>execution</strong>. Anthropic provides the schema knowledge inside the model, but you still write the Python code that actually touches the filesystem. The text editor tool is a hybrid: Anthropic knows the API; you own the runtime.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>: The text editor tool is the canonical example of a built-in (schema-provided) tool where the developer supplies execution logic.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Chain of file operations (view → edit → create → test) is a typical multi-turn agentic pattern.</li>
+<li>Expect questions contrasting built-in tools (like text editor) with server tools (like web search) where Anthropic handles execution entirely.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What must you declare to use the text editor tool?</td>
+<td>A small stub with <code>type</code> (versioned) and <code>name</code> (e.g., <code>str_replace_editor</code>)</td>
+</tr>
+<tr>
+<td>Who provides the schema for the text editor tool?</td>
+<td>Anthropic — Claude already knows the parameters; you do not define them</td>
+</tr>
+<tr>
+<td>Who provides the implementation for the text editor tool?</td>
+<td>The developer — you write the filesystem-manipulating functions that execute Claude's commands</td>
+</tr>
+<tr>
+<td>What operations does the text editor tool support?</td>
+<td>view, create, str_replace, insert, undo_edit</td>
+</tr>
+<tr>
+<td>Why does the <code>type</code> string contain a date (e.g., <code>text_editor_20241022</code>)?</td>
+<td>Because the schema is versioned per Claude model family; the version must match your model</td>
+</tr>
+<tr>
+<td>Can Claude request to view a directory with this tool?</td>
+<td>Yes — <code>view</code> works on both files and directories</td>
+</tr>
+<tr>
+<td>What is the main risk of running the text editor tool unsandboxed?</td>
+<td>Claude can write arbitrary files; path validation and a sandbox directory are essential</td>
+</tr>
+<tr>
+<td>Why does this tool exist when editors already have AI built in?</td>
+<td>To let Claude-powered applications embed programmatic file editing, useful for codemods, agents, and headless automation</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

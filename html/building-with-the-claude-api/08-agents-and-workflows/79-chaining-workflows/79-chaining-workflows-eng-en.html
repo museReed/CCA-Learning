@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chaining Workflows Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Chaining Workflows — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — PRIMARY</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2 (agentic patterns — chaining), 5.2 (production workflow deployment)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 79</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Chaining is the simplest and most useful workflow pattern: break a complex task into a sequence of focused LLM calls where each step's output feeds the next — the opposite of parallelization, used when later steps <em>depend on</em> earlier ones.</p>
+<hr />
+<h2>What Is Prompt Chaining</h2>
+<p>From Anthropic's "Building Effective Agents" blog post, <strong>prompt chaining</strong> decomposes a task into a sequence of steps, where each LLM call processes the output of the previous one. This pattern is ideal when you can cleanly decompose a task but each step depends on the prior step's results.</p>
+<p>The key signal that you need chaining: you can list the steps in order, and step N+1 genuinely needs step N's output.</p>
+<hr />
+<h2>The Social Media Example from the Lesson</h2>
+<p>The lesson walks through a social media marketing tool that auto-generates and posts videos:</p>
+<pre><code>1. Find related trending topics on Twitter       (non-LLM)
+2. Select the most interesting topic              (Claude)
+3. Research the topic                             (Claude)
+4. Write a script for a short-form video          (Claude)
+5. Generate video with AI avatar + text-to-speech (non-LLM)
+6. Post to social media                           (non-LLM)
+</code></pre>
+<p>Key observations:<br />
+- <strong>Not every step is an LLM call.</strong> Chains can interleave LLM and non-LLM processing (step 1 is Twitter API, step 5 is a video pipeline, step 6 is a posting API).<br />
+- <strong>Each LLM step is focused.</strong> Claude picks a topic in step 2, researches in step 3, writes a script in step 4 — never all three in one prompt.<br />
+- <strong>Outputs are passed forward.</strong> The chosen topic becomes input to the research step; the research becomes input to the script.</p>
+<hr />
+<h2>Why Chain Instead of One Big Prompt</h2>
+<p>Chaining gives you:</p>
+<ol>
+<li><strong>Focused attention per step.</strong> Claude does one thing well instead of juggling everything.</li>
+<li><strong>Non-LLM processing hooks.</strong> Between steps, your code can validate, transform, fetch data, or short-circuit.</li>
+<li><strong>Testability.</strong> Each step has a clean input/output contract — easy to unit-test and eval.</li>
+<li><strong>Observability.</strong> Failures are localized to a specific step, not buried in a single monolithic prompt.</li>
+<li><strong>Partial reruns.</strong> If step 3 of 5 fails, you can rerun from step 3 instead of starting over.</li>
+</ol>
+<hr />
+<h2>The Long Prompt Problem (The Lesson's Core Motivation)</h2>
+<p>Even with carefully worded constraints, Claude sometimes ignores rules in long prompts. The lesson gives an example: writing a technical article that:</p>
+<ul>
+<li>must not mention AI authorship</li>
+<li>must avoid emojis</li>
+<li>must skip clichéd / casual language</li>
+<li>must be professional and technical</li>
+</ul>
+<p>A single prompt trying to enforce all four constraints <em>and</em> generate a good article often produces output that violates one or more rules.</p>
+<h3>The Chaining Solution</h3>
+<p>Split into two steps:</p>
+<p><strong>Step 1 — First draft</strong></p>
+<pre><code class="language-python">draft = claude.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=2048,
+    messages=[{&quot;role&quot;: &quot;user&quot;,
+               &quot;content&quot;: f&quot;Write a technical article about {topic}.&quot;}]
+).content[0].text
+</code></pre>
+<p><strong>Step 2 — Focused revision</strong></p>
+<pre><code class="language-python">final = claude.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=2048,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: f&quot;&quot;&quot;
+Revise the article provided below.
+
+Follow these steps to rewrite the article:
+1. Identify any location where the text identifies the author as an AI and remove them
+2. Find and remove all emojis
+3. Locate any cringey writing and replace it with text that would be written by a technical writer
+
+&lt;article&gt;
+{draft}
+&lt;/article&gt;
+&quot;&quot;&quot;}]
+).content[0].text
+</code></pre>
+<p>In step 2, Claude is not trying to <em>create</em> a good article <em>and</em> satisfy constraints — it is only enforcing constraints on an already-written article. The focused task succeeds where the combined task fails.</p>
+<hr />
+<h2>Canonical Python Implementation</h2>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+def call_claude(system: str, user: str) -&gt; str:
+    resp = client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=2048,
+        system=system,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: user}],
+    )
+    return resp.content[0].text
+
+def social_media_chain(keyword: str) -&gt; str:
+    # Step 1: non-LLM — fetch trends
+    trends = twitter_api.fetch_trends(keyword)
+
+    # Step 2: LLM — pick the best topic
+    topic = call_claude(
+        system=&quot;You pick the most engaging trend.&quot;,
+        user=f&quot;Trends:\n{trends}\n\nReturn the single best topic.&quot;,
+    )
+
+    # Step 3: LLM — research the topic (with error check)
+    research = call_claude(
+        system=&quot;You are a concise researcher.&quot;,
+        user=f&quot;Research the topic: {topic}&quot;,
+    )
+    if len(research) &lt; 100:
+        raise RuntimeError(&quot;Research step returned too little content&quot;)
+
+    # Step 4: LLM — write a script using research
+    script = call_claude(
+        system=&quot;You write 60-second video scripts.&quot;,
+        user=f&quot;Write a script using this research:\n{research}&quot;,
+    )
+
+    # Step 5: non-LLM — synthesize video
+    video = video_pipeline.synthesize(script)
+
+    # Step 6: non-LLM — post
+    return social_media.post(video)
+</code></pre>
+<p>Each step has a clear contract, an error-handling hook, and can be replaced independently.</p>
+<hr />
+<h2>Error Propagation in Chains</h2>
+<p>Because each step depends on the previous one, chains must handle errors deliberately:</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Description</th>
+<th>Use When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Fail fast</strong></td>
+<td>Raise on first failure</td>
+<td>Early prototype, simple flows</td>
+</tr>
+<tr>
+<td><strong>Retry step</strong></td>
+<td>Retry the failing step with backoff</td>
+<td>Transient API errors</td>
+</tr>
+<tr>
+<td><strong>Validate then branch</strong></td>
+<td>Inspect step output, choose next step</td>
+<td>Output quality varies (e.g., empty research)</td>
+</tr>
+<tr>
+<td><strong>Graceful degradation</strong></td>
+<td>Skip non-critical steps</td>
+<td>Optional enrichment steps</td>
+</tr>
+<tr>
+<td><strong>Replay from checkpoint</strong></td>
+<td>Persist step outputs, resume on retry</td>
+<td>Long chains, expensive calls</td>
+</tr>
+</tbody>
+</table>
+<p>A production chain typically combines all five, with each step wrapped in retry + validation.</p>
+<hr />
+<h2>Chaining vs Parallelization vs Agents</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Chaining</th>
+<th>Parallelization</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Step dependencies</td>
+<td>Yes (sequential)</td>
+<td>No (independent)</td>
+<td>Decided at runtime</td>
+</tr>
+<tr>
+<td>Control flow</td>
+<td>Code</td>
+<td>Code</td>
+<td>LLM</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>Sum of step latencies</td>
+<td>Max of step latencies</td>
+<td>Variable</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>Sum of step costs</td>
+<td>Sum of step costs</td>
+<td>Variable</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Complex multi-step tasks with dependencies</td>
+<td>Complex decisions across independent criteria</td>
+<td>Open-ended tasks</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Building an agent when chaining would do.</strong> If you can list the steps, chaining is simpler and more reliable than handing the flow to Claude.</li>
+<li><strong>Chains that are too long.</strong> Each step is a potential failure point. If you have 10+ LLM calls in a chain, consider splitting into multiple chains with checkpoints.</li>
+<li><strong>Forgetting to pass context between steps.</strong> Step 4 needs step 3's output — do not assume Claude remembers; explicitly inject it.</li>
+<li><strong>No error handling between steps.</strong> A single bad step can propagate garbage all the way to the final output. Validate between steps.</li>
+<li><strong>Chaining what should be a single call.</strong> Not every task needs to be chained. If one prompt works reliably, use one prompt.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Chaining is the "break the long prompt problem" pattern. When Claude ignores constraints in a monolithic prompt, split the task: one call to create, another to enforce. This focused-attention principle extends to any multi-step task where the next step genuinely needs the previous step's output. For the exam, remember: <strong>chaining has sequential dependencies, parallelization does not.</strong></p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (22%) PRIMARY</strong>: Chaining is one of the four core workflow patterns. Expect a scenario question distinguishing it from parallelization and routing.</li>
+<li><strong>D5 (20%) SECONDARY</strong>: Production chains need error handling, checkpoints, and validation between steps.</li>
+<li>Signal words for chaining: "sequential", "output of step N feeds step N+1", "focus on one aspect at a time", "break down into steps".</li>
+<li>Key distinction: chaining = sequential dependencies; parallelization = independent sub-tasks.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is prompt chaining?</td>
+<td>Break a task into sequential LLM calls where each step's output feeds the next</td>
+</tr>
+<tr>
+<td>How does chaining differ from parallelization?</td>
+<td>Chaining has sequential dependencies; parallelization runs independent sub-tasks concurrently</td>
+</tr>
+<tr>
+<td>What is "the long prompt problem" that chaining solves?</td>
+<td>Claude ignores constraints in monolithic prompts; splitting into create + revise steps enforces them reliably</td>
+</tr>
+<tr>
+<td>Can chains include non-LLM steps?</td>
+<td>Yes — chains often interleave LLM calls with API calls, validation, and data transforms</td>
+</tr>
+<tr>
+<td>What is the two-step chaining solution for constraint enforcement?</td>
+<td>Step 1: generate initial draft. Step 2: dedicated revision pass that enforces each rule</td>
+</tr>
+<tr>
+<td>Name four error-handling strategies for chains.</td>
+<td>Fail-fast, retry-step, validate-then-branch, graceful degradation, replay-from-checkpoint</td>
+</tr>
+<tr>
+<td>What is the trade-off between chaining and parallelization?</td>
+<td>Chaining sums latencies (slower) but supports dependencies; parallelization maxes latency but requires independence</td>
+</tr>
+<tr>
+<td>When should you NOT use chaining?</td>
+<td>When a single prompt works reliably, or when sub-tasks can run independently (use parallelization)</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

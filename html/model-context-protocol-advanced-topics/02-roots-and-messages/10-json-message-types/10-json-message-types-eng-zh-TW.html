@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>10 Json Message Types Eng Zh Tw</title>
+<title>Json Message Types Eng Zh Tw</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -133,7 +133,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </tr>
 </tbody>
 </table>
-<pre class="highlight"><code class="language-json">// 範例：CallToolRequest
+<pre><code class="language-json">// 範例：CallToolRequest
 {
   &quot;jsonrpc&quot;: &quot;2.0&quot;,
   &quot;id&quot;: 1,
@@ -160,7 +160,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 }
 </code></pre>
-
 <p>注意 <code>id</code> 欄位 — 它關聯 request 和對應的 result（JSON-RPC 2.0 標準）。</p>
 <hr />
 <h2>Notifications</h2>
@@ -202,7 +201,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </tr>
 </tbody>
 </table>
-<pre class="highlight"><code class="language-json">// 範例：ProgressNotification（沒有 &quot;id&quot; 欄位）
+<pre><code class="language-json">// 範例：ProgressNotification（沒有 &quot;id&quot; 欄位）
 {
   &quot;jsonrpc&quot;: &quot;2.0&quot;,
   &quot;method&quot;: &quot;notifications/progress&quot;,
@@ -213,12 +212,11 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 }
 </code></pre>
-
 <p>與 request 的關鍵差異：<strong>沒有 <code>id</code> 欄位</strong> = notification。</p>
 <hr />
 <h2>雙向協議</h2>
 <p>MCP 是雙向的 — 兩端都能發起通訊：</p>
-<pre class="highlight"><code>Client                          Server
+<pre><code>Client                          Server
   |                               |
   |-- InitializeRequest ---------&gt;|  (Client 發起)
   |&lt;-- InitializeResult ----------|
@@ -233,7 +231,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   |                               |
   |-- RootsListChanged ----------&gt;|  (Client 推送 notification)
 </code></pre>
-
 <p>這不同於簡單的 HTTP API（只有 client 發起）。MCP 中雙方都是 peer。</p>
 <hr />
 <h2>規格文件</h2>
@@ -244,7 +241,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <li>Server 可用任何語言撰寫（Python, Go, Rust 等）</li>
 <li>TypeScript 型別作為所有實作的標準參考</li>
 </ul>
-<pre class="highlight"><code class="language-typescript">// 來自規格 — 定義結構，非執行期程式碼
+<pre><code class="language-typescript">// 來自規格 — 定義結構，非執行期程式碼
 interface CallToolRequest {
   method: &quot;tools/call&quot;;
   params: {
@@ -253,7 +250,6 @@ interface CallToolRequest {
   };
 }
 </code></pre>
-
 <hr />
 <h2>Client vs. Server 訊息</h2>
 <p>理解哪端發送什麼：</p>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Handling Message Blocks Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Handling Message Blocks — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) / D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (content block handling), 2.1 (tool schema integration), 1.2 (agentic loop foundation)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 36</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>When tools are enabled, Claude returns a list of typed content blocks (<code>TextBlock</code>, <code>ToolUseBlock</code>) instead of a single text string, and your code must iterate over them, preserve the full structure in conversation history, and dispatch on block type.</p>
+<hr />
+<h2>The Shift From Text-Only to Multi-Block Responses</h2>
+<p>Without tools, <code>response.content</code> is functionally a single <code>TextBlock</code>. With <code>tools=[...]</code> in the request, Claude can decide to call a function, and the assistant message becomes a <strong>heterogeneous list</strong>:</p>
+<pre><code class="language-python">response = client.messages.create(
+    model=model,
+    max_tokens=1000,
+    messages=messages,
+    tools=[get_current_datetime_schema],
+)
+
+# response.content is now a list of blocks:
+# [TextBlock(text=&quot;I can help you find the current time...&quot;),
+#  ToolUseBlock(id=&quot;toolu_01...&quot;, name=&quot;get_current_datetime&quot;, input={})]
+</code></pre>
+<p>The fundamental change: <code>response.content</code> is <strong>always a list of blocks</strong>, and any given turn may mix narration text with one or more tool-use requests.</p>
+<hr />
+<h2>Anatomy of a <code>ToolUseBlock</code></h2>
+<p>Each tool-use block carries four fields your code must handle:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>Always <code>"tool_use"</code> — use this to filter blocks by type</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td>Unique per-call ID (e.g., <code>toolu_01A09q90qw...</code>). You must echo this back in the matching <code>tool_result</code></td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>Function name the model chose (must match a schema you registered)</td>
+</tr>
+<tr>
+<td><code>input</code></td>
+<td>Dict of arguments conforming to the tool's <code>input_schema</code></td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-python">for block in response.content:
+    if block.type == &quot;tool_use&quot;:
+        tool_id = block.id
+        tool_name = block.name
+        tool_args = block.input  # dict, unpack with **
+</code></pre>
+<hr />
+<h2>Preserving Content in Conversation History</h2>
+<p>Claude is stateless — <strong>you</strong> manage history. When the assistant returns multi-block content, you must append the <strong>entire <code>response.content</code> list</strong>, not just the text:</p>
+<pre><code class="language-python">messages.append({
+    &quot;role&quot;: &quot;assistant&quot;,
+    &quot;content&quot;: response.content   # keep ALL blocks, including ToolUseBlock
+})
+</code></pre>
+<p>If you flatten this to a string or drop the tool-use block, the next API call will fail because the subsequent <code>tool_result</code> block (in a user message) will reference a <code>tool_use_id</code> that no longer exists in history. The API enforces this pairing strictly.</p>
+<hr />
+<h2><code>stop_reason</code> as the Loop Signal</h2>
+<p>Alongside the content list, each response has a <code>stop_reason</code>. When Claude emits a tool-use block, <code>stop_reason == "tool_use"</code>. This is the canonical signal that your code must execute a tool and send results back before getting a final answer. Other common values: <code>"end_turn"</code> (Claude is done), <code>"max_tokens"</code>, <code>"stop_sequence"</code>.</p>
+<hr />
+<h2>Updating Helper Functions for Multi-Block Content</h2>
+<p>If you previously wrote helpers that assumed text-only content:</p>
+<pre><code class="language-python"># Old (text-only) — BREAKS with tools
+def add_assistant_message(messages, text):
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: text})
+</code></pre>
+<p>Upgrade them to accept either a string or a full <code>Message</code> object:</p>
+<pre><code class="language-python">from anthropic.types import Message
+
+def add_assistant_message(messages, message):
+    content = message.content if isinstance(message, Message) else message
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: content})
+</code></pre>
+<p>This polymorphism is essential once you introduce tools — every call site that used to pass a string now needs to handle typed block lists.</p>
+<hr />
+<h2>The Complete Tool-Use Flow (Single Turn)</h2>
+<ol>
+<li>Send user message + <code>tools=[...]</code> schema list</li>
+<li>Receive assistant message with <code>content = [TextBlock, ToolUseBlock]</code> and <code>stop_reason="tool_use"</code></li>
+<li>Iterate <code>response.content</code>, find <code>ToolUseBlock</code>, extract <code>id</code>, <code>name</code>, <code>input</code></li>
+<li>Execute the real function locally</li>
+<li>Append a user message containing a <code>tool_result</code> block referencing the same <code>id</code></li>
+<li>Re-call the API (still passing <code>tools=[...]</code>) to get the final natural-language answer</li>
+</ol>
+<p>Each step depends on preserving the full block structure — skipping any part breaks the chain.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Treating <code>response.content</code> as a string</strong> — it is a list of typed blocks when tools are enabled. Use <code>response.content[0].text</code> or iterate.</li>
+<li><strong>Dropping the <code>ToolUseBlock</code> when storing history</strong> — the next turn's <code>tool_result</code> will reference an <code>id</code> the API cannot find, causing a 400 error.</li>
+<li><strong>Assuming exactly one block per response</strong> — Claude may emit narration text plus one or more tool-use blocks in the same turn.</li>
+<li><strong>Forgetting to pass <code>tools=[...]</code> on the follow-up call</strong> — even after you have the tool result, Claude needs the schema to resolve the tool references in history.</li>
+<li><strong>Using block index (<code>content[1]</code>) instead of filtering by <code>type</code></strong> — Claude may omit the text block or change block order; always filter on <code>block.type == "tool_use"</code>.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The moment you add <code>tools=[...]</code> to a request, you cross a contract boundary: responses become heterogeneous block lists and history must preserve exact block identity (especially <code>tool_use_id</code>). Code that assumed "assistant content is a string" will silently break, and the failures surface as cryptic 400s on subsequent turns. Write helpers that accept <code>Message</code> objects from day one.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Understand the <code>TextBlock</code> vs <code>ToolUseBlock</code> distinction and how <code>input_schema</code> maps to the <code>input</code> field on a <code>ToolUseBlock</code>.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: This lesson is the foundation for the agentic loop — <code>stop_reason == "tool_use"</code> is the canonical continuation signal.</li>
+<li>Expect questions that show a code snippet assigning <code>response.content</code> to a string and ask what goes wrong.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the type of <code>response.content</code> when tools are enabled?</td>
+<td>A list of typed content blocks (e.g., <code>TextBlock</code>, <code>ToolUseBlock</code>)</td>
+</tr>
+<tr>
+<td>Which four fields appear on a <code>ToolUseBlock</code>?</td>
+<td><code>type</code>, <code>id</code>, <code>name</code>, <code>input</code></td>
+</tr>
+<tr>
+<td>What <code>stop_reason</code> value signals Claude wants to call a tool?</td>
+<td><code>"tool_use"</code></td>
+</tr>
+<tr>
+<td>Why must you append the full <code>response.content</code> (not just text) to history?</td>
+<td>Because the next <code>tool_result</code> block references the <code>ToolUseBlock.id</code>, which must exist in conversation history</td>
+</tr>
+<tr>
+<td>How do you safely identify tool-use blocks in a response?</td>
+<td>Filter by <code>block.type == "tool_use"</code> — never rely on block index</td>
+</tr>
+<tr>
+<td>Must you still pass <code>tools=[...]</code> on the follow-up API call after sending a tool result?</td>
+<td>Yes — Claude needs the schema to resolve tool references in prior history</td>
+</tr>
+<tr>
+<td>What Python idiom unpacks the <code>ToolUseBlock.input</code> dict into keyword arguments for your function?</td>
+<td><code>my_function(**block.input)</code></td>
+</tr>
+<tr>
+<td>What happens if your helper flattens <code>response.content</code> to a string?</td>
+<td>Subsequent turns fail because the <code>tool_use_id</code> referenced in <code>tool_result</code> is no longer in history</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

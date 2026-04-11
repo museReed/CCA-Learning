@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Setup Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Claude Code Setup — PM Perspective（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試 Domain</td>
+<td>D3 — Claude Code Configuration (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（Claude Code 安裝與設定）、3.2（認證）、1.1（Claude Code 概觀）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 74</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Claude Code 的設定刻意設計成三步驟、低摩擦流程 —— 低啟動能量是刻意的產品決策，決定了開發者採用率，也決定你實際上能瞄準哪些 persona。</p>
+<hr />
+<h2>心智模型：可安裝的同事</h2>
+<p>安裝 Claude Code 比較不像裝 app，更像聘請同事。三個步驟對應：</p>
+<table>
+<thead>
+<tr>
+<th>步驟</th>
+<th>招聘比喻</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>安裝 Node.js</td>
+<td>先確認辦公室有新同事需要的電源插座</td>
+</tr>
+<tr>
+<td><code>npm install -g @anthropic-ai/claude-code</code></td>
+<td>新同事自備筆電報到（CLI 執行檔）</td>
+</tr>
+<tr>
+<td><code>claude</code> + 帳號登入</td>
+<td>新同事簽了聘僱合約（你的 Anthropic 帳號）</td>
+</tr>
+</tbody>
+</table>
+<p>花 60 秒設定完，「同事」就能跟你配對寫 code。這是目前最快可取得真實 agent 的路徑 —— 大多數 agent 產品需要多上好幾倍的設定。</p>
+<hr />
+<h2>為什麼設定摩擦很重要</h2>
+<p>設定的每一步都會流失使用者。Claude Code 的三步流程已經逼近理論最小值：</p>
+<table>
+<thead>
+<tr>
+<th>設定複雜度</th>
+<th>典型產品</th>
+<th>Claude Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 步</td>
+<td>網頁 app —— 連結點開</td>
+<td>—</td>
+</tr>
+<tr>
+<td>1 步</td>
+<td>瀏覽器擴充 —— 安裝一次</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>3 步</strong></td>
+<td>帶相依性的 CLI 工具</td>
+<td><strong>Claude Code</strong></td>
+</tr>
+<tr>
+<td>5+ 步</td>
+<td>桌面 app + API key + 設定檔</td>
+<td>多數企業 agent</td>
+</tr>
+</tbody>
+</table>
+<p>Claude Code 團隊的產品決策：把門檻壓在「任何熟悉終端機的開發者」。這句話定義了可觸及的受眾。</p>
+<hr />
+<h2>產品使用情境</h2>
+<h3>何時推薦「安裝 Claude Code」</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>為什麼合適</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>團隊已經習慣 npm</td>
+<td>沒有新工具要學</td>
+</tr>
+<tr>
+<td>需要檔案系統 + git + shell 存取</td>
+<td>內建工具已涵蓋</td>
+</tr>
+<tr>
+<td>後續要用 MCP server 擴充</td>
+<td>擴充點從第一天就存在</td>
+</tr>
+<tr>
+<td>想要帳號式計費，不用 raw key</td>
+<td>登入模型直接搞定</td>
+</tr>
+</tbody>
+</table>
+<h3>何時不該推薦 Claude Code</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>更好的替代</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>非技術使用者</td>
+<td>用 Claude.ai 或 app 內建的 chat widget</td>
+</tr>
+<tr>
+<td>嚴格企業環境、沒有 npm</td>
+<td>做 web 工具或用 Claude.ai for business</td>
+</tr>
+<tr>
+<td>只用 Windows 且沒 WSL</td>
+<td>評估 Claude.ai 或 API-based 工具</td>
+</tr>
+<tr>
+<td>功能要 GUI 不是 CLI</td>
+<td>用 API 自建 UI</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 決策框架</h2>
+<p>如果你在問「我們團隊要不要採用 Claude Code？」，檢查：</p>
+<ol>
+<li><strong>開發者是否本來就住在終端機？</strong> 是的話採用成本趨近零。</li>
+<li><strong>每台開發機都有 npm 或 WSL 嗎？</strong> 這是硬性前提。</li>
+<li><strong>我們需要帳號式認證還是已經有 API key 管理？</strong> Claude Code 預期帳號登入。</li>
+<li><strong>第一年會需要 MCP 擴充嗎？</strong> 需要的話 Claude Code 是理想選擇；不需要的話 raw API 可能更簡單。</li>
+<li><strong>設定出問題時誰負責支援？</strong> 三步流程很少出錯，但還是得有人回答「為什麼 <code>claude</code> 說 command not found？」</li>
+</ol>
+<hr />
+<h2>四大內建能力（用戶開箱即得）</h2>
+<p>從 PM 角度看，開發者完成安裝那一刻，以下能力直接繼承：</p>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>商業價值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File operations</td>
+<td>Agent 能讀寫 codebase —— 能真做事，不只是聊天</td>
+</tr>
+<tr>
+<td>Terminal access</td>
+<td>Agent 能跑 test、linter、腳本 —— 閉合驗證迴圈</td>
+</tr>
+<tr>
+<td>Web access</td>
+<td>Agent 能抓最新文件 —— 不用再抱怨「training data 過期」</td>
+</tr>
+<tr>
+<td>MCP server support</td>
+<td>之後加的任何東西都能擴充 agent 而不用重新發佈</td>
+</tr>
+</tbody>
+</table>
+<p>了解這份清單很重要，因為當有人問「Claude Code 到底做什麼？」，這四點就是核心答案。</p>
+<hr />
+<h2>認證方式決策</h2>
+<p>Claude Code 用 <strong>帳號式登入</strong>，不是 raw API key。產品層面的影響：</p>
+<table>
+<thead>
+<tr>
+<th>面向</th>
+<th>帳號登入（Claude Code）</th>
+<th>Raw API key</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>使用者體驗</td>
+<td>一次登入，自動復用</td>
+<td>剪貼，常不小心 commit 進 git</td>
+</tr>
+<tr>
+<td>安全性</td>
+<td>Anthropic 管理 session</td>
+<td>使用者自管 secret</td>
+</tr>
+<tr>
+<td>計費</td>
+<td>綁在使用者訂閱上</td>
+<td>綁在你的 API organization 上</td>
+</tr>
+<tr>
+<td>合規</td>
+<td>較簡單 —— infra 不用放 secret</td>
+<td>較難 —— 要管 key rotation</td>
+</tr>
+<tr>
+<td>撤銷</td>
+<td>使用者登出或 Anthropic 撤銷</td>
+<td>你手動輪換 key</td>
+</tr>
+</tbody>
+</table>
+<p>PM 推動「推薦工程師使用某個 coding agent」時，帳號登入通常是贏家。但如果是「要做一個背後用 Claude 的產品」，API key 才是對的模型。</p>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>以為「支援 Windows」等於任何 Windows</strong> —— 實際只有 WSL；要提前告知 Windows 使用者。</li>
+<li><strong>把設定當 rollout 計畫的附屬事項</strong> —— 就算只有三步，還是會有人卡住，文件要寫。</li>
+<li><strong>混淆 Claude Code 登入與 Anthropic API key</strong> —— 兩條不同的計費路徑，有不同的運維模型。</li>
+<li><strong>忽略四大內建能力</strong> —— 「檔案 + 終端 + 網頁 + MCP」是對利害關係人溝通的最低可行功能清單。</li>
+<li><strong>沒有 rollback 計畫</strong> —— 如果某人機器上 <code>claude</code> 出問題，<code>npm uninstall -g @anthropic-ai/claude-code</code> 必須寫進文件作為逃生門。</li>
+</ol>
+<blockquote>
+<p><strong>關鍵洞察</strong></p>
+<p>設定摩擦是 <strong>產品槓桿</strong>，不是技術雜務。Claude Code 的三步安裝是刻意的：把受眾擴大到任何熟悉 npm 的開發者，同時仍保有完整 agent 功能。PM 比較 agent 平台時，「啟動能量」是最重要的單一問題。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D3（Claude Code Configuration）</strong>：會出安裝步驟、平台支援、認證模型的題目。</li>
+<li><strong>D1（Agentic Coding &amp; Architecture）</strong>：要理解為什麼 agent 產品要維持輕量安裝路徑。</li>
+<li>小心 Windows/WSL 陷阱題和精確 package 名稱題。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code 需要幾個設定步驟？</td>
+<td>三個：裝 Node.js、<code>npm install -g @anthropic-ai/claude-code</code>、跑 <code>claude</code> 並登入</td>
+</tr>
+<tr>
+<td>Claude Code 用什麼認證模型？</td>
+<td>透過 Anthropic 帳號做帳號式登入，不用 raw API key</td>
+</tr>
+<tr>
+<td>Claude Code 支援哪些作業系統？</td>
+<td>macOS、Windows（透過 WSL）、Linux</td>
+</tr>
+<tr>
+<td>安裝後使用者直接獲得的四大能力是什麼？</td>
+<td>File operations、terminal access、web access、MCP server support</td>
+</tr>
+<tr>
+<td>為什麼設定摩擦對 PM 採用決策很重要？</td>
+<td>每一步都會流失使用者 —— 三步流程把受眾定在「熟悉終端機的開發者」</td>
+</tr>
+<tr>
+<td>PM 何時「不該」推薦 Claude Code？</td>
+<td>使用者非技術人員、Windows 沒 WSL、或需要 GUI 而非 CLI 的情境</td>
+</tr>
+<tr>
+<td>Claude Code 計費與直接用 Anthropic API 有何差異？</td>
+<td>Claude Code 綁在使用者 Anthropic 帳號訂閱；API 用組織擁有的 API key</td>
+</tr>
+<tr>
+<td>PM 為何傾向帳號登入勝過 API key？</td>
+<td>更好的 UX、無 secret 洩漏風險、Anthropic 管理 session、合規更容易</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

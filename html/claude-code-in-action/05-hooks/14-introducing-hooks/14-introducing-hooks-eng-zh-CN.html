@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>14 Introducing Hooks Eng Zh Cn</title>
+<title>Introducing Hooks Eng Zh Cn</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -115,7 +115,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p>📎 流程图由 nanobanana 产出</p>
 </blockquote>
 <p>设定方式：</p>
-<pre class="highlight"><code class="language-json">&quot;PreToolUse&quot;: [
+<pre><code class="language-json">&quot;PreToolUse&quot;: [
   {
     &quot;matcher&quot;: &quot;Read&quot;,
     &quot;hooks&quot;: [
@@ -127,7 +127,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 ]
 </code></pre>
-
 <p><code>matcher</code> 就是 pattern matching — 指定要拦截哪个工具。这里是只拦截 <code>Read</code>。</p>
 <blockquote>
 <p>💡 <strong>什么时候该用 PreToolUse？</strong></p>
@@ -145,7 +144,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p>📎 流程图由 nanobanana 产出</p>
 </blockquote>
 <p>设定方式：</p>
-<pre class="highlight"><code class="language-json">&quot;PostToolUse&quot;: [
+<pre><code class="language-json">&quot;PostToolUse&quot;: [
   {
     &quot;matcher&quot;: &quot;Write|Edit|MultiEdit&quot;,
     &quot;hooks&quot;: [
@@ -157,7 +156,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 ]
 </code></pre>
-
 <p>注意 matcher 可以用 <code>|</code> 匹配多个工具，就像 regex 的 OR。</p>
 <blockquote>
 <p>🎬 <strong>影片补充</strong></p>

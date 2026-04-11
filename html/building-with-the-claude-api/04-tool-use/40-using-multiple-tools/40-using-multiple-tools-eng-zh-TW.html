@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Using Multiple Tools Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>使用多個 Tools — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)、D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1（tool schema 與選擇）、1.2（tool 編排）、2.4（多輪 tool loop）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 40</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude 可以在單一對話中自行選擇並串接多個 tools；只要已經建立好核心的 tool-handling 基礎架構（schema 列表 + router 函式），新增 tool 就是一個簡單的四步驟模式，成本隨 tool 數量線性成長。</p>
+<hr />
+<h2>核心模式</h2>
+<p>從單一 tool 擴展到多個 tools，只需要每個新 tool 做四件事：</p>
+<ol>
+<li>實作 Python 函式</li>
+<li>定義 JSON schema</li>
+<li>將 schema 加入 <code>tools=[...]</code> 列表</li>
+<li>在 tool router 加上 <code>elif</code> 分支</li>
+</ol>
+<p>外層的 agentic loop 完全不需要改動。既有的 <code>stop_reason == "tool_use"</code> 判斷與 message 累積邏輯都繼續有效。</p>
+<hr />
+<h2>範例：三個 tool 的提醒 Agent</h2>
+<pre><code class="language-python">tools = [
+    get_current_datetime_schema,
+    add_duration_to_datetime_schema,
+    set_reminder_schema,
+]
+
+def run_tool(tool_name: str, tool_input: dict):
+    if tool_name == &quot;get_current_datetime&quot;:
+        return get_current_datetime(**tool_input)
+    elif tool_name == &quot;add_duration_to_datetime&quot;:
+        return add_duration_to_datetime(**tool_input)
+    elif tool_name == &quot;set_reminder&quot;:
+        return set_reminder(**tool_input)
+    else:
+        raise ValueError(f&quot;未知的 tool: {tool_name}&quot;)
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,
+    messages=messages,
+)
+</code></pre>
+<p>Router 本質上是一個 dispatch table；當 tool 數量超過 5 個時，建議改用 dict registry：</p>
+<pre><code class="language-python">TOOL_REGISTRY = {
+    &quot;get_current_datetime&quot;: get_current_datetime,
+    &quot;add_duration_to_datetime&quot;: add_duration_to_datetime,
+    &quot;set_reminder&quot;: set_reminder,
+}
+
+def run_tool(tool_name, tool_input):
+    return TOOL_REGISTRY[tool_name](**tool_input)
+</code></pre>
+<hr />
+<h2>Claude 如何選擇 Tool</h2>
+<p>當列表中有多個 tools 時，Claude 會讀取每個 schema 的 <code>name</code> 與 <code>description</code>，並依據對話脈絡判斷要呼叫哪個（或不呼叫）。選擇因素包括：</p>
+<ul>
+<li><strong>Description 品質</strong> — 清晰、動作導向的描述勝過模糊描述</li>
+<li><strong>輸入參數名稱</strong> — 命名清楚的參數降低歧義</li>
+<li><strong>使用者請求的用字</strong> — 「提醒我」明顯對應到 <code>set_reminder</code></li>
+<li><strong>鏈式依賴</strong> — 如果某 tool 需要的資料還沒有，Claude 可能會先呼叫另一個 tool 取得</li>
+</ul>
+<p>這就是為什麼 tool description 的重要性跟實作本身一樣高。</p>
+<hr />
+<h2>串接呼叫與 Agentic Loop</h2>
+<p>範例 prompt：<em>「幫我設定看醫生的提醒，在 2050 年 1 月 1 日之後的第 177 天。」</em></p>
+<p>Claude 通常會跨多輪產生多個 tool_use block：</p>
+<ol>
+<li><strong>Turn 1</strong> — Claude 發出 <code>add_duration_to_datetime(start="2050-01-01", days=177)</code> 的 <code>tool_use</code></li>
+<li><strong>你的程式碼</strong>執行函式、回傳 <code>"2050-06-27"</code> 為 <code>tool_result</code></li>
+<li><strong>Turn 2</strong> — Claude 收到結果，發出 <code>set_reminder(date="2050-06-27", description="doctor appointment")</code></li>
+<li><strong>你的程式碼</strong>執行函式、回傳確認訊息</li>
+<li><strong>Turn 3</strong> — Claude 發出最後的 <code>text</code> block，總結執行內容</li>
+</ol>
+<p>Agent loop 會持續呼叫 API，直到 <code>stop_reason != "tool_use"</code>。</p>
+<hr />
+<h2>Parallel vs. Sequential Tool Calls</h2>
+<p>單一 assistant message <strong>可以同時包含多個 tool_use block（parallel）</strong>，只要這些 tool 彼此獨立。例如使用者問「東京天氣是多少，還有 AAPL 現在股價？」，Claude 可能在同一個 response 中同時發出 <code>get_weather</code> 與 <code>get_stock_price</code>。你必須執行每一個，並在<strong>單一 user message</strong> 中一次回傳<strong>所有</strong> <code>tool_result</code> block。</p>
+<pre><code class="language-python"># 從 assistant turn 收集所有 tool_use block
+tool_uses = [b for b in response.content if b.type == &quot;tool_use&quot;]
+
+# 執行並建立 tool_result block
+tool_results = [
+    {
+        &quot;type&quot;: &quot;tool_result&quot;,
+        &quot;tool_use_id&quot;: tu.id,
+        &quot;content&quot;: str(run_tool(tu.name, tu.input)),
+    }
+    for tu in tool_uses
+]
+
+# 在單一 user message 中送出所有結果
+messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: tool_results})
+</code></pre>
+<p>相對地，Sequential chaining（Tool A 的結果餵給 Tool B）需要多次 API 來回，會以多個 turn 的形式累積在 <code>messages</code> 中。</p>
+<hr />
+<h2>Multi-Tool 請求的 Message 結構</h2>
+<p>多 tool 請求的對話歷史如下：</p>
+<pre><code>user:      「177 天後設提醒」
+assistant: [text「我得先算日期」] + [tool_use add_duration_to_datetime]
+user:      [tool_result &quot;2050-06-27&quot;]
+assistant: [text「現在設定提醒」] + [tool_use set_reminder]
+user:      [tool_result &quot;已設定&quot;]
+assistant: [text「完成，提醒排定在 2050 年 6 月 27 日」]
+</code></pre>
+<p>注意 assistant message 可以同時包含 text block 與 tool_use block。重播歷史時<strong>不要把 text block 拿掉</strong> — Claude 會將它們當作推理的脈絡。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>忘記註冊 schema</strong> — 函式與 router case 都寫好了，但忘了加進 <code>tools=[...]</code> 列表，Claude 永遠不知道這個 tool 存在。</li>
+<li><strong>Router 對未知 tool 靜默忽略</strong> — 遇到未知 name 應該直接 raise，讓 schema 拼字錯誤立刻浮現，而不是靜默回傳 <code>None</code>。</li>
+<li><strong>Claude 同時發多個 parallel tool_use，但只回了一個 tool_result</strong> — API 會回錯，因為 tool_use_id 集合對不上。</li>
+<li><strong>把 assistant message 的 text block 丟掉</strong> — assistant 的 content 是 block list，加入歷史時要保留所有 block。</li>
+<li><strong>Tool description 太模糊</strong> — 「helper tool」「utility」這類描述會讓 Claude 選錯 tool，應該寫動作導向的描述：「Adds a duration in days to a starting datetime」。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>N 個 tool 的 agentic loop 與 1 個 tool 的 loop 完全相同。只要 <code>stop_reason == "tool_use"</code> 處理正確，擴展純粹就是註冊更多 schema 與 dispatch case。架構成本是固定的，唯一的變動成本是寫出高品質的 tool description。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>：理解 Claude 如何根據 schema 與 description 在多個 tool 之間做選擇，常出現 tool dispatch 的題型。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：辨識 parallel tool_use 的情境，並知道必須在單一 user turn 內回傳所有 tool_result。</li>
+<li><strong>Task 2.4（多輪 tool loop）</strong>：追蹤鏈式 tool-use 序列並指出 loop 在哪裡終止，是常見的題目類型。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新增一個 tool 到 multi-tool agent 的四步驟？</td>
+<td>1) 實作函式 2) 定義 schema 3) 加入 tools 列表 4) 加上 router case</td>
+</tr>
+<tr>
+<td>Claude 如何在多個 tool 之間做選擇？</td>
+<td>依據每個 tool 的 name、description、參數名稱以及當前對話脈絡</td>
+</tr>
+<tr>
+<td>單一 assistant message 可以包含多個 tool_use block 嗎？</td>
+<td>可以，parallel 呼叫會以多個 tool_use block 的形式出現在同一個 response，必須在單一 user message 中全部回覆</td>
+</tr>
+<tr>
+<td>每個回傳的 tool_result 必須附帶什麼？</td>
+<td>對應 assistant tool_use block 的 <code>tool_use_id</code></td>
+</tr>
+<tr>
+<td>Agentic loop 什麼時候停止？</td>
+<td>當 <code>stop_reason</code> 不再是 <code>"tool_use"</code>（通常變成 <code>"end_turn"</code>）</td>
+</tr>
+<tr>
+<td>為什麼要保留 assistant turn 的 text block？</td>
+<td>Claude 會將它們當作推理的脈絡，刪掉會讓後續輪次變差</td>
+</tr>
+<tr>
+<td>大型 <code>if/elif</code> router 的可擴展替代方案？</td>
+<td>用 dict 建立 tool registry，將 name 對應到 callable</td>
+</tr>
+<tr>
+<td>Tool description 過於模糊有什麼風險？</td>
+<td>Claude 可能選錯 tool 或誤用，導致錯誤的 tool 呼叫</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

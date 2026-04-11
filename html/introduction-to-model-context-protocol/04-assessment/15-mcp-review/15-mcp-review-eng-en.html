@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>15 Mcp Review Eng En</title>
+<title>Mcp Review Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -57,12 +57,11 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>The Three Primitives: Complete Reference</h2>
 <h3>1. Tools — Model-Controlled</h3>
 <p>Claude decides when and how to call tools during its reasoning process.</p>
-<pre class="highlight"><code class="language-python">@mcp.tool()
+<pre><code class="language-python">@mcp.tool()
 def calculate_sqrt(number: float) -&gt; float:
     &quot;&quot;&quot;Calculate the square root of a number.&quot;&quot;&quot;
     return math.sqrt(number)
 </code></pre>
-
 <p><strong>When to use</strong>: Give Claude capabilities it does not have natively — database queries, API calls, file operations, calculations, code execution.</p>
 <p><strong>Key characteristics</strong>:<br />
 - Claude autonomously decides invocation timing<br />
@@ -73,11 +72,10 @@ def calculate_sqrt(number: float) -&gt; float:
 <hr />
 <h3>2. Resources — App-Controlled</h3>
 <p>Your application code decides when to fetch resource data.</p>
-<pre class="highlight"><code class="language-python">@mcp.resource(&quot;docs://documents/{doc_id}&quot;, mime_type=&quot;text/plain&quot;)
+<pre><code class="language-python">@mcp.resource(&quot;docs://documents/{doc_id}&quot;, mime_type=&quot;text/plain&quot;)
 def fetch_doc(doc_id: str) -&gt; str:
     return docs[doc_id]
 </code></pre>
-
 <p><strong>When to use</strong>: Fetch data for UI display or inject context into prompts — autocomplete lists, document mentions, sidebar panels.</p>
 <p><strong>Key characteristics</strong>:<br />
 - Application code calls <code>read_resource()</code>, not Claude<br />
@@ -88,11 +86,10 @@ def fetch_doc(doc_id: str) -&gt; str:
 <hr />
 <h3>3. Prompts — User-Controlled</h3>
 <p>Users explicitly trigger predefined workflows through UI interactions.</p>
-<pre class="highlight"><code class="language-python">@mcp.prompt(name=&quot;format&quot;, description=&quot;Rewrite document in Markdown&quot;)
+<pre><code class="language-python">@mcp.prompt(name=&quot;format&quot;, description=&quot;Rewrite document in Markdown&quot;)
 def format_document(doc_id: str = Field(...)) -&gt; list[base.Message]:
     return [base.UserMessage(f&quot;Reformat document {doc_id} to markdown...&quot;)]
 </code></pre>
-
 <p><strong>When to use</strong>: Predefined, repeatable workflows that users trigger on demand — slash commands, workflow buttons, guided procedures.</p>
 <p><strong>Key characteristics</strong>:<br />
 - User triggers via <code>/command</code>, button click, or menu selection<br />
@@ -103,7 +100,7 @@ def format_document(doc_id: str = Field(...)) -&gt; list[base.Message]:
 <hr />
 <h2>The Decision Guide</h2>
 <p>This is the most important decision framework for the CCA exam:</p>
-<pre class="highlight"><code>Need to give Claude new capabilities?
+<pre><code>Need to give Claude new capabilities?
   → TOOLS (model-controlled)
 
 Need data for UI display or prompt context?
@@ -112,7 +109,6 @@ Need data for UI display or prompt context?
 Want predefined workflows users can trigger?
   → PROMPTS (user-controlled)
 </code></pre>
-
 <h3>Extended Decision Matrix</h3>
 <table>
 <thead>

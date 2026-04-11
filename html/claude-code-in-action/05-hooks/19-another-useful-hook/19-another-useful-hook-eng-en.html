@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>19 Another Useful Hook Eng En</title>
+<title>Another Useful Hook Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -137,7 +137,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <h2>The Confusing Part: Variable stdin Input</h2>
 <p>Each hook type receives <strong>different stdin JSON structures</strong>. And for <code>PreToolUse</code>/<code>PostToolUse</code>, the <code>tool_input</code> field varies based on which tool was called.</p>
 <h3>Example 1: PostToolUse on TodoWrite</h3>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;session_id&quot;: &quot;9ecf22fa-edf8-4332-ae85-b6d5456eda64&quot;,
   &quot;transcript_path&quot;: &quot;&lt;path_to_transcript&gt;&quot;,
   &quot;hook_event_name&quot;: &quot;PostToolUse&quot;,
@@ -151,20 +151,18 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 }
 </code></pre>
-
 <p>Key fields for PostToolUse:<br />
 - <code>tool_name</code> — which tool was used<br />
 - <code>tool_input</code> — what Claude sent TO the tool (varies per tool)<br />
 - <code>tool_response</code> — what the tool returned (varies per tool)</p>
 <h3>Example 2: Stop Hook</h3>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;session_id&quot;: &quot;af9f50b6-f042-4773-b3e2-c3a4814765ce&quot;,
   &quot;transcript_path&quot;: &quot;&lt;path_to_transcript&gt;&quot;,
   &quot;hook_event_name&quot;: &quot;Stop&quot;,
   &quot;stop_hook_active&quot;: false
 }
 </code></pre>
-
 <p>Notice: No <code>tool_name</code>, no <code>tool_input</code>, no <code>tool_response</code>. Completely different structure.</p>
 <blockquote>
 <p>⚠️ <strong>This is the #1 pitfall when writing hooks</strong></p>
@@ -175,7 +173,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <em>Figure: Debug hook pattern — inspect stdin with jq before building production logic, like using curl -v before writing an HTTP client.</em></p>
 <h2>The Debug Hook: Your Best Friend</h2>
 <p>The lesson's most practical tip is a universal debug hook that logs stdin to a file:</p>
-<pre class="highlight"><code class="language-json">&quot;PostToolUse&quot;: [
+<pre><code class="language-json">&quot;PostToolUse&quot;: [
   {
     &quot;matcher&quot;: &quot;*&quot;,
     &quot;hooks&quot;: [
@@ -187,7 +185,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 ]
 </code></pre>
-
 <p>What this does:<br />
 1. The <code>*</code> matcher catches <strong>all</strong> tool uses<br />
 2. <code>jq .</code> pretty-prints the JSON stdin<br />
@@ -205,7 +202,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p>This is the same pattern as using <code>curl -v</code> to inspect HTTP responses before writing API client code.</p>
 </blockquote>
 <p>This works for any hook type — just change the key:</p>
-<pre class="highlight"><code class="language-json">&quot;Stop&quot;: [
+<pre><code class="language-json">&quot;Stop&quot;: [
   {
     &quot;matcher&quot;: &quot;*&quot;,
     &quot;hooks&quot;: [
@@ -217,7 +214,6 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
   }
 ]
 </code></pre>
-
 <hr />
 <h2>Common stdin Fields by Hook Type</h2>
 <table>

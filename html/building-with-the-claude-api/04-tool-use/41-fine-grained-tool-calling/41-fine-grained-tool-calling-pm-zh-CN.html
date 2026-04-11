@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fine Grained Tool Calling Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Fine-Grained Tool Calling — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)、D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1（tool schema 与选择）、5.2（streaming 与响应速度）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 41</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Fine-grained tool calling 让产品可以让用户实时看到 AI "一个字一个字敲出" tool 参数的过程——代价是工程端必须更仔细处理可能暂时不合法的 JSON。</p>
+<hr />
+<h2>Mental Model：现场即时字幕 vs. 完整字幕</h2>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>类比</th>
+<th>用户体验</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>默认 streaming</td>
+<td>每次一整句才出现的电视字幕</td>
+<td>停顿后整句浮出</td>
+</tr>
+<tr>
+<td>Fine-grained</td>
+<td>一个字一个字即时敲出的现场听打</td>
+<td>平滑实时,但偶尔会闪过错字</td>
+</tr>
+</tbody>
+</table>
+<p>同样的 trade-off 套用在 tool 参数 streaming:默认感觉像爆发、fine-grained 感觉像 live feed——但 live feed 可能瞬间出现稍后会被修正的乱码。</p>
+<hr />
+<h2>为什么对产品重要</h2>
+<p>Tool 参数生成可能很长。如果 tool 接收一篇 2,000 字的文章或一张详细的 JSON 表单,Claude 要花好几秒组装。这段时间内用户什么都看不到——除非你 stream。</p>
+<p>Fine-grained tool calling 是下列三者的差别：</p>
+<ul>
+<li><strong>"点击 Generate、等 8 秒、内容出现"</strong>（不 stream）</li>
+<li><strong>"点击 Generate、内容随主要字段完成而分批出现"</strong>（默认 streaming）</li>
+<li><strong>"点击 Generate、看到光标在即时敲出结果"</strong>（fine-grained）</li>
+</ul>
+<p>对内容生成型 UX（写作、起草、表单填写）,第三种通常明显更好。</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>适合 Fine-Grained 的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么有价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>有预览面板的 AI 写作工具</td>
+<td>用户想看到草稿慢慢浮现</td>
+</tr>
+<tr>
+<td>长文 email 生成器</td>
+<td>显著降低感知延迟</td>
+</tr>
+<tr>
+<td>多字段的实时表单 autofill</td>
+<td>每个字段完成就立即渲染</td>
+</tr>
+<tr>
+<td>带可视编辑器的 code generation</td>
+<td>像人类协作者的实时打字感</td>
+</tr>
+<tr>
+<td>长结构化报告（多段）</td>
+<td>用户可以边读前段边等后段生成</td>
+</tr>
+</tbody>
+</table>
+<h3>默认模式更合适</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么保留默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>短小的原子 tool call（&lt; 1 秒）</td>
+<td>Buffering 看不出来,fine-grained 的复杂度白花</td>
+</tr>
+<tr>
+<td>没人看的后台自动化</td>
+<td>没人看 stream,不用付延迟代价</td>
+</tr>
+<tr>
+<td>合规关键流程</td>
+<td>你想保留服务器端验证的安全网</td>
+</tr>
+<tr>
+<td>单一错值就让下游坏掉的 tool</td>
+<td>部分/无效 JSON 风险太高</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>如果 Yes</th>
+<th>行动</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>有用户正在看响应渲染吗？</td>
+<td>Yes</td>
+<td>考虑 streaming</td>
+</tr>
+<tr>
+<td>Tool 参数生成超过 3 秒吗？</td>
+<td>Yes</td>
+<td>Streaming 有价值</td>
+</tr>
+<tr>
+<td>默认 streaming 明显卡卡的吗？</td>
+<td>Yes</td>
+<td>考虑 fine-grained</td>
+</tr>
+<tr>
+<td>工程端能加完整的 JSON 错误处理吗？</td>
+<td>Yes</td>
+<td>Fine-grained 可以安全使用</td>
+</tr>
+<tr>
+<td>这个 tool 对畸形输入零容忍吗？</td>
+<td>Yes</td>
+<td>保留默认</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>隐藏成本：工程复杂度</h2>
+<p>Fine-grained tool calling 不是一个免费的"加速"开关,它把责任从 Anthropic 服务器搬到你的代码：</p>
+<ul>
+<li>JSON 验证 → 搬到 client</li>
+<li>错误恢复 → 搬到 client</li>
+<li>Schema 一致性检查 → 搬到 client</li>
+<li>边缘情况（null、undefined、断开的字符串）处理 → 搬到 client</li>
+</ul>
+<p>PM 提议启用 fine-grained 时必须把这些工程工作算进预算。草率上线会带来比默认模式更糟的 UX（用户在 live feed 上看到 crash）。</p>
+<hr />
+<h2>应该追踪的指标</h2>
+<p>上线后需要埋点以下项目：</p>
+<ol>
+<li><strong>首个可见 token 的时间</strong> — 使用 fine-grained 的主要理由,应该显著下降</li>
+<li><strong>Tool 执行成功率</strong> — 应该维持;如果下降,代表 JSON 处理有 bug</li>
+<li><strong>Client 端 parse 错误率</strong> — fine-grained 下会是非零,应随处理成熟而下降</li>
+<li><strong>端到端完成时间</strong> — 可能不会变快;fine-grained 主要改善"感知延迟"</li>
+<li><strong>生成期间的用户参与度</strong> — 是否更愿意停留在页面？真正的 UX 胜面</li>
+</ol>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>以为 fine-grained 就是全部变快</strong> — 端到端时间通常一样,改善的是感知延迟而不是吞吐量。</li>
+<li><strong>没写 JSON 错误处理就上 fine-grained</strong> — 用户会看到 live feed 没错,也会看到 malformed chunk 造成的 crash。</li>
+<li><strong>在短 tool call 上用 fine-grained</strong> — 复杂度多了、UX 几乎没差。</li>
+<li><strong>没埋点 parse 错误率</strong> — 没有这个指标,你根本不知道自己的处理有没有效。</li>
+<li><strong>把 fine-grained 跟 "Claude 变快" 混为一谈</strong> — 它只影响 streaming 中 tool 参数的投递,不影响模型生成速度。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Fine-grained tool calling 是感知延迟的杠杆,不是吞吐量的杠杆。在用户正在看长时间 tool 生成、且工程端能投入完整 JSON 处理时才启用。CCA 考试要记得:trade-off 是"client 端 JSON 验证责任"换"chunk 立即投递"。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>：理解 fine-grained 会关闭 streaming 期间服务器的 JSON 验证,client 必须处理错误。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>：Streaming 是核心 UX 杠杆,fine-grained 是其中最激进的设定。</li>
+<li>题目可能描述一个 UX 问题（"tool streaming 感觉一阵一阵"）并问是哪个设定控制的。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fine-grained tool calling 的用户可见效果是什么？</td>
+<td>Tool 参数以逐 token 实时串流出现,而不是一阵一阵地 burst</td>
+</tr>
+<tr>
+<td>默认 tool-use streaming 感觉像什么？</td>
+<td>停顿后爆发——每个 burst 对应一个验证过的最外层 key</td>
+</tr>
+<tr>
+<td>Fine-grained 的主要工程成本是什么？</td>
+<td>Client 必须在 streaming 中 graceful 处理无效 / 部分 JSON</td>
+</tr>
+<tr>
+<td>PM 什么时候应该选 fine-grained？</td>
+<td>长时间 tool 生成、用户正在看响应浮现、且工程端能投入 JSON 错误处理</td>
+</tr>
+<tr>
+<td>哪一个指标在 fine-grained 之后最会改善？</td>
+<td>首个可见 token 的时间——感知延迟</td>
+</tr>
+<tr>
+<td>启用 fine-grained 之后哪个指标不应该变差？</td>
+<td>Tool 执行成功率——parse bug 会在这里浮现</td>
+</tr>
+<tr>
+<td>Fine-grained streaming 最好的类比？</td>
+<td>一个字一个字的现场听打,相对于整句才出现的电视字幕</td>
+</tr>
+<tr>
+<td>什么时候 fine-grained 是白花复杂度？</td>
+<td>短 tool call、后台自动化,或不能容忍畸形输入的关键 tool</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

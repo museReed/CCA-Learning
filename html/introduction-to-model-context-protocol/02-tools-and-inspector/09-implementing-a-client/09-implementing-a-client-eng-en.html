@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>09 Implementing A Client Eng En</title>
+<title>Implementing A Client Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -55,14 +55,13 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>The Client Architecture</h2>
 <p>The MCP client is composed of two main SDK classes:</p>
-<pre class="highlight"><code class="language-python">from mcp import ClientSession
+<pre><code class="language-python">from mcp import ClientSession
 from mcp.client import Client
 </code></pre>
-
 <p><strong>Client</strong> — Manages the connection lifecycle (connecting, disconnecting, transport management).</p>
 <p><strong>ClientSession</strong> — Provides the methods for interacting with the MCP server (<code>list_tools()</code>, <code>call_tool()</code>, etc.).</p>
 <p>These two classes work together: the Client establishes the connection, and the ClientSession uses that connection to communicate.</p>
-<pre class="highlight"><code class="language-python">class MCPClient:
+<pre><code class="language-python">class MCPClient:
     def __init__(self):
         self.client = Client()
         self.session: ClientSession | None = None
@@ -78,7 +77,6 @@ from mcp.client import Client
         self.session = ClientSession(*stdio_transport)
         await self.session.initialize()
 </code></pre>
-
 <blockquote>
 <p><strong>Key Insight</strong><br />
 The <code>initialize()</code> call is critical. It performs the MCP handshake where client and server negotiate capabilities. Without it, subsequent calls will fail.</p>
@@ -86,7 +84,7 @@ The <code>initialize()</code> call is critical. It performs the MCP handshake wh
 <hr />
 <h2>The Two Essential Methods</h2>
 <h3>list_tools() — Discovery</h3>
-<pre class="highlight"><code class="language-python">async def discover_tools(self):
+<pre><code class="language-python">async def discover_tools(self):
     &quot;&quot;&quot;Discover available tools from the MCP server.&quot;&quot;&quot;
     response = await self.session.list_tools()
 
@@ -98,7 +96,6 @@ The <code>initialize()</code> call is critical. It performs the MCP handshake wh
 
     return response.tools
 </code></pre>
-
 <p><code>list_tools()</code> returns a <code>ListToolsResult</code> containing an array of tool definitions. Each tool has:</p>
 <ul>
 <li><code>name</code> — The tool identifier (e.g., "read_doc_contents")</li>
@@ -107,14 +104,13 @@ The <code>initialize()</code> call is critical. It performs the MCP handshake wh
 </ul>
 <p>This is what you pass to Claude so it knows what tools are available.</p>
 <h3>call_tool() — Execution</h3>
-<pre class="highlight"><code class="language-python">async def execute_tool(self, tool_name: str, tool_input: dict):
+<pre><code class="language-python">async def execute_tool(self, tool_name: str, tool_input: dict):
     &quot;&quot;&quot;Execute a tool on the MCP server.&quot;&quot;&quot;
     result = await self.session.call_tool(tool_name, tool_input)
 
     # result.content contains the tool output
     return result.content
 </code></pre>
-
 <p><code>call_tool()</code> takes two arguments:</p>
 <ul>
 <li><code>tool_name</code> — Which tool to call (string)</li>
@@ -128,7 +124,7 @@ The tool_name and tool_input typically come directly from Claude's tool_use resp
 <hr />
 <h2>Complete Client-Side Flow</h2>
 <p>Here is how the client integrates with Claude in the full agentic loop:</p>
-<pre class="highlight"><code class="language-python">import anthropic
+<pre><code class="language-python">import anthropic
 from mcp import ClientSession
 
 class AgenticMCPClient:
@@ -191,7 +187,6 @@ class AgenticMCPClient:
 
         return response.content[0].text
 </code></pre>
-
 <p>The five key steps:</p>
 <ol>
 <li><strong>Discover</strong> — <code>list_tools()</code> gets available tools</li>
@@ -202,9 +197,8 @@ class AgenticMCPClient:
 </ol>
 <hr />
 <h2>Running the Client</h2>
-<pre class="highlight"><code class="language-bash">uv run mcp_client.py
+<pre><code class="language-bash">uv run mcp_client.py
 </code></pre>
-
 <p>The <code>uv</code> runner handles dependency resolution and virtual environment management. When run, the client:</p>
 <ol>
 <li>Connects to the specified MCP server</li>
@@ -214,7 +208,7 @@ class AgenticMCPClient:
 </ol>
 <hr />
 <h2>Error Handling in the Client</h2>
-<pre class="highlight"><code class="language-python">async def safe_call_tool(self, tool_name: str, tool_input: dict):
+<pre><code class="language-python">async def safe_call_tool(self, tool_name: str, tool_input: dict):
     try:
         result = await self.session.call_tool(tool_name, tool_input)
         if result.isError:
@@ -223,7 +217,6 @@ class AgenticMCPClient:
     except Exception as e:
         return f&quot;MCP communication error: {str(e)}&quot;
 </code></pre>
-
 <p>Key error scenarios:</p>
 <ul>
 <li><strong>Tool not found</strong> — The tool name does not match any registered tool</li>

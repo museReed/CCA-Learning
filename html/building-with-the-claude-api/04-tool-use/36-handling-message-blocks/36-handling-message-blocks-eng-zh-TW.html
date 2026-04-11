@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Handling Message Blocks Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Handling Message Blocks — Engineering Deep Dive（繁中）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) / D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2（content block 處理）、2.1（tool schema 整合）、1.2（agentic loop 基礎）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 36</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>只要在 request 中帶入 <code>tools=[...]</code>，Claude 的回應 <code>content</code> 就不再是單一字串，而是一個由 <code>TextBlock</code>、<code>ToolUseBlock</code> 等 typed block 組成的 list；你的程式碼必須迭代這些 block、完整保留到對話歷史、並依 block type dispatch。</p>
+<hr />
+<h2>從純文字回應跨到 Multi-Block 回應</h2>
+<p>沒有 tools 時，<code>response.content</code> 實務上只是一個 <code>TextBlock</code>。一旦 request 帶 <code>tools=[...]</code>，Claude 就可能決定要呼叫 function，assistant message 就會變成<strong>異質的 block list</strong>：</p>
+<pre><code class="language-python">response = client.messages.create(
+    model=model,
+    max_tokens=1000,
+    messages=messages,
+    tools=[get_current_datetime_schema],
+)
+
+# response.content 現在是 block 的 list：
+# [TextBlock(text=&quot;我可以幫你查現在的時間...&quot;),
+#  ToolUseBlock(id=&quot;toolu_01...&quot;, name=&quot;get_current_datetime&quot;, input={})]
+</code></pre>
+<p>關鍵轉變：<code>response.content</code> <strong>永遠是一個 list</strong>，單一回合可能同時包含說明文字與一個或多個 tool use 請求。</p>
+<hr />
+<h2><code>ToolUseBlock</code> 的結構</h2>
+<p>每個 tool-use block 有四個你必須處理的欄位：</p>
+<table>
+<thead>
+<tr>
+<th>欄位</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>永遠是 <code>"tool_use"</code>——用它來過濾 block</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td>每次呼叫唯一 ID（如 <code>toolu_01A09q90qw...</code>）。你必須在對應的 <code>tool_result</code> 中回填這個 ID</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>模型選擇的 function 名稱（必須對應你註冊的 schema）</td>
+</tr>
+<tr>
+<td><code>input</code></td>
+<td>符合該 tool <code>input_schema</code> 的參數 dict</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-python">for block in response.content:
+    if block.type == &quot;tool_use&quot;:
+        tool_id = block.id
+        tool_name = block.name
+        tool_args = block.input  # dict，用 ** 展開
+</code></pre>
+<hr />
+<h2>在對話歷史中保留完整 Content</h2>
+<p>Claude 是 stateless 的——歷史記錄由<strong>你</strong>管理。當 assistant 回傳 multi-block content 時，必須把<strong>整個 <code>response.content</code> list</strong> append 回去，不可以只留 text：</p>
+<pre><code class="language-python">messages.append({
+    &quot;role&quot;: &quot;assistant&quot;,
+    &quot;content&quot;: response.content   # 保留所有 block，包含 ToolUseBlock
+})
+</code></pre>
+<p>如果把它攤平成字串、或把 tool-use block 丟掉，下一次 API 呼叫就會壞掉：因為下一則 user message 裡的 <code>tool_result</code> 會引用一個已經不存在於歷史中的 <code>tool_use_id</code>，API 對這個配對非常嚴格。</p>
+<hr />
+<h2><code>stop_reason</code> 作為 Loop 信號</h2>
+<p>每個 response 除了 content list，還有 <code>stop_reason</code>。當 Claude 輸出 tool-use block 時，<code>stop_reason == "tool_use"</code>。這就是標準的信號，告訴你程式碼必須先去跑 tool、把結果送回來，才能拿到最終回答。其他常見值：<code>"end_turn"</code>（Claude 說完了）、<code>"max_tokens"</code>、<code>"stop_sequence"</code>。</p>
+<hr />
+<h2>升級 Helper Function 處理 Multi-Block</h2>
+<p>如果你之前寫的 helper 預設只處理純文字：</p>
+<pre><code class="language-python"># 舊版（純文字）——加 tools 後會壞
+def add_assistant_message(messages, text):
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: text})
+</code></pre>
+<p>升級成接受字串或完整 <code>Message</code> 物件：</p>
+<pre><code class="language-python">from anthropic.types import Message
+
+def add_assistant_message(messages, message):
+    content = message.content if isinstance(message, Message) else message
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: content})
+</code></pre>
+<p>這種多型處理在引入 tool 後是必要的——原本傳字串的呼叫點現在都要能處理 typed block list。</p>
+<hr />
+<h2>完整 Tool-Use 流程（單一回合）</h2>
+<ol>
+<li>送 user message + <code>tools=[...]</code> schema list</li>
+<li>收到 assistant message，<code>content = [TextBlock, ToolUseBlock]</code>，<code>stop_reason="tool_use"</code></li>
+<li>迭代 <code>response.content</code>，找出 <code>ToolUseBlock</code>，取出 <code>id</code>、<code>name</code>、<code>input</code></li>
+<li>在本地執行真正的 function</li>
+<li>append 一則 user message，裡面放一個 <code>tool_result</code> block，<code>tool_use_id</code> 對應剛才的 <code>id</code></li>
+<li>再打一次 API（<strong>仍然要帶 <code>tools=[...]</code></strong>），拿到最終的自然語言回答</li>
+</ol>
+<p>每一步都依賴完整保留 block 結構——漏掉任何一塊整條鏈路就會斷。</p>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>把 <code>response.content</code> 當字串用</strong>——啟用 tools 後它是 typed block 的 list，要用 <code>response.content[0].text</code> 或 iterate。</li>
+<li><strong>存歷史時把 <code>ToolUseBlock</code> 丟掉</strong>——下一回合的 <code>tool_result</code> 會引用不存在的 <code>id</code>，API 直接噴 400。</li>
+<li><strong>假設一個回應只有一個 block</strong>——Claude 可能同一回合送說明文字 + 多個 tool-use block。</li>
+<li><strong>follow-up 呼叫忘了帶 <code>tools=[...]</code></strong>——即使你已經有 tool 結果，Claude 還是需要 schema 才能解析歷史中的 tool 引用。</li>
+<li><strong>用 index（<code>content[1]</code>）抓 tool-use block</strong>——Claude 可能省略 text block 或調換順序，永遠要 filter <code>block.type == "tool_use"</code>。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>只要你在 request 裡加 <code>tools=[...]</code>，就跨過了一條契約邊界：回應變成異質 block list、歷史必須精準保留 block 身份（特別是 <code>tool_use_id</code>）。原本假設「assistant content 是字串」的程式碼會悄悄壞掉，而且錯誤會在後續回合以看不懂的 400 出現。從第一天就把 helper 寫成能吃 <code>Message</code> 物件。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：理解 <code>TextBlock</code> vs <code>ToolUseBlock</code> 的差別，以及 <code>input_schema</code> 如何對應到 <code>ToolUseBlock.input</code>。</li>
+<li><strong>D1（Agentic Architecture）</strong>：這一課是 agentic loop 的基礎——<code>stop_reason == "tool_use"</code> 是正式的延續信號。</li>
+<li>考題常會給一段把 <code>response.content</code> 當字串處理的程式碼，問你哪裡會出錯。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>題目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>啟用 tools 後 <code>response.content</code> 是什麼型別？</td>
+<td>一個 typed content block 的 list（<code>TextBlock</code>、<code>ToolUseBlock</code> 等）</td>
+</tr>
+<tr>
+<td><code>ToolUseBlock</code> 有哪四個欄位？</td>
+<td><code>type</code>、<code>id</code>、<code>name</code>、<code>input</code></td>
+</tr>
+<tr>
+<td>哪個 <code>stop_reason</code> 值代表 Claude 要呼叫 tool？</td>
+<td><code>"tool_use"</code></td>
+</tr>
+<tr>
+<td>為什麼必須把完整的 <code>response.content</code> append 到歷史，而不能只存 text？</td>
+<td>因為下一個 <code>tool_result</code> 會引用 <code>ToolUseBlock.id</code>，那個 ID 必須存在於對話歷史中</td>
+</tr>
+<tr>
+<td>如何安全地在 response 中找出 tool-use block？</td>
+<td>用 <code>block.type == "tool_use"</code> 過濾，不要用 index</td>
+</tr>
+<tr>
+<td>follow-up API 呼叫送 tool_result 時還需要帶 <code>tools=[...]</code> 嗎？</td>
+<td>要——Claude 需要 schema 才能解析歷史中的 tool 引用</td>
+</tr>
+<tr>
+<td>把 <code>ToolUseBlock.input</code> 展開成 keyword arguments 的 Python 語法？</td>
+<td><code>my_function(**block.input)</code></td>
+</tr>
+<tr>
+<td>如果 helper 把 <code>response.content</code> 攤平成字串會怎樣？</td>
+<td>後續回合會壞掉，因為 <code>tool_result</code> 裡的 <code>tool_use_id</code> 在歷史中找不到對應</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Schemas Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Tool Schemas — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (tool schema design), 2.2 (tool function definition), 1.2 (agentic loop foundation)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 35</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A tool schema is a JSON Schema document with three top-level fields (<code>name</code>, <code>description</code>, <code>input_schema</code>) — it is the public API contract your Python function exposes to Claude, and its prose quality determines whether Claude picks the right tool and calls it with the right arguments.</p>
+<hr />
+<h2>The Three Required Fields</h2>
+<p>Every tool definition sent to the Anthropic API must include:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>The identifier Claude uses to reference the tool. Must match the function registry key.</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td>3–4 sentences telling Claude what the tool does, when to use it, and what it returns.</td>
+</tr>
+<tr>
+<td><code>input_schema</code></td>
+<td>JSON Schema object</td>
+<td>The JSON Schema describing the function's arguments.</td>
+</tr>
+</tbody>
+</table>
+<p>These three fields become the contract Claude reads every time it decides whether to call the tool.</p>
+<hr />
+<h2>Complete Example: <code>get_current_datetime</code></h2>
+<pre><code class="language-python">from datetime import datetime
+from anthropic.types import ToolParam
+
+def get_current_datetime(date_format: str = &quot;%Y-%m-%d %H:%M:%S&quot;) -&gt; str:
+    if not date_format:
+        raise ValueError(&quot;date_format cannot be empty&quot;)
+    return datetime.now().strftime(date_format)
+
+get_current_datetime_schema: ToolParam = {
+    &quot;name&quot;: &quot;get_current_datetime&quot;,
+    &quot;description&quot;: (
+        &quot;Returns the current date and time formatted according to &quot;
+        &quot;the specified format string. Use this whenever you need to &quot;
+        &quot;know the current moment in time, for example when a user &quot;
+        &quot;asks what time it is or you need to timestamp a reminder. &quot;
+        &quot;Returns a string formatted per Python's strftime codes.&quot;
+    ),
+    &quot;input_schema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;date_format&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;description&quot;: (
+                    &quot;A strftime format string such as '%Y-%m-%d %H:%M:%S'. &quot;
+                    &quot;Defaults to ISO-style date and time if not provided.&quot;
+                ),
+                &quot;default&quot;: &quot;%Y-%m-%d %H:%M:%S&quot;,
+            }
+        },
+        &quot;required&quot;: [],
+    },
+}
+</code></pre>
+<p>Notice the <strong>naming convention</strong>: the function is <code>get_current_datetime</code>, and the schema variable is <code>get_current_datetime_schema</code>. Mirror pairs make it trivial to match function implementations with their schemas.</p>
+<hr />
+<h2>Anatomy of <code>input_schema</code></h2>
+<p><code>input_schema</code> is a standard JSON Schema fragment. Three pieces matter most:</p>
+<h3>1. <code>type: "object"</code></h3>
+<p>Tool inputs must always be objects (key-value maps of named arguments). This is because the API passes <code>input</code> as a JSON object that your code will unpack with <code>**block.input</code>.</p>
+<h3>2. <code>properties</code></h3>
+<p>Each key in <code>properties</code> is a parameter name. Each value is a sub-schema describing the parameter's type, constraints, and — most importantly — its <strong>description</strong>.</p>
+<pre><code class="language-python">&quot;properties&quot;: {
+    &quot;date_format&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;description&quot;: &quot;A strftime format string...&quot;,
+        &quot;default&quot;: &quot;%Y-%m-%d %H:%M:%S&quot;
+    }
+}
+</code></pre>
+<p>The <code>description</code> on each property is your chance to tell Claude exactly what kind of value to send. Treat it like a docstring aimed at an LLM.</p>
+<h3>3. <code>required</code></h3>
+<p>An array listing which parameter names are required. Parameters not in this list are optional, and Claude may omit them. Because <code>date_format</code> has a default, it is optional, so <code>required</code> is an empty list.</p>
+<pre><code class="language-python">&quot;required&quot;: []              # all parameters optional
+&quot;required&quot;: [&quot;city&quot;]         # city is required, others optional
+&quot;required&quot;: [&quot;city&quot;, &quot;date&quot;] # both required
+</code></pre>
+<hr />
+<h2>Why Description Quality Dominates Everything Else</h2>
+<p>Two tools with identical code but different descriptions will perform radically differently:</p>
+<table>
+<thead>
+<tr>
+<th>Description</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Gets the time"</td>
+<td>Claude may confuse it with other time tools; inconsistent usage.</td>
+</tr>
+<tr>
+<td>"Returns the current date and time formatted per strftime codes. Use when the user asks 'what time is it' or when you need to timestamp a new record. Returns a formatted string."</td>
+<td>Claude picks this tool correctly, supplies the right format, and interprets the result sensibly.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Best practices for descriptions:</strong></p>
+<ul>
+<li>3–4 sentences (enough context, not a novel).</li>
+<li>State <strong>what</strong> it does and <strong>what</strong> it returns.</li>
+<li>State <strong>when</strong> Claude should use it (the "when" sentence is the most often skipped and the most valuable).</li>
+<li>Mention related tools to avoid confusion (e.g., "for converting a date string to a timestamp, see <code>parse_datetime</code>").</li>
+<li>For parameters, describe valid values, units, and format with concrete examples.</li>
+</ul>
+<hr />
+<h2>Generating Schemas: Let Claude Do It</h2>
+<p>Instead of writing schemas by hand, you can have Claude generate them for you:</p>
+<ol>
+<li>Copy the tool function code.</li>
+<li>Ask Claude something like: <em>"Write a valid JSON schema spec for the purposes of tool calling for this function. Follow the best practices listed in the attached documentation."</em></li>
+<li>Attach the Anthropic tool-use documentation as context.</li>
+<li>Paste the generated schema into your code, using the <code>{function_name}_schema</code> naming convention.</li>
+</ol>
+<p>This is a meta-application of the tool-use principle: use the AI to build the AI's own inputs.</p>
+<hr />
+<h2>Type Safety with <code>ToolParam</code></h2>
+<p>The <code>anthropic</code> SDK exposes a <code>ToolParam</code> TypedDict you can use for compile-time (static analysis) checking:</p>
+<pre><code class="language-python">from anthropic.types import ToolParam
+
+get_current_datetime_schema = ToolParam(
+    name=&quot;get_current_datetime&quot;,
+    description=&quot;Returns the current date and time...&quot;,
+    input_schema={
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;date_format&quot;: {
+                &quot;type&quot;: &quot;string&quot;,
+                &quot;description&quot;: &quot;...&quot;,
+                &quot;default&quot;: &quot;%Y-%m-%d %H:%M:%S&quot;,
+            }
+        },
+        &quot;required&quot;: [],
+    },
+)
+</code></pre>
+<p>Benefits:</p>
+<ul>
+<li>IDE autocomplete on the three required fields</li>
+<li>Mypy / pyright catches typos like <code>descripton</code> before runtime</li>
+<li>Self-documenting code for teammates</li>
+</ul>
+<p>Not strictly required — the API accepts plain dicts — but strongly recommended for production code.</p>
+<hr />
+<h2>JSON Schema Features Commonly Used in Tool Definitions</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Example</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td><code>"string"</code>, <code>"integer"</code>, <code>"boolean"</code>, <code>"array"</code>, <code>"object"</code>, <code>"number"</code></td>
+<td>Declare the JSON type</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>free text</td>
+<td>LLM-readable per-parameter guidance</td>
+</tr>
+<tr>
+<td><code>default</code></td>
+<td>literal value</td>
+<td>Used when Claude omits an optional param</td>
+</tr>
+<tr>
+<td><code>enum</code></td>
+<td><code>["celsius", "fahrenheit"]</code></td>
+<td>Restrict to a fixed set of allowed values</td>
+</tr>
+<tr>
+<td><code>items</code></td>
+<td>schema</td>
+<td>Describe array element types</td>
+</tr>
+<tr>
+<td><code>minimum</code> / <code>maximum</code></td>
+<td>numeric</td>
+<td>Numeric ranges</td>
+</tr>
+<tr>
+<td><code>pattern</code></td>
+<td>regex</td>
+<td>String format validation</td>
+</tr>
+<tr>
+<td><code>required</code></td>
+<td>array of names</td>
+<td>Required property names</td>
+</tr>
+</tbody>
+</table>
+<p><code>enum</code> is especially powerful: it takes ambiguity off the table by forcing Claude to pick from a defined set.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Missing <code>type: "object"</code></strong> — every <code>input_schema</code> must start with <code>type: "object"</code>, not just <code>properties</code>.</li>
+<li><strong>Empty or vague descriptions</strong> — "Gets data" gives Claude nothing to go on. Invest prose here.</li>
+<li><strong>Forgetting <code>required</code></strong> — omitting it does not mean "all required"; it means "none required". Be explicit.</li>
+<li><strong>Schema / function mismatch</strong> — the schema says <code>city</code>, the function uses <code>location</code>. Claude will supply <code>city</code> and your code will crash.</li>
+<li><strong>Over-constraining with patterns</strong> — regex that rejects valid inputs you didn't anticipate blocks legitimate use.</li>
+<li><strong>Putting implementation details in descriptions</strong> — Claude does not need to know you call a SQLite DB; it needs to know what the tool does conceptually.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>A tool schema is not mere wiring — it is an <strong>LLM-readable API contract</strong>. Every word in the description and every parameter annotation changes how Claude decides to call the tool. The engineering time you spend on schema descriptions pays off as fewer wrong tool picks, fewer malformed arguments, and fewer frustrated users. On the CCA exam, questions about <code>input_schema</code> structure and description best practices appear repeatedly under D2.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: structure of tool definitions (<code>name</code>, <code>description</code>, <code>input_schema</code>), JSON Schema basics, <code>required</code> semantics, enum usage.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: schema quality directly influences Claude's tool selection during the agent loop.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: using <code>ToolParam</code> for type safety in production code.</li>
+<li>Expect questions like: "What are the three required fields in a tool definition?" or "How does Claude decide which tool to call when two tools exist?" — answer: description quality and name clarity.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three required fields in a tool definition?</td>
+<td><code>name</code>, <code>description</code>, and <code>input_schema</code>.</td>
+</tr>
+<tr>
+<td>What must the top-level <code>type</code> of <code>input_schema</code> always be?</td>
+<td><code>"object"</code> — tool inputs are always JSON objects.</td>
+</tr>
+<tr>
+<td>What does <code>required</code> mean in an <code>input_schema</code>?</td>
+<td>An array of property names that must be supplied; parameters not listed are optional.</td>
+</tr>
+<tr>
+<td>Why is description quality critical in a tool schema?</td>
+<td>Claude reads the description to decide when to call the tool and how to fill its parameters — prose quality directly drives correctness.</td>
+</tr>
+<tr>
+<td>What naming convention does the course recommend for schemas?</td>
+<td><code>{function_name}_schema</code> — mirror the function name so implementation and schema stay matched.</td>
+</tr>
+<tr>
+<td>What is <code>ToolParam</code> and when should you use it?</td>
+<td>A TypedDict from <code>anthropic.types</code> that adds static type checking to tool schemas; use it in production code for IDE and mypy support.</td>
+</tr>
+<tr>
+<td>How can you generate a schema without writing JSON Schema by hand?</td>
+<td>Ask Claude to generate one — paste the function code and the tool-use docs, and request a properly formatted schema.</td>
+</tr>
+<tr>
+<td>Why use <code>enum</code> in a property schema?</td>
+<td>To restrict Claude to a fixed set of valid values (e.g., <code>["celsius", "fahrenheit"]</code>), eliminating ambiguity.</td>
+</tr>
+<tr>
+<td>What fails if the schema's parameter name does not match the Python function's parameter name?</td>
+<td>The function call — Claude supplies the schema name, <code>**block.input</code> unpacks it into the function, and Python raises a <code>TypeError</code> for unexpected or missing arguments.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

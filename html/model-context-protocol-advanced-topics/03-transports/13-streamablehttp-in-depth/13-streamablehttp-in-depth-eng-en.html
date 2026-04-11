@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>13 Streamablehttp In Depth Eng En</title>
+<title>Streamablehttp In Depth Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -56,7 +56,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <p><img alt="Streamable Http Sse" src="visuals/streamable-http-sse.svg" /></p>
 <h2>The Problem SSE Solves</h2>
 <p>HTTP is client-initiated only. But MCP needs the server to push messages (progress, logs, sampling requests). <strong>SSE</strong> flips this: the client opens a persistent connection, and the server pushes events down that connection whenever it wants.</p>
-<pre class="highlight"><code>Traditional HTTP:
+<pre><code>Traditional HTTP:
   Client ──request──→ Server
   Client ←──response── Server
   (server cannot initiate)
@@ -68,7 +68,6 @@ With SSE:
   Client ←──event 3─── Server
   ...
 </code></pre>
-
 <hr />
 <h2>Connection Setup Sequence</h2>
 <table>
@@ -103,7 +102,7 @@ With SSE:
 </tbody>
 </table>
 <p>The session ID is critical — it links the GET SSE connection to the POST requests from the same client.</p>
-<pre class="highlight"><code class="language-python"># Step 1-3: Normal handshake
+<pre><code class="language-python"># Step 1-3: Normal handshake
 session_id = initialize_handshake(server_url)
 
 # Step 4: Open persistent SSE connection
@@ -112,7 +111,6 @@ sse_stream = requests.get(f&quot;{server_url}/sse&quot;,
     stream=True
 )
 </code></pre>
-
 <hr />
 <h2>Dual SSE Architecture</h2>
 <p>This is the key architectural concept. There are <strong>two types</strong> of SSE connections:</p>
@@ -130,7 +128,7 @@ sse_stream = requests.get(f&quot;{server_url}/sse&quot;,
 <li>Carries <strong>tool-specific messages</strong>: progress updates, log entries, final result</li>
 <li>Think of it as a "per-task channel"</li>
 </ul>
-<pre class="highlight"><code>Client                          Server
+<pre><code>Client                          Server
   │                               │
   │──── GET /sse ────────────────→│  (Primary SSE — stays open)
   │←─── server-initiated msgs ───│
@@ -141,7 +139,6 @@ sse_stream = requests.get(f&quot;{server_url}/sse&quot;,
   │──── POST /tools/call ────────→│  (Another tool SSE)
   │←─── progress, logs, result ──│
 </code></pre>
-
 <blockquote>
 <p>💡 <strong>Key Insight</strong><br />
 The dual SSE design means the server can push progress for a specific tool call via the tool SSE, AND simultaneously push unrelated server-initiated requests via the primary SSE. They are independent channels.</p>

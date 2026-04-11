@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Text Edit Tool Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Text Editor Tool — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%), D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (built-in / server tools), 1.2 (tool orchestration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 42</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The text editor tool lets your product embed a "mini Claude Code" inside any workflow — Claude already knows how to edit files; you only have to provide the sandbox it writes into.</p>
+<hr />
+<h2>Mental Model: The IKEA Furniture Kit</h2>
+<p>Buying tools from scratch is like building a custom chair from raw wood — you design every joint. The text editor tool is like an IKEA kit: Anthropic ships all the parts (schema + command vocabulary), and you only provide the workspace (your filesystem or sandbox).</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Custom Tool</th>
+<th>Text Editor Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Schema definition</td>
+<td>You write it</td>
+<td>Ships with Claude</td>
+</tr>
+<tr>
+<td>Command vocabulary</td>
+<td>You design it</td>
+<td>Predefined (view, create, str_replace, insert, undo_edit)</td>
+</tr>
+<tr>
+<td>Execution code</td>
+<td>You write it</td>
+<td><strong>You still write it</strong></td>
+</tr>
+<tr>
+<td>Sandbox / safety model</td>
+<td>Your responsibility</td>
+<td><strong>Still your responsibility</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The speed-up is real but the safety responsibility is unchanged.</p>
+<hr />
+<h2>What Your Product Gets</h2>
+<p>The text editor tool immediately unlocks:</p>
+<ul>
+<li><strong>Read files</strong> (any granularity — whole file or specific line ranges)</li>
+<li><strong>List directory contents</strong></li>
+<li><strong>Create new files</strong></li>
+<li><strong>Replace strings within files</strong></li>
+<li><strong>Insert text at specific line numbers</strong></li>
+<li><strong>Undo recent edits</strong></li>
+</ul>
+<p>That is the full vocabulary of a code editor. You can build products like:</p>
+<ul>
+<li>A PR refactoring bot that takes a repo and a style guide, then rewrites code</li>
+<li>A content migration agent that rewrites Markdown files to a new schema</li>
+<li>A documentation auto-updater that keeps READMEs in sync with code changes</li>
+<li>An onboarding assistant that sets up config files in a user's sandbox</li>
+</ul>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When the Text Editor Tool Shines</h3>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Fit</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code refactoring tool</td>
+<td>Strong</td>
+<td>Core loop is view → edit → save</td>
+</tr>
+<tr>
+<td>Documentation generator</td>
+<td>Strong</td>
+<td>Claude can read code and create doc files</td>
+</tr>
+<tr>
+<td>Template scaffolder</td>
+<td>Strong</td>
+<td>Claude creates multiple files in a standard structure</td>
+</tr>
+<tr>
+<td>Internal developer agents</td>
+<td>Strong</td>
+<td>Focused on a controlled repo sandbox</td>
+</tr>
+<tr>
+<td>Headless automation (CI)</td>
+<td>Strong</td>
+<td>Files are the universal interface</td>
+</tr>
+</tbody>
+</table>
+<h3>When to Look Elsewhere</h3>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Structured data editing (DB records)</td>
+<td>Build a custom tool with your DB schema</td>
+</tr>
+<tr>
+<td>UI / visual editing</td>
+<td>Use specialized design tools</td>
+</tr>
+<tr>
+<td>Single atomic content edit</td>
+<td>Direct text generation without file I/O</td>
+</tr>
+<tr>
+<td>Collaborative real-time doc editing</td>
+<td>Use a document-sync service instead</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Sandbox Question</h2>
+<p>Since your code runs Claude's file commands, you decide the blast radius. This is a critical PM decision:</p>
+<table>
+<thead>
+<tr>
+<th>Sandbox Level</th>
+<th>Risk</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Whole filesystem</td>
+<td>Very high — Claude could write anywhere</td>
+<td>Never ship to production</td>
+</tr>
+<tr>
+<td>Project directory</td>
+<td>Medium — scoped but still substantial</td>
+<td>Internal developer tools</td>
+</tr>
+<tr>
+<td>Dedicated workspace directory</td>
+<td>Low — clean boundary</td>
+<td>User-facing products</td>
+</tr>
+<tr>
+<td>Read-only</td>
+<td>Minimal</td>
+<td>Analysis / review agents</td>
+</tr>
+<tr>
+<td>Virtual filesystem (in-memory)</td>
+<td>Lowest</td>
+<td>Preview-only experiences</td>
+</tr>
+</tbody>
+</table>
+<p>Start with the strictest sandbox that still delivers the product value, then widen only with explicit justification.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the product edit files as a core workflow?</td>
+<td>Yes</td>
+<td>Text editor tool is a great fit</td>
+</tr>
+<tr>
+<td>Can you define a tight sandbox directory?</td>
+<td>Yes</td>
+<td>Production-ready</td>
+</tr>
+<tr>
+<td>Does Claude need to create multiple related files?</td>
+<td>Yes</td>
+<td>Text editor handles this naturally</td>
+</tr>
+<tr>
+<td>Do users expect undo functionality?</td>
+<td>Yes</td>
+<td>Implement <code>undo_edit</code> in your handler</td>
+</tr>
+<tr>
+<td>Does the product write to critical system paths?</td>
+<td>Yes</td>
+<td><strong>Stop</strong> — re-architect around a sandbox</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Hybrid Responsibility Model</h2>
+<p>This is the most important PM insight for built-in tools: <strong>Anthropic owns the schema; you own the runtime</strong>. That means:</p>
+<ul>
+<li>You decide what "file" means (could be S3 objects, Git blobs, in-memory strings)</li>
+<li>You decide what <code>create</code> costs (e.g., charge per file for a metered product)</li>
+<li>You decide retention and undo behavior</li>
+<li>You decide logging, auditing, and compliance</li>
+</ul>
+<p>PMs sometimes assume built-in = fully managed. It is not. Built-in means "schema is pre-wired"; you still ship all the operational concerns.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Assuming the text editor tool is fully managed</strong> — Anthropic provides the schema; your team still builds the sandbox, safety, and file operations.</li>
+<li><strong>Not implementing <code>undo_edit</code></strong> — users expect undo in editor-like products; skipping it breaks the mental model.</li>
+<li><strong>Launching with a wide-open sandbox</strong> — "internal only" expands into production; start strict.</li>
+<li><strong>Ignoring audit logging</strong> — Claude's edits should be traceable for debugging, compliance, and rollback.</li>
+<li><strong>Forgetting about <code>view</code> on directories</strong> — the tool is about navigation, not just editing; support listing as well as reading.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Built-in tools are a hybrid: Anthropic ships the schema, you ship the runtime and the safety model. The product value of the text editor tool is that it removes weeks of schema / command design work, but none of the operational work around sandboxing, auditing, and undo. Budget accordingly.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong>: The text editor tool is a canonical example of a built-in (schema-provided) tool requiring developer execution.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: File operations are a natural multi-turn pattern — view, edit, verify, repeat.</li>
+<li>Exam questions often distinguish between "built-in with local execution" (text editor) and "built-in with managed execution" (web search).</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does Anthropic provide with the text editor tool?</td>
+<td>The schema and command vocabulary — Claude already knows how to use it</td>
+</tr>
+<tr>
+<td>What must the developer still provide?</td>
+<td>The execution code that actually reads, writes, creates, and undoes files on disk</td>
+</tr>
+<tr>
+<td>What are the file operations the tool supports?</td>
+<td>view, create, str_replace, insert, undo_edit</td>
+</tr>
+<tr>
+<td>What is the critical PM decision when shipping this tool?</td>
+<td>The sandbox — which directory, paths, or virtual filesystem Claude is allowed to touch</td>
+</tr>
+<tr>
+<td>Why is this tool a "hybrid" responsibility model?</td>
+<td>Schema is fully managed by Anthropic, runtime and safety are fully owned by the developer</td>
+</tr>
+<tr>
+<td>Name three products where the text editor tool is a strong fit.</td>
+<td>Refactoring bots, doc generators, template scaffolders</td>
+</tr>
+<tr>
+<td>What must PMs budget for beyond the tool integration?</td>
+<td>Sandboxing, audit logging, undo behavior, path validation</td>
+</tr>
+<tr>
+<td>What happens if you skip <code>undo_edit</code> in your handler?</td>
+<td>Claude's undo attempts fail silently and the user's mental model breaks</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

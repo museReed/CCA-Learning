@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>07 Adding Context Eng En</title>
+<title>Adding Context Eng En</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -64,14 +64,13 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <li><strong>Generate a CLAUDE.md file</strong> — a summary of what it found plus instructions for future sessions</li>
 <li><strong>Ask for permission</strong> — you approve the file write (Enter) or enable auto-accept (Shift+Tab)</li>
 </ol>
-<pre class="highlight"><code>$ claude
+<pre><code>$ claude
 &gt; /init
 
 Claude analyzes your codebase...
 → Identifies project purpose, architecture, key files
 → Writes CLAUDE.md to project root
 </code></pre>
-
 <blockquote>
 <p>🎬 <strong>Instructor insight from the video</strong></p>
 <p>The instructor demonstrates running <code>/init</code> on the uigen project. Claude reads through the entire codebase, identifies it as a Node.js app with Prisma/SQLite, and generates a CLAUDE.md summarizing the architecture, important commands (<code>npm run dev</code>, <code>npm run setup</code>), and coding patterns. The instructor notes that CLAUDE.md "gets included in every request" — making it a persistent system prompt.</p>
@@ -81,7 +80,9 @@ Claude analyzes your codebase...
 <p><img alt="Claude Md Hierarchy Priority Stack" src="visuals/claude-md-hierarchy-priority-stack.svg" /><br />
 <em>Figure: CLAUDE.md hierarchy — local overrides project overrides global.</em></p>
 <p>This is the most exam-critical concept in this lesson. Claude Code recognizes CLAUDE.md files at three levels:</p>
-<pre class="highlight"><code>Priority (highest → lowest):
+<!-- diagram: claude-md-hierarchy — three layers with priority arrows -->
+
+<pre><code>Priority (highest → lowest):
 ┌─────────────────────────────────────────────┐
 │ ~/.claude/CLAUDE.md          (Global)       │
 │  → Applied to ALL projects on this machine  │
@@ -96,7 +97,6 @@ Claude analyzes your codebase...
 │  → Personal overrides for this project      │
 └─────────────────────────────────────────────┘
 </code></pre>
-
 <p><strong>Critical exam rule: More local = higher priority.</strong></p>
 <table>
 <thead>
@@ -135,26 +135,23 @@ Claude analyzes your codebase...
 <hr />
 <h2>The # Memory Command</h2>
 <p>To update CLAUDE.md without manually editing the file, use the <code>#</code> command:</p>
-<pre class="highlight"><code>&gt; # Use comments sparingly. Only comment complex code.
+<pre><code>&gt; # Use comments sparingly. Only comment complex code.
 </code></pre>
-
 <p>Claude merges this instruction into your CLAUDE.md intelligently — it does not blindly append. This is called "memory mode" because it persists across sessions.</p>
 <hr />
 <h2>@ File Mentions: Precise Context Injection (Tasks 5.1, 5.4)</h2>
 <p>When you need Claude to focus on specific files, use the <code>@</code> syntax:</p>
-<pre class="highlight"><code>&gt; How does the auth system work? @auth
+<pre><code>&gt; How does the auth system work? @auth
 </code></pre>
-
 <p>Claude shows a list of auth-related files for you to select. The selected file's contents are included in the current request.</p>
 <p><strong>Two usage patterns:</strong></p>
 <h3>1. Interactive @ mentions (in chat)</h3>
 <p>Type <code>@</code> followed by a partial filename. Claude provides autocomplete suggestions. The file contents are injected into that single request.</p>
 <h3>2. @ mentions in CLAUDE.md (persistent)</h3>
-<pre class="highlight"><code class="language-markdown"># CLAUDE.md
+<pre><code class="language-markdown"># CLAUDE.md
 The database schema is defined in @prisma/schema.prisma.
 Reference it when working with data models.
 </code></pre>
-
 <p>When <code>@</code> is used inside CLAUDE.md, the referenced file is included in <strong>every request</strong> automatically. This is powerful but expensive — it consumes context window on every turn.</p>
 <blockquote>
 <p>⚠️ <strong>Context Window Warning</strong></p>
@@ -164,7 +161,7 @@ Reference it when working with data models.
 </blockquote>
 <hr />
 <h2>Context Management Strategy for Large Codebases (Task 5.4)</h2>
-<pre class="highlight"><code>Context Budget Allocation:
+<pre><code>Context Budget Allocation:
 ┌────────────────────────────────────────────┐
 │  CLAUDE.md (always loaded)          ~5-10% │
 │  @ references in CLAUDE.md          ~5-15% │
@@ -174,7 +171,6 @@ Reference it when working with data models.
 │  Claude's response                   ~10-20%│
 └────────────────────────────────────────────┘
 </code></pre>
-
 <p><strong>Strategy:</strong><br />
 - Put only critical, cross-cutting files in CLAUDE.md <code>@</code> references (schema, API contracts)<br />
 - Use interactive <code>@</code> for task-specific files<br />

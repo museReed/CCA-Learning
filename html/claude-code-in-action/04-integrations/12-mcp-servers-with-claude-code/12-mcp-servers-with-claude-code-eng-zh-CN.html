@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>12 Mcp Servers With Claude Code Eng Zh Cn</title>
+<title>Mcp Servers With Claude Code Eng Zh Cn</title>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
 h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
@@ -57,6 +57,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>MCP Server 怎么运作</h2>
 <p>MCP server 可以跑在<strong>远端</strong>或<strong>本地</strong>。它们通过标准化的 protocol 把工具暴露给 Claude Code，让 Claude 在 runtime 动态发现和调用。</p>
+<!-- diagram: mcp-architecture — Claude Code ↔ MCP Protocol ↔ MCP Server (Playwright / DB / API) ↔ 外部系统 (浏览器 / 数据库 / 服务) -->
 <blockquote>
 <p>📎 架构图由 nanobanana 产出</p>
 </blockquote>
@@ -102,9 +103,8 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>安装 MCP Server</h2>
 <p>课程用 Playwright MCP server 做示范。在你的 <strong>terminal</strong> 执行（不是在 Claude Code 里面）：</p>
-<pre class="highlight"><code class="language-bash">claude mcp add playwright npx @playwright/mcp@latest
+<pre><code class="language-bash">claude mcp add playwright npx @playwright/mcp@latest
 </code></pre>
-
 <p>这个命令做两件事：<br />
 1. <strong>命名</strong> MCP server 为 <code>playwright</code><br />
 2. <strong>注册</strong> 启动命令（<code>npx @playwright/mcp@latest</code>），在本地执行</p>
@@ -115,14 +115,13 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 <hr />
 <h2>权限管理</h2>
 <p>Claude 第一次使用 MCP 工具时，每次都会问你要不要允许。如果觉得烦，可以在 <code>.claude/settings.local.json</code> 里预先授权：</p>
-<pre class="highlight"><code class="language-json">{
+<pre><code class="language-json">{
   &quot;permissions&quot;: {
     &quot;allow&quot;: [&quot;mcp__playwright&quot;],
     &quot;deny&quot;: []
   }
 }
 </code></pre>
-
 <blockquote>
 <p>⚠️ <strong>双下划线</strong></p>
 <p>格式是 <code>mcp__&lt;server_name&gt;</code> — 注意是<strong>两个</strong>下划线。这是考试常考的细节。</p>

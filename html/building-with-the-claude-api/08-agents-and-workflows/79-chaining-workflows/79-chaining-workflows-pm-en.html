@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chaining Workflows Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Chaining Workflows — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — PRIMARY</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2 (agentic patterns — chaining), 5.2 (production workflow deployment)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 79</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Chaining is the "one thing at a time" workflow: any time Claude struggles to satisfy multiple constraints in a single prompt, or when a task has natural sequential stages, split it into focused steps with outputs flowing from one to the next.</p>
+<hr />
+<h2>Mental Model: The Newsroom</h2>
+<p>A magazine article is not written by one person doing everything at once:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Job</th>
+<th>Analogy to Chaining</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Reporter</strong></td>
+<td>Gathers raw material</td>
+<td>Step 1: research LLM call</td>
+</tr>
+<tr>
+<td><strong>Writer</strong></td>
+<td>Turns material into draft</td>
+<td>Step 2: drafting LLM call</td>
+</tr>
+<tr>
+<td><strong>Copy editor</strong></td>
+<td>Enforces house style, removes clichés</td>
+<td>Step 3: revision LLM call</td>
+</tr>
+<tr>
+<td><strong>Fact checker</strong></td>
+<td>Validates claims</td>
+<td>Step 4: validation (can be non-LLM)</td>
+</tr>
+<tr>
+<td><strong>Publisher</strong></td>
+<td>Distributes the finished piece</td>
+<td>Step 5: publishing API call</td>
+</tr>
+</tbody>
+</table>
+<p>Each role focuses on what they do best, and work flows from one desk to the next. Chaining workflows are the same idea applied to Claude: instead of one prompt playing all five roles badly, five focused calls each play one role well.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When Chaining Fits</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Chaining</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Marketing copy generator with brand voice rules</td>
+<td>Step 1 drafts, step 2 enforces voice, step 3 shortens</td>
+</tr>
+<tr>
+<td>Auto-reply system with tone calibration</td>
+<td>Classify intent → draft reply → tone-correct → send</td>
+</tr>
+<tr>
+<td>Document translation preserving structure</td>
+<td>Extract structure → translate text → reassemble</td>
+</tr>
+<tr>
+<td>Data-to-report pipelines</td>
+<td>Fetch data → summarize → format → add visualizations</td>
+</tr>
+<tr>
+<td>Video content pipeline (lesson example)</td>
+<td>Trending topics → research → script → video → post</td>
+</tr>
+<tr>
+<td>Legal contract review</td>
+<td>Section-by-section analysis feeding a final recommendation</td>
+</tr>
+</tbody>
+</table>
+<h3>When Chaining Does Not Fit</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simple one-shot task</td>
+<td>Just one Claude call</td>
+</tr>
+<tr>
+<td>Independent sub-analyses</td>
+<td>Parallelization (lesson 78)</td>
+</tr>
+<tr>
+<td>Open-ended exploration</td>
+<td>Agent (lesson 77)</td>
+</tr>
+<tr>
+<td>Latency-critical real-time feature</td>
+<td>Single call — chaining sums latencies</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The "Long Prompt Problem" PMs Recognize</h2>
+<p>This is the most common PM pain point chaining solves. You write a PRD saying "the AI should generate content that is X, Y, Z, avoiding A, B, C" — engineering builds a big prompt with all those rules — and the output still violates rules inconsistently.</p>
+<p><strong>Diagnosis</strong>: You're asking Claude to <em>create</em> quality content <em>and</em> enforce six constraints simultaneously. Split the job:</p>
+<ol>
+<li><strong>First call</strong> — focus only on creating good content</li>
+<li><strong>Second call</strong> — focus only on enforcing constraints ("remove X, replace Y, adjust tone Z")</li>
+</ol>
+<p>The second call succeeds because Claude is no longer balancing creativity against compliance — it is just editing.</p>
+<p>This pattern scales to any feature with "the output should be X <em>and</em> avoid Y" requirements.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>Ask these questions:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the task have natural sequential stages?</td>
+<td>Yes</td>
+<td>Chaining candidate</td>
+</tr>
+<tr>
+<td>Is Claude ignoring some rules in a single prompt?</td>
+<td>Yes</td>
+<td>Chaining (split create/enforce)</td>
+</tr>
+<tr>
+<td>Do later steps need earlier step outputs?</td>
+<td>Yes</td>
+<td>Chaining, not parallelization</td>
+</tr>
+<tr>
+<td>Can I validate output between steps?</td>
+<td>Yes</td>
+<td>Chaining (adds quality gates)</td>
+</tr>
+<tr>
+<td>Is a single prompt working reliably?</td>
+<td>Yes</td>
+<td>Do not chain — keep it simple</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Business Value Framing</h2>
+<p>When advocating for chaining vs a single big prompt, translate to business-speak:</p>
+<ul>
+<li><strong>Quality</strong> — "Each step does one thing well instead of several things poorly"</li>
+<li><strong>Reliability</strong> — "Constraints are enforced by a dedicated revision step, not left to chance"</li>
+<li><strong>Testability</strong> — "Each step has clear inputs and outputs, so we can unit-test and eval them independently"</li>
+<li><strong>Observability</strong> — "Failures show up in a specific step, not hidden in a monolithic prompt"</li>
+<li><strong>Latency trade-off</strong> — "Total time is the sum of step times, so we budget for ~2× the single-prompt time"</li>
+</ul>
+<hr />
+<h2>Hidden Costs PMs Should Budget For</h2>
+<ol>
+<li><strong>Latency sums up.</strong> Chains are slower than single prompts. If step 1 is 2s, step 2 is 2s, step 3 is 2s, total is 6s. Users feel this. Mitigate with streaming intermediate outputs if appropriate.</li>
+<li><strong>Token cost sums up.</strong> Each step pays its own prompt tokens + output tokens. Model the total cost early.</li>
+<li><strong>Error propagation.</strong> A bad step 2 output makes step 3 worse. Require engineering to add validation between steps.</li>
+<li><strong>Debugging complexity.</strong> Multi-step failures require trace logs — make sure observability is in the spec.</li>
+<li><strong>Eval work multiplies.</strong> Each step needs its own eval dataset <em>plus</em> end-to-end evals.</li>
+</ol>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Chaining when one prompt is enough.</strong> Over-engineering is real. Start with the simplest solution; chain only when the single prompt genuinely fails.</li>
+<li><strong>Chain too long.</strong> 3–5 steps is sweet spot. 10+ step chains become fragile and slow. If you need 10+ steps, you probably want multiple smaller chains with checkpoints.</li>
+<li><strong>Missing the non-LLM hooks.</strong> Chains let you interleave code between LLM calls — PMs forget this and ask for "AI everything", missing opportunities for deterministic validation.</li>
+<li><strong>Not budgeting for eval.</strong> Each chain step needs evals. The eval budget is often bigger than the initial build budget.</li>
+<li><strong>Not specifying error handling in the PRD.</strong> When step 3 fails, what happens? Retry? Fallback? Degrade? Fail the whole request? Specify it upfront.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Chaining is the "one focused responsibility per call" pattern. When your product requires Claude to balance multiple goals (create + enforce, extract + reformat, classify + respond), split the work into sequential, single-purpose LLM calls. The "long prompt problem" is the #1 PM pain point this solves. For the exam, remember: <strong>chaining has sequential dependencies; parallelization does not.</strong></p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (22%) PRIMARY</strong>: Chaining is one of the four core workflow patterns. Expect scenario questions distinguishing chaining from parallelization and routing.</li>
+<li><strong>D5 (20%) SECONDARY</strong>: Production patterns — error handling, checkpointing, between-step validation.</li>
+<li>Signal words for chaining: "sequential", "output feeds next step", "break into steps", "focus on one aspect".</li>
+<li>The clearest tell: a scenario describing "Claude writes X, then we ask Claude to revise X" — that is chaining.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is chaining in product terms?</td>
+<td>Break a task into sequential, focused LLM calls where each step's output feeds the next</td>
+</tr>
+<tr>
+<td>What is the newsroom analogy for chaining?</td>
+<td>Reporter → writer → copy editor → fact checker → publisher; each role focused, work flows between desks</td>
+</tr>
+<tr>
+<td>What is "the long prompt problem" that chaining solves?</td>
+<td>Claude ignores constraints when a single prompt tries to create content AND enforce rules simultaneously</td>
+</tr>
+<tr>
+<td>How does chaining differ from parallelization?</td>
+<td>Chaining has sequential dependencies; parallelization runs independent sub-tasks at the same time</td>
+</tr>
+<tr>
+<td>When should a PM avoid chaining?</td>
+<td>When a single prompt works reliably or latency is the top constraint</td>
+</tr>
+<tr>
+<td>Name three PM mistakes with chaining.</td>
+<td>Chaining when unnecessary, chains too long, forgetting error handling in the PRD</td>
+</tr>
+<tr>
+<td>What hidden costs should PMs budget for chaining features?</td>
+<td>Latency sum, token cost sum, eval per step, error handling, debug complexity</td>
+</tr>
+<tr>
+<td>Is chaining a workflow or an agent?</td>
+<td>A workflow — code owns the sequence, Claude does not decide the next step</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

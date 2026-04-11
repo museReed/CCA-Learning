@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="900" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="450" y="40" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Anatomy of a Tool Schema</text>
+  <text x="450" y="62" text-anchor="middle" font-size="13" fill="#6B7280">JSON Schema fields Claude uses to decide when and how to call your tool</text>
+
+  <!-- Code block background -->
+  <rect x="180" y="95" width="440" height="430" rx="10" fill="#0F172A" filter="url(#shadow)"/>
+  <rect x="180" y="95" width="440" height="32" rx="10" fill="#1E293B"/>
+  <circle cx="200" cy="111" r="5" fill="#EF4444"/>
+  <circle cx="216" cy="111" r="5" fill="#F59E0B"/>
+  <circle cx="232" cy="111" r="5" fill="#22C55E"/>
+  <text x="400" y="116" text-anchor="middle" font-size="11" fill="#94A3B8">tool definition (Python dict / JSON)</text>
+
+  <!-- Code lines -->
+  <text x="200" y="155" font-size="13" fill="#E2E8F0" font-family="Menlo, monospace">{</text>
+
+  <!-- name line -->
+  <text x="220" y="180" font-size="13" font-family="Menlo, monospace" fill="#60A5FA">"name"</text>
+  <text x="272" y="180" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">: </text>
+  <text x="288" y="180" font-size="13" font-family="Menlo, monospace" fill="#FDE68A">"get_weather"</text>
+  <text x="388" y="180" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">,</text>
+
+  <!-- description line -->
+  <text x="220" y="210" font-size="13" font-family="Menlo, monospace" fill="#60A5FA">"description"</text>
+  <text x="330" y="210" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">:</text>
+  <text x="220" y="228" font-size="12" font-family="Menlo, monospace" fill="#FDE68A">  "Get current weather for a city",</text>
+
+  <!-- input_schema -->
+  <text x="220" y="258" font-size="13" font-family="Menlo, monospace" fill="#60A5FA">"input_schema"</text>
+  <text x="338" y="258" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">: {</text>
+  <text x="240" y="278" font-size="13" font-family="Menlo, monospace" fill="#A78BFA">"type"</text>
+  <text x="285" y="278" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">: </text>
+  <text x="301" y="278" font-size="13" font-family="Menlo, monospace" fill="#FDE68A">"object"</text>
+  <text x="360" y="278" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">,</text>
+
+  <text x="240" y="298" font-size="13" font-family="Menlo, monospace" fill="#A78BFA">"properties"</text>
+  <text x="340" y="298" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">: {</text>
+
+  <text x="260" y="318" font-size="12" font-family="Menlo, monospace" fill="#34D399">"city"</text>
+  <text x="298" y="318" font-size="12" font-family="Menlo, monospace" fill="#E2E8F0">: {</text>
+  <text x="280" y="335" font-size="11" font-family="Menlo, monospace" fill="#A78BFA">"type"</text>
+  <text x="320" y="335" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">:</text>
+  <text x="330" y="335" font-size="11" font-family="Menlo, monospace" fill="#FDE68A">"string"</text>
+  <text x="378" y="335" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">,</text>
+  <text x="280" y="350" font-size="11" font-family="Menlo, monospace" fill="#A78BFA">"description"</text>
+  <text x="370" y="350" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">:</text>
+  <text x="280" y="365" font-size="11" font-family="Menlo, monospace" fill="#FDE68A">  "City name, e.g. 'SF'"</text>
+  <text x="260" y="382" font-size="12" font-family="Menlo, monospace" fill="#E2E8F0">},</text>
+
+  <text x="260" y="402" font-size="12" font-family="Menlo, monospace" fill="#34D399">"unit"</text>
+  <text x="298" y="402" font-size="12" font-family="Menlo, monospace" fill="#E2E8F0">: {</text>
+  <text x="280" y="419" font-size="11" font-family="Menlo, monospace" fill="#A78BFA">"type"</text>
+  <text x="320" y="419" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">:</text>
+  <text x="330" y="419" font-size="11" font-family="Menlo, monospace" fill="#FDE68A">"string"</text>
+  <text x="378" y="419" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">,</text>
+  <text x="280" y="434" font-size="11" font-family="Menlo, monospace" fill="#A78BFA">"enum"</text>
+  <text x="318" y="434" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">: [</text>
+  <text x="338" y="434" font-size="11" font-family="Menlo, monospace" fill="#FDE68A">"c"</text>
+  <text x="360" y="434" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">,</text>
+  <text x="368" y="434" font-size="11" font-family="Menlo, monospace" fill="#FDE68A">"f"</text>
+  <text x="386" y="434" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">]</text>
+  <text x="260" y="450" font-size="12" font-family="Menlo, monospace" fill="#E2E8F0">}</text>
+  <text x="240" y="468" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">},</text>
+
+  <text x="240" y="490" font-size="13" font-family="Menlo, monospace" fill="#A78BFA">"required"</text>
+  <text x="325" y="490" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">: [</text>
+  <text x="350" y="490" font-size="13" font-family="Menlo, monospace" fill="#FDE68A">"city"</text>
+  <text x="392" y="490" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">]</text>
+  <text x="220" y="508" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">}</text>
+  <text x="200" y="525" font-size="13" font-family="Menlo, monospace" fill="#E2E8F0">}</text>
+
+  <!-- Callout: name -->
+  <rect x="650" y="160" width="220" height="50" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="660" y="180" font-size="12" font-weight="600" fill="#3B82F6">name (required)</text>
+  <text x="660" y="198" font-size="10" fill="#1E293B">snake_case identifier Claude</text>
+  <text x="660" y="210" font-size="10" fill="#1E293B">returns when invoking the tool</text>
+  <line x1="620" y1="180" x2="650" y2="180" stroke="#3B82F6" stroke-width="2" stroke-dasharray="3,3"/>
+
+  <!-- Callout: description -->
+  <rect x="650" y="225" width="220" height="60" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <text x="660" y="245" font-size="12" font-weight="600" fill="#22C55E">description (critical!)</text>
+  <text x="660" y="262" font-size="10" fill="#1E293B">Plain English — Claude uses this</text>
+  <text x="660" y="274" font-size="10" fill="#1E293B">to decide WHEN to call. Be</text>
+  <text x="660" y="286" font-size="10" fill="#1E293B">specific and include examples.</text>
+  <line x1="620" y1="220" x2="650" y2="250" stroke="#22C55E" stroke-width="2" stroke-dasharray="3,3"/>
+
+  <!-- Callout: input_schema -->
+  <rect x="650" y="305" width="220" height="60" rx="8" fill="#FAF5FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="660" y="325" font-size="12" font-weight="600" fill="#8B5CF6">input_schema</text>
+  <text x="660" y="342" font-size="10" fill="#1E293B">Standard JSON Schema. Defines</text>
+  <text x="660" y="354" font-size="10" fill="#1E293B">parameters, types, constraints.</text>
+  <text x="660" y="366" font-size="10" fill="#1E293B">type must be "object".</text>
+  <line x1="620" y1="275" x2="650" y2="335" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="3,3"/>
+
+  <!-- Callout: properties -->
+  <rect x="650" y="385" width="220" height="55" rx="8" fill="#FFF7ED" stroke="#FB923C" stroke-width="2" filter="url(#shadow)"/>
+  <text x="660" y="405" font-size="12" font-weight="600" fill="#FB923C">properties</text>
+  <text x="660" y="422" font-size="10" fill="#1E293B">Each param has type, description.</text>
+  <text x="660" y="434" font-size="10" fill="#1E293B">Use enum for fixed choices.</text>
+  <line x1="620" y1="345" x2="650" y2="410" stroke="#FB923C" stroke-width="2" stroke-dasharray="3,3"/>
+
+  <!-- Callout: required -->
+  <rect x="650" y="460" width="220" height="50" rx="8" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <text x="660" y="480" font-size="12" font-weight="600" fill="#EF4444">required</text>
+  <text x="660" y="497" font-size="10" fill="#1E293B">Array of mandatory field names.</text>
+  <text x="660" y="509" font-size="10" fill="#1E293B">Claude must provide these.</text>
+  <line x1="620" y1="490" x2="650" y2="485" stroke="#EF4444" stroke-width="2" stroke-dasharray="3,3"/>
+
+  <!-- Bottom tip -->
+  <rect x="100" y="545" width="700" height="40" rx="8" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="450" y="570" text-anchor="middle" font-size="12" fill="#1E293B" font-weight="500">Tip: Invest heavily in the description field — it is effectively a prompt Claude reads every turn.</text>
+</svg>

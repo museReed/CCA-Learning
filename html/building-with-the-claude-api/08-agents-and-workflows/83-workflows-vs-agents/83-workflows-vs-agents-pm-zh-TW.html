@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workflows Vs Agents Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Workflows vs Agents — PM 觀點</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%);D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (agent vs workflow 架構)、1.2 (agentic loop)、5.1 (production pattern 選型)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 83</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Workflow 是你能完整寫清楚的 AI 功能的可靠、便宜、可預測架構;Agent 是你沒辦法寫清楚的功能的彈性、昂貴、較不可預測架構——PM 的工作是把 pattern 對應到問題,而不是在 roadmap review 時挑聽起來比較帥的那一個。</p>
+<hr />
+<h2>PM 為什麼該在意</h2>
+<p>每個 AI 功能的 PRD 都在暗中做這個架構選擇。如果你不刻意選,工程團隊會幫你選——通常選他們覺得比較有趣的那個,也就是 agent。六個月後你會在開會討論為什麼每 ticket 成本是 workflow 方案的 10 倍,而那個 workflow 本來可以用三分之一的時間上線。</p>
+<p>這是那種「對使用者最好的答案幾乎永遠是比較不華麗的那個」的決策。</p>
+<hr />
+<h2>心智模型:生產線 vs 工作坊</h2>
+<p><strong>Workflow = 生產線</strong>。每個站做一個工作。原料從頭進,產品從尾出。品質高、產能高、成本低,每個站都可以獨立量。缺點:這條線只能做一種產品。要換產品就要重新設計線。</p>
+<p><strong>Agent = 工匠工作坊</strong>。工匠牆上掛著工具,客戶給他一個目標(「幫我做張桌子」)。他根據這個特定需求挑工具、決定順序。輸出比較彈性——「幫我做張有多一個抽屜的桌子」走一樣流程。缺點:慢、每件成本高、比較難量,因為每次都不一樣。</p>
+<p>大部分產品應該:生產線處理 80% 流量,工作坊處理需要手工的 20%。</p>
+<hr />
+<h2>完整比較表(PM 視角)</h2>
+<table>
+<thead>
+<tr>
+<th>維度</th>
+<th>Workflow</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>可靠度</strong></td>
+<td>高 — 每次相同結果</td>
+<td>較低 — 偶爾會脫軌</td>
+</tr>
+<tr>
+<td><strong>每任務 cost</strong></td>
+<td>低、可預測</td>
+<td>高、變動(1x-10x workflow 成本)</td>
+</tr>
+<tr>
+<td><strong>Latency</strong></td>
+<td>低、可預測</td>
+<td>較高、變動</td>
+</tr>
+<tr>
+<td><strong>Eval 複雜度</strong></td>
+<td>中等 — 逐步測試</td>
+<td>高 — 必須測 emergent 行為</td>
+</tr>
+<tr>
+<td><strong>彈性</strong></td>
+<td>低 — 只能做你寫的</td>
+<td>高 — 處理新情境</td>
+</tr>
+<tr>
+<td><strong>首次出貨時間</strong></td>
+<td>前期較長(要設計流程)</td>
+<td>前期較短(設計工具箱)</td>
+</tr>
+<tr>
+<td><strong>處理新使用者請求的時間</strong></td>
+<td>一張新 ticket + 新分支</td>
+<td>通常為零—— agent 直接處理</td>
+</tr>
+<tr>
+<td><strong>非預期失敗的 support ticket</strong></td>
+<td>低</td>
+<td>高、較難診斷</td>
+</tr>
+<tr>
+<td><strong>使用者信任</strong></td>
+<td>靠可預測性穩定累積</td>
+<td>高度依賴 inspection 和護欄</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>產品使用情境</h2>
+<h3>什麼時候選 Workflow</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>為什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「用 3 個 bullet 摘要這篇文章」</td>
+<td>純轉換,已知單一輸入</td>
+</tr>
+<tr>
+<td>「抽取發票金額」</td>
+<td>合規要求 deterministic 行為</td>
+</tr>
+<tr>
+<td>「翻譯產品描述」</td>
+<td>可量、可 cache、便宜</td>
+</tr>
+<tr>
+<td>「客服 ticket 分類」</td>
+<td>窄、可重複、eval 友好</td>
+</tr>
+<tr>
+<td>任何受管制或稽核流程</td>
+<td>可預測性不可妥協</td>
+</tr>
+</tbody>
+</table>
+<h3>什麼時候選 Agent</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>為什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>跨未知 codebase 的寫程式助手</td>
+<td>無法事先列出使用者會問什麼</td>
+</tr>
+<tr>
+<td>「幫我搞稅務」對話工具</td>
+<td>每個使用者的問題路徑都不同</td>
+</tr>
+<tr>
+<td>創意內容生成</td>
+<td>創意需要 tool 重組</td>
+</tr>
+<tr>
+<td>開放式 debug 助手</td>
+<td>無法事先預測 bug</td>
+</tr>
+<tr>
+<td>跨混亂 schema 的內部「資料分析師」</td>
+<td>每個問題都需要重新探索</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Cost 和 Latency——商業數學</h2>
+<p>典型 3 步驟任務:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Workflow</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每任務 token 數</td>
+<td>~3,000(固定)</td>
+<td>~3,000 - 30,000(變動)</td>
+</tr>
+<tr>
+<td>每任務 latency</td>
+<td>~3-6 秒</td>
+<td>~5-30 秒</td>
+</tr>
+<tr>
+<td>Cost 倍數</td>
+<td>1x(baseline)</td>
+<td>1x 到 10x</td>
+</tr>
+<tr>
+<td>Support ticket</td>
+<td>1x(baseline)</td>
+<td>1.5x 到 3x(debuggability 成本)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM 心法</strong>:workflow 95% 準確、agent 96% 準確時,workflow 勝。你付 5-10 倍 cost 換 1 個百分點的準確度,這點通常用更好的 eval 或 workflow 重試就能補回來。</p>
+<hr />
+<h2>PM 決策框架</h2>
+<p>每個 AI 功能跑這個序列:</p>
+<table>
+<thead>
+<tr>
+<th>步驟</th>
+<th>問題</th>
+<th>Yes 去</th>
+<th>No 去</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>我能事先完整列出使用者流程嗎?</td>
+<td>Workflow</td>
+<td>第 2 步</td>
+</tr>
+<tr>
+<td>2</td>
+<td>任務是純轉換(A -&gt; B)嗎?</td>
+<td>Workflow</td>
+<td>第 3 步</td>
+</tr>
+<tr>
+<td>3</td>
+<td>請求多元且不可預測嗎?</td>
+<td>第 4 步</td>
+<td>Workflow</td>
+</tr>
+<tr>
+<td>4</td>
+<td>動作取決於即時環境 state 嗎?</td>
+<td>Agent + inspection</td>
+<td>第 5 步</td>
+</tr>
+<tr>
+<td>5</td>
+<td>我們負擔得起 5-10x cost 和 eval 複雜度嗎?</td>
+<td>Agent</td>
+<td>拆成更小的 workflow</td>
+</tr>
+</tbody>
+</table>
+<p>最後一個 sanity check:<strong>如果我們做成 workflow,使用者會發現差別嗎?</strong> 答案是「不會」就出 workflow。</p>
+<hr />
+<h2>PM 常見錯誤</h2>
+<ol>
+<li><strong>因為 agent 聽起來潮就選 agent</strong> — 「agentic」在 roadmap review 好賣,但大部分功能應該是 workflow。先把可靠度搞定。</li>
+<li><strong>沒預留 agent 的 cost 倍數</strong> — 每請求 cost 可能跳 5-10 倍沒人預測到。承諾前先估 agent cost。</li>
+<li><strong>時程沒算 eval 複雜度</strong> — Agent 的 eval 案例需要 3-10 倍多。加進估時,不要當成免費。</li>
+<li><strong>PRD 寫死 tool 順序</strong> — 逼工程團隊進 workflow 模式,即使 agent 更適合。寫目標,不要寫序列。</li>
+<li><strong>漏掉混合方案</strong> — Production 系統很少是純 agent 或純 workflow。Classifier + router 通常是兩邊的優點都拿到。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>預設答案是 workflow。使用者問題真的需要、而且你接受 cost、latency、eval overhead 時才選 agent。使用者不在乎你的架構,他們在乎功能穩定、負擔得起、可預測。把 pattern 對齊到問題是 agentic 產品裡最高槓桿的 PM 決策。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>:會出「workflow vs agent」情境題。公式:可預測且窄 -&gt; workflow;不可預測且廣 -&gt; agent;預設永遠 workflow。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>:Production trade-off(cost、latency、eval、reliability)大部分功能都偏向 workflow。這會直接考。</li>
+<li>考題提示字:「compliance」「predictable」「cheapest」 -&gt; workflow;「varied requests」「creative combinations」「novel situations」 -&gt; agent。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anthropic 對 workflow vs agent 的預設建議是什麼?</td>
+<td>預設 workflow;只有 workflow 解不了的問題才用 agent。</td>
+</tr>
+<tr>
+<td>生產線 vs 工作坊的類比是什麼?</td>
+<td>Workflow = 生產線(單一產品、高產能、便宜、可預測)。Agent = 工作坊(工匠配工具,彈性但慢且貴)。</td>
+</tr>
+<tr>
+<td>列出三個 workflow 在 production 勝 agent 的維度。</td>
+<td>可靠度、cost、latency、debuggability、可預測性、eval 簡單度(任三)。</td>
+</tr>
+<tr>
+<td>PM 什麼時候該選 agent 而不是 workflow?</td>
+<td>使用者請求多元、不可預測、需要創意 tool 組合,而且 workflow 準確度不夠時。</td>
+</tr>
+<tr>
+<td>同一個任務 agent 相較 workflow 的典型 cost 倍數是多少?</td>
+<td>1x 到 10x,看 agent 跑幾次 loop 迭代。</td>
+</tr>
+<tr>
+<td>什麼 PRD 錯誤會逼工程團隊選錯架構?</td>
+<td>寫死 tool 順序而不是寫使用者目標——會強制 workflow 模式,即使 agent 更適合。</td>
+</tr>
+<tr>
+<td>Production 系統常用的混合 pattern 是什麼?</td>
+<td>Workflow router 把簡單案例送到 workflow 分支,難案例送到 agent。</td>
+</tr>
+<tr>
+<td>決定選 agent 前的最後 sanity check 問題是什麼?</td>
+<td>如果做成 workflow,使用者會發現差別嗎?不會就出 workflow。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi Turn Conversations With Tools Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Multi-Turn Conversations with Tools — PM Perspective（繁中）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) / D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3（multi-turn conversation management）、1.2（agentic loop 實作）、2.4（multi-turn tool loops）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 38</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Multi-turn tool 對話解鎖了「Claude 可以幫我呼叫一支 API」和「Claude 可以規劃、執行、串接多個動作解決真實使用者問題」之間的差距——而工程成本是寫一個 loop，不是整個重寫。</p>
+<hr />
+<h2>心智模型：生產線上的工人</h2>
+<p>把 Claude 想成一個聰明的生產線工人，工作台上放著各種專門工具：</p>
+<table>
+<thead>
+<tr>
+<th>單回合 tool</th>
+<th>Multi-turn tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工人拿一樣工具、用完、放回去</td>
+<td>工人拿工具 A、看結果、拿工具 B、看結果、一直到完成</td>
+</tr>
+<tr>
+<td>主管（你的程式）交還一個結果</td>
+<td>主管交還每一個結果，工人決定下一步</td>
+</tr>
+<tr>
+<td>任務：「量這個零件」</td>
+<td>任務：「確認這個零件尺寸對——量它、對規格、必要時調整」</td>
+</tr>
+</tbody>
+</table>
+<p>工人不會事先規劃每一次 tool 呼叫。他們看目前結果、決定下一步。你程式的工作就是每次工人要求新動作時，把正確的 tool 結果交回去——直到工人最後交出完成品。</p>
+<hr />
+<h2>為什麼產品要在乎</h2>
+<p>Multi-turn tool 對話是 <strong>agent 類功能</strong> 的棲息地。沒有它，Claude 基本上只是個裝了一個 function 的高級 autocomplete。有了它，Claude 變成能：</p>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>串接依賴操作</td>
+<td>「訂機票然後加進行事曆」</td>
+</tr>
+<tr>
+<td>先看再做</td>
+<td>「查天氣，再決定要不要訂戶外餐廳」</td>
+</tr>
+<tr>
+<td>迭代優化</td>
+<td>「搜尋產品、按評分篩、買評分最高的那個」</td>
+</tr>
+<tr>
+<td>錯誤恢復</td>
+<td>「如果那個 API 掛了，試備援 API」</td>
+</tr>
+</tbody>
+</table>
+<p>每一個都是高槓桿的產品能力，單次 tool 呼叫做不到。Multi-turn loop 是從「AI 功能」走向「AI agent」的門檻。</p>
+<hr />
+<h2>產品應用場景</h2>
+<h3>非要 Multi-Turn 不可的時候</h3>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>為什麼要 Multi-Turn</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「幫我規劃京都旅行」</td>
+<td>需要序列決策（日期 → 飯店 → 機票 → 活動）</td>
+</tr>
+<tr>
+<td>「Debug 這段 code 的錯誤」</td>
+<td>讀檔 → 找問題 → 改 → 驗證</td>
+</tr>
+<tr>
+<td>「幫我總結最近 30 封信」</td>
+<td>抓清單 → 抓每封信 → 綜合</td>
+</tr>
+<tr>
+<td>「找 80 萬以下、學區好的房子」</td>
+<td>搜尋物件 → 抓學校評分 → 篩選 → 排序</td>
+</tr>
+</tbody>
+</table>
+<h3>單回合就夠的時候</h3>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>為什麼單回合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「今天幾號？」</td>
+<td>一次 tool 呼叫就結束</td>
+</tr>
+<tr>
+<td>「翻譯這段」</td>
+<td>純模型操作，根本不用 tool</td>
+</tr>
+<tr>
+<td>「給我一個優惠碼」</td>
+<td>單次查詢</td>
+</tr>
+</tbody>
+</table>
+<p>PM 的經驗法則：<strong>如果答案需要「先做 X，再根據結果做 Y」，就需要 multi-turn。</strong></p>
+<hr />
+<h2>PM 決策框架</h2>
+<p>規劃 multi-turn tool 功能之前，先回答這些：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>為什麼重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>最多允許跑幾次迭代？</td>
+<td>延遲、成本、安全邊界——使用者不能無限等</td>
+</tr>
+<tr>
+<td>迭代中間如何向使用者顯示進度？</td>
+<td>好幾秒的空白畫面會毀掉感知品質</td>
+</tr>
+<tr>
+<td>中途 tool 失敗怎麼辦？</td>
+<td>需要優雅降級策略</td>
+</tr>
+<tr>
+<td>Token 成本預算怎麼抓？</td>
+<td>每個回合都會讓歷史變長，長 loop 很貴</td>
+</tr>
+<tr>
+<td>Loop 的觀測性怎麼做？</td>
+<td>Production debug 需要看到每個回合</td>
+</tr>
+<tr>
+<td>使用者可以打斷 loop 嗎？</td>
+<td>沒有取消鈕的長 loop 是敵意 UX</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>以為 shipping 了第一個 tool 之後「agent」就免費</strong>——從單回合變多回合需要真正的 loop 實作、錯誤處理、成本控制</li>
+<li><strong>Loop 期間沒有進度指示</strong>——使用者看到 spinner 會以為產品壞了；要把每一步顯示出來</li>
+<li><strong>沒有 max_iterations 上限</strong>——搞混的 Claude 或壞掉的 tool 會無限 loop；跳過這個的 PM 會 ship 一張失控 token 帳單</li>
+<li><strong>沒編更長的延遲預算</strong>——multi-turn 一定比單回合慢，因為每次 tool 呼叫都是一趟 round trip</li>
+<li><strong>忽略部分結果</strong>——loop 撞到上限時，要顯示「不完整」結果還是裝沒事？這是產品決策不是工程決策</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Multi-turn tool 對話是產品層級對 agent 的定義。技術成本很小——一個 <code>while</code> loop 加更好的 helper function——但產品影響很大：延遲預算、進度 UX、取消、token 成本、觀測性全部都變成一線議題。把「讓這個功能支援 multi-turn」當成產品里程碑，不是一個 tech spike。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：Multi-turn tool 對話是典型的 agentic loop。考題會問什麼時候用、跟單回合呼叫怎麼差。</li>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：記住 tool schema 必須在每次迭代都帶上。</li>
+<li>考題描述「依賴鏈的 tool 呼叫」的情境——答案幾乎永遠是「實作對話 loop」。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>題目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用什麼生產線比喻來理解 multi-turn tool 對話？</td>
+<td>一個聰明的工人一次拿一樣工具、看每個結果、決定下一步</td>
+</tr>
+<tr>
+<td>Agent 的產品層級定義是什麼？</td>
+<td>支援 multi-turn tool 對話的功能——串接、依賴推理</td>
+</tr>
+<tr>
+<td>什麼時候必須用 multi-turn 而不是單回合？</td>
+<td>當答案需要「先做 X 再根據 X 的結果做 Y」——規劃、迭代、錯誤恢復</td>
+</tr>
+<tr>
+<td>Multi-turn tool 功能最大的隱藏成本是什麼？</td>
+<td>延遲——每次 tool 呼叫多一趟 round trip，感覺比單回合慢</td>
+</tr>
+<tr>
+<td>Multi-turn 功能為什麼需要 max_iterations 上限？</td>
+<td>防止失控 loop 燒光 token、永遠卡住 UI</td>
+</tr>
+<tr>
+<td>Multi-turn loop 期間最重要的 UX 元素是什麼？</td>
+<td>進度指示——把每個步驟顯示出來，否則使用者會以為產品壞了</td>
+</tr>
+<tr>
+<td>Multi-turn 引入了哪些產品決策？</td>
+<td>迭代上限、進度 UX、取消、token 預算、觀測性</td>
+</tr>
+<tr>
+<td>為什麼不能直接 reuse 單回合 tool 實作？</td>
+<td>單回合 tooling 不保留歷史、不管理 stop_reason、不處理一個 response 多個 tool 呼叫</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

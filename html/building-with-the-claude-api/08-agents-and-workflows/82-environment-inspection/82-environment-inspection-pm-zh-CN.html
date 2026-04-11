@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Environment Inspection Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Environment Inspection — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (agent 架构)、1.2 (agentic loop)、1.3 (agent 中的 tool use)、5.1 (production pattern 选型)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 08-agents-and-workflows / Lesson 82</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>AI agent 默认是盲的——它需要明确的"眼睛"去看你 App 的 state 才能可靠地交付结果。PM 必须从第一天就把 inspection 能力写进预算,不能当成 nice-to-have。</p>
+<hr />
+<h2>PM 为什么该关心</h2>
+<p>Production AI 功能大部分的失败不是 model"幻觉"——是 model 在它实际看不到的 state 上做动作。用户的文件因为错误假设被改掉、按钮被宣告点击成功但其实什么都没发生、数据库 row 用过时 context 被更新。</p>
+<p>解法不是"用更聪明的 model",而是给 agent <strong>观察能力</strong>,并且强制它在每个动作前后都用。这是 PM 的决策,因为它会出现在你的 PRD 里:tool 需求、成本预算、可靠度 SLO。</p>
+<table>
+<thead>
+<tr>
+<th>没有 Inspection</th>
+<th>有 Inspection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent 凭空猜现实</td>
+<td>Agent 每个决策都接地在观察到的 state</td>
+</tr>
+<tr>
+<td>静默失败传到用户</td>
+<td>失败在同一轮就被抓到并修正</td>
+</tr>
+<tr>
+<td>"AI 看起来不太可靠"</td>
+<td>"AI 稳定地交付它承诺的东西"</td>
+</tr>
+<tr>
+<td>错误编辑引发客服 ticket</td>
+<td>用户信任随时间累积</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>心智模型:没看 X 光就动刀的外科医生</h2>
+<p>想象一个外科医生,靠教科书背下人体解剖,但拒绝在开刀前看你实际的 X 光片。每个病人都略有不同——器官位置会偏、血管分支不尽相同——教科书的平均值不是你的身体。</p>
+<p>没有 environment inspection 的 agent 就是那个医生。他们知道代码、文件、数据库、UI"通常"长什么样,然后根据平均值动作。Environment inspection 就是 X 光:它让 Claude 看到面前这个 <strong>特定的</strong> 病人,不是教科书。</p>
+<p>产品版本的心法:<strong>agent 动刀前要先看,缝合后要再看一次。</strong></p>
+<hr />
+<h2>产品使用场景</h2>
+<h3>什么时候 Inspection 是关键</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>Inspection 给你什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI 编码助手编辑用户文件</td>
+<td>防止覆盖"上次读取之后"才发生的变更</td>
+</tr>
+<tr>
+<td>Agent 操作网页 UI(Computer Use)</td>
+<td>每次点击后的 screenshot 确认点击成功</td>
+</tr>
+<tr>
+<td>AI 客服 agent 更新 CRM 记录</td>
+<td>Read-back 确认更新有存进去</td>
+</tr>
+<tr>
+<td>AI 内容生成器产出多媒体</td>
+<td>抽 frame/字幕验证输出符合 brief</td>
+</tr>
+<tr>
+<td>AI 操作团队共享数据</td>
+<td>抓出 race condition 和 stale-state bug</td>
+</tr>
+</tbody>
+</table>
+<h3>什么时候 Inspection 是过度工程</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>为什么可以跳过</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一次性文字摘要</td>
+<td>没有 state 被变更——没东西可 inspect</td>
+</tr>
+<tr>
+<td>固定输入的翻译</td>
+<td>输出就是唯一 artifact;没有下游 state</td>
+</tr>
+<tr>
+<td>分类或评分</td>
+<td>Pure function——没有环境可 inspect</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule</strong>:任何会写入东西(文件、DB、API、UI)的功能都该有 inspection。只读取并返回文字的功能通常不需要。</p>
+<hr />
+<h2>"不做 Inspection"的隐藏成本</h2>
+<p>团队跳过 inspection 是因为感觉像工程 overhead。这个省法实际上买到什么:</p>
+<table>
+<thead>
+<tr>
+<th>跳过省下</th>
+<th>后来付的代价</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每个动作少 2 次 tool call</td>
+<td>客服 ticket 变 10 倍</td>
+</tr>
+<tr>
+<td>每次请求 cost 少 ~20%</td>
+<td>一次错误编辑就失去用户信任</td>
+</tr>
+<tr>
+<td>响应稍快</td>
+<td>工程团队好几个月在救 edge case</td>
+</tr>
+<tr>
+<td>PRD 比较简单</td>
+<td>Production 有不可知的失败模式</td>
+</tr>
+</tbody>
+</table>
+<p>这是典型的短期 vs 长期 trade-off。为了赶 demo date 跳过 inspection 的 PM 通常会付 5 倍回去补客服负担。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<p>对每个 AI 功能问:</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>为什么重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent 变更了什么 state?</td>
+<td>任何变更的东西都必须可观察</td>
+</tr>
+<tr>
+<td>Agent 怎么知道动作成功?</td>
+<td>答不出来 = 你有个盲 agent</td>
+</tr>
+<tr>
+<td>静默失败长什么样?</td>
+<td>Inspection 是你实时抓静默失败的方法</td>
+</tr>
+<tr>
+<td>如果 state 在 agent 上次读取后变了会怎样?</td>
+<td>答案是"数据丢失" = 写入前强制重新 inspect</td>
+</tr>
+<tr>
+<td>怎么衡量结果符合意图?</td>
+<td>动作后的 inspection 是你的 in-band quality gate</td>
+</tr>
+</tbody>
+</table>
+<p>如果团队说"直接相信 tool result 就好",推回去。Claude 分不出"我做了"跟"我以为我做了"的差别,没有证据它真的不知道。</p>
+<hr />
+<h2>PM 常见错误</h2>
+<ol>
+<li><strong>把 inspection 当成要优化掉的 cost</strong> — 每次 inspection 省下的客服和恢复成本是它自己的好几倍。</li>
+<li><strong>PRD 里没列 inspection tool</strong> — 你不写,工程团队就会做 write-only 版本。</li>
+<li><strong>Computer Use 为了"省钱"关掉 screenshot</strong> — 这会让下游每个 agent 决策都静默劣化。</li>
+<li><strong>说"model 应该自己知道"</strong> — Environment inspection 关心的是 model 面前的 <strong>具体</strong> state,训练数据给不了这个。</li>
+<li><strong>用"tool call 次数"当成功指标</strong> — 你要的是"verified success rate"不是"tool call success rate"。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Environment inspection 是任何 agentic 产品里单一杠杆最高的可靠度功能。把它写进 PRD、把它列进 acceptance criteria——这就分开了"用户信任的 AI 产品"跟"制造客服 ticket 的 AI 产品"。心法:"Agent 动作前看到什么?动作后怎么确认成功?"</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>:会出情境题"agent 改错文件,哪里出问题?"答案通常是"没先检视当前 state"。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>:Production agent 的可靠度、error handling、用户信任都是 inspection 的下游。</li>
+<li>考题关键字:"grounding""observe environment""verify output""read before write"。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Environment inspection 为什么对 agent 很关键?</td>
+<td>Claude 默认是盲的——它需要 tool 来观察真实 state,否则只能根据假设行动。</td>
+</tr>
+<tr>
+<td>Environment inspection 的外科医生类比是什么?</td>
+<td>一个拒绝看你 X 光的医生——他懂一般解剖但不懂你这个病人;inspection 就是 X 光。</td>
+</tr>
+<tr>
+<td>PM 什么时候该在 PRD 里要求 environment inspection?</td>
+<td>只要 agent 会变更任何 state 就要——文件、数据库、UI、API。</td>
+</tr>
+<tr>
+<td>列出三个 inspection 很关键的产品情境。</td>
+<td>AI 代码编辑器、Computer Use agent、CRM 更新 agent、内容生成器、共享数据 agent(任三)。</td>
+</tr>
+<tr>
+<td>跳过 inspection 的隐藏成本是什么?</td>
+<td>静默失败传到用户、客服 ticket 爆掉、用户信任崩盘——通常比 inspection 本身的 cost 贵 5 倍。</td>
+</tr>
+<tr>
+<td>PM 在 PRD 里对每个 AI 动作该问的单一问题是什么?</td>
+<td>"Agent 怎么知道这个动作成功了?"</td>
+</tr>
+<tr>
+<td>为什么"model 应该自己知道"是错的 PM 直觉?</td>
+<td>训练数据给的是平均值,inspection 关心的是此刻 model 面前的具体 state。</td>
+</tr>
+<tr>
+<td>比"tool call 成功率"更重要的 success metric 是什么?</td>
+<td>Verified outcome success rate——观察到的 state 是否真的符合用户意图。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

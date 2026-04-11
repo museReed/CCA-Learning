@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing Tool Use Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>介紹 Tool Use — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試 Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2（agentic loop 基礎）、2.1（tool schema 設計）、2.4（multi-turn tool loop）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 04-tool-use / Lesson 32</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Tool use 是一套結構化的 request/response 協定,讓 Claude 能主動請求你的應用程式去抓取外部資料或執行動作,補上訓練資料與即時世界之間的落差。</p>
+<hr />
+<h2>沒有 Tools 時的問題:靜態知識的邊界</h2>
+<p>沒有 tools,Claude 就被訓練截止日期綁死。使用者問「舊金山現在天氣如何?」時,只會得到:</p>
+<blockquote>
+<p>「抱歉,我沒辦法取得最新的天氣資訊。」</p>
+</blockquote>
+<p>這是能力的牆,不是 prompt 寫不好的問題。再怎麼調 prompt 也變不出訓練資料裡沒有的即時資訊。同樣的牆出現在:</p>
+<ul>
+<li>即時股價、賽事比分、新聞頭條</li>
+<li>公司內部資料庫與 CRM 記錄</li>
+<li>使用者個人狀態(行事曆、檔案、偏好)</li>
+<li>任何需要真實世界副作用的操作(寄信、寫檔案、觸發 workflow)</li>
+</ul>
+<p>Tools 是架構面的答案:與其用 prompt 繞過限制,不如透過結構化的方式<strong>擴展</strong> Claude 的能力,讓它可以向你的程式碼求助。</p>
+<hr />
+<h2>Tool Use 的四步驟流程</h2>
+<pre><code>┌──────────┐   1. 使用者問題 + 工具定義           ┌─────────┐
+│  Client  │ ─────────────────────────────────▶ │ Claude  │
+│  (app)   │                                     │   API   │
+│          │ ◀──────────────────────────────────│         │
+│          │   2. tool_use request (name + args) └─────────┘
+│          │
+│          │   3. 本地執行 function
+│          │
+│          │   4. tool_result 帶回結果           ┌─────────┐
+│          │ ─────────────────────────────────▶ │ Claude  │
+│          │ ◀──────────────────────────────────│   API   │
+│          │   5. 最終自然語言回覆                └─────────┘
+└──────────┘
+</code></pre>
+<ol>
+<li><strong>初始請求</strong> — 把使用者問題加上可用工具清單(name、description、input_schema)POST 到 <code>/v1/messages</code>。</li>
+<li><strong>工具請求</strong> — Claude 的 <code>stop_reason</code> 回 <code>"tool_use"</code>,<code>content</code> 裡會有 <code>tool_use</code> block,包含 <code>id</code>、<code>name</code>、<code>input</code>(JSON 參數)。</li>
+<li><strong>本地執行</strong> — 你的伺服器讀 tool_use block,呼叫對應的 Python function,拿到結果。</li>
+<li><strong>最終回覆</strong> — 把 assistant 訊息與一則新的 user 訊息(含 <code>tool_result</code> block,用 <code>tool_use_id</code> 對應)附加進去,再呼叫一次 API。Claude 綜合所有資訊產生最終答案。</li>
+</ol>
+<hr />
+<h2>最小可行 Python 範例</h2>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+tools = [{
+    &quot;name&quot;: &quot;get_weather&quot;,
+    &quot;description&quot;: &quot;回傳指定城市的目前天氣。&quot;,
+    &quot;input_schema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;city&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;城市名稱,例如 San Francisco&quot;}
+        },
+        &quot;required&quot;: [&quot;city&quot;]
+    }
+}]
+
+messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;舊金山現在天氣怎樣?&quot;}]
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,
+    messages=messages,
+)
+
+if response.stop_reason == &quot;tool_use&quot;:
+    tool_use = next(b for b in response.content if b.type == &quot;tool_use&quot;)
+    result = fetch_weather(tool_use.input[&quot;city&quot;])  # 你的 function
+
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: response.content})
+    messages.append({
+        &quot;role&quot;: &quot;user&quot;,
+        &quot;content&quot;: [{
+            &quot;type&quot;: &quot;tool_result&quot;,
+            &quot;tool_use_id&quot;: tool_use.id,
+            &quot;content&quot;: result,
+        }],
+    })
+
+    final = client.messages.create(
+        model=&quot;claude-sonnet-4-5&quot;,
+        max_tokens=1024,
+        tools=tools,
+        messages=messages,
+    )
+    print(final.content[0].text)
+</code></pre>
+<p>核心觀念:<strong>tool use 是 multi-turn</strong>。一個使用者問題通常會橫跨兩次(以上)API 呼叫。</p>
+<hr />
+<h2>為什麼 Tools 比 Fine-tune 更適合即時資料</h2>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>新鮮度</th>
+<th>成本</th>
+<th>維運</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fine-tune 最新資料</td>
+<td>數小時到數天 stale</td>
+<td>高(retrain)</td>
+<td>持續 retrain</td>
+</tr>
+<tr>
+<td>RAG(vector search)</td>
+<td>看 index 更新頻率</td>
+<td>中(embedding + 儲存)</td>
+<td>需維護 index pipeline</td>
+</tr>
+<tr>
+<td><strong>Tool use</strong></td>
+<td>即時 — 直接打 live source</td>
+<td>按次計費</td>
+<td>零 — source of truth 在上游</td>
+</tr>
+</tbody>
+</table>
+<p>Tools 是唯一一種讓 Claude 直接讀取系統真實來源的模式。不快取、不過期。</p>
+<hr />
+<h2>關鍵優勢</h2>
+<ul>
+<li><strong>即時資訊</strong> — 取得訓練資料裡沒有的最新資料</li>
+<li><strong>外部系統整合</strong> — 串接資料庫、SaaS API、內部服務</li>
+<li><strong>動態回應</strong> — 每次答案都奠基於最新狀態</li>
+<li><strong>結構化互動</strong> — Claude 透過 <code>input_schema</code> 明確宣告它要什麼</li>
+<li><strong>可執行動作</strong> — tools 不只讀取,還能寫入,這是 Claude 變成 agent 的關鍵</li>
+</ul>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>忘了第二次 API 呼叫</strong> — 把 <code>tool_use</code> block 直接回給使用者,沒有實際執行並把結果送回 Claude。</li>
+<li><strong><code>tool_use_id</code> 對不上</strong> — <code>tool_result</code> 必須引用原始 <code>tool_use</code> 的 <code>id</code>,否則 Claude 會斷開 context。</li>
+<li><strong>用字串傳遞 assistant 訊息</strong> — assistant message 的 <code>content</code> 必須保留完整陣列,不可壓成純文字。</li>
+<li><strong>以為 tools 是可有可無</strong> — 需要即時資料時,沒有 prompt engineering 的替代方案,只能用 tools。</li>
+<li><strong>沒處理 <code>stop_reason</code></strong> — 要分支判斷是否進入下一輪 loop,或直接回最終答案。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Tool use 不是單次 API call,而是<strong>一個 loop</strong>。每一輪檢查 <code>stop_reason</code>,若是 <code>tool_use</code> 就本地執行、附上 <code>tool_result</code>,再呼叫一次 API。這個 loop 是 CCA 整個 agentic 章節的基礎。搞懂它就同時解鎖 D1(agents)與 D2(tool design)。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D2(Tool Design &amp; MCP Integration)</strong>:tool_use request/response 流程、<code>tool_use</code> 與 <code>tool_result</code> block 類型、<code>input_schema</code> 即為 JSON Schema。</li>
+<li><strong>D1(Agentic Architecture)</strong>:tool use 這個 loop 就是最小的 agentic loop。Multi-turn tool call 就是更複雜 agent pattern 的起點。</li>
+<li>考題常見情境:「Claude 需要即時天氣」→ 答案永遠是 tools,不是 prompt engineering。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool use 解決什麼問題?</td>
+<td>Claude 訓練截止的限制 — 讓它能取得即時資料與外部系統,補上模型原本不知道的資訊。</td>
+</tr>
+<tr>
+<td>哪個 <code>stop_reason</code> 代表 Claude 想呼叫工具?</td>
+<td><code>"tool_use"</code></td>
+</tr>
+<tr>
+<td>Claude 要求工具時會回什麼 content block?</td>
+<td><code>tool_use</code> block,含 <code>id</code>、<code>name</code>、<code>input</code>(JSON 參數)。</td>
+</tr>
+<tr>
+<td>你的 app 如何把工具結果回傳給 Claude?</td>
+<td>送一則新的 user message,裡面放 <code>tool_result</code> block,用 <code>tool_use_id</code> 對應原 tool_use。</td>
+</tr>
+<tr>
+<td>一次 tool use round trip 最少要幾次 API call?</td>
+<td>至少兩次 — 一次收 tool_use 請求,一次送 tool_result 拿最終答案。</td>
+</tr>
+<tr>
+<td>Tool use 的四個步驟是?</td>
+<td>1) 初始請求帶 tools,2) Claude 回 tool_use,3) 本地執行,4) 回 tool_result,Claude 產出最終答案。</td>
+</tr>
+<tr>
+<td>為何 prompt engineering 取代不了 tools 的即時資料需求?</td>
+<td>因為那些資料從來沒在訓練資料裡 — 再怎麼 prompt 都生不出來。</td>
+</tr>
+<tr>
+<td>Tools 能有副作用嗎?</td>
+<td>可以 — tools 能讀(天氣 API)也能寫(寄信、建立記錄),這正是 Claude 變成 agent 的關鍵。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
