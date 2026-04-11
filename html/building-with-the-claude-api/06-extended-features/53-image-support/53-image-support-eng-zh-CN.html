@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Support Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Image Support — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — 主要；D5 — Enterprise Deployment (20%) — 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2（content blocks）、2.1（多模态输入结构）、5.2（token 计费）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 53</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude 的 image support 让你把 image content block 塞进 user message 与 text 并列，用同一个 Messages API 变成多模态端点——搭配明确的配额、token 计费、以及文字任务该有的 prompt engineering 纪律。</p>
+<hr />
+<h2>多模态消息，同一个 API</h2>
+<p>没有另一个"vision"端点。你调用 <code>/v1/messages</code> 的方式不变；差别是 user message 的 <code>content</code> 变成一个可以同时放 <strong>image block</strong> 与 <strong>text block</strong> 的 list。Claude 读完整个多模态 payload 后回一个普通 text block。</p>
+<p>这个设计是刻意的：既有的消息处理代码大多照旧能用，唯一要多学的是怎么组 image block、以及它的 token 成本怎么算。</p>
+<hr />
+<h2>必记的硬约束</h2>
+<p>课程点名了一组每个 production 部署都要遵守的限制：</p>
+<ul>
+<li><strong>单次 request 最多 100 张图</strong>（所有 messages 合计）。</li>
+<li><strong>单张图最大 5 MB。</strong></li>
+<li><strong>只传一张图时</strong>：最大长宽 <strong>8000 px</strong>。</li>
+<li><strong>传多张图时</strong>：每张最大长宽 <strong>2000 px</strong>。</li>
+<li>图可以用 <strong>base64 编码</strong>或<strong>图片 URL</strong> 发送。</li>
+<li>Token 成本公式：<code>tokens = (width_px × height_px) / 750</code>。</li>
+</ul>
+<p>这个 token 公式对成本模型很重要。一张 1920×1080 的图光是塞进 prompt 就要 <code>2,764</code> tokens——还没算 text 或响应 tokens。要积极缩图：1024×1024 约 1400 tokens、512×512 约 350 tokens。不需要全分辨率就不要传全分辨率。</p>
+<hr />
+<h2>Image Block 结构</h2>
+<p>Image block 放在 user message 的 content list 里，和 text block 并列：</p>
+<pre><code class="language-python">import base64
+
+with open(&quot;image.png&quot;, &quot;rb&quot;) as f:
+    image_bytes = base64.standard_b64encode(f.read()).decode(&quot;utf-8&quot;)
+
+add_user_message(messages, [
+    # Image Block
+    {
+        &quot;type&quot;: &quot;image&quot;,
+        &quot;source&quot;: {
+            &quot;type&quot;: &quot;base64&quot;,
+            &quot;media_type&quot;: &quot;image/png&quot;,
+            &quot;data&quot;: image_bytes,
+        }
+    },
+    # Text Block
+    {
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;text&quot;: &quot;What do you see in this image?&quot;
+    }
+])
+</code></pre>
+<p>要点：</p>
+<ul>
+<li><code>type: "image"</code>——不是 <code>"image_url"</code> 或别的。</li>
+<li><code>source.type: "base64"</code>——另一个选项是 URL。</li>
+<li><code>source.media_type</code>——必须和真实文件匹配（<code>image/png</code>、<code>image/jpeg</code> 等）。</li>
+<li><code>source.data</code>——base64 字符串，不是原始 bytes。</li>
+</ul>
+<p>留意顺序：先 image block，再 text block。课程示例把问题放在图片<strong>之后</strong>，读起来像"看这个，然后回答这个"。两种顺序都可以，但实务上把图片先放、问题紧接着最干净。</p>
+<hr />
+<h2>Message flow 没变</h2>
+<p>Request/response 流程完全和纯文字对话一样。你的服务器发送一个包含混合 block 的 user message，Claude 回一个 text block 分析结果。多轮对话、tool use、system prompt——图像输入之上全都照旧运作。循环里没有任何东西因为某一轮包含图片而改变。</p>
+<p>这是 content-block 导向 API 的隐藏好处：新增一个模态不需要新 endpoint 或新 handler。</p>
+<hr />
+<h2>Prompting 技巧：同样的规则</h2>
+<p>这堂课最大的要点：<strong>你对文字用的 prompt engineering 技巧，对图片同样适用</strong>。一个天真的问题"这张图里有几颗弹珠？"常常会数错；一个好设计的 prompt 则不会。</p>
+<p>课程示范的三个技巧：</p>
+<ol>
+<li><strong>详细的指引与分析步骤。</strong> 告诉 Claude 要用什么方法，而不只是问问题。</li>
+<li><strong>One-shot 或 multi-shot 示例。</strong> 附一张你已经知道答案的参考图、写出正确答案，再问目标图。Claude 会对着示例校准。</li>
+<li><strong>把复杂任务拆成小步骤。</strong> 与其直接要最终答案，先要中间观察，再要最终判断。</li>
+</ol>
+<h3>课程的逐步计数示例</h3>
+<pre><code>Analyze this image of marbles and determine the exact count using this methodology:
+1. Begin by identifying each unique marble one at a time. Assign each a number as you identify it.
+2. Verify your result by counting with a different method. Start from the bottom-left corner and work row by row, from left to right.
+
+What is the exact, verified number of marbles in this image?
+</code></pre>
+<p>这个简单的转换——从"几颗？"变成"用这个方法数，然后用第二种方法验证"——不换模型、不换图片，准确度就大幅提升。</p>
+<hr />
+<h2>实务例：火灾风险评估</h2>
+<p>课程走过一个用卫星影像自动化住家保险火灾风险评估的例子。保险公司不再派人到现场，而是把卫星影像和一个结构化 prompt 一起发送给 Claude。</p>
+<p>Prompt 把任务拆成五个明确步骤：识别主要住宅、树冠悬伸分析、火灾风险评估、防护空间识别、最后给 1 到 4 的数字评级。每一步都精确告诉 Claude 要看什么。</p>
+<pre><code>Analyze the attached satellite image of a property with these specific steps:
+
+1. Residence identification: Locate the primary residence on the property by looking for:
+   - The largest roofed structure
+   - Typical residential features (driveway connection, regular geometry)
+   - Distinction from other structures (garages, sheds, pools)
+
+2. Tree overhang analysis: Examine all trees near the primary residence:
+   - Identify any trees whose canopy extends directly over any portion of the roof
+   - Estimate the percentage of roof covered by overhanging branches (0-25%, 25-50%, 50-75%, 75%+)
+   - Note particularly dense areas of overhang
+
+3. Fire risk assessment: For any overhanging trees, evaluate:
+   - Potential wildfire vulnerability (ember catch points, continuous fuel paths to structure)
+   - Proximity to chimneys, vents, or other roof openings if visible
+   - Areas where branches create a &quot;bridge&quot; between wildland vegetation and the structure
+
+4. Defensible space identification: Assess the property's overall vegetative structure:
+   - Identify if trees connect to form a continuous canopy over or near the home
+   - Note any obvious fuel ladders (vegetation that can carry fire from ground to tree to roof)
+
+5. Fire risk rating: Based on your analysis, assign a Fire Risk Rating from 1-4:
+   - Rating 1 (Low Risk): No tree branches overhanging the roof, good defensible space around the home
+   - Rating 2 (Moderate Risk): Minimal overhang (&lt;25% of roof), some separation between tree canopies
+   - Rating 3 (High Risk): Significant overhang (25-50% of roof), connected tree canopies, multiple vulnerability points
+   - Rating 4 (Severe Risk): Extensive overhang (&gt;50% of roof), dense vegetation against structure
+
+For each item above (1-5), write one sentence summarizing your findings, with your final response being the numerical rating.
+</code></pre>
+<p>从这个 prompt 内化两个 pattern：</p>
+<ol>
+<li><strong>命名步骤加上明确子问题。</strong> 不是"评估这个物件"而是"找最大的屋顶结构、规则几何、与车道连接"。</li>
+<li><strong>量化输出用分类区间。</strong> 不要只问一个分数，而是定义 1、2、3、4 各代表什么，等于给一份 rubric，产出会稳定非常多。</li>
+</ol>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>对难的视觉任务用简单问题。</strong> 没给方法论的"几颗弹珠？"结果不可靠。把文字 prompt 纪律带到图像任务。</li>
+<li><strong>忽略 token 公式。</strong> <code>tokens = (w × h) / 750</code> 意味着全分辨率图会默默吃掉 token 预算。编码前先缩图。</li>
+<li><strong>超过单张图大小限制。</strong> 5 MB、单图 8000 px、多图 2000 px 都是硬停，违规 API 会直接拒绝。</li>
+<li><strong>忘记 100 张图的 per-request 上限。</strong> 大量视觉流程必须以 100 为单位 batch。</li>
+<li><strong><code>media_type</code> 和实际文件不一致。</strong> 对 JPEG 声明 <code>image/png</code> 会让解码混乱。检查文件，不要猜。</li>
+<li><strong>把 image block 当成 URL 字段。</strong> 它是一个结构化的 content block，有 <code>type</code>、<code>source.type</code>、<code>source.media_type</code>、<code>source.data</code>。单纯的 URL 字符串不能用。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Claude 的 image support 不是另一个产品——它只是 Messages API 里的一种新 block 类型。API 表面不难；production 真正重要的是 <strong>token 计费</strong>（width × height / 750 公式）和 <strong>prompt 纪律</strong>（step-by-step 方法论、rubric、one-shot 示例对图像和对文字一样重要）。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：Image block 是 content-block 变体——记得 <code>type: "image"</code> 结构、<code>source.type: "base64"</code>、以及 <code>media_type</code> 字段。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>：记住配额（100 张、5 MB、8000 px / 2000 px）与 token 公式 <code>(w × h) / 750</code> 用于成本规划。</li>
+<li>可能的题型："为什么我的图像任务准确度很低？"预期答案通常是"对图片套用和文字一样的 prompt engineering：方法论、one-shot 示例、步骤拆解。"</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单次 Claude API request 最多几张图？</td>
+<td>全部 messages 合计 100 张。</td>
+</tr>
+<tr>
+<td>单张图文件大小上限？</td>
+<td>5 MB。</td>
+</tr>
+<tr>
+<td>单图 vs 多图的最大长宽是多少？</td>
+<td>单图 8000 px，多图每张 2000 px。</td>
+</tr>
+<tr>
+<td>图片 token 成本的公式是？</td>
+<td><code>tokens = (width_px × height_px) / 750</code>。</td>
+</tr>
+<tr>
+<td>发送图给 Claude 的两种方式？</td>
+<td>Base64 编码内嵌，或图片 URL。</td>
+</tr>
+<tr>
+<td>图片用哪个 block type？数据放在哪个字段？</td>
+<td><code>type: "image"</code>，<code>source.type: "base64"</code>，<code>source.data</code> 放 base64 字符串（加 <code>source.media_type</code>）。</td>
+</tr>
+<tr>
+<td>为什么"有几颗弹珠？"在图片任务上常失败？</td>
+<td>那是天真的 prompt。图像任务需要和文字一样的方法论、step-by-step 指令、one-shot 示例。</td>
+</tr>
+<tr>
+<td>课程建议图像任务用哪三个 prompting 技巧？</td>
+<td>1) 详细指引与方法论，2) one-shot 或 multi-shot 示例，3) 拆成小步骤。</td>
+</tr>
+<tr>
+<td>加入图片会改变 message flow 吗？</td>
+<td>不会——仍然是 user message 发到 <code>/v1/messages</code>、回一个 text block。循环没变。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

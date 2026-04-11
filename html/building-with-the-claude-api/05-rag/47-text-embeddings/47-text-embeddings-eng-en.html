@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Embeddings Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Text Embeddings — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Architecture (22%) — primary; D4 — Safety &amp; Alignment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3 (context management), 4.1 (grounded responses)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 47</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A text embedding is a numerical vector that captures the meaning of a piece of text; RAG retrieval works by embedding both the user's query and the stored chunks, then finding the chunks whose vectors are closest to the query's.</p>
+<hr />
+<h2>The Retrieval Problem</h2>
+<p>After chunking, you have a collection of text chunks. When a user asks a question, you need to find which chunks relate to what the user is asking. This is fundamentally a <strong>search problem</strong> — "look through all chunks, identify the ones relevant to the query."</p>
+<p>Two approaches to that search:</p>
+<ul>
+<li><strong>Keyword search</strong> — look for exact word matches. Fast, simple, but fails on synonyms, paraphrases, and conceptually similar phrasing that shares no keywords.</li>
+<li><strong>Semantic search</strong> — find chunks whose <em>meaning</em> is closest to the query, regardless of exact words. This is the RAG default and is powered by embeddings.</li>
+</ul>
+<p>Semantic search is the right tool when users ask natural-language questions that do not parrot the document's vocabulary. "How much did the company earn?" should match a chunk titled "Revenue", even though no shared keyword exists.</p>
+<hr />
+<h2>What Is a Text Embedding?</h2>
+<p>A text embedding is a <strong>numerical representation of the meaning</strong> contained in some text. Think of it as converting words and sentences into a format computers can compare mathematically.</p>
+<p>The process:</p>
+<ul>
+<li>You feed text into an <strong>embedding model</strong></li>
+<li>The model outputs a long <strong>list of numbers</strong> (the embedding vector)</li>
+<li>Each number ranges from <strong>-1 to +1</strong></li>
+<li>Each number represents some learned feature or quality of the input text</li>
+</ul>
+<hr />
+<h2>Understanding the Numbers</h2>
+<p>Each number in an embedding is essentially a "score" for some quality of the input. The critical caveat: <strong>we do not know precisely what each number represents</strong>.</p>
+<p>It is tempting to say "dimension 42 is how happy the text is" or "dimension 17 is how much it talks about oceans" — but these are just conceptual illustrations. The actual semantics of each dimension are learned by the model during training and are not directly interpretable by humans.</p>
+<p>What matters for RAG is not what each dimension <em>means</em>, but that texts with similar meanings produce similar vectors. The model guarantees the <strong>geometry</strong> — we do not need to interpret the axes.</p>
+<hr />
+<h2>VoyageAI for Embeddings</h2>
+<p>Anthropic does not currently provide embedding generation. The recommended provider is <strong>VoyageAI</strong>.</p>
+<p>To set up:</p>
+<ol>
+<li>Sign up for a VoyageAI account (separate from Anthropic)</li>
+<li>Get an API key (free to start)</li>
+<li>Add the key to your environment variables</li>
+</ol>
+<p>In your <code>.env</code> file:</p>
+<pre><code>VOYAGE_API_KEY=&quot;your_key_here&quot;
+</code></pre>
+<p>This is an important D5-adjacent point for deployment: RAG pipelines introduce a <strong>second vendor</strong> into your stack, with its own key, rate limits, pricing, and SLO.</p>
+<hr />
+<h2>Implementation</h2>
+<p>Install the library:</p>
+<pre><code>%pip install voyageai
+</code></pre>
+<p>Set up the client and a helper function:</p>
+<pre><code class="language-python">from dotenv import load_dotenv
+import voyageai
+
+load_dotenv()
+client = voyageai.Client()
+
+def generate_embedding(text, model=&quot;voyage-3-large&quot;, input_type=&quot;query&quot;):
+    result = client.embed([text], model=model, input_type=input_type)
+    return result.embeddings[0]
+</code></pre>
+<p>Things to notice:</p>
+<ul>
+<li><code>client.embed</code> takes a <strong>list</strong> of texts, not a single string — the API is batched. You can and should pass multiple texts at once when embedding all your chunks.</li>
+<li><code>result.embeddings</code> is a list aligned with the input list; we take <code>[0]</code> for the single-text case.</li>
+<li><code>input_type</code> matters: "query" vs. "document". Many embedding models have asymmetric tuning, producing subtly different vectors for queries and documents even for the same text.</li>
+<li><code>model="voyage-3-large"</code> is the example in the lesson — pick a model size based on your quality/cost/latency targets.</li>
+</ul>
+<p>Running this on a text chunk returns a list of floating-point numbers — the embedding. The process itself is simple; the real challenge is using embeddings <strong>effectively</strong> for retrieval.</p>
+<hr />
+<h2>Where Embeddings Fit in the RAG Pipeline</h2>
+<pre><code>┌──────────────┐    chunk       ┌──────────────┐   embed each chunk   ┌──────────────┐
+│   Document   │ ─────────────▶ │    Chunks    │ ──────────────────▶ │   Vectors    │
+└──────────────┘                └──────────────┘                      └──────────────┘
+                                                                            │
+                                                                            ▼
+┌──────────────┐   embed query  ┌──────────────┐   compare vectors    ┌──────────────┐
+│  User query  │ ─────────────▶ │ Query vector │ ──────────────────▶ │  Top-k chunks│
+└──────────────┘                └──────────────┘                      └──────────────┘
+</code></pre>
+<p>The embedding step happens <strong>twice</strong>:</p>
+<ol>
+<li><strong>At preprocessing time</strong> — every chunk in your corpus is embedded and stored.</li>
+<li><strong>At query time</strong> — every incoming user query is embedded, and that vector is compared against the stored chunk vectors.</li>
+</ol>
+<p>Both sides of the comparison must use the same embedding model. Mixing models produces vectors in incompatible geometries, so similarity scores become meaningless.</p>
+<hr />
+<h2>Query vs. Document Input Types</h2>
+<p>VoyageAI exposes an <code>input_type</code> parameter with values like <code>"query"</code> and <code>"document"</code>. The lesson uses <code>input_type="query"</code> in the example function. In a full pipeline:</p>
+<ul>
+<li>When embedding <strong>chunks for storage</strong>, pass <code>input_type="document"</code></li>
+<li>When embedding the <strong>user's question at query time</strong>, pass <code>input_type="query"</code></li>
+</ul>
+<p>The model has been tuned so that query embeddings are optimally aligned with document embeddings. This small detail can measurably improve retrieval quality.</p>
+<hr />
+<h2>CCA Task Annotations</h2>
+<ul>
+<li><strong>Task 1.3 (Context Management)</strong> — embeddings are the mechanism by which you select which chunks become context. They are the "scoring function" of context selection.</li>
+<li><strong>Task 4.1 (Grounded Responses)</strong> — the quality of grounding depends on whether the right chunks were retrieved; embeddings are the first lever that controls this.</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Mixing embedding models between index and query time</strong> — the vectors live in different spaces; similarity becomes nonsense.</li>
+<li><strong>Not using <code>input_type</code> correctly</strong> — documents and queries should use their respective input types where the provider supports it.</li>
+<li><strong>Re-embedding on every query</strong> — embed chunks once at preprocessing, store the vectors, and reuse them. Only the query is embedded at runtime.</li>
+<li><strong>Forgetting to budget for VoyageAI latency and cost</strong> — the embedding API call is a new network hop on every query; it matters for p99 latency and for per-query cost.</li>
+<li><strong>Assuming dimensions are interpretable</strong> — you cannot "look at" a dimension to debug a retrieval failure; debugging is always about comparing full vectors.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Embeddings reduce "which chunk is most relevant to this query" to "which vector is closest to this vector". That is the whole trick. You do not need to understand what individual dimensions mean — you only need to trust that the model placed semantically similar texts near each other in vector space. The entire art of RAG retrieval is choosing a good embedding model and comparing vectors correctly.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Architecture)</strong>: embeddings are the search backbone of RAG retrieval. Know what they are, how they are produced, and why they enable semantic search.</li>
+<li><strong>D4 (Safety &amp; Alignment)</strong>: better retrieval → better grounding → fewer hallucinations. Embeddings are where retrieval quality begins.</li>
+<li>Expect questions like "Anthropic does not provide embeddings — what is the recommended provider?" (VoyageAI) and "what is the range of embedding values?" (-1 to +1 per dimension).</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is a text embedding?</td>
+<td>A numerical vector representation of the meaning of a piece of text, used for semantic search.</td>
+</tr>
+<tr>
+<td>What is the range of each number in an embedding?</td>
+<td>-1 to +1.</td>
+</tr>
+<tr>
+<td>Does Anthropic provide embeddings?</td>
+<td>No — the lesson recommends VoyageAI as the embedding provider.</td>
+</tr>
+<tr>
+<td>Which environment variable does VoyageAI use?</td>
+<td><code>VOYAGE_API_KEY</code> in your <code>.env</code> file.</td>
+</tr>
+<tr>
+<td>How does semantic search differ from keyword search?</td>
+<td>Semantic search matches meaning via vector similarity; keyword search only matches exact words.</td>
+</tr>
+<tr>
+<td>What does the <code>input_type</code> parameter do?</td>
+<td>Tells the embedding model whether the input is a query or a document; the model uses asymmetric tuning to optimize retrieval quality.</td>
+</tr>
+<tr>
+<td>How many times is the embedding model called in a RAG pipeline?</td>
+<td>Many times at preprocessing (once per chunk) and once per incoming user query.</td>
+</tr>
+<tr>
+<td>Why is it wrong to mix embedding models between index and query time?</td>
+<td>The vectors live in different spaces, so similarity scores become meaningless.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

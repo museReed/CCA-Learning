@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Citations Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Citations — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D4 — AI Safety &amp; Alignment (20%) — primary; D2 — Tool Design &amp; MCP Integration (18%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>4.2 (grounded outputs), 2.2 (content blocks), 5.4 (trust and verifiability)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 55</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Citations turn Claude's document-grounded answers from opaque text into a verifiable trail — for every claim, you get the exact source text, which document it came from, and where in that document it lives.</p>
+<hr />
+<h2>The Trust Problem Citations Solve</h2>
+<p>When Claude answers a question about a document you provided, users cannot tell, just from the text, whether the answer came from your document or from the model's training data. That ambiguity is a trust killer for any feature where the source matters: legal research, financial analysis, medical information, compliance QA.</p>
+<p>Citations fix this by creating an explicit, machine-readable trail from every statement in Claude's response back to the source text that grounds it. The model does not just answer — it shows its receipts.</p>
+<hr />
+<h2>Enabling Citations</h2>
+<p>Citations turn on with two additions to the <code>document</code> content block: a human-readable <code>title</code> and a <code>citations.enabled</code> flag.</p>
+<pre><code class="language-python">{
+    &quot;type&quot;: &quot;document&quot;,
+    &quot;source&quot;: {
+        &quot;type&quot;: &quot;base64&quot;,
+        &quot;media_type&quot;: &quot;application/pdf&quot;,
+        &quot;data&quot;: file_bytes,
+    },
+    &quot;title&quot;: &quot;earth.pdf&quot;,
+    &quot;citations&quot;: { &quot;enabled&quot;: True }
+}
+</code></pre>
+<p>Two fields matter:</p>
+<ul>
+<li><strong><code>title</code></strong> — a readable name for the document. This is what users see in the UI when a citation appears; it is also what Claude uses internally to distinguish between multiple documents in the same request.</li>
+<li><strong><code>citations.enabled</code></strong> — the switch that tells Claude to track source provenance for every statement it makes.</li>
+</ul>
+<p>The rest of the document block is unchanged from the PDF support pattern.</p>
+<hr />
+<h2>Response Structure When Citations Are On</h2>
+<p>With citations disabled, Claude's response is a simple text block. With citations enabled, Claude returns a richer structure where text segments are accompanied by citation metadata. Each citation contains:</p>
+<ul>
+<li><strong><code>cited_text</code></strong> — the exact text from your document that supports the statement. This is the ground truth the model points at, character-for-character.</li>
+<li><strong><code>document_index</code></strong> — which document Claude is referencing, useful when a single request contains multiple documents.</li>
+<li><strong><code>document_title</code></strong> — the title you assigned to the document (the same string you put in the document block).</li>
+<li><strong><code>start_page_number</code></strong> — where in the document the cited text begins.</li>
+<li><strong><code>end_page_number</code></strong> — where the cited text ends.</li>
+</ul>
+<p>For a PDF, <code>start_page_number</code> and <code>end_page_number</code> are page numbers. For plain text sources, these are replaced by <strong>character positions</strong> that pinpoint the exact span inside the text.</p>
+<hr />
+<h2>Citations With Plain Text Sources</h2>
+<p>Citations are not a PDF-only feature. You can enable them on plain text documents by changing the <code>source</code> block:</p>
+<pre><code class="language-python">{
+    &quot;type&quot;: &quot;document&quot;,
+    &quot;source&quot;: {
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;media_type&quot;: &quot;text/plain&quot;,
+        &quot;data&quot;: article_text,
+    },
+    &quot;title&quot;: &quot;earth_article&quot;,
+    &quot;citations&quot;: { &quot;enabled&quot;: True }
+}
+</code></pre>
+<p>The differences from the PDF case:</p>
+<ul>
+<li><code>source.type</code> is <code>"text"</code> instead of <code>"base64"</code>.</li>
+<li><code>source.media_type</code> is <code>"text/plain"</code>.</li>
+<li><code>source.data</code> contains the raw article text, not base64 bytes.</li>
+<li>The returned citations use <strong>character positions</strong> (start_index / end_index) instead of page numbers.</li>
+</ul>
+<p>This matters for RAG pipelines: when your retrieval step surfaces a chunk of plain text, you can pass it in as a citable document and get precise character spans back, which makes hover-over UIs or highlighting tooling very clean to build.</p>
+<hr />
+<h2>Building User Interfaces With Citations</h2>
+<p>The real product leverage of citations is the UI layer. A typical pattern:</p>
+<ol>
+<li>Claude's response arrives with citation-annotated segments.</li>
+<li>The UI renders the answer text as normal, but each cited span gets a marker (a small number, a highlighted background, or an inline icon).</li>
+<li>Hovering or clicking the marker opens a popover that shows the <code>cited_text</code>, the <code>document_title</code>, and a jump-to-page or jump-to-character action.</li>
+<li>The user can verify the claim in place, without leaving the answer view.</li>
+</ol>
+<p>This turns Claude from a "black box that answers" into a "research assistant that shows its work." Users who need to trust the output can check it in two clicks; users who do not care can ignore the markers.</p>
+<hr />
+<h2>When to Use Citations</h2>
+<p>The lesson names four situations where citations earn their cost and complexity:</p>
+<ul>
+<li><strong>Users need to verify information for accuracy.</strong> High-stakes answers — legal, medical, financial — require proof.</li>
+<li><strong>You are working with authoritative documents.</strong> If the document is the source of truth (a contract, a regulation, a clinical guideline), users should be able to point at it.</li>
+<li><strong>Transparency about information sources is critical.</strong> Some products — enterprise search, research tools, knowledge bases — live or die on source transparency.</li>
+<li><strong>Users might want to explore the broader context around specific facts.</strong> Citations are a hook for drill-down UX; users can jump from an answer to the surrounding paragraph to the full document.</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Forgetting the <code>title</code> field.</strong> Citations use the title as the document identifier in the response. Without it, the user sees a blank or generic label and cannot distinguish between documents.</li>
+<li><strong>Enabling citations but not displaying them.</strong> If you switch the flag on but render the answer as plain text, you pay the token cost with none of the trust benefit.</li>
+<li><strong>Assuming page numbers work for plain-text sources.</strong> Plain-text citations return character positions, not pages. Your UI has to branch on source type.</li>
+<li><strong>Not handling the richer response structure.</strong> Citations-enabled responses are more complex than a single text block. Your content-block handler must iterate and pull citation metadata correctly.</li>
+<li><strong>Mixing cited and uncited documents in one request without tracking which is which.</strong> <code>document_index</code> tells you which document a citation points at — use it.</li>
+<li><strong>Assuming citations verify correctness.</strong> A citation proves the source text exists and Claude read it — it does not prove Claude's interpretation is correct. Treat citations as provenance, not as accuracy guarantees.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Citations are the grounding layer that converts Claude's document answers into verifiable claims. The API surface is tiny — a <code>title</code> field and a <code>citations.enabled</code> flag — but the product impact is enormous: for every high-stakes document workflow (legal, medical, financial, compliance), citations are the difference between a feature users can ship and one they cannot. Pair citations with PDF support and you have the canonical enterprise document stack.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D4 (AI Safety &amp; Alignment)</strong>: grounded outputs and verifiable responses are core safety concerns. Citations are the standard mechanism for producing verifiable, source-linked answers.</li>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: citations extend the <code>document</code> content block. Know the <code>title</code> and <code>citations.enabled</code> fields plus the citation metadata shape (<code>cited_text</code>, <code>document_index</code>, <code>document_title</code>, page or character positions).</li>
+<li>Exam scenario pattern: "Users need to verify that Claude's answer came from a specific source." The answer is citations enabled on the document block, with the UI surfacing <code>cited_text</code> and <code>document_title</code>.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What two fields do you add to a document block to enable citations?</td>
+<td>A <code>title</code> field (readable document name) and <code>"citations": {"enabled": True}</code>.</td>
+</tr>
+<tr>
+<td>What are the five pieces of information inside a citation object?</td>
+<td><code>cited_text</code>, <code>document_index</code>, <code>document_title</code>, <code>start_page_number</code>, and <code>end_page_number</code>.</td>
+</tr>
+<tr>
+<td>How do citations differ between PDF and plain-text sources?</td>
+<td>PDF citations return page numbers; plain-text citations return character positions inside the text.</td>
+</tr>
+<tr>
+<td>What <code>source.type</code> and <code>media_type</code> do you use for a plain-text citable document?</td>
+<td><code>source.type: "text"</code> and <code>media_type: "text/plain"</code>, with the raw article text in <code>data</code>.</td>
+</tr>
+<tr>
+<td>When should you use citations?</td>
+<td>When users need to verify information, when you are working with authoritative documents, when source transparency is critical, or when users may want to explore context.</td>
+</tr>
+<tr>
+<td>Why is a <code>title</code> field required when enabling citations?</td>
+<td>It is the document identifier returned in each citation and the label users see in the UI; without it, multi-document responses are ambiguous.</td>
+</tr>
+<tr>
+<td>What is the difference between a citation and a correctness guarantee?</td>
+<td>A citation proves the source text exists and Claude read it; it does not prove Claude's interpretation of that text is correct.</td>
+</tr>
+<tr>
+<td>What is the canonical UX pattern for citations?</td>
+<td>Render the answer with inline markers on cited spans, and on hover show <code>cited_text</code> and <code>document_title</code> with a jump-to-source action.</td>
+</tr>
+<tr>
+<td>Why are citations critical for legal, medical, and financial products?</td>
+<td>Users in those domains must verify the source of any claim before acting on it; citations provide the auditable trail that makes those features shippable.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implementing The Rag Flow Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Implementing the RAG Flow — PM Perspective（產品視角）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D1 — Agentic Architecture（22%）主領域；D5 — Enterprise Deployment（20%）次領域</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3（context management）、5.2（production search infrastructure）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 49</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>RAG 把一堆私有文件變成產品功能——五步驟流程（切、embed、存、對 query embed、搜尋）是讓 Claude「認識你們公司」所需最小的投資。</p>
+<hr />
+<h2>Mental Model：會貼便利貼的圖書館員</h2>
+<p>想像你請了一位聰明的研究助理，他知道所有公開資料，但從沒看過你們內部 wiki。你不可能每次問問題前都叫他讀 10,000 頁。</p>
+<p>所以你：</p>
+<ol>
+<li>把 wiki 切成一張張主題便利貼（<strong>chunk</strong>）。</li>
+<li>每張便利貼貼上一張顏色貼紙代表它的意思（<strong>embed</strong>）。</li>
+<li>按顏色把便利貼歸檔到一個巨大牆面組織器（<strong>vector store</strong>）。</li>
+<li>使用者問問題時，你在問題上貼一張相同規格的顏色貼紙（<strong>query embedding</strong>）。</li>
+<li>走到牆邊拿幾張顏色最接近的便利貼（<strong>similarity search</strong>）。</li>
+</ol>
+<p>助理只讀這幾張便利貼回答——快、準、而且有實際 wiki 作根據。</p>
+<hr />
+<h2>PM 為什麼要在意</h2>
+<p>以下需求預設答案都是 RAG：</p>
+<ul>
+<li>「助理要認得我們內部文件。」</li>
+<li>「它要能回答我們產品目錄的問題。」</li>
+<li>「客服要能看到相關的過去工單。」</li>
+<li>「工具要能參照公司政策回答。」</li>
+</ul>
+<p>沒有 RAG，Claude 只能給通用答案。有 RAG，Claude 的答案<strong>以貴公司 source of truth 為基礎</strong>——底層文件一更新，答案就跟著更新。</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>RAG 是對的選擇</h3>
+<table>
+<thead>
+<tr>
+<th>User Need</th>
+<th>為什麼 RAG 合適</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「問我們知識庫」的助理</td>
+<td>語料龐大、問題多樣、需要新鮮度</td>
+</tr>
+<tr>
+<td>客服自助化</td>
+<td>要根據現行 help article 作答</td>
+</tr>
+<tr>
+<td>內部 wiki / onboarding copilot</td>
+<td>員工對已知文件問非結構化問題</td>
+</tr>
+<tr>
+<td>產品目錄搜尋（「推薦 1,500 美元以下筆電」）</td>
+<td>意圖語意比規格更重要</td>
+</tr>
+<tr>
+<td>合約 / 政策查詢</td>
+<td>大型法律語料，每次查詢聚焦</td>
+</tr>
+</tbody>
+</table>
+<h3>RAG 過頭或不對的情況</h3>
+<table>
+<thead>
+<tr>
+<th>User Need</th>
+<th>更好的方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一般聊天或 brainstorm</td>
+<td>基本模型就夠</td>
+</tr>
+<tr>
+<td>精確 unique ID 查詢</td>
+<td>正常 DB query，不用 vector search</td>
+</tr>
+<tr>
+<td>即時資料（價格、庫存）</td>
+<td>Tool use，不要用會 stale 的 index</td>
+</tr>
+<tr>
+<td>超小語料（&lt;幾頁）</td>
+<td>直接貼在 system prompt</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>五步驟（大白話）</h2>
+<ol>
+<li><strong>Chunk</strong>——把每份文件切成一小段一小段。</li>
+<li><strong>Embed</strong>——把每段變成一個表達它意思的 vector。</li>
+<li><strong>Store</strong>——把 vector 連同原文存進可搜尋的 index。</li>
+<li><strong>Embed 問題</strong>——把 user query 轉成同一類型的 vector。</li>
+<li><strong>搜尋</strong>——回傳最相似的 chunks 給 Claude 當 context。</li>
+</ol>
+<p>產品洞見：步驟 1–3 是<strong>批次預處理</strong>（付一次），步驟 4–5 在每筆 user query 都要跑（按次付）。</p>
+<hr />
+<h2>PM 決策框架</h2>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>如果答 Yes</th>
+<th>含義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>語料是否大於 context window？</td>
+<td>Yes</td>
+<td>必須用 RAG。</td>
+</tr>
+<tr>
+<td>內容更新頻率高於每月一次？</td>
+<td>Yes</td>
+<td>編列 ingestion/refresh pipeline 預算。</td>
+</tr>
+<tr>
+<td>使用者問的是語意問題（不是精確查）？</td>
+<td>Yes</td>
+<td>Vector search 是對的檢索模式。</td>
+</tr>
+<tr>
+<td>使用者也會問具體 ID / SKU / error code？</td>
+<td>Yes</td>
+<td>規劃 hybrid search（後續課程）。</td>
+</tr>
+<tr>
+<td>語料屬機密？</td>
+<td>Yes</td>
+<td>評估 vector store 自架還是雲端以符合法遵。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>成本與新鮮度現實檢查</h2>
+<p>RAG 有三個經常性成本中心，PM 常常低估：</p>
+<ul>
+<li><strong>Embedding 成本</strong>：每個 chunk embed 一次；每個 query 每次都 embed。會隨語料和流量放大。</li>
+<li><strong>儲存成本</strong>：vector index 隨語料大小和 chunk 數量成長。要編列 index rebuild 成本。</li>
+<li><strong>Ingestion / refresh latency</strong>：如果文件每天更新，index 不跑 refresh job 會一天內就 stale。一開始就決定 SLA。</li>
+</ul>
+<p>好 PM 的習慣：PRD 裡寫一行「RAG freshness SLA」——例如「知識庫答案最多不超過 24 小時 stale」。</p>
+<hr />
+<h2>PM 常見錯誤</h2>
+<ol>
+<li><strong>承諾即時知識，但 index 每晚才 refresh</strong>——使用者幾天內就抓到 stale 答案。</li>
+<li><strong>忽略 chunking 策略</strong>——糟糕 chunking 會悄悄拉低答案品質，還被罵「Claude 很笨」。</li>
+<li><strong>沒做 eval 就 ship</strong>——上線前要有一組「問題 + 預期 citation」的 test set 才抓得到 regression。</li>
+<li><strong>沒 log retrieved chunks</strong>——使用者抱怨答案爛，看不到當時取回哪些 chunks 根本沒法 debug。</li>
+<li><strong>以為語意搜尋能處理精確查詢</strong>——經常漏 ID 和代號，通常需要 hybrid search（BM25 + 語意）。</li>
+</ol>
+<blockquote>
+<p><strong>核心洞見</strong></p>
+<p>RAG 不是模型功能——它是<strong>資料 pipeline 的產品決策</strong>。品質上限由語料整理、chunking 策略、freshness SLA 決定，不是由模型決定。把 RAG 當成「神奇地讓 Claude 認得我們文件」的 PM 會低投入在 pipeline 上，最終 ship 出令人失望的功能。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：RAG 是擴充 Claude 知識超越訓練資料的經典 pattern。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：了解 production 跑 vector index 的成本與 freshness 取捨。</li>
+<li>題目模式：「Claude 不認識我們內部文件——該用什麼 pattern？」→ RAG。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>便利貼圖書館員 analogy 怎麼對應 RAG？</td>
+<td>把 wiki 切成便利貼、每張貼一張意思貼紙、按顏色歸檔、把問題貼同類貼紙、抓最近的便利貼。</td>
+</tr>
+<tr>
+<td>什麼時候 RAG 是錯的工具？</td>
+<td>精確 ID 查詢（用 DB）、即時資料（用 tool use）、或超小語料（直接放 system prompt）。</td>
+</tr>
+<tr>
+<td>哪些 RAG 步驟是 batch 預處理？哪些是 per-request？</td>
+<td>Chunk、embed、store 是預處理（付一次）。embed query + 搜尋每次 user request 都跑。</td>
+</tr>
+<tr>
+<td>RAG 功能 PRD 必須寫什麼？</td>
+<td>Freshness SLA、eval set、retrieval logging、embedding + vector store 成本預算。</td>
+</tr>
+<tr>
+<td>為什麼 chunking 策略對 PM 很重要？</td>
+<td>爛 chunking 會悄悄拉垮答案品質，卻被誤會成「模型很笨」——其實是你管的 pipeline bug。</td>
+</tr>
+<tr>
+<td>讓 Claude「認得你們公司」所需最小的單位是什麼？</td>
+<td>五步驟 RAG 流程：chunk、embed、store、embed query、搜尋。</td>
+</tr>
+<tr>
+<td>RAG index 該多久 refresh 一次？</td>
+<td>取決於底層文件更新頻率；SLA 是 PM 在 PRD 裡的決策。</td>
+</tr>
+<tr>
+<td>使用者在 RAG 功能裡問精確 ID，你要怎麼辦？</td>
+<td>規劃 hybrid search——把 BM25 lexical search 跟 semantic search 合併（下幾堂課會教）。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pdf Support Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>PDF Support — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — 主要；D5 — Enterprise Deployment (20%) — 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2（content blocks）、2.1（多模态输入）、5.2（文档处理管线）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 54</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>PDF support 几乎是 image support 的 drop-in 扩展——把 block <code>type</code> 从 <code>"image"</code> 换成 <code>"document"</code>，media type 换成 <code>application/pdf</code>，Claude 就能读整份文档，包括文字、表格、图表和内嵌图像。</p>
+<hr />
+<h2>为什么 PDF support 是大事</h2>
+<p>大多数企业知识都活在 PDF 里：合同、研究论文、财报、保单、合规文档、产品规格书。有 document support 之前，要从 PDF 抽取意义得把 OCR、layout parser、table extractor、chunking 管线串在一起——每一段都会引入自己的错误。</p>
+<p>PDF support 把整条管线收敛成单次 API 调用。Claude 直接读整份文档回答问题、摘要内容或抽取结构化数据，不需要中间那串工具链。你仍然需要思考超长文档怎么切，但常见情境就是"送 PDF、问问题、拿答案"。</p>
+<hr />
+<h2>几乎和 image processing 一样</h2>
+<p>课程最重要的一点：PDF support 几乎原样重用 image processing 的 pattern。如果你已经会发送图，就已经会 90% 的 PDF support。</p>
+<p>以下是课程里的完整示例：</p>
+<pre><code class="language-python">with open(&quot;earth.pdf&quot;, &quot;rb&quot;) as f:
+    file_bytes = base64.standard_b64encode(f.read()).decode(&quot;utf-8&quot;)
+
+messages = []
+
+add_user_message(
+    messages,
+    [
+        {
+            &quot;type&quot;: &quot;document&quot;,
+            &quot;source&quot;: {
+                &quot;type&quot;: &quot;base64&quot;,
+                &quot;media_type&quot;: &quot;application/pdf&quot;,
+                &quot;data&quot;: file_bytes,
+            },
+        },
+        {&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: &quot;Summarize the document in one sentence&quot;},
+    ],
+)
+
+chat(messages)
+</code></pre>
+<p>观察结构：一个 <code>document</code> block 和一个 <code>text</code> block 放在同一个 user message 的 <code>content</code> list 里。Document block 装 base64 编码的 PDF；text block 装问题。Claude 回一个普通 text block。</p>
+<hr />
+<h2>和 image processing 的差别</h2>
+<p>课程明确列出从 image 代码转到 PDF 只有四个差别：</p>
+<ol>
+<li><strong>扩展名</strong>：打开文件时 <code>.png</code> → <code>.pdf</code>。</li>
+<li><strong>变量名</strong>：<code>image_bytes</code> → <code>file_bytes</code>，为了可读性（这只是惯例；API 不在意你本地变量叫什么）。</li>
+<li><strong>Block <code>type</code></strong>：<code>"image"</code> → <code>"document"</code>。</li>
+<li><strong><code>media_type</code></strong>：<code>"image/png"</code> → <code>"application/pdf"</code>。</li>
+</ol>
+<p>整个 diff 就这样。<code>source.type: "base64"</code> 不变。Data 字段仍然放 base64 字符串。Text block 的结构不变。能处理 content blocks 的既有消息处理代码照旧能用——它只需要把 <code>"document"</code> 认成一种合法的 block type。</p>
+<hr />
+<h2>Claude 能从 PDF 抽取什么</h2>
+<p>课程明确点出 Claude 在 PDF 里原生处理的四类内容：</p>
+<ul>
+<li><strong>文档内各处的文字内容</strong>。</li>
+<li><strong>PDF 内嵌的图片与图表</strong>。</li>
+<li><strong>表格</strong>与其中的数据关联。</li>
+<li><strong>文档结构与排版</strong>。</li>
+</ul>
+<p>这比听起来更重要。PDF 里的表格历来很麻烦——layout 分析得推断 row/column 边界、合并单元格、多行条目、header 层级。图表在没有额外 vision 步骤前等于看不见。Claude 的原生 PDF support 把这四件事都变成"直接问就好"。</p>
+<p>具体来说，一个 <code>document</code> block 让你可以：</p>
+<ul>
+<li>摘要一份 10-K 申报文档。</li>
+<li>从财务表格里抓特定数字。</li>
+<li>不用先把图表转成 PNG 就能描述它。</li>
+<li>把 QA 答案锚在一份政策文档的结构上。</li>
+</ul>
+<p>课程用的例子是一份存成 PDF 的 Earth 维基文章，请 Claude 用一句话摘要——最小可行演示，证明 document block 端到端都能通。</p>
+<hr />
+<h2>课程暗示的 production 考量</h2>
+<p>课程本身很短，没列出约束，但配额思路上和 image 同款。做 production PDF 管线时要想：</p>
+<ul>
+<li><strong>大小边界。</strong> 非常大的 PDF 每次塞进去都贵。对长篇内容考虑按 section 切档，只把相关片段发送给 Claude。</li>
+<li><strong>前处理。</strong> 如果你的 PDF 是扫描文档 OCR 而来，PDF 质量直接影响 Claude 的抽取准确度。干净 PDF → 更好的答案。</li>
+<li><strong>Prompt 结构。</strong> 和图像一样，prompt 纪律很重要。含糊的"跟我说这份文档"比"用一句话摘要第 3 节"或"把 executive summary 里所有金额以 JSON 抽取"差很多。</li>
+<li><strong>Caching。</strong> 如果你常对同一份文档发多个 query，prompt caching 会变得很有吸引力，因为 PDF bytes 占了输入的主体。</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>PDF 用 <code>type: "image"</code>。</strong> Block type 必须是 <code>"document"</code>，对 PDF 用 image block 会被拒绝或误读。</li>
+<li><strong>错的 <code>media_type</code>。</strong> 必须完全是 <code>application/pdf</code>——不是 <code>pdf</code>、不是 <code>application/x-pdf</code>。</li>
+<li><strong>发送原始 bytes 而不是 base64。</strong> <code>data</code> 字段是 base64 字符串，不是 raw bytes 或文件路径。</li>
+<li><strong>以为 PDF 便宜。</strong> 长 PDF 每次调用都烧真 token。规划 chunking、考虑 caching。</li>
+<li><strong>跳过 prompt 层。</strong> API 给你一份文档；你还是得问一个精准问题。"摘要整份"会产出含糊答案。</li>
+<li><strong>忘了消息处理代码要认 <code>"document"</code> blocks。</strong> 如果你的 handler 假设只有 <code>"text"</code> 和 <code>"image"</code>，加 PDF 会默默坏掉。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>PDF support 就是 image-block 的 pattern 改两个字段：<code>type</code> 变 <code>"document"</code>、<code>media_type</code> 变 <code>"application/pdf"</code>。其他所有东西——base64 编码、content-block 结构、message flow、system prompt、tool use——都完全一样。真正不同的是 <strong>production 思维</strong>：PDF 比截图大，所以 chunking、caching、精准 prompt 比一次性图像输入更重要。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：PDF 是 content-block 变体。记得 block type 是 <code>"document"</code>（不是 <code>"pdf"</code>），media type 是 <code>"application/pdf"</code>。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>：RAG 的文档处理管线、合同分析、政策 QA——PDF support 常常是最简单的答案，胜过手搓的 OCR / layout 管线。</li>
+<li>考题情境："你要 Claude 读一份 PDF 合同并抽取免责条款。"答案是 <code>document</code> content block + <code>application/pdf</code> media type + 一个精准的抽取 prompt。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude 对 PDF 用哪种 block type？</td>
+<td><code>"document"</code>——不是 <code>"pdf"</code> 也不是 <code>"image"</code>。</td>
+</tr>
+<tr>
+<td>PDF 的 media type 是？</td>
+<td><code>"application/pdf"</code>。</td>
+</tr>
+<tr>
+<td>怎么把 PDF bytes 编码给 API？</td>
+<td>把文件 base64 编码，字符串放在 <code>source.data</code>，配 <code>source.type: "base64"</code>。</td>
+</tr>
+<tr>
+<td>Image 代码转 PDF 要改哪四件事？</td>
+<td>扩展名（<code>.png</code> → <code>.pdf</code>）、变量名（<code>image_bytes</code> → <code>file_bytes</code>）、block type（<code>"image"</code> → <code>"document"</code>）、media type（<code>image/png</code> → <code>application/pdf</code>）。</td>
+</tr>
+<tr>
+<td>Claude 原生可以从 PDF 抽取哪四种内容？</td>
+<td>文字内容、内嵌图片与图表、表格与数据关联、文档结构与排版。</td>
+</tr>
+<tr>
+<td>为什么原生 PDF support 比表面看更重要？</td>
+<td>它把传统 OCR + layout + table + chunking 管线收敛成一次 API 调用，并原生处理历来麻烦的表格与图表。</td>
+</tr>
+<tr>
+<td>摘要 PDF 该用哪种 prompt pattern？</td>
+<td>和文字一样的 prompt 纪律——要精准（"用一句话摘要第 3 节"）而不是含糊（"跟我说这份文档"）。</td>
+</tr>
+<tr>
+<td>何时该先把 PDF 切片再发送给 Claude？</td>
+<td>当 token 成本或 context 长度成为瓶颈，或只有少数 section 和问题相关时。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Citations Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Citations — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D4 — AI Safety &amp; Alignment (20%) — primary; D2 — Tool Design &amp; MCP Integration (18%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>4.2 (grounded outputs), 2.2 (content blocks), 5.4 (trust and verifiability)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 55</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Citations are the trust layer for any Claude feature where users need to know "where did this answer come from?" — they turn Claude from a black box into a research assistant that shows its work.</p>
+<hr />
+<h2>Mental Model: The Research Assistant With Receipts</h2>
+<p>Imagine hiring a research assistant to read a stack of contracts and summarize them. Two scenarios:</p>
+<ul>
+<li><strong>Without citations</strong>: the assistant hands you a summary and says "trust me." You have no way to verify it, and if the summary is wrong you cannot tell which document misled them.</li>
+<li><strong>With citations</strong>: every sentence in the summary has a footnote pointing at the exact clause in the exact contract. You can spot-check any claim in seconds.</li>
+</ul>
+<p>Citations are footnotes for Claude. The cost is slightly more complex response handling; the payoff is a feature users are willing to trust with real decisions.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Citations are the single feature that makes high-stakes document features shippable. Without them:</p>
+<ul>
+<li>Legal teams will not use an AI contract reviewer.</li>
+<li>Compliance will not approve a policy-QA tool.</li>
+<li>Doctors will not rely on a clinical reference assistant.</li>
+<li>Financial analysts will not trust extraction from a 10-K.</li>
+</ul>
+<p>With them, all of those features suddenly clear the bar. Users can verify any claim before acting on it. Auditors have a traceable trail. Customer-facing products can say "here is the source" instead of "please trust our AI."</p>
+<p>If your product exists in a regulated, high-stakes, or enterprise setting, citations are almost never optional.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When Citations Are Required</h3>
+<table>
+<thead>
+<tr>
+<th>Product Context</th>
+<th>Why Citations Are Mandatory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Legal research, contract review</td>
+<td>Lawyers must cite source clauses for any assertion</td>
+</tr>
+<tr>
+<td>Clinical decision support</td>
+<td>Clinicians need to verify the source guideline before acting</td>
+</tr>
+<tr>
+<td>Financial analysis</td>
+<td>Auditors demand a traceable evidence chain</td>
+</tr>
+<tr>
+<td>Regulatory / compliance QA</td>
+<td>Regulators require proof the answer came from the policy text</td>
+</tr>
+<tr>
+<td>Enterprise knowledge search</td>
+<td>Internal users want to jump from answer to source document</td>
+</tr>
+<tr>
+<td>Academic or research tools</td>
+<td>Researchers cannot cite a source they cannot point at</td>
+</tr>
+</tbody>
+</table>
+<h3>When Citations Are Optional</h3>
+<table>
+<thead>
+<tr>
+<th>Product Context</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Casual chat / creative writing</td>
+<td>No grounded source is involved</td>
+</tr>
+<tr>
+<td>Brainstorming with Claude's general knowledge</td>
+<td>The source would be the training data, which is not citable</td>
+</tr>
+<tr>
+<td>Summaries of content the user provided verbally</td>
+<td>No written document to cite</td>
+</tr>
+<tr>
+<td>Internal prototypes without shipping commitments</td>
+<td>Pay the complexity cost only when trust is a requirement</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When designing a document-grounded feature, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Will users make decisions based on Claude's answer?</td>
+<td>Yes</td>
+<td>Citations are almost certainly required.</td>
+</tr>
+<tr>
+<td>Is the workflow regulated (legal, medical, financial, compliance)?</td>
+<td>Yes</td>
+<td>Citations are mandatory — ship them with the first release.</td>
+</tr>
+<tr>
+<td>Will internal auditors or external reviewers see Claude's output?</td>
+<td>Yes</td>
+<td>Citations produce the trail they need.</td>
+</tr>
+<tr>
+<td>Can users tolerate the slight UI complexity of citation markers?</td>
+<td>Yes</td>
+<td>Build a hover-to-verify pattern.</td>
+</tr>
+<tr>
+<td>Does the feature use multiple documents per request?</td>
+<td>Yes</td>
+<td><code>document_index</code> and <code>document_title</code> matter; track them in the UI.</td>
+</tr>
+<tr>
+<td>Are we working with plain-text RAG chunks instead of PDFs?</td>
+<td>Yes</td>
+<td>Citations still work — they return character positions instead of pages.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Cost, Complexity, and UX Trade-offs</h2>
+<p>Citations are one of the cheapest high-impact features in the API. The costs:</p>
+<ul>
+<li><strong>Slightly more complex response handling.</strong> Engineering must iterate over content blocks and surface citation metadata to the UI.</li>
+<li><strong>A modest token overhead</strong> per call, because Claude emits citation metadata alongside text.</li>
+<li><strong>UX design work</strong> to create the hover-and-verify pattern.</li>
+</ul>
+<p>The benefits:</p>
+<ul>
+<li><strong>Trust.</strong> Users will actually rely on the output.</li>
+<li><strong>Regulatory clearance.</strong> Legal and compliance teams can approve features they would otherwise block.</li>
+<li><strong>Fewer hallucination incidents.</strong> Citations surface when Claude is drawing from the document vs. reaching outside it — a natural sanity check.</li>
+<li><strong>Better UX for drill-down.</strong> Users who want more context can jump to the source paragraph or page.</li>
+</ul>
+<p>For any enterprise document feature, the cost-benefit is a near-slam-dunk. For consumer features on general knowledge, citations often do not apply.</p>
+<hr />
+<h2>The PDF + Citations Canonical Stack</h2>
+<p>Pair lesson 54 (PDF support) with lesson 55 (citations) and you have the canonical Claude-based enterprise document stack:</p>
+<ol>
+<li>PDF content block with <code>citations.enabled: True</code> and a readable <code>title</code>.</li>
+<li>A precise extraction or QA prompt.</li>
+<li>A UI that renders the answer with inline citation markers and hover popovers.</li>
+<li>Optional: prompt caching on the document bytes for repeat queries.</li>
+</ol>
+<p>This is the shortest path from "we have a pile of PDFs" to "we have a shippable enterprise feature users trust." Every document-workflow PRD should reference this pairing explicitly.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating citations as optional for high-stakes features.</strong> They are not. Users in regulated workflows will not adopt the feature without them.</li>
+<li><strong>Enabling citations in the API but not displaying them in the UI.</strong> You pay the cost, get no trust benefit, and confuse the engineering team about why they exist.</li>
+<li><strong>Forgetting the <code>title</code> field.</strong> Multi-document responses become ambiguous and users cannot tell which document a citation came from.</li>
+<li><strong>Assuming citations guarantee correctness.</strong> A citation proves the source text exists; it does not prove Claude's paraphrase is faithful. Review for interpretation errors is still needed on high-stakes answers.</li>
+<li><strong>Not handling plain-text RAG chunks.</strong> If your pipeline surfaces text chunks, citations still work — but they return character positions instead of page numbers. Your UI has to branch on source type.</li>
+<li><strong>Underestimating the UX design work.</strong> Citation markers, hover popovers, jump-to-source, and "no citation available" fallback states all need explicit design.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Citations are the minimum viable trust mechanism for any Claude feature grounded in documents the user cares about. They are cheap to enable, expensive to skip: without them, enterprise and regulated features rarely clear the trust bar, and users fall back on reading the source themselves. Pair citations with PDF support and you get the canonical enterprise document stack in one request.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D4 (AI Safety &amp; Alignment)</strong>: citations are the standard mechanism for grounded, verifiable outputs. Expect questions framed around trust and source transparency.</li>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: know the API shape — <code>title</code> field, <code>citations.enabled</code> flag, citation metadata structure (<code>cited_text</code>, <code>document_index</code>, <code>document_title</code>, page or character positions).</li>
+<li>Exam scenario pattern: "Users need to verify Claude's document answer." The answer is enabling citations on the document block and surfacing <code>cited_text</code> in the UI.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the research assistant analogy for citations?</td>
+<td>Without citations, the assistant says "trust me"; with citations, every sentence has a footnote pointing at the exact source clause so you can spot-check it.</td>
+</tr>
+<tr>
+<td>When are citations mandatory?</td>
+<td>In regulated or high-stakes workflows: legal, medical, financial, compliance, enterprise knowledge, academic or research tools.</td>
+</tr>
+<tr>
+<td>When are citations optional or irrelevant?</td>
+<td>Casual chat, creative writing, brainstorming on general knowledge, or summaries of content the user only provided verbally.</td>
+</tr>
+<tr>
+<td>What does a PM need to design for a citations UX?</td>
+<td>Inline markers, hover popovers with <code>cited_text</code> and <code>document_title</code>, jump-to-source actions, and fallback states for no-citation segments.</td>
+</tr>
+<tr>
+<td>What is the minimum-viable enterprise document stack?</td>
+<td>PDF content block + citations enabled + precise prompt + UI with citation markers + optional prompt caching for repeat queries.</td>
+</tr>
+<tr>
+<td>Why are citations cheap to enable but expensive to skip?</td>
+<td>Enabling costs a small token overhead and modest UI work; skipping means high-stakes features cannot clear trust and compliance bars.</td>
+</tr>
+<tr>
+<td>Do citations guarantee Claude's answer is correct?</td>
+<td>No. They prove Claude read a specific source passage, not that Claude's interpretation of that passage is accurate. Human review is still needed on consequential answers.</td>
+</tr>
+<tr>
+<td>What should a citations PRD spec?</td>
+<td>Trust requirements (who needs to verify), UX pattern for markers and popovers, handling of multiple documents, plain-text vs PDF source type, and a fallback for missing citations.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

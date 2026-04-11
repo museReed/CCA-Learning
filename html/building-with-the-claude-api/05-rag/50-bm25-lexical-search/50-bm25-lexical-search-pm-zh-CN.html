@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bm25 Lexical Search Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>BM25 Lexical Search — PM Perspective（产品视角）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Architecture（22%）主领域；D5 — Enterprise Deployment（20%）次领域；D2 — Tool Design（18%）也相关</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3（context management）、5.2（production search infrastructure）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 50</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>BM25 是一个不起眼、已有数十年历史的搜索技术，却悄悄拯救了你的 RAG 产品——在用户输入精确 order ID 而你的 AI 助理很有自信地返回错的 ticket 的那天。</p>
+<hr />
+<h2>Mental Model：聪明实习生 vs Ctrl-F 高手</h2>
+<p>想象两位助理帮你在一份 500 页报告里找资料：</p>
+<ul>
+<li><strong>聪明实习生（语义搜索）</strong>：把报告读完，归纳主题。问"上一季发生什么事？"他答得很好。问"incident INC-2023-Q4-011 怎样？"他很有自信地描述另一个 incident，因为他记得"那个是资安相关"，没去检查编号。</li>
+<li><strong>Ctrl-F 高手（BM25）</strong>：任何字面 string 都能瞬间找到，但零理解力。问"上一季发生什么事？"他耸肩。问"INC-2023-Q4-011"他立刻指出提到这个 ID 的那三页。</li>
+</ul>
+<p>好的研究团队两种都要。这就是 hybrid retrieval 对 RAG 产品做的事。</p>
+<hr />
+<h2>PM 为什么要在意</h2>
+<p>纯语义 RAG 是 AI 功能最常见的早期失败模式。产品在 demo 时很漂亮（概念问题答得很好），但实际使用就崩了，因为真实用户常常输入：</p>
+<ul>
+<li>Order ID："查订单 #78921 状态"</li>
+<li>SKU："SKU-GX-42B 还有货吗？"</li>
+<li>Error code："ERR_UNAUTHORIZED_10031 是什么？"</li>
+<li>Ticket 编号、CVE ID、invoice 编号、员工编号、合同代码。</li>
+</ul>
+<p>这些都可能被纯语义搜索漏掉，返回一个很自信但错误的答案。BM25（或任何 lexical search）是便宜又可靠的 safety net。</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>BM25 / Hybrid 是对的选择</h3>
+<table>
+<thead>
+<tr>
+<th>User Need</th>
+<th>为什么 BM25 有帮助</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>精确 ticket / order / incident 查询</td>
+<td>ID 必须字面符合</td>
+</tr>
+<tr>
+<td>技术文档的 error code 搜索</td>
+<td>Code 是罕见 token，BM25 一击命中</td>
+</tr>
+<tr>
+<td>法律合同条款搜索</td>
+<td>字面 phrase 关键</td>
+</tr>
+<tr>
+<td>产品 SKU / barcode 查询</td>
+<td>精确 token，没语义代理</td>
+</tr>
+<tr>
+<td>合规 / 政策关键字审计</td>
+<td>需要字面匹配，不是 paraphrase</td>
+</tr>
+</tbody>
+</table>
+<h3>单靠 BM25 不够</h3>
+<table>
+<thead>
+<tr>
+<th>User Need</th>
+<th>为什么还是需要语义搜索</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"怎么退款？"</td>
+<td>用户绝不会打"refund policy section 4"</td>
+</tr>
+<tr>
+<td>"上一季有什么重点发现？"</td>
+<td>纯概念，没字面关键字</td>
+</tr>
+<tr>
+<td>多语言或改述的 query</td>
+<td>BM25 只看字面，太浅</td>
+</tr>
+<tr>
+<td>容错的产品搜索</td>
+<td>Lexical match 对拼错就失效</td>
+</tr>
+</tbody>
+</table>
+<p><strong>真正的答案是 hybrid</strong>——两种并行——不是选边站。</p>
+<hr />
+<h2>四步骤（大白话）</h2>
+<ol>
+<li><strong>把问题拆成字</strong>——"a INC-2023-Q4-011"变 <code>["a", "INC-2023-Q4-011"]</code>。</li>
+<li><strong>算每个字有多常见</strong>——"a"到处都是，ID 只出现一次。</li>
+<li><strong>罕见字多给分</strong>——ID 被当作强 signal；"a"被当作 noise。</li>
+<li><strong>按总分排序文档</strong>——提到罕见字的文档胜出。</li>
+</ol>
+<p>注意这里没有模型、没有 embedding API、没有 GPU。BM25 纯粹是文字计数。这就是为什么它又便宜又快。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>如果答 Yes</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户会输入字面识别码（ID、code、SKU）？</td>
+<td>Yes</td>
+<td>组合里要加 BM25。</td>
+</tr>
+<tr>
+<td>语料是技术类（docs、reports、policies）？</td>
+<td>Yes</td>
+<td>Hybrid 几乎都是赢家。</td>
+</tr>
+<tr>
+<td>Latency budget 紧？</td>
+<td>Yes</td>
+<td>BM25 latency 是免费的——不调用 embedding。</td>
+</tr>
+<tr>
+<td>Embedding API 账单是痛点？</td>
+<td>Yes</td>
+<td>BM25 能抵销成本——query 时不跑 embedding。</td>
+</tr>
+<tr>
+<td>用户主要问概念问题？</td>
+<td>Yes</td>
+<td>语义搜索为主，BM25 当安全网。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>成本与延迟现实检查</h2>
+<p>BM25 是你能加到 RAG 产品上最便宜的检索：</p>
+<ul>
+<li><strong>Query 时不调用 embedding API</strong>——BM25 完全在你自己的 process 中对 indexed text 跑。</li>
+<li><strong>Index 建得快</strong>——文字 tokenization 与计数，不用 GPU 数学。</li>
+<li><strong>内存占用小</strong>——稀疏的 term-document matrix 压缩效率很好。</li>
+</ul>
+<p>不加 BM25 的代价很隐微但严重：用户看到那些他们知道存在的 ID 被"很有自信地答错"时，信任会悄悄流失。Hybrid search 是便宜的信任保险。</p>
+<hr />
+<h2>PM 常见错误</h2>
+<ol>
+<li><strong>相信"向量搜索解决一切"</strong>——不会。用户一打 ID，纯向量 RAG 就破功。</li>
+<li><strong>把 BM25 延后当 optimization</strong>——它不是 optimization，它是精确查询的 correctness feature。</li>
+<li><strong>没有字面 query 的 eval set</strong>——eval 要混概念题跟 ID 题。少一种，regression 就躲起来。</li>
+<li><strong>只把一种搜索的结果拿出来</strong>——hybrid 是合并，不是择一。下一课讲合并策略。</li>
+<li><strong>低估用户信任冲击</strong>——一个 ID 答错失去的信任，比十个好答案累积的还多。</li>
+</ol>
+<blockquote>
+<p><strong>核心洞见</strong></p>
+<p>Hybrid retrieval 不是进阶升级——它是<strong>任何会有用户输入精确识别码的 RAG 产品的基线</strong>。语义搜索给你"看起来厉害"的答案；BM25 给你字面 query 上"正确"的答案。认真的产品两个都要。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：了解 hybrid retrieval 是两种互补搜索方法的组合。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：BM25 在运维上便宜——它是流量放大时不会让 embedding 成本复利上升的检索层。</li>
+<li><strong>D2（Tool Design）</strong>：如果把 retrieval 暴露成 tool，BM25 / 语义 / hybrid 的选择会形塑 tool description。</li>
+<li>题目 pattern："纯语义搜索对含特定 code 的 query 返回不相关结果——怎么修？"→ 加 BM25 / hybrid search。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>实习生 vs Ctrl-F analogy 怎么对应 BM25？</td>
+<td>语义搜索像聪明实习生，理解主题；BM25 像 Ctrl-F 高手，找字面 string。团队两个都要。</td>
+</tr>
+<tr>
+<td>纯语义 RAG 产品什么时候在 production 崩掉？</td>
+<td>用户第一次输入精确 ID、SKU 或 error code 的时候——语义搜索经常很自信地返回错文档。</td>
+</tr>
+<tr>
+<td>BM25 query time 需要调用 embedding API 吗？</td>
+<td>不用。它对 indexed text 跑，不调用模型，所以便宜又低延迟。</td>
+</tr>
+<tr>
+<td>BM25 四个打分步骤（大白话）？</td>
+<td>1) 把 query 拆成字、2) 算每个字多常见、3) 罕见字多给分、4) 按总分排 document。</td>
+</tr>
+<tr>
+<td>RAG 产品应该用 BM25 取代语义搜索吗？</td>
+<td>不——两个并行跑（hybrid）。互相补漏。</td>
+</tr>
+<tr>
+<td>RAG eval set 应该长什么样？</td>
+<td>概念题和字面识别码题混搭，才能量化 hybrid 品质。</td>
+</tr>
+<tr>
+<td>忽略 BM25 的 PM 最大风险是什么？</td>
+<td>用户信任崩盘——一个 ID 答错侵蚀的信任，比很多好的概念答案累积的还多。</td>
+</tr>
+<tr>
+<td>哪类 token 最受益于 BM25？</td>
+<td>罕见、技术性的字面 token：ID、SKU、error code、ticket 编号、CVE 编号、合同代码。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Support Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Image Support — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — 主要；D5 — Enterprise Deployment (20%) — 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2（content blocks）、2.1（多模態輸入）、5.2（token 計價）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 53</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Image support 讓同一個 Claude API 變成多模態端點，一口氣打開許多過去卡在人工視覺作業的產品類別——保險勘查、醫療分診、零售分析、現場作業自動化。</p>
+<hr />
+<h2>Mental Model：把照片交給分析師</h2>
+<p>想像你公司最強的分析師。你問「這個辦公室怎麼了？」他能回答問題、發現異常、歸納模式。但今天你必須<strong>用嘴</strong>描述場景給他聽。Image support 就是把實體照片交到他手上。</p>
+<p>你能問的問題沒變。變的是現在這些問題的答案是基於真實視覺證據，而不是你對場景的描述。而且因為 Claude 直接讀圖，分析師永遠不會漏掉「你描述中沒提到」的東西。</p>
+<p>這是任何「答案要靠看、而不只是讀」的產品最大的一次解鎖。</p>
+<hr />
+<h2>PM 為什麼該在意</h2>
+<p>過去難以或無法自動化的產品類別，現在變得可行：</p>
+<ul>
+<li><strong>保險勘查</strong>：衛星或空拍影像搭配 rubric prompt 取代現場勘查員。</li>
+<li><strong>醫療分診</strong>：皮膚科 app 請 Claude 分類可見病灶（需在醫師監督下）。</li>
+<li><strong>電商</strong>：自動分類賣家上傳的商品照片。</li>
+<li><strong>無障礙</strong>：即時為圖片生成豐富的 alt-text。</li>
+<li><strong>內容審查</strong>：在大量圖像動態裡標記敏感內容。</li>
+<li><strong>零售分析</strong>：從店內照片計算貨架、偵測缺貨、稽核陳列。</li>
+</ul>
+<p>同一個 Messages API 全都吃。沒有另一個 vision 產品、沒有另一份定價、沒有另一個 SDK——就是在你現有的 request 裡多放一個 content block。</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>Image support 合適的情境</h3>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>為何可行</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>回答基於真實圖片的問題（這張照片裡有什麼？）</td>
+<td>核心能力——Claude 直接看圖</td>
+</tr>
+<tr>
+<td>從視覺內容中結構化擷取（計數、類別標籤）</td>
+<td>搭配良好 rubric 可行</td>
+</tr>
+<tr>
+<td>依書面標準做品質管制或視覺稽核</td>
+<td>Rubric + 逐步 prompt 可產生穩定一致的評分</td>
+</tr>
+<tr>
+<td>多張圖並排比較</td>
+<td>每個 request 最多 100 張，適合前後對照或批次比對</td>
+</tr>
+</tbody>
+</table>
+<h3>不適合的情境</h3>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>更好的選擇</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>即時影片分析</td>
+<td>Vision API 是單張圖 one-shot，不是影片管線</td>
+</tr>
+<tr>
+<td>像素級測量或小字 OCR</td>
+<td>專門的 OCR / CV 工具，必要時再和 Claude 組合做推理</td>
+</tr>
+<tr>
+<td>醫療診斷（作為唯一決策者）</td>
+<td>永遠搭配醫師；不要出貨自動診斷</td>
+</tr>
+<tr>
+<td>高吞吐量 + 低預算的批次處理</td>
+<td>每張圖成本隨解析度增長，要早期算清 token 數學</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 決策框架</h2>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>若答 Yes</th>
+<th>意涵</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>使用者 workflow 真的需要判讀圖像嗎？</td>
+<td>Yes</td>
+<td>Image support 是合適候選。</td>
+</tr>
+<tr>
+<td>答案可以從一張靜態影格導出嗎？</td>
+<td>Yes</td>
+<td>你在 Claude 的甜蜜區。</td>
+</tr>
+<tr>
+<td>我們每次 request 會送超過 100 張圖嗎？</td>
+<td>Yes</td>
+<td>必須 batch——100 張是硬上限。</td>
+</tr>
+<tr>
+<td>我們能把圖縮到最小可用尺寸嗎？</td>
+<td>Yes</td>
+<td>就做。Token 是 <code>(width × height) / 750</code>，大小直接影響錢。</td>
+</tr>
+<tr>
+<td>我們需要像素級測量或小字 OCR 嗎？</td>
+<td>Yes</td>
+<td>先用專門前處理器。Claude 是對圖像推理，不是精密量測。</td>
+</tr>
+<tr>
+<td>我們能寫一份 rubric 或方法論給模型跟嗎？</td>
+<td>Yes</td>
+<td>準確度會跳升。天真的 prompt 通常不達標。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Cost、Accuracy、UX 權衡</h2>
+<p>這個 token 公式比表面看起來更重要。<code>(width × height) / 750</code> 對像素數呈線性，意思是<strong>解析度翻倍，token 成本變四倍</strong>。一張 1170×2532 的手機截圖每次呼叫約 3950 tokens。每天 10 萬次呼叫，月帳單上就是一條看得見的 line item。</p>
+<p>三條 PM playbook：</p>
+<ol>
+<li><strong>積極前處理。</strong> 把圖縮到還能讓 Claude 看出重點的最小尺寸。上線前要測出準確度下限。</li>
+<li><strong>套用文字 prompt 的紀律。</strong> 天真的「這張圖裡有什麼？」會低效。給 Claude rubric、方法論、最好還有 one-shot 參考。</li>
+<li><strong>為 100 張上限規劃預算。</strong> 若每個使用者 session 要處理數百張圖，batching 層必須明確設計。</li>
+</ol>
+<hr />
+<h2>Prompt Engineering 的平行對應</h2>
+<p>PRD 要釘死的一件事：<strong>你對文字用的 prompt engineering 技巧，對圖片同樣適用</strong>。這是課程的重點，也是多數天真整合會失分的地方：</p>
+<ul>
+<li>簡單問題 → 不穩定答案（「幾顆彈珠？」→ 數錯）。</li>
+<li>詳細方法論 + one-shot 範例 + 步驟拆解 → 穩定答案。</li>
+<li>分類 rubric（定義 1、2、3、4 代表什麼）→ 量化輸出穩定很多。</li>
+</ul>
+<p>課程裡的火災風險評估就是 PM 範本：命名步驟、列每步要看什麼、明確定義輸出類別。任何 vision 功能的 PRD 都該長這樣。</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>寫「分析這張圖」卻沒給方法論。</strong> 模型會做些事，但不穩定。把 rubric 寫進 PRD。</li>
+<li><strong>忽略 token 數學。</strong> 一張全解析度手機截圖可能相當於好幾頁文字的成本。選功能前要先建模。</li>
+<li><strong>跳過圖像上限的審視。</strong> 有些流程默默需要超過 100 張，只有在 production 才發現。</li>
+<li><strong>把 image support 當成另一個產品。</strong> 它是同一個 Messages API 裡的一種 content block，你現有的 retry、logging、auth 全都能用。</li>
+<li><strong>沒有準確度 eval set 就出貨 image 功能。</strong> 在沒標過代表性樣本前，你根本不知道功能夠不夠好。</li>
+<li><strong>忘了對使用者上傳的圖做 safety review。</strong> 當使用者能上傳任意圖片，內容審查和隱私策略就要升級。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Image support 是 Claude API 最大的多模態產品解鎖，而且工程成本幾乎為零——它只是在既有 request 裡多一個 block。PM 真正的工作全在 <strong>prompt rubric</strong>（詳細方法論、one-shot 範例、分類輸出）和 <strong>token 數學</strong>（縮圖、圍繞 100 張上限做 batch）。把這兩件事做對，整類原本要靠人工的視覺作業就能自動化。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：把 image block 認成同一個 Messages API 的 content-block 變體；沒有另一個 endpoint。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>：記住配額（100 張、5 MB、單圖 8000 px / 多圖 2000 px）與 <code>(w × h) / 750</code> token 公式。</li>
+<li>可能的情境題：「圖像分析結果不穩定——你建議怎麼做？」預期答案是套用文字等級的 prompt 紀律（方法論、one-shot、拆解）並把圖縮到合適尺寸。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Image support 的分析師類比是什麼？</td>
+<td>以前你得用嘴描述照片給分析師，現在你直接把照片交給他——問題一樣，但依據是真的影像。</td>
+</tr>
+<tr>
+<td>Image support 解鎖了哪些產品類別？</td>
+<td>保險勘查、醫療分診（需醫師監督）、電商標籤、無障礙 alt-text、內容審查、零售分析。</td>
+</tr>
+<tr>
+<td>每次 request 圖像的硬上限是幾張？</td>
+<td>所有 messages 合計 100 張。</td>
+</tr>
+<tr>
+<td>單張圖檔案大小上限？</td>
+<td>5 MB。</td>
+</tr>
+<tr>
+<td>圖片 token 公式是？</td>
+<td><code>tokens = (width × height) / 750</code>。解析度翻倍，成本變四倍。</td>
+</tr>
+<tr>
+<td>為什麼天真 prompt 在圖像任務上表現不佳？</td>
+<td>因為圖像任務和文字一樣需要方法論、rubric、one-shot 範例、步驟拆解。</td>
+</tr>
+<tr>
+<td>Vision 功能的 PRD 該包含什麼？</td>
+<td>Rubric / 方法論、token 成本模型、100 張上限的 batching 計畫、準確度 eval set、上傳的 safety review。</td>
+</tr>
+<tr>
+<td>什麼時候不該用 image support？</td>
+<td>即時影片、像素級量測、獨立決策的醫療診斷、或高吞吐量 + 低預算批次處理。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

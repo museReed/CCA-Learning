@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Chunking Strategies Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Text Chunking Strategies — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Architecture (22%) — primary; D4 — Safety &amp; Alignment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3 (context management), 4.1 (grounded responses)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 46</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Chunking is the RAG step that decides what "a retrievable unit" means — and a bad chunking strategy silently poisons every downstream retrieval, letting irrelevant content into prompts and producing confident wrong answers.</p>
+<hr />
+<h2>Why Chunking Is the Highest-Leverage Step</h2>
+<p>Consider a document with two sections: medical research and software engineering. A user asks "How many bugs did engineers fix this year?". If chunking is bad, the word "bug" appearing in the medical section (as in "XDR-47, a bug we have not seen before") gets pulled into the context — and Claude happily answers about a virus instead of software defects.</p>
+<p>This is the core failure mode: <strong>a chunk looked relevant because it shared a keyword, but the surrounding meaning was different</strong>. Chunking determines the granularity at which semantic similarity is evaluated. Too coarse and chunks mix topics; too fine and chunks lose context.</p>
+<hr />
+<h2>Strategy 1: Size-Based Chunking</h2>
+<p>The simplest approach — divide text into equal-length strings. A 325-character document might become three chunks of roughly 108 characters each.</p>
+<p><strong>Pros:</strong><br />
+- Trivial to implement<br />
+- Works with any document type (text, code, logs, anything)<br />
+- Predictable chunk count and size</p>
+<p><strong>Cons:</strong><br />
+- Words get cut off mid-sentence<br />
+- Chunks lose important context from surrounding text<br />
+- Section headers can be separated from their content</p>
+<h3>Fix: Add Overlap</h3>
+<p>Overlap means each chunk includes some characters from neighboring chunks — giving you a sliding window that preserves boundary context.</p>
+<pre><code class="language-python">def chunk_by_char(text, chunk_size=150, chunk_overlap=20):
+    chunks = []
+    start_idx = 0
+
+    while start_idx &lt; len(text):
+        end_idx = min(start_idx + chunk_size, len(text))
+        chunk_text = text[start_idx:end_idx]
+        chunks.append(chunk_text)
+
+        start_idx = (
+            end_idx - chunk_overlap if end_idx &lt; len(text) else len(text)
+        )
+
+    return chunks
+</code></pre>
+<p>Two things to notice:<br />
+1. The loop advances by <code>chunk_size - chunk_overlap</code> effectively — overlap shrinks the net step.<br />
+2. The terminal branch sets <code>start_idx = len(text)</code> to guarantee loop exit; no off-by-one.</p>
+<hr />
+<h2>Strategy 2: Structure-Based Chunking</h2>
+<p>Split on the document's natural structure — headers, paragraphs, sections. Best when you control the format (Markdown, internal reports with guaranteed heading style).</p>
+<pre><code class="language-python">def chunk_by_section(document_text):
+    pattern = r&quot;\n## &quot;
+    return re.split(pattern, document_text)
+</code></pre>
+<p><strong>Pros:</strong><br />
+- Cleanest, most meaningful chunks — each one is a complete semantic unit<br />
+- Natural boundaries match how humans think about the document<br />
+- A chunk "about risk factors" actually contains the Risk Factors section</p>
+<p><strong>Cons:</strong><br />
+- Only works when structure is guaranteed — plain text or scanned PDFs have no headers to split on<br />
+- Section sizes vary wildly; one section might be 50 words, another 5000<br />
+- A single giant section can still blow past your token budget</p>
+<p>Structure-based is the <strong>ideal</strong> when the format cooperates, and the <strong>wrong tool</strong> when it does not.</p>
+<hr />
+<h2>Strategy 3: Semantic-Based Chunking</h2>
+<p>Split into sentences first, then use NLP to measure how related consecutive sentences are, and build chunks from groups of related sentences.</p>
+<p><strong>Pros:</strong><br />
+- Produces the most semantically coherent chunks<br />
+- Boundaries follow meaning, not characters or headers</p>
+<p><strong>Cons:</strong><br />
+- Computationally expensive (you are running a semantic similarity model during preprocessing)<br />
+- Complex to implement correctly<br />
+- Harder to tune than size or sentence approaches</p>
+<p>Use semantic chunking when chunk quality is critical and you have the compute budget to justify it.</p>
+<hr />
+<h2>Strategy 4: Sentence-Based Chunking (The Practical Middle Ground)</h2>
+<p>Split into sentences with a regex, then group sentences into chunks with optional sentence overlap.</p>
+<pre><code class="language-python">def chunk_by_sentence(text, max_sentences_per_chunk=5, overlap_sentences=1):
+    sentences = re.split(r&quot;(?&lt;=[.!?])\s+&quot;, text)
+
+    chunks = []
+    start_idx = 0
+
+    while start_idx &lt; len(sentences):
+        end_idx = min(start_idx + max_sentences_per_chunk, len(sentences))
+        current_chunk = sentences[start_idx:end_idx]
+        chunks.append(&quot; &quot;.join(current_chunk))
+
+        start_idx += max_sentences_per_chunk - overlap_sentences
+
+        if start_idx &lt; 0:
+            start_idx = 0
+
+    return chunks
+</code></pre>
+<p>Notice the regex <code>(?&lt;=[.!?])\s+</code> — a lookbehind that keeps the terminal punctuation on the previous sentence rather than stripping it. The overlap is now measured in <strong>sentences</strong>, not characters, which is a more meaningful unit.</p>
+<p>Sentence-based is the sensible default when you do not have structural guarantees but you still want human-readable chunk boundaries.</p>
+<hr />
+<h2>Choosing a Strategy</h2>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Best For</th>
+<th>Avoid When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Structure-based</strong></td>
+<td>Markdown, internal reports with guaranteed headers</td>
+<td>Plain text, PDFs, mixed formats</td>
+</tr>
+<tr>
+<td><strong>Sentence-based</strong></td>
+<td>Most prose text documents</td>
+<td>Code (sentences are not a concept)</td>
+</tr>
+<tr>
+<td><strong>Size-based + overlap</strong></td>
+<td>Any content type, code, logs, fallback</td>
+<td>When you have better structure signals and want to use them</td>
+</tr>
+<tr>
+<td><strong>Semantic</strong></td>
+<td>High-stakes retrieval where quality justifies cost</td>
+<td>Latency-sensitive or budget-constrained preprocessing</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Production heuristic</strong>: size-based chunking with overlap is the common go-to because it is simple, reliable, and works with anything. It will not be perfect, but it will not break your pipeline. Graduate to sentence/structure/semantic when you have evidence that retrieval quality is hurting.</p>
+<p>There is <strong>no single "best" strategy</strong>. The right choice depends on your documents, use cases, and the quality/complexity trade-off you can afford.</p>
+<hr />
+<h2>CCA Task Annotations</h2>
+<ul>
+<li><strong>Task 1.3 (Context Management)</strong> — chunking is how you control the granularity of retrievable context; chunk size determines what "a unit of knowledge" is for your system.</li>
+<li><strong>Task 4.1 (Grounded Responses)</strong> — good chunking reduces the probability of pulling in off-topic text that would ground a wrong answer.</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Assuming chunking is a solved problem</strong> — default parameters on a chunking library will work until they do not, and then you will not know why retrieval started failing.</li>
+<li><strong>No overlap in size-based chunking</strong> — words and sentences get cut at boundaries, and chunks lose the context that makes them retrievable.</li>
+<li><strong>Using structure-based chunking on unstructured text</strong> — if there are no headers, the regex returns the whole document as one chunk.</li>
+<li><strong>One-size-fits-all across document types</strong> — code, prose, and tables need different strategies; do not force the same chunker on all of them.</li>
+<li><strong>Not logging chunk IDs in production</strong> — when retrieval returns the wrong chunk you cannot debug it unless you can trace which chunk was picked.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Chunking is the first place a RAG pipeline can silently lie to the user. Every downstream step — embedding, retrieval, prompt assembly — takes chunks as given. If a chunk crosses a topic boundary or cuts off a definition, the retrieval system will confidently return it, and Claude will confidently answer from it. Invest in chunking evals before you invest in retrieval tuning.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Architecture)</strong>: chunking is the first decision in the RAG context-management pipeline. Know the four strategies, their trade-offs, and when to use each.</li>
+<li><strong>D4 (Safety &amp; Alignment)</strong>: bad chunking is a silent source of wrong answers — the "bug" example from the lesson is a classic exam scenario.</li>
+<li>Expect questions framed as "Markdown docs with guaranteed headers → which strategy?" (structure) and "plain text PDFs → which strategy?" (size+overlap or sentence).</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name the four chunking strategies covered.</td>
+<td>Size-based, structure-based, sentence-based, semantic-based.</td>
+</tr>
+<tr>
+<td>What problem does chunk overlap solve?</td>
+<td>Boundary context loss — it ensures complete words/sentences and preserves context shared between adjacent chunks.</td>
+</tr>
+<tr>
+<td>When is structure-based chunking the best choice?</td>
+<td>When you have guarantees about document structure (Markdown headers, templated reports).</td>
+</tr>
+<tr>
+<td>What is the downside of structure-based chunking?</td>
+<td>It only works when structure is present; plain text or PDFs without headers cannot use it.</td>
+</tr>
+<tr>
+<td>Why is semantic chunking expensive?</td>
+<td>It requires running NLP / similarity models during preprocessing to measure sentence relatedness.</td>
+</tr>
+<tr>
+<td>What is the production fallback chunking strategy?</td>
+<td>Size-based with overlap — it works on any content type.</td>
+</tr>
+<tr>
+<td>Why is the "bug" example (medical vs. engineering) instructive?</td>
+<td>It shows how bad chunking can pull an irrelevant chunk into the prompt simply because of keyword overlap.</td>
+</tr>
+<tr>
+<td>In <code>chunk_by_char</code>, what does <code>start_idx = end_idx - chunk_overlap</code> do?</td>
+<td>Advances the window by <code>chunk_size - chunk_overlap</code>, preserving overlap between adjacent chunks.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

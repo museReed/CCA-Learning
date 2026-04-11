@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Citations Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Citations — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D4 — AI Safety &amp; Alignment (20%) — 主要；D2 — Tool Design &amp; MCP Integration (18%) — 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>4.2（grounded outputs）、2.2（content blocks）、5.4（信任与可验证性）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 55</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Citations 是任何用户需要知道"这个答案哪来的？"的 Claude 功能的信任层——它把 Claude 从黑盒变成会摊开工作过程的研究助理。</p>
+<hr />
+<h2>Mental Model：会拿出收据的研究助理</h2>
+<p>想象你请一个研究助理读一叠合同、做摘要。两种情境：</p>
+<ul>
+<li><strong>没有 citations</strong>：助理交给你一份摘要然后说"相信我"。你没办法验证，若摘要出错你也不知道是哪份文档误导了他。</li>
+<li><strong>有 citations</strong>：摘要里每句话都有脚注，指向某份合同里某条具体条款。你可以在几秒内抽检任何一项。</li>
+</ul>
+<p>Citations 就是 Claude 的脚注。代价是稍微复杂的响应处理；收益是用户愿意用这个功能做真实决策。</p>
+<hr />
+<h2>PM 为什么该在意</h2>
+<p>Citations 是让高代价文档功能能够上线的关键功能。没有它：</p>
+<ul>
+<li>法务团队不会用 AI 合同审查器。</li>
+<li>合规不会批准政策 QA 工具。</li>
+<li>医师不会依赖临床参考助理。</li>
+<li>金融分析师不会信任从 10-K 抽取出的数据。</li>
+</ul>
+<p>有了它，上述所有功能突然都能过关。用户可以在采取行动前验证任何陈述。审计员有可追溯轨迹。面向客户的产品可以说"这是来源"而不是"请相信我们的 AI"。</p>
+<p>如果你的产品在受管制、高代价或企业环境里，citations 几乎从来不是可选项。</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>Citations 必备的情境</h3>
+<table>
+<thead>
+<tr>
+<th>产品情境</th>
+<th>为何强制要有 citations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>法律研究、合同审查</td>
+<td>律师对每个主张都要引用原条款</td>
+</tr>
+<tr>
+<td>临床决策支持</td>
+<td>临床医师采取行动前需验证来源指引</td>
+</tr>
+<tr>
+<td>金融分析</td>
+<td>审计员要求可追溯的证据链</td>
+</tr>
+<tr>
+<td>法规 / 合规 QA</td>
+<td>监管机构要求证明答案来自政策原文</td>
+</tr>
+<tr>
+<td>企业知识搜索</td>
+<td>内部用户想从答案跳到来源文档</td>
+</tr>
+<tr>
+<td>学术或研究工具</td>
+<td>研究者无法引用指不出的来源</td>
+</tr>
+</tbody>
+</table>
+<h3>Citations 可选的情境</h3>
+<table>
+<thead>
+<tr>
+<th>产品情境</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>闲聊 / 创意写作</td>
+<td>没有依据型的来源</td>
+</tr>
+<tr>
+<td>用 Claude 一般知识做 brainstorming</td>
+<td>来源是训练数据，不可引用</td>
+</tr>
+<tr>
+<td>对用户口述内容做摘要</td>
+<td>没有书面文档可引用</td>
+</tr>
+<tr>
+<td>无发布承诺的内部原型</td>
+<td>只在"信任是需求"时才付复杂度</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 决策框架</h2>
+<p>设计以文档为依据的功能时要问：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>若答 Yes</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户会基于 Claude 的答案做决策吗？</td>
+<td>Yes</td>
+<td>几乎一定要有 citations。</td>
+</tr>
+<tr>
+<td>Workflow 是受管制的（法律、医疗、金融、合规）？</td>
+<td>Yes</td>
+<td>Citations 强制要有——第一个 release 就要上。</td>
+</tr>
+<tr>
+<td>内部审计或外部审查者会看到 Claude 的输出？</td>
+<td>Yes</td>
+<td>Citations 会产生他们需要的轨迹。</td>
+</tr>
+<tr>
+<td>用户能容忍 citation 标记带来的一点 UI 复杂度吗？</td>
+<td>Yes</td>
+<td>建 hover-to-verify pattern。</td>
+</tr>
+<tr>
+<td>单一 request 用多份文档吗？</td>
+<td>Yes</td>
+<td><code>document_index</code> 和 <code>document_title</code> 很重要，UI 要追踪。</td>
+</tr>
+<tr>
+<td>我们用的是纯文字 RAG chunks 而不是 PDF？</td>
+<td>Yes</td>
+<td>Citations 仍然能用，只是回的是字符位置不是页码。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Cost、Complexity、UX 权衡</h2>
+<p>Citations 是 API 里最便宜、最高影响力的功能之一。成本：</p>
+<ul>
+<li><strong>响应处理稍微复杂。</strong> 工程端要迭代 content blocks 并把 citation metadata 拉到 UI。</li>
+<li><strong>每次调用有少许 token 开销</strong>，因为 Claude 会在文字旁边吐 citation metadata。</li>
+<li><strong>UX 设计工作</strong>，要做 hover-and-verify pattern。</li>
+</ul>
+<p>效益：</p>
+<ul>
+<li><strong>信任。</strong> 用户真的会拿输出来用。</li>
+<li><strong>法规通过。</strong> 法务与合规能批准原本会挡下来的功能。</li>
+<li><strong>幻觉事件更少。</strong> Citations 会显示 Claude 在引文档还是在外推——是自然的 sanity check。</li>
+<li><strong>更好的深钻 UX。</strong> 想要更多脉络的用户可以跳到来源段落或页面。</li>
+</ul>
+<p>对任何企业文档功能，成本效益几乎是必赢的选择。对消费端的一般知识功能，citations 常常不适用。</p>
+<hr />
+<h2>PDF + Citations 标准 stack</h2>
+<p>把课程 54（PDF support）和课程 55（citations）配对，就是标准的 Claude 企业文档 stack：</p>
+<ol>
+<li>启用 <code>citations.enabled: True</code> 并带可读 <code>title</code> 的 PDF content block。</li>
+<li>精准的抽取或 QA prompt。</li>
+<li>渲染答案并在行内放 citation 标记、提供 hover popover 的 UI。</li>
+<li>可选：对文档 bytes 做 prompt caching 以支持重复 query。</li>
+</ol>
+<p>这是从"我们有一堆 PDF"到"我们有一个可发布、用户信任的企业功能"的最短路径。每一份文档 workflow 的 PRD 都应该明确引用这个配对。</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>对高代价功能把 citations 当可选项。</strong> 它不是。受管制 workflow 里的用户没有它不会采用。</li>
+<li><strong>在 API 打开 citations 却没在 UI 显示。</strong> 付了成本、拿不到信任效益，还让工程团队困惑功能的意义。</li>
+<li><strong>忘了 <code>title</code> 字段。</strong> 多文档响应变得暧昧，用户无法分辨 citation 来自哪份文档。</li>
+<li><strong>以为 citations 保证正确性。</strong> Citation 证明来源文字存在，不证明 Claude 的改写忠实。高代价答案仍需人工审查解读错误。</li>
+<li><strong>没处理纯文字 RAG chunks。</strong> 若你的管线发送的是文字 chunk，citations 仍然能用，但返回的是字符位置不是页码，UI 必须依 source 类型分支。</li>
+<li><strong>低估 UX 设计工作。</strong> Citation 标记、hover popover、跳到来源、"无 citation"的 fallback 都需要明确设计。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Citations 是任何基于用户在意的文档的 Claude 功能的最小可行信任机制。启用便宜、跳过很贵：没有它，企业和受管制功能很少能过信任门槛，用户只好自己回去读原文。把 citations 和 PDF support 配对，一个 request 就能拿到标准的企业文档 stack。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D4 (AI Safety &amp; Alignment)</strong>：Citations 是 grounded、可验证输出的标准机制。预期考信任与来源透明度的题目。</li>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：要会 API 形状——<code>title</code> 字段、<code>citations.enabled</code> 标志、citation metadata 结构（<code>cited_text</code>、<code>document_index</code>、<code>document_title</code>、页码或字符位置）。</li>
+<li>情境题："用户需要验证 Claude 的文档答案。"答案是在 document block 启用 citations 并在 UI 显示 <code>cited_text</code>。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Citations 的研究助理类比是什么？</td>
+<td>没 citations 时助理说"相信我"；有 citations 时每句话都有脚注指向某个来源条款，你可以抽检。</td>
+</tr>
+<tr>
+<td>什么时候 citations 是强制的？</td>
+<td>受管制或高代价 workflow：法律、医疗、金融、合规、企业知识、学术或研究工具。</td>
+</tr>
+<tr>
+<td>什么时候 citations 可选或不适用？</td>
+<td>闲聊、创意写作、一般知识 brainstorming、或对用户口述内容做摘要。</td>
+</tr>
+<tr>
+<td>Citations UX 要设计什么？</td>
+<td>行内标记、hover popover 显示 <code>cited_text</code> 与 <code>document_title</code>、跳到来源、以及无 citation 片段的 fallback。</td>
+</tr>
+<tr>
+<td>最小可行的企业文档 stack 是什么？</td>
+<td>PDF content block + 启用 citations + 精准 prompt + 有 citation 标记的 UI +（可选）对重复 query 的 prompt caching。</td>
+</tr>
+<tr>
+<td>为什么 citations 启用便宜、跳过很贵？</td>
+<td>启用只要少许 token 开销与中等 UI 工作；跳过代表高代价功能过不了信任与合规门槛。</td>
+</tr>
+<tr>
+<td>Citations 保证 Claude 的答案正确吗？</td>
+<td>不。它证明 Claude 读过某段来源原文，不证明 Claude 的解读准确。具后果的答案仍需人工审查。</td>
+</tr>
+<tr>
+<td>Citations PRD 该规格什么？</td>
+<td>信任需求（谁要验证）、标记与 popover 的 UX pattern、多文档处理、纯文字 vs PDF source type、缺 citation 的 fallback。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

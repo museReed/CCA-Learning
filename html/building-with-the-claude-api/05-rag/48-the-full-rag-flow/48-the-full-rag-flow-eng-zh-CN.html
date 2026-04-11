@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Full Rag Flow Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Full RAG Flow — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Architecture (22%) 主要；D4 — Safety &amp; Alignment (20%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3（context management）、4.1（grounded responses）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 48</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>完整 RAG flow 是一个六步 pipeline — chunk → embed → 存 → embed query → similarity search → 喂 prompt 给 Claude — 其中 cosine similarity 是把「找相关文字」转换成「找最接近向量」的度量。</p>
+<hr />
+<h2>六个步骤</h2>
+<pre><code>  [预处理 — 每份文档跑一次]
+  1. 切 source text
+  2. 为每个 chunk 产生 embedding
+  3. 存进 vector database
+                      │
+                      ▼
+  [查询时 — 每次用户请求跑]
+  4. 把用户 query 转 embedding
+  5. 找相似 embedding（cosine similarity）
+  6. 用 retrieved chunks 组最后 prompt → Claude
+</code></pre>
+<p>步骤 1-3 是<strong>预处理</strong>，事先跑，每份文档一次。步骤 4-6 是<strong>查询时</strong>，每次用户请求都跑。这个切割就是 RAG 可扩展的原因：昂贵的工作做一次，便宜的工作每次 query 才做。</p>
+<hr />
+<h2>Step 1：切 Source Text</h2>
+<p>把每份文档切成可管理的 chunks。lesson 用两个 toy section：</p>
+<ul>
+<li>Section 1 — Medical Research：<em>"This year saw significant strides in our understanding of XDR-47, a 'bug' we have not seen before."</em></li>
+<li>Section 2 — Software Engineering：<em>"This division dedicated significant effort to studying various infection vectors in our distributed systems."</em></li>
+</ul>
+<p>注意词汇陷阱：医疗 section 用了「bug」，软件 section 用了「infection vectors」。keyword search 会很开心地把两者接错线。RAG 必须做得比这好。</p>
+<hr />
+<h2>Step 2：产生 Embeddings</h2>
+<p>每个 chunk 喂进 embedding model（本课程是 VoyageAI），拿回一个数值向量。</p>
+<p>lesson 用<strong>玩具二维模型</strong>让几何看得见。在这个想象模型里：</p>
+<ul>
+<li>维度 1 = 「文字多谈医疗领域」</li>
+<li>维度 2 = 「文字多谈软件工程」</li>
+</ul>
+<p>医疗 chunk 的 embedding 是 <code>[0.97, 0.34]</code> — 很医疗，但「bug」这个字造成一点软件词汇渗漏。软件 chunk 是 <code>[0.30, 0.97]</code> — 偏重软件，但「infection vectors」带进一点医疗信号。</p>
+<p>真正的模型用数百或数千维度，无法按维度解读。玩具模型存在只是为了说明 similarity 在几何上长什么样子。</p>
+<hr />
+<h2>Normalization（归一化）</h2>
+<p>大部分 embedding API 会把向量归一化成单位长度（magnitude 1.0）。数学自动处理，你通常不用自己做。归一化后：</p>
+<ul>
+<li><code>[0.97, 0.34]</code> → <code>[0.944, 0.331]</code></li>
+<li><code>[0.30, 0.97]</code> → <code>[0.295, 0.955]</code></li>
+</ul>
+<p>你可以把归一化向量想成单位圆（或高维的单位超球面）上的点。归一化让 <strong>cosine similarity</strong> 和 <strong>dot product</strong> 等价，也是 vector database 能优化 similarity search 的原因。</p>
+<hr />
+<h2>Step 3：存进 Vector Database</h2>
+<p>Vector database 是优化过的专门存储库：</p>
+<ul>
+<li><strong>存储</strong>长长的 float list</li>
+<li><strong>搜索</strong>最接近 query 向量的向量（approximate nearest neighbor）</li>
+<li><strong>扩展</strong>到百万或十亿级向量</li>
+</ul>
+<p>这步完成后预处理就结束。pipeline 暂停，等用户 query。到这里为止的所有工作都会被未来所有 query 摊提。</p>
+<hr />
+<h2>Step 4：处理 User Query</h2>
+<p>当用户问<em>「I'm curious about the company. In particular, what did the software engineering dept do this year?」</em>，你把 query 喂进<strong>同一个</strong> embedding model（与 chunks 用同一个）。</p>
+<p>玩具示例给的原始向量是 <code>[0.1, 0.89]</code> — 低医疗、高软件工程。归一化后：<code>[0.112, 0.993]</code>。</p>
+<p>重点：同一个模型。而且若 provider 支持，这里用 <code>input_type="query"</code>（Step 2 的 chunks 则用 <code>input_type="document"</code>）。</p>
+<hr />
+<h2>Step 5：用 Cosine Similarity 找相似 Embedding</h2>
+<p>把 query 向量送到 vector database，要求返回最接近的存储向量。</p>
+<h3>Cosine Similarity 怎么运作</h3>
+<p>Cosine similarity 衡量两个向量之间夹角的余弦：</p>
+<ul>
+<li>范围：<strong>-1 到 +1</strong></li>
+<li>接近 <strong>+1</strong> → 高相似度（向量几乎同方向）</li>
+<li>接近 <strong>-1</strong> → 非常不同（向量反方向）</li>
+<li><strong>0</strong> → 垂直（没有有意义的关联）</li>
+</ul>
+<p>玩具示例里：</p>
+<table>
+<thead>
+<tr>
+<th>比对</th>
+<th>Cosine Similarity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Query vs. 软件 chunk</td>
+<td><strong>0.983</strong>（非常高）</td>
+</tr>
+<tr>
+<td>Query vs. 医疗 chunk</td>
+<td>0.398（低很多）</td>
+</tr>
+</tbody>
+</table>
+<p>Vector database 返回软件 chunk — 正是用户想要的，尽管两个 chunks 有重叠词汇（「bug」、「infection vectors」）。</p>
+<h3>Cosine Distance</h3>
+<p>你也会在 vector database 文档看到 <strong>cosine distance</strong>，定义是 <code>1 - cosine_similarity</code>。用 cosine distance：</p>
+<ul>
+<li>接近 <strong>0</strong> → 高相似度</li>
+<li>较大值 → 较不相似</li>
+</ul>
+<p>这通常比较好解读，因为「距离」会随东西越不相似而变大。同样的底层数学，只是报告惯例不同。</p>
+<hr />
+<h2>Step 6：组最后 Prompt</h2>
+<p>把用户问题和 retrieved chunk(s) 组成 prompt 送给 Claude：</p>
+<pre><code>Answer the user's question about the financial document.
+
+&lt;user_question&gt;
+How many bugs did engineers fix this year?
+&lt;/user_question&gt;
+
+&lt;report&gt;
+## Section 2: Software Engineering
+This division dedicated significant effort to studying various infection vectors in our distributed systems
+&lt;/report&gt;
+</code></pre>
+<p>Retrieved chunk 用 XML tag（<code>&lt;report&gt;</code>）包起来，让 Claude 知道哪一部分是用户问题、哪一部分是 grounding source。Claude 接着从组合后的 context 产出答案。</p>
+<p>这是 retrieval-augmented generation 的「generation」那一半。注意 Claude 自己从未调用 vector database — 你的应用程式做的。从 Claude 角度看，它收到的是一个普通 prompt，只是有异常多的精心挑选 context。</p>
+<hr />
+<h2>为什么词汇陷阱是重点</h2>
+<p>「bug」例子特意构造来让 keyword search 出糗。两个 chunks 都含疾病类语言；基于关键词的 retriever 很可能对「how many bugs did engineers fix」返回医疗 chunk。在 semantic embedding 上做 cosine similarity 能正确处理，因为 query 向量方向（软件偏重）接近软件 chunk 的方向。</p>
+<p>这就是为什么 embedding 重要：它测的是<strong>语义</strong>方向，不是<strong>词汇</strong>重叠。</p>
+<hr />
+<h2>CCA Task 对应</h2>
+<ul>
+<li><strong>Task 1.3（Context Management）</strong> — 整个 RAG flow 就是 context-management pipeline。预处理决定什么可被检索；retrieval 决定什么进 context；prompt 组装决定 Claude 怎么看。</li>
+<li><strong>Task 4.1（Grounded Responses）</strong> — 最终 prompt 把 Claude 的答案 grounded 在 retrieved chunks。用 XML tag 包 chunks 等于向模型表明「这是来源素材」。</li>
+</ul>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>忘了 query 要用和 chunks 同一个 embedding model</strong> — 向量落在不兼容空间，similarity score 变毫无意义。</li>
+<li><strong>跳过 normalization</strong> — provider 没帮你归一化、且 database 用 dot product 时，非归一化向量会产生错误排序。</li>
+<li><strong>返回太多 chunks</strong> — top-k 设太大会把低相关内容塞进 prompt，分散 Claude 注意力。</li>
+<li><strong>最终 prompt 没 XML／结构化标记</strong> — Claude 分不出问题和来源素材，grounding 变弱。</li>
+<li><strong>生产没记录 retrieval score</strong> — 答案错时需要 retrieved chunks 的 similarity score 来 debug 是 retrieval 问题还是 generation 问题。</li>
+</ol>
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>六步 RAG flow 其实是两半黏在一起：<strong>离线预处理 pipeline</strong>（chunk → embed → 存），每份文档跑一次；<strong>在线 query pipeline</strong>（embed query → retrieve → prompt），每次请求跑。你未来会 debug 的每个 RAG bug 都住在这六步其中之一，所以要知道边界在哪、哪一步拥有哪种失败模式。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：端对端 RAG pipeline 是核心 agentic-pattern 题目。预期会看「RAG 步骤正确顺序是什么」或「cosine similarity 在 flow 里的哪一步」这种题。</li>
+<li><strong>D4（Safety &amp; Alignment）</strong>：RAG grounding 降低幻觉。「bug」例子是好 retrieval 阻止自信错答案的教科书案例。</li>
+<li>要准备好定义 cosine similarity、它的范围、和 cosine distance 的关系。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>列出完整 RAG flow 的六个步骤。</td>
+<td>1) 切文字、2) 产生 embedding、3) 存进 vector DB、4) Embed user query、5) 找相似 embedding（cosine similarity）、6) 组最终 prompt 调用 Claude。</td>
+</tr>
+<tr>
+<td>哪几步是预处理 vs. 查询时？</td>
+<td>1-3 是预处理（每份文档一次）；4-6 是查询时（每次用户请求一次）。</td>
+</tr>
+<tr>
+<td>Cosine similarity 的范围？</td>
+<td>-1 到 +1。</td>
+</tr>
+<tr>
+<td>Cosine similarity 为 +1 代表什么？</td>
+<td>向量同方向 — 最高相似度。</td>
+</tr>
+<tr>
+<td>Cosine similarity 为 0 代表什么？</td>
+<td>向量垂直 — 没有有意义的关联。</td>
+</tr>
+<tr>
+<td>Cosine distance 怎么定义？</td>
+<td><code>1 - cosine_similarity</code>。小值 = 高相似度；大值 = 较不相似。</td>
+</tr>
+<tr>
+<td>为什么 query 和 chunks 必须用同一个 embedding model？</td>
+<td>否则向量在不同几何空间，similarity 失去意义。</td>
+</tr>
+<tr>
+<td>什么是 normalization、为什么重要？</td>
+<td>把向量缩到单位长度（magnitude 1.0）。让 cosine similarity 和 dot product 等价，并支持有效率的 similarity search。</td>
+</tr>
+<tr>
+<td>「bug」例子里为什么 cosine similarity 成功而 keyword search 失败？</td>
+<td>它比较语义方向不是词汇重叠，所以 query 的软件偏重方向匹配软件 chunk，即使词汇有重叠。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Support Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Image Support — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (content blocks), 2.1 (multimodal input structure), 5.2 (token accounting)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 53</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude's image support lets you drop image content blocks into user messages alongside text, turning the same Messages API into a multimodal endpoint — with concrete quotas, token accounting, and the same prompt engineering discipline that text tasks require.</p>
+<hr />
+<h2>Multimodal Messages, Same API</h2>
+<p>There is no separate "vision" endpoint. You call <code>/v1/messages</code> the way you always do; the difference is that a user message's <code>content</code> becomes a list that can mix <strong>image blocks</strong> and <strong>text blocks</strong>. Claude reads the full multimodal payload and replies with a normal text block.</p>
+<p>This design is deliberate: existing message-handling code mostly works, and the only new thing is knowing how to construct an image block and account for its token cost.</p>
+<hr />
+<h2>Hard Limits to Remember</h2>
+<p>The course calls out a specific set of limits that every production deployment has to respect:</p>
+<ul>
+<li><strong>Up to 100 images</strong> across all messages in a single request.</li>
+<li><strong>Max 5 MB per image.</strong></li>
+<li><strong>Single image</strong>: max height and max width of <strong>8000 px</strong>.</li>
+<li><strong>Multiple images</strong>: max height and max width of <strong>2000 px</strong> per image.</li>
+<li>Images can be sent <strong>base64-encoded</strong> or as a <strong>URL</strong> to the image.</li>
+<li>Token cost formula: <code>tokens = (width_px × height_px) / 750</code>.</li>
+</ul>
+<p>The token formula is important for cost modeling. A 1920×1080 image costs about <code>2,764</code> tokens just to include — before any text or response tokens. Resize aggressively: a 1024×1024 image is ~1400 tokens; a 512×512 is ~350. If you do not need full resolution, do not send full resolution.</p>
+<hr />
+<h2>Image Block Structure</h2>
+<p>The image block lives inside a user message's content list, next to any text blocks:</p>
+<pre><code class="language-python">import base64
+
+with open(&quot;image.png&quot;, &quot;rb&quot;) as f:
+    image_bytes = base64.standard_b64encode(f.read()).decode(&quot;utf-8&quot;)
+
+add_user_message(messages, [
+    # Image Block
+    {
+        &quot;type&quot;: &quot;image&quot;,
+        &quot;source&quot;: {
+            &quot;type&quot;: &quot;base64&quot;,
+            &quot;media_type&quot;: &quot;image/png&quot;,
+            &quot;data&quot;: image_bytes,
+        }
+    },
+    # Text Block
+    {
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;text&quot;: &quot;What do you see in this image?&quot;
+    }
+])
+</code></pre>
+<p>Key details:</p>
+<ul>
+<li><code>type: "image"</code> — not <code>"image_url"</code> or anything else.</li>
+<li><code>source.type: "base64"</code> — the other option is URL.</li>
+<li><code>source.media_type</code> — must match the actual file (<code>image/png</code>, <code>image/jpeg</code>, etc.).</li>
+<li><code>source.data</code> — the base64 string, not raw bytes.</li>
+</ul>
+<p>Note the pattern: image block first, then text block. The course's example puts the question <em>after</em> the image, which reads like "look at this, now answer this." You can order them either way, but in practice putting the image first and the question right after it is cleanest.</p>
+<hr />
+<h2>Message Flow Is Unchanged</h2>
+<p>The request/response cycle works exactly like a text-only conversation. Your server sends a user message with mixed blocks; Claude replies with a text block containing its analysis. Multi-turn conversations, tool use, system prompts — all work the same way on top of image input. Nothing about the loop changes just because one turn included an image.</p>
+<p>This is one of the hidden wins of content-block-oriented APIs: adding a new modality does not force new endpoints or new handlers.</p>
+<hr />
+<h2>Prompting Techniques: The Same Rules Apply</h2>
+<p>The single biggest takeaway from the lesson: <strong>the prompt engineering techniques you use with text apply just as strongly to images</strong>. A naive question like "How many marbles are in this image?" will often return an incorrect count. A well-engineered prompt will not.</p>
+<p>The three techniques the lesson demonstrates:</p>
+<ol>
+<li><strong>Detailed guidelines and analysis steps.</strong> Tell Claude the methodology it should use, not just the question.</li>
+<li><strong>One-shot or multi-shot examples.</strong> Include a reference image whose answer you know, state the correct answer, then ask about the target image. Claude calibrates off the example.</li>
+<li><strong>Breaking complex tasks into smaller steps.</strong> Instead of asking for a final answer, ask for intermediate observations first, then the final judgement.</li>
+</ol>
+<h3>Step-by-step counting example from the lesson</h3>
+<pre><code>Analyze this image of marbles and determine the exact count using this methodology:
+1. Begin by identifying each unique marble one at a time. Assign each a number as you identify it.
+2. Verify your result by counting with a different method. Start from the bottom-left corner and work row by row, from left to right.
+
+What is the exact, verified number of marbles in this image?
+</code></pre>
+<p>This simple transformation — from "how many?" to "count with this methodology, then verify with a second pass" — dramatically improves accuracy without changing the model or the image.</p>
+<hr />
+<h2>Real-World Example: Fire Risk Assessment</h2>
+<p>The lesson walks through automating fire-risk assessments for home insurance from satellite imagery. Instead of sending a field inspector, an insurance company sends satellite images to Claude with a structured prompt.</p>
+<p>The prompt decomposes the task into five explicit steps: residence identification, tree-overhang analysis, fire-risk assessment, defensible-space identification, and a final numerical rating from 1 to 4. Each step tells Claude exactly what to look for.</p>
+<pre><code>Analyze the attached satellite image of a property with these specific steps:
+
+1. Residence identification: Locate the primary residence on the property by looking for:
+   - The largest roofed structure
+   - Typical residential features (driveway connection, regular geometry)
+   - Distinction from other structures (garages, sheds, pools)
+
+2. Tree overhang analysis: Examine all trees near the primary residence:
+   - Identify any trees whose canopy extends directly over any portion of the roof
+   - Estimate the percentage of roof covered by overhanging branches (0-25%, 25-50%, 50-75%, 75%+)
+   - Note particularly dense areas of overhang
+
+3. Fire risk assessment: For any overhanging trees, evaluate:
+   - Potential wildfire vulnerability (ember catch points, continuous fuel paths to structure)
+   - Proximity to chimneys, vents, or other roof openings if visible
+   - Areas where branches create a &quot;bridge&quot; between wildland vegetation and the structure
+
+4. Defensible space identification: Assess the property's overall vegetative structure:
+   - Identify if trees connect to form a continuous canopy over or near the home
+   - Note any obvious fuel ladders (vegetation that can carry fire from ground to tree to roof)
+
+5. Fire risk rating: Based on your analysis, assign a Fire Risk Rating from 1-4:
+   - Rating 1 (Low Risk): No tree branches overhanging the roof, good defensible space around the home
+   - Rating 2 (Moderate Risk): Minimal overhang (&lt;25% of roof), some separation between tree canopies
+   - Rating 3 (High Risk): Significant overhang (25-50% of roof), connected tree canopies, multiple vulnerability points
+   - Rating 4 (Severe Risk): Extensive overhang (&gt;50% of roof), dense vegetation against structure
+
+For each item above (1-5), write one sentence summarizing your findings, with your final response being the numerical rating.
+</code></pre>
+<p>Two patterns to internalize from this prompt:</p>
+<ol>
+<li><strong>Named steps with explicit sub-questions.</strong> Not "assess the property" but "look for largest roofed structure; regular geometry; driveway connection."</li>
+<li><strong>Categorical bands for quantitative output.</strong> Instead of asking for a single score, define what 1, 2, 3, and 4 mean. This is equivalent to providing a rubric and dramatically stabilizes outputs.</li>
+</ol>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Using simple questions on hard visual tasks.</strong> "How many marbles?" without a methodology produces unreliable counts. Always bring text-prompting discipline to image tasks.</li>
+<li><strong>Ignoring the token formula.</strong> <code>tokens = (w × h) / 750</code> means full-resolution images silently burn token budgets. Resize before encoding.</li>
+<li><strong>Exceeding per-image size limits.</strong> 5 MB and 8000 px for single-image / 2000 px for multi-image are hard stops; the API will reject violations.</li>
+<li><strong>Forgetting the 100-image cap per request.</strong> Bulk visual workflows must batch by 100.</li>
+<li><strong>Mismatching <code>media_type</code> and actual file.</strong> Declaring <code>image/png</code> for a JPEG will confuse decoding. Inspect the file, don't guess.</li>
+<li><strong>Treating the image block as a URL field.</strong> It is a structured content block with <code>type</code>, <code>source.type</code>, <code>source.media_type</code>, and <code>source.data</code>. A flat URL string will not work.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Claude's image support is not a separate product — it is a new block type inside the same Messages API. The API surface is easy; what matters for production is <strong>token accounting</strong> (the width × height / 750 formula) and <strong>prompt discipline</strong> (step-by-step methodologies, rubrics, and one-shot examples are as important for images as they are for text).</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: image blocks are a content-block variant — know the <code>type: "image"</code> shape, <code>source.type: "base64"</code>, and <code>media_type</code> fields.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: remember the quotas (100 images, 5 MB, 8000 px / 2000 px) and the token formula <code>(w × h) / 750</code> for cost planning.</li>
+<li>Watch for questions framed as "why is accuracy low on my image task?" — the intended answer is usually "apply the same prompt engineering you use for text: methodology, one-shot examples, step decomposition."</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the max number of images in a single Claude API request?</td>
+<td>100 images total across all messages.</td>
+</tr>
+<tr>
+<td>What is the per-image size limit?</td>
+<td>5 MB.</td>
+</tr>
+<tr>
+<td>What is the max dimension for a single-image request vs multi-image?</td>
+<td>8000 px for a single image, 2000 px when sending multiple images.</td>
+</tr>
+<tr>
+<td>What is the formula for image token cost?</td>
+<td><code>tokens = (width_px × height_px) / 750</code>.</td>
+</tr>
+<tr>
+<td>What are the two ways to send an image to Claude?</td>
+<td>Base64-encoded inline, or as a URL to the image.</td>
+</tr>
+<tr>
+<td>What block type do you use for an image, and what field inside holds the data?</td>
+<td><code>type: "image"</code>, with <code>source.type: "base64"</code> and <code>source.data</code> holding the base64 string (plus <code>source.media_type</code>).</td>
+</tr>
+<tr>
+<td>Why does "How many marbles?" often fail on an image?</td>
+<td>It is a naive prompt. Image tasks need the same methodology, step-by-step instructions, and one-shot examples that text tasks need.</td>
+</tr>
+<tr>
+<td>What three prompting techniques does the lesson recommend for image tasks?</td>
+<td>1) Detailed guidelines and methodology, 2) one-shot or multi-shot examples, 3) decomposition into smaller steps.</td>
+</tr>
+<tr>
+<td>Does adding an image change the message-flow loop?</td>
+<td>No — it is still a user message sent to <code>/v1/messages</code>, replied to with a text block. The loop is unchanged.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extended Thinking Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Extended Thinking — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (reasoning depth and agent decision quality), 1.2 (agentic loop), 5.2 (latency/cost trade-offs)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 52</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Extended thinking gives Claude dedicated "scratch paper" tokens to reason through a hard problem before emitting its final answer, trading higher cost and latency for improved accuracy on tasks that ordinary prompting cannot reliably solve.</p>
+<hr />
+<h2>The Problem: When Prompt Engineering Stops Working</h2>
+<p>Every serious Claude deployment eventually hits a class of prompts where iteration on instructions, examples, and guardrails stops moving the accuracy needle. The model produces a plausible answer, but on hard reasoning problems that answer is not consistently right. Extended thinking exists for exactly this moment — it is the feature you turn on <strong>after</strong> you have optimized your prompt and eval suite and still need more headroom.</p>
+<p>Think of it as Claude's scratch paper: the model writes its reasoning to an internal working area, and only after that work is done does it produce the final response. You pay for the scratch paper in tokens, and you wait longer for the answer, but the final answer is informed by a much longer internal deliberation.</p>
+<hr />
+<h2>Response Structure: Two Blocks Instead of One</h2>
+<p>With extended thinking disabled, a Claude response is a simple text block. With extended thinking enabled, the response becomes structured — you get back both a <strong>thinking block</strong> (the reasoning trace) and a <strong>text block</strong> (the final answer).</p>
+<p>This changes how your application handles responses. Code that assumes <code>response.content[0].text</code> now has to iterate through content blocks and distinguish thinking content from user-facing text. If you render Claude's output directly to a user, you must decide whether to show the thinking process, hide it, or collapse it behind a "show reasoning" toggle.</p>
+<hr />
+<h2>Enabling Thinking in Code</h2>
+<p>The course teaches a minimal wrapper that exposes two new parameters on your chat function: <code>thinking</code> (boolean switch) and <code>thinking_budget</code> (max tokens Claude may spend on reasoning).</p>
+<pre><code class="language-python">def chat(
+    messages,
+    system=None,
+    temperature=1.0,
+    stop_sequences=[],
+    tools=None,
+    thinking=False,
+    thinking_budget=1024,
+):
+    ...
+</code></pre>
+<p>Inside the function, when <code>thinking</code> is on you inject a <code>thinking</code> config block into the API parameters:</p>
+<pre><code class="language-python">if thinking:
+    params[&quot;thinking&quot;] = {
+        &quot;type&quot;: &quot;enabled&quot;,
+        &quot;budget&quot;: thinking_budget,
+    }
+</code></pre>
+<p>Then you call it:</p>
+<pre><code class="language-python">chat(messages, thinking=True)
+</code></pre>
+<p>Two hard constraints apply:</p>
+<ul>
+<li><strong>Minimum budget is 1024 tokens.</strong> You cannot ask for a smaller scratch pad.</li>
+<li><strong><code>max_tokens</code> must be greater than <code>thinking_budget</code>.</strong> The thinking budget is <em>part of</em> the token budget Claude is allowed to spend, so <code>max_tokens</code> must leave room for both the reasoning trace and the final answer.</li>
+</ul>
+<hr />
+<h2>The Signature System</h2>
+<p>Extended thinking responses carry a cryptographic <strong>signature</strong> over the thinking content. The signature is how Anthropic detects tampering: if a developer modifies the thinking text and passes it back into a later turn, the signature will no longer validate and the model will reject it.</p>
+<p>The reason this matters is a safety guarantee. Claude's reasoning is part of how Anthropic's alignment training works — if developers could edit the reasoning text between turns, they could steer the model into unsafe territory by forging a "chain of thought" that justifies dangerous outputs. The signature prevents that attack vector.</p>
+<p>Practical implication: <strong>never mutate thinking blocks.</strong> When you carry conversation history forward to the next turn, round-trip thinking blocks byte-for-byte, signature included.</p>
+<hr />
+<h2>Redacted Thinking Blocks</h2>
+<p>Sometimes Claude's internal safety systems flag the reasoning trace itself. When that happens you do not receive the raw reasoning text — you receive a <strong>redacted thinking block</strong> containing an encrypted payload in place of readable text.</p>
+<p>Two things matter here:</p>
+<ol>
+<li><strong>Do not crash on redacted blocks.</strong> Your content-block handler must treat redacted thinking as a valid variant alongside regular thinking and text blocks.</li>
+<li><strong>Pass them back intact.</strong> Even though your code cannot read the redacted content, Claude can decrypt it on the next turn, so passing the encrypted payload preserves context. Dropping it silently truncates Claude's memory.</li>
+</ol>
+<p>The course mentions that for testing purposes there is a special trigger string you can send to force a redacted response. Use it to exercise your handler and confirm nothing downstream assumes every thinking block is readable.</p>
+<hr />
+<h2>Cost and Latency Trade-offs</h2>
+<p>Extended thinking is not free:</p>
+<ul>
+<li><strong>Higher cost.</strong> Thinking tokens are billed. A 1024-token thinking budget on every call is real money at scale.</li>
+<li><strong>Higher latency.</strong> The model literally spends more wall-clock time before emitting its first text token.</li>
+<li><strong>More complex client code.</strong> Content-block iteration, signature handling, redacted-block fallback.</li>
+</ul>
+<p>The guidance is to treat thinking as an accuracy lever you pull <strong>after</strong> standard prompting. The decision process is:</p>
+<ol>
+<li>Write the prompt.</li>
+<li>Build an eval set.</li>
+<li>Iterate on the prompt until accuracy plateaus.</li>
+<li>If accuracy is still below your bar, enable thinking and re-run the eval.</li>
+</ol>
+<p>If thinking fixes it, ship. If it does not, the problem is not a reasoning-depth problem and you need a different approach (tools, RAG, better prompt structure).</p>
+<hr />
+<h2>Feature Compatibility Caveat</h2>
+<p>The course explicitly notes that extended thinking is <strong>not compatible</strong> with certain other features, notably <strong>assistant message pre-filling</strong> and custom <strong>temperature</strong>. This matters in production: if your existing prompt strategy relies on pre-filled assistant messages to steer output format, you cannot simply layer thinking on top. You have to redesign that part of the prompt.</p>
+<p>The full incompatibility list is maintained in the Anthropic docs; the lesson points at that reference rather than embedding the list, because it evolves with new models.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Enabling thinking before optimizing the prompt.</strong> Thinking costs money and latency. If your prompt is simply wrong, thinking will not fix it — you will just pay more for the same wrong answer.</li>
+<li><strong>Setting <code>max_tokens</code> ≤ <code>thinking_budget</code>.</strong> The API will reject the call. <code>max_tokens</code> must accommodate both the thinking trace and the final answer.</li>
+<li><strong>Mutating thinking blocks between turns.</strong> Any modification breaks the signature and Claude will reject the history.</li>
+<li><strong>Crashing on redacted thinking blocks.</strong> Treat redacted as a first-class variant; do not assume thinking content is always readable text.</li>
+<li><strong>Showing raw thinking to end users without a toggle.</strong> The reasoning trace is verbose and internal. Surface it intentionally or hide it by default.</li>
+<li><strong>Combining thinking with pre-filled assistant messages or custom temperature without checking compatibility.</strong> The call will fail or behave unexpectedly.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Extended thinking is an accuracy lever, not a default. The right workflow is: optimize the prompt first, build evals, and only then enable thinking when the eval gap is clearly a reasoning-depth problem. The signature system and redacted blocks are safety features — treat thinking blocks as opaque, pass them through untouched, and never assume they are readable text.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>: extended thinking is the canonical way to deepen Claude's reasoning inside an agentic loop. Expect questions on when thinking helps (hard reasoning) vs. when it is wasted spend (simple transformations).</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: cost/latency trade-offs, <code>thinking_budget</code> vs <code>max_tokens</code> constraint, and feature-compatibility caveats are exam-ready facts.</li>
+<li>Watch for exam questions framed as: "Prompt engineering has plateaued — what is the next lever?" The answer is extended thinking with an eval-driven decision.</li>
+<li>Remember the two safety mechanisms: <strong>signature</strong> (tamper detection) and <strong>redacted blocks</strong> (internal safety flagging), and that both must be passed back untouched.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What problem does extended thinking solve?</td>
+<td>Hard reasoning problems where ordinary prompt engineering has plateaued — it gives Claude scratch-paper tokens to deliberate before answering.</td>
+</tr>
+<tr>
+<td>What is the minimum <code>thinking_budget</code>?</td>
+<td>1024 tokens.</td>
+</tr>
+<tr>
+<td>What is the relationship between <code>max_tokens</code> and <code>thinking_budget</code>?</td>
+<td><code>max_tokens</code> must be strictly greater than <code>thinking_budget</code>, because the budget is spent from within the max.</td>
+</tr>
+<tr>
+<td>What are the two content block types you get back when thinking is enabled?</td>
+<td>A thinking block (the reasoning trace) and a text block (the final answer).</td>
+</tr>
+<tr>
+<td>What is the signature on a thinking block and why does it exist?</td>
+<td>A cryptographic token that proves the thinking content has not been modified; it prevents developers from forging reasoning to steer the model unsafely.</td>
+</tr>
+<tr>
+<td>What is a redacted thinking block?</td>
+<td>A thinking block whose reasoning has been flagged by internal safety systems and is returned in encrypted form. Your code must handle it and pass it back untouched.</td>
+</tr>
+<tr>
+<td>When should you enable extended thinking?</td>
+<td>Only after you have optimized the prompt, built evals, and confirmed accuracy is still below your bar due to reasoning depth.</td>
+</tr>
+<tr>
+<td>Name two features extended thinking is NOT compatible with.</td>
+<td>Assistant message pre-filling and custom temperature.</td>
+</tr>
+<tr>
+<td>What are the three trade-offs of enabling extended thinking?</td>
+<td>Higher cost (thinking tokens are billed), higher latency (more wall-clock time), and more complex client code (block iteration, signatures, redaction).</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Retrieval Augmented Generation — Why It Matters</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Stuffing an 800-page doc into a prompt fails; RAG fetches only the chunks you need</text>
+
+  <!-- Column 1: Claude alone -->
+  <rect x="40" y="90" width="440" height="470" rx="12" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="90" width="440" height="48" rx="12" fill="#EF4444"/>
+  <rect x="40" y="126" width="440" height="12" fill="#EF4444"/>
+  <text x="260" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">Prompt Stuffing (naive)</text>
+
+  <rect x="95" y="152" width="330" height="26" rx="13" fill="#FEE2E2"/>
+  <text x="260" y="170" text-anchor="middle" font-size="11" font-weight="600" fill="#991B1B">Include the entire 800-page document in the prompt</text>
+
+  <!-- User -->
+  <rect x="60" y="196" width="100" height="40" rx="8" fill="white" stroke="#FCA5A5"/>
+  <text x="110" y="212" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B">User</text>
+  <text x="110" y="227" text-anchor="middle" font-size="9" fill="#6B7280">"What risks?"</text>
+
+  <line x1="165" y1="216" x2="190" y2="216" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Giant prompt -->
+  <rect x="195" y="184" width="240" height="64" rx="6" fill="#FEE2E2" stroke="#EF4444" stroke-width="1.5"/>
+  <text x="315" y="202" text-anchor="middle" font-size="11" font-weight="700" fill="#991B1B">Giant prompt</text>
+  <text x="315" y="218" text-anchor="middle" font-size="9" fill="#7F1D1D">question + 800 pages</text>
+  <text x="315" y="232" text-anchor="middle" font-size="9" fill="#7F1D1D">of raw text</text>
+  <text x="315" y="244" text-anchor="middle" font-size="9" font-family="Menlo, monospace" fill="#DC2626">~200K tokens</text>
+
+  <!-- Claude -->
+  <rect x="180" y="272" width="160" height="40" rx="8" fill="white" stroke="#FCA5A5"/>
+  <text x="260" y="288" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B">Claude</text>
+  <text x="260" y="302" text-anchor="middle" font-size="9" fill="#6B7280">context overloaded</text>
+
+  <line x1="260" y1="252" x2="260" y2="268" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="260" y1="316" x2="260" y2="332" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Bad response -->
+  <rect x="100" y="336" width="320" height="52" rx="6" fill="white" stroke="#FCA5A5"/>
+  <text x="260" y="356" text-anchor="middle" font-size="11" font-weight="600" fill="#991B1B">Diluted / hallucinated answer</text>
+  <text x="260" y="374" text-anchor="middle" font-size="10" fill="#7F1D1D">key facts buried in noise</text>
+
+  <!-- Cons -->
+  <rect x="60" y="410" width="400" height="134" rx="8" fill="white" stroke="#FECACA"/>
+  <text x="76" y="432" font-size="11" font-weight="700" fill="#991B1B">Limitations</text>
+  <text x="76" y="452" font-size="10" fill="#1E293B">- Hard prompt-length limit; doc may not fit</text>
+  <text x="76" y="470" font-size="10" fill="#1E293B">- Claude less effective with very long prompts</text>
+  <text x="76" y="488" font-size="10" fill="#1E293B">- Every call costs full token price</text>
+  <text x="76" y="506" font-size="10" fill="#1E293B">- Latency grows linearly with size</text>
+  <text x="76" y="524" font-size="10" fill="#1E293B">- No citations; no way to verify</text>
+
+  <!-- Column 2: Claude + RAG -->
+  <rect x="520" y="90" width="440" height="470" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="520" y="90" width="440" height="48" rx="12" fill="#22C55E"/>
+  <rect x="520" y="126" width="440" height="12" fill="#22C55E"/>
+  <text x="740" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">Claude + RAG (grounded)</text>
+
+  <rect x="575" y="152" width="330" height="26" rx="13" fill="#DCFCE7"/>
+  <text x="740" y="170" text-anchor="middle" font-size="11" font-weight="600" fill="#14532D">Retrieve only the chunks relevant to the question</text>
+
+  <!-- User -->
+  <rect x="540" y="196" width="100" height="40" rx="8" fill="white" stroke="#86EFAC"/>
+  <text x="590" y="212" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B">User</text>
+  <text x="590" y="227" text-anchor="middle" font-size="9" fill="#6B7280">"What risks?"</text>
+
+  <line x1="645" y1="216" x2="670" y2="216" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Retrieval -->
+  <rect x="675" y="196" width="130" height="40" rx="8" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="740" y="212" text-anchor="middle" font-size="11" font-weight="600" fill="#1E40AF">Retriever</text>
+  <text x="740" y="226" text-anchor="middle" font-size="9" fill="#1E3A8A">search chunks</text>
+
+  <line x1="810" y1="216" x2="830" y2="216" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="835" y="196" width="105" height="40" rx="8" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="887" y="212" text-anchor="middle" font-size="11" font-weight="600" fill="#92400E">Top-K chunks</text>
+  <text x="887" y="226" text-anchor="middle" font-size="9" fill="#78350F">Risk Factors §</text>
+
+  <!-- Augmented prompt -->
+  <rect x="600" y="260" width="280" height="58" rx="6" fill="#DCFCE7" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="740" y="278" text-anchor="middle" font-size="11" font-weight="700" fill="#14532D">Augmented prompt</text>
+  <text x="740" y="294" text-anchor="middle" font-size="9" fill="#166534">question + 2-3 relevant chunks</text>
+  <text x="740" y="308" text-anchor="middle" font-size="9" font-family="Menlo, monospace" fill="#16A34A">~2K tokens</text>
+
+  <line x1="740" y1="242" x2="740" y2="256" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Claude -->
+  <rect x="660" y="336" width="160" height="40" rx="8" fill="white" stroke="#86EFAC"/>
+  <text x="740" y="352" text-anchor="middle" font-size="11" font-weight="600" fill="#1E293B">Claude</text>
+  <text x="740" y="366" text-anchor="middle" font-size="9" fill="#6B7280">focused context</text>
+
+  <line x1="740" y1="322" x2="740" y2="332" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Benefits -->
+  <rect x="540" y="400" width="400" height="144" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="556" y="422" font-size="11" font-weight="700" fill="#166534">Benefits</text>
+  <text x="556" y="442" font-size="10" fill="#1E293B">- Focuses Claude on only the most relevant content</text>
+  <text x="556" y="460" font-size="10" fill="#1E293B">- Scales to very large docs and multi-doc collections</text>
+  <text x="556" y="478" font-size="10" fill="#1E293B">- Smaller prompts = lower cost + lower latency</text>
+  <text x="556" y="496" font-size="10" fill="#1E293B">- Enables verifiable answers (see Citations)</text>
+  <text x="556" y="516" font-size="10" fill="#1E293B">- Trade-off: chunking strategy + retrieval tuning</text>
+  <text x="556" y="534" font-size="10" fill="#1E293B">- Best when docs exceed the context window</text>
+
+  <text x="500" y="582" text-anchor="middle" font-size="11" fill="#6B7280">RAG trades simplicity for scalability, accuracy, and cost efficiency.</text>
+</svg>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing Retrieval Augmented Generation Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing Retrieval Augmented Generation — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Architecture (22%) 主要；D4 — Safety &amp; Alignment (20%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3（context management）、4.1（grounded responses）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 45</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>RAG 是让「用 AI 问遍公司整个知识库」变成可交付产品功能的关键：它让 Claude 能回答那些根本放不进一次对话的文档。</p>
+<hr />
+<h2>心智模型：研究助理与档案柜</h2>
+<p>想象两种助理的差别：</p>
+<table>
+<thead>
+<tr>
+<th>助理类型</th>
+<th>运作方式</th>
+<th>限制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>纯记忆型</strong></td>
+<td>靠学校学的知识回答</td>
+<td>训练没碰过的主题就没办法</td>
+</tr>
+<tr>
+<td><strong>Prompt-stuffer</strong></td>
+<td>你把 800 页报告整本交给他再问</td>
+<td>他被信息淹没、失焦，影印账单爆炸</td>
+</tr>
+<tr>
+<td><strong>RAG 研究员</strong></td>
+<td>你问问题；他走到档案柜、抽出最相关的一个文件夹、读完、回答</td>
+<td>可扩展到超大资料库；每个答案都 grounded 在特定来源</td>
+</tr>
+</tbody>
+</table>
+<p>RAG 就是 <strong>档案柜 + 研究员</strong> 的 pattern。预处理（chunking + indexing）等于整理档案柜；查询（retrieval + prompt）等于研究员去抽对的文件夹。</p>
+<hr />
+<h2>RAG 解决的商业问题</h2>
+<p>每个知识密集的产品都会撞上同一面墙：<strong>「AI 读得到我们的东西吗？」</strong></p>
+<ul>
+<li>客服：「能不能从我们 2,000 篇 help articles 回答？」</li>
+<li>法务：「能不能搜索合同封存库？」</li>
+<li>企业搜索：「能不能看懂我们 10 年的 Confluence？」</li>
+<li>财务分析：「能不能从这份 800 页的 10-K 抽出 risk factors？」</li>
+</ul>
+<p>没有 RAG，答案是「只有放得进一次 prompt 才行」，而这几乎永远不够。有了 RAG，你对任意大小的 corpus 都有故事可讲。</p>
+<hr />
+<h2>产品用例</h2>
+<h3>适合 RAG 的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么 RAG 赢</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>知识库 Q&amp;A</td>
+<td>corpus 大、问题窄、答案要能引用来源</td>
+</tr>
+<tr>
+<td>「Chat with your PDF」</td>
+<td>单一文档太大塞不进 context</td>
+</tr>
+<tr>
+<td>企业内部搜索</td>
+<td>多文档、多来源、内容会演进</td>
+</tr>
+<tr>
+<td>领域专家（医疗、法律）</td>
+<td>大量参考资料，答案需要 grounded</td>
+</tr>
+<tr>
+<td>客服 copilot</td>
+<td>上千篇 help articles，要找对的那一篇</td>
+</tr>
+</tbody>
+</table>
+<h3>不适合 RAG 的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>更好的替代</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>可以塞进 prompt 的短 PDF</td>
+<td><strong>直接 prompt</strong> — RAG 是过度工程</td>
+</tr>
+<tr>
+<td>「今天天气如何？」</td>
+<td><strong>Tool use</strong> — 你要的是实时数据，不是静态文档</td>
+</tr>
+<tr>
+<td>「帮我发这封邮件」</td>
+<td><strong>Tool use</strong> — 你要的是动作，不是 retrieval</td>
+</tr>
+<tr>
+<td>闲聊、不需要知识 grounding</td>
+<td><strong>单纯 Claude</strong> — 不需要 corpus</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>RAG 的成本／复杂度取舍</h2>
+<p>RAG 不是免费的。作为 PM，你拿以下换到以下：</p>
+<table>
+<thead>
+<tr>
+<th>放弃</th>
+<th>换到</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工程简洁</td>
+<td>突破 context window 的 scale</td>
+</tr>
+<tr>
+<td>零 infra 起点</td>
+<td>每次查询更便宜、更快的 prompt</td>
+</tr>
+<tr>
+<td>「把文档丢进去就好」的 UX</td>
+<td>可审计、可引用的答案</td>
+</tr>
+<tr>
+<td>零搜索质量 bug</td>
+<td>本来做不到的功能</td>
+</tr>
+</tbody>
+</table>
+<p>陷阱是不需要 RAG 时就往 RAG 跳。如果你的知识库舒服放得进 prompt，最简单的架构就是最好的。等 corpus 体积逼你上去时才上。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<p>当 stakeholder 说「我们要 AI 读我们的文档」时，问这些：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>如果「是」</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>整个 corpus 舒服放得进一次 prompt 吗？</td>
+<td>跳过 RAG — 直接塞</td>
+</tr>
+<tr>
+<td>内容是稳定的（非实时）吗？</td>
+<td>RAG 可行</td>
+</tr>
+<tr>
+<td>用户需要 AI 引用或链接到来源吗？</td>
+<td>RAG — retrieved chunks 让 citation 很自然</td>
+</tr>
+<tr>
+<td>corpus 每天／每小时在变吗？</td>
+<td>RAG 但要有清楚的 re-indexing 计划</td>
+</tr>
+<tr>
+<td>这其实是实时数据（天气、股价）吗？</td>
+<td><strong>不是</strong> RAG — 用 tool use</td>
+</tr>
+<tr>
+<td>用户会在广大 library 里问窄问题吗？</td>
+<td>RAG 理想</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>「retrieval 质量」这个产品风险</h2>
+<p>这是 PM 最常漏掉的一块：<strong>RAG 会默默失败</strong>。</p>
+<p>一般 AI 功能给错答案就是错答案，有人会开 ticket。RAG 功能里，不管 retrieval 层抓回什么 chunk，Claude 都会很有信心地根据它回答，即使那 chunk 是错的。用户看到的是流畅、权威、错的答案。</p>
+<p>这代表：</p>
+<ul>
+<li>retrieval 质量是<strong>产品质量</strong>问题，不只是工程细节</li>
+<li>你需要测试 retriever 的 eval，不只是测试模型的 eval</li>
+<li>citation 是用户端的安全功能，让他们能自我查核</li>
+<li>「置信度」要来自来源，不是来自 Claude 的语气</li>
+</ul>
+<p>PM 如果略过这块，就是客服团队被「AI 跟我讲错」淹没的那个人。</p>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>太早上 RAG</strong> — corpus 放得进 10K tokens 就硬上整套 vector database pipeline。</li>
+<li><strong>UX 没设计 citation</strong> — Claude 不引用任何东西，用户无法查核，信任崩盘。</li>
+<li><strong>把 retriever 当「做完了」</strong> — 没 eval、没监控、默默返回错 chunk。</li>
+<li><strong>把 RAG 和 tool use 搞混</strong> — 拿 RAG 去 pitch 一个其实需要实时数据的功能。</li>
+<li><strong>忽略 re-indexing 成本</strong> — 忘记每次文档更新都触发一个工程要负责的预处理 pipeline。</li>
+</ol>
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>RAG 把「懂东西的 AI」变成「读你东西的 AI」。对产品而言，这就是新奇 chatbot 与可交付功能的差别。陷阱是 retrieval 质量会变成产品质量指标：retrieval 烂，模型再怎么调都救不了答案。要上 RAG 的 PM 必须自己拥有 retrieval 的 eval loop，不只是 generation。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：情境题若写「大型文档 corpus ＋ 问问题」→ 答 RAG。熟悉形状：chunk → index → retrieve → prompt。</li>
+<li><strong>D4（Safety &amp; Alignment）</strong>：RAG 把回答 grounded 在来源文字，这是标准的降幻觉 pattern。</li>
+<li>注意与 tool use 的对照：实时／动态数据用 tool use，不是 RAG。静态／文档 corpus 用 RAG。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用一句话说，RAG 让产品能做什么？</td>
+<td>能对大到塞不进一次 prompt 的 corpus 提问。</td>
+</tr>
+<tr>
+<td>RAG 的「档案柜」类比是什么？</td>
+<td>预处理＝整理档案柜；查询时＝研究员抽对的文件夹。</td>
+</tr>
+<tr>
+<td>PM 何时应该选 prompt stuffing 而不是 RAG？</td>
+<td>corpus 舒服放得进 context window 时，RAG 是不必要的复杂度。</td>
+</tr>
+<tr>
+<td>PM 何时应该选 tool use 而不是 RAG？</td>
+<td>数据是实时／动态（天气、价格、live 系统）而非静态文档时。</td>
+</tr>
+<tr>
+<td>RAG 功能隐藏的产品风险是什么？</td>
+<td>retrieval 默默失败 — Claude 很有信心地根据错 chunk 回答。</td>
+</tr>
+<tr>
+<td>为什么 RAG UX 的 citation 很重要？</td>
+<td>让用户能验证来源，在信任答案前抓到 retrieval 错误。</td>
+</tr>
+<tr>
+<td>举三个 RAG 明显胜出的商业场景。</td>
+<td>知识库 Q&amp;A、chat-with-your-PDF、企业内部搜索。</td>
+</tr>
+<tr>
+<td>选 RAG 要 PM 放弃什么？</td>
+<td>工程简洁 — 换来 scale、成本效率、可引用性。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

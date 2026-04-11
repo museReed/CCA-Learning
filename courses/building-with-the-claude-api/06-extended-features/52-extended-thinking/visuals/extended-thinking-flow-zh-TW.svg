@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Extended Thinking — 回答前先在草稿紙上推理</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Thinking 區塊讓 Claude 先思考再回應;多付 thinking tokens 換取複雜任務的準確度</text>
+
+  <rect x="40" y="90" width="440" height="470" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="90" width="440" height="44" rx="12" fill="#3B82F6"/>
+  <rect x="40" y="122" width="440" height="12" fill="#3B82F6"/>
+  <text x="260" y="118" text-anchor="middle" font-size="15" font-weight="600" fill="white">標準回應(不啟用 thinking)</text>
+
+  <rect x="60" y="148" width="400" height="24" rx="12" fill="#DBEAFE"/>
+  <text x="260" y="165" text-anchor="middle" font-size="11" font-weight="600" fill="#1E40AF">Prompt → 單一 text 區塊</text>
+
+  <rect x="60" y="184" width="400" height="48" rx="6" fill="white" stroke="#93C5FD"/>
+  <text x="70" y="202" font-size="10" font-weight="700" fill="#1E40AF">使用者 prompt</text>
+  <text x="70" y="220" font-size="10" fill="#1E293B">"What's 17 × 23?"</text>
+
+  <line x1="260" y1="238" x2="260" y2="258" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="140" y="264" width="240" height="40" rx="8" fill="#DBEAFE" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="260" y="288" text-anchor="middle" font-size="12" font-weight="700" fill="#1E40AF">Claude</text>
+
+  <line x1="260" y1="308" x2="260" y2="328" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="60" y="334" width="400" height="80" rx="6" fill="white" stroke="#93C5FD"/>
+  <text x="70" y="352" font-size="10" font-weight="700" fill="#1E40AF">Response 內容</text>
+  <rect x="70" y="360" width="380" height="44" rx="4" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="80" y="377" font-size="10" font-family="Menlo, monospace" fill="#1E3A8A">{"type": "text",</text>
+  <text x="80" y="391" font-size="10" font-family="Menlo, monospace" fill="#1E3A8A"> "text": "391"}</text>
+
+  <rect x="60" y="430" width="400" height="116" rx="6" fill="#0F172A"/>
+  <text x="70" y="450" font-size="10" font-family="Menlo, monospace" fill="#34D399">client.messages.create(</text>
+  <text x="70" y="466" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">  model="claude-...",</text>
+  <text x="70" y="482" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">  max_tokens=1024,</text>
+  <text x="70" y="498" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">  messages=messages,</text>
+  <text x="70" y="514" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">  # 沒有 thinking 參數</text>
+  <text x="70" y="530" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">)</text>
+
+  <rect x="520" y="90" width="440" height="470" rx="12" fill="#F3E8FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="520" y="90" width="440" height="44" rx="12" fill="#8B5CF6"/>
+  <rect x="520" y="122" width="440" height="12" fill="#8B5CF6"/>
+  <text x="740" y="118" text-anchor="middle" font-size="15" font-weight="600" fill="white">啟用 Extended Thinking</text>
+
+  <rect x="540" y="148" width="400" height="24" rx="12" fill="#EDE9FE"/>
+  <text x="740" y="165" text-anchor="middle" font-size="11" font-weight="600" fill="#5B21B6">Prompt → thinking 區塊 + text 區塊</text>
+
+  <rect x="540" y="184" width="400" height="48" rx="6" fill="white" stroke="#A78BFA"/>
+  <text x="550" y="202" font-size="10" font-weight="700" fill="#5B21B6">使用者 prompt</text>
+  <text x="550" y="220" font-size="10" fill="#1E293B">"證明 √2 是無理數"</text>
+
+  <line x1="740" y1="238" x2="740" y2="258" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="620" y="264" width="240" height="40" rx="8" fill="#EDE9FE" stroke="#8B5CF6" stroke-width="1.5"/>
+  <text x="740" y="288" text-anchor="middle" font-size="12" font-weight="700" fill="#5B21B6">Claude(推理模式)</text>
+
+  <line x1="740" y1="308" x2="740" y2="324" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="540" y="328" width="400" height="44" rx="6" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="550" y="346" font-size="10" font-weight="700" fill="#92400E">1. thinking 區塊</text>
+  <text x="550" y="363" font-size="10" font-family="Menlo, monospace" fill="#78350F">"用反證法。假設 √2 = p/q..."</text>
+
+  <rect x="540" y="378" width="400" height="38" rx="6" fill="#DCFCE7" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="550" y="396" font-size="10" font-weight="700" fill="#14532D">2. text 區塊(最終答案)</text>
+  <text x="550" y="412" font-size="10" font-family="Menlo, monospace" fill="#166534">"√2 是無理數,因為..."</text>
+
+  <rect x="540" y="430" width="400" height="116" rx="6" fill="#0F172A"/>
+  <text x="550" y="450" font-size="10" font-family="Menlo, monospace" fill="#34D399">client.messages.create(</text>
+  <text x="550" y="466" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">  model="claude-...",</text>
+  <text x="550" y="482" font-size="10" font-family="Menlo, monospace" fill="#FCD34D">  max_tokens=4096,</text>
+  <text x="550" y="498" font-size="10" font-family="Menlo, monospace" fill="#FCD34D">  thinking={</text>
+  <text x="550" y="514" font-size="10" font-family="Menlo, monospace" fill="#FCD34D">    "type": "enabled",</text>
+  <text x="550" y="530" font-size="10" font-family="Menlo, monospace" fill="#FCD34D">    "budget_tokens": 1024})</text>
+
+  <text x="500" y="578" text-anchor="middle" font-size="11" fill="#6B7280">budget_tokens ≥ 1024,max_tokens 必須大於 budget_tokens · Signature 保護 thinking 完整性 · 被安全系統標記時會回傳 redacted 區塊</text>
+</svg>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Chunking Strategies Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Text Chunking Strategies — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D1 — Agentic Architecture (22%) 主要；D4 — Safety &amp; Alignment (20%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3（context management）、4.1（grounded responses）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 46</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Chunking 是每個 RAG 功能看不見的產品品質旋鈕 — 它決定「一個知識單位」長什麼樣子，做錯了 AI 就會很有信心地引用錯段落。</p>
+<hr />
+<h2>心智模型：在晚宴切蛋糕</h2>
+<p>想像一個多層蛋糕。客人點「巧克力那層」或「草莓那層」。怎麼切很重要：</p>
+<table>
+<thead>
+<tr>
+<th>切法</th>
+<th>每個客人拿到</th>
+<th>Chunking 策略</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>隨機 5 公分立方塊</td>
+<td>有時純巧克力，有時一半巧克力一半草莓</td>
+<td>Size-based、無 overlap</td>
+</tr>
+<tr>
+<td>同樣的立方塊，但沾到下一塊的邊</td>
+<td>一樣，但看得到旁邊是什麼層</td>
+<td>Size-based + overlap</td>
+</tr>
+<tr>
+<td>乾淨的水平切片，一層一片</td>
+<td>他們點的那層，剛剛好</td>
+<td>Structure-based</td>
+</tr>
+<tr>
+<td>廚師按風味挑選分組</td>
+<td>最小份量的純風味</td>
+<td>Semantic</td>
+</tr>
+</tbody>
+</table>
+<p>切得隨便，就會吃到跨層的那一口。點草莓的客人咬到一大塊巧克力也不知道為什麼。<strong>這就是使用者在 RAG 功能裡遇到爛 chunking 的感覺</strong>。</p>
+<hr />
+<h2>為什麼這是 PM 問題（不只是工程問題）</h2>
+<p>Chunking 決策直接驅動使用者看得到的行為：</p>
+<ul>
+<li><strong>「AI 給我不相關的答案」</strong> → 通常是 chunking 爛</li>
+<li><strong>「AI 在 citation 裡切在句子中間」</strong> → 一定是 chunking 爛</li>
+<li><strong>「AI 用我沒問的 section 回答」</strong> → 本 lesson 經典的「bug」例子</li>
+<li><strong>「文件更新後答案沒跟上」</strong> → re-chunking pipeline 壞了</li>
+</ul>
+<p>PM 如果覺得 chunking 是「工程搞定的事」，就會是 CEO demo 功能結果拿到錯答案時那個道歉的人。</p>
+<hr />
+<h2>四種策略的 PM 白話</h2>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>PM 白話</th>
+<th>何時用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Size-based</strong></td>
+<td>「每 500 字切一次，加 overlap」</td>
+<td>混合內容的預設 — 便宜、可靠、可預期</td>
+</tr>
+<tr>
+<td><strong>Structure-based</strong></td>
+<td>「按 Markdown header 切」</td>
+<td>你控制內容格式時（內部文件、範本化報告）</td>
+</tr>
+<tr>
+<td><strong>Sentence-based</strong></td>
+<td>「每 5 個句子一組」</td>
+<td>散文為主的內容，句子是有意義的單位</td>
+</tr>
+<tr>
+<td><strong>Semantic</strong></td>
+<td>「用 NLP 把相關想法留在一起」</td>
+<td>高風險 retrieval（法律、醫療）值得花 compute 時</td>
+</tr>
+</tbody>
+</table>
+<p>PM 要內化的一件事：<strong>沒有哪個是通用「最佳」</strong>。對的策略看內容型態、品質標準、工程預算。</p>
+<hr />
+<h2>「bug」例子 — 每個 PM 都該知道</h2>
+<p>Lesson 用一個很鮮明的例子：一份文件有醫療研究和軟體工程兩個 section。醫療 section 剛好寫「XDR-47, a bug we have not seen before」。使用者問「How many bugs did engineers fix this year?」。</p>
+<p>爛的 chunker 可能因為有「bug」這個字就把醫療 chunk 撈出來。Claude 接著寫一段流暢的關於病毒的答案 — 錯的 section、錯的領域、錯的答案，但語氣很有信心。</p>
+<p>這就是<strong>默默失敗</strong> pattern。沒有錯誤訊息。log 看起來健康。只有使用者自己 QA 答案時才會發現。對 PM 而言，這種 bug 到第十次就會毀掉使用者信任。</p>
+<hr />
+<h2>產品用例</h2>
+<h3>何時用 Structure-Based</h3>
+<table>
+<thead>
+<tr>
+<th>訊號</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>內容是 Markdown</td>
+<td>header 是可靠邊界</td>
+</tr>
+<tr>
+<td>你擁有撰寫範本（內部 wiki、PRD 範本）</td>
+<td>可以強制結構</td>
+</tr>
+<tr>
+<td>每個 section 語意大致一致</td>
+<td>語意對齊免費附送</td>
+</tr>
+</tbody>
+</table>
+<h3>何時用 Size-Based + Overlap</h3>
+<table>
+<thead>
+<tr>
+<th>訊號</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>你無法保證文件結構</td>
+<td>fallback 必須什麼都能處理</td>
+</tr>
+<tr>
+<td>內容混雜（docs + PDF + code + log）</td>
+<td>一個策略搞定全部</td>
+</tr>
+<tr>
+<td>你在出 MVP 想要可預期的行為</td>
+<td>最好推理</td>
+</tr>
+</tbody>
+</table>
+<h3>何時用 Sentence-Based</h3>
+<table>
+<thead>
+<tr>
+<th>訊號</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>內容是散文、沒結構</td>
+<td>句子是自然單位</td>
+</tr>
+<tr>
+<td>你要人類可讀的 citation</td>
+<td>citation 框裡切掉的字看起來很壞</td>
+</tr>
+</tbody>
+</table>
+<h3>何時用 Semantic</h3>
+<table>
+<thead>
+<tr>
+<th>訊號</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>領域高風險（法律、醫療、金融）</td>
+<td>retrieval 錯有實際後果</td>
+</tr>
+<tr>
+<td>retrieval 是驗證過的產品瓶頸</td>
+<td>有數據顯示 chunk 品質重要</td>
+</tr>
+<tr>
+<td>你有 compute 預算</td>
+<td>前處理比較重</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 決策框架</h2>
+<p>規劃 RAG 功能時，簽核前回答這些：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>為什麼重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>我們的 canonical 內容格式是什麼？</td>
+<td>決定 structure-based 是否可行</td>
+</tr>
+<tr>
+<td>chunk 大小預算是多少？</td>
+<td>直接關聯 prompt 大小、成本、延遲</td>
+</tr>
+<tr>
+<td>誰負責 chunk 品質 eval？</td>
+<td>必須有具名 owner，不是「工程大家都負責」</td>
+</tr>
+<tr>
+<td>使用者怎麼看到 citation？</td>
+<td>如果 citation 可見，切掉的 chunk 看起來壞了</td>
+</tr>
+<tr>
+<td>文件變更時怎麼 re-chunk？</td>
+<td>每次內容更新都有前處理成本</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>把 chunking 當工程實作細節</strong> — 它是產品槓桿；chunk 大小直接影響使用者看到的內容。</li>
+<li><strong>沒有 chunk 品質 eval</strong> — 沒 test set 就出貨，代表你從憤怒使用者那學到 chunking 爛。</li>
+<li><strong>以為一個策略適合所有內容型態</strong> — 有 docs、PDF、code 的平台需要不只一個 chunker。</li>
+<li><strong>忽略 re-indexing 故事</strong> — 每次內容更新都觸發前處理；pipeline 脆弱的話，你的「AI 回答」功能會默默 stale。</li>
+<li><strong>citation 不可稽核</strong> — 沒有可見的來源連結，使用者抓不到默默失敗，信任崩塌。</li>
+</ol>
+<blockquote>
+<p><strong>關鍵洞察</strong></p>
+<p>Chunking 是 retrieval 的默默兄弟。當有人說「我們 RAG 系統答錯了」，大約一半情況的 root cause 是 chunking — 好 chunk 根本沒被產生，所以好 retrieval 不可能發生。對 PM 而言這代表 chunk 品質 day one 就是 eval target，不是「之後再迭代」的東西。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：熟悉四種策略、取捨、情境題準備好（「Markdown 有保證 header → ？」、「PDF 混雜 → ？」）。</li>
+<li><strong>D4（Safety &amp; Alignment）</strong>：「bug」例子直接對應幻覺風險 — 錯 chunk 導致很有信心的錯答案。</li>
+<li>注意考題環繞「overlap」的寫法 — 問「怎麼避免 chunk 被切在句子中間」答案永遠是 overlap。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PM 為什麼要關心 chunking？</td>
+<td>它是默默驅動產品品質的元素 — 爛 chunking 導致很有信心的錯答案，使用者無法 debug。</td>
+</tr>
+<tr>
+<td>「bug」例子在教什麼？</td>
+<td>同一個關鍵字可以出現在不相關領域（醫療 vs. 軟體），產生錯但流暢的答案。</td>
+</tr>
+<tr>
+<td>切蛋糕的類比是什麼？</td>
+<td>糟糕切法會跨層，讓客人咬到錯的口味 — 爛 chunking 跨主題邊界。</td>
+</tr>
+<tr>
+<td>PM 何時挑 structure-based chunking？</td>
+<td>你控制內容格式時（Markdown、範本化報告），header 是可靠邊界。</td>
+</tr>
+<tr>
+<td>預設 fallback chunking 策略？</td>
+<td>Size-based + overlap — 適用任何內容型態、行為可預期。</td>
+</tr>
+<tr>
+<td>為什麼 chunk overlap 對使用者看到的 citation 很重要？</td>
+<td>沒有 overlap，chunk 會切在句子中間，citation 看起來壞了。</td>
+</tr>
+<tr>
+<td>誰該負責 chunk 品質 eval？</td>
+<td>具名 PM／工程搭檔 — 不是「工程大家」；這是產品指標。</td>
+</tr>
+<tr>
+<td>爛 chunking 的默默失敗模式是什麼？</td>
+<td>沒錯誤、log 健康、使用者拿到根據不相關 chunk 產出的自信錯答案。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

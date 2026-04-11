@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Full Rag Flow Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Full RAG Flow — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Architecture (22%) 主要；D4 — Safety &amp; Alignment (20%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3（context management）、4.1（grounded responses）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 48</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>完整 RAG flow 有六步，干净地切成「一次性预处理 pipeline」和「每次查询 pipeline」两半 — 搞懂这个切割是 PM 推理任何 RAG 功能成本、延迟、内容新鲜度的方式。</p>
+<hr />
+<h2>心智模型：图书馆卡片目录</h2>
+<p>想象一座用户还没进来的图书馆：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>图书馆比喻</th>
+<th>RAG 步骤</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Setup</td>
+<td>馆员读每本书、写索引卡</td>
+<td>Chunk + embed + store</td>
+</tr>
+<tr>
+<td>等待</td>
+<td>卡片目录整齐待命</td>
+<td>Vector DB 已就绪</td>
+</tr>
+<tr>
+<td>问题</td>
+<td>访客问「关于中世纪烹饪的书？」</td>
+<td>User query 到达</td>
+</tr>
+<tr>
+<td>查找</td>
+<td>馆员翻卡找最接近的匹配</td>
+<td>Embed query + cosine similarity</td>
+</tr>
+<tr>
+<td>答复</td>
+<td>馆员把相关书交给访客</td>
+<td>Retrieved chunks 进 prompt</td>
+</tr>
+<tr>
+<td>综合</td>
+<td>访客读书、写报告</td>
+<td>Claude 写最终答案</td>
+</tr>
+</tbody>
+</table>
+<p>图书馆能运作只因有人事先做了索引工作。那就是 RAG 的预处理 pipeline。查询时步骤则是馆员迎接每位访客。</p>
+<hr />
+<h2>PM 白话的六步</h2>
+<pre><code>[预处理 — 每份文档付钱一次，受惠于未来所有 query]
+1. Chunk:       「把文档切成可搜索片段」
+2. Embed:       「把每片转成意义坐标」
+3. Store:       「把所有坐标放进 vector database」
+
+[查询时 — 每次用户请求付钱一次]
+4. Embed query: 「把用户问题转成意义坐标」
+5. Search:      「用 cosine similarity 找最接近坐标」
+6. Prompt:      「问题 + top 匹配交给 Claude 回答」
+</code></pre>
+<p><strong>PM 关键洞察</strong>：新增一份文档，1-3 跑一次。今天有一百万用户问问题，4-6 跑一百万次。预算成本和延迟代表要知道哪一步住在哪一半。</p>
+<hr />
+<h2>为什么这个切割对产品规划重要</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>预处理侧（1-3）</th>
+<th>查询时侧（4-6）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>谁付钱？</td>
+<td>被未来所有 query 摊提</td>
+<td>每次用户请求付一次</td>
+</tr>
+<tr>
+<td>延迟敏感？</td>
+<td>不 — 后台跑</td>
+<td>是 — 用户在等</td>
+</tr>
+<tr>
+<td>新鲜度影响</td>
+<td>过时 index 代表过时答案</td>
+<td>永远读 index 最新状态</td>
+</tr>
+<tr>
+<td>失败爆炸范围</td>
+<td>坏 batch 污染未来 retrieval</td>
+<td>坏 query 伤害一次用户交互</td>
+</tr>
+<tr>
+<td>成本优化</td>
+<td>更少 re-index、更 aggressive batch</td>
+<td>更小 top-k、缓存 embedding</td>
+</tr>
+</tbody>
+</table>
+<p>产品决策会打在不同半边。「我们要答案反映今天更新」是预处理问题。「我们要 2 秒内答」是查询时问题。</p>
+<hr />
+<h2>「bug」例子当产品课</h2>
+<p>lesson 的玩具例子用一个含「bug」字的医疗研究 chunk（XDR-47 病毒那种）和一个软件工程 chunk。用户问「How many bugs did engineers fix this year?」。</p>
+<p>keyword retriever 可能返回医疗 chunk 只因字面含「bug」。cosine-similarity retriever 会正确返回软件 chunk，因为 query 的语义方向匹配软件 chunk 的语义方向（cosine similarity 0.983 vs. 0.398）。</p>
+<p><strong>这就是 RAG 做对的产品价值</strong>：用户拿到他们想问的答案，而不是关键词找到的答案。对于客服、法律、企业搜索产品，这个差异会反映在客户满意度上。</p>
+<hr />
+<h2>给 PM 的 Cosine Similarity</h2>
+<p>你不需要数学，但需要直觉：</p>
+<table>
+<thead>
+<tr>
+<th>分数</th>
+<th>意义</th>
+<th>PM 白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>+1.0</td>
+<td>向量同方向</td>
+<td>完美匹配</td>
+</tr>
+<tr>
+<td>~0.9</td>
+<td>方向非常接近</td>
+<td>很有信心相关</td>
+</tr>
+<tr>
+<td>~0.5</td>
+<td>大致同社区</td>
+<td>可能相关</td>
+</tr>
+<tr>
+<td>0.0</td>
+<td>垂直</td>
+<td>无有意义关联</td>
+</tr>
+<tr>
+<td>-1.0</td>
+<td>反方向</td>
+<td>反相关</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cosine distance</strong> 是 <code>1 - cosine similarity</code>。小距离＝高相似度。产品仪表板有时显示其中之一；知道两者是同一指标、极性相反。</p>
+<p>PM 应该问：「我们的 top-k similarity 门槛是多少？」和「top match 相似度低于 X 时，要不要显示『没有好答案』回应而不是编造一个？」</p>
+<hr />
+<h2>产品用例</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>pipeline 落点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>客服 copilot</td>
+<td>重度 help articles 预处理；快速查询时 retrieval</td>
+</tr>
+<tr>
+<td>Chat-with-your-PDF</td>
+<td>用户上传 → 上传时预处理 → 对话时 query</td>
+</tr>
+<tr>
+<td>企业知识搜索</td>
+<td>持续 re-index Confluence/Drive；高 QPS query 路径</td>
+</tr>
+<tr>
+<td>法律研究</td>
+<td>大 corpus，稀少但高风险查询；质量优于速度</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 决策框架</h2>
+<p>任何 RAG 产品，要能回答：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>哪一半</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文档多常变？</td>
+<td>预处理</td>
+<td>驱动 re-indexing 计划与成本</td>
+</tr>
+<tr>
+<td>Corpus 多大？</td>
+<td>预处理</td>
+<td>驱动存储与 embedding 成本</td>
+</tr>
+<tr>
+<td>每日多少查询？</td>
+<td>查询时</td>
+<td>驱动每次查询预算</td>
+</tr>
+<tr>
+<td>延迟 SLO 是什么？</td>
+<td>查询时</td>
+<td>驱动 top-k、caching、模型选择</td>
+</tr>
+<tr>
+<td>retrieval 找不到好匹配怎么办？</td>
+<td>查询时</td>
+<td>塑造「无答案」UX 避免幻觉</td>
+</tr>
+<tr>
+<td>怎么对用户显示 citation？</td>
+<td>查询时</td>
+<td>最终 prompt／UI 步骤的一部分</td>
+</tr>
+<tr>
+<td>文档变更时怎么 re-index？</td>
+<td>预处理</td>
+<td>必须是 owned 工程流程</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>混淆预处理与查询时成本</strong> — 搞不清楚为什么 RAG 某些情境贵、某些情境便宜。</li>
+<li><strong>没有 stale-index 计划</strong> — 用户会发现文档更新要好几天才反映在答案里。</li>
+<li><strong>没设 similarity 门槛</strong> — 低置信度匹配被当高置信度匹配对待，导致错答案。</li>
+<li><strong>没有「无答案」UX</strong> — retrieval 找不到好东西时 Claude 还是会产出，用户拿到编造内容。</li>
+<li><strong>UI 略过 citation</strong> — 用户无法验证答案，就抓不到 retrieval 失败，信任默默崩塌。</li>
+</ol>
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>六步 RAG flow 其实是两个 pipeline 共享一个 vector database。预处理是你对每份文档付一次的投资；查询时是你每次用户请求要付的经常性成本。PM 把这两半分清楚就能推理单位经济、延迟预算、新鲜度、失败模式 — 这就是「RAG 功能能交付」与「RAG 功能在生产默默坏掉」的差别。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：端对端 RAG 题会考你是否知道六步顺序和 cosine similarity 在哪一步。</li>
+<li><strong>D4（Safety &amp; Alignment）</strong>：grounding flow（retrieve chunk、用 XML tag 包、交给 Claude）是课程里经典的降幻觉 pattern。</li>
+<li>熟悉 cosine similarity 范围（-1 到 +1）和 cosine distance 关系（1 - cosine similarity）。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RAG flow 的两半是什么？</td>
+<td>预处理（chunk、embed、store — 每份文档一次）和查询时（embed query、retrieve、prompt — 每次用户请求一次）。</td>
+</tr>
+<tr>
+<td>RAG 的图书馆类比是什么？</td>
+<td>馆员事先索引书；访客提问时馆员查最接近的索引卡并交出相关书。</td>
+</tr>
+<tr>
+<td>Cosine similarity 范围？</td>
+<td>-1 到 +1。</td>
+</tr>
+<tr>
+<td>cosine similarity 0.983 代表什么？</td>
+<td>极高相似度 — 两向量几乎同方向。</td>
+</tr>
+<tr>
+<td>「bug」例子的 similarity 分数差是多少？</td>
+<td>Query 对软件 chunk = 0.983；Query 对医疗 chunk = 0.398。</td>
+</tr>
+<tr>
+<td>PM 为什么在意预处理／查询时切割？</td>
+<td>它决定成本、延迟、新鲜度、失败模式在生产怎么表现。</td>
+</tr>
+<tr>
+<td>什么是 cosine distance？</td>
+<td><code>1 - cosine similarity</code> — 一种报告惯例，小值代表高相似度。</td>
+</tr>
+<tr>
+<td>举一个由查询时半边驱动的产品决策。</td>
+<td>延迟 SLO、top-k 大小、「无答案」UX、caching 策略。</td>
+</tr>
+<tr>
+<td>举一个由预处理半边驱动的产品决策。</td>
+<td>Re-indexing 计划、chunking 策略、embedding provider 选择、corpus 大小预算。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Embeddings Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Text Embeddings — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Architecture (22%) 主要；D4 — Safety &amp; Alignment (20%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3（context management）、4.1（grounded responses）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 47</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Text embedding 是一个捕捉文字意义的数值向量；RAG retrieval 的做法就是把 user query 和存储的 chunks 都转成 embedding，再找出向量与 query 最接近的 chunks。</p>
+<hr />
+<h2>Retrieval 问题</h2>
+<p>切完 chunk 之后，你手上有一堆文字片段。用户提问时，你要找出哪些 chunks 与问题相关。这本质上是<strong>搜索问题</strong> — 「扫所有 chunks，找出与 query 相关的」。</p>
+<p>两种做法：</p>
+<ul>
+<li><strong>Keyword search</strong> — 找完全匹配的字。快、简单，但遇到同义词、改写、共享概念但无共享字词的情况会失败。</li>
+<li><strong>Semantic search</strong> — 找<em>意义</em>最接近 query 的 chunks，不管确切字词。这是 RAG 默认，由 embeddings 支撑。</li>
+</ul>
+<p>用户用自然语言问问题、且不一定鹦鹉学舌文档用语时，semantic search 是对的工具。「这家公司赚了多少？」应该要能匹配到标题为「Revenue」的 chunk，即使没有共享关键词。</p>
+<hr />
+<h2>什么是 text embedding？</h2>
+<p>Text embedding 是某段文字<strong>意义的数值表示</strong>。想象成把字和句子转换成电脑可以用数学比较的格式。</p>
+<p>流程：</p>
+<ul>
+<li>你把文字喂进 <strong>embedding model</strong></li>
+<li>模型输出一个很长的<strong>数字 list</strong>（embedding 向量）</li>
+<li>每个数字范围 <strong>-1 到 +1</strong></li>
+<li>每个数字代表输入文字的某种学到的特征或质量</li>
+</ul>
+<hr />
+<h2>理解这些数字</h2>
+<p>embedding 里每个数字本质上是某种输入质量的「分数」。重点警告：<strong>我们无法精确知道每个数字代表什么</strong>。</p>
+<p>会很想说「第 42 维代表文字有多快乐」或「第 17 维代表文字多谈海洋」，但这些只是概念示意。每个维度的实际语义是模型在训练时学到的，人类无法直接解读。</p>
+<p>对 RAG 重要的不是每个维度<em>代表什么</em>，而是意义相似的文字会产生相似的向量。模型保证<strong>几何</strong>，我们不需要解读轴。</p>
+<hr />
+<h2>用 VoyageAI 做 embeddings</h2>
+<p>Anthropic 目前不提供 embedding 生成。推荐 provider 是 <strong>VoyageAI</strong>。</p>
+<p>设定步骤：</p>
+<ol>
+<li>申请 VoyageAI 账号（与 Anthropic 分开）</li>
+<li>取得 API key（免费起步）</li>
+<li>把 key 加到环境变量</li>
+</ol>
+<p>在 <code>.env</code> 加：</p>
+<pre><code>VOYAGE_API_KEY=&quot;your_key_here&quot;
+</code></pre>
+<p>这是部署时要注意的 D5 相关重点：RAG pipeline 引入<strong>第二个 vendor</strong>到你的 stack，有自己的 key、rate limit、定价、SLO。</p>
+<hr />
+<h2>实现</h2>
+<p>安装 library：</p>
+<pre><code>%pip install voyageai
+</code></pre>
+<p>设定 client 与 helper function：</p>
+<pre><code class="language-python">from dotenv import load_dotenv
+import voyageai
+
+load_dotenv()
+client = voyageai.Client()
+
+def generate_embedding(text, model=&quot;voyage-3-large&quot;, input_type=&quot;query&quot;):
+    result = client.embed([text], model=model, input_type=input_type)
+    return result.embeddings[0]
+</code></pre>
+<p>要注意：</p>
+<ul>
+<li><code>client.embed</code> 吃的是<strong>文字 list</strong>，不是单一字符串 — API 是 batched。embedding 所有 chunks 时可以（也应该）一次传多笔。</li>
+<li><code>result.embeddings</code> 是跟输入 list 对齐的 list；单笔情况取 <code>[0]</code>。</li>
+<li><code>input_type</code> 有差：「query」vs.「document」。许多 embedding 模型有非对称调校，即使同一段文字，query 和 document 产出的向量会略有不同。</li>
+<li><code>model="voyage-3-large"</code> 是 lesson 的例子 — 依质量／成本／延迟目标挑模型大小。</li>
+</ul>
+<p>对 chunk 跑这个 function 会返回一个 floating-point 数字 list — 就是 embedding。流程本身简单；真正挑战在<strong>有效率地</strong>用 embedding 做 retrieval。</p>
+<hr />
+<h2>Embeddings 在 RAG pipeline 的位置</h2>
+<pre><code>┌──────────────┐    chunk       ┌──────────────┐   每个 chunk 都 embed  ┌──────────────┐
+│   Document   │ ─────────────▶ │    Chunks    │ ───────────────────▶ │   Vectors    │
+└──────────────┘                └──────────────┘                      └──────────────┘
+                                                                            │
+                                                                            ▼
+┌──────────────┐  embed query   ┌──────────────┐   比对向量              ┌──────────────┐
+│  User query  │ ─────────────▶ │ Query vector │ ───────────────────▶ │  Top-k chunks│
+└──────────────┘                └──────────────┘                      └──────────────┘
+</code></pre>
+<p>embedding 会被调用<strong>两次</strong>：</p>
+<ol>
+<li><strong>预处理时</strong> — corpus 里每个 chunk 都被 embed 并存储。</li>
+<li><strong>查询时</strong> — 每个进来的 user query 被 embed，那个向量拿去和存储的 chunk 向量比对。</li>
+</ol>
+<p>比对两边必须用同一个 embedding model。混用模型产生的是不同几何空间的向量，similarity score 会变得毫无意义。</p>
+<hr />
+<h2>Query vs. Document input type</h2>
+<p>VoyageAI 暴露 <code>input_type</code> 参数，有 <code>"query"</code> 和 <code>"document"</code> 这种值。lesson 的示例 function 用 <code>input_type="query"</code>。在完整 pipeline 里：</p>
+<ul>
+<li>embed <strong>要存储的 chunks</strong> 时传 <code>input_type="document"</code></li>
+<li>embed <strong>查询时的 user 问题</strong>时传 <code>input_type="query"</code></li>
+</ul>
+<p>模型被调校过，让 query embedding 能和 document embedding 最好地对齐。这个小细节可以测得出 retrieval 质量差异。</p>
+<hr />
+<h2>CCA Task 对应</h2>
+<ul>
+<li><strong>Task 1.3（Context Management）</strong> — embedding 是你挑选哪些 chunk 变成 context 的机制，是 context 挑选的「评分函数」。</li>
+<li><strong>Task 4.1（Grounded Responses）</strong> — grounding 质量取决于 retrieve 到的 chunks 对不对；embedding 是第一个控制这件事的杠杆。</li>
+</ul>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>index 和 query 用不同 embedding model</strong> — 向量在不同空间；相似度变胡说。</li>
+<li><strong><code>input_type</code> 没用对</strong> — provider 支持时，document 和 query 要用各自对应的 input type。</li>
+<li><strong>每次 query 都 re-embed chunks</strong> — chunks 预处理时 embed 一次、存好向量、反复用。runtime 只 embed query。</li>
+<li><strong>忘了预留 VoyageAI 的延迟与成本</strong> — embedding API 调用是每次 query 的新 network hop；对 p99 延迟和每次查询成本有影响。</li>
+<li><strong>以为维度可解读</strong> — 你无法「看某个维度」来 debug retrieval 失败；debug 永远是比对整个向量。</li>
+</ol>
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>Embedding 把「哪个 chunk 对这个 query 最相关」化约成「哪个向量对这个向量最接近」。这就是全部的 trick。你不需要理解个别维度代表什么 — 只需要相信模型把语义相似的文字放在向量空间中靠近的位置。RAG retrieval 的全部艺术在于挑一个好的 embedding model、并正确地比对向量。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试关联</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：embedding 是 RAG retrieval 的搜索骨干。熟悉它是什么、怎么产生、为什么能做 semantic search。</li>
+<li><strong>D4（Safety &amp; Alignment）</strong>：更好 retrieval → 更好 grounding → 更少幻觉。embedding 是 retrieval 质量的起点。</li>
+<li>预期考题像「Anthropic 不提供 embeddings — 推荐的 provider 是？」（VoyageAI）、「embedding 值范围是？」（每个维度 -1 到 +1）。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>什么是 text embedding？</td>
+<td>一段文字意义的数值向量表示，用于 semantic search。</td>
+</tr>
+<tr>
+<td>embedding 里每个数字的范围是？</td>
+<td>-1 到 +1。</td>
+</tr>
+<tr>
+<td>Anthropic 提供 embedding 吗？</td>
+<td>不 — lesson 推荐 VoyageAI 当 embedding provider。</td>
+</tr>
+<tr>
+<td>VoyageAI 用哪个环境变量？</td>
+<td><code>.env</code> 里的 <code>VOYAGE_API_KEY</code>。</td>
+</tr>
+<tr>
+<td>Semantic search 和 keyword search 有何不同？</td>
+<td>Semantic search 通过向量相似度比对意义；keyword search 只比对确切字。</td>
+</tr>
+<tr>
+<td><code>input_type</code> 参数做什么？</td>
+<td>告诉 embedding model 输入是 query 还是 document；模型用非对称调校优化 retrieval 质量。</td>
+</tr>
+<tr>
+<td>RAG pipeline 里 embedding model 会被调用几次？</td>
+<td>预处理时很多次（每个 chunk 一次），runtime 每个进来的 user query 一次。</td>
+</tr>
+<tr>
+<td>为什么 index 和 query 混用不同 embedding model 是错的？</td>
+<td>向量在不同空间，similarity 失去意义。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

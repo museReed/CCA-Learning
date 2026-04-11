@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Support Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Image Support — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (content blocks), 2.1 (multimodal input), 5.2 (token accounting)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 53</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Image support turns the same Claude API into a multimodal endpoint, opening up entire product categories — insurance inspections, medical triage, retail analytics, field-ops automation — that were previously locked behind human-in-the-loop vision work.</p>
+<hr />
+<h2>Mental Model: Handing the Analyst a Photo</h2>
+<p>Imagine your company's best analyst. If you ask them "what's going on in this office?" they can answer questions, spot anomalies, and summarize patterns. But today you have to verbally describe the scene to them. Image support is handing the analyst the actual photograph.</p>
+<p>The questions you can ask do not change. What changes is that now they are grounded in real visual evidence instead of your description of it. And because Claude reads the photo directly, the analyst never misses something that was "not in the description."</p>
+<p>This is the single biggest unlock for any product where the answer depends on seeing, not just reading.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Product categories that were historically impossible or expensive to automate become viable:</p>
+<ul>
+<li><strong>Insurance inspections</strong>: satellite or drone imagery fed into a rubric-based prompt replaces a field inspector.</li>
+<li><strong>Medical triage</strong>: a dermatology app asking Claude to categorize a visible condition (under clinician supervision).</li>
+<li><strong>E-commerce</strong>: automatic categorization of seller-uploaded product photos.</li>
+<li><strong>Accessibility</strong>: generating rich alt-text from images on the fly.</li>
+<li><strong>Content moderation</strong>: flagging sensitive material across a large image feed.</li>
+<li><strong>Retail analytics</strong>: counting shelves, detecting out-of-stock, or auditing planograms from store photos.</li>
+</ul>
+<p>The same Messages API handles all of these. No separate vision product, no separate pricing page, no separate SDK — just a new content block inside the request you already make.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When Image Support Fits</h3>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Why It Works</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Answer questions grounded in a real image (what is in this photo?)</td>
+<td>Core capability — Claude sees the image directly</td>
+</tr>
+<tr>
+<td>Structured extraction from visual content (table counts, category tags)</td>
+<td>Works with a well-prompted rubric</td>
+</tr>
+<tr>
+<td>Quality control or visual audits against written criteria</td>
+<td>Rubric + step-by-step prompt gives reliable, consistent scoring</td>
+</tr>
+<tr>
+<td>Side-by-side comparison of multiple images</td>
+<td>Up to 100 images per request, useful for before/after or batch comparisons</td>
+</tr>
+</tbody>
+</table>
+<h3>When Image Support Is Not the Answer</h3>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Real-time video analysis</td>
+<td>Vision APIs are single-shot on images, not video pipelines</td>
+</tr>
+<tr>
+<td>Pixel-perfect measurements or OCR on tiny text</td>
+<td>Specialized OCR or CV tools, possibly combined with Claude for reasoning</td>
+</tr>
+<tr>
+<td>Medical diagnosis (as the sole decision-maker)</td>
+<td>Always pair with a clinician; do not ship autonomous diagnosis</td>
+</tr>
+<tr>
+<td>Very high-throughput batch processing on a tight cost budget</td>
+<td>Cost per image grows with resolution; spec the token math early</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the user workflow genuinely depend on interpreting an image?</td>
+<td>Yes</td>
+<td>Image support is a real candidate.</td>
+</tr>
+<tr>
+<td>Is the answer derivable from a single still frame?</td>
+<td>Yes</td>
+<td>You are in Claude's sweet spot.</td>
+</tr>
+<tr>
+<td>Will we be sending more than 100 images per request?</td>
+<td>Yes</td>
+<td>Batch your workflow — 100 is a hard cap.</td>
+</tr>
+<tr>
+<td>Can we downsize images to the smallest useful dimensions?</td>
+<td>Yes</td>
+<td>Do it. Tokens are <code>(width × height) / 750</code>, so size matters directly.</td>
+</tr>
+<tr>
+<td>Do we need pixel-perfect measurements or OCR on tiny text?</td>
+<td>Yes</td>
+<td>Consider a specialized pre-processor; Claude is for reasoning about the image, not measuring it.</td>
+</tr>
+<tr>
+<td>Can we write a rubric or methodology the model should follow?</td>
+<td>Yes</td>
+<td>Accuracy will jump. Naive prompts usually under-deliver.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Cost, Accuracy, and UX Trade-offs</h2>
+<p>The token formula matters more than it looks. <code>(width × height) / 750</code> is linear in pixel count, which means doubling resolution quadruples token cost. A mobile screenshot at 1170×2532 costs ~3950 tokens per call. At 100k calls a day, that is a visible line item.</p>
+<p>Three PM playbooks:</p>
+<ol>
+<li><strong>Pre-process aggressively.</strong> Resize to the smallest dimensions that still let Claude see what matters. Test the accuracy floor before shipping.</li>
+<li><strong>Bring the same prompt discipline you use for text.</strong> A naive "what's in this image?" prompt will under-perform. Give Claude a rubric, a methodology, and ideally a one-shot reference.</li>
+<li><strong>Budget for the 100-image cap.</strong> If your workflow handles hundreds of images per user session, design the batching layer explicitly.</li>
+</ol>
+<hr />
+<h2>The Prompt Engineering Parallel</h2>
+<p>One thing to hammer into any spec: <strong>the prompt engineering techniques you use with text apply to images</strong>. This is in the lesson and it is where most naive integrations lose points:</p>
+<ul>
+<li>Simple questions lead to unreliable answers ("how many marbles?" → wrong count).</li>
+<li>Detailed methodology + one-shot example + step decomposition lead to reliable answers.</li>
+<li>Categorical rubrics (define what 1, 2, 3, 4 mean) stabilize quantitative output.</li>
+</ul>
+<p>The fire-risk assessment example in the lesson is a PM template: name the steps, list what to look for in each, and define the output categories explicitly. Any vision PRD should read like that.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Specifying "analyze the image" without a methodology.</strong> The model will do something, but it will not be reliable. Write the rubric into the PRD.</li>
+<li><strong>Ignoring the token math.</strong> A full-resolution phone screenshot can cost as much as several pages of text. Model this before picking the feature.</li>
+<li><strong>Skipping the image cap review.</strong> Some workflows silently need more than 100 images per request and only discover it in production.</li>
+<li><strong>Treating image support as a separate product.</strong> It is a content block inside the same Messages API, which means your existing retries, logging, and auth already work.</li>
+<li><strong>Shipping image features without an accuracy eval set.</strong> You do not know if the feature is good until you have labeled a representative sample.</li>
+<li><strong>Forgetting safety review on user-uploaded images.</strong> When users can upload arbitrary images, your content-moderation and privacy posture has to level up.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Image support is the biggest multimodal product unlock in the Claude API and it costs almost no engineering effort — it is just a new block inside an existing request. The PM work is all in the <strong>prompt rubric</strong> (detailed methodology, one-shot examples, categorical outputs) and the <strong>token math</strong> (size images down, batch around the 100-image cap). Get those two right and entire categories of previously-manual vision work become automatable.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: recognize image blocks as a content-block variant in the same Messages API; no separate endpoint.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: remember quotas (100 images, 5 MB, 8000 px single / 2000 px multi) and the <code>(w × h) / 750</code> token formula.</li>
+<li>Exam scenario pattern: "image analysis is returning inconsistent answers — what do you recommend?" The intended answer is to apply text-grade prompt discipline (methodology, one-shot, decomposition) and to right-size the image.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the analyst analogy for image support?</td>
+<td>Before, you had to describe a photo to your analyst. Now you can hand them the actual photo — the questions are the same, but the grounding is real.</td>
+</tr>
+<tr>
+<td>What product categories does image support unlock?</td>
+<td>Insurance inspections, medical triage (with clinician), e-commerce tagging, accessibility alt-text, content moderation, retail analytics.</td>
+</tr>
+<tr>
+<td>What is the hard per-request cap on image count?</td>
+<td>100 images total across all messages in a single request.</td>
+</tr>
+<tr>
+<td>What is the max per-image file size?</td>
+<td>5 MB.</td>
+</tr>
+<tr>
+<td>What is the token formula for an image?</td>
+<td><code>tokens = (width × height) / 750</code>. Doubling resolution quadruples token cost.</td>
+</tr>
+<tr>
+<td>Why do naive prompts underperform on image tasks?</td>
+<td>Because image tasks need the same prompt discipline as text — methodology, rubrics, one-shot examples, step decomposition.</td>
+</tr>
+<tr>
+<td>What belongs in a PRD for a vision feature?</td>
+<td>A rubric / methodology, a token-cost model, a batching plan for the 100-image cap, an accuracy eval set, and a safety review for uploads.</td>
+</tr>
+<tr>
+<td>When is image support the wrong choice?</td>
+<td>Real-time video, pixel-perfect measurement, sole-decision medical diagnosis, or very high-throughput batch processing on tight cost budgets.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

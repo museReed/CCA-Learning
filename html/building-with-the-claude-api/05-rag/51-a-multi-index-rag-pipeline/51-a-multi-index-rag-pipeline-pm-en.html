@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Multi Index Rag Pipeline Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>A Multi-Index RAG Pipeline — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Architecture (22%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3 (context management), 5.2 (production search infrastructure)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 51</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A multi-index RAG pipeline is the architectural pattern that lets you keep adding search capabilities (semantic, keyword, recency, domain-specific) without re-architecting — giving your product room to grow retrieval quality as you learn what your users actually ask.</p>
+<hr />
+<h2>Mental Model: The Panel of Expert Judges</h2>
+<p>Imagine a cooking competition with three judges: a flavor expert, a presentation expert, and a technique expert. Each scores dishes on a completely different scale — stars, letters, percentages. You cannot just average their scores; the numbers are not comparable.</p>
+<p>Instead, you ask each judge to <strong>rank</strong> the dishes: 1st, 2nd, 3rd. Then a dish that ranks high with multiple judges rises to the top overall, even if no single judge's raw score would have picked it.</p>
+<p>This is exactly what reciprocal rank fusion does for search:</p>
+<ul>
+<li><strong>Vector search</strong> is the "flavor" judge — understands meaning.</li>
+<li><strong>BM25</strong> is the "ingredients label" judge — checks literal match.</li>
+<li>Future indexes are new judges — recency, domain, graph — each with their own perspective.</li>
+</ul>
+<p>The Retriever is the head judge who collects rankings and produces a fair final score.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Multi-index retrieval is the point where RAG goes from a prototype to a scalable product. It matters because:</p>
+<ul>
+<li><strong>Growth path is built in</strong> — you add new retrieval signals (freshness, popularity, domain) without touching the rest of the product.</li>
+<li><strong>Quality compounds</strong> — each new index catches what the previous ones miss; compounded quality beats any single retrieval method.</li>
+<li><strong>Failure modes isolate</strong> — if one index degrades, the others still serve. That is operationally precious.</li>
+<li><strong>Eval becomes tractable</strong> — you can A/B test indexes independently (add one, measure, keep or drop).</li>
+</ul>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When a Multi-Index Retriever Pays Off</h3>
+<table>
+<thead>
+<tr>
+<th>User Need</th>
+<th>Why Multiple Indexes Help</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mixed conceptual + literal queries</td>
+<td>Semantic + BM25 cover both</td>
+</tr>
+<tr>
+<td>Freshness matters ("what's new this week?")</td>
+<td>Add a recency index alongside the existing two</td>
+</tr>
+<tr>
+<td>Multi-domain knowledge base</td>
+<td>Add a domain-routing index that boosts specialist docs</td>
+</tr>
+<tr>
+<td>Long-tail queries ("unusual product names")</td>
+<td>Lexical index catches what semantic misses</td>
+</tr>
+<tr>
+<td>Legal / compliance with both themes and exact wording</td>
+<td>Hybrid is the only reliable answer</td>
+</tr>
+</tbody>
+</table>
+<h3>When Multi-Index Is Overkill</h3>
+<table>
+<thead>
+<tr>
+<th>User Need</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tiny corpus (&lt;100 docs)</td>
+<td>One index is plenty; ops overhead dominates</td>
+</tr>
+<tr>
+<td>Only conceptual questions, ever</td>
+<td>Pure semantic is fine — measure before adding more</td>
+</tr>
+<tr>
+<td>Tight latency budget (&lt;100ms)</td>
+<td>Each extra index adds latency; measure trade-off</td>
+</tr>
+<tr>
+<td>Early-stage MVP</td>
+<td>Ship semantic-only, then add BM25 when real queries demand it</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Reciprocal Rank Fusion in Plain English</h2>
+<p>Imagine each search method gives you a <strong>top-3 list</strong>. You do not care how confident each method is; you only care about where each document showed up on each list.</p>
+<ul>
+<li>First place on a list = lots of credit</li>
+<li>Second place = less credit</li>
+<li>Third place = a little credit</li>
+<li>Not on a list at all = no credit from that source</li>
+</ul>
+<p>Add up a document's credits from every list. The document with the most total credit wins. A document that showed up high in two lists will almost always beat one that showed up high in only one.</p>
+<p>That is reciprocal rank fusion. It is a way to merge search results fairly without needing the underlying methods to agree on what a "score" means.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Do users ask both conceptual and literal queries?</td>
+<td>Yes</td>
+<td>You need hybrid — at least semantic + BM25.</td>
+</tr>
+<tr>
+<td>Is freshness a product promise?</td>
+<td>Yes</td>
+<td>Add a recency/time-weighted index.</td>
+</tr>
+<tr>
+<td>Are there distinct content domains (docs, tickets, code)?</td>
+<td>Yes</td>
+<td>Consider per-domain indexes and route by query type.</td>
+</tr>
+<tr>
+<td>Do you have an eval set?</td>
+<td>No</td>
+<td>Build one first — you cannot tune multi-index without measurement.</td>
+</tr>
+<tr>
+<td>Is latency budget tight?</td>
+<td>Yes</td>
+<td>Start with two indexes, measure, then expand.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Cost, Latency &amp; Operational Trade-offs</h2>
+<p>Each index you add costs something. A good PM budgets explicitly:</p>
+<ul>
+<li><strong>Index build cost</strong> — every ingest writes to every index. Budget CPU + memory + storage.</li>
+<li><strong>Query latency</strong> — each index adds latency, usually in parallel, so total latency is max(per-index latency) + fusion overhead.</li>
+<li><strong>Ops surface</strong> — every index is a new thing that can break, get stale, or need reindexing.</li>
+<li><strong>Eval complexity</strong> — adding an index means re-running the eval set to confirm it does not regress existing wins.</li>
+</ul>
+<p>Recommended sequence: ship with semantic only → add BM25 when literal queries fail → add recency only if you measurably need freshness → add domain indexes only if the eval set shows routing wins.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Adding indexes because they sound clever</strong> — without eval, new indexes can hurt quality. Always measure.</li>
+<li><strong>Treating RRF as magic</strong> — it only improves quality if each index actually contributes useful rankings. A useless index still costs latency.</li>
+<li><strong>Skipping the eval set</strong> — without it, you have no way to know which index changed what, and regressions hide.</li>
+<li><strong>Ignoring latency compounding</strong> — each index has a latency cost; a budget of "six indexes in parallel" is not free.</li>
+<li><strong>Forgetting user-facing surface</strong> — multi-index retrieval is invisible to users if done right, and they should never see "which index found this chunk." Keep it internal.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Multi-index retrieval is the architecture that lets your RAG product keep improving without rewrites. The Retriever + RRF pattern is a composition contract: every new retrieval signal plugs in cleanly, gets measured independently, and either improves the product or gets removed. That composability is what separates a RAG toy from a RAG platform.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Architecture)</strong>: hybrid retrieval and rank fusion are core advanced RAG patterns.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: modular retriever design is how production RAG systems scale without tearing out the retrieval layer.</li>
+<li>Exam pattern: "How do you combine two retrieval systems with incompatible scoring?" → Reciprocal rank fusion on ranks, not scores.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the panel-of-judges analogy for multi-index retrieval?</td>
+<td>Each search method is a judge with its own scoring scale; you rank-normalize their opinions and pick the dish that most judges rank high.</td>
+</tr>
+<tr>
+<td>Why does reciprocal rank fusion use rank instead of raw scores?</td>
+<td>Because different search methods use incompatible scoring systems — rank is the only common currency.</td>
+</tr>
+<tr>
+<td>When should you add a second index to your RAG product?</td>
+<td>When your eval set shows conceptual or literal queries are failing that a complementary method would catch.</td>
+</tr>
+<tr>
+<td>What is the recommended rollout sequence for indexes?</td>
+<td>Semantic first → add BM25 when literal queries fail → add recency only if freshness matters → add domain-routing only if eval shows a win.</td>
+</tr>
+<tr>
+<td>How do new indexes affect latency?</td>
+<td>Each adds latency (usually in parallel); total becomes max(per-index) plus fusion overhead. Budget before adding.</td>
+</tr>
+<tr>
+<td>What is the hidden cost of adding an index?</td>
+<td>Ingest compute, storage, ops surface, and eval complexity — not just query latency.</td>
+</tr>
+<tr>
+<td>What's the biggest PM mistake with multi-index RAG?</td>
+<td>Adding indexes without an eval set, so nobody can prove they help or hurt.</td>
+</tr>
+<tr>
+<td>Is multi-index retrieval visible to end users?</td>
+<td>No — it should be fully internal. Users just see "better answers"; they never see which index returned what.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

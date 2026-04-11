@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bm25 Lexical Search Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>BM25 Lexical Search — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Architecture (22%) — primary; D5 — Enterprise Deployment (20%) — secondary; D2 — Tool Design (18%) — also relevant for retrieval as a tool</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3 (context management), 5.2 (production search infrastructure)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 50</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>BM25 is a classical lexical search algorithm that complements semantic search by reliably matching exact terms (IDs, codes, rare words) — the half of retrieval quality that embeddings quietly fail at.</p>
+<hr />
+<h2>The Problem: Semantic Search Misses Exact Terms</h2>
+<p>Imagine searching a report for the incident ID <code>INC-2023-Q4-011</code>. Semantic search is good at conceptual similarity — it understands that "incident report" and "cybersecurity event" are related — but it can return sections that are conceptually nearby yet <strong>do not actually contain the exact ID</strong> you asked about. In the lesson's example, a pure semantic search for the incident ID pulled up the correct cybersecurity section alongside an unrelated financial analysis section.</p>
+<p>Why? Embeddings compress text into a dense vector where rare tokens get averaged away. A literal string like <code>INC-2023-Q4-011</code> has almost no semantic neighbors, so the embedding for a question containing it is dominated by the surrounding words — and similarity matches those words, not the ID.</p>
+<hr />
+<h2>The Hybrid Search Strategy</h2>
+<p>The fix is not to replace semantic search but to run two searches in parallel and merge:</p>
+<ul>
+<li><strong>Semantic search</strong> — embeddings, cosine similarity, good at conceptual questions.</li>
+<li><strong>Lexical search</strong> — classical token matching (BM25), good at exact term hits.</li>
+<li><strong>Merged results</strong> — combine both and return a unified list.</li>
+</ul>
+<p>Each method catches what the other drops. Together they form a more robust retrieval layer.</p>
+<hr />
+<h2>How BM25 Works</h2>
+<p>BM25 (Best Match 25) scores documents for a query in four steps:</p>
+<ol>
+<li><strong>Tokenize the query</strong> — break the user's question into terms. <code>"a INC-2023-Q4-011"</code> becomes <code>["a", "INC-2023-Q4-011"]</code>.</li>
+<li><strong>Count term frequency</strong> — measure how often each term appears across all documents. <code>"a"</code> might show up 5 times across the corpus; <code>"INC-2023-Q4-011"</code> might show up only once.</li>
+<li><strong>Weight terms by rarity</strong> — rarer terms get higher importance scores. Common words (<code>"a"</code>, <code>"the"</code>) contribute almost nothing; rare terms (<code>"INC-2023-Q4-011"</code>) dominate the score.</li>
+<li><strong>Rank documents</strong> — return the documents with the highest accumulated weighted term frequencies.</li>
+</ol>
+<p>The core intuition: <strong>a term that appears everywhere is noise; a term that appears in only one place is a very strong signal.</strong> BM25 turns that intuition into a score.</p>
+<hr />
+<h2>Implementing BM25 Search</h2>
+<p>The lesson provides a simple wrapper class <code>BM25Index</code> that mirrors the API of <code>VectorIndex</code>:</p>
+<pre><code class="language-python"># 1. Chunk your text by sections
+chunks = chunk_by_section(text)
+
+# 2. Create a BM25 store and add documents
+store = BM25Index()
+for chunk in chunks:
+    store.add_document({&quot;content&quot;: chunk})
+
+# 3. Search the store
+results = store.search(&quot;What happened with INC-2023-Q4-011?&quot;, 3)
+
+# Print results
+for doc, distance in results:
+    print(distance, &quot;\n&quot;, doc[&quot;content&quot;][:200], &quot;\n----\n&quot;)
+</code></pre>
+<p>Two API points worth memorizing:</p>
+<ul>
+<li><code>add_document({"content": chunk})</code> — documents are stored as dict payloads, same shape as the vector store, so both indexes are interchangeable upstream.</li>
+<li><code>store.search(query_text, k)</code> — takes raw query text (BM25 does its own tokenization; no embedding call needed) and returns top-k (doc, distance) pairs.</li>
+</ul>
+<p>The output for the <code>INC-2023-Q4-011</code> query now correctly prioritizes the two sections that literally mention the incident ID — Software Engineering and Cybersecurity.</p>
+<hr />
+<h2>Why This Works Better for Exact Matches</h2>
+<p>BM25 excels at exact matches because it:</p>
+<ul>
+<li><strong>Weights rare terms heavily</strong> — an incident ID that appears once carries maximum discriminative power.</li>
+<li><strong>Ignores common words</strong> — stop-word-like terms contribute close to zero.</li>
+<li><strong>Scores by term frequency, not meaning</strong> — no semantic smoothing to wash away literal tokens.</li>
+<li><strong>Handles technical tokens well</strong> — IDs, SKUs, error codes, function names, CVE numbers all benefit.</li>
+</ul>
+<p>The flip side: BM25 is bad at conceptual similarity. If a user asks "what went wrong last quarter?" BM25 cannot match that to a section titled "Cybersecurity Analysis." That is exactly where semantic search wins.</p>
+<hr />
+<h2>API Consistency Sets Up the Next Lesson</h2>
+<p>Notice that <code>BM25Index</code> and <code>VectorIndex</code> share an almost identical surface:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>BM25Index</th>
+<th>VectorIndex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>add_document(dict)</code></td>
+<td>stores raw text</td>
+<td>stores vector + metadata</td>
+</tr>
+<tr>
+<td><code>search(query, k)</code></td>
+<td>returns top-k by BM25 score</td>
+<td>returns top-k by cosine distance</td>
+</tr>
+</tbody>
+</table>
+<p>This is not an accident. The consistent API is what enables the multi-index Retriever in the next lesson — a single wrapper that can forward the same query to both indexes and merge results via reciprocal rank fusion.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Assuming semantic search can find exact IDs</strong> — it frequently cannot. Anything token-literal should go through BM25.</li>
+<li><strong>Replacing semantic search with BM25</strong> — you lose conceptual understanding. Hybrid is the right pattern, not either-or.</li>
+<li><strong>Not chunking before BM25</strong> — BM25 scores documents; chunking is how you get a "document" at the right granularity.</li>
+<li><strong>Storing only text in BM25 payloads</strong> — add metadata (section title, doc id) so downstream merging and attribution work.</li>
+<li><strong>Skipping normalization</strong> — casing and punctuation variations can hurt BM25. The basic tokenizer shown in the lesson hides this, but production systems should think about it.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Semantic search handles meaning; BM25 handles literal tokens. A production RAG system almost always needs both, because user queries mix conceptual intent with specific identifiers. The hybrid pattern is not an optimization — it is the default.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Architecture)</strong>: hybrid retrieval is the canonical advanced RAG pattern; understand the complementary roles of semantic vs lexical search.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: BM25 is cheap to run (no embedding API calls on ingest or query), which matters for cost and latency in production.</li>
+<li><strong>D2 (Tool Design)</strong>: when you wrap retrieval as a tool Claude can call, knowing whether that tool uses BM25 / semantic / hybrid affects how you describe it to the model.</li>
+<li>Exam pattern: "Semantic search returned irrelevant results for a query containing a specific ID — what do you add?" → BM25 / hybrid search.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does BM25 stand for?</td>
+<td>Best Match 25 — a classical lexical search algorithm.</td>
+</tr>
+<tr>
+<td>What problem with semantic search does BM25 solve?</td>
+<td>Missing exact-term matches (IDs, codes, rare words) that embeddings wash out.</td>
+</tr>
+<tr>
+<td>What are the four steps BM25 uses to score a query?</td>
+<td>1) Tokenize the query, 2) count term frequency, 3) weight terms by rarity, 4) rank documents by accumulated weighted frequency.</td>
+</tr>
+<tr>
+<td>Why do rare terms get higher weight in BM25?</td>
+<td>Because they are more discriminative — a term that appears in only one place is a strong signal.</td>
+</tr>
+<tr>
+<td>Does BM25 need an embedding API call at query time?</td>
+<td>No — BM25 works directly on tokens, no embedding required.</td>
+</tr>
+<tr>
+<td>Should hybrid search replace semantic search?</td>
+<td>No — hybrid means running both in parallel and merging, not replacing.</td>
+</tr>
+<tr>
+<td>What API method does <code>BM25Index</code> share with <code>VectorIndex</code>?</td>
+<td><code>add_document(dict)</code> and <code>search(query, k)</code> — consistent APIs enable a unified Retriever.</td>
+</tr>
+<tr>
+<td>When does BM25 fail?</td>
+<td>When the query is conceptual and shares no literal tokens with the relevant document. Semantic search is needed there.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

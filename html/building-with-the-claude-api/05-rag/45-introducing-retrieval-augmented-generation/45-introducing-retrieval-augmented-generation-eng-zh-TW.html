@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing Retrieval Augmented Generation Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing Retrieval Augmented Generation — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D1 — Agentic Architecture (22%) 主要；D4 — Safety &amp; Alignment (20%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3（context management）、4.1（grounded responses）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 45</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>RAG（Retrieval Augmented Generation）解決「文件太大塞不進 prompt」的問題：先把文件切成 chunks 存起來，使用者提問時只注入最相關的片段。</p>
+<hr />
+<h2>能力牆：大型文件</h2>
+<p>想像一份 800 頁的財報，使用者問「這家公司有哪些 risk factors？」。原始文字放不進一次 <code>messages.create</code> 呼叫。這不是 prompt engineering 問題，而是架構問題。</p>
+<p>三個力量把「全部塞進去」的做法打掉：</p>
+<ul>
+<li><strong>context window 硬限制</strong> — 有些文件就是比模型支援的長度還長。</li>
+<li><strong>品質下降</strong> — prompt 太長時 Claude 效果會變差，相關訊號會被雜訊淹沒。</li>
+<li><strong>成本與延遲</strong> — prompt 越大 token 越多，處理越慢。</li>
+</ul>
+<hr />
+<h2>做法 1：Prompt Stuffing（基準做法）</h2>
+<p>最簡單的做法是把文件所有文字抽出來直接放進 prompt：</p>
+<pre><code>Answer the user's question about the financial document.
+
+&lt;user_question&gt;
+{user_question}
+&lt;/user_question&gt;
+
+&lt;financial_document&gt;
+{financial_document}
+&lt;/financial_document&gt;
+</code></pre>
+<p>短文件這樣做完全 OK，也是當內容舒服放進 context 時的正確預設值。它有一個重要優點：零前處理、零 retrieval 邏輯、搜尋層零 bug。</p>
+<p>一旦文件（或整個 corpus）超過 context window 的舒適比例，它就失效。</p>
+<hr />
+<h2>做法 2：RAG — 先切塊再檢索</h2>
+<p>RAG 走兩個階段：</p>
+<ol>
+<li><strong>前處理（offline）</strong> — 把每份文件切成較小的 chunks 存起來。每份文件做一次。</li>
+<li><strong>查詢時（online）</strong> — 使用者提問時，在 chunks 裡搜尋最相關的幾塊，只把那幾塊塞進 prompt。</li>
+</ol>
+<p>所以使用者問「What risks does this company face?」會觸發一次 lookup，找到 "Risk Factors" 那一節，那一塊（加上問題）才是 Claude 看到的內容。</p>
+<p>這就是 RAG 的基本形狀：<strong>chunk → index → retrieve → prompt</strong>。Lessons 46-48 逐步填滿每個步驟。</p>
+<hr />
+<h2>好處</h2>
+<ul>
+<li><strong>聚焦</strong> — Claude 只看到相關內容，推理時不會被干擾</li>
+<li><strong>可擴展</strong> — 可以處理遠大於 context window 的文件與 corpus</li>
+<li><strong>多文件</strong> — 單一 index 可以跨多份檔案</li>
+<li><strong>更便宜更快</strong> — prompt 小 token 成本低、延遲低</li>
+</ul>
+<hr />
+<h2>挑戰</h2>
+<ul>
+<li><strong>前處理成本</strong> — 每次新增或更新文件都需要跑 chunking pipeline</li>
+<li><strong>retrieval 品質</strong> — 需要真的能找到「相關」chunks 的搜尋機制；retrieval 爛了答案就錯</li>
+<li><strong>context 不足</strong> — 被撿回來的 chunk 可能缺了 Claude 需要的周邊脈絡（例如定義在前一節）</li>
+<li><strong>chunking 策略選擇</strong> — 等長切割、按 section 切、semantic 切，各有取捨</li>
+</ul>
+<p>RAG 用<strong>複雜度</strong>換<strong>可擴展性與效率</strong>。corpus 放得進 context 就不要用 RAG；放不進就幾乎一定要用。</p>
+<hr />
+<h2>何時用 RAG</h2>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>用 RAG？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5 頁 PDF、單一文件</td>
+<td>不用 — 直接塞 prompt</td>
+</tr>
+<tr>
+<td>800 頁的財務申報</td>
+<td>要</td>
+</tr>
+<tr>
+<td>公司知識庫上千篇文章</td>
+<td>要</td>
+</tr>
+<tr>
+<td>單一使用者問題查一份固定的 2000-token FAQ</td>
+<td>不用</td>
+</tr>
+<tr>
+<td>需要即時、變動的資料（天氣、股價）</td>
+<td>不用 — 用 <strong>tool use</strong></td>
+</tr>
+</tbody>
+</table>
+<p>RAG 適合<strong>大型、相對穩定的 corpus</strong>，需要在文字上做 semantic search。Tool use 適合<strong>即時、動態資料來源</strong>，需要即時讀取。</p>
+<hr />
+<h2>CCA Task 對應</h2>
+<ul>
+<li><strong>Task 1.3（Context Management）</strong> — RAG 是 context management 的代表 pattern。你在決定<em>哪些</em> context 進 window，不只是<em>要不要</em>放 context。</li>
+<li><strong>Task 4.1（Grounded Responses）</strong> — 注入來源 chunks 給 Claude 一個事實基礎，降低幻覺。這把 RAG 連到 Safety &amp; Alignment 領域。</li>
+</ul>
+<hr />
+<h2>工程深度：為什麼 RAG 屬於 D1</h2>
+<p>架構層面看，RAG 是一個 <strong>retriever + generator</strong> pipeline。retriever 不是 Claude 的一部分，是你擁有的 deterministic 程式碼；generator 是 Claude，用你 retriever 組好的 prompt 來呼叫。這個分離很重要：</p>
+<ol>
+<li><strong>retriever 可以單元測試</strong> — 給 query X，是否回傳 chunk Y？</li>
+<li><strong>retriever 可以替換</strong> — 從 keyword 換成 semantic 換成 hybrid search，都不用動模型</li>
+<li><strong>可以稽核 grounding</strong> — 每個答案都可以追到特定 chunk，這是 safety 贏面</li>
+</ol>
+<p>RAG 也是走向 agentic architecture 最簡單的第一步。retrieval 一旦變成 function call，就離把它包成 Claude 自己選擇呼叫的 <strong>tool</strong> 不遠，這就是 RAG 與 Ch04（Tool Use）交會點。</p>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>prompt stuffing 就夠用還硬要 RAG</strong> — 文件放得進 context 的話，RAG 只是增加複雜度沒有好處。</li>
+<li><strong>把 RAG 和 tool use 搞混</strong> — RAG 處理靜態文字 corpus；tool use 處理即時資料。兩個是不同 pattern。</li>
+<li><strong>把 retrieval 當成解決了的問題</strong> — 糟糕的 chunking 或 retrieval 會默默回傳錯的 chunks，Claude 會很有信心地根據錯內容回答。</li>
+<li><strong>prompt 裡沒有 citation 標記</strong> — 不標明 chunk 來源，就失去 RAG 一半的價值（可稽核性）。</li>
+<li><strong>忘了 chunk overlap / 邊界 context</strong> — 定義或 header 被切掉，chunk 看起來相關但缺關鍵細節。</li>
+</ol>
+<blockquote>
+<p><strong>關鍵洞察</strong></p>
+<p>RAG 不是模型能力，而是<strong>應用層架構</strong>。Claude 不會「做 RAG」；是你的程式碼組出含 retrieved chunks 的 prompt 再交給 Claude。也就是說每個 RAG bug 都是應用層 bug，每個 RAG 改善都是應用層改動。pipeline 要自己擁有。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：RAG 是基礎的 context augmentation pattern。預期會看到「大型 corpus、問問題」的情境題 → RAG。</li>
+<li><strong>D4（Safety &amp; Alignment）</strong>：RAG 把回答 grounded 在 retrieved text，降低幻覺，這是核心 alignment pattern。</li>
+<li>注意陷阱：題目描述<strong>即時資料</strong>（天氣、價格）應答 <strong>tool use</strong>，不是 RAG。描述<strong>穩定文件 corpus</strong> 才答 RAG。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RAG 解決什麼問題？</td>
+<td>處理無法塞進單一 prompt 的大型文件：切成 chunks、查詢時只注入相關片段。</td>
+</tr>
+<tr>
+<td>RAG pipeline 的兩個階段？</td>
+<td>前處理（chunk + index）與查詢時（retrieve + prompt）。</td>
+</tr>
+<tr>
+<td>為什麼不全部塞進 prompt？</td>
+<td>context window 限制、長 prompt 品質下降、成本與延遲變高。</td>
+</tr>
+<tr>
+<td>RAG 相對 prompt stuffing 的三個好處？</td>
+<td>聚焦相關內容、可擴展到大型 corpus、成本與延遲較低。</td>
+</tr>
+<tr>
+<td>RAG 的三個挑戰？</td>
+<td>需要前處理 pipeline、retrieval 品質難做、chunk 可能缺周邊 context。</td>
+</tr>
+<tr>
+<td>什麼情況<strong>不</strong>該用 RAG？</td>
+<td>文件放得進 context window，或需要即時資料（用 tool use）。</td>
+</tr>
+<tr>
+<td>RAG 主要對應哪個 CCA 領域？</td>
+<td>D1 — Agentic Architecture，透過 context management。</td>
+</tr>
+<tr>
+<td>RAG 為什麼能降低幻覺？</td>
+<td>把權威來源文字注入 prompt，給 Claude 一個 grounded 的事實基礎。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

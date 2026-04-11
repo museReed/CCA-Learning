@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">The Full RAG Pipeline — Offline Indexing + Online Query</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Preprocess documents once; at query time, retrieve top-K chunks and pass them to Claude</text>
+
+  <!-- Offline band -->
+  <rect x="30" y="86" width="940" height="210" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+  <rect x="30" y="86" width="940" height="32" rx="12" fill="#3B82F6"/>
+  <rect x="30" y="106" width="940" height="12" fill="#3B82F6"/>
+  <text x="46" y="108" font-size="13" font-weight="700" fill="white">1. Offline / preprocessing (one-time per doc)</text>
+
+  <!-- Step 1: Documents -->
+  <rect x="50" y="140" width="130" height="120" rx="8" fill="white" stroke="#93C5FD" stroke-width="1.5"/>
+  <text x="115" y="162" text-anchor="middle" font-size="11" font-weight="700" fill="#1E40AF">Documents</text>
+  <rect x="66" y="174" width="98" height="14" rx="2" fill="#DBEAFE"/>
+  <text x="72" y="185" font-size="9" fill="#1E3A8A">medical.pdf</text>
+  <rect x="66" y="192" width="98" height="14" rx="2" fill="#DBEAFE"/>
+  <text x="72" y="203" font-size="9" fill="#1E3A8A">eng_report.md</text>
+  <rect x="66" y="210" width="98" height="14" rx="2" fill="#DBEAFE"/>
+  <text x="72" y="221" font-size="9" fill="#1E3A8A">legal.txt</text>
+  <text x="115" y="246" text-anchor="middle" font-size="9" fill="#64748B">raw source docs</text>
+
+  <line x1="185" y1="200" x2="210" y2="200" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 2: Chunk -->
+  <rect x="215" y="140" width="130" height="120" rx="8" fill="white" stroke="#93C5FD" stroke-width="1.5"/>
+  <text x="280" y="162" text-anchor="middle" font-size="11" font-weight="700" fill="#1E40AF">Chunk</text>
+  <rect x="228" y="174" width="104" height="12" rx="2" fill="#60A5FA"/>
+  <rect x="228" y="190" width="104" height="12" rx="2" fill="#60A5FA"/>
+  <rect x="228" y="206" width="104" height="12" rx="2" fill="#60A5FA"/>
+  <rect x="228" y="222" width="104" height="12" rx="2" fill="#60A5FA"/>
+  <text x="280" y="246" text-anchor="middle" font-size="9" fill="#64748B">size / sentence / section</text>
+
+  <line x1="350" y1="200" x2="375" y2="200" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 3: Embed -->
+  <rect x="380" y="140" width="130" height="120" rx="8" fill="white" stroke="#93C5FD" stroke-width="1.5"/>
+  <text x="445" y="162" text-anchor="middle" font-size="11" font-weight="700" fill="#1E40AF">Embed</text>
+  <text x="445" y="182" text-anchor="middle" font-size="10" fill="#1E293B">voyage-3-large</text>
+  <rect x="398" y="192" width="94" height="14" rx="2" fill="#DBEAFE"/>
+  <text x="403" y="203" font-size="8" font-family="Menlo, monospace" fill="#1E3A8A">[0.94, 0.33, ...]</text>
+  <rect x="398" y="210" width="94" height="14" rx="2" fill="#DBEAFE"/>
+  <text x="403" y="221" font-size="8" font-family="Menlo, monospace" fill="#1E3A8A">[0.30, 0.96, ...]</text>
+  <text x="445" y="246" text-anchor="middle" font-size="9" fill="#64748B">normalized vectors</text>
+
+  <line x1="515" y1="200" x2="540" y2="200" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 4: Vector DB -->
+  <rect x="545" y="140" width="160" height="120" rx="8" fill="#DBEAFE" stroke="#3B82F6" stroke-width="2"/>
+  <text x="625" y="162" text-anchor="middle" font-size="11" font-weight="700" fill="#1E40AF">Vector DB</text>
+  <!-- DB cylinder -->
+  <ellipse cx="625" cy="188" rx="50" ry="10" fill="white" stroke="#3B82F6"/>
+  <rect x="575" y="188" width="100" height="40" fill="white" stroke="#3B82F6"/>
+  <ellipse cx="625" cy="228" rx="50" ry="10" fill="white" stroke="#3B82F6"/>
+  <text x="625" y="213" text-anchor="middle" font-size="10" font-weight="600" fill="#1E40AF">vectors + chunks</text>
+  <text x="625" y="250" text-anchor="middle" font-size="9" fill="#64748B">indexed for ANN search</text>
+
+  <!-- Preprocessing note -->
+  <rect x="720" y="140" width="230" height="120" rx="8" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="835" y="160" text-anchor="middle" font-size="11" font-weight="700" fill="#92400E">Pause</text>
+  <text x="735" y="180" font-size="10" fill="#78350F">All above happens once, ahead of</text>
+  <text x="735" y="194" font-size="10" fill="#78350F">time. Now we wait for a query.</text>
+  <line x1="735" y1="206" x2="945" y2="206" stroke="#F59E0B" stroke-dasharray="3,3"/>
+  <text x="735" y="224" font-size="10" fill="#78350F">Re-run when docs change, not</text>
+  <text x="735" y="238" font-size="10" fill="#78350F">per query. Save to disk.</text>
+
+  <!-- Online band -->
+  <rect x="30" y="308" width="940" height="250" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2"/>
+  <rect x="30" y="308" width="940" height="32" rx="12" fill="#22C55E"/>
+  <rect x="30" y="328" width="940" height="12" fill="#22C55E"/>
+  <text x="46" y="330" font-size="13" font-weight="700" fill="white">2. Online / query time (every user request)</text>
+
+  <!-- User query -->
+  <rect x="50" y="360" width="130" height="64" rx="8" fill="white" stroke="#86EFAC" stroke-width="1.5"/>
+  <text x="115" y="380" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">User query</text>
+  <text x="115" y="398" text-anchor="middle" font-size="9" fill="#1E293B">"software eng dept</text>
+  <text x="115" y="412" text-anchor="middle" font-size="9" fill="#1E293B">this year?"</text>
+
+  <line x1="185" y1="392" x2="210" y2="392" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Embed query -->
+  <rect x="215" y="360" width="130" height="64" rx="8" fill="white" stroke="#86EFAC" stroke-width="1.5"/>
+  <text x="280" y="380" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">Embed query</text>
+  <text x="280" y="398" text-anchor="middle" font-size="9" font-family="Menlo, monospace" fill="#1E293B">[0.11, 0.99, ...]</text>
+  <text x="280" y="414" text-anchor="middle" font-size="9" fill="#64748B">same model</text>
+
+  <line x1="350" y1="392" x2="375" y2="392" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Retrieve -->
+  <rect x="380" y="360" width="130" height="64" rx="8" fill="#DCFCE7" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="445" y="378" text-anchor="middle" font-size="11" font-weight="700" fill="#14532D">Retrieve Top-K</text>
+  <text x="445" y="394" text-anchor="middle" font-size="9" fill="#166534">cosine similarity</text>
+  <text x="445" y="408" text-anchor="middle" font-size="9" fill="#166534">against vector DB</text>
+  <line x1="445" y1="290" x2="445" y2="355" stroke="#64748B" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <text x="460" y="318" font-size="9" fill="#6B7280">read</text>
+
+  <line x1="515" y1="392" x2="540" y2="392" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Top chunks -->
+  <rect x="545" y="360" width="160" height="64" rx="8" fill="white" stroke="#86EFAC" stroke-width="1.5"/>
+  <text x="625" y="378" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">Top-K chunks</text>
+  <rect x="555" y="386" width="140" height="14" rx="2" fill="#DCFCE7"/>
+  <text x="560" y="397" font-size="9" fill="#14532D">SW Eng (sim 0.98)</text>
+  <rect x="555" y="404" width="140" height="14" rx="2" fill="#DCFCE7"/>
+  <text x="560" y="415" font-size="9" fill="#14532D">Medical (sim 0.40)</text>
+
+  <line x1="710" y1="392" x2="735" y2="392" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Augmented prompt + Claude -->
+  <rect x="740" y="360" width="210" height="64" rx="8" fill="#DCFCE7" stroke="#22C55E" stroke-width="2"/>
+  <text x="845" y="378" text-anchor="middle" font-size="11" font-weight="700" fill="#14532D">Augment → Claude</text>
+  <text x="845" y="394" text-anchor="middle" font-size="9" fill="#166534">question + top chunks</text>
+  <text x="845" y="408" text-anchor="middle" font-size="9" fill="#166534">→ grounded answer</text>
+
+  <!-- Bottom: cosine formula + similarity scores -->
+  <rect x="50" y="448" width="440" height="94" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="60" y="468" font-size="11" font-weight="700" fill="#166534">Cosine similarity (how Top-K is scored)</text>
+  <text x="60" y="486" font-size="10" font-family="Menlo, monospace" fill="#1E293B">cos(θ) = (A · B) / (‖A‖·‖B‖)     range: [-1, 1]</text>
+  <text x="60" y="504" font-size="10" fill="#1E293B">1 → identical · 0 → unrelated · -1 → opposite</text>
+  <text x="60" y="520" font-size="10" fill="#1E293B">cosine distance = 1 - similarity (smaller = closer)</text>
+  <text x="60" y="536" font-size="9" fill="#6B7280">Example query · SW Eng = 0.983   ·   query · Medical = 0.398</text>
+
+  <!-- Final prompt sample -->
+  <rect x="510" y="448" width="440" height="94" rx="8" fill="#0F172A"/>
+  <text x="520" y="467" font-size="10" font-family="Menlo, monospace" fill="#34D399">Answer the user's question about the document.</text>
+  <text x="520" y="482" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">&lt;user_question&gt;</text>
+  <text x="520" y="496" font-size="10" font-family="Menlo, monospace" fill="#FCD34D">  What did software engineering do?</text>
+  <text x="520" y="510" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">&lt;/user_question&gt;</text>
+  <text x="520" y="524" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">&lt;report&gt; ## Software Engineering ...</text>
+  <text x="520" y="538" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">&lt;/report&gt;</text>
+
+  <text x="500" y="582" text-anchor="middle" font-size="11" fill="#6B7280">Pipeline end-to-end: Documents → Chunk → Embed → Vector DB · Query → Embed → Retrieve → Augment → Claude</text>
+</svg>

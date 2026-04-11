@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extended Thinking Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Extended Thinking — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — 主要；D5 — Enterprise Deployment (20%) — 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1（推理深度）、1.2（agentic loop）、5.2（latency/cost 权衡）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 52</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Extended thinking 是当 prompt engineering 在难推理任务上走到尽头时，产品经理可以拉的那根调节杆——多花钱、多等几秒，换一个更聪明的答案。</p>
+<hr />
+<h2>Mental Model：国际象棋选手与时钟</h2>
+<p>想象一位国际象棋大师在两种不同赛制下下棋。</p>
+<ul>
+<li><strong>Bullet chess（超快棋）</strong>：时钟只有三十秒。他靠直觉飞快落子，大多能赢，但有些该赢的会输。</li>
+<li><strong>Classical chess（慢棋）</strong>：时钟有数小时。他靠在椅背上，在脑中推演各种变化、评估风险，下出明显更强的棋。</li>
+</ul>
+<p>标准 Claude 就是 bullet chess——快、流畅、通常正确。Extended thinking 是 classical chess——你买的是模型在草稿纸上思考的时间。棋是同一盘棋，差别在选手有多少时间想。</p>
+<p>没人会为了点一份咖啡用 classical chess。同样，也不该为了 prompt engineering 就能解决的问题付 extended thinking 的钱。</p>
+<hr />
+<h2>PM 为什么该在意</h2>
+<p>Extended thinking 是少数能把<strong>成本与延迟</strong>直接换<strong>准确度</strong>的产品杠杆。这正是 PM 每天在处理的取舍：</p>
+<ul>
+<li>用户抱怨 Claude 对某个难问题五次错一次。</li>
+<li>工程团队已经调了两周 prompt，eval 分数停滞。</li>
+<li>CFO 在问为什么 AI 功能有延迟尖峰。</li>
+<li>没人知道该拉哪根杆。</li>
+</ul>
+<p>Extended thinking 给你一个有名字、可量测的选项带到那场对话里——测试成本很低（翻旗标重跑 eval），约束明确到可以写进 PRD。</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>Extended thinking 该打开的时机</h3>
+<table>
+<thead>
+<tr>
+<th>用户需求</th>
+<th>为什么 thinking 有帮助</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>难推理（数学、逻辑、多步规划）</td>
+<td>模型真的需要思考 token 来走完每一步</td>
+</tr>
+<tr>
+<td>高代价的答案，准确度比延迟更重要</td>
+<td>用户愿意多等几秒换一个正确答案</td>
+</tr>
+<tr>
+<td>多约束的复杂文档分析</td>
+<td>思考空间让模型能协调相互冲突的条件</td>
+</tr>
+<tr>
+<td>需要"想清楚"而不是"查一下"的研究型问题</td>
+<td>任务形状本身就是推导答案，不是检索</td>
+</tr>
+</tbody>
+</table>
+<h3>不该打开的时机</h3>
+<table>
+<thead>
+<tr>
+<th>用户需求</th>
+<th>更好的选择</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>简单改写、摘要、翻译</td>
+<td>Base model；thinking 加成本但不加准确度</td>
+</tr>
+<tr>
+<td>需要快速响应、延迟即 UX 的聊天</td>
+<td>Extended thinking 会明显拖慢</td>
+</tr>
+<tr>
+<td>要抓实时数据</td>
+<td>用 tools 而不是 thinking——再怎么深思熟虑也变不出训练数据里没有的事实</td>
+</tr>
+<tr>
+<td>短结构化抽取</td>
+<td>这是 prompt/格式问题，不是推理问题</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 决策框架</h2>
+<p>当团队有人说"我们来打开 extended thinking"时，要问：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>若答 Yes</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>我们对着 eval set 优化过 prompt 了吗？</td>
+<td>No</td>
+<td>先做这件事。Thinking 修不了坏掉的 prompt。</td>
+</tr>
+<tr>
+<td>准确度差距明显是推理深度问题吗？</td>
+<td>No</td>
+<td>问题可能在 tools、RAG 或结构——不是 thinking。</td>
+</tr>
+<tr>
+<td>用户能容忍这个交互多等几秒吗？</td>
+<td>No</td>
+<td>Thinking 会伤 UX。考虑异步或进度提示。</td>
+</tr>
+<tr>
+<td>每次调用的成本增加在当前量级下可接受吗？</td>
+<td>No</td>
+<td>Thinking tokens 规模化后是真金白银，先算清楚再决定。</td>
+</tr>
+<tr>
+<td>这个 flow 依赖 assistant 预填或自定义 temperature 吗？</td>
+<td>Yes</td>
+<td>与 thinking 不兼容，必须重新设计 prompt 策略。</td>
+</tr>
+</tbody>
+</table>
+<p>以上全绿就打开 thinking 跑 eval，看差距是否收敛。若收敛就发布，并在 PRD 里写下成本与延迟预算。</p>
+<hr />
+<h2>Cost、Latency、UX 权衡</h2>
+<p>Extended thinking 不是无声升级。它改变三件用户会感觉到的事：</p>
+<ul>
+<li><strong>等待时间上升。</strong> 模型真的会花更长的实际时间在思考。交互 UI 需要能容忍多几秒的 loading state。</li>
+<li><strong>每次调用成本上升。</strong> Thinking tokens 要计费。每天 10 万次调用、budget 1024 token，月账单上看得到。</li>
+<li><strong>响应处理变复杂。</strong> 工程端要迭代 content blocks，还要决定要不要把推理展示给用户看。这是设计决策，不只是代码决策。</li>
+</ul>
+<p>PM 的卫生习惯：任何启用 thinking 的功能，PRD 里必含：</p>
+<ol>
+<li>以 eval 为基础的理由（开启前后的准确度）。</li>
+<li>每次调用成本估算与月度预测。</li>
+<li>Loading state 与可选的"显示推理"toggle 的 UX 规格。</li>
+<li>当 thinking 与其他依赖功能不兼容时的 fallback 路径。</li>
+</ol>
+<hr />
+<h2>Safety 故事：Signatures 与 Redacted Blocks</h2>
+<p>Extended thinking 带两个 safety 特性。PM 应该知道它们存在，因为它们同时影响信任消息和技术设计。</p>
+<ul>
+<li><strong>Signatures</strong>——每个 thinking block 都有加密签名。如果开发者（或攻击者）试图在对话中段改写推理、把 Claude 引到不安全的地方，签名验证会失败、history 会被拒绝。这是你可以对客户说"我们怎么知道推理没被篡改"时指得出来的保证。</li>
+<li><strong>Redacted blocks</strong>——有时 Claude 自家的 safety 系统会对推理亮红灯，并以加密形式回传。你的 app 读不出 redacted 内容，但必须原样传回去以保留上下文。产品含义：你的"显示推理"UI 偶尔会在某一轮没东西可显示，必须准备一个优雅的 fallback，而不是丢错误画面。</li>
+</ul>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Prompt 还没优化就先开 thinking。</strong> 结果就是把推理杠杆叠在一个坏掉的 prompt 上，准确度几乎不动。</li>
+<li><strong>把 thinking 当成"Claude 免费变聪明"。</strong> 它是成本与延迟的权衡。假装不是，就会在上线时吓到财务与 UX。</li>
+<li><strong>把原始推理文字直接渲染给用户。</strong> 推理轨迹又长又偏内部，用户默认不会想看一整面墙的思考过程。</li>
+<li><strong>忽略功能不兼容性。</strong> 若你现在的 prompt 策略用了 assistant 预填或自定义 temperature，打开 thinking 会整个坏掉。</li>
+<li><strong>忘记 thinking budget 必须严格小于 max_tokens。</strong> API 会强制这条约束。第一次在 production 出故障，就是一次本来可以在 review 时拦截的事故。</li>
+<li><strong>没为 redacted 情境更新"显示推理"UI。</strong> 用户会看到空白面板，以为功能坏了。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Extended thinking 是 Claude API 第一个干净、可被产品经理管理的权衡——一边是准确度，另一边是成本加延迟。PM 的工作是知道什么时候拉它：在 prompt 优化之后、有 eval 证据支持、并且只用在那些用户宁愿等久一点也要正确答案的难推理任务上。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>：把 extended thinking 认成 agentic loop 内推理深度的标准杠杆，并分辨它 vs. prompt / tools 各自的适用场景。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>：成本与延迟的权衡、以 eval 驱动的采用决策、以及 <code>thinking_budget</code> / <code>max_tokens</code> 的约束都是 production 级的考点。</li>
+<li>可能的情境题："Prompt engineering 在一个难推理任务上碰到天花板——下一步该怎么做？"预期答案是 extended thinking，且要 eval-driven。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Extended thinking 的国际象棋类比是什么？</td>
+<td>标准 Claude 是 bullet chess——快、通常正确。Extended thinking 是 classical chess——买模型在草稿纸上思考的时间，在难题上给更强的答案。</td>
+</tr>
+<tr>
+<td>什么时候 extended thinking 是错的工具？</td>
+<td>快速简单任务（改写、翻译、闲聊）或真正问题是缺数据（该用 tools/RAG）而不是推理深度时。</td>
+</tr>
+<tr>
+<td>PM 在一个功能上打开 thinking 前必须先完成什么？</td>
+<td>针对 eval set 的 prompt 优化，且证据显示剩下的差距是 prompt 单独解不掉的推理深度问题。</td>
+</tr>
+<tr>
+<td>Extended thinking 对用户体验改变哪三件事？</td>
+<td>等待时间、每次调用成本、以及响应复杂度（推理轨迹出现在 content blocks）。</td>
+</tr>
+<tr>
+<td>启用 thinking 的功能 PRD 该包含什么？</td>
+<td>以 eval 为基础的准确度理由、成本预测、UX loading states、以及兼容性 fallback。</td>
+</tr>
+<tr>
+<td>Thinking signature 保证什么？</td>
+<td>推理轨迹在对话 turn 之间没被篡改，防止开发者伪造 chain-of-thought 把模型引到不安全的地方。</td>
+</tr>
+<tr>
+<td>什么是 redacted thinking block？app 该怎么处理？</td>
+<td>因为内部 safety 系统标记而被加密的 thinking block。App 读不到内容但必须原样传回以保留上下文。</td>
+</tr>
+<tr>
+<td>为什么 extended thinking 与某些功能不兼容？</td>
+<td>出于模型设计原因——特别是 pre-filled assistant 消息与自定义 temperature 会和 thinking 机制冲突，启用 thinking 时那部分 prompt 策略必须重做。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

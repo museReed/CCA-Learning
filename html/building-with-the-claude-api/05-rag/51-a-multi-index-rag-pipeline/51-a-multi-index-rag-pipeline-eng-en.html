@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Multi Index Rag Pipeline Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>A Multi-Index RAG Pipeline — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Architecture (22%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3 (context management), 5.2 (production search infrastructure)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 51</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A multi-index RAG pipeline wraps <code>VectorIndex</code> and <code>BM25Index</code> behind a single <code>Retriever</code> that forwards queries to both and merges results via reciprocal rank fusion — turning two independent search systems into one hybrid retrieval layer.</p>
+<hr />
+<h2>The Multi-Index Architecture</h2>
+<p>Both <code>VectorIndex</code> and <code>BM25Index</code> already share nearly identical APIs — <code>add_document()</code> and <code>search()</code>. That consistency is what makes a clean wrapper possible:</p>
+<pre><code>                       ┌─────────────┐
+  add_document() ────▶ │             │ ────▶ VectorIndex.add_document
+                       │  Retriever  │ ────▶ BM25Index.add_document
+  search(query)  ────▶ │             │
+                       │             │ ────▶ VectorIndex.search
+                       │             │ ────▶ BM25Index.search
+                       └──────┬──────┘
+                              │  reciprocal rank fusion
+                              ▼
+                       merged top-k results
+</code></pre>
+<p>The <code>Retriever</code> is a thin coordinator. It broadcasts writes to every underlying index and, on read, fans out the query to all indexes and merges the rankings into a single sorted list.</p>
+<hr />
+<h2>Understanding Reciprocal Rank Fusion (RRF)</h2>
+<p>Merging results from different search methods is harder than it looks. Each method has its own scoring system — BM25 scores are not comparable to cosine distances. You cannot just union the two result lists or average their scores.</p>
+<p>The trick is to ignore the raw scores and use <strong>rank</strong> (position in each list) instead. Reciprocal rank fusion formalizes this:</p>
+<pre><code>RRF_score(d) = Σ  1 / (k + rank_i(d))
+              i
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>d</code> is a document</li>
+<li><code>i</code> indexes each ranking source (VectorIndex, BM25Index, ...)</li>
+<li><code>rank_i(d)</code> is the 1-based rank of document <code>d</code> in ranking <code>i</code></li>
+<li><code>k</code> is a smoothing constant (often 60; the lesson uses 1 for clearer results)</li>
+</ul>
+<p>Documents that rank highly in <strong>multiple</strong> indexes accumulate more score and rise to the top. Documents that rank highly in only one are not disqualified but are penalized.</p>
+<h3>Worked Example</h3>
+<p>Searching for "INC-2023-Q4-011":</p>
+<ul>
+<li>VectorIndex returns: Section 2 (rank 1), Section 7 (rank 2), Section 6 (rank 3)</li>
+<li>BM25Index returns: Section 6 (rank 1), Section 2 (rank 2), Section 7 (rank 3)</li>
+</ul>
+<p>With <code>k = 1</code>:</p>
+<ul>
+<li>Section 2: <code>1/(1+1) + 1/(1+2) = 0.5 + 0.333 = 0.833</code></li>
+<li>Section 7: <code>1/(1+2) + 1/(1+3) = 0.333 + 0.25 = 0.583</code></li>
+<li>Section 6: <code>1/(1+3) + 1/(1+1) = 0.25 + 0.5 = 0.75</code></li>
+</ul>
+<p>Final merged ranking: <strong>Section 2 (0.833) &gt; Section 6 (0.75) &gt; Section 7 (0.583)</strong>.</p>
+<p>Intuitively: Section 2 ranked well in both lists, so it wins. Section 6 ranked #1 in BM25 but #3 in vectors, and still beats Section 7 which was only mid-ranked everywhere.</p>
+<hr />
+<h2>The Retriever Class</h2>
+<pre><code class="language-python">class Retriever:
+    def __init__(self, *indexes: SearchIndex):
+        if len(indexes) == 0:
+            raise ValueError(&quot;At least one index must be provided&quot;)
+        self._indexes = list(indexes)
+
+    def add_document(self, document: Dict[str, Any]):
+        for index in self._indexes:
+            index.add_document(document)
+
+    def search(self, query_text: str, k: int = 1, k_rrf: int = 60):
+        # Get results from all indexes
+        all_results = []
+        for idx, results in enumerate(all_results):
+            for rank, (doc, _) in enumerate(results):
+                # Track document ranks across indexes
+                # Apply RRF scoring formula
+        # Return merged and sorted results
+</code></pre>
+<p>Key design points:</p>
+<ul>
+<li><strong>Variadic indexes</strong> — <code>*indexes: SearchIndex</code> lets the Retriever accept any number of concrete index implementations. At least one must be supplied.</li>
+<li><strong>Broadcast writes</strong> — <code>add_document</code> simply forwards the same payload to every index. Each index stores it in its own format (vector for <code>VectorIndex</code>, raw text for <code>BM25Index</code>).</li>
+<li><strong>Unified search</strong> — callers only interact with <code>Retriever.search(query_text, k)</code>. They never know or care which underlying indexes exist.</li>
+<li><strong>Configurable <code>k_rrf</code></strong> — the RRF smoothing constant is exposed as a parameter with a default (60 is a common textbook value; the lesson uses 1 for demonstration clarity).</li>
+</ul>
+<p>The key insight is that by keeping the API consistent across every search implementation, combining them becomes a trivial wrapper rather than a tangled integration.</p>
+<hr />
+<h2>Testing the Hybrid Approach</h2>
+<p>Recall the earlier problem: pure vector search for "what happened with INC-2023-Q4-011?" returned the cybersecurity incident first but then the wrong second result (financial analysis) instead of the software engineering section.</p>
+<p>With the hybrid Retriever, the output becomes:</p>
+<ol>
+<li>Section 10: Cybersecurity Analysis — Incident Response Report (most relevant)</li>
+<li>Section 2: Software Engineering — Project Phoenix Stability Enhancements (second most relevant)</li>
+<li>Section 5: Legal Developments (third)</li>
+</ol>
+<p>This matches intuition: both sections that actually mention the incident rise to the top, and the spurious financial section drops out because BM25 does not give it any literal-token support.</p>
+<hr />
+<h2>Extensibility: The SearchIndex Protocol</h2>
+<p>Every index — present or future — implements the same <code>SearchIndex</code> protocol: <code>add_document()</code> and <code>search()</code>. That means the Retriever is automatically compatible with any new search methodology you bolt on:</p>
+<ul>
+<li>A keyword-based index</li>
+<li>A graph-based search over a knowledge graph</li>
+<li>A specialized domain index (e.g., symbol search for code)</li>
+<li>A recent-documents index that prioritizes freshness</li>
+</ul>
+<p>Just implement the two methods and pass an instance to <code>Retriever(...)</code>. RRF handles the fusion automatically. This modular approach keeps each search implementation focused and testable while providing a clean combination point.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Merging by raw scores</strong> — BM25 scores and cosine distances are not comparable. Always use rank-based fusion (RRF), not score arithmetic.</li>
+<li><strong>Ignoring the <code>k</code> constant</strong> — <code>k</code> in the RRF formula is not the same as the top-k of the search result. Confusing them leads to miscalibrated scores.</li>
+<li><strong>Assuming more indexes always help</strong> — each new index adds latency and compute. Add only indexes that demonstrably improve eval metrics.</li>
+<li><strong>Broadcasting writes without deduplication</strong> — if the same document is added twice to the Retriever, each underlying index sees two copies. Deduplicate at ingest.</li>
+<li><strong>Forgetting to pass <code>k_rrf</code> through the API</strong> — defaults are fine for most cases but production eval may require tuning.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Reciprocal rank fusion is the trick that makes multi-index retrieval "just work." It sidesteps the incompatibility between different scoring systems by ranking-only arithmetic. Combined with a consistent <code>SearchIndex</code> protocol, it lets you treat hybrid retrieval as a composition problem rather than an integration problem.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Architecture)</strong>: hybrid retrieval and rank fusion are the canonical advanced RAG patterns. Expect questions about combining search modalities.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: modular retriever design is a production concern — knowing how to scale by adding independent indexes without tearing out the retrieval layer.</li>
+<li>Exam pattern: "You have a semantic index and a BM25 index with incompatible scores — how do you merge their results?" → Reciprocal rank fusion over the per-index ranks.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does the Retriever class do?</td>
+<td>Wraps multiple <code>SearchIndex</code> implementations behind a single <code>add_document</code> / <code>search</code> API, broadcasting writes and merging reads via RRF.</td>
+</tr>
+<tr>
+<td>Why can't you merge BM25 and cosine scores directly?</td>
+<td>They use incompatible scoring systems — you must rank-normalize instead.</td>
+</tr>
+<tr>
+<td>What is the RRF formula?</td>
+<td><code>RRF_score(d) = Σ 1 / (k + rank_i(d))</code> — sum, across all rankings i, of the reciprocal of (k plus the document's rank in that ranking).</td>
+</tr>
+<tr>
+<td>What is the <code>k</code> constant in RRF, and what value does the lesson use?</td>
+<td>A smoothing constant — often 60 in practice, but the lesson uses 1 for clearer demonstration math.</td>
+</tr>
+<tr>
+<td>In the worked example, why did Section 2 win?</td>
+<td>It ranked #1 in VectorIndex and #2 in BM25, scoring 0.833 under RRF — the highest combined score.</td>
+</tr>
+<tr>
+<td>What two methods define the SearchIndex protocol?</td>
+<td><code>add_document(dict)</code> and <code>search(query, k)</code>.</td>
+</tr>
+<tr>
+<td>How does the Retriever handle adding new index types later?</td>
+<td>Any class implementing <code>add_document</code> and <code>search</code> drops in unchanged — RRF handles fusion automatically.</td>
+</tr>
+<tr>
+<td>How did the hybrid Retriever fix the earlier problematic query result?</td>
+<td>The wrong "financial analysis" section dropped out, and the two sections actually mentioning the incident ID rose to the top.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Citations Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Citations — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D4 — AI Safety &amp; Alignment (20%) — 主要；D2 — Tool Design &amp; MCP Integration (18%) — 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>4.2（grounded outputs）、2.2（content blocks）、5.4（信任與可驗證性）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 55</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Citations 把 Claude 基於文件的答案從不透明文字變成可驗證的軌跡——對每一個陳述，你都能拿到支撐它的原文、出自哪份文件、以及在文件裡的位置。</p>
+<hr />
+<h2>Citations 解決的信任問題</h2>
+<p>當 Claude 對著你提供的文件回答問題時，使用者光看文字沒辦法分辨答案是來自你的文件還是模型的訓練資料。這個曖昧性對任何「來源很重要」的功能都是信任殺手：法律研究、金融分析、醫療資訊、合規 QA。</p>
+<p>Citations 的修法是為 Claude 回應裡的每一個陳述建立一條明確、機器可讀的軌跡，指回支撐它的原文。模型不只回答——它把收據一起拿出來。</p>
+<hr />
+<h2>啟用 Citations</h2>
+<p>啟用 citations 需要在 <code>document</code> content block 上加兩件事：一個人類可讀的 <code>title</code> 和一個 <code>citations.enabled</code> 旗標。</p>
+<pre><code class="language-python">{
+    &quot;type&quot;: &quot;document&quot;,
+    &quot;source&quot;: {
+        &quot;type&quot;: &quot;base64&quot;,
+        &quot;media_type&quot;: &quot;application/pdf&quot;,
+        &quot;data&quot;: file_bytes,
+    },
+    &quot;title&quot;: &quot;earth.pdf&quot;,
+    &quot;citations&quot;: { &quot;enabled&quot;: True }
+}
+</code></pre>
+<p>兩個欄位很重要：</p>
+<ul>
+<li><strong><code>title</code></strong>——文件的可讀名稱。這是使用者在 UI 上看到 citation 時顯示的名字；Claude 也用它在同一個 request 的多份文件之間做區分。</li>
+<li><strong><code>citations.enabled</code></strong>——告訴 Claude 為每一個陳述追蹤來源的開關。</li>
+</ul>
+<p>Document block 的其他部分和 PDF support 的 pattern 完全一樣。</p>
+<hr />
+<h2>開啟 Citations 後的回應結構</h2>
+<p>關閉 citations 時，Claude 的回應是一個簡單的 text block。開啟後，Claude 回傳一個更豐富的結構，文字片段附帶 citation metadata。每個 citation 包含：</p>
+<ul>
+<li><strong><code>cited_text</code></strong>——文件裡支撐該陳述的原文，逐字元對應。這是模型指向的 ground truth。</li>
+<li><strong><code>document_index</code></strong>——Claude 參考的是哪一份文件，單一 request 裡有多份文件時很有用。</li>
+<li><strong><code>document_title</code></strong>——你指給文件的 title（和 document block 裡那個字串一樣）。</li>
+<li><strong><code>start_page_number</code></strong>——被引用文字的起始位置。</li>
+<li><strong><code>end_page_number</code></strong>——被引用文字的結束位置。</li>
+</ul>
+<p>PDF 的 <code>start_page_number</code> / <code>end_page_number</code> 是頁碼。純文字來源則把這兩個欄位換成<strong>字元位置</strong>，精確指向文字裡的某個 span。</p>
+<hr />
+<h2>對純文字來源的 Citations</h2>
+<p>Citations 不是 PDF 獨享。對純文字文件開 citations 的方式是換 <code>source</code> block：</p>
+<pre><code class="language-python">{
+    &quot;type&quot;: &quot;document&quot;,
+    &quot;source&quot;: {
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;media_type&quot;: &quot;text/plain&quot;,
+        &quot;data&quot;: article_text,
+    },
+    &quot;title&quot;: &quot;earth_article&quot;,
+    &quot;citations&quot;: { &quot;enabled&quot;: True }
+}
+</code></pre>
+<p>和 PDF 情況的差別：</p>
+<ul>
+<li><code>source.type</code> 是 <code>"text"</code> 而不是 <code>"base64"</code>。</li>
+<li><code>source.media_type</code> 是 <code>"text/plain"</code>。</li>
+<li><code>source.data</code> 放原始文章文字，不是 base64 bytes。</li>
+<li>回傳的 citations 用<strong>字元位置</strong>（start_index / end_index）而不是頁碼。</li>
+</ul>
+<p>這對 RAG 管線意義很大：當你的檢索步驟抓出一段純文字 chunk，你可以把它當成一份可引用的文件送進去，拿回精確的字元 span，用來做 hover-over UI 或 highlight 工具非常乾淨。</p>
+<hr />
+<h2>用 Citations 做 UI</h2>
+<p>Citations 的真正產品槓桿在 UI 層。典型 pattern：</p>
+<ol>
+<li>Claude 的回應帶著 citation 註解的片段送回來。</li>
+<li>UI 照常渲染答案文字，但每個被引用的 span 加上標記（一個小數字、反白背景、或內嵌 icon）。</li>
+<li>Hover 或點擊標記會打開一個 popover，顯示 <code>cited_text</code>、<code>document_title</code>，並提供跳到某頁或某字元位置的動作。</li>
+<li>使用者可以就地驗證陳述，不用離開答案畫面。</li>
+</ol>
+<p>這把 Claude 從「回答的黑盒」變成「會把工作過程攤開的研究助理」。需要信任輸出的使用者可以兩下點擊驗證；不在意的使用者可以忽略標記。</p>
+<hr />
+<h2>何時該用 Citations</h2>
+<p>課程點名四個 citations 值得花成本與複雜度的情境：</p>
+<ul>
+<li><strong>使用者需要驗證資訊的正確性。</strong> 高代價答案——法律、醫療、金融——需要證據。</li>
+<li><strong>你處理的是權威文件。</strong> 若文件是 source of truth（合約、法規、臨床指引），使用者應該能指向它。</li>
+<li><strong>來源透明度對產品至關重要。</strong> 有些產品——企業搜尋、研究工具、知識庫——靠來源透明度活著。</li>
+<li><strong>使用者可能想探索特定事實周圍的脈絡。</strong> Citations 是往下鑽的 UX 鉤子；使用者可以從答案跳到周圍段落再跳到整份文件。</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>忘了 <code>title</code> 欄位。</strong> Citations 在回應裡用 title 當文件識別字。沒寫，使用者看到空白或通用標籤，無法區分文件。</li>
+<li><strong>啟用 citations 卻沒顯示。</strong> 旗標打開卻把答案渲染成純文字，token 成本照付、信任效益為零。</li>
+<li><strong>以為純文字來源用頁碼。</strong> 純文字的 citations 回傳字元位置，不是頁碼。你的 UI 必須依 source 類型分支。</li>
+<li><strong>沒處理更豐富的回應結構。</strong> 開 citations 的回應比單一 text block 複雜。Content-block handler 必須迭代並正確拉出 citation metadata。</li>
+<li><strong>在同一個 request 裡混用有引用和沒引用的文件卻沒追蹤。</strong> <code>document_index</code> 告訴你 citation 指向哪一份——要用它。</li>
+<li><strong>以為 citations 等於正確性保證。</strong> Citation 證明原文存在、Claude 讀過它——不證明 Claude 的解讀正確。Citations 是來源證據，不是準確度保證。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Citations 是把 Claude 的文件答案轉成可驗證陳述的依據層。API 表面很小——一個 <code>title</code> 欄位加一個 <code>citations.enabled</code> 旗標——但產品衝擊巨大：對每一個高代價文件 workflow（法律、醫療、金融、合規），citations 就是「能出貨」和「不能出貨」的差別。把 citations 和 PDF support 搭配起來，就是企業文件 stack 的標準組合。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D4 (AI Safety &amp; Alignment)</strong>：Grounded outputs 與可驗證回應是核心 safety 考量。Citations 是產生可驗證、有來源連結答案的標準機制。</li>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>：Citations 延伸 <code>document</code> content block。要知道 <code>title</code> 和 <code>citations.enabled</code> 欄位，以及 citation metadata 的形狀（<code>cited_text</code>、<code>document_index</code>、<code>document_title</code>、頁碼或字元位置）。</li>
+<li>情境題：「使用者需要驗證 Claude 的答案來自某個特定來源。」答案是在 document block 上啟用 citations，並在 UI 上顯示 <code>cited_text</code> 和 <code>document_title</code>。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>啟用 citations 要在 document block 加哪兩個欄位？</td>
+<td>一個 <code>title</code> 欄位（可讀文件名）加 <code>"citations": {"enabled": True}</code>。</td>
+</tr>
+<tr>
+<td>Citation 物件裡有哪五項資訊？</td>
+<td><code>cited_text</code>、<code>document_index</code>、<code>document_title</code>、<code>start_page_number</code>、<code>end_page_number</code>。</td>
+</tr>
+<tr>
+<td>PDF 和純文字來源的 citations 差在哪？</td>
+<td>PDF citations 回傳頁碼；純文字 citations 回傳字元位置。</td>
+</tr>
+<tr>
+<td>純文字可引用文件用什麼 <code>source.type</code> 和 <code>media_type</code>？</td>
+<td><code>source.type: "text"</code> 和 <code>media_type: "text/plain"</code>，<code>data</code> 放原始文章文字。</td>
+</tr>
+<tr>
+<td>什麼時候該用 citations？</td>
+<td>使用者需要驗證資訊、處理權威文件、來源透明度關鍵、或使用者可能想探索脈絡時。</td>
+</tr>
+<tr>
+<td>為什麼啟用 citations 時 <code>title</code> 欄位是必要的？</td>
+<td>它是每個 citation 回傳的文件識別字，也是使用者在 UI 看到的標籤；沒有它，多文件回應會曖昧。</td>
+</tr>
+<tr>
+<td>Citation 和正確性保證的差別？</td>
+<td>Citation 證明原文存在、Claude 讀過它；不證明 Claude 的解讀正確。</td>
+</tr>
+<tr>
+<td>Citations 的標準 UX pattern？</td>
+<td>在被引用的 span 加行內標記，hover 顯示 <code>cited_text</code> 與 <code>document_title</code>，並提供跳到來源的動作。</td>
+</tr>
+<tr>
+<td>為什麼 citations 對法律、醫療、金融產品至關重要？</td>
+<td>這些領域的使用者必須先驗證來源才敢採取行動；citations 提供讓這些功能能出貨的可稽核軌跡。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

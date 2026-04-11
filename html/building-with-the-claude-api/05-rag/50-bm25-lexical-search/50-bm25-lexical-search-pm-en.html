@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bm25 Lexical Search Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>BM25 Lexical Search — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Architecture (22%) — primary; D5 — Enterprise Deployment (20%) — secondary; D2 — Tool Design (18%) — relevant</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3 (context management), 5.2 (production search infrastructure)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 50</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>BM25 is the unglamorous, decades-old search technique that quietly saves your RAG product from the day a user types an exact order ID and your AI assistant confidently returns the wrong ticket.</p>
+<hr />
+<h2>Mental Model: The Smart Intern vs the Ctrl-F Power User</h2>
+<p>Imagine two assistants helping you find information in a 500-page report:</p>
+<ul>
+<li><strong>Smart intern (semantic search)</strong>: reads the report and summarizes themes. Ask "what happened last quarter?" and they nail it. Ask "what about incident INC-2023-Q4-011?" and they confidently describe a different incident because they remember it was "the cybersecurity one" without checking the number.</li>
+<li><strong>Ctrl-F power user (BM25)</strong>: can find any literal string instantly but has zero understanding. Ask "what happened last quarter?" and they shrug. Ask "INC-2023-Q4-011" and they immediately point to the exact three pages that mention it.</li>
+</ul>
+<p>A great research team has <strong>both</strong>. That is exactly what hybrid retrieval does for your RAG product.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Semantic-only RAG is the most common early failure mode for AI features. The product looks great in demos (conceptual questions work beautifully) and falls over in real use, because real users constantly type things like:</p>
+<ul>
+<li>Order IDs: "status of order #78921"</li>
+<li>SKUs: "is SKU-GX-42B in stock?"</li>
+<li>Error codes: "what causes ERR_UNAUTHORIZED_10031?"</li>
+<li>Ticket numbers, CVE IDs, invoice numbers, employee IDs, contract codes.</li>
+</ul>
+<p>Any of those can miss a pure semantic search and return a confidently wrong answer. BM25 (or any lexical search) is the cheap, reliable safety net.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When BM25 / Hybrid Search Is the Right Call</h3>
+<table>
+<thead>
+<tr>
+<th>User Need</th>
+<th>Why BM25 Helps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exact ticket / order / incident lookup</td>
+<td>IDs must match literally</td>
+</tr>
+<tr>
+<td>Error code search in technical docs</td>
+<td>Codes are rare tokens; BM25 nails them</td>
+</tr>
+<tr>
+<td>Legal contract term search</td>
+<td>Literal phrases matter</td>
+</tr>
+<tr>
+<td>Product SKU / barcode lookup</td>
+<td>Exact token, no semantic proxy</td>
+</tr>
+<tr>
+<td>Compliance / policy keyword audits</td>
+<td>Needs literal match, not paraphrase</td>
+</tr>
+</tbody>
+</table>
+<h3>When BM25 Alone Is Not Enough</h3>
+<table>
+<thead>
+<tr>
+<th>User Need</th>
+<th>Why You Still Need Semantic Search</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"How do I refund an order?"</td>
+<td>User never types "refund policy section 4"</td>
+</tr>
+<tr>
+<td>"What were the main findings last quarter?"</td>
+<td>Conceptual, no literal keywords</td>
+</tr>
+<tr>
+<td>Multilingual or paraphrased queries</td>
+<td>BM25 is token-literal and shallow</td>
+</tr>
+<tr>
+<td>Typo-tolerant product search</td>
+<td>Lexical match fails on misspellings</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The real answer is hybrid</strong> — both running in parallel — not either on its own.</p>
+<hr />
+<h2>The Four Steps in Plain English</h2>
+<ol>
+<li><strong>Break the question into words</strong> — "a INC-2023-Q4-011" becomes <code>["a", "INC-2023-Q4-011"]</code>.</li>
+<li><strong>Count how common each word is</strong> — "a" appears everywhere, the ID appears once.</li>
+<li><strong>Give rare words more credit</strong> — the ID is treated as a strong signal; "a" is treated as noise.</li>
+<li><strong>Rank documents by total credit</strong> — the document that mentions the rare word wins.</li>
+</ol>
+<p>Notice there is no model, no embedding API, no GPU. BM25 is pure text counting. That is why it is cheap and fast.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Do users type literal identifiers (IDs, codes, SKUs)?</td>
+<td>Yes</td>
+<td>You need BM25 in the mix.</td>
+</tr>
+<tr>
+<td>Is your corpus technical (docs, reports, policies)?</td>
+<td>Yes</td>
+<td>Hybrid almost always wins.</td>
+</tr>
+<tr>
+<td>Is latency budget tight?</td>
+<td>Yes</td>
+<td>BM25 is free latency-wise — no embedding call.</td>
+</tr>
+<tr>
+<td>Is the embedding API bill a concern?</td>
+<td>Yes</td>
+<td>BM25 offsets cost — it does not use embeddings at query time.</td>
+</tr>
+<tr>
+<td>Are users mostly asking conceptual questions?</td>
+<td>Yes</td>
+<td>Semantic search is primary; BM25 is the safety net.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Cost &amp; Latency Reality Check</h2>
+<p>BM25 is the cheapest retrieval you can add to a RAG product:</p>
+<ul>
+<li><strong>No embedding API calls on query</strong> — BM25 runs entirely in your process on indexed text.</li>
+<li><strong>Index build is fast</strong> — text tokenization and counting, not GPU math.</li>
+<li><strong>Memory footprint is small</strong> — sparse term-document matrices compress well.</li>
+</ul>
+<p>The cost of <strong>not</strong> having BM25 is subtle but serious: users quietly lose trust when they see "confidently wrong" answers about IDs they know exist. Hybrid search is cheap insurance against that trust collapse.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Buying into "vector search solves everything"</strong> — it does not. The day a user types an ID, a pure-vector RAG product breaks.</li>
+<li><strong>Deferring BM25 as "optimization"</strong> — it is not optimization, it is a correctness feature for exact lookups.</li>
+<li><strong>No eval set of literal queries</strong> — your eval should mix conceptual queries and ID queries. Without both, regressions hide.</li>
+<li><strong>Surfacing only one search's results</strong> — hybrid means merging, not picking a winner. The next lesson covers merge strategies.</li>
+<li><strong>Underestimating user trust impact</strong> — one wrong answer on an ID costs more trust than ten good conceptual answers earn.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Hybrid retrieval is not a fancy upgrade — it is the baseline for any RAG product whose users ever type exact identifiers. Semantic search gives you "impressive" answers; BM25 gives you "correct" answers on literal queries. A serious product needs both.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Architecture)</strong>: understand hybrid retrieval as a composition of two complementary search methods.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: BM25 is operationally cheap — it is the retrieval layer that does not compound embedding cost as traffic grows.</li>
+<li><strong>D2 (Tool Design)</strong>: if retrieval is exposed as a tool, the choice of BM25 vs semantic vs hybrid shapes its tool description.</li>
+<li>Exam pattern: "pure semantic search returned irrelevant results for a query with a specific code — fix?" → add BM25 / hybrid search.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the intern-vs-Ctrl-F analogy for BM25?</td>
+<td>Semantic search is a smart intern who understands themes; BM25 is a Ctrl-F user who finds exact strings. You want both on your team.</td>
+</tr>
+<tr>
+<td>When does a pure semantic RAG product break in production?</td>
+<td>The first time a user types an exact ID, SKU, or error code — semantic search often returns the wrong document confidently.</td>
+</tr>
+<tr>
+<td>Does BM25 need an embedding API call at query time?</td>
+<td>No. It runs on indexed text with no model calls, making it cheap and low-latency.</td>
+</tr>
+<tr>
+<td>What are the four BM25 scoring steps in plain English?</td>
+<td>1) Split the query into words, 2) count how common each word is, 3) give rare words more weight, 4) rank documents by total weight.</td>
+</tr>
+<tr>
+<td>Should your RAG product replace semantic search with BM25?</td>
+<td>No — use both in parallel (hybrid). Each catches what the other misses.</td>
+</tr>
+<tr>
+<td>What should your RAG eval set look like?</td>
+<td>A mix of conceptual questions and literal-identifier questions, so hybrid quality is measurable.</td>
+</tr>
+<tr>
+<td>What is the biggest PM risk of ignoring BM25?</td>
+<td>User trust collapse — one confidently wrong ID answer erodes more trust than many good conceptual answers build.</td>
+</tr>
+<tr>
+<td>What kinds of tokens benefit most from BM25?</td>
+<td>Rare, technical literals: IDs, SKUs, error codes, ticket numbers, CVE numbers, contract codes.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

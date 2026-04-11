@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Chunking Strategies Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Text Chunking Strategies — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Architecture (22%) — primary; D4 — Safety &amp; Alignment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.3 (context management), 4.1 (grounded responses)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 05-rag / Lesson 46</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Chunking is the invisible product-quality knob of every RAG feature — it decides what "one unit of knowledge" looks like, and getting it wrong means your AI confidently cites the wrong paragraph.</p>
+<hr />
+<h2>Mental Model: Cutting Cake for a Dinner Party</h2>
+<p>Imagine a multi-layer cake. Guests ask for "the chocolate layer" or "the strawberry layer". How you slice it matters:</p>
+<table>
+<thead>
+<tr>
+<th>Slicing Style</th>
+<th>What Each Guest Gets</th>
+<th>Chunking Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Random 2-inch cubes</td>
+<td>Sometimes pure chocolate, sometimes half-chocolate-half-strawberry</td>
+<td>Size-based, no overlap</td>
+</tr>
+<tr>
+<td>Random 2-inch cubes with a smear from the next cube</td>
+<td>Same, but you can see which layer is next</td>
+<td>Size-based with overlap</td>
+</tr>
+<tr>
+<td>Clean horizontal slices, one per layer</td>
+<td>Exactly what they asked for</td>
+<td>Structure-based</td>
+</tr>
+<tr>
+<td>A chef who picks flavors to group</td>
+<td>Smallest portions of pure flavor</td>
+<td>Semantic</td>
+</tr>
+</tbody>
+</table>
+<p>A careless slice gives you a bite that crosses layers. The guest who asked for strawberry gets a blob of chocolate in their mouth and does not know why. <strong>That is what bad chunking feels like to a user of a RAG feature.</strong></p>
+<hr />
+<h2>Why This Is a PM Problem (Not Just Eng)</h2>
+<p>Chunking decisions drive user-visible behavior:</p>
+<ul>
+<li><strong>"The AI gave me an irrelevant answer"</strong> → usually bad chunking</li>
+<li><strong>"The AI cut off mid-sentence in the citation"</strong> → definitely bad chunking</li>
+<li><strong>"The AI answered using a different section than what I asked about"</strong> → the classic "bug" example from this lesson</li>
+<li><strong>"Updates to our docs do not show up in answers"</strong> → the re-chunking pipeline failed</li>
+</ul>
+<p>A PM who thinks chunking is "something engineering handles" will be the one apologizing when the CEO demos the feature and gets a wrong answer.</p>
+<hr />
+<h2>The Four Strategies, in PM Terms</h2>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>PM Description</th>
+<th>When to Pick It</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Size-based</strong></td>
+<td>"Cut every 500 characters, add overlap"</td>
+<td>Default for mixed content — cheap, reliable, predictable</td>
+</tr>
+<tr>
+<td><strong>Structure-based</strong></td>
+<td>"Split on the Markdown headers"</td>
+<td>When you control the content format (internal docs, template reports)</td>
+</tr>
+<tr>
+<td><strong>Sentence-based</strong></td>
+<td>"Group 5 sentences at a time"</td>
+<td>Prose-heavy content where sentences are meaningful units</td>
+</tr>
+<tr>
+<td><strong>Semantic</strong></td>
+<td>"Use NLP to keep related ideas together"</td>
+<td>High-stakes retrieval (legal, medical) where quality justifies compute</td>
+</tr>
+</tbody>
+</table>
+<p>The one thing a PM needs to internalize: <strong>none of these is universally "best"</strong>. The right strategy depends on the content type, the quality bar, and the engineering budget.</p>
+<hr />
+<h2>The "Bug" Example — Why Every PM Should Know It</h2>
+<p>The lesson uses a vivid example: a document has a medical research section and a software engineering section. The medical section happens to say "XDR-47, a bug we have not seen before". A user asks "How many bugs did engineers fix this year?".</p>
+<p>A bad chunker might pull the medical chunk because it contains the word "bug". Claude then writes a fluent answer about viruses — wrong section, wrong domain, wrong answer, but phrased confidently.</p>
+<p>This is the <strong>silent failure</strong> pattern. There is no error message. The logs look healthy. Only a user QA-ing the answer would spot it. For a PM, this is the kind of bug that destroys user trust by the tenth occurrence.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>Use Structure-Based When...</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Content is written in Markdown</td>
+<td>Headers are reliable boundaries</td>
+</tr>
+<tr>
+<td>You own the authoring template (internal wiki, PRD template)</td>
+<td>You can enforce structure</td>
+</tr>
+<tr>
+<td>Each section has roughly consistent meaning</td>
+<td>Semantic alignment comes for free</td>
+</tr>
+</tbody>
+</table>
+<h3>Use Size-Based + Overlap When...</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You cannot guarantee document structure</td>
+<td>Fallback must work on anything</td>
+</tr>
+<tr>
+<td>Content is mixed (docs + PDFs + code + logs)</td>
+<td>One strategy for everything</td>
+</tr>
+<tr>
+<td>You are shipping an MVP and want predictable behavior</td>
+<td>Simplest to reason about</td>
+</tr>
+</tbody>
+</table>
+<h3>Use Sentence-Based When...</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Content is prose, no structure</td>
+<td>Sentences are the natural unit</td>
+</tr>
+<tr>
+<td>You want human-readable citations</td>
+<td>Cut-off words look bad in a cite box</td>
+</tr>
+</tbody>
+</table>
+<h3>Use Semantic When...</h3>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Domain is high-stakes (legal, medical, financial)</td>
+<td>Wrong retrieval has real consequences</td>
+</tr>
+<tr>
+<td>Retrieval is a proven product bottleneck</td>
+<td>You have data showing chunk quality matters</td>
+</tr>
+<tr>
+<td>You have compute budget to spare</td>
+<td>Preprocessing is heavier</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When specifying a RAG feature, answer these before signing off:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Why It Matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is our canonical content format?</td>
+<td>Dictates whether structure-based is viable</td>
+</tr>
+<tr>
+<td>What is our chunk size budget?</td>
+<td>Ties directly to prompt size, cost, latency</td>
+</tr>
+<tr>
+<td>Who owns chunk quality eval?</td>
+<td>Must be a named owner, not "engineering in general"</td>
+</tr>
+<tr>
+<td>How do users see citations?</td>
+<td>If citations are visible, cut-off chunks look broken</td>
+</tr>
+<tr>
+<td>How do we re-chunk when docs change?</td>
+<td>Every content update has a preprocessing cost</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating chunking as an engineering implementation detail</strong> — it is a product lever; chunk size directly affects what your users see.</li>
+<li><strong>No chunk-quality eval</strong> — shipping without a test set means you learn about bad chunking from angry users.</li>
+<li><strong>Assuming one strategy fits all content types</strong> — a platform with docs, PDFs, and code needs more than one chunker.</li>
+<li><strong>Ignoring the re-indexing story</strong> — every content update triggers preprocessing; if that pipeline is fragile, your "AI answers" feature silently goes stale.</li>
+<li><strong>Not making citations auditable</strong> — without visible source links, users cannot catch silent failures, and trust erodes.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Chunking is the silent cousin of retrieval. When someone says "our RAG system got the wrong answer", the root cause is chunking about half the time — a good chunk was never created, so good retrieval was impossible. For PMs, this means chunking quality is an eval target on day one, not a thing you "iterate on later".</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Architecture)</strong>: Know the four strategies, their trade-offs, and be ready for scenario questions ("Markdown docs with guaranteed headers → ?", "mixed PDFs → ?").</li>
+<li><strong>D4 (Safety &amp; Alignment)</strong>: The "bug" example maps directly to hallucination risk — a wrong chunk leads to a confidently wrong answer.</li>
+<li>Watch for exam framing around "overlap" — the correct answer to "how do you stop chunks from cutting off mid-sentence" is always overlap.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Why should PMs care about chunking?</td>
+<td>It is a silent driver of product quality — bad chunking causes confidently wrong answers that users cannot debug.</td>
+</tr>
+<tr>
+<td>What is the "bug" example teaching?</td>
+<td>How a keyword can match across unrelated domains (medical vs. software), producing a wrong but fluent answer.</td>
+</tr>
+<tr>
+<td>What is the cake-slicing analogy?</td>
+<td>A bad cut crosses layers and gives the guest a bite of the wrong flavor — bad chunking crosses topic boundaries.</td>
+</tr>
+<tr>
+<td>When should a PM pick structure-based chunking?</td>
+<td>When you control the content format (Markdown, templated reports) so headers are reliable boundaries.</td>
+</tr>
+<tr>
+<td>What is the go-to fallback chunking strategy?</td>
+<td>Size-based with overlap — it works on any content type, predictable behavior.</td>
+</tr>
+<tr>
+<td>Why is chunk overlap important for user-visible citations?</td>
+<td>Without overlap, chunks cut off mid-sentence and look broken when shown as a citation.</td>
+</tr>
+<tr>
+<td>Who should own chunk-quality eval?</td>
+<td>A named PM/engineering partnership — not "engineering in general"; it is a product metric.</td>
+</tr>
+<tr>
+<td>What is the silent failure mode of bad chunking?</td>
+<td>No error; logs look healthy; users get a confidently wrong answer based on an irrelevant chunk.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

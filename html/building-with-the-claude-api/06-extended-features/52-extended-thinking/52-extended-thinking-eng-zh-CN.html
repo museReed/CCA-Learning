@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extended Thinking Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Extended Thinking — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — 主要；D5 — Enterprise Deployment (20%) — 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1（推理深度与 agent 决策质量）、1.2（agentic loop）、5.2（latency/cost 权衡）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 52</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Extended thinking 给 Claude 专属的"草稿纸"token，让模型在产出最终答案前先推理一遍；用更高的成本和延迟，换取单靠 prompt 无法稳定达成的准确度。</p>
+<hr />
+<h2>问题情境：prompt engineering 到达瓶颈时</h2>
+<p>每个严肃的 Claude 部署最终都会遇到一类 prompt——不论你怎么调整指令、example、guardrail，准确率就是上不去。模型给出的答案看起来合理，但对于较难的推理题，答案并不稳定正确。Extended thinking 就是为这个时刻设计的，它是你在<strong>已经</strong>优化过 prompt 和 eval 套件后，仍然需要更多余量时才打开的功能。</p>
+<p>把它想成 Claude 的草稿纸：模型会把推理过程写在一块内部工作区，做完草稿才产出最终回应。你用 token 付草稿纸的钱，等更长时间，但最终答案基于更长的内部思考而来。</p>
+<hr />
+<h2>响应结构：从一块变两块</h2>
+<p>Extended thinking 关闭时，Claude 的响应就是一个简单的 text block。打开之后，响应结构化为两部分——一个 <strong>thinking block</strong>（推理轨迹）加一个 <strong>text block</strong>（最终答案）。</p>
+<p>这会改变应用处理响应的方式。原本假设 <code>response.content[0].text</code> 的代码，现在必须迭代 content blocks 并区分 thinking 与用户可见的 text。如果你把 Claude 的输出直接渲染给用户，必须决定要显示推理过程、隐藏它、或收在"显示推理"按钮后面。</p>
+<hr />
+<h2>在代码里启用 thinking</h2>
+<p>课程教一个最小封装，在 chat 函数上多开两个参数：<code>thinking</code>（布尔开关）与 <code>thinking_budget</code>（Claude 可花在推理的最大 token 数）。</p>
+<pre><code class="language-python">def chat(
+    messages,
+    system=None,
+    temperature=1.0,
+    stop_sequences=[],
+    tools=None,
+    thinking=False,
+    thinking_budget=1024,
+):
+    ...
+</code></pre>
+<p>函数内部，当 <code>thinking</code> 打开时把 thinking 配置注入 API 参数：</p>
+<pre><code class="language-python">if thinking:
+    params[&quot;thinking&quot;] = {
+        &quot;type&quot;: &quot;enabled&quot;,
+        &quot;budget&quot;: thinking_budget,
+    }
+</code></pre>
+<p>调用方式：</p>
+<pre><code class="language-python">chat(messages, thinking=True)
+</code></pre>
+<p>两条硬约束：</p>
+<ul>
+<li><strong>最小 budget 是 1024 tokens。</strong> 不能再小。</li>
+<li><strong><code>max_tokens</code> 必须大于 <code>thinking_budget</code>。</strong> 因为 thinking 的预算是从 <code>max_tokens</code> 里面扣的，<code>max_tokens</code> 必须容纳推理轨迹和最终答案。</li>
+</ul>
+<hr />
+<h2>签名系统</h2>
+<p>Extended thinking 的响应会带上 thinking 内容的<strong>加密签名</strong>。签名是 Anthropic 检测篡改的机制：如果开发者改动了 thinking 文字再把它送回下一轮，签名就会验证失败，模型会拒绝这批 history。</p>
+<p>这是一个 safety 保证。Claude 的推理是 alignment training 的一部分——如果开发者能在 turn 之间改动推理文字，就能伪造一串合理化危险输出的"chain of thought"，把模型引导到不安全的区域。签名就是为了堵上这个攻击面。</p>
+<p>实务含义：<strong>永远不要修改 thinking blocks</strong>。把对话历史送到下一轮时，连同签名逐 byte 原样送回。</p>
+<hr />
+<h2>Redacted thinking blocks</h2>
+<p>有时 Claude 的内部 safety 系统会对推理轨迹本身亮红灯。此时你拿到的不是可读的推理文字，而是一个 <strong>redacted thinking block</strong>，里面装的是加密的 payload。</p>
+<p>两件事很重要：</p>
+<ol>
+<li><strong>遇到 redacted block 不能崩溃。</strong> 你的 content-block handler 必须把 redacted 当成一种合法变体，和普通 thinking block、text block 一样处理。</li>
+<li><strong>原样送回。</strong> 虽然你的代码读不出 redacted 的内容，Claude 在下一轮可以解密，所以把加密 payload 传回去就能保留上下文。若悄悄丢掉，等于截断了 Claude 的记忆。</li>
+</ol>
+<p>课程提到测试时可以发一个特殊的 trigger 字符串强制 Claude 回传 redacted 响应，用来验证 handler 不会因为某些下游代码假设 thinking block 一定可读而掉链子。</p>
+<hr />
+<h2>成本与延迟的权衡</h2>
+<p>Extended thinking 不是免费的：</p>
+<ul>
+<li><strong>成本更高。</strong> Thinking tokens 要计费，每次调用都吃 1024-token 的 thinking budget，规模化后就是真金白银。</li>
+<li><strong>延迟更高。</strong> 模型在吐出第一个 text token 之前要花更多实际时间。</li>
+<li><strong>客户端代码更复杂。</strong> Content-block 迭代、签名处理、redacted 的 fallback。</li>
+</ul>
+<p>指导原则：把 thinking 当成<strong>准确度的调节杆</strong>，在标准 prompt engineering 之后才拉。决策流程：</p>
+<ol>
+<li>写好 prompt。</li>
+<li>建立 eval set。</li>
+<li>反复优化 prompt 直到准确率停滞。</li>
+<li>如果仍低于门槛，开 thinking 再跑一次 eval。</li>
+</ol>
+<p>Thinking 解决了就发布。若没解决，代表问题不是推理深度的问题，需要换别的方案（tools、RAG、更好的 prompt 结构）。</p>
+<hr />
+<h2>功能兼容性注意事项</h2>
+<p>课程明确点名 extended thinking 与某些其他功能<strong>不兼容</strong>，特别是 <strong>assistant message pre-filling</strong> 与自定义 <strong>temperature</strong>。这在 production 里很重要：如果你现有的 prompt 策略靠 pre-fill 的 assistant 消息来引导输出格式，就不能直接把 thinking 叠上去，必须重新设计那部分的 prompt。</p>
+<p>完整的不兼容清单放在 Anthropic docs，课程指向那份文档而不在此列出，因为清单会随新模型演进。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>在优化 prompt 之前就开 thinking。</strong> Thinking 花钱又花时间。如果你的 prompt 根本写错，thinking 不会把它变对，你只是花更多钱得到同样错的答案。</li>
+<li><strong><code>max_tokens</code> ≤ <code>thinking_budget</code>。</strong> API 会拒绝调用。<code>max_tokens</code> 必须能同时容纳推理轨迹和最终答案。</li>
+<li><strong>在 turn 之间修改 thinking blocks。</strong> 任何修改都会破坏签名，Claude 会拒绝 history。</li>
+<li><strong>遇到 redacted thinking 就崩溃。</strong> 把 redacted 当一等公民处理，不要假设 thinking 内容永远是可读文字。</li>
+<li><strong>把原始 thinking 直接丢给用户看却没给 toggle。</strong> 推理轨迹又长又偏内部，要么刻意呈现，要么默认隐藏。</li>
+<li><strong>没检查兼容性就把 thinking 和 assistant 预填或自定义 temperature 混用。</strong> 调用会失败或行为异常。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Extended thinking 是准确度的调节杆，不是默认值。正确的流程是：先优化 prompt，再建 eval，最后当 eval gap 明显是推理深度问题时才开 thinking。签名系统和 redacted blocks 是 safety 机制——把 thinking blocks 当成不透明对象，原样传递，不要假设它永远是可读文字。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Coding &amp; Architecture)</strong>：Extended thinking 是在 agentic loop 内加深 Claude 推理的标准做法。预期会考"什么时候 thinking 有帮助（难推理题）vs 什么时候是浪费（简单转换）"。</li>
+<li><strong>D5 (Enterprise Deployment)</strong>：成本/延迟权衡、<code>thinking_budget</code> vs <code>max_tokens</code> 的约束、以及兼容性警告都是可直接出题的事实。</li>
+<li>可能的题型："Prompt engineering 已到瓶颈——下一个手段是什么？"答案是 extended thinking，且需 eval-driven 决策。</li>
+<li>记住两个 safety 机制：<strong>signature</strong>（篡改检测）和 <strong>redacted blocks</strong>（内部安全标记），两者都必须原样传回。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Extended thinking 解决什么问题？</td>
+<td>Prompt engineering 已到瓶颈的难推理题——它给 Claude 草稿纸 token，让它在回答前深思熟虑。</td>
+</tr>
+<tr>
+<td><code>thinking_budget</code> 的最小值是？</td>
+<td>1024 tokens。</td>
+</tr>
+<tr>
+<td><code>max_tokens</code> 和 <code>thinking_budget</code> 的关系？</td>
+<td><code>max_tokens</code> 必须严格大于 <code>thinking_budget</code>，因为 budget 是从 max 里扣的。</td>
+</tr>
+<tr>
+<td>启用 thinking 后会拿回哪两种 content block？</td>
+<td>一个 thinking block（推理轨迹）和一个 text block（最终答案）。</td>
+</tr>
+<tr>
+<td>Thinking block 上的 signature 是什么？为何存在？</td>
+<td>加密 token，用来证明 thinking 内容未被修改；防止开发者伪造 reasoning 把模型引导到危险区。</td>
+</tr>
+<tr>
+<td>什么是 redacted thinking block？</td>
+<td>推理被内部 safety 系统标记、以加密形式回传的 thinking block。代码必须能处理并原样传回。</td>
+</tr>
+<tr>
+<td>何时应该启用 extended thinking？</td>
+<td>只在优化 prompt、建好 eval、确认准确度仍因推理深度不足而低于门槛时才开。</td>
+</tr>
+<tr>
+<td>举两个 extended thinking <strong>不</strong>兼容的功能。</td>
+<td>Assistant message pre-filling 与自定义 temperature。</td>
+</tr>
+<tr>
+<td>启用 extended thinking 的三个代价？</td>
+<td>成本更高（thinking tokens 计费）、延迟更高、客户端代码更复杂（block 迭代、签名、redaction）。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

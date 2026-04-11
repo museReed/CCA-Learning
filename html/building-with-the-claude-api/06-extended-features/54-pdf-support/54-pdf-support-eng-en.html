@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pdf Support Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>PDF Support — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (content blocks), 2.1 (multimodal input), 5.2 (document processing pipelines)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 54</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>PDF support is a near drop-in extension of image support — you swap the block <code>type</code> from <code>"image"</code> to <code>"document"</code> and the media type to <code>application/pdf</code>, and Claude reads the full document including text, tables, charts, and embedded images.</p>
+<hr />
+<h2>Why PDF Support Is a Big Deal</h2>
+<p>Most enterprise knowledge lives in PDFs: contracts, research papers, financial reports, insurance policies, compliance documents, product spec sheets. Before document support, extracting meaning from a PDF meant stitching together an OCR pass, a layout parser, a table extractor, and a chunking pipeline — each of which introduced its own error.</p>
+<p>PDF support collapses that pipeline to a single API call. Claude reads the whole document directly and answers questions, summarizes content, or extracts structured data without the intermediate toolchain. You still need to think about how to chunk very long documents, but the common case is "send the PDF, ask the question, get the answer."</p>
+<hr />
+<h2>Nearly Identical to Image Processing</h2>
+<p>The lesson's main point is that PDF support reuses the image-processing pattern almost verbatim. If you already know how to send an image, you already know 90% of PDF support.</p>
+<p>Here is the full example from the lesson:</p>
+<pre><code class="language-python">with open(&quot;earth.pdf&quot;, &quot;rb&quot;) as f:
+    file_bytes = base64.standard_b64encode(f.read()).decode(&quot;utf-8&quot;)
+
+messages = []
+
+add_user_message(
+    messages,
+    [
+        {
+            &quot;type&quot;: &quot;document&quot;,
+            &quot;source&quot;: {
+                &quot;type&quot;: &quot;base64&quot;,
+                &quot;media_type&quot;: &quot;application/pdf&quot;,
+                &quot;data&quot;: file_bytes,
+            },
+        },
+        {&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: &quot;Summarize the document in one sentence&quot;},
+    ],
+)
+
+chat(messages)
+</code></pre>
+<p>Observe the structure: a <code>document</code> block and a <code>text</code> block together in a single user message's <code>content</code> list. The document block carries the base64-encoded PDF; the text block carries the question. Claude replies with a normal text block.</p>
+<hr />
+<h2>Key Changes From Image Processing</h2>
+<p>The lesson enumerates exactly four differences when adapting your image code to PDFs:</p>
+<ol>
+<li><strong>File extension</strong>: <code>.png</code> → <code>.pdf</code> when opening the file.</li>
+<li><strong>Variable name</strong>: <code>image_bytes</code> → <code>file_bytes</code> for clarity (a convention, not a requirement — the API does not care what you name the local variable).</li>
+<li><strong>Block <code>type</code></strong>: <code>"image"</code> → <code>"document"</code>.</li>
+<li><strong><code>media_type</code></strong>: <code>"image/png"</code> → <code>"application/pdf"</code>.</li>
+</ol>
+<p>That is the entire diff. The <code>source.type: "base64"</code> stays the same. The data field still holds a base64 string. The text block is still structured the same way. Existing message-handling code that understands content blocks keeps working — it just has to recognize <code>"document"</code> as a valid block type.</p>
+<hr />
+<h2>What Claude Can Extract From PDFs</h2>
+<p>The course explicitly calls out four categories of extraction Claude handles natively inside a PDF:</p>
+<ul>
+<li><strong>Text content</strong> throughout the document.</li>
+<li><strong>Images and charts</strong> embedded in the PDF.</li>
+<li><strong>Tables</strong> and their data relationships.</li>
+<li><strong>Document structure and formatting.</strong></li>
+</ul>
+<p>This is a bigger deal than it sounds. Tables inside PDFs have historically been painful — layout analysis has to infer row/column boundaries, merged cells, multi-line entries, and header hierarchies. Charts were effectively invisible without a separate vision step. Claude's native PDF support turns all four of those into "just ask a question."</p>
+<p>Concretely, that means a single <code>document</code> block lets you:</p>
+<ul>
+<li>Summarize a 10-K filing.</li>
+<li>Pull specific numbers out of a financial table.</li>
+<li>Describe a chart without ever extracting it to PNG first.</li>
+<li>Ground a QA answer in a policy document's structure.</li>
+</ul>
+<p>The course's running example is a Wikipedia article about Earth saved as a PDF, summarized in one sentence by Claude — a minimal demonstration that the document block works end-to-end.</p>
+<hr />
+<h2>Production Considerations the Lesson Implies</h2>
+<p>The lesson itself is short and does not enumerate limits, but the same quota pattern as images applies in spirit: you need to plan for document size and count. For production PDF pipelines, think about:</p>
+<ul>
+<li><strong>Size bounds.</strong> Very large PDFs can be expensive to include. Consider splitting documents by section for long-form content and routing only the relevant chunks to Claude.</li>
+<li><strong>Pre-processing.</strong> If your PDFs come from OCR of scans, the quality of the PDF affects Claude's extraction accuracy. Clean PDFs → better answers.</li>
+<li><strong>Prompt structure.</strong> As with images, the prompt discipline matters. A vague "tell me about this document" is worse than "summarize section 3 in one sentence" or "extract all dollar amounts in the executive summary as JSON."</li>
+<li><strong>Caching.</strong> If you re-query the same document often, prompt caching becomes attractive because the document bytes dominate the input.</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Using <code>type: "image"</code> for a PDF.</strong> The block type must be <code>"document"</code>. Claude will reject or misinterpret an image block pointing at a PDF.</li>
+<li><strong>Wrong <code>media_type</code>.</strong> <code>application/pdf</code> exactly — not <code>pdf</code>, not <code>application/x-pdf</code>.</li>
+<li><strong>Sending raw bytes instead of base64.</strong> The <code>data</code> field is a base64 string, not raw bytes or a file path.</li>
+<li><strong>Assuming PDF is cheap.</strong> A long PDF costs real tokens on every call. Plan chunking and consider caching.</li>
+<li><strong>Skipping the prompt layer.</strong> The API gives you a document; you still have to ask a precise question. Summarize-the-whole-thing prompts produce vague answers.</li>
+<li><strong>Forgetting that message-handling code must recognize <code>"document"</code> blocks.</strong> If you built your handler to assume only <code>"text"</code> and <code>"image"</code> exist, adding PDFs silently breaks it.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>PDF support is the image-block pattern with two fields changed: <code>type</code> becomes <code>"document"</code> and <code>media_type</code> becomes <code>"application/pdf"</code>. Everything else — base64 encoding, content-block structure, message flow, system prompts, tool use — stays identical. What actually differs is <strong>production thinking</strong>: PDFs are larger than screenshots, so chunking, caching, and precise prompts matter more than they do for one-off image inputs.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: PDFs are a content-block variant. Know that the block type is <code>"document"</code> (not <code>"pdf"</code>) and the media type is <code>"application/pdf"</code>.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: document processing pipelines for RAG, contract analysis, policy QA — PDF support is often the simplest answer and beats hand-rolled OCR/layout pipelines.</li>
+<li>Exam scenario pattern: "You need Claude to read a PDF contract and extract the indemnification clause." The answer is a <code>document</code> content block with <code>application/pdf</code> media type, plus a precise extraction prompt.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What block type does Claude use for PDFs?</td>
+<td><code>"document"</code> — not <code>"pdf"</code> or <code>"image"</code>.</td>
+</tr>
+<tr>
+<td>What media type do you use for a PDF?</td>
+<td><code>"application/pdf"</code>.</td>
+</tr>
+<tr>
+<td>How do you encode the PDF bytes for the API?</td>
+<td>Base64-encode the file and pass the string as <code>source.data</code>, with <code>source.type: "base64"</code>.</td>
+</tr>
+<tr>
+<td>What are the four things that change between image and PDF code?</td>
+<td>File extension (<code>.png</code> → <code>.pdf</code>), variable name (<code>image_bytes</code> → <code>file_bytes</code>), block type (<code>"image"</code> → <code>"document"</code>), and media type (<code>image/png</code> → <code>application/pdf</code>).</td>
+</tr>
+<tr>
+<td>What four kinds of content can Claude extract from a PDF natively?</td>
+<td>Text content, embedded images and charts, tables and their data relationships, and document structure and formatting.</td>
+</tr>
+<tr>
+<td>Why is native PDF support a bigger deal than it looks?</td>
+<td>It collapses a traditional OCR + layout + table + chunking pipeline into a single API call, and it natively handles tables and charts that were historically painful.</td>
+</tr>
+<tr>
+<td>What prompt pattern should you use when summarizing a PDF?</td>
+<td>The same prompt discipline you use for text — be specific ("summarize section 3 in one sentence") rather than vague ("tell me about this document").</td>
+</tr>
+<tr>
+<td>When should you chunk a PDF before sending it to Claude?</td>
+<td>When the document is large enough that either token cost or context length becomes the bottleneck, or when only a few sections are relevant to the question.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
