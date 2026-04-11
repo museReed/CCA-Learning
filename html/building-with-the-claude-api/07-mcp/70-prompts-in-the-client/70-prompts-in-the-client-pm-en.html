@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompts In The Client Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompts in the Client — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (client-side MCP prompt usage), 1.2 (agent loop seeding)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 70</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Wiring prompts into the client is what turns them from "server-side potential" into "user-visible buttons" — it is the last mile that lets your product ship slash-commands, quick actions, and template galleries that hide all the prompt engineering behind a single tap.</p>
+<hr />
+<h2>Mental Model: The Remote Control With Named Buttons</h2>
+<p>Imagine your MCP server is a capable appliance — it can cook anything. Without prompts in the client, users stand in front of it with a manual typing raw instructions. With prompts in the client, you give them a remote control:</p>
+<ul>
+<li><code>/format</code> button → reformats documents to markdown</li>
+<li><code>/summarize</code> button → condenses content</li>
+<li><code>/translate</code> button → converts languages</li>
+</ul>
+<p>Each button is a pre-engineered recipe. The user taps it, maybe picks an argument (which document), and the appliance does its thing. The recipe lives on the server; the button lives in the client. This lesson is about how the button gets wired up.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>This is where prompts go from an engineering abstraction to a <strong>product feature you can point at in a demo</strong>. Without client-side wiring, prompts are invisible. With it:</p>
+<ul>
+<li>Users see a <strong>discoverable menu</strong> instead of a blank text box</li>
+<li>Onboarding flows can open with "try this prompt"</li>
+<li>Support can say "click <code>/format</code> to fix this document"</li>
+<li>Analytics can track which prompts get used</li>
+<li>Marketing can showcase specific commands</li>
+</ul>
+<p>The two client methods (<code>list_prompts</code>, <code>get_prompt</code>) are small in code but large in product surface. Every prompt you want to ship lives and dies on whether the client exposes it well.</p>
+<hr />
+<h2>What the Client Actually Shows the User</h2>
+<p>The canonical flow from the user's point of view:</p>
+<ol>
+<li>User types <code>/</code> or clicks a "commands" button.</li>
+<li>The client calls <code>list_prompts()</code> and renders a menu with names and descriptions.</li>
+<li>User picks one (say <code>format</code>).</li>
+<li>The client reads the argument metadata and prompts for required inputs (e.g., "Which document?").</li>
+<li>The client calls <code>get_prompt("format", {"doc_id": "report.pdf"})</code> under the hood.</li>
+<li>The server returns the full message list — the user does not see this step.</li>
+<li>The client sends the messages to Claude and shows the streaming response.</li>
+</ol>
+<p>From the user's point of view: "I picked an action and it just worked." From the PM's point of view: every step above is a design decision.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When Client-Side Prompt Wiring Shines</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why It Works</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Complex apps with many possible actions</td>
+<td>A slash menu beats dumping everything into one free-form prompt</td>
+</tr>
+<tr>
+<td>Onboarding new users</td>
+<td>Curated prompts demo the product's capability immediately</td>
+</tr>
+<tr>
+<td>Teams sharing best-practice workflows</td>
+<td>Prompts become organizational knowledge</td>
+</tr>
+<tr>
+<td>Reducing support load</td>
+<td>"Click <code>/format</code>" is shorter than "copy this prompt text"</td>
+</tr>
+<tr>
+<td>Brand-consistent outputs</td>
+<td>Each prompt enforces a specific style/format</td>
+</tr>
+</tbody>
+</table>
+<h3>When It Is Overkill</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single-use prototype</td>
+<td>Skip the plumbing; just hardcode text</td>
+</tr>
+<tr>
+<td>Totally free-form chat product</td>
+<td>Prompts limit more than they help</td>
+</tr>
+<tr>
+<td>No MCP server yet</td>
+<td>Build the server first (Lesson 69)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When designing a prompt-powered feature, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Will users need to discover the prompt on their own?</td>
+<td>Yes</td>
+<td>Must ship client-side listing (<code>list_prompts</code>)</td>
+</tr>
+<tr>
+<td>Does the prompt take arguments?</td>
+<td>Yes</td>
+<td>Design the argument picker UX (dropdown, autocomplete, form)</td>
+</tr>
+<tr>
+<td>Will the prompt be invoked repeatedly?</td>
+<td>Yes</td>
+<td>Consider surfacing as a top-level button, not buried in a menu</td>
+</tr>
+<tr>
+<td>Do you want telemetry on prompt usage?</td>
+<td>Yes</td>
+<td>Instrument the client side; server-side usage is invisible to the product team</td>
+</tr>
+<tr>
+<td>Should the prompt name match a brand voice?</td>
+<td>Yes</td>
+<td>Name and description are marketing copy — treat them as such</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>UX Design Notes</h2>
+<p>Because prompts appear in the client, these are PM/design decisions:</p>
+<ul>
+<li><strong>Naming</strong> — <code>/format</code> is better than <code>/do_format_thing_v2</code>. Short, verb-first, obvious.</li>
+<li><strong>Descriptions</strong> — one line, outcome-focused ("Rewrite document in markdown"), not feature-focused ("Uses the MCP prompt <code>format_document</code> with doc_id parameter").</li>
+<li><strong>Argument collection</strong> — most users will not read forms. Provide defaults, smart autocomplete, and sensible fallbacks.</li>
+<li><strong>Discoverability</strong> — <code>/</code> menu, quick actions bar, onboarding callouts. Pick at least one.</li>
+<li><strong>Feedback</strong> — show a loading state while <code>get_prompt</code> runs, then stream the Claude response.</li>
+<li><strong>Error handling</strong> — if the server is unreachable or the prompt errors, show "this command is temporarily unavailable" instead of a raw stack trace.</li>
+</ul>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Shipping prompts without a discovery affordance</strong> — users will not find them, so they do not exist.</li>
+<li><strong>Cryptic names and descriptions</strong> — treat prompt metadata as microcopy; iterate on it as you would a button label.</li>
+<li><strong>No argument UX</strong> — users will bounce rather than type a raw <code>doc_id</code>. Provide a picker.</li>
+<li><strong>No analytics</strong> — if you cannot see which prompts get used, you cannot prune the losers.</li>
+<li><strong>Fragile error paths</strong> — server hiccups should degrade gracefully; the user should not see Python exceptions.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p><code>list_prompts</code> and <code>get_prompt</code> are the cheapest investment a PM can demand for the highest product impact. They turn engineering-maintained recipes into product-visible actions without any per-prompt eng work after the first setup. A well-wired client means every new prompt the server author ships appears in your product automatically — roadmap on autopilot.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: know that the client exposes <code>list_prompts</code> and <code>get_prompt</code> to let users discover and invoke prompts.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: prompts seed the agent loop; the rest of the loop (tools, resources) proceeds normally.</li>
+<li>Exam pattern: "How are MCP server prompts surfaced to users?" → the client implements <code>list_prompts</code>/<code>get_prompt</code> and typically renders them as a slash menu.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the "remote control with named buttons" analogy?</td>
+<td>The server is an appliance that can do anything; the client's prompt wiring is the remote whose buttons each correspond to a pre-engineered recipe.</td>
+</tr>
+<tr>
+<td>What are the two client methods that expose prompts to users?</td>
+<td><code>list_prompts()</code> for discovery and <code>get_prompt(name, args)</code> for invocation.</td>
+</tr>
+<tr>
+<td>Why do prompts need client-side wiring?</td>
+<td>Without it, prompts are invisible — they exist on the server but users cannot find or trigger them.</td>
+</tr>
+<tr>
+<td>What should a good prompt name look like?</td>
+<td>Short, verb-first, obvious — e.g., <code>/format</code>, not <code>/do_format_thing_v2</code>.</td>
+</tr>
+<tr>
+<td>Why is analytics instrumentation a PM responsibility?</td>
+<td>Server-side prompt execution is invisible to product teams; analytics have to live in the client where users actually interact.</td>
+</tr>
+<tr>
+<td>How should the UX collect arguments?</td>
+<td>With pickers, autocomplete, and defaults — not by asking users to type raw argument keys.</td>
+</tr>
+<tr>
+<td>What happens when the server errors on <code>get_prompt</code>?</td>
+<td>The client should degrade gracefully — "this command is temporarily unavailable" — never show a stack trace.</td>
+</tr>
+<tr>
+<td>Why is client-side prompt wiring the "last mile" of MCP?</td>
+<td>Because tools, resources, and server-side prompts are all useless to users unless the client surfaces them as discoverable actions.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

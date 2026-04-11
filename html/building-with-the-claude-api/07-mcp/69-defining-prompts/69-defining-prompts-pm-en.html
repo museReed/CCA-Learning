@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defining Prompts Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Prompts — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP primitives: prompts), 1.2 (agent loop priming)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 69</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompts are MCP's "greatest hits playlist" — curated, expert-tuned instructions the server author ships so users get consistently high-quality results without having to learn prompt engineering themselves. They turn unreliable free-text requests into predictable, brand-consistent features.</p>
+<hr />
+<h2>Mental Model: The Cookbook Recipe</h2>
+<ul>
+<li>Users writing their own instructions are home cooks improvising. Sometimes they nail it; sometimes it is inedible.</li>
+<li>Prompts are the cookbook the restaurant author gives them. Follow the recipe, get the chef's version every time.</li>
+<li>Users still customize via parameters (the <code>doc_id</code> is the ingredient swap), but the method is locked in.</li>
+</ul>
+<p>Good MCP servers ship recipes for their most common use cases. Users pick from a slash-menu; the server does the heavy prompt lifting.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Free-form prompting is the AI product equivalent of "type a command in the terminal." Expert users love it. Everyone else bounces. Prompts convert expert knowledge into:</p>
+<ul>
+<li><strong>Consistent quality</strong> — every user gets the same tested result</li>
+<li><strong>Discoverable features</strong> — prompts become slash-commands, quick actions, buttons</li>
+<li><strong>Brand voice</strong> — your writing style, your formatting, your tone, baked into the template</li>
+<li><strong>Onboarding shortcuts</strong> — new users hit "run prompt" and see a great result immediately</li>
+<li><strong>Cost control</strong> — tuned prompts are usually shorter and more focused than what users type</li>
+</ul>
+<p>For a PM, prompts are the productization layer on top of tools and resources.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When Prompts Pay Off</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Prompts Are the Right Layer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A task your users do repeatedly (reformat, summarize, translate)</td>
+<td>Codify the best version once</td>
+</tr>
+<tr>
+<td>A task where wording matters a lot (tone, structure, compliance)</td>
+<td>Lock down the wording</td>
+</tr>
+<tr>
+<td>Features you want to expose as slash-commands or quick actions</td>
+<td>Prompts naturally map to UI affordances</td>
+</tr>
+<tr>
+<td>Low-confidence users who want "just make it good"</td>
+<td>Hide the prompt complexity behind a button</td>
+</tr>
+</tbody>
+</table>
+<h3>When Prompts Are Overkill</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better Pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One-off tasks with no repeat users</td>
+<td>Free-form input is fine</td>
+</tr>
+<tr>
+<td>Highly variable tasks where constraints hurt</td>
+<td>Let users write their own</td>
+</tr>
+<tr>
+<td>Tasks that are really data lookups</td>
+<td>Use a resource</td>
+</tr>
+<tr>
+<td>Tasks that are really actions</td>
+<td>Use a tool</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>How Users Experience a Prompt</h2>
+<p>From the user's side, a prompt usually appears as:</p>
+<ol>
+<li>A slash-command (<code>/format</code>, <code>/summarize</code>) in a CLI or chat UI</li>
+<li>A button or quick action in a graphical app</li>
+<li>A template picker on first launch</li>
+</ol>
+<p>They select it, fill in one or two parameters (like which document), and the system runs the full pre-engineered instruction. The user never sees — and never has to write — the underlying prompt text.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>Before building a prompt, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is the output quality highly sensitive to how the request is worded?</td>
+<td>Yes</td>
+<td>Ship a prompt</td>
+</tr>
+<tr>
+<td>Is this a repeat task across many users?</td>
+<td>Yes</td>
+<td>Ship a prompt</td>
+</tr>
+<tr>
+<td>Does the expertise to do this well live with your team?</td>
+<td>Yes</td>
+<td>Ship a prompt (externalize the knowledge)</td>
+</tr>
+<tr>
+<td>Will users want to do the task in many different creative ways?</td>
+<td>Yes</td>
+<td>Do NOT ship a prompt; leave free-form</td>
+</tr>
+<tr>
+<td>Does the prompt need live data?</td>
+<td>Yes</td>
+<td>Combine prompt with a resource or tool</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Quality Bar: When Is a Prompt "Good Enough" to Ship?</h2>
+<p>The lesson's guidance is strict: only ship prompts that are demonstrably better than what users would write themselves. A rough checklist:</p>
+<ol>
+<li><strong>Tested on 5+ realistic inputs</strong> — does it produce good output every time?</li>
+<li><strong>Clear parameter schema</strong> — each argument has a description that the client can display.</li>
+<li><strong>Works with your tools and resources</strong> — the prompt references real server primitives, not imagined ones.</li>
+<li><strong>Survives edge cases</strong> — empty inputs, non-standard document IDs, edge lengths.</li>
+<li><strong>Has a one-line description</strong> — users choose from a menu based on that string.</li>
+</ol>
+<p>If your prompt does not beat a 30-second ad-hoc attempt, do not ship it. You will train users to distrust prompts.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Shipping too many prompts</strong> — more prompts than users can scan produce decision paralysis. Prune ruthlessly; 3–10 great prompts beats 50 mediocre ones.</li>
+<li><strong>Vague descriptions</strong> — if users cannot tell what a prompt does, they will not pick it. Write them like button labels.</li>
+<li><strong>Treating prompts as static config</strong> — they need versioning, eval, and iteration like any other model-facing code.</li>
+<li><strong>Mixing prompts with data</strong> — if you find yourself hardcoding the document content in the prompt, you actually want a resource.</li>
+<li><strong>Not measuring prompt quality</strong> — track which prompts get selected and which produce rework. Kill the losers.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompts are the primitive that turns MCP from "developer SDK" into "product surface." Tools and resources make the server capable; prompts make it usable. A PM who understands this ships small, crisp menus of high-quality actions — the AI-product equivalent of a well-organized slash-menu in Notion or Linear — and users feel they got a great tool without ever opening a text box.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: prompts are the third MCP primitive (after tools and resources); know that they are parameterized and return a sequence of messages.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: prompts seed the agent loop with a high-quality starting conversation.</li>
+<li>Exam pattern: "A server author wants to ship a reusable 'reformat to markdown' command. Which primitive?" → prompt.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the "cookbook recipe" analogy for prompts?</td>
+<td>Users writing their own prompts are improvising cooks; prompts are the cookbook recipes the restaurant author ships — users fill in ingredients (parameters), get chef-quality results.</td>
+</tr>
+<tr>
+<td>Why are prompts a productization layer?</td>
+<td>They take expert prompt-engineering knowledge and expose it to users as simple slash-commands or quick actions.</td>
+</tr>
+<tr>
+<td>When should a PM NOT ship a prompt?</td>
+<td>When the task varies widely per user, is one-off, or is really a data lookup (resource) or action (tool).</td>
+</tr>
+<tr>
+<td>What makes a prompt "shippable"?</td>
+<td>Tested on realistic inputs, clear parameter schema, works with server tools/resources, handles edge cases, has a clear one-line description.</td>
+</tr>
+<tr>
+<td>Why do vague descriptions kill prompts?</td>
+<td>Users select prompts from a menu based on the description; vague ones never get picked and waste engineering effort.</td>
+</tr>
+<tr>
+<td>Should you ship 50 mediocre prompts or 5 great ones?</td>
+<td>5 great ones — more prompts cause decision paralysis and dilute perceived quality.</td>
+</tr>
+<tr>
+<td>How do prompts compose with tools and resources?</td>
+<td>A prompt can reference a tool (e.g., "use <code>edit_document</code> to save the result") or a resource, acting as a recipe for a multi-step workflow.</td>
+</tr>
+<tr>
+<td>What happens if a prompt hardcodes document content instead of a parameter?</td>
+<td>You are using a prompt where you actually wanted a resource — prompts are templates, resources are data.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

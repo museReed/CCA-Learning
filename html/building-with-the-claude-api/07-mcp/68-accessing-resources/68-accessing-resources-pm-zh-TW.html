@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accessing Resources Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Accessing Resources — PM Perspective（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration（18%）主；D1 — Agentic Architecture（22%）次</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（client 端 MCP resource 使用）、1.2（context 注入）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 68</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Accessing resources 是讓「@mention」變成產品功能的那塊 MCP：應用向 server 要被引用的資料，直接塞進 prompt 交給 Claude——零 tool call、零猜測、可預測的延遲與成本。</p>
+<hr />
+<h2>心智模型：給 Claude 一個已開好的資料夾</h2>
+<ul>
+<li><strong>Tool call</strong> 是給 Claude 一張地圖，希望它走到正確的大樓。知道路就快，不知道就慢又容易錯</li>
+<li><strong>Resource access</strong> 是直接把資料夾打開放在 Claude 面前，Claude 一開始就能讀，不繞路、不用決定</li>
+</ul>
+<p>當使用者明確指名要用什麼（「用這份文件」、「看這筆紀錄」），resource access 幾乎都是對的 pattern。</p>
+<hr />
+<h2>為什麼 PM 要在意</h2>
+<p>「@mention」做成 tool 和做成 resource，實際表現差異非常大：</p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>Tool call 路徑</th>
+<th>Resource access 路徑</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每則使用者訊息的 API round trip</td>
+<td>2+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>延遲負擔</td>
+<td>每多一輪 ~1.5–3 秒</td>
+<td>幾乎 0（在 Claude 呼叫前完成）</td>
+</tr>
+<tr>
+<td>Token 成本</td>
+<td>tool schema + tool_use + tool_result + 最終答案</td>
+<td>只有注入的內容</td>
+</tr>
+<tr>
+<td>可靠度</td>
+<td>依賴 Claude 正確決策</td>
+<td>確定性</td>
+</tr>
+<tr>
+<td>UX</td>
+<td>「thinking...」轉圈更久</td>
+<td>回應更俐落</td>
+</tr>
+</tbody>
+</table>
+<p>用 resource access 上線的功能，立即就比較快且便宜——不用再調 prompt。</p>
+<hr />
+<h2>產品場景</h2>
+<h3>什麼時候用 Resource Access</h3>
+<table>
+<thead>
+<tr>
+<th>使用者體驗</th>
+<th>為什麼適合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>@mention 文件 / 紀錄 / ticket</td>
+<td>使用者明確指定要包什麼</td>
+</tr>
+<tr>
+<td>Always-on context（公司政策、詞彙表）</td>
+<td>每次都要帶</td>
+</tr>
+<tr>
+<td>「摘要這一頁」帶頁 ID 選擇器</td>
+<td>確定性查詢、不需 Claude 決策</td>
+</tr>
+<tr>
+<td>File picker → 注入</td>
+<td>應用知道是哪個檔案，無歧義</td>
+</tr>
+</tbody>
+</table>
+<h3>Resource Access 不夠時</h3>
+<table>
+<thead>
+<tr>
+<th>使用者需求</th>
+<th>更適合的 pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>對話中途讓 Claude 決定要不要查更多</td>
+<td>Tool call</td>
+</tr>
+<tr>
+<td>跨多個項目搜尋</td>
+<td>Tool call 帶 query</td>
+</tr>
+<tr>
+<td>依推理決定是否 fetch</td>
+<td>Tool call</td>
+</tr>
+<tr>
+<td>有副作用的動作</td>
+<td>Tool call（絕不是 resource）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 決策框架</h2>
+<p>對任何「抓取並顯示」的功能問自己：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>若是 Yes</th>
+<th>意義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>使用者指定要抓哪個項目？</td>
+<td>Yes</td>
+<td>Resource access</td>
+</tr>
+<tr>
+<td>候選集合在 UI 建構時就已知？</td>
+<td>Yes</td>
+<td>Resource access（可用 dropdown / autocomplete）</td>
+</tr>
+<tr>
+<td>希望這個意圖永遠觸發 fetch？</td>
+<td>Yes</td>
+<td>Resource access</td>
+</tr>
+<tr>
+<td>希望 Claude 可以跳過 fetch？</td>
+<td>Yes</td>
+<td>Tool call</td>
+</tr>
+<tr>
+<td>fetch 需要搜尋或排序？</td>
+<td>Yes</td>
+<td>Tool call（Claude 帶 query）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>需要設計的 UX 層面</h2>
+<p>因為 resource access 在 <strong>Claude 呼叫之前</strong> 發生，UX 負擔在你的應用本身：</p>
+<ul>
+<li><strong>Discovery</strong> — 使用者怎麼知道有 resource 可用？（@ autocomplete、slash menu、file picker）</li>
+<li><strong>Selection affordance</strong> — dropdown vs 模糊搜尋 vs 指令輸入</li>
+<li><strong>進度提示</strong> — resource fetch 還是有延遲，要放低調 loader</li>
+<li><strong>錯誤狀態</strong> — URI 失敗時顯示「該文件已不可用」</li>
+<li><strong>Preview</strong> — 讓使用者在送出前看到即將注入什麼（可選但體驗佳）</li>
+</ul>
+<p>這完全是產品設計，不是 prompt engineering，設計師負責。</p>
+<hr />
+<h2>成本與 Context Window</h2>
+<p>Resource access 單次 API 呼叫便宜，但 token 不是免費——注入內容會佔 prompt 空間。PM 要預算：</p>
+<ul>
+<li><strong>大文件</strong> — 能不能放進 context window？要定 truncation 或 chunking 規則</li>
+<li><strong>多 resource 同時</strong> — 使用者若能 @mention 多項，總量可能爆開，要設上限</li>
+<li><strong>資料陳舊</strong> — 內容是某時點快照，要決定每輪是否重抓</li>
+<li><strong>log 中的敏感資料</strong> — 注入內容會流經 telemetry，要決定 redaction</li>
+</ul>
+<hr />
+<h2>PM 常見錯誤</h2>
+<ol>
+<li><strong>把 @mention 做成 tool call</strong> — 能動但慢一倍、貴一倍，對使用者沒任何好處</li>
+<li><strong>讓 resource 無上限成長</strong> — 把 50 頁 PDF 每輪都注入會燒爆 context 與延遲，要訂上限</li>
+<li><strong>沒設計 resource discovery UX</strong> — 使用者找不到的 resource 等同不存在</li>
+<li><strong>忘記錯誤狀態</strong> — resource 可能失敗（不存在、無權限、太大），UI 必須處理</li>
+<li><strong>跳過 preview affordance</strong> — 讓使用者看見即將注入什麼能提升信任，減少「Claude 為什麼這樣說？」的客訴</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Resource access 是讓「使用者驅動的 context」變得無感的 pattern。使用者視角：「我 mention 了一個檔案，Claude 讀了」。架構視角：一次 API 呼叫而不是兩次、確定性的內容、清楚切分「應用抓什麼」與「Claude 推理什麼」。對 PM 而言，這是設計 context 豐富的 Claude 功能時最高槓桿的 pattern。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：要知道 resource access 在 MCP client 內（如 <code>read_resource</code>），在 Claude 呼叫之前執行，不是 tool loop 的一部分</li>
+<li><strong>D1（Agentic Architecture）</strong>：Resources 把 context 預先注入，縮短 agent loop</li>
+<li>考題模式：「使用者 @mention 一份文件，文件內容怎麼到 Claude？」→ client 抓 resource 後 inline 進 prompt，不是 tool call</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「資料夾 vs 地圖」比喻是什麼？</td>
+<td>Tool call 給 Claude 一張地圖希望它找到資料；resource access 直接把資料夾打開放在 Claude 面前</td>
+</tr>
+<tr>
+<td>為什麼 resource access 比 tool call 做 @mention 便宜？</td>
+<td>一次 API round trip 而非兩次、總 token 更少、不用等 Claude 決定是否抓</td>
+</tr>
+<tr>
+<td>誰負責 resource discovery 的 UX？</td>
+<td>你的產品 / 設計團隊——使用者看到的 @ autocomplete、file picker、slash menu</td>
+</tr>
+<tr>
+<td>Resource access 仍有什麼成本？</td>
+<td>注入內容會占 prompt token，可能逼近 context window</td>
+</tr>
+<tr>
+<td>什麼時候 tool call 比 resource 好？</td>
+<td>需要 Claude 判斷是否抓、需要 search、或操作有副作用時</td>
+</tr>
+<tr>
+<td>@mention 功能的 PRD 要含什麼？</td>
+<td>mention 的數量與大小上限、resource 失敗的 fallback UX、preview 機制、延遲預算、注入內容的隱私規則</td>
+</tr>
+<tr>
+<td>為什麼 resource access 比 tool call 更確定性？</td>
+<td>應用保證 fetch 一定發生，Claude 不會決定、不會跳過</td>
+</tr>
+<tr>
+<td>Resource-based 流程中，Claude 被呼叫前發生什麼？</td>
+<td>應用透過 MCP client 抓 resource 並 inline 進正在組的 prompt</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

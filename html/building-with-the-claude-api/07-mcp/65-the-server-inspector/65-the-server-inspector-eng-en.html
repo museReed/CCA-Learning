@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Server Inspector Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Server Inspector — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP primitives), 2.1 (tool schema design), 1.2 (agent loop integration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 65</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The MCP Inspector is a browser-based development tool — shipped with the Python MCP SDK as <code>mcp dev</code> — that lets you <code>list</code> and <code>call</code> your server's tools, resources, and prompts directly, without wiring the server up to Claude or a real application first.</p>
+<hr />
+<h2>The Problem: Debugging Feedback Loops</h2>
+<p>When you build an MCP server, you have two ways to exercise its tools:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Feedback loop</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wire it into a full Claude-based application</td>
+<td>Slow, noisy, mixes MCP bugs with prompt/agent bugs</td>
+</tr>
+<tr>
+<td>Exercise it directly via the MCP protocol</td>
+<td>Fast, isolated, reveals MCP bugs in seconds</td>
+</tr>
+</tbody>
+</table>
+<p>The first path is what you eventually need, but it is the worst place to debug. You don't know if a failure came from your tool, your prompt, Claude's choice of tool, or your agent loop. The <strong>Inspector</strong> collapses the feedback loop by giving you the second path out of the box.</p>
+<hr />
+<h2>Starting the Inspector</h2>
+<p>From an activated Python environment (check your project's README for the exact command), run:</p>
+<pre><code class="language-bash">mcp dev mcp_server.py
+</code></pre>
+<p>This command:</p>
+<ol>
+<li>Starts a development server on <strong>port 6277</strong>.</li>
+<li>Prints a local URL for the Inspector UI.</li>
+<li>Loads your MCP server code so its tools, resources, and prompts are discoverable.</li>
+</ol>
+<p>You then open the URL in your browser and land on the <strong>MCP Inspector dashboard</strong>.</p>
+<blockquote>
+<p>Note: the lesson explicitly says the Inspector is "actively being developed", so the exact UI may differ from the course screenshots. The <strong>capabilities</strong> — list tools, call tools, view results — remain the same.</p>
+</blockquote>
+<hr />
+<h2>Connecting and Discovering Tools</h2>
+<p>The Inspector workflow is driven from the left-hand sidebar. The core steps:</p>
+<ol>
+<li><strong>Click "Connect"</strong> — establishes the MCP protocol session with your server.</li>
+<li><strong>Navigate to "Tools"</strong> — switches to the tools view in the navigation bar.</li>
+<li><strong>Click "List Tools"</strong> — sends a <code>ListToolsRequest</code> and renders the response.</li>
+<li><strong>Select a tool</strong> — opens a form view for that tool's input schema.</li>
+<li><strong>Fill in parameters</strong> — the form is generated from your Python type hints + <code>Field(description=...)</code>.</li>
+<li><strong>Click "Run Tool"</strong> — sends a <code>CallToolRequest</code> and shows the result inline.</li>
+</ol>
+<p>Every interaction maps 1:1 to a real MCP protocol message, so what you test in the Inspector is exactly what a real MCP client would see.</p>
+<p>Besides Tools, the navigation bar also exposes sections for <strong>Resources</strong> and <strong>Prompts</strong> (covered in later lessons), letting you test all three primitives from one UI.</p>
+<hr />
+<h2>A Worked Example: Exercising the Document Tools</h2>
+<p>Using the server from Lesson 64, here is how you would verify both tools from the Inspector without ever booting the chatbot:</p>
+<h3>1. Read a Document</h3>
+<ul>
+<li>Tool: <code>read_doc_contents</code></li>
+<li>Parameters: <code>doc_id = "deposition.md"</code></li>
+<li>Expected result: <code>"This deposition covers the testimony of Angela Smith, P.E."</code></li>
+</ul>
+<h3>2. Edit and Re-Read</h3>
+<ul>
+<li>Tool: <code>edit_document</code></li>
+<li>Parameters: <code>doc_id = "deposition.md"</code>, <code>old_str = "Angela Smith"</code>, <code>new_str = "Jane Doe"</code></li>
+<li>Inspector confirms the call completed.</li>
+</ul>
+<p>Immediately after the edit, re-run <code>read_doc_contents</code> with the same ID — you should see the text has been replaced. This <strong>chained verification</strong> pattern is a low-cost way to check that mutation tools actually work.</p>
+<p>Because documents live in an in-memory dict, restarting the server wipes the changes. That's a feature during debugging — every session starts from a clean state.</p>
+<hr />
+<h2>The Development Loop Enabled</h2>
+<p>The Inspector creates a tight, repeatable loop:</p>
+<pre><code>┌─────────────────────────┐
+│ 1. Edit mcp_server.py   │
+└───────────┬─────────────┘
+            ▼
+┌─────────────────────────┐
+│ 2. Restart `mcp dev`    │   (or rely on auto-reload)
+└───────────┬─────────────┘
+            ▼
+┌─────────────────────────┐
+│ 3. List Tools in UI     │
+└───────────┬─────────────┘
+            ▼
+┌─────────────────────────┐
+│ 4. Run Tool with inputs │
+└───────────┬─────────────┘
+            ▼
+┌─────────────────────────┐
+│ 5. Inspect results      │
+└───────────┬─────────────┘
+            ▼
+         (repeat)
+</code></pre>
+<p>Each iteration touches only the MCP server — no Claude API calls, no prompt engineering, no chat loop. That isolation is precisely what makes the Inspector valuable.</p>
+<hr />
+<h2>Why This Matters Architecturally</h2>
+<p>The Inspector is an admission that <strong>MCP is a protocol</strong>, not a Claude-specific feature. A protocol needs a generic client for debugging, independent of the specific consumer (Claude, other LLMs, or automation). <code>mcp dev</code> is that generic client.</p>
+<p>Concretely:</p>
+<table>
+<thead>
+<tr>
+<th>Without Inspector</th>
+<th>With Inspector</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Every test requires a Claude API key</td>
+<td>Works offline from Claude</td>
+</tr>
+<tr>
+<td>Tool bugs mask prompt bugs</td>
+<td>Tool bugs isolated</td>
+</tr>
+<tr>
+<td>Feedback loop: minutes</td>
+<td>Feedback loop: seconds</td>
+</tr>
+<tr>
+<td>You can't validate tool schemas without a chatbot</td>
+<td>Schemas render as forms instantly</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>What the Inspector Does NOT Do</h2>
+<p>It is important to be clear about the boundaries:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>In the Inspector?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exercise tools, resources, prompts</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Render auto-generated schemas as forms</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Call Claude with the resulting tool</td>
+<td>No — use the full chatbot for that</td>
+</tr>
+<tr>
+<td>Replace end-to-end testing</td>
+<td>No — still run integration tests</td>
+</tr>
+<tr>
+<td>Deploy your server</td>
+<td>No — <code>mcp dev</code> is dev-only</td>
+</tr>
+</tbody>
+</table>
+<p>The Inspector's value is in <strong>isolating MCP behavior</strong> from LLM behavior. Once your tools pass in the Inspector, you move on to wiring them into your agent.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Skipping the Inspector and going straight to chatbot integration.</strong> You lose the isolated feedback loop and end up debugging two layers at once.</li>
+<li><strong>Not clicking "Connect" first.</strong> The left-side Connect button actually starts the session; without it, "List Tools" returns nothing.</li>
+<li><strong>Assuming UI stability.</strong> The lesson warns the Inspector UI is "actively being developed" — learn the concepts (list, call, chain), not the exact pixels.</li>
+<li><strong>Forgetting the port.</strong> Default is <code>6277</code>; if it's taken, the command will tell you.</li>
+<li><strong>Testing only the happy path.</strong> Put in a bogus <code>doc_id</code> too — verify your <code>ValueError</code> surfaces cleanly.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The Inspector is a <strong>protocol debugger</strong>. It separates "does my tool work?" from "does Claude use my tool well?" — two very different questions that get conflated when you only test end-to-end. Build the habit of hitting the Inspector first on every new tool and every change to an existing one. It will save you hours of tangled debugging across the rest of Ch07.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know that the Python MCP SDK ships a browser-based Inspector launched with <code>mcp dev mcp_server.py</code>, and that the Inspector exposes Tools, Resources, and Prompts.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Recognize the Inspector as the isolated test surface for MCP, distinct from full agent testing.</li>
+<li>Scenario question to expect: "your tool works in the Inspector but fails from your chatbot — what category of bug is it?" — answer: not an MCP bug; likely a prompt, schema description, or agent-loop bug.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>How do you start the MCP Inspector?</td>
+<td><code>mcp dev mcp_server.py</code> from an activated Python environment.</td>
+</tr>
+<tr>
+<td>What port does the Inspector run on by default?</td>
+<td><code>6277</code></td>
+</tr>
+<tr>
+<td>What is the first button to click in the Inspector sidebar?</td>
+<td>"Connect" — it starts the session with your MCP server.</td>
+</tr>
+<tr>
+<td>What three primitives does the Inspector let you exercise?</td>
+<td>Tools, Resources, and Prompts.</td>
+</tr>
+<tr>
+<td>What does clicking "List Tools" do at the protocol level?</td>
+<td>Sends a <code>ListToolsRequest</code> and renders the returned <code>ListToolsResult</code>.</td>
+</tr>
+<tr>
+<td>What does "Run Tool" do at the protocol level?</td>
+<td>Sends a <code>CallToolRequest</code> with the form inputs and displays the <code>CallToolResult</code>.</td>
+</tr>
+<tr>
+<td>What is the chained verification pattern shown in the lesson?</td>
+<td>Call <code>edit_document</code> then immediately call <code>read_doc_contents</code> to confirm the edit.</td>
+</tr>
+<tr>
+<td>What is the Inspector's biggest value for debugging?</td>
+<td>It isolates MCP behavior from LLM behavior — tool bugs stop masking prompt bugs.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

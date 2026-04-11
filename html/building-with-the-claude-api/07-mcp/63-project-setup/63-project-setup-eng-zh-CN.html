@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Setup Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Project Setup — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives）、1.2（agent loop 集成）、2.1（tool schemas）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 63</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Lesson 63 把动手做的 MCP 项目搭起来——一个 CLI chatbot，同一个 codebase 里有自定义的 MCP client 和自定义的 MCP server，并确立后续 lesson 64、65 会延伸的目录结构、环境变量和"hello world" baseline。</p>
+<hr />
+<h2>我们要做什么</h2>
+<p>这个项目是一个 command-line chatbot，让用户通过 Claude 和一组内存里的文档交互。它有两个主要组件，会在 Ch07 后面的 lessons 渐进实现：</p>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MCP client</strong></td>
+<td>处理用户 chat loop，并转发 tool use requests</td>
+</tr>
+<tr>
+<td><strong>自定义 MCP server</strong></td>
+<td>管理文档操作（读取和更新）</td>
+</tr>
+</tbody>
+</table>
+<p>MCP server 会对外提供两个必要的 tools（lesson 64 会细讲）：</p>
+<ol>
+<li>一个<strong>读取</strong> tool，返回某份文档的内容。</li>
+<li>一个<strong>更新</strong> tool，用 find-and-replace 修改文档。</li>
+</ol>
+<p>文档存在一个普通的 Python dict 里——没有数据库——让焦点放在 MCP 机制本身，而不是 persistence 的管道。</p>
+<hr />
+<h2>重要的架构备注</h2>
+<p>这节课明确点出一个设计警告：<strong>真实世界的项目通常只会实现 MCP client 或 MCP server 的其中一边，不会两边都做</strong>。常见模式：</p>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP server 作者</td>
+<td>你把内部服务的功能开放给其他开发者</td>
+</tr>
+<tr>
+<td>MCP client 作者</td>
+<td>你做一个 app 连到现成的 MCP servers（如 GitHub、Sentry）</td>
+</tr>
+</tbody>
+</table>
+<p>这门课在同一个 repo 两边都做<strong>只是为了教学</strong>——这样你不用切 codebase 就能看到协议两端如何对话。不要误以为这是 production 推荐做法。</p>
+<hr />
+<h2>项目结构</h2>
+<p>解压缩 lesson 附的 <code>cli_project.zip</code> 之后，你至少会看到：</p>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main.py</code></td>
+<td>进入点，跑 CLI chat loop</td>
+</tr>
+<tr>
+<td><code>mcp_client.py</code></td>
+<td>MCP client 实现（后面会填）</td>
+</tr>
+<tr>
+<td><code>mcp_server.py</code></td>
+<td>自定义 MCP server（后面会填）</td>
+</tr>
+<tr>
+<td><code>.env</code></td>
+<td>环境变量文件——放 <code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td><code>README.md</code></td>
+<td>逐步的设置说明</td>
+</tr>
+</tbody>
+</table>
+<p><code>.env</code> 是关键：没有 Anthropic API key，chatbot 根本无法调用 Claude。不管是 <code>uv</code> 还是纯 <code>pip</code> 路径，都预期第一次跑之前 key 已经就位。</p>
+<hr />
+<h2>安装依赖</h2>
+<p>README 记录了两条支持的安装路径：</p>
+<h3>方式 1 — UV（推荐）</h3>
+<pre><code class="language-bash"># 在项目目录
+uv run main.py
+</code></pre>
+<p><code>uv</code> 是 Astral 出的 Python package manager（跟 ruff 同作者），把 venv 管理和 dependency 安装包成一个命令。如果项目有 <code>pyproject.toml</code> 或 <code>uv.lock</code>，<code>uv run</code> 会在执行前自动解析和安装依赖。</p>
+<h3>方式 2 — 标准 Python + pip</h3>
+<pre><code class="language-bash"># 创建并激活 venv，然后
+pip install -r requirements.txt
+python main.py
+</code></pre>
+<p>任何一条路最后都会得到：</p>
+<ul>
+<li><code>anthropic</code> SDK 装好</li>
+<li><code>mcp</code>（Python MCP SDK）装好</li>
+<li>一个能跑 <code>main.py</code> 的 Python interpreter</li>
+</ul>
+<hr />
+<h2>"Hello World" Baseline</h2>
+<p>开始实现任何 MCP 功能前，这门课要求你先用一个小问题验证 baseline：</p>
+<pre><code>&gt; what's 1+1?
+</code></pre>
+<p>你应该很快得到 Claude 的回应。这个 sanity check 确认三件事：</p>
+<ol>
+<li><code>.env</code> 被 <code>main.py</code> 读到了。</li>
+<li>你的 API key 有效（不是 401）。</li>
+<li>Claude SDK 正确安装，可以调用。</li>
+</ol>
+<p>如果这里失败，就不要继续往 lesson 64-65 推进——MCP 只会在已经坏掉的设置上加更多移动零件。</p>
+<hr />
+<h2>为什么这节课重要</h2>
+<p>一个能跑的 baseline 是后续所有有意义调试的前提。Lesson 65 的 MCP inspector 和 lesson 64 的 tool 实现都假设你已经能从 <code>main.py</code> 打到 Claude。这节课很短，因为它的任务不是教概念——它是在为接下来整章排除环境借口。</p>
+<p>具体来说，Lesson 63 建立了：</p>
+<table>
+<thead>
+<tr>
+<th>设置项目</th>
+<th>后面哪些 lessons 会用到</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>有 <code>ANTHROPIC_API_KEY</code> 的 <code>.env</code></td>
+<td>从这里开始每一课</td>
+</tr>
+<tr>
+<td>可运作的 <code>main.py</code> CLI</td>
+<td>64、65、66、68、70</td>
+</tr>
+<tr>
+<td>装好的 <code>mcp</code> Python SDK</td>
+<td>64（<code>FastMCP</code>）、65（<code>mcp dev</code>）</td>
+</tr>
+<tr>
+<td>装好的 <code>anthropic</code> Python SDK</td>
+<td>每次调用 Claude</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Python MCP SDK 技术栈</h2>
+<p>Lesson 63 还没写任何 MCP 代码，但已经装了你下一步要用的 runtime。后面 lessons 会用到的两个相关 import：</p>
+<pre><code class="language-python">from mcp.server.fastmcp import FastMCP   # lesson 64
+from anthropic import Anthropic          # 每一课
+</code></pre>
+<p><code>FastMCP</code> 是高阶的 server builder（decorator + type hints）；<code>mcp</code> 包也附了 client API 和 CLI inspector（<code>mcp dev</code>，lesson 65 会用）。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>跳过 baseline 测试。</strong> 如果 <code>what's 1+1?</code> 都不行，停下来修设置——不要在上面堆 MCP。</li>
+<li><strong>忘了 <code>.env</code>。</strong> Anthropic SDK 是从环境变量读 <code>ANTHROPIC_API_KEY</code>；少了 key 会在调用时才报错，不是 import 时。</li>
+<li><strong>用 global Python interpreter。</strong> <code>uv</code> 和 venv 都会隔离依赖；global 安装容易和 <code>mcp</code> 包版本冲突。</li>
+<li><strong>以为 production 也要两边都做。</strong> 重读"重要的架构备注"——真实项目通常只做一边。</li>
+<li><strong>忽略 README。</strong> README 带着精确的设置步骤；Anthropic 的课程项目和它高度耦合。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>这节课的真正重点是<strong>消除设置上的模糊</strong>。MCP 带进来比纯 tool use 更多的移动零件（subprocesses、transports、SDK 版本）。之后要调试这些的唯一办法，是从一个已知正常的 baseline 开始。让 <code>what's 1+1?</code> 跑起来是 5 分钟的投资，接下来四节课都在赚回来。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>："CLI chatbot + 内存文档 + 读/写 tools"是 MCP 入门的经典示例——考试情境题可能会呼应它。</li>
+<li><strong>D1（Agentic Architecture）</strong>：了解 <code>main.py</code> 是 host、<code>mcp_client.py</code> 是 client、<code>mcp_server.py</code> 是 server——这个三位组合会在后面题目反复出现。</li>
+<li>要记得"client 和 server 两边都做"是教学选择，不是 production 推荐。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ch07 的示范项目是什么？</td>
+<td>一个 CLI chatbot，用 MCP client 加上自定义 MCP server 来读取和更新内存里的文档集合。</td>
+</tr>
+<tr>
+<td>自定义 MCP server 会对外提供哪两个 tools？</td>
+<td>一个读取文档的 tool 和一个编辑文档（find and replace）的 tool。</td>
+</tr>
+<tr>
+<td>为什么这门课在同一个 repo 里做 client 和 server？</td>
+<td>纯粹为了教学，让你在同一个 codebase 看到 MCP 协议的两边。</td>
+</tr>
+<tr>
+<td>真实世界的做法通常长怎样？</td>
+<td>只做 client 或 server 其中一边——不会两边都做——把服务开放给别人或消费现成的 servers。</td>
+</tr>
+<tr>
+<td>第一次跑之前要在 <code>.env</code> 加什么？</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td>推荐用哪个 Python 工具跑这个项目？</td>
+<td><code>uv run main.py</code></td>
+</tr>
+<tr>
+<td>设置完的 baseline sanity check 是什么？</td>
+<td>问 chatbot <code>what's 1+1?</code> 并确认 Claude 有回答。</td>
+</tr>
+<tr>
+<td>starter 项目有哪些文件？</td>
+<td><code>main.py</code>、<code>mcp_client.py</code>、<code>mcp_server.py</code>、<code>.env</code>、和一份 README。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

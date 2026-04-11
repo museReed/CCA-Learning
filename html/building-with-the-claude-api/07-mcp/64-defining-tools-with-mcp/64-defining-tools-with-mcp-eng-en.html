@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defining Tools With Mcp Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Tools with MCP — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (tool schema design), 2.3 (MCP primitives: tools), 1.2 (agent loop integration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 64</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Lesson 64 shows how the Python MCP SDK (<code>FastMCP</code>) collapses tool authoring into decorators plus type hints — the SDK auto-generates the JSON schema from your function signature and Pydantic <code>Field</code> metadata, so you write normal Python instead of hand-rolled JSON Schema.</p>
+<hr />
+<h2>Why the SDK Matters</h2>
+<p>In Ch04 tool use, every tool definition meant writing the same verbose JSON schema:</p>
+<pre><code class="language-python">tools = [{
+    &quot;name&quot;: &quot;read_doc_contents&quot;,
+    &quot;description&quot;: &quot;...&quot;,
+    &quot;input_schema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;doc_id&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;...&quot;}
+        },
+        &quot;required&quot;: [&quot;doc_id&quot;]
+    }
+}]
+</code></pre>
+<p>That's fine for one tool and painful for twenty. The Python MCP SDK (<code>mcp.server.fastmcp.FastMCP</code>) uses a decorator-driven pattern that:</p>
+<ul>
+<li>Takes a plain Python function</li>
+<li>Reads its type hints and <code>Field(description=...)</code> annotations</li>
+<li>Generates the equivalent JSON schema automatically</li>
+<li>Registers the tool with the MCP server</li>
+</ul>
+<p>The result: tool definition shrinks to a few lines that read like normal Python code.</p>
+<hr />
+<h2>Setting Up the Server</h2>
+<p>Creating an MCP server is one import and one line:</p>
+<pre><code class="language-python">from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP(&quot;DocumentMCP&quot;, log_level=&quot;ERROR&quot;)
+</code></pre>
+<ul>
+<li><code>"DocumentMCP"</code> is the server's name (identifier surfaced to clients).</li>
+<li><code>log_level="ERROR"</code> silences noisy informational logs during development.</li>
+</ul>
+<p>The <code>mcp</code> object is the registry onto which you attach tools (and, in later lessons, resources and prompts).</p>
+<hr />
+<h2>The In-Memory Document Store</h2>
+<p>The lesson uses a plain Python dict as the "database":</p>
+<pre><code class="language-python">docs = {
+    &quot;deposition.md&quot;: &quot;This deposition covers the testimony of Angela Smith, P.E.&quot;,
+    &quot;report.pdf&quot;: &quot;The report details the state of a 20m condenser tower.&quot;,
+    &quot;financials.docx&quot;: &quot;These financials outline the project's budget and expenditure&quot;,
+    &quot;outlook.pdf&quot;: &quot;This document presents the projected future performance of the&quot;,
+    &quot;plan.md&quot;: &quot;The plan outlines the steps for the project's implementation.&quot;,
+    &quot;spec.txt&quot;: &quot;These specifications define the technical requirements for the equipment&quot;
+}
+</code></pre>
+<p>Keys are document IDs, values are the text contents. No persistence — documents live in process memory. This deliberately keeps the focus on MCP authoring rather than DB plumbing.</p>
+<hr />
+<h2>Tool 1: <code>read_doc_contents</code></h2>
+<p>The decorator-driven read tool:</p>
+<pre><code class="language-python">@mcp.tool(
+    name=&quot;read_doc_contents&quot;,
+    description=&quot;Read the contents of a document and return it as a string.&quot;
+)
+def read_document(
+    doc_id: str = Field(description=&quot;Id of the document to read&quot;)
+):
+    if doc_id not in docs:
+        raise ValueError(f&quot;Doc with id {doc_id} not found&quot;)
+
+    return docs[doc_id]
+</code></pre>
+<p>What's happening under the hood:</p>
+<table>
+<thead>
+<tr>
+<th>Source element</th>
+<th>Becomes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@mcp.tool(name=..., description=...)</code></td>
+<td>Top-level tool metadata in the MCP schema</td>
+</tr>
+<tr>
+<td><code>doc_id: str</code> type hint</td>
+<td><code>{"type": "string"}</code> in the generated JSON Schema</td>
+</tr>
+<tr>
+<td><code>Field(description="...")</code></td>
+<td>The <code>description</code> for the <code>doc_id</code> property</td>
+</tr>
+<tr>
+<td>Function body</td>
+<td>The callable executed when Claude issues <code>CallToolRequest</code></td>
+</tr>
+<tr>
+<td><code>raise ValueError(...)</code></td>
+<td>Surfaces as a tool error that Claude can read and potentially recover from</td>
+</tr>
+</tbody>
+</table>
+<p>Note that the function name (<code>read_document</code>) is independent from the MCP tool name (<code>read_doc_contents</code>); the decorator's <code>name=</code> argument is authoritative.</p>
+<hr />
+<h2>Tool 2: <code>edit_document</code></h2>
+<p>The second tool is a simple find-and-replace editor:</p>
+<pre><code class="language-python">@mcp.tool(
+    name=&quot;edit_document&quot;,
+    description=&quot;Edit a document by replacing a string in the documents content with a new string.&quot;
+)
+def edit_document(
+    doc_id: str = Field(description=&quot;Id of the document that will be edited&quot;),
+    old_str: str = Field(description=&quot;The text to replace. Must match exactly, including whitespace.&quot;),
+    new_str: str = Field(description=&quot;The new text to insert in place of the old text.&quot;)
+):
+    if doc_id not in docs:
+        raise ValueError(f&quot;Doc with id {doc_id} not found&quot;)
+
+    docs[doc_id] = docs[doc_id].replace(old_str, new_str)
+</code></pre>
+<p>Key engineering details:</p>
+<ul>
+<li>Three parameters, each annotated with <code>Field(description=...)</code> so Claude understands their roles.</li>
+<li>The <code>old_str</code> description explicitly notes "must match exactly, including whitespace" — this is Claude-facing documentation that reduces flaky edits.</li>
+<li>Implementation uses Python's built-in <code>str.replace</code>, which replaces <strong>all</strong> occurrences; if uniqueness matters in your real system, add a match-count check.</li>
+<li>The function has no explicit return; it mutates the dict in place.</li>
+</ul>
+<hr />
+<h2>Error Handling via <code>ValueError</code></h2>
+<p>Both tools raise <code>ValueError</code> when they receive a bad <code>doc_id</code>. The MCP SDK converts these into tool error responses that Claude receives in the next <code>tool_result</code> block, giving it a chance to:</p>
+<ul>
+<li>Apologize and ask the user for a valid ID</li>
+<li>Retry with a different ID if one looks similar</li>
+<li>Escalate to a "can't find this doc" final response</li>
+</ul>
+<p>This is the <strong>structured error</strong> pattern: you give Claude a readable explanation instead of a silent failure, and the agent loop can incorporate the error into its reasoning.</p>
+<hr />
+<h2>Key Benefits of the SDK Approach</h2>
+<p>The lesson highlights five wins over hand-written tool schemas:</p>
+<ol>
+<li><strong>Automatic JSON Schema generation</strong> from Python type hints.</li>
+<li><strong>Clean, readable code</strong> — the tool body looks like normal Python.</li>
+<li><strong>Built-in parameter validation</strong> via Pydantic <code>Field</code>.</li>
+<li><strong>Reduced boilerplate</strong> — no manual <code>{"type": "object", "properties": ...}</code> dictionaries.</li>
+<li><strong>Type safety and IDE support</strong> during development.</li>
+</ol>
+<p>The meta-point: the SDK lets you focus on <strong>business logic</strong> (what the tool does) while the protocol (schema, serialization) is handled for you.</p>
+<hr />
+<h2>Advanced Considerations Not Shown in the Lesson</h2>
+<p>The source is intentionally minimal, but real servers should also consider:</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Return type hints</td>
+<td>Fully typed returns let FastMCP describe the result shape</td>
+</tr>
+<tr>
+<td>Optional parameters with defaults</td>
+<td>Use <code>Field(default=..., description=...)</code></td>
+</tr>
+<tr>
+<td>Long descriptions</td>
+<td>The <code>description</code> is Claude's instruction manual — invest in clarity</td>
+</tr>
+<tr>
+<td>Side-effect logging</td>
+<td><code>edit_document</code> mutates state; in prod you'd audit-log every call</td>
+</tr>
+<tr>
+<td>Concurrency safety</td>
+<td>The dict is shared state; in prod use a lock or an async-safe store</td>
+</tr>
+</tbody>
+</table>
+<p>None of these are required to complete the course project, but they distinguish "works in demo" from "ships to users".</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Forgetting <code>Field</code> descriptions.</strong> Without them Claude only sees the parameter name — tool quality drops sharply.</li>
+<li><strong>Using the function name instead of the MCP tool name.</strong> The decorator's <code>name=</code> is what Claude sees; your function name is internal.</li>
+<li><strong>Letting errors bubble as unhandled exceptions.</strong> <code>ValueError</code> is converted into a readable tool error; arbitrary exceptions are noisier and less recoverable.</li>
+<li><strong>Assuming tool names and schemas are stable.</strong> If you rename or reshape a tool, clients (including the MCP inspector in lesson 65) need to re-list tools.</li>
+<li><strong>Relying on the description doing prompt engineering.</strong> Keep descriptions truthful; don't embed contradictory instructions that confuse Claude.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The Python MCP SDK turns tool authoring into normal Python code with two sprinkles of metadata (<code>@mcp.tool(...)</code> + <code>Field(description=...)</code>). That is the central productivity win of MCP: you trade hand-written JSON Schema for decorated functions, and the framework handles the protocol. Every tool you add later in the course follows this exact pattern.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know <code>FastMCP("Name", log_level=...)</code>, the <code>@mcp.tool(name, description)</code> decorator, and how <code>Field(description=...)</code> populates the schema.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Understand how a <code>ValueError</code> is surfaced to Claude as a recoverable tool error in the agent loop.</li>
+<li>Scenario questions may ask: "how does the SDK know to require <code>doc_id</code>?" — answer: because it's a positional parameter with no default, the SDK marks it required in the schema.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which class initializes an MCP server in the Python SDK?</td>
+<td><code>FastMCP</code> from <code>mcp.server.fastmcp</code></td>
+</tr>
+<tr>
+<td>How do you declare a tool?</td>
+<td>Decorate a function with <code>@mcp.tool(name=..., description=...)</code></td>
+</tr>
+<tr>
+<td>How do you document a parameter for Claude?</td>
+<td>Use <code>Pydantic</code>'s <code>Field(description="...")</code> as the parameter default</td>
+</tr>
+<tr>
+<td>What does the SDK generate from your type hints?</td>
+<td>The JSON Schema (including <code>type</code>, <code>properties</code>, and <code>required</code>)</td>
+</tr>
+<tr>
+<td>How do the two demo tools persist data?</td>
+<td>They don't — documents live in a module-level Python dict (in-memory)</td>
+</tr>
+<tr>
+<td>What happens if <code>read_doc_contents</code> is called with an unknown doc_id?</td>
+<td>The tool raises <code>ValueError</code>, which is surfaced to Claude as a tool error</td>
+</tr>
+<tr>
+<td>How many tools does the demo server expose?</td>
+<td>Two — <code>read_doc_contents</code> and <code>edit_document</code></td>
+</tr>
+<tr>
+<td>What are the five benefits of the SDK approach listed in the lesson?</td>
+<td>Auto JSON Schema, clean code, Pydantic validation, less boilerplate, type safety/IDE support</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

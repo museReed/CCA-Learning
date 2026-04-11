@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Setup Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Project Setup — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives）、1.2（agent loop 整合）、2.1（tool schemas）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 63</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Lesson 63 是「環境就緒」檢查點：在團隊寫任何 MCP 程式碼之前，先驗證 baseline CLI chatbot 能和 Claude 講話——因為後面每一個 MCP 功能都是疊在這個 baseline 上面。</p>
+<hr />
+<h2>心智模型：IKEA 組裝前的檢查頁</h2>
+<p>把這節課想成 IKEA 說明書的第一頁：「打開箱子、把零件排出來、確認每項都在」。你還沒組任何東西，你只是在確認自己<strong>可以</strong>組裝。</p>
+<table>
+<thead>
+<tr>
+<th>IKEA 步驟</th>
+<th>MCP 專案步驟</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>開箱把零件排出來</td>
+<td>解壓 <code>cli_project.zip</code></td>
+</tr>
+<tr>
+<td>核對零件清單</td>
+<td>確認 <code>main.py</code>、<code>mcp_client.py</code>、<code>mcp_server.py</code> 都在</td>
+</tr>
+<tr>
+<td>檢查工具</td>
+<td>裝好 <code>uv</code> 或 <code>pip</code> + venv</td>
+</tr>
+<tr>
+<td>檢查接頭</td>
+<td>在 <code>.env</code> 加上 <code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td>試鎖一根螺絲</td>
+<td>問 bot <code>what's 1+1?</code></td>
+</tr>
+</tbody>
+</table>
+<p>跳過 IKEA 檢查頁的結果是書架晃。跳過 Lesson 63 的結果是你之後抓 MCP bug 時，發現那些 bug 根本是設定問題偽裝的——而這類 bug 最吃工程時間。</p>
+<hr />
+<h2>為什麼這節課對 PM 重要</h2>
+<p>PM 可能會想「為什麼要花一節課做『裝起來』？」。三個理由：</p>
+<ol>
+<li><strong>環境是 AI 功能陣亡的地方。</strong>「demo 沒事」→「prod 出包」通常是環境問題，不是程式碼問題。MCP 在一般的 Claude API 使用上面再多疊 subprocesses 和 SDK 版本。</li>
+<li><strong>專案形狀 = 你的功能形狀。</strong> 這節課的 CLI chatbot 就是最小可行的參考架構：host + client + server + env file。PM 只要把這個三位組合內化，就能對未來任何 MCP 功能做 reasoning。</li>
+<li><strong>定義 bootstrap 階段的 "done"。</strong> 這節課給團隊一個清楚的 initial setup 驗收標準：<code>what's 1+1?</code> 有回答就算。這就少了一次「到底通了沒？」的模糊對話。</li>
+</ol>
+<hr />
+<h2>產品相關的架構提醒</h2>
+<p>這節課明確指出真實專案通常只做 MCP client <strong>或</strong> MCP server 的其中一邊，不會兩邊都做：</p>
+<table>
+<thead>
+<tr>
+<th>團隊意圖</th>
+<th>做哪邊</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「我們要做一個 Claude 驅動的聊天，處理我們的內部資料」</td>
+<td>MCP client + 現有 server</td>
+</tr>
+<tr>
+<td>「我們要把我們的 SaaS 開放給市場上所有 AI agent」</td>
+<td>MCP server 給別人用</td>
+</tr>
+<tr>
+<td>「我們在做平台層」</td>
+<td>可能兩邊都做，但應該在不同 repo</td>
+</tr>
+</tbody>
+</table>
+<p>從 PM 角度這是一個<strong>一次下定、長期遵守的 scoping 決策</strong>：</p>
+<ul>
+<li>MCP server 作者 = 你在把資料/動作產品化給 agents。</li>
+<li>MCP client 作者 = 你在把 AI 體驗產品化給使用者。</li>
+</ul>
+<p>這門課把兩邊做在同一個 repo 純粹是為了教學——別讓它模糊你產品的 scope。</p>
+<hr />
+<h2>示範專案的產品應用</h2>
+<p>這節課的 CLI chatbot 是玩具，但形狀可以直接用：</p>
+<table>
+<thead>
+<tr>
+<th>實際產品</th>
+<th>形狀怎麼對應</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>內部文件助理</td>
+<td>記憶體 docs → 真實 knowledge base；CLI → 網頁 UI</td>
+</tr>
+<tr>
+<td>會改 config 的開發者工具 CLI</td>
+<td>find-and-replace tool → 範本化 config 修改</td>
+</tr>
+<tr>
+<td>Ops runbook 助理</td>
+<td>read + update tools → runbook 讀取和修改</td>
+</tr>
+<tr>
+<td>法遵審查機器人</td>
+<td>read tool → 讀政策文件；update tool → 提議紅字修改</td>
+</tr>
+</tbody>
+</table>
+<p>只要 PM 在評估的 AI 功能是「讀+寫小塊有限資料集」，都能把這個專案當作可動的範本。</p>
+<hr />
+<h2>PM 決策框架</h2>
+<p>在團隊帶著真實產品情境進入這節課前要問：</p>
+<ol>
+<li><strong>我們產品是哪一邊？</strong> Client（消費 server）、server（發佈 tools）、還是少見的兩邊都做？</li>
+<li><strong>Prod 的 secret 放哪？</strong> <code>.env</code> 開發用沒問題；production 要用 secret manager。</li>
+<li><strong>我們的最小可行資料集是什麼？</strong> 在 demo 裡是 dict。在 prod 是你能安全讓 Claude 讀寫的東西。</li>
+<li><strong>CLI 和 UI 層誰擁有？</strong> 這節課用 CLI；你產品會有真的前端。計畫好轉換。</li>
+<li><strong>「setup works」的驗收標準？</strong> 抄這節課的做法——定義一個小小的可測試 smoke check。</li>
+</ol>
+<hr />
+<h2>運營和成本筆記</h2>
+<p>就算是空白 project 也有成本意涵：</p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>PM 為什麼該在意</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API key</td>
+<td><code>what's 1+1?</code> 一跑就開始計費</td>
+</tr>
+<tr>
+<td><code>uv</code> vs <code>pip</code></td>
+<td>影響 CI 時間和 onboarding 速度</td>
+</tr>
+<tr>
+<td><code>.env</code> 政策</td>
+<td>Secret 外洩風險——第一天就 gitignore</td>
+</tr>
+<tr>
+<td>Starter code vs completed code</td>
+<td>Anthropic 提供 <code>cli_project.zip</code> 和 <code>cli_project_COMPLETE.zip</code>，選一份當參考</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>把 Lesson 63 當成可以跳</strong> — baseline 壞掉會讓後面每一課都更難 debug。</li>
+<li><strong>以為 CLI 就是最終 UX</strong> — 它是課程產物；你的產品需要真 UI。</li>
+<li><strong>模糊 client/server 的擁有權</strong> — 不要只因為課程這樣做就把「兩邊都做」塞到同一個 service。</li>
+<li><strong>API key 永遠住在 <code>.env</code></strong> — 上線前要規劃搬到 secret manager。</li>
+<li><strong>沒定義 smoke test</strong> — 抄 <code>1+1?</code> 的模式，縮放到你自己產品真實的資料路徑。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>這節課看起來像 DevOps 水管，但它偷偷塞給 PM 一個很有價值的成品：一個<strong>最小可行的 MCP 架構</strong>（host + client + server + env + baseline check）。任何你要 scope 的真實產品，都可以視為這個形狀的專門化。把這個形狀記住，它到處都在重複出現。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：知道 Ch07 的工作範例是一個 CLI chatbot，對記憶體文件做 read 和 update tools。</li>
+<li><strong>D1（Agentic Architecture）</strong>：認識 host/client/server 三位組合是 MCP 的標準排版。</li>
+<li>預期會有情境題問：給定產品目標，團隊該做 client 還是 server？</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lesson 63 實際在教什麼？</td>
+<td>如何 bootstrap Ch07 專案，讓 chatbot 在任何 MCP code 寫出來之前就能和 Claude 講話。</td>
+</tr>
+<tr>
+<td>Baseline smoke test 是什麼？</td>
+<td>問 bot <code>what's 1+1?</code> 並確認 Claude 有回答。</td>
+</tr>
+<tr>
+<td>Production 時團隊該同時做 MCP client 和 server 嗎？</td>
+<td>通常只做一邊——課程是為了教學才兩邊做。</td>
+</tr>
+<tr>
+<td>Demo 把 document 存在哪？</td>
+<td>記憶體 Python dict——沒有資料庫。</td>
+</tr>
+<tr>
+<td>README 支援哪兩條安裝路徑？</td>
+<td><code>uv run main.py</code>（推薦）和標準 Python + pip + <code>python main.py</code>。</td>
+</tr>
+<tr>
+<td>第一次跑之前必備的 secret 是什麼？</td>
+<td><code>.env</code> 裡的 <code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td>「client 或 server，不是兩邊」的備註 PM 要帶走什麼？</td>
+<td>你產品通常只挑一個角色；混用是 scoping 出問題的徵兆。</td>
+</tr>
+<tr>
+<td>這節課給 PM 什麼具體成品？</td>
+<td>一個可重用的 MCP 最小可行架構範本：host + client + server + env + baseline check。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

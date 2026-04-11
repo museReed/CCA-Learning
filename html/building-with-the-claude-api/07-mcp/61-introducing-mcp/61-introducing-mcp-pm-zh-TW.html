@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing Mcp Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing MCP — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives）、2.1（tool schemas）、1.2（agent loop 整合）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 61</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>MCP 是 Claude 整合的「不要重造輪子」層：你的團隊不用為每一個想串的 SaaS 都去寫 tool 定義、測試、持續維護，而是直接裝一個現成的 MCP server，就能免費繼承整個 tool 目錄。</p>
+<hr />
+<h2>心智模型：Claude 的 App Store</h2>
+<p>把 Ch04 的 tool use 想像成教 Claude 怎麼使用一個你客製打造的裝置；MCP 就是那個裝置連上去的 <strong>App Store</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>沒有 MCP</th>
+<th>有 MCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每個整合都是客製品</td>
+<td>整合可以「安裝」</td>
+</tr>
+<tr>
+<td>工程團隊擁有每個 tool schema</td>
+<td>服務提供者或社群擁有</td>
+</tr>
+<tr>
+<td>加 GitHub 要寫幾十個 schema</td>
+<td>加 GitHub 只要裝一個 server</td>
+</tr>
+<tr>
+<td>每次 API 改版都是你的維護問題</td>
+<td>上游發新版本</td>
+</tr>
+</tbody>
+</table>
+<p>「App Store」不是官方說法，但它抓住了最重要的產品真相：MCP 徹底改變了整合工作的經濟學。</p>
+<hr />
+<h2>這節課為什麼對 PM 重要</h2>
+<p>一個產品團隊在評估「我們能不能做一個 AI 助理，讓它回答使用者關於我們 GitHub / Jira / Sentry / Notion 的問題？」歷來答案都是：</p>
+<blockquote>
+<p>「可以，但要花 3-6 個月工程來寫和維護這些 tool 整合。」</p>
+</blockquote>
+<p>MCP 把這個時間線大幅壓縮。粗略估計：</p>
+<table>
+<thead>
+<tr>
+<th>整合來源</th>
+<th>大概多久可以「Claude 能用」</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>為單一 SaaS 客製寫 tools</td>
+<td>數週到數月</td>
+</tr>
+<tr>
+<td>安裝官方 MCP server</td>
+<td>數小時</td>
+</tr>
+<tr>
+<td>安裝社群 MCP server</td>
+<td>數小時（加上 due diligence）</td>
+</tr>
+<tr>
+<td>還沒有 MCP server</td>
+<td>回到原本的時間線</td>
+</tr>
+</tbody>
+</table>
+<p>PM 在評估任何會碰外部系統的 AI 功能時，第一個該問的問題是：「這個服務有沒有現成的 MCP server？」</p>
+<hr />
+<h2>用 PM 語言翻譯 GitHub 範例</h2>
+<p>這節課用 GitHub 當主要範例。PM 應該這樣內化：</p>
+<blockquote>
+<p>「讓 Claude 能回答<em>任何</em>GitHub 問題，成本是多少？」</p>
+</blockquote>
+<p>沒有 MCP 的話，「任何 GitHub 問題」意味著你要承諾撰寫、測試、維護一個 tool 給使用者可能提到的每個功能：repos、PRs、issues、projects、releases、actions、reviews、members、permissions、search、notifications。那是一個跨季度的專案——還沒輪到 Jira 或 Slack。</p>
+<p>有了 MCP，「任何 GitHub 問題」只要連到 GitHub MCP server——tools 都已經寫好了，服務提供者（或可信的社群）會維護它們。</p>
+<hr />
+<h2>產品應用場景</h2>
+<h3>MCP 是對的答案</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>為什麼 MCP 合適</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>橫跨多個 SaaS 工具的 AI 助理</td>
+<td>N 個 install 指令換 N 個生態系</td>
+</tr>
+<tr>
+<td>來自利害關係人的長尾整合需求</td>
+<td>可以增量加，不用重構架構</td>
+</tr>
+<tr>
+<td>內部「AI 對公司資料」的 pilot</td>
+<td>把內部 API 包成一個 MCP server，所有 Claude 產品都能用</td>
+</tr>
+<tr>
+<td>需要很多小動作的 agent workflow</td>
+<td>每個動作都是現成的 MCP tool</td>
+</tr>
+</tbody>
+</table>
+<h3>MCP 太重了</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>改用什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>對簡單內部 endpoint 的一次性查詢</td>
+<td>直接寫 tool 比裝 server 快</td>
+</tr>
+<tr>
+<td>只需要讀一份靜態文件</td>
+<td>用 resource 或純 context</td>
+</tr>
+<tr>
+<td>還在驗證使用者是否需要這個功能</td>
+<td>先 hard-code，等到訊號明確再說</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 決策框架</h2>
+<p>有人提議「我們加 X 整合」時要問：</p>
+<ol>
+<li><strong>廠商有沒有官方 MCP server？</strong> 先從這裡開始——品質最高。</li>
+<li><strong>有社群 MCP server 嗎？</strong> 可以用，但要做資安和維護的 due diligence。</li>
+<li><strong>如果都沒有，這個功能值得自己寫嗎？</strong> 用「每週會用或涉及安全」的標準。</li>
+<li><strong>我們真正需要廠商 API 的哪個子集？</strong> 避免 scope creep——如果只要 3 個功能，不要裝 80 個 tools。</li>
+<li><strong>MCP server 掛掉時有什麼 fallback？</strong> MCP server 是獨立 process，要規劃失敗情境。</li>
+</ol>
+<hr />
+<h2>隱藏的 PM 優勢</h2>
+<p>Tools/prompts/resources 這三種 primitive 也是 PM 的槓桿點：</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>PM 真正買到的東西</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tools</td>
+<td>助理能代替使用者做的動作</td>
+</tr>
+<tr>
+<td>Prompts</td>
+<td>預先寫好的 workflow，一鍵載入</td>
+</tr>
+<tr>
+<td>Resources</td>
+<td>助理可以讀取的策展過的資料面</td>
+</tr>
+</tbody>
+</table>
+<p>PM 可以把 MCP 採用 scope 成「裝這個 server 用它的 tools，順便把它的 prompts 開放給 power users」——同一個 server 能交付多層價值。</p>
+<hr />
+<h2>生態系定位</h2>
+<p>PM 也該知道：</p>
+<table>
+<thead>
+<tr>
+<th>事實</th>
+<th>產品意涵</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 是開放協定</td>
+<td>你沒有被鎖在 Anthropic；整合可以搬到其他 model host</td>
+</tr>
+<tr>
+<td>任何人都能寫 server</td>
+<td>廠商、社群、你的內部平台團隊</td>
+</tr>
+<tr>
+<td>服務提供者常釋出官方 server</td>
+<td>評估功能時第一站</td>
+</tr>
+<tr>
+<td>生態系成長很快</td>
+<td>「還沒有 MCP server」這個回答的半衰期很短</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>把 MCP 當成技術細節</strong> — 它是每一次整合的 <em>buy vs build</em> 決策。</li>
+<li><strong>沒問使用者實際需要什麼 tools 就裝一堆 server</strong> — tool 氾濫會膨脹 context 拖慢回應。</li>
+<li><strong>以為 MCP 解決 auth</strong> — 憑證管理、rate limits、權限還是你產品的問題。</li>
+<li><strong>忘了預算 server 的更新</strong> — MCP server 有版本，過期的版本會默默出錯。</li>
+<li><strong>把 MCP 和 tool use 搞混</strong> — tool use 是 Claude 協定，MCP tools 還是跑在上面。你不能跳過學 tool use。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>MCP 不是技術升級，而是<strong>經濟</strong>升級。它把「讓 AI 功能接觸真實系統」的主要成本（撰寫和維護 tool 整合）交給別人承擔。PM 的工作是注意到：「我們該自己寫這個整合嗎？」的答案已經從「好幾個月的工作」變成「一行 install 指令」——然後重新排優先序。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：知道 MCP 是什麼、誰在寫 MCP servers、三種 primitives。</li>
+<li><strong>D1（Agentic Architecture）</strong>：了解 MCP 是 agent 插入的可重複使用整合層。</li>
+<li>考題常問「MCP 解決什麼問題？」——答案是<em>撰寫/維護 tool 整合的負擔</em>。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 一句話 pitch 是什麼？</td>
+<td>一個讓你「安裝」現成 tool 整合到 Claude 的協定，而不用自己寫。</td>
+</tr>
+<tr>
+<td>PM 在評估新 Claude 整合時第一個該問什麼？</td>
+<td>「這個服務有沒有官方或社群的 MCP server？」</td>
+</tr>
+<tr>
+<td>MCP 的三種 primitives 是什麼？</td>
+<td>Tools、Prompts、Resources</td>
+</tr>
+<tr>
+<td>MCP 取代 tool use 嗎？</td>
+<td>不——它是分發層，還是跑在 tool use 上面。</td>
+</tr>
+<tr>
+<td>誰常寫 MCP server？</td>
+<td>服務提供者（官方）、社群維護者、或你自己的內部團隊</td>
+</tr>
+<tr>
+<td>PM 採用 MCP server 時該預算什麼？</td>
+<td>Token 成本、延遲、故障面、資安審查、版本維護</td>
+</tr>
+<tr>
+<td>MCP 是 Anthropic 專屬嗎？</td>
+<td>不——它是開放協定，任何 model host 或 application 都能用。</td>
+</tr>
+<tr>
+<td>GitHub 範例中呈現的主要問題是什麼？</td>
+<td>要為單一服務的 API 撰寫和維護幾十個客製 tools。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

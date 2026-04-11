@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defining Tools With Mcp Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Tools with MCP — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (tool schemas), 2.3 (MCP primitives: tools), 1.2 (agent loop integration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 64</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Lesson 64 is where tool authoring becomes <strong>cheap</strong>: the Python MCP SDK replaces hand-written JSON Schema with decorated functions, collapsing the time-to-first-tool from "a day of boilerplate" to "a paragraph of Python" — which changes how PMs should scope AI features.</p>
+<hr />
+<h2>Mental Model: From Schematics to Business Cards</h2>
+<p>Before the SDK, adding a tool felt like drafting electrical schematics:</p>
+<table>
+<thead>
+<tr>
+<th>Pre-SDK (hand-written JSON)</th>
+<th>With SDK (decorators + type hints)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Long JSON Schema docs</td>
+<td>A decorated Python function</td>
+</tr>
+<tr>
+<td>Easy to miss a <code>required</code> key</td>
+<td>SDK fills it in from function signature</td>
+</tr>
+<tr>
+<td>Hard for non-author devs to read</td>
+<td>Reads like business logic</td>
+</tr>
+<tr>
+<td>Docs live far from the code</td>
+<td>Description sits on the parameter itself</td>
+</tr>
+</tbody>
+</table>
+<p>Think of MCP tools with the SDK as <strong>business cards</strong>: small, standardized, legible — a new tool fits on a few lines and is ready to hand out to Claude.</p>
+<hr />
+<h2>Why This Lesson Matters for PMs</h2>
+<p>Three product-level consequences of the SDK's ergonomics:</p>
+<ol>
+<li><strong>Tool count becomes cheap.</strong> If adding a new tool costs minutes, PMs can safely ask for more granular capabilities — one tool per intent — instead of mega-tools that bundle behavior.</li>
+<li><strong>Descriptions become product copy.</strong> The <code>description</code> is Claude's instruction manual; writing it well is a PM/writer job, not just an engineering job. It is the tool's prompt engineering.</li>
+<li><strong>Error handling is part of UX.</strong> When a tool fails (<code>ValueError</code>), Claude surfaces the error to the user. That means tool error messages are <strong>user-visible copy</strong>. PMs should review them.</li>
+</ol>
+<hr />
+<h2>Walkthrough of the Two Demo Tools</h2>
+<p>The lesson implements two tools against an in-memory document store:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Business role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read_doc_contents</code></td>
+<td>"Let Claude look up a specific document by ID"</td>
+</tr>
+<tr>
+<td><code>edit_document</code></td>
+<td>"Let Claude propose and apply a find/replace edit"</td>
+</tr>
+</tbody>
+</table>
+<p>The descriptions explicitly warn Claude about subtle gotchas — for example, <code>old_str</code> specifies "must match exactly, including whitespace". A PM reading this should treat tool descriptions as <strong>the guardrail layer between Claude and real-world side effects</strong>.</p>
+<h3>The Find/Replace Caveat (Product Warning)</h3>
+<p><code>edit_document</code> uses Python's <code>str.replace</code>, which replaces <strong>every</strong> occurrence in the document. That's fine for a demo; in a real product, it is a footgun:</p>
+<blockquote>
+<p>"Replace the word 'budget' with 'expenditure'" could silently change every mention of 'budget' across the document, not just the one the user intended.</p>
+</blockquote>
+<p>A PM should flag this. Real products typically need:</p>
+<ul>
+<li>A uniqueness check on the match</li>
+<li>A preview-before-apply step</li>
+<li>An audit log of all edits</li>
+<li>User approval for destructive actions</li>
+</ul>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>Where lightweight tool authoring pays off</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why it fits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rapid feature iteration</td>
+<td>A new tool is a ~10-line change; PMs can experiment</td>
+</tr>
+<tr>
+<td>Domain-specific assistants</td>
+<td>Author one tool per domain action (read policy, propose edit, post summary)</td>
+</tr>
+<tr>
+<td>Internal platform teams</td>
+<td>Standardize a library of company tools via a shared MCP server</td>
+</tr>
+<tr>
+<td>Tool catalogs</td>
+<td>Multiple tools with clear, single responsibilities; Claude picks at runtime</td>
+</tr>
+</tbody>
+</table>
+<h3>Where low friction is a risk</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Caution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mutating production systems</td>
+<td>Low friction makes it easy to ship risky tools — require review</td>
+</tr>
+<tr>
+<td>Ambiguous tool names</td>
+<td>Claude's selection depends on description quality; sloppy copy = wrong tool chosen</td>
+</tr>
+<tr>
+<td>Overlapping tools</td>
+<td>Two tools doing similar things confuses Claude; PMs should deduplicate</td>
+</tr>
+<tr>
+<td>Silent side effects</td>
+<td><code>edit_document</code> replaces all matches; real products need explicit confirmation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework: Reviewing a Tool PR</h2>
+<p>When your team adds a new MCP tool, as a PM you should check:</p>
+<ol>
+<li><strong>Is the tool's <code>name</code> clear and imperative?</strong> (<code>read_doc_contents</code>, not <code>docs_tool_3</code>)</li>
+<li><strong>Does the <code>description</code> tell Claude what it does AND what it won't do?</strong> (e.g. "must match exactly, including whitespace")</li>
+<li><strong>Does every parameter have a <code>Field(description=...)</code>?</strong> Missing descriptions degrade tool quality.</li>
+<li><strong>What happens on failure?</strong> The tool should raise a user-readable error, not silently fail.</li>
+<li><strong>Is the tool destructive?</strong> If yes, is there approval/confirmation in the product flow?</li>
+<li><strong>Is there overlap with existing tools?</strong> If so, merge or rename to disambiguate.</li>
+</ol>
+<hr />
+<h2>Descriptions as Copywriting</h2>
+<p>The MCP tool description is arguably the most underestimated piece of copy in a Claude product:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read by Claude, not users</td>
+<td>No marketing fluff; plain declarative language wins</td>
+</tr>
+<tr>
+<td>Used for tool selection</td>
+<td>Ambiguous descriptions → wrong tool called</td>
+</tr>
+<tr>
+<td>Constrains agent behavior</td>
+<td>You can set expectations ("use only when you have an exact doc ID")</td>
+</tr>
+<tr>
+<td>Invisible to eng reviewers</td>
+<td>Code review doesn't catch weak copy — PM must review</td>
+</tr>
+</tbody>
+</table>
+<p>A PM rule of thumb: if a tool description wouldn't pass a technical writer's review, it probably wouldn't pass Claude's either.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Reviewing tool code but not tool descriptions</strong> — the description is the API contract with Claude.</li>
+<li><strong>Scoping mega-tools</strong> — one tool that "does everything with a document" is harder for Claude than three focused tools.</li>
+<li><strong>Ignoring destructive side effects</strong> — <code>edit_document</code> silently replaces all matches; that needs product UX around it.</li>
+<li><strong>Assuming error messages are internal</strong> — <code>ValueError</code> text reaches the end user via Claude; make it clear.</li>
+<li><strong>Treating SDK ergonomics as "engineering only"</strong> — the productivity win changes how fast you can experiment at the PM level.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>MCP tool definitions with the Python SDK are a PM surface, not just an engineering surface. The <code>name</code>, <code>description</code>, and parameter docs are product copy that shapes Claude's behavior and user-visible outputs. When tool authoring becomes this cheap, the bottleneck shifts from engineering effort to product judgment — and that's where PMs earn their keep.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know that the SDK pattern is <code>FastMCP</code> + <code>@mcp.tool(...)</code> + <code>Field(description=...)</code>.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Understand that tool errors (raised exceptions) propagate through the agent loop and Claude can incorporate them in its next turn.</li>
+<li>Be ready for scenario questions about tool naming, description quality, and error surfacing.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the PM takeaway from the SDK-based tool pattern?</td>
+<td>Tool authoring is now cheap enough that PMs can ask for more, narrower tools instead of mega-tools.</td>
+</tr>
+<tr>
+<td>Who should review the <code>description</code> field on a tool?</td>
+<td>The PM — it is product copy that shapes Claude's behavior.</td>
+</tr>
+<tr>
+<td>What is the hidden risk of <code>edit_document</code> in the lesson?</td>
+<td>It calls <code>str.replace</code>, replacing every occurrence; real products need uniqueness or confirmation.</td>
+</tr>
+<tr>
+<td>Why do tool errors matter at the product level?</td>
+<td>When a tool raises <code>ValueError</code>, Claude surfaces the message to the user — it is user-visible copy.</td>
+</tr>
+<tr>
+<td>What happens when a parameter has no <code>Field</code> description?</td>
+<td>Claude only sees the parameter name, so tool selection and usage quality drops.</td>
+</tr>
+<tr>
+<td>How many tools does the demo server expose, and what do they do?</td>
+<td>Two: <code>read_doc_contents</code> and <code>edit_document</code> (find-and-replace).</td>
+</tr>
+<tr>
+<td>What is the PM rule for tool overlap?</td>
+<td>Two tools doing similar things confuse Claude — dedupe or rename.</td>
+</tr>
+<tr>
+<td>What's the one-sentence PM framing of tool descriptions?</td>
+<td>They are Claude's instruction manual, and therefore product copy.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

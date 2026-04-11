@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defining Resources Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Resources — PM Perspective（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration（18%）主；D1 — Agentic Architecture（22%）次</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives：tools vs resources vs prompts）、1.2（context 注入）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 67</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Resources 是 MCP 的「資料架」——一種結構化的方式讓 server 暴露唯讀資料（文件、紀錄、清單），應用可以直接拉取注入 Claude prompt，不需要 tool call，也不讓 Claude 自己猜要抓什麼。</p>
+<hr />
+<h2>心智模型：餐廳菜單 vs 廚房</h2>
+<ul>
+<li><strong>Resources = 菜單</strong>：一張可讀的清單，列出 server 能提供的東西。你（應用）從菜單挑，server 把東西端給你，你擺到 Claude 的盤子上。</li>
+<li><strong>Tools = 廚房</strong>：Claude 下單「幫我做三明治」，廚房實際去做（動作、副作用）。</li>
+</ul>
+<p>兩者都由同一家餐廳（MCP server）提供。選菜單還是選廚房，就是選 resource 還是 tool。</p>
+<hr />
+<h2>為什麼 PM 要在意</h2>
+<p>幾乎所有有 context 感的 AI 功能——「@mention 文件」、「拉這筆紀錄」、「給我這個客戶的最新 notes」——背後都是 resources。搞清楚兩者差別會影響：</p>
+<ul>
+<li><strong>誰驅動 fetch</strong> — 使用者 / 應用（resource）vs Claude（tool）</li>
+<li><strong>成本</strong> — 拉一次 resource vs 給 Claude 一個可能呼叫很多次的 tool</li>
+<li><strong>延遲</strong> — Resources 進第一個 prompt；tools 多一次 API round trip</li>
+<li><strong>可預測性</strong> — Resources 永遠注入相同資料；tools 由 Claude 決定，比較靈活但不確定</li>
+</ul>
+<p>PM 若搞混，要嘛為本該是直接拉取的操作支付 tool call 費用，要嘛做出 Claude 明明有資料卻幻想的產品。</p>
+<hr />
+<h2>功能範例：<code>@document</code> mention</h2>
+<p>課程用具體功能切入：CLI 中使用者輸入 <code>@</code>，跳出文件 autocomplete；選好送出，文件全文注入 prompt。</p>
+<p>兩個 resources：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>Resource 類型</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>列出所有文件給 autocomplete</td>
+<td>Direct（靜態 URI）</td>
+<td>固定、無參數、每次呼叫一樣</td>
+</tr>
+<tr>
+<td>用 ID 取單一文件</td>
+<td>Templated（帶 <code>{doc_id}</code>）</td>
+<td>帶參數、每次輸出不同</td>
+</tr>
+</tbody>
+</table>
+<p>零 tool call，拉資料完全不經 Claude round trip。應用直接從 server 拿資料塞進 prompt。</p>
+<hr />
+<h2>Resource vs Tool — PM 速查表</h2>
+<table>
+<thead>
+<tr>
+<th>產品情境</th>
+<th>Resource 或 Tool？</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>使用者輸入 @filename 時插入文件內容</td>
+<td>Resource</td>
+<td>純讀、應用驅動、無須 Claude 判斷</td>
+</tr>
+<tr>
+<td>Claude 回答時可自行搜尋知識庫</td>
+<td>Tool</td>
+<td>Claude 決定何時搜</td>
+</tr>
+<tr>
+<td>填充客戶清單 dropdown</td>
+<td>Resource</td>
+<td>靜態清單拉取</td>
+</tr>
+<tr>
+<td>更新客戶電話</td>
+<td>Tool</td>
+<td>寫入 / 副作用</td>
+</tr>
+<tr>
+<td>顯示當前 KPI dashboard</td>
+<td>Resource</td>
+<td>Pull-and-render</td>
+</tr>
+<tr>
+<td>「如果我日曆有空就幫我訂會議」</td>
+<td>Tool（agentic）</td>
+<td>Claude 推理、決定、行動</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>產品場景</h2>
+<h3>什麼時候用 Resources</h3>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>為什麼適合 Resources</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>使用者引用特定項目（@mention、/command、file picker）</td>
+<td>應用依使用者選擇驅動 fetch</td>
+</tr>
+<tr>
+<td>永遠要注入的 context（公司 style guide、詞彙表、schema）</td>
+<td>拉一次，每次對話都帶上</td>
+</tr>
+<tr>
+<td>UI 元件清單（autocomplete、dropdown）</td>
+<td>Direct resource 對應靜態集合</td>
+</tr>
+<tr>
+<td>資料驅動 onboarding（「你的上一筆訂單」）</td>
+<td>每個使用者拉一次、注入 prompt</td>
+</tr>
+</tbody>
+</table>
+<h3>什麼時候改用 Tools</h3>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>為什麼適合 Tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>是否要 fetch 應由 Claude 判斷</td>
+<td>只有 tools 讓 Claude 有選擇</td>
+</tr>
+<tr>
+<td>有副作用的操作</td>
+<td>Resources 是唯讀的</td>
+</tr>
+<tr>
+<td>參數要靠推理決定</td>
+<td>Tool input 可在對話中動態合成</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 決策框架</h2>
+<p>規格「拉取類」功能前問自己：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>若是 Yes</th>
+<th>意義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>是由使用者（而非 Claude）決定拉哪個項目？</td>
+<td>Yes</td>
+<td>Resource</td>
+</tr>
+<tr>
+<td>純讀、無副作用？</td>
+<td>Yes</td>
+<td>Resource</td>
+</tr>
+<tr>
+<td>希望每次對話都一定把資料放進 prompt？</td>
+<td>Yes</td>
+<td>Resource</td>
+</tr>
+<tr>
+<td>希望 Claude 覺得沒必要就可以跳過 fetch？</td>
+<td>Yes</td>
+<td>Tool</td>
+</tr>
+<tr>
+<td>操作會修改資料？</td>
+<td>Yes</td>
+<td>Tool</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 常見錯誤</h2>
+<ol>
+<li><strong>把所有 MCP 能力都當 tool</strong> — 最便宜、最可預測的原語經常是 resource。先問「誰決定？」再規格</li>
+<li><strong>不思考 URI namespace</strong> — URI 就是 API，爛 URI（<code>docs://d1</code>、<code>docs://d2</code>）後面會吃大虧，要像設計 REST API 一樣認真</li>
+<li><strong>以為 resources 是免費的</strong> — 注入的內容還是吃 token，大文件會炸 context window</li>
+<li><strong>把讀寫混在同一個原語</strong> — 讀用 resource、寫用 tool，security review 與 audit log 會簡單太多</li>
+<li><strong>跳過 Inspector 驗證</strong> — MCP Inspector 可以在 client 還沒寫之前證明 resource 能用，PM 應該把這當成交付要求</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Resources 是讓產品對 Claude 說「這就是你需要的資料」而不是「這是你也許能用的工具」的原語。每次強迫 Claude 選擇，都要付 token 成本並增加變異。Resources 是 PM 保留「確定性」與「成本控制」的武器，同時還能給 Claude 新鮮、相關的 context。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：Resources 是 MCP 三個 primitives 之一（tools、resources、prompts），知道 direct vs templated 的差異</li>
+<li><strong>D1（Agentic Architecture）</strong>：Resources 是不經 tool call 把 context 塞進 agent loop 的方式，由 client 拉取後注入 prompt</li>
+<li>考題模式：「應用要依使用者選擇把文件內容放進 prompt，是 tool 還是 resource？」→ resource</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resources 與 tools 的「菜單 vs 廚房」比喻？</td>
+<td>Resources 是菜單（應用挑出資料端給 Claude），tools 是廚房（Claude 選擇去做的動作）</td>
+</tr>
+<tr>
+<td>Resources 有哪兩種？</td>
+<td>Direct（靜態 URI、固定呼叫）與 templated（帶參數的 URI、參數化呼叫）</td>
+</tr>
+<tr>
+<td>什麼時候該用 resource 而非 tool？</td>
+<td>當應用（而非 Claude）決定 fetch、fetch 沒副作用、資料應一律出現在 prompt 裡</td>
+</tr>
+<tr>
+<td>舉一個 direct vs templated resource 的產品範例。</td>
+<td>Direct：列出所有文件給 autocomplete。Templated：用 <code>{doc_id}</code> 取特定文件</td>
+</tr>
+<tr>
+<td>Resources 還是會有哪種成本？</td>
+<td>Token 成本——注入的內容會計入 context window</td>
+</tr>
+<tr>
+<td>為什麼 URI 設計要認真對待？</td>
+<td>URI 是 server 的 API 契約，爛 URI 跟爛 REST route 一樣難改</td>
+</tr>
+<tr>
+<td>對 Claude 而言 resources 與 tools 有何不同？</td>
+<td>Claude 不會「決定」呼叫 resource；resource 由 client 拉取注入 prompt，Claude 只看到結果</td>
+</tr>
+<tr>
+<td>上線前該要求使用哪個驗證工具？</td>
+<td>MCP Inspector，它列出 direct 與 templated resources，可以先端到端測</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

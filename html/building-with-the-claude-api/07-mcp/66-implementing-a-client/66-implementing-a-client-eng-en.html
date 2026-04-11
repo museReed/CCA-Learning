@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implementing A Client Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Implementing a Client — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP primitives: client/server, list_tools, call_tool), 2.2 (content block types), 1.2 (agentic loop integration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 66</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>An MCP client is a thin wrapper around the MCP Python SDK's <code>ClientSession</code> that exposes two essential methods — <code>list_tools()</code> and <code>call_tool()</code> — so your application can discover and invoke server-side tools without worrying about transport, handshake, or resource cleanup.</p>
+<hr />
+<h2>Why a Custom Client Class</h2>
+<p>In most real-world MCP projects you implement <strong>either</strong> a client <strong>or</strong> a server, not both. This course builds both so you can see how they fit together. The MCP client has two layers:</p>
+<ol>
+<li><strong><code>ClientSession</code></strong> — the underlying connection primitive provided by the MCP Python SDK. It handles the protocol handshake, message framing, and async lifecycle.</li>
+<li><strong><code>MCPClient</code></strong> — a custom class you write on top of <code>ClientSession</code> that:</li>
+<li>Owns session lifecycle (startup + cleanup) via async context managers</li>
+<li>Surfaces ergonomic methods (<code>list_tools</code>, <code>call_tool</code>, and later <code>read_resource</code>, <code>list_prompts</code>, <code>get_prompt</code>)</li>
+<li>Hides the transport details (stdio subprocess, command + args) from the rest of your application</li>
+</ol>
+<p>The critical reason for wrapping is <strong>resource cleanup</strong>: <code>ClientSession</code> requires proper async teardown. Bundling it in a context-managed class means callers never forget to close the subprocess.</p>
+<hr />
+<h2>How the Client Fits the Agent Loop</h2>
+<p>Your CLI code needs two capabilities from the MCP server:</p>
+<ol>
+<li>Get the list of available tools to forward to Claude (so Claude knows what it can call).</li>
+<li>Execute a tool when Claude emits a <code>tool_use</code> block (so the result can be fed back into the agent loop).</li>
+</ol>
+<pre><code>┌────────────┐   list_tools()    ┌────────────┐
+│ CLI / App  │ ────────────────▶ │ MCPClient  │
+│            │ ◀──────────────── │            │
+│            │     [tools]       └────────────┘
+│            │                         │
+│            │   ── call_tool() ──────▶│
+│            │ ◀─── ToolResult ────────│
+└────────────┘                         ▼
+                                  MCP Server
+                                  (subprocess)
+</code></pre>
+<p>The MCP client is the bridge: application logic on one side, MCP server on the other, agent loop wrapping both.</p>
+<hr />
+<h2>The Two Core Methods</h2>
+<h3><code>list_tools()</code></h3>
+<pre><code class="language-python">async def list_tools(self) -&gt; list[types.Tool]:
+    result = await self.session().list_tools()
+    return result.tools
+</code></pre>
+<ul>
+<li>Calls the session's built-in <code>list_tools()</code>.</li>
+<li>Returns a list of <code>types.Tool</code> objects — each contains <code>name</code>, <code>description</code>, and <code>inputSchema</code>.</li>
+<li>Your app converts these into the <code>tools</code> array that goes into <code>client.messages.create(..., tools=...)</code>.</li>
+</ul>
+<h3><code>call_tool()</code></h3>
+<pre><code class="language-python">async def call_tool(
+    self, tool_name: str, tool_input: dict
+) -&gt; types.CallToolResult | None:
+    return await self.session().call_tool(tool_name, tool_input)
+</code></pre>
+<ul>
+<li>Takes the <code>name</code> and <code>input</code> fields that Claude emitted in the <code>tool_use</code> block.</li>
+<li>Delegates to the session's <code>call_tool()</code>, which sends the request over the MCP transport and awaits the server's response.</li>
+<li>Returns a <code>CallToolResult</code> whose <code>content</code> you plug into a <code>tool_result</code> block in the next API call.</li>
+</ul>
+<p>Both methods are intentionally thin — the SDK does the real work. Your class exists to give callers a stable, friendly surface.</p>
+<hr />
+<h2>Testing the Client Directly</h2>
+<p>The same file includes a testing harness that exercises the client in isolation (no Claude involved):</p>
+<pre><code class="language-python">async with MCPClient(
+    command=&quot;uv&quot;, args=[&quot;run&quot;, &quot;mcp_server.py&quot;]
+) as client:
+    result = await client.list_tools()
+    print(result)
+</code></pre>
+<p>Running it should print the tool definitions for <code>read_doc_contents</code> and <code>edit_document</code> — the tools registered on the server in earlier lessons. This is a smoke test: if the list comes back, the handshake, transport, and decoder are all healthy.</p>
+<hr />
+<h2>End-to-End Flow (What Happens When a User Asks a Question)</h2>
+<ol>
+<li><strong>Startup</strong> — CLI opens the <code>MCPClient</code> context manager, which spawns the <code>mcp_server.py</code> subprocess and performs the MCP handshake.</li>
+<li><strong>Tool discovery</strong> — CLI calls <code>client.list_tools()</code>. The result is stored or converted into the Anthropic tool schema.</li>
+<li><strong>First Claude call</strong> — user question + tool definitions go to <code>client.messages.create()</code>.</li>
+<li><strong>Claude emits <code>tool_use</code></strong> — e.g., <code>read_doc_contents(doc_id="report.pdf")</code>.</li>
+<li><strong>Dispatch</strong> — CLI calls <code>client.call_tool("read_doc_contents", {"doc_id": "report.pdf"})</code>.</li>
+<li><strong>Server executes</strong> — returns a <code>CallToolResult</code> with the document text.</li>
+<li><strong>Second Claude call</strong> — CLI appends a <code>tool_result</code> block referencing the original <code>tool_use_id</code> and calls Claude again.</li>
+<li><strong>Final answer</strong> — Claude composes the user-facing response.</li>
+</ol>
+<p>This is the same four-step tool use loop from Chapter 4 — MCP just replaces the local Python function dispatch with a protocol-based server call.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Calling <code>session()</code> without an active context</strong> — the <code>ClientSession</code> must be initialized inside an <code>async with</code> block. Accessing it outside leaks the subprocess.</li>
+<li><strong>Returning the raw <code>CallToolResult</code> to Claude</strong> — you must still wrap it in a <code>tool_result</code> content block referencing the correct <code>tool_use_id</code>.</li>
+<li><strong>Forgetting the subprocess command</strong> — MCPClient is parameterized by <code>command</code> and <code>args</code> (e.g., <code>command="uv", args=["run", "mcp_server.py"]</code>). Wrong path = zero tools discovered.</li>
+<li><strong>Treating <code>list_tools()</code> as cheap</strong> — it involves an async round trip. Cache the result per session instead of calling on every user message.</li>
+<li><strong>Mixing sync and async</strong> — all MCP SDK calls are async. Calling them from sync code without an event loop will raise runtime errors.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>An MCP client is not a rewrite of your agent loop — it is a <strong>transport substitution</strong>. Everywhere your old code called a local Python function, it now calls <code>client.call_tool(...)</code> instead. The agent loop, <code>tool_use</code> / <code>tool_result</code> protocol, and Anthropic API contract stay identical. MCP's power comes precisely from this separability: your servers become reusable across any Claude application without reshaping the agent loop.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: recognize that an MCP client wraps <code>ClientSession</code>, exposes <code>list_tools()</code> / <code>call_tool()</code>, and is the substitution point for local tool dispatch.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: the agent loop is unchanged by MCP — the client is just a different way to fetch tools and execute them.</li>
+<li>Exam pattern: "Where in an MCP-based app does the tool execution actually run?" → on the server, invoked via <code>call_tool()</code> on the client.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the two layers of an MCP client?</td>
+<td><code>ClientSession</code> (SDK primitive handling transport + handshake) and a custom <code>MCPClient</code> class wrapping it for lifecycle and ergonomics.</td>
+</tr>
+<tr>
+<td>Why wrap <code>ClientSession</code> in a custom class?</td>
+<td>To guarantee async resource cleanup via context managers and to expose ergonomic methods to the rest of the app.</td>
+</tr>
+<tr>
+<td>What two methods must an MCP client implement at minimum?</td>
+<td><code>list_tools()</code> and <code>call_tool(tool_name, tool_input)</code>.</td>
+</tr>
+<tr>
+<td>What does <code>list_tools()</code> return?</td>
+<td>A list of <code>types.Tool</code> objects with <code>name</code>, <code>description</code>, and <code>inputSchema</code> — ready to forward to Claude.</td>
+</tr>
+<tr>
+<td>What does <code>call_tool()</code> accept and return?</td>
+<td>Accepts <code>tool_name</code> and <code>tool_input</code> dict; returns a <code>CallToolResult | None</code>.</td>
+</tr>
+<tr>
+<td>How do you test the MCP client in isolation?</td>
+<td>Run the client file directly with a harness like <code>async with MCPClient(command="uv", args=["run", "mcp_server.py"]) as client: await client.list_tools()</code>.</td>
+</tr>
+<tr>
+<td>How does MCP change the agent loop?</td>
+<td>It does not — only the tool dispatch step is replaced by <code>client.call_tool(...)</code>. The loop, stop_reason logic, and tool_result protocol stay identical.</td>
+</tr>
+<tr>
+<td>What is the typical <code>command</code>/<code>args</code> combination used in the course?</td>
+<td><code>command="uv"</code>, <code>args=["run", "mcp_server.py"]</code> — spawns the server as a subprocess over stdio.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

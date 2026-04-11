@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accessing Resources Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Accessing Resources — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (client-side MCP resource usage), 1.2 (context injection)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 68</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Accessing resources is the part of MCP that turns "@mention" into a product feature: your app asks the server for the referenced data and hands it to Claude inside the prompt — zero tool calls, zero guessing, predictable latency and cost.</p>
+<hr />
+<h2>Mental Model: Handing Claude a Folder Instead of a Map</h2>
+<ul>
+<li><strong>Tool calls</strong> are giving Claude a map and hoping it walks to the right building. Fast if it knows where to go, slow and error-prone if it doesn't.</li>
+<li><strong>Resource access</strong> is handing Claude a folder with the exact document already opened. Claude starts reading immediately — no detour, no decision required.</li>
+</ul>
+<p>When users explicitly point at a thing ("use this document", "look at this record"), resource access is almost always the right pattern.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>The difference between "@mention" built as a tool vs built as a resource is night-and-day in practice:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Tool call path</th>
+<th>Resource access path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API round trips per user message</td>
+<td>2+</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Latency overhead</td>
+<td>~1.5–3s per extra turn</td>
+<td>~0ms (happens before the Claude call)</td>
+</tr>
+<tr>
+<td>Token cost</td>
+<td>tool schema + tool_use + tool_result + final answer</td>
+<td>just the injected content</td>
+</tr>
+<tr>
+<td>Reliability</td>
+<td>depends on Claude choosing correctly</td>
+<td>deterministic</td>
+</tr>
+<tr>
+<td>UX</td>
+<td>"thinking..." spinner longer</td>
+<td>snappier response</td>
+</tr>
+</tbody>
+</table>
+<p>A feature launched with resource access will feel faster and cost less — immediately, without any prompt tuning.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When to Use Resource Access</h3>
+<table>
+<thead>
+<tr>
+<th>User Experience</th>
+<th>Why Resource Access Fits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>@mention a document / record / ticket</td>
+<td>User explicitly chose what to include</td>
+</tr>
+<tr>
+<td>Always-on context (company policies, glossary)</td>
+<td>Must be there every time</td>
+</tr>
+<tr>
+<td>"Summarize this page" with a page ID selector</td>
+<td>Deterministic lookup, no Claude decision needed</td>
+</tr>
+<tr>
+<td>File picker → inject</td>
+<td>App knows which file, no ambiguity</td>
+</tr>
+</tbody>
+</table>
+<h3>When Resource Access Is Not Enough</h3>
+<table>
+<thead>
+<tr>
+<th>User Need</th>
+<th>Better Pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Let Claude decide mid-conversation whether to look up more</td>
+<td>Tool call</td>
+</tr>
+<tr>
+<td>Search across many items</td>
+<td>Tool call that takes a query</td>
+</tr>
+<tr>
+<td>Conditional fetch based on reasoning</td>
+<td>Tool call</td>
+</tr>
+<tr>
+<td>Actions with side effects</td>
+<td>Tool call (never a resource)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>For any "fetch and show" feature, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the user specify which thing to fetch?</td>
+<td>Yes</td>
+<td>Resource access</td>
+</tr>
+<tr>
+<td>Is the set of candidates known at the time we build the UI?</td>
+<td>Yes</td>
+<td>Resource access (can be a dropdown / autocomplete)</td>
+</tr>
+<tr>
+<td>Do we want the fetch to always happen for this intent?</td>
+<td>Yes</td>
+<td>Resource access</td>
+</tr>
+<tr>
+<td>Should Claude be free to skip the fetch?</td>
+<td>Yes</td>
+<td>Tool call</td>
+</tr>
+<tr>
+<td>Does the fetch need search / ranking?</td>
+<td>Yes</td>
+<td>Tool call (Claude passes the query)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>UX Implications to Design</h2>
+<p>Because resource access happens <strong>before</strong> the Claude call, the UX burden sits in your own app:</p>
+<ul>
+<li><strong>Discovery</strong> — how do users know a resource exists? (@ autocomplete, slash menu, file picker)</li>
+<li><strong>Selection affordance</strong> — dropdown vs fuzzy search vs typed command</li>
+<li><strong>Progress indicator</strong> — the resource fetch still has latency; show a subtle loader</li>
+<li><strong>Error states</strong> — "that document is no longer available" when the URI fails</li>
+<li><strong>Preview</strong> — show what will be injected before the user commits (optional but delightful)</li>
+</ul>
+<p>This is pure product design, not prompt engineering. Your designers own it.</p>
+<hr />
+<h2>Cost and Context-Window Implications</h2>
+<p>Resource access is cheap per API call but not free in tokens — the injected content occupies space in the prompt. PMs should plan for:</p>
+<ul>
+<li><strong>Large documents</strong> — can the content fit in the context window? Plan truncation or chunking rules.</li>
+<li><strong>Many resources at once</strong> — if users can @mention multiple items, the combined size can blow up. Set a limit.</li>
+<li><strong>Stale data</strong> — the content is a point-in-time snapshot. Decide if you need to refetch per turn.</li>
+<li><strong>Sensitive data in logs</strong> — injected content flows through your telemetry. Redact accordingly.</li>
+</ul>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Building @mention as a tool call</strong> — it works, but is twice as slow and twice as expensive for no user benefit.</li>
+<li><strong>Letting resources grow unbounded</strong> — a 50-page PDF injected into every turn will burn context and latency. Define limits.</li>
+<li><strong>No UX for resource discovery</strong> — a resource that users cannot find is a resource that does not exist.</li>
+<li><strong>Forgetting error states</strong> — resources can fail (missing, permissioned, too large). Your UI must handle it.</li>
+<li><strong>Skipping preview affordance</strong> — letting users see what is about to be injected increases trust and reduces "why did Claude say that?" escalations.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Resource access is the pattern that makes user-driven context feel invisible. From the user's perspective: "I mentioned a file, Claude read it." From the architecture: one API call instead of two, deterministic content, and a clean separation between "what the app fetched" and "what Claude reasoned about." For PMs, this is the single highest-leverage pattern to know when designing context-rich Claude features.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: know that resource access lives in the MCP client (e.g., <code>read_resource</code>) and runs before the Claude call, not during a tool loop.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: resources shorten the agent loop by injecting context up front.</li>
+<li>Exam pattern: "A user @mentions a document. How does the document content reach Claude?" → the client fetches the resource and inlines it into the prompt — no tool call.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the "folder vs map" analogy?</td>
+<td>Tool calls give Claude a map to hopefully find data. Resource access hands Claude a folder with the document already opened.</td>
+</tr>
+<tr>
+<td>Why is resource access cheaper than a tool call for @mention features?</td>
+<td>One API round trip instead of two, fewer tokens overall, and no wait for Claude to decide whether to fetch.</td>
+</tr>
+<tr>
+<td>Which team owns the UX for resource discovery?</td>
+<td>Your product/design team — the user-facing @ autocomplete, file picker, or slash menu.</td>
+</tr>
+<tr>
+<td>What cost does resource access still incur?</td>
+<td>The injected content consumes prompt tokens and can push against the context window.</td>
+</tr>
+<tr>
+<td>When is a tool call better than a resource?</td>
+<td>When Claude should reason about whether to fetch, when the fetch needs search, or when the operation has side effects.</td>
+</tr>
+<tr>
+<td>What should a PRD for an @mention feature include?</td>
+<td>Limits on size/count of mentions, fallback UX on resource failure, preview affordance, latency budget, and privacy rules for injected content.</td>
+</tr>
+<tr>
+<td>Why is resource access more deterministic than a tool call?</td>
+<td>The app guarantees the fetch happens; Claude never decides and never skips it.</td>
+</tr>
+<tr>
+<td>What happens before Claude is even called in a resource-based flow?</td>
+<td>The app uses the MCP client to fetch the resource and inline it into the prompt being built.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

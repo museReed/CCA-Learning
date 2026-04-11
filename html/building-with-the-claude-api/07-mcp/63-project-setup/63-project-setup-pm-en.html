@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Setup Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Project Setup — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP primitives), 1.2 (agent loop integration), 2.1 (tool schemas)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 63</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Lesson 63 is the "environment readiness" checkpoint: before your team writes any MCP code, verify the baseline CLI chatbot can talk to Claude — because every MCP feature that follows rides on top of that baseline.</p>
+<hr />
+<h2>Mental Model: The IKEA Instructions Step Before Assembly</h2>
+<p>Think of this lesson as the IKEA instruction page that says <em>"open the box, lay out the parts, confirm all items are present."</em> You haven't built anything yet. You are checking that you <strong>can</strong> build.</p>
+<table>
+<thead>
+<tr>
+<th>IKEA step</th>
+<th>MCP project step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unbox and lay out parts</td>
+<td>Extract <code>cli_project.zip</code></td>
+</tr>
+<tr>
+<td>Check the parts list</td>
+<td>Verify <code>main.py</code>, <code>mcp_client.py</code>, <code>mcp_server.py</code> present</td>
+</tr>
+<tr>
+<td>Check the tools</td>
+<td>Install <code>uv</code> or <code>pip</code> + venv</td>
+</tr>
+<tr>
+<td>Check the connectors</td>
+<td>Add <code>ANTHROPIC_API_KEY</code> to <code>.env</code></td>
+</tr>
+<tr>
+<td>Test move a single screw</td>
+<td>Ask the bot <code>what's 1+1?</code></td>
+</tr>
+</tbody>
+</table>
+<p>Skipping IKEA's setup page leads to a wobbly bookshelf. Skipping Lesson 63 leads to MCP bugs that are really setup bugs in disguise — and those cost the most engineering time to debug.</p>
+<hr />
+<h2>Why This Lesson Matters for PMs</h2>
+<p>A PM may wonder why to bother with an "install the project" lesson at all. Three reasons:</p>
+<ol>
+<li><strong>Environment is where AI features die.</strong> "It worked on the demo" → "it failed in prod" is usually an env story, not a code story. MCP adds subprocesses and SDK versioning on top of normal Claude API use.</li>
+<li><strong>The project shape is your feature shape.</strong> The CLI chatbot in this lesson is the minimum viable reference architecture: host + client + server + env file. A PM who internalizes this triad can reason about any future MCP feature.</li>
+<li><strong>Defining "done" for bootstrapping.</strong> The lesson hands the team a crisp acceptance criterion for initial setup: <code>what's 1+1?</code> returns an answer. That's one less ambiguous "is it working yet?" conversation.</li>
+</ol>
+<hr />
+<h2>The Product-Relevant Architecture Callout</h2>
+<p>The lesson explicitly flags that in real projects teams usually build <strong>either</strong> an MCP client <strong>or</strong> an MCP server, not both:</p>
+<table>
+<thead>
+<tr>
+<th>Team intent</th>
+<th>Build the...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"We want Claude-powered chat over our internal data"</td>
+<td>MCP client + existing servers</td>
+</tr>
+<tr>
+<td>"We want to expose our SaaS to every AI agent on the market"</td>
+<td>MCP server that others consume</td>
+</tr>
+<tr>
+<td>"We're building a platform layer"</td>
+<td>Possibly both, but separate repos</td>
+</tr>
+</tbody>
+</table>
+<p>From a PM perspective this is a <strong>scoping decision</strong> you make once and live with:</p>
+<ul>
+<li>MCP server author = you are productizing your data/actions to agents.</li>
+<li>MCP client author = you are productizing an AI experience to end users.</li>
+</ul>
+<p>The course builds both in one repo purely for education — don't let that blur your product's scope.</p>
+<hr />
+<h2>Product Use Cases for the Bootstrapped Project</h2>
+<p>The lesson's CLI chatbot is a toy, but the shape is directly useful:</p>
+<table>
+<thead>
+<tr>
+<th>Realistic product</th>
+<th>How the shape maps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Internal docs assistant</td>
+<td>In-memory docs → real knowledge base; CLI → web UI</td>
+</tr>
+<tr>
+<td>Dev-tools CLI that edits config</td>
+<td>find-and-replace tool → templated config edits</td>
+</tr>
+<tr>
+<td>Ops runbook assistant</td>
+<td>read + update tools → runbook read and amend</td>
+</tr>
+<tr>
+<td>Compliance review bot</td>
+<td>read tool → read policy docs; update tool → propose redlines</td>
+</tr>
+</tbody>
+</table>
+<p>Any PM scoping an AI feature that reads + writes a small bounded data set can treat this project as a working template.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>Before your team starts down this lesson with a real product in mind, ask:</p>
+<ol>
+<li><strong>Which side is our product?</strong> Client (consume servers), server (publish tools), or rare-case both?</li>
+<li><strong>Where will secrets live in prod?</strong> <code>.env</code> is fine for dev; production needs a secret manager.</li>
+<li><strong>What's our minimum viable data set?</strong> In the demo it's a dict. In prod it's whatever you can safely let Claude read and edit.</li>
+<li><strong>Who owns the CLI vs UI layer?</strong> The lesson uses a CLI; your product will likely have a real front end. Plan that transition.</li>
+<li><strong>What's the acceptance criterion for "setup works"?</strong> Copy the lesson's approach — define a tiny, testable smoke check.</li>
+</ol>
+<hr />
+<h2>Operational and Cost Notes</h2>
+<p>Even a blank-slate project has cost implications:</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Why a PM should care</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API key</td>
+<td>Billing starts the moment the baseline <code>what's 1+1?</code> runs</td>
+</tr>
+<tr>
+<td><code>uv</code> vs <code>pip</code></td>
+<td>Affects CI time and onboarding speed</td>
+</tr>
+<tr>
+<td><code>.env</code> policy</td>
+<td>Secret sprawl risk — make sure it's gitignored from day 1</td>
+</tr>
+<tr>
+<td>Starter code vs completed code</td>
+<td>Anthropic ships both <code>cli_project.zip</code> and <code>cli_project_COMPLETE.zip</code>; pick one for reference</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating Lesson 63 as skippable</strong> — a broken baseline makes every later lesson harder to debug.</li>
+<li><strong>Assuming a CLI is the final UX</strong> — it is a course artifact; your product needs real UI.</li>
+<li><strong>Blurring client/server ownership</strong> — resist building "both in one service" just because the course did.</li>
+<li><strong>Letting the API key live in <code>.env</code> forever</strong> — plan the migration to a secret manager before go-live.</li>
+<li><strong>Not defining a smoke test</strong> — copy the <code>1+1?</code> pattern for your own product, scaled to your real data path.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>This lesson looks like DevOps plumbing, but it quietly hands the PM an invaluable artifact: a <strong>minimum viable MCP architecture</strong> (host + client + server + env + baseline check). Any real product you scope can be reasoned about as a specialization of that shape. Memorize the shape; it recurs everywhere.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know that Ch07's working example is a CLI chatbot over in-memory documents with read and update tools.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Recognize the host/client/server triad as the canonical MCP layout.</li>
+<li>Be ready for scenario questions that ask which half (client or server) a team should build given a product goal.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does Lesson 63 actually teach?</td>
+<td>How to bootstrap the Ch07 project so the chatbot can talk to Claude before any MCP code exists.</td>
+</tr>
+<tr>
+<td>What is the baseline smoke test?</td>
+<td>Ask the bot <code>what's 1+1?</code> and confirm Claude responds.</td>
+</tr>
+<tr>
+<td>In production, should a team build both an MCP client and server?</td>
+<td>Usually only one — the course builds both for teaching purposes.</td>
+</tr>
+<tr>
+<td>What does the demo store documents in?</td>
+<td>An in-memory Python dictionary — no database.</td>
+</tr>
+<tr>
+<td>Which two install paths does the README support?</td>
+<td><code>uv run main.py</code> (recommended) and standard Python + pip + <code>python main.py</code>.</td>
+</tr>
+<tr>
+<td>What secret must be present before first run?</td>
+<td><code>ANTHROPIC_API_KEY</code> in <code>.env</code></td>
+</tr>
+<tr>
+<td>What is the PM takeaway from the "client or server, not both" note?</td>
+<td>Your product usually picks one role; conflating them is a scoping smell.</td>
+</tr>
+<tr>
+<td>What concrete artifact does this lesson hand the PM?</td>
+<td>A reusable minimum viable MCP architecture template: host + client + server + env + baseline check.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

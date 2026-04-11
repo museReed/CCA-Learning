@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defining Prompts Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Prompts — Engineering Deep Dive（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration（18%）主；D1 — Agentic Architecture（22%）次</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives：tools、resources、prompts）、1.2（seed agent loop）、2.2（base.Message content blocks）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 69</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompts 是 MCP 的第三個原語——預先調校過、高品質的指令模板。Server 作者把「怎麼寫才會得到好結果」的 know-how 封裝起來，讓 client 可以用名字呼叫，而不是要求終端使用者自己學 prompt engineering。</p>
+<hr />
+<h2>Prompts 解決的問題</h2>
+<p>使用者當然可以自己寫指令——「convert report.pdf to markdown」也會動。但結果的好壞完全取決於 prompt 寫得多好，而多數使用者不是 prompt 工程師。本課的核心觀點：</p>
+<blockquote>
+<p>使用者雖然能自己完成任務，但使用 server 作者精心設計與測試過的 prompt，能得到更一致、更高品質的結果。</p>
+</blockquote>
+<p>Prompts 把專家知識外部化。開發者知道怎麼寫一個能產出優質 markdown 的 prompt，就把它烘焙成 server 端可重用的模板。</p>
+<hr />
+<h2>Prompts 在 MCP 原語中的位置</h2>
+<table>
+<thead>
+<tr>
+<th>原語</th>
+<th>目的</th>
+<th>範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool</td>
+<td>執行動作</td>
+<td><code>edit_document(doc_id, new_content)</code></td>
+</tr>
+<tr>
+<td>Resource</td>
+<td>暴露資料</td>
+<td><code>docs://documents/{doc_id}</code></td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>預先調校的指令模板</td>
+<td><code>format(doc_id)</code> 把文件改成 markdown</td>
+</tr>
+</tbody>
+</table>
+<p>Prompt 不是「Claude 要讀的文字」，而是一個 <strong>可呼叫的模板</strong>：client 帶參數呼叫，拿回一串可以直接送給 Claude 的訊息。</p>
+<hr />
+<h2>Prompts 怎麼運作</h2>
+<ul>
+<li>用 <code>@mcp.prompt()</code> 裝飾器定義</li>
+<li>每個 prompt 帶 <code>name</code> 與 <code>description</code></li>
+<li>回傳一個訊息 list（user / assistant），組成完整的對話開場</li>
+<li>Prompt 應該高品質、測試過、與 server 主要用途相關</li>
+</ul>
+<p>Client 後續用名字呼叫時，server 會用 client 提供的參數執行裝飾過的 function，把回傳的訊息 list 轉交給 client，client 原封不動送給 Claude。</p>
+<hr />
+<h2>實作 Format 指令 — Imports</h2>
+<p>先從 MCP SDK import base message types：</p>
+<pre><code class="language-python">from mcp.server.fastmcp import base
+</code></pre>
+<p><code>base</code> 提供 <code>UserMessage</code>、<code>AssistantMessage</code> 等型別化物件，用來組 prompt 的訊息 list。</p>
+<hr />
+<h2>實作 Format 指令 — 定義</h2>
+<pre><code class="language-python">@mcp.prompt(
+    name=&quot;format&quot;,
+    description=&quot;Rewrites the contents of the document in Markdown format.&quot;
+)
+def format_document(
+    doc_id: str = Field(description=&quot;Id of the document to format&quot;)
+) -&gt; list[base.Message]:
+    prompt = f&quot;&quot;&quot;
+Your goal is to reformat a document to be written with markdown syntax.
+
+The id of the document you need to reformat is:
+
+{doc_id}
+
+
+Add in headers, bullet points, tables, etc as necessary. Feel free to add in extra formatting.
+Use the 'edit_document' tool to edit the document. After the document has been reformatted...
+&quot;&quot;&quot;
+
+    return [
+        base.UserMessage(prompt)
+    ]
+</code></pre>
+<p>重點：</p>
+<ul>
+<li><code>@mcp.prompt(name=..., description=...)</code> 把 prompt 註冊到 server，client 列清單時會看到這些字串</li>
+<li><code>doc_id: str = Field(description="...")</code> 是帶 metadata 的參數，description 會傳給 client 讓使用者知道要填什麼</li>
+<li>Function body 用 f-string 組多行模板，回傳 <strong>訊息 list</strong>，這裡只有一則 <code>UserMessage</code></li>
+<li>注意 prompt 內文引用了 <code>edit_document</code> <strong>tool</strong>——prompt 可以跟 server 其他 tool / resource 一起合奏，是「用 server 能力組出工作流」的 recipe</li>
+</ul>
+<hr />
+<h2>為什麼回傳型別是 <code>list[base.Message]</code></h2>
+<p>Prompts 可以編碼多輪對話。例如你也可以預先塞一則 assistant 訊息：</p>
+<ul>
+<li><code>base.UserMessage(...)</code> — 使用者「說」的</li>
+<li><code>base.AssistantMessage(...)</code> — 預先放的 assistant 回應（適合 few-shot conditioning）</li>
+</ul>
+<p>回傳 list 讓 server 作者完全控制 prompt 啟動時 Claude 看到的對話狀態，client 只是播放訊息。</p>
+<hr />
+<h2>用 MCP Inspector 測試</h2>
+<p>Inspector 有專門的 Prompts 區。測試步驟：</p>
+<ol>
+<li>跑 <code>uv run mcp dev mcp_server.py</code></li>
+<li>瀏覽器打開 Inspector</li>
+<li>進 Prompts、選 prompt、填參數</li>
+<li>Inspector 會顯示產生的訊息（就是即將送給 Claude 的內容）</li>
+</ol>
+<p>這讓你在接 client 之前就能確認變數有正確插值、訊息結構符合預期。</p>
+<hr />
+<h2>Best Practices</h2>
+<p>本課提到：</p>
+<ol>
+<li><strong>專注在 server 主要用途的任務</strong> — 文件 server 該出 <code>format</code>、<code>summarize</code>、<code>outline</code> 這類 prompt</li>
+<li><strong>寫詳細具體的指令</strong> — 模糊 prompt 產出模糊結果</li>
+<li><strong>用不同輸入徹底測試</strong> — 用 Inspector</li>
+<li><strong>描述要清楚</strong> — 使用者依 description 選擇 prompt</li>
+<li><strong>設計 prompt 與 tool / resource 合奏</strong> — 範圍清楚的 prompt 會自然串到 server 的 tool（例如 format prompt 最後呼叫 <code>edit_document</code>）</li>
+</ol>
+<p>核心觀點：<strong>Prompt 是你身為 server 作者的專業</strong>，以 client 可呼叫的形式封存。若使用者三十秒內能自己寫出來，大概不需要做成 prompt；若你花了一週才調出最佳措辭，那才是值得暴露的知識。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>把 prompt 當 raw 字串</strong> — prompt 是 callable，回傳 <code>base.Message</code> list，不是模板字串</li>
+<li><strong>忘了 <code>Field(description=...)</code></strong> — 沒有它，client 側無法告訴使用者要填什麼</li>
+<li><strong>把 prompt 該抓的資料寫死</strong> — 若 prompt 要文件文字，應該引用對應的 tool / resource，不要把資料烘焙進 prompt</li>
+<li><strong>寫低成本 prompt</strong> — 比使用者自己打的還差的 prompt 是負價值，只上你真的證明比 ad-hoc 更好的 prompt</li>
+<li><strong>混淆 prompt 與 resource</strong> — Prompt 是指令模板，resource 是資料，不要用 prompt 回文件內容</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompts 是大多數 MCP 討論忽略的原語。Tools 給 Claude 能力，resources 給 context，prompts 給 <strong>方向</strong>。三個原語都有的 server 組合起來就像個小產品：client 能發現「能做什麼」（tools）、「有什麼資料」（resources）、「有哪些精心策劃的起點」（prompts）。實務上，prompt 會變成使用者看到的 slash-command 或快捷動作。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：Prompts 是 tools、resources 之外的第三種 MCP 原語；知道 <code>@mcp.prompt()</code> 裝飾器、<code>name</code> / <code>description</code>、回傳型別 <code>list[base.Message]</code>、參數的 <code>Field(description=...)</code></li>
+<li><strong>D1（Agentic Architecture）</strong>：Prompts 用 server 作者預先工程化的高品質開場訊息 seed agent loop</li>
+<li>考題模式：「Server 作者要上線一個可重用、帶參數的文件改寫 markdown 指令，該用哪個 MCP 原語？」→ prompt，用 <code>@mcp.prompt()</code> 定義</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 的 prompts 是什麼？</td>
+<td>Server 定義的預先調校、帶參數的指令模板，client 可用名字呼叫，取得給 Claude 的高品質對話開場</td>
+</tr>
+<tr>
+<td>定義 prompt 的裝飾器？</td>
+<td><code>@mcp.prompt(name=..., description=...)</code></td>
+</tr>
+<tr>
+<td>Prompt function 回傳什麼？</td>
+<td><code>list[base.Message]</code>——組成對話開場的 user/assistant 訊息 list</td>
+</tr>
+<tr>
+<td>base message types 從哪裡 import？</td>
+<td><code>from mcp.server.fastmcp import base</code>，提供 <code>base.UserMessage</code>、<code>base.AssistantMessage</code> 等</td>
+</tr>
+<tr>
+<td>參數 description 怎麼到使用者？</td>
+<td>透過 <code>Field(description="...")</code> 放在參數上，MCP SDK 會傳給 client</td>
+</tr>
+<tr>
+<td>為什麼要出 prompt 而不是讓使用者自己寫？</td>
+<td>Server 作者有測過的專業級 prompt，暴露出來可以在不要求使用者學 prompt engineering 的情況下提升結果品質</td>
+</tr>
+<tr>
+<td>怎麼在接 client 之前測 prompt？</td>
+<td>跑 <code>uv run mcp dev mcp_server.py</code>，用 MCP Inspector 的 Prompts 區看產生的訊息</td>
+</tr>
+<tr>
+<td>Format 範例怎麼與其他 MCP 原語連動？</td>
+<td>它引用 <code>edit_document</code> tool，顯示 prompt 可以串接 tool 與 resource 完成任務</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

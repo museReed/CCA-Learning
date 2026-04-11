@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">MCP 資源類型 — Direct vs Templated</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Resources 透過 URI 將資料暴露給 client（類似 GET handler）。SDK 依 MIME 型別自動序列化回傳值。</text>
+
+  <!-- LEFT: Direct (Static) Resources -->
+  <rect x="40" y="90" width="440" height="440" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="90" width="440" height="48" rx="12" fill="#3B82F6"/>
+  <rect x="40" y="126" width="440" height="12" fill="#3B82F6"/>
+  <text x="260" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">Direct Resource（固定 URI）</text>
+
+  <rect x="95" y="152" width="330" height="26" rx="13" fill="#DBEAFE"/>
+  <text x="260" y="170" text-anchor="middle" font-size="11" font-weight="600" fill="#1E40AF">URI 固定不變 — 像是固定位址的 endpoint</text>
+
+  <!-- URI example -->
+  <text x="60" y="202" font-size="11" fill="#6B7280" font-weight="600">URI →</text>
+  <rect x="60" y="210" width="400" height="30" rx="6" fill="#0F172A"/>
+  <text x="260" y="230" text-anchor="middle" font-size="12" font-family="Menlo, monospace" fill="#34D399">docs://documents</text>
+
+  <!-- Code -->
+  <text x="60" y="262" font-size="11" fill="#6B7280" font-weight="600">Server 端定義 →</text>
+  <rect x="60" y="270" width="400" height="104" rx="6" fill="#0F172A"/>
+  <text x="72" y="288" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">@mcp.resource(</text>
+  <text x="88" y="302" font-size="10" font-family="Menlo, monospace" fill="#34D399">  "docs://documents",</text>
+  <text x="88" y="316" font-size="10" font-family="Menlo, monospace" fill="#FBBF24">  mime_type="application/json"</text>
+  <text x="72" y="330" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">)</text>
+  <text x="72" y="344" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">def list_docs() -&gt; list[str]:</text>
+  <text x="72" y="358" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">    return list(docs.keys())</text>
+
+  <!-- Example response -->
+  <text x="60" y="394" font-size="11" fill="#6B7280" font-weight="600">範例回應 →</text>
+  <rect x="60" y="402" width="400" height="52" rx="6" fill="white" stroke="#93C5FD" stroke-width="1.5"/>
+  <text x="72" y="422" font-size="10" font-family="Menlo, monospace" fill="#1E293B">[</text>
+  <text x="72" y="436" font-size="10" font-family="Menlo, monospace" fill="#1E293B">  "report.pdf", "notes.md", "plan.txt"</text>
+  <text x="72" y="450" font-size="10" font-family="Menlo, monospace" fill="#1E293B">]</text>
+
+  <!-- Use case -->
+  <rect x="60" y="466" width="400" height="48" rx="6" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="76" y="484" font-size="11" font-weight="700" fill="#92400E">使用情境</text>
+  <text x="76" y="502" font-size="10" fill="#78350F">列出所有文件給 @mention 自動補全 — 不需參數</text>
+
+  <!-- RIGHT: Templated Resources -->
+  <rect x="520" y="90" width="440" height="440" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="520" y="90" width="440" height="48" rx="12" fill="#22C55E"/>
+  <rect x="520" y="126" width="440" height="12" fill="#22C55E"/>
+  <text x="740" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">Resource Template（參數化）</text>
+
+  <rect x="575" y="152" width="330" height="26" rx="13" fill="#DCFCE7"/>
+  <text x="740" y="170" text-anchor="middle" font-size="11" font-weight="600" fill="#14532D">URI 含 {參數} — SDK 解析後以 kwargs 傳入函式</text>
+
+  <!-- URI example -->
+  <text x="540" y="202" font-size="11" fill="#6B7280" font-weight="600">URI →</text>
+  <rect x="540" y="210" width="400" height="30" rx="6" fill="#0F172A"/>
+  <text x="740" y="230" text-anchor="middle" font-size="12" font-family="Menlo, monospace" fill="#34D399">docs://documents/{doc_id}</text>
+
+  <!-- Code -->
+  <text x="540" y="262" font-size="11" fill="#6B7280" font-weight="600">Server 端定義 →</text>
+  <rect x="540" y="270" width="400" height="104" rx="6" fill="#0F172A"/>
+  <text x="552" y="288" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">@mcp.resource(</text>
+  <text x="568" y="302" font-size="10" font-family="Menlo, monospace" fill="#34D399">  "docs://documents/{doc_id}",</text>
+  <text x="568" y="316" font-size="10" font-family="Menlo, monospace" fill="#FBBF24">  mime_type="text/plain"</text>
+  <text x="552" y="330" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">)</text>
+  <text x="552" y="344" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">def fetch_doc(doc_id: str) -&gt; str:</text>
+  <text x="552" y="358" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">    return docs[doc_id]</text>
+
+  <!-- Example response -->
+  <text x="540" y="394" font-size="11" fill="#6B7280" font-weight="600">範例回應 →</text>
+  <rect x="540" y="402" width="400" height="52" rx="6" fill="white" stroke="#86EFAC" stroke-width="1.5"/>
+  <text x="552" y="422" font-size="10" font-family="Menlo, monospace" fill="#1E293B">GET docs://documents/report.pdf →</text>
+  <text x="552" y="438" font-size="10" font-family="Menlo, monospace" fill="#1E293B">"This 20m condenser tower requires daily</text>
+  <text x="552" y="450" font-size="10" font-family="Menlo, monospace" fill="#1E293B">inspection and ..."</text>
+
+  <!-- Use case -->
+  <rect x="540" y="466" width="400" height="48" rx="6" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="556" y="484" font-size="11" font-weight="700" fill="#92400E">使用情境</text>
+  <text x="556" y="502" font-size="10" fill="#78350F">依 id 抓取特定文件 — 例如使用者輸入 @report.pdf 時</text>
+
+  <!-- Bottom: URI schemes + MIME types legend -->
+  <rect x="40" y="544" width="920" height="44" rx="6" fill="white" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="58" y="562" font-size="10" font-weight="700" fill="#1E293B">URI schemes：</text>
+  <text x="150" y="562" font-size="10" font-family="Menlo, monospace" fill="#3B82F6">file://</text>
+  <text x="200" y="562" font-size="10" font-family="Menlo, monospace" fill="#3B82F6">https://</text>
+  <text x="260" y="562" font-size="10" font-family="Menlo, monospace" fill="#3B82F6">docs://</text>
+  <text x="320" y="562" font-size="10" font-family="Menlo, monospace" fill="#3B82F6">custom://</text>
+  <text x="390" y="562" font-size="10" fill="#6B7280">（任何你設計的 scheme）</text>
+  <text x="58" y="580" font-size="10" font-weight="700" fill="#1E293B">MIME types：</text>
+  <text x="150" y="580" font-size="10" font-family="Menlo, monospace" fill="#F59E0B">application/json</text>
+  <text x="270" y="580" font-size="10" font-family="Menlo, monospace" fill="#F59E0B">text/plain</text>
+  <text x="350" y="580" font-size="10" font-family="Menlo, monospace" fill="#F59E0B">image/png</text>
+  <text x="430" y="580" font-size="10" fill="#6B7280">— SDK 依回傳型別自動序列化</text>
+</svg>

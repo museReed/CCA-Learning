@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defining Tools With Mcp Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Tools with MCP — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1（tool schema 设计）、2.3（MCP primitives：tools）、1.2（agent loop 集成）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 64</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Lesson 64 演示 Python MCP SDK（<code>FastMCP</code>）如何把 tool 编写压缩成"decorator + type hints"——SDK 会从你的 function signature 和 Pydantic <code>Field</code> 注解自动生成 JSON schema，让你写正常 Python 而不是手工 JSON Schema。</p>
+<hr />
+<h2>为什么需要 SDK</h2>
+<p>Ch04 的 tool use 里，每个 tool 定义都要写一大段冗长的 JSON schema：</p>
+<pre><code class="language-python">tools = [{
+    &quot;name&quot;: &quot;read_doc_contents&quot;,
+    &quot;description&quot;: &quot;...&quot;,
+    &quot;input_schema&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;doc_id&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;description&quot;: &quot;...&quot;}
+        },
+        &quot;required&quot;: [&quot;doc_id&quot;]
+    }
+}]
+</code></pre>
+<p>一个 tool 还好，二十个 tool 就痛苦了。Python MCP SDK（<code>mcp.server.fastmcp.FastMCP</code>）用 decorator 驱动的模式：</p>
+<ul>
+<li>拿一个普通的 Python 函数</li>
+<li>读取它的 type hints 和 <code>Field(description=...)</code> 注解</li>
+<li>自动生成对应的 JSON schema</li>
+<li>把 tool 注册到 MCP server</li>
+</ul>
+<p>结果是：tool 定义缩到几行，看起来就像普通 Python 代码。</p>
+<hr />
+<h2>建立 Server</h2>
+<p>创建一个 MCP server 只要一行 import + 一行初始化：</p>
+<pre><code class="language-python">from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP(&quot;DocumentMCP&quot;, log_level=&quot;ERROR&quot;)
+</code></pre>
+<ul>
+<li><code>"DocumentMCP"</code> 是 server 的名字（呈现给 clients 的标识名）。</li>
+<li><code>log_level="ERROR"</code> 在开发时压掉吵人的 info log。</li>
+</ul>
+<p><code>mcp</code> 对象是一个 registry，你把 tools（以及后面的 lessons 要加的 resources 和 prompts）挂在上面。</p>
+<hr />
+<h2>内存文档存储</h2>
+<p>这节课把普通 Python dict 当"数据库"用：</p>
+<pre><code class="language-python">docs = {
+    &quot;deposition.md&quot;: &quot;This deposition covers the testimony of Angela Smith, P.E.&quot;,
+    &quot;report.pdf&quot;: &quot;The report details the state of a 20m condenser tower.&quot;,
+    &quot;financials.docx&quot;: &quot;These financials outline the project's budget and expenditure&quot;,
+    &quot;outlook.pdf&quot;: &quot;This document presents the projected future performance of the&quot;,
+    &quot;plan.md&quot;: &quot;The plan outlines the steps for the project's implementation.&quot;,
+    &quot;spec.txt&quot;: &quot;These specifications define the technical requirements for the equipment&quot;
+}
+</code></pre>
+<p>Key 是 document ID，value 是文字内容。没有 persistence——文档活在 process memory。这样做是刻意的，让焦点放在 MCP 编写而不是 DB 管道上。</p>
+<hr />
+<h2>Tool 1：<code>read_doc_contents</code></h2>
+<p>Decorator 驱动的读取 tool：</p>
+<pre><code class="language-python">@mcp.tool(
+    name=&quot;read_doc_contents&quot;,
+    description=&quot;Read the contents of a document and return it as a string.&quot;
+)
+def read_document(
+    doc_id: str = Field(description=&quot;Id of the document to read&quot;)
+):
+    if doc_id not in docs:
+        raise ValueError(f&quot;Doc with id {doc_id} not found&quot;)
+
+    return docs[doc_id]
+</code></pre>
+<p>底层发生的事：</p>
+<table>
+<thead>
+<tr>
+<th>Source 元素</th>
+<th>变成什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@mcp.tool(name=..., description=...)</code></td>
+<td>MCP schema 里 tool 的顶层 metadata</td>
+</tr>
+<tr>
+<td><code>doc_id: str</code> type hint</td>
+<td>生成的 JSON Schema 里的 <code>{"type": "string"}</code></td>
+</tr>
+<tr>
+<td><code>Field(description="...")</code></td>
+<td><code>doc_id</code> property 的 <code>description</code></td>
+</tr>
+<tr>
+<td>Function body</td>
+<td>Claude 发 <code>CallToolRequest</code> 时执行的 callable</td>
+</tr>
+<tr>
+<td><code>raise ValueError(...)</code></td>
+<td>会变成 Claude 能读的 tool 错误，可能可以修正</td>
+</tr>
+</tbody>
+</table>
+<p>注意函数名（<code>read_document</code>）和 MCP tool 名（<code>read_doc_contents</code>）是独立的；decorator 的 <code>name=</code> 才是权威。</p>
+<hr />
+<h2>Tool 2：<code>edit_document</code></h2>
+<p>第二个 tool 是简单的 find-and-replace 编辑器：</p>
+<pre><code class="language-python">@mcp.tool(
+    name=&quot;edit_document&quot;,
+    description=&quot;Edit a document by replacing a string in the documents content with a new string.&quot;
+)
+def edit_document(
+    doc_id: str = Field(description=&quot;Id of the document that will be edited&quot;),
+    old_str: str = Field(description=&quot;The text to replace. Must match exactly, including whitespace.&quot;),
+    new_str: str = Field(description=&quot;The new text to insert in place of the old text.&quot;)
+):
+    if doc_id not in docs:
+        raise ValueError(f&quot;Doc with id {doc_id} not found&quot;)
+
+    docs[doc_id] = docs[doc_id].replace(old_str, new_str)
+</code></pre>
+<p>工程细节：</p>
+<ul>
+<li>三个参数，每个都用 <code>Field(description=...)</code> 注解，让 Claude 理解角色。</li>
+<li><code>old_str</code> description 明写"must match exactly, including whitespace"——这是面向 Claude 的文档，可减少不稳定的编辑。</li>
+<li>实现用 Python 内建 <code>str.replace</code>，会替换<strong>所有</strong>出现位置；如果你真实系统需要唯一性，要加一个 match-count check。</li>
+<li>函数没有显式 return；它直接 mutate dict。</li>
+</ul>
+<hr />
+<h2>用 <code>ValueError</code> 做错误处理</h2>
+<p>两个 tools 收到无效 <code>doc_id</code> 时都 <code>raise ValueError</code>。MCP SDK 会把这些转成 tool error response，Claude 在下一个 <code>tool_result</code> block 收到，让它可以：</p>
+<ul>
+<li>道歉并请用户提供有效 ID</li>
+<li>用看起来相似的 ID 重试</li>
+<li>升级成"找不到这份文档"的最终回答</li>
+</ul>
+<p>这是<strong>结构化错误</strong>模式：你给 Claude 一段可读的解释，而不是默默失败；agent loop 就能把错误纳入推理。</p>
+<hr />
+<h2>SDK 方式的关键好处</h2>
+<p>这节课列了五个相较手写 tool schema 的赢面：</p>
+<ol>
+<li><strong>自动从 Python type hints 生成 JSON Schema</strong>。</li>
+<li><strong>干净、可读的代码</strong>——tool body 看起来像普通 Python。</li>
+<li><strong>用 Pydantic <code>Field</code> 内建参数验证</strong>。</li>
+<li><strong>减少样板</strong>——不用手写 <code>{"type": "object", "properties": ...}</code> 的 dict。</li>
+<li><strong>开发时的类型安全和 IDE 支持</strong>。</li>
+</ol>
+<p>Meta-point：SDK 让你专注在<strong>业务逻辑</strong>（tool 做什么），协议层（schema、序列化）自动处理。</p>
+<hr />
+<h2>课程没演示的进阶考量</h2>
+<p>Source 刻意简化，但真实 server 还该考虑：</p>
+<table>
+<thead>
+<tr>
+<th>关注点</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Return type hints</td>
+<td>完全类型化的 return 让 FastMCP 能描述结果形状</td>
+</tr>
+<tr>
+<td>带 default 的 optional 参数</td>
+<td>用 <code>Field(default=..., description=...)</code></td>
+</tr>
+<tr>
+<td>长描述</td>
+<td><code>description</code> 是 Claude 的操作手册——值得投资写清楚</td>
+</tr>
+<tr>
+<td>Side-effect logging</td>
+<td><code>edit_document</code> 修改 state；prod 应每次调用都 audit-log</td>
+</tr>
+<tr>
+<td>并发安全</td>
+<td>dict 是共享 state；prod 要用 lock 或 async-safe store</td>
+</tr>
+</tbody>
+</table>
+<p>这些不是完成这门课项目的必要项目，但能区分"demo 能跑"和"能上线给用户"。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>忘了 <code>Field</code> description。</strong> 没有的话 Claude 只看到参数名字——tool 质量立刻下降。</li>
+<li><strong>用函数名当 MCP tool 名。</strong> Claude 看到的是 decorator 的 <code>name=</code>；函数名是内部的。</li>
+<li><strong>让错误变未处理 exception 冒上来。</strong> <code>ValueError</code> 会被转成可读的 tool error；其他 exception 比较吵且不好恢复。</li>
+<li><strong>以为 tool name 和 schema 是稳定的。</strong> 如果你改名或改形状，clients（包括 lesson 65 的 MCP inspector）要重新 list tools。</li>
+<li><strong>靠 description 做 prompt engineering。</strong> Description 要诚实；不要塞相互矛盾的指示让 Claude 混淆。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Python MCP SDK 把 tool 编写变成普通 Python 代码 + 两撮 metadata（<code>@mcp.tool(...)</code> + <code>Field(description=...)</code>）。这就是 MCP 的核心生产力赢面：你用"decorated function"换掉"手写 JSON Schema"，framework 搞定协议。课程后面加的每个 tool 都是这个模式。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：知道 <code>FastMCP("Name", log_level=...)</code>、<code>@mcp.tool(name, description)</code> decorator、以及 <code>Field(description=...)</code> 如何填入 schema。</li>
+<li><strong>D1（Agentic Architecture）</strong>：理解 <code>ValueError</code> 如何在 agent loop 里被呈现成 Claude 可恢复的 tool error。</li>
+<li>情境题可能问："SDK 怎么知道要 require <code>doc_id</code>？"——答：因为它是没有 default 的 positional 参数，SDK 把它标成 schema 中的 required。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python MCP SDK 用哪个 class 初始化 server？</td>
+<td><code>FastMCP</code>（来自 <code>mcp.server.fastmcp</code>）</td>
+</tr>
+<tr>
+<td>怎么声明一个 tool？</td>
+<td>用 <code>@mcp.tool(name=..., description=...)</code> decorate 一个函数</td>
+</tr>
+<tr>
+<td>怎么为 Claude 文档化一个参数？</td>
+<td>用 Pydantic 的 <code>Field(description="...")</code> 当参数 default</td>
+</tr>
+<tr>
+<td>SDK 从你的 type hints 生成什么？</td>
+<td>JSON Schema（包含 <code>type</code>、<code>properties</code>、<code>required</code>）</td>
+</tr>
+<tr>
+<td>两个 demo tools 的数据持久化方式？</td>
+<td>没有——文档活在 module-level 的 Python dict（内存）</td>
+</tr>
+<tr>
+<td><code>read_doc_contents</code> 收到不存在的 doc_id 会怎样？</td>
+<td>Tool <code>raise ValueError</code>，变成送给 Claude 的 tool error</td>
+</tr>
+<tr>
+<td>Demo server 对外提供几个 tools？</td>
+<td>两个——<code>read_doc_contents</code> 和 <code>edit_document</code></td>
+</tr>
+<tr>
+<td>这节课列出 SDK 方法的哪五个好处？</td>
+<td>自动 JSON Schema、干净代码、Pydantic validation、减少样板、类型安全/IDE 支持</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

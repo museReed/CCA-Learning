@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Setup Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Project Setup — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP primitives), 1.2 (agent loop integration), 2.1 (tool schemas)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 63</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Lesson 63 bootstraps the hands-on MCP project — a CLI chatbot with both a custom MCP client and a custom MCP server in the same codebase — and establishes the directory layout, env vars, and "hello world" baseline you will build on in lessons 64 and 65.</p>
+<hr />
+<h2>What We're Building</h2>
+<p>The project is a command-line chatbot that lets users interact with an in-memory document collection through Claude. It has two main components that will be implemented incrementally over the rest of Ch07:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MCP client</strong></td>
+<td>Handles the user chat loop and forwards tool use requests</td>
+</tr>
+<tr>
+<td><strong>Custom MCP server</strong></td>
+<td>Manages document operations (read and update)</td>
+</tr>
+</tbody>
+</table>
+<p>The MCP server will expose two essential tools (covered in detail in lesson 64):</p>
+<ol>
+<li>A <strong>read</strong> tool that returns a document's contents.</li>
+<li>An <strong>update</strong> tool that edits a document via find-and-replace.</li>
+</ol>
+<p>Documents are stored in a plain Python dictionary — no database — to keep the focus on MCP mechanics rather than persistence plumbing.</p>
+<hr />
+<h2>Important Architecture Note</h2>
+<p>The lesson calls out a design caveat: <strong>in real-world projects you typically implement either an MCP client OR an MCP server, not both</strong>. Common patterns:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP server author</td>
+<td>You expose your internal service's functionality to other developers</td>
+</tr>
+<tr>
+<td>MCP client author</td>
+<td>You build an app that connects to existing MCP servers (e.g. GitHub, Sentry)</td>
+</tr>
+</tbody>
+</table>
+<p>The course builds both halves in the same repo <strong>only for educational purposes</strong> — so you can see how the two sides of the protocol talk to each other without switching codebases. Don't mistake this for the recommended production pattern.</p>
+<hr />
+<h2>Project Layout</h2>
+<p>After extracting the <code>cli_project.zip</code> attached to the lesson, you will find at minimum:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main.py</code></td>
+<td>Entry point; runs the CLI chat loop</td>
+</tr>
+<tr>
+<td><code>mcp_client.py</code></td>
+<td>The MCP client implementation (will be filled in later)</td>
+</tr>
+<tr>
+<td><code>mcp_server.py</code></td>
+<td>The custom MCP server (will be filled in later)</td>
+</tr>
+<tr>
+<td><code>.env</code></td>
+<td>Environment file — holds <code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td><code>README.md</code></td>
+<td>Step-by-step setup instructions</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>.env</code> file is the critical piece: without an Anthropic API key, the chatbot cannot call Claude at all. Both the <code>uv</code> and plain <code>pip</code> paths expect the key to be present before first run.</p>
+<hr />
+<h2>Installing Dependencies</h2>
+<p>The README documents two supported install paths:</p>
+<h3>Option 1 — UV (recommended)</h3>
+<pre><code class="language-bash"># In the project directory
+uv run main.py
+</code></pre>
+<p><code>uv</code> is a Python package manager (from Astral, authors of ruff) that combines venv management and dependency install in one command. If the project ships a <code>pyproject.toml</code> or <code>uv.lock</code>, <code>uv run</code> will resolve and install dependencies automatically before executing.</p>
+<h3>Option 2 — Standard Python + pip</h3>
+<pre><code class="language-bash"># Create and activate a venv, then
+pip install -r requirements.txt
+python main.py
+</code></pre>
+<p>Either path should leave you with:</p>
+<ul>
+<li>The <code>anthropic</code> SDK installed</li>
+<li>The <code>mcp</code> (Python MCP SDK) installed</li>
+<li>A working Python interpreter that can run <code>main.py</code></li>
+</ul>
+<hr />
+<h2>"Hello World" Baseline</h2>
+<p>Before implementing any MCP features, the course asks you to verify the baseline by asking a trivial question:</p>
+<pre><code>&gt; what's 1+1?
+</code></pre>
+<p>You should get a quick response from Claude. This sanity-check confirms three things:</p>
+<ol>
+<li>Your <code>.env</code> is readable by <code>main.py</code>.</li>
+<li>Your API key is valid (no 401).</li>
+<li>The Claude SDK is correctly installed and callable.</li>
+</ol>
+<p>If this fails, there is no point proceeding to lessons 64-65 — MCP will just add more moving parts to an already broken setup.</p>
+<hr />
+<h2>Why This Lesson Matters</h2>
+<p>A running baseline is the precondition for any meaningful debugging later. The MCP inspector in lesson 65 and the tool implementations in lesson 64 both assume you can already hit Claude from <code>main.py</code>. The lesson is short because its job is not to teach a concept — it is to remove environment excuses for the rest of the chapter.</p>
+<p>Concretely, Lesson 63 sets up:</p>
+<table>
+<thead>
+<tr>
+<th>Setup item</th>
+<th>Needed by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.env</code> with <code>ANTHROPIC_API_KEY</code></td>
+<td>Every lesson from here on</td>
+</tr>
+<tr>
+<td>Working <code>main.py</code> CLI</td>
+<td>64, 65, 66, 68, 70</td>
+</tr>
+<tr>
+<td>Installed <code>mcp</code> Python SDK</td>
+<td>64 (<code>FastMCP</code>), 65 (<code>mcp dev</code>)</td>
+</tr>
+<tr>
+<td>Installed <code>anthropic</code> Python SDK</td>
+<td>Every Claude call</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Python MCP SDK Stack</h2>
+<p>Lesson 63 doesn't write MCP code yet, but it does install the runtime you will use next. The two relevant imports for the remaining lessons are:</p>
+<pre><code class="language-python">from mcp.server.fastmcp import FastMCP   # lesson 64
+from anthropic import Anthropic          # every lesson
+</code></pre>
+<p><code>FastMCP</code> is the high-level server builder (decorators + type hints); the <code>mcp</code> package also ships a client API and a CLI inspector (<code>mcp dev</code>, used in lesson 65).</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Skipping the baseline test.</strong> If <code>what's 1+1?</code> doesn't work, stop and fix setup — don't add MCP on top.</li>
+<li><strong>Forgetting the <code>.env</code> file.</strong> The Anthropic SDK reads <code>ANTHROPIC_API_KEY</code> from the environment; a missing key produces an unhelpful error at call time, not at import time.</li>
+<li><strong>Using a global Python interpreter.</strong> Both <code>uv</code> and venv isolate dependencies; a global install risks version conflicts with the <code>mcp</code> package.</li>
+<li><strong>Assuming you must build both halves in production.</strong> Re-read the Important Architecture Note: real projects usually build only one side.</li>
+<li><strong>Ignoring the README.</strong> The README carries exact setup steps; Anthropic course projects are tightly coupled to it.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>This lesson's real point is <strong>remove setup ambiguity</strong>. MCP introduces more moving parts than plain tool use (subprocesses, transports, SDK versions). The only way to debug those later without pulling your hair out is to start from a known-good baseline. Getting <code>what's 1+1?</code> to work once is a 5-minute investment that pays back across the next four lessons.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: The scenario of "CLI chatbot with in-memory doc store + read/update tools" is the canonical MCP intro example — exam scenarios may echo it.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Understand that <code>main.py</code> is the host, <code>mcp_client.py</code> is the client, <code>mcp_server.py</code> is the server — this triad recurs in subsequent questions.</li>
+<li>Recognize that "build both client and server" is an educational choice, not a production recommendation.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the demo project in Ch07?</td>
+<td>A CLI chatbot that uses an MCP client plus a custom MCP server to read and update an in-memory document collection.</td>
+</tr>
+<tr>
+<td>What two tools will the custom MCP server expose?</td>
+<td>A read-document tool and an edit-document tool (find and replace).</td>
+</tr>
+<tr>
+<td>Why does the course build both client and server in one repo?</td>
+<td>Purely for educational purposes, so you can see both sides of the MCP protocol in one codebase.</td>
+</tr>
+<tr>
+<td>What does real-world practice usually look like?</td>
+<td>You build either a client OR a server — not both — exposing a service to others or consuming existing servers.</td>
+</tr>
+<tr>
+<td>What must you add to <code>.env</code> before first run?</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td>What is the recommended Python tool to run the project?</td>
+<td><code>uv run main.py</code></td>
+</tr>
+<tr>
+<td>What is the baseline sanity check after setup?</td>
+<td>Ask the chatbot <code>what's 1+1?</code> and verify Claude responds.</td>
+</tr>
+<tr>
+<td>What files ship in the starter project?</td>
+<td><code>main.py</code>, <code>mcp_client.py</code>, <code>mcp_server.py</code>, <code>.env</code>, and a README.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

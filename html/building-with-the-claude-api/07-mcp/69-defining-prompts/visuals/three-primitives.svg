@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">MCP — The Three Primitives</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Tools, Resources and Prompts each have a different controller: the model, the app, or the user</text>
+
+  <!-- Card 1: Tools -->
+  <rect x="30" y="90" width="305" height="470" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="30" y="90" width="305" height="48" rx="12" fill="#3B82F6"/>
+  <rect x="30" y="126" width="305" height="12" fill="#3B82F6"/>
+  <text x="182" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">Tools</text>
+
+  <!-- Controlled by -->
+  <rect x="50" y="156" width="265" height="32" rx="16" fill="#DBEAFE"/>
+  <text x="182" y="176" text-anchor="middle" font-size="11" font-weight="700" fill="#1E40AF">Model-controlled</text>
+
+  <text x="50" y="210" font-size="10" font-weight="700" fill="#6B7280">WHO DECIDES TO USE IT</text>
+  <text x="50" y="226" font-size="11" fill="#1E293B">Claude chooses when to call,</text>
+  <text x="50" y="240" font-size="11" fill="#1E293B">based on the user's query.</text>
+
+  <text x="50" y="270" font-size="10" font-weight="700" fill="#6B7280">PURPOSE</text>
+  <text x="50" y="286" font-size="11" fill="#1E293B">Perform an action</text>
+  <text x="50" y="300" font-size="11" fill="#1E293B">(side effects allowed)</text>
+
+  <text x="50" y="330" font-size="10" font-weight="700" fill="#6B7280">USE CASE</text>
+  <text x="50" y="346" font-size="11" fill="#1E293B">Edit a document, send an</text>
+  <text x="50" y="360" font-size="11" fill="#1E293B">email, create a GitHub issue</text>
+
+  <text x="50" y="390" font-size="10" font-weight="700" fill="#6B7280">EXAMPLE</text>
+  <rect x="50" y="398" width="265" height="120" rx="6" fill="#0F172A"/>
+  <text x="62" y="416" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">@mcp.tool()</text>
+  <text x="62" y="430" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">def edit_document(</text>
+  <text x="62" y="444" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">  doc_id: str,</text>
+  <text x="62" y="458" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">  old: str,</text>
+  <text x="62" y="472" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">  new: str,</text>
+  <text x="62" y="486" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">) -&gt; str:</text>
+  <text x="62" y="500" font-size="10" font-family="Menlo, monospace" fill="#34D399">  docs[doc_id] = ...</text>
+  <text x="62" y="514" font-size="10" font-family="Menlo, monospace" fill="#34D399">  return "ok"</text>
+
+  <rect x="50" y="528" width="265" height="20" rx="4" fill="white" stroke="#93C5FD" stroke-width="1"/>
+  <text x="182" y="542" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#1E40AF">ListToolsRequest · CallToolRequest</text>
+
+  <!-- Card 2: Resources -->
+  <rect x="347" y="90" width="305" height="470" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="347" y="90" width="305" height="48" rx="12" fill="#22C55E"/>
+  <rect x="347" y="126" width="305" height="12" fill="#22C55E"/>
+  <text x="500" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">Resources</text>
+
+  <rect x="367" y="156" width="265" height="32" rx="16" fill="#DCFCE7"/>
+  <text x="500" y="176" text-anchor="middle" font-size="11" font-weight="700" fill="#14532D">App-controlled</text>
+
+  <text x="367" y="210" font-size="10" font-weight="700" fill="#6B7280">WHO DECIDES TO USE IT</text>
+  <text x="367" y="226" font-size="11" fill="#1E293B">Your application chooses</text>
+  <text x="367" y="240" font-size="11" fill="#1E293B">when to fetch the data.</text>
+
+  <text x="367" y="270" font-size="10" font-weight="700" fill="#6B7280">PURPOSE</text>
+  <text x="367" y="286" font-size="11" fill="#1E293B">Expose read-only data</text>
+  <text x="367" y="300" font-size="11" fill="#1E293B">(like GET endpoints)</text>
+
+  <text x="367" y="330" font-size="10" font-weight="700" fill="#6B7280">USE CASE</text>
+  <text x="367" y="346" font-size="11" fill="#1E293B">Document @mentions, file</text>
+  <text x="367" y="360" font-size="11" fill="#1E293B">browser, repo list for UI</text>
+
+  <text x="367" y="390" font-size="10" font-weight="700" fill="#6B7280">EXAMPLE</text>
+  <rect x="367" y="398" width="265" height="120" rx="6" fill="#0F172A"/>
+  <text x="379" y="416" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">@mcp.resource(</text>
+  <text x="379" y="430" font-size="10" font-family="Menlo, monospace" fill="#34D399">  "docs://{doc_id}",</text>
+  <text x="379" y="444" font-size="10" font-family="Menlo, monospace" fill="#FBBF24">  mime_type="text/plain"</text>
+  <text x="379" y="458" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">)</text>
+  <text x="379" y="472" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">def fetch_doc(</text>
+  <text x="379" y="486" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">  doc_id: str</text>
+  <text x="379" y="500" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">) -&gt; str:</text>
+  <text x="379" y="514" font-size="10" font-family="Menlo, monospace" fill="#34D399">  return docs[doc_id]</text>
+
+  <rect x="367" y="528" width="265" height="20" rx="4" fill="white" stroke="#86EFAC" stroke-width="1"/>
+  <text x="500" y="542" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#14532D">ReadResourceRequest · URI-based</text>
+
+  <!-- Card 3: Prompts -->
+  <rect x="664" y="90" width="305" height="470" rx="12" fill="#F5F3FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="664" y="90" width="305" height="48" rx="12" fill="#8B5CF6"/>
+  <rect x="664" y="126" width="305" height="12" fill="#8B5CF6"/>
+  <text x="817" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">Prompts</text>
+
+  <rect x="684" y="156" width="265" height="32" rx="16" fill="#EDE9FE"/>
+  <text x="817" y="176" text-anchor="middle" font-size="11" font-weight="700" fill="#5B21B6">User-controlled</text>
+
+  <text x="684" y="210" font-size="10" font-weight="700" fill="#6B7280">WHO DECIDES TO USE IT</text>
+  <text x="684" y="226" font-size="11" fill="#1E293B">The user picks a command</text>
+  <text x="684" y="240" font-size="11" fill="#1E293B">(e.g. slash-command menu).</text>
+
+  <text x="684" y="270" font-size="10" font-weight="700" fill="#6B7280">PURPOSE</text>
+  <text x="684" y="286" font-size="11" fill="#1E293B">Pre-built, tested templates</text>
+  <text x="684" y="300" font-size="11" fill="#1E293B">returning ready messages</text>
+
+  <text x="684" y="330" font-size="10" font-weight="700" fill="#6B7280">USE CASE</text>
+  <text x="684" y="346" font-size="11" fill="#1E293B">/format report.pdf —</text>
+  <text x="684" y="360" font-size="11" fill="#1E293B">high-quality canned prompts</text>
+
+  <text x="684" y="390" font-size="10" font-weight="700" fill="#6B7280">EXAMPLE</text>
+  <rect x="684" y="398" width="265" height="120" rx="6" fill="#0F172A"/>
+  <text x="696" y="416" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">@mcp.prompt(</text>
+  <text x="696" y="430" font-size="10" font-family="Menlo, monospace" fill="#34D399">  name="format",</text>
+  <text x="696" y="444" font-size="10" font-family="Menlo, monospace" fill="#FBBF24">  description="..."</text>
+  <text x="696" y="458" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">)</text>
+  <text x="696" y="472" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">def format_document(</text>
+  <text x="696" y="486" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">  doc_id: str,</text>
+  <text x="696" y="500" font-size="10" font-family="Menlo, monospace" fill="#E2E8F0">) -&gt; list[Message]:</text>
+  <text x="696" y="514" font-size="10" font-family="Menlo, monospace" fill="#34D399">  return [UserMessage(...)]</text>
+
+  <rect x="684" y="528" width="265" height="20" rx="4" fill="white" stroke="#C4B5FD" stroke-width="1"/>
+  <text x="817" y="542" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#5B21B6">GetPromptRequest · Message list</text>
+
+  <!-- Bottom note -->
+  <text x="500" y="582" text-anchor="middle" font-size="11" fill="#6B7280">Choose by <tspan font-weight="700" fill="#1E293B">who controls</tspan>: model → Tools, app → Resources, user → Prompts</text>
+</svg>

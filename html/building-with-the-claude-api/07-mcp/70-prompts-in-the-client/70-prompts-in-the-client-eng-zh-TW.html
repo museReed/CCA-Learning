@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompts In The Client Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompts in the Client — Engineering Deep Dive（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration（18%）主；D1 — Agentic Architecture（22%）次</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives：client 端 prompt 存取）、1.2（seed agent loop）、2.2（message content blocks）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 70</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>從 client 使用 prompt 就是在 MCP client 加兩個方法：<code>list_prompts()</code> 做探索、<code>get_prompt(name, args)</code> 取得已插值的訊息 list，直接送給 Claude 當作新對話的開場。</p>
+<hr />
+<h2>Client 端契約</h2>
+<p>Server 用 <code>@mcp.prompt()</code> 定義的 prompt，要 client 暴露兩個方法才真正可用：</p>
+<ol>
+<li><strong><code>list_prompts()</code></strong> — 回傳 server 知道的所有 prompt，含名字、描述、參數 metadata</li>
+<li><strong><code>get_prompt(prompt_name, args)</code></strong> — 用給定參數執行 server 的 prompt function，回傳結果訊息 list</li>
+</ol>
+<p>兩個方法準備好後，應用就能做 slash menu UI、為每個 prompt 顯示描述、向使用者收參數、然後啟動一個組好的 Claude 對話。</p>
+<hr />
+<h2>實作 <code>list_prompts</code></h2>
+<pre><code class="language-python">async def list_prompts(self) -&gt; list[types.Prompt]:
+    result = await self.session().list_prompts()
+    return result.prompts
+</code></pre>
+<p>這是對 session 的直通：</p>
+<ul>
+<li><code>self.session().list_prompts()</code> 呼叫 MCP SDK，向 server 問目前註冊的 prompt</li>
+<li>SDK 回 <code>ListPromptsResult</code>，你把 <code>result.prompts</code> 當作 <code>types.Prompt</code> list 回出去</li>
+</ul>
+<p>每個 <code>types.Prompt</code> 物件帶：</p>
+<ul>
+<li><code>name</code> — 字串識別（例如 <code>"format"</code>）</li>
+<li><code>description</code> — UI 顯示用的人類可讀說明</li>
+<li>參數 metadata — 名字、描述、是否必填</li>
+</ul>
+<p>應用用這些資訊組 picker、驗證輸入、或做權限控制。</p>
+<hr />
+<h2>實作 <code>get_prompt</code></h2>
+<pre><code class="language-python">async def get_prompt(self, prompt_name, args: dict[str, str]):
+    result = await self.session().get_prompt(prompt_name, args)
+    return result.messages
+</code></pre>
+<p>這個方法帶參數抓指定的 prompt：</p>
+<ul>
+<li><code>prompt_name</code> — 從 <code>list_prompts()</code> 看到的名字</li>
+<li><code>args</code> — dict，key 對應 server 端 function 的參數名</li>
+<li>session 的 <code>get_prompt</code> 發請求給 server，server 執行 prompt function 並回傳 <code>list[base.Message]</code></li>
+<li>你把 <code>result.messages</code> 回出去——就是可以直接送給 Claude 的對話</li>
+</ul>
+<hr />
+<h2>Prompt 參數怎麼運作</h2>
+<p>Server 端 prompt function 會有參數。例如：</p>
+<pre><code class="language-python">def format_document(doc_id: str):
+    # doc_id 會被插值進 prompt 模板
+</code></pre>
+<p>Client 呼叫 <code>get_prompt("format", {"doc_id": "report.pdf"})</code> 時，MCP SDK 會把 dict 當 keyword arguments 餵給 <code>format_document(doc_id="report.pdf")</code>。Function 執行、插值、回訊息 list。Client 看不到中間模板，只看到最終訊息。</p>
+<p>這種參數化是 prompt 能重用的原因：一個 server 端模板服務無限的參數組合。</p>
+<hr />
+<h2>在 CLI 測試 Prompts</h2>
+<p><code>list_prompts</code> 與 <code>get_prompt</code> 接好後，CLI 會把 prompts 暴露成 slash-command。打 <code>/</code> 會跳出 prompt 選單。選一個之後可能會再要你填一些參數（例如「要 format 哪份文件？」），接著完成的 prompt 送給 Claude。</p>
+<p>典型 workflow：</p>
+<ol>
+<li><strong>使用者選 prompt</strong>（例如 <code>/format</code>）</li>
+<li><strong>系統要求必要參數</strong>（例如哪份文件）</li>
+<li><strong>Client 呼叫 <code>get_prompt(name, args)</code></strong> — 收到插值後的訊息</li>
+<li><strong>Client 把訊息送給 Claude</strong> — Claude 用這個 seed 開始對話</li>
+<li><strong>Claude 正常進行</strong> — 可能呼叫 tool、讀 resource、產最終答案</li>
+</ol>
+<hr />
+<h2>完整 Prompt 驅動的 Agent Loop</h2>
+<p>從 server 作者角度看，prompt 是食譜；從 client 角度看，是預組好的對話開場。合起來：</p>
+<pre><code>┌──────────┐                       ┌────────────┐    list_prompts()      ┌────────────┐
+│  User    │                       │ Application│ ─────────────────────▶ │ MCP Server │
+│          │                       │ (+ client) │                        │            │
+│          │   選 &quot;format&quot;          │            │                        │            │
+│          │ ─────────────────────▶ │            │                        │            │
+│          │   doc_id=&quot;report.pdf&quot;  │            │    get_prompt(...)     │            │
+│          │ ─────────────────────▶ │            │ ─────────────────────▶ │            │
+│          │                        │            │ ◀───────────────────── │            │
+│          │                        │            │   messages=[...]       └────────────┘
+│          │                        │            │                              │
+│          │                        │            │   第一次呼叫 Claude          │
+│          │                        │            │ ─────────────────────▶ ┌──────────┐
+│          │                        │            │ ◀───────────────────── │  Claude  │
+│          │                        │            │   tool_use(...)        │   API    │
+│          │                        │            │                        └──────────┘
+│          │                        │            │   loop 繼續...
+└──────────┘                        └────────────┘
+</code></pre>
+<p>Prompt 只 seed 對話，之後 tool use、resource access、多輪推理都照常走。</p>
+<hr />
+<h2>Prompt Best Practices（本課提到）</h2>
+<ul>
+<li>與 server 用途相關</li>
+<li>上線前充分測試</li>
+<li>清楚具體的指令</li>
+<li>設計時考慮與現有 tool 的協作</li>
+<li>仔細想使用者要提供什麼參數</li>
+</ul>
+<p>對應 Lesson 69 的 server 端 best practices，client 是 prompt 的消費者。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>把 <code>get_prompt</code> 結果當純文字</strong> — 它是 <strong>訊息 list</strong>，要用 Anthropic API 的 messages 參數送，不是單一使用者字串</li>
+<li><strong>傳錯參數名</strong> — <code>args</code> 的 key 要跟 server prompt function 的參數名完全一致，不一致就噴錯</li>
+<li><strong>沒先呼叫 <code>list_prompts</code> 就呼 <code>get_prompt</code></strong> — 技術上可以，但失去做 UI 與驗證的機會</li>
+<li><strong>跨 session 快取 prompt 結果</strong> — Prompt 輸出是新對話的模板，後續對話狀態是 per-session，快取訊息會誤導狀態模型</li>
+<li><strong>忽略 description metadata</strong> — prompts 的重點就是可發現性，把 description 傳進 UI</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p><code>list_prompts</code> 與 <code>get_prompt</code> 很小——兩個方法、幾行程式——卻是 MCP 產品表面的收尾。有了它們，你的 client 就多了「server 作者維護的預先工程化動作選單」。每次 server 作者改進一個 prompt，所有用它的 client 都自動升級。這種不對稱複利讓 prompts 變成三種 MCP 原語中對 PM 最友善的一個。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：知道 client 側兩個方法（<code>list_prompts</code>、<code>get_prompt</code>）、dict 傳參、回傳 <code>list[base.Message]</code></li>
+<li><strong>D1（Agentic Architecture）</strong>：Prompts 用策劃的對話開場 seed agent loop，後續照常</li>
+<li>考題模式：「Client 如何帶參數抓 prompt？」→ <code>await self.session().get_prompt(prompt_name, args)</code> 並回傳 <code>result.messages</code></li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>使用 prompts 需要哪兩個 client 方法？</td>
+<td><code>list_prompts()</code> 做探索、<code>get_prompt(prompt_name, args)</code> 取插值後的訊息 list</td>
+</tr>
+<tr>
+<td><code>list_prompts()</code> 回傳什麼？</td>
+<td><code>result.prompts</code>——<code>types.Prompt</code> list，含 name、description、參數 metadata</td>
+</tr>
+<tr>
+<td><code>get_prompt</code> 回傳什麼？</td>
+<td><code>result.messages</code>——<code>list[base.Message]</code>，可直接送給 Claude</td>
+</tr>
+<tr>
+<td>Prompt 參數怎麼傳？</td>
+<td>用 <code>dict[str, str]</code>，key 對應 server prompt function 的參數名</td>
+</tr>
+<tr>
+<td>Client 呼叫 <code>get_prompt</code> 時 server 做什麼？</td>
+<td>用 args 當 keyword arguments 執行裝飾過的 prompt function，回結果訊息 list</td>
+</tr>
+<tr>
+<td>Client 拿到訊息後怎麼用？</td>
+<td>送給 Claude 當新對話的開場，agent loop 照常進行（tool、resource、多輪）</td>
+</tr>
+<tr>
+<td>CLI 中 prompt 怎麼呈現給使用者？</td>
+<td>Slash-command（例如 <code>/format</code>），可選擇的參數 picker，然後送給 Claude</td>
+</tr>
+<tr>
+<td>為什麼跨 session 快取 <code>get_prompt</code> 結果有風險？</td>
+<td>Prompt 輸出是新對話的模板，後續狀態是 per-session，快取訊息會誤導應用的狀態模型</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

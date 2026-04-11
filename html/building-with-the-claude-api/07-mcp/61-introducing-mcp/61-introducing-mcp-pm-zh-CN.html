@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing Mcp Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing MCP — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives）、2.1（tool schemas）、1.2（agent loop 集成）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 61</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>MCP 是 Claude 集成的"不要重造轮子"层：你的团队不用为每一个想接入的 SaaS 都去写 tool 定义、测试、持续维护，而是直接安装一个现成的 MCP 服务器，就能免费继承整个 tool 目录。</p>
+<hr />
+<h2>心智模型：Claude 的 App Store</h2>
+<p>把 Ch04 的 tool use 想象成教 Claude 如何使用一个你定制打造的设备；MCP 就是那个设备连上去的 <strong>App Store</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>没有 MCP</th>
+<th>有 MCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每个集成都是定制品</td>
+<td>集成可以"安装"</td>
+</tr>
+<tr>
+<td>工程团队拥有每个 tool schema</td>
+<td>服务提供者或社区拥有</td>
+</tr>
+<tr>
+<td>加 GitHub 要写几十个 schema</td>
+<td>加 GitHub 只要装一个 server</td>
+</tr>
+<tr>
+<td>每次 API 改版都是你的维护问题</td>
+<td>上游发新版本</td>
+</tr>
+</tbody>
+</table>
+<p>"App Store"不是官方说法，但它抓住了最重要的产品真相：MCP 彻底改变了集成工作的经济学。</p>
+<hr />
+<h2>这节课为什么对 PM 重要</h2>
+<p>一个产品团队在评估"我们能不能做一个 AI 助手，让它回答用户关于我们 GitHub / Jira / Sentry / Notion 的问题？"历来的答案都是：</p>
+<blockquote>
+<p>"可以，但要花 3-6 个月工程来写和维护这些 tool 集成。"</p>
+</blockquote>
+<p>MCP 把这个时间线大幅压缩。粗略估计：</p>
+<table>
+<thead>
+<tr>
+<th>集成来源</th>
+<th>大概多久可以"Claude 能用"</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>为单一 SaaS 定制写 tools</td>
+<td>数周到数月</td>
+</tr>
+<tr>
+<td>安装官方 MCP server</td>
+<td>数小时</td>
+</tr>
+<tr>
+<td>安装社区 MCP server</td>
+<td>数小时（加上 due diligence）</td>
+</tr>
+<tr>
+<td>还没有 MCP server</td>
+<td>回到原本的时间线</td>
+</tr>
+</tbody>
+</table>
+<p>PM 在评估任何会接触外部系统的 AI 功能时，第一个该问的问题是："这个服务有没有现成的 MCP server？"</p>
+<hr />
+<h2>用 PM 语言翻译 GitHub 示例</h2>
+<p>这节课用 GitHub 当主要示例。PM 应该这样内化：</p>
+<blockquote>
+<p>"让 Claude 能回答<em>任何</em> GitHub 问题，成本是多少？"</p>
+</blockquote>
+<p>没有 MCP 的话，"任何 GitHub 问题"意味着你要承诺编写、测试、维护一个 tool 给用户可能提到的每个功能：repos、PRs、issues、projects、releases、actions、reviews、members、permissions、search、notifications。那是一个跨季度的项目——还轮不到 Jira 或 Slack。</p>
+<p>有了 MCP，"任何 GitHub 问题"只要连到 GitHub MCP 服务器——tools 都已经写好了，服务提供者（或可信的社区）会维护它们。</p>
+<hr />
+<h2>产品应用场景</h2>
+<h3>MCP 是对的答案</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么 MCP 合适</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>横跨多个 SaaS 工具的 AI 助手</td>
+<td>N 个 install 命令换 N 个生态</td>
+</tr>
+<tr>
+<td>来自利益相关人的长尾集成需求</td>
+<td>可以增量加，不用重构架构</td>
+</tr>
+<tr>
+<td>内部"AI 对公司数据"的 pilot</td>
+<td>把内部 API 包成一个 MCP server，所有 Claude 产品都能用</td>
+</tr>
+<tr>
+<td>需要很多小动作的 agent workflow</td>
+<td>每个动作都是现成的 MCP tool</td>
+</tr>
+</tbody>
+</table>
+<h3>MCP 太重了</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>改用什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>对简单内部 endpoint 的一次性查询</td>
+<td>直接写 tool 比装 server 快</td>
+</tr>
+<tr>
+<td>只需要读一份静态文档</td>
+<td>用 resource 或纯 context</td>
+</tr>
+<tr>
+<td>还在验证用户是否需要这个功能</td>
+<td>先 hard-code，等信号明确再说</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 决策框架</h2>
+<p>有人提议"我们加 X 集成"时要问：</p>
+<ol>
+<li><strong>厂商有没有官方 MCP server？</strong> 先从这里开始——质量最高。</li>
+<li><strong>有社区 MCP server 吗？</strong> 可以用，但要做安全和维护的 due diligence。</li>
+<li><strong>如果都没有，这个功能值得自己写吗？</strong> 用"每周会用或涉及安全"的标准。</li>
+<li><strong>我们真正需要厂商 API 的哪个子集？</strong> 避免 scope creep——如果只要 3 个功能，不要装 80 个 tools。</li>
+<li><strong>MCP server 挂掉时有什么 fallback？</strong> MCP server 是独立 process，要规划失败场景。</li>
+</ol>
+<hr />
+<h2>隐藏的 PM 优势</h2>
+<p>Tools/prompts/resources 这三种 primitive 也是 PM 的杠杆点：</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>PM 真正买到的东西</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tools</td>
+<td>助手能代替用户做的动作</td>
+</tr>
+<tr>
+<td>Prompts</td>
+<td>预先写好的 workflow，一键加载</td>
+</tr>
+<tr>
+<td>Resources</td>
+<td>助手可以读取的策展过的数据面</td>
+</tr>
+</tbody>
+</table>
+<p>PM 可以把 MCP 采用 scope 成"装这个 server 用它的 tools，顺便把它的 prompts 开放给 power users"——同一个 server 能交付多层价值。</p>
+<hr />
+<h2>生态定位</h2>
+<p>PM 也该知道：</p>
+<table>
+<thead>
+<tr>
+<th>事实</th>
+<th>产品含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 是开放协议</td>
+<td>你没有被锁在 Anthropic；集成可以搬到其他 model host</td>
+</tr>
+<tr>
+<td>任何人都能写 server</td>
+<td>厂商、社区、你的内部平台团队</td>
+</tr>
+<tr>
+<td>服务提供者常发布官方 server</td>
+<td>评估功能时第一站</td>
+</tr>
+<tr>
+<td>生态成长很快</td>
+<td>"还没有 MCP server"这个答案的半衰期很短</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>把 MCP 当成技术细节</strong> — 它是每一次集成的 <em>buy vs build</em> 决策。</li>
+<li><strong>没问用户实际需要什么 tools 就装一堆 server</strong> — tool 泛滥会膨胀 context 拖慢响应。</li>
+<li><strong>以为 MCP 解决 auth</strong> — 凭证管理、rate limits、权限还是你产品的问题。</li>
+<li><strong>忘了预算 server 的更新</strong> — MCP server 有版本，过期的版本会默默出错。</li>
+<li><strong>把 MCP 和 tool use 搞混</strong> — tool use 是 Claude 协议，MCP tools 还是跑在上面。你不能跳过学 tool use。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>MCP 不是技术升级，而是<strong>经济</strong>升级。它把"让 AI 功能接触真实系统"的主要成本（编写和维护 tool 集成）交给别人承担。PM 的工作是注意到："我们该自己写这个集成吗？"的答案已经从"好几个月的工作"变成"一行 install 命令"——然后重新排优先级。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：知道 MCP 是什么、谁在写 MCP servers、三种 primitives。</li>
+<li><strong>D1（Agentic Architecture）</strong>：了解 MCP 是 agent 插入的可重复使用集成层。</li>
+<li>考题常问"MCP 解决什么问题？"——答案是<em>编写/维护 tool 集成的负担</em>。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 一句话 pitch 是什么？</td>
+<td>一个让你"安装"现成 tool 集成到 Claude 的协议，而不用自己写。</td>
+</tr>
+<tr>
+<td>PM 在评估新 Claude 集成时第一个该问什么？</td>
+<td>"这个服务有没有官方或社区的 MCP server？"</td>
+</tr>
+<tr>
+<td>MCP 的三种 primitives 是什么？</td>
+<td>Tools、Prompts、Resources</td>
+</tr>
+<tr>
+<td>MCP 取代 tool use 吗？</td>
+<td>不——它是分发层，还是跑在 tool use 上面。</td>
+</tr>
+<tr>
+<td>谁常写 MCP server？</td>
+<td>服务提供者（官方）、社区维护者、或你自己的内部团队</td>
+</tr>
+<tr>
+<td>PM 采用 MCP server 时该预算什么？</td>
+<td>Token 成本、延迟、故障面、安全审查、版本维护</td>
+</tr>
+<tr>
+<td>MCP 是 Anthropic 专属吗？</td>
+<td>不——它是开放协议，任何 model host 或 application 都能用。</td>
+</tr>
+<tr>
+<td>GitHub 示例中呈现的主要问题是什么？</td>
+<td>要为单一服务的 API 编写和维护几十个定制 tools。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

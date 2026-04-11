@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing Mcp Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing MCP — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives：tools/resources/prompts）、2.1（tool schema 設計）、1.2（agent loop 整合）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 61</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Model Context Protocol（MCP）是一層通訊協定，讓你可以把「別人已經寫好」的 tools 直接插進 Claude，而不用自己寫 schema 和實作——它把「撰寫工具」的負擔從你的 server 轉移到專門的 MCP server。</p>
+<hr />
+<h2>MCP 要解決的問題</h2>
+<p>學完 Ch04 的 tool use 之後，你會撞到下一面牆：<strong>工具撰寫的規模</strong>。想像你要做一個 chat 介面，讓使用者問 Claude 關於 GitHub 的事：</p>
+<blockquote>
+<p>"我所有 repo 裡面有哪些還沒合的 pull request？"</p>
+</blockquote>
+<p>要回答這個，Claude 需要能打 GitHub API 的 tools。GitHub 功能面非常廣——repos、pull requests、issues、projects、commits、reviews、actions。一個「完整」的 GitHub chatbot 代表你要自己寫<strong>好幾十個</strong> tools，每個都要：</p>
+<ol>
+<li>一份 JSON schema 描述輸入</li>
+<li>一個 Python function 實作呼叫</li>
+<li>測試、錯誤處理、auth、rate-limit 處理</li>
+<li>GitHub API 改版時持續維護</li>
+</ol>
+<p>這是單一開發者很難扛下的工作量，而且每整合一個新服務（Slack、Jira、Sentry、Figma...）都要從頭來一次。</p>
+<hr />
+<h2>MCP 如何改變這個局面</h2>
+<p>MCP 把 tool <strong>定義</strong>和<strong>執行</strong>的負擔，從你的 application server 移到專門的 <strong>MCP server</strong>。你不用自己寫 GitHub tools，而是連到一個已經內建這些功能的 GitHub MCP server：</p>
+<pre><code>┌────────────────┐                      ┌──────────────────────┐
+│  你的 server   │                      │   GitHub MCP Server  │
+│  (MCP client)  │ ◀─── MCP protocol ──▶│  - list_repos        │
+│                │                      │  - list_prs          │
+│  Claude API    │                      │  - create_issue      │
+│  integration   │                      │  - ...（更多）        │
+└────────────────┘                      └──────────────────────┘
+</code></pre>
+<p>MCP server 就是一層包在外部服務（GitHub、AWS、Jira...）外面的 wrapper，對外提供現成的 tools、prompts、resources。任何會講 MCP 協定的 application 都能接上並立刻使用。</p>
+<hr />
+<h2>MCP Server 對外提供什麼</h2>
+<p>一個 MCP server 提供三種 primitive 類型（後面的 lessons 會深入每一種，但你現在就該認識）：</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>Claude 可以呼叫的 function，用來執行動作或取得資料</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>可重複使用的 prompt 範本，由 host application 顯示</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>Claude 可以讀取的資料（檔案、記錄等）</td>
+</tr>
+</tbody>
+</table>
+<p>Lesson 61 著重 tools；resources 和 prompts 在 Ch07 後面的 lessons 處理。</p>
+<hr />
+<h2>誰會寫 MCP Server？</h2>
+<p>任何人都可以寫。實務上分三層：</p>
+<table>
+<thead>
+<tr>
+<th>作者</th>
+<th>範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>服務提供者官方</td>
+<td>AWS 官方釋出 MCP server，內建 EC2、S3、IAM 等 tools</td>
+</tr>
+<tr>
+<td>社群</td>
+<td>開源的 <code>sentry-mcp</code>、<code>playwright-mcp</code>、<code>firecrawl-mcp-server</code> 等</td>
+</tr>
+<tr>
+<td>你自己（內部）</td>
+<td>針對公司內部 API 寫的自訂 server</td>
+</tr>
+</tbody>
+</table>
+<p>共通模式：想整合服務 X 時，<strong>先確認是否已有現成的 MCP server，再決定要不要自己寫 tools</strong>。</p>
+<hr />
+<h2>MCP 和直接 Tool Use 的差別</h2>
+<p>很常見的誤解是把 MCP 當成 tool use 的替代品。其實兩者是互補的：</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>是什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tool use</strong></td>
+<td>Claude API 的協定：<code>tool_use</code> request block → <code>tool_result</code> reply block</td>
+</tr>
+<tr>
+<td><strong>MCP</strong></td>
+<td>一個獨立的協定，用來<strong>打包和分發</strong>工具，讓別人定義和執行它們</td>
+</tr>
+</tbody>
+</table>
+<p>使用 MCP 時，你的 server 對 Claude 仍然是在做一般的 tool use 呼叫。差別在於<strong>是誰</strong>寫的和執行 tool 的實作：</p>
+<table>
+<thead>
+<tr>
+<th>直接 tools</th>
+<th>MCP tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>你自己寫 schema</td>
+<td>MCP server 內建 schema</td>
+</tr>
+<tr>
+<td>你自己實作 function</td>
+<td>MCP server 執行 function</td>
+</tr>
+<tr>
+<td>你自己維護整合</td>
+<td>Server 作者維護</td>
+</tr>
+<tr>
+<td>你擁有 code</td>
+<td>你只是 consume server</td>
+</tr>
+</tbody>
+</table>
+<p>無論哪種方式，你的 server 都會從 Claude 收到 <code>tool_use</code> block，執行它（MCP 的話是請 MCP client 去轉送），再回傳 <code>tool_result</code>。Agent loop 本質沒變。</p>
+<hr />
+<h2>Mental Model：工具分發層</h2>
+<p>如果 tool use 是 Claude 的電源插頭，那 MCP 就是電網。它標準化了：</p>
+<ul>
+<li><strong>Discovery</strong>：「這個 server 提供哪些 tools？」</li>
+<li><strong>Invocation</strong>：「用這些參數呼叫這個 tool」</li>
+<li><strong>Transport</strong>：現在主要是 stdio，複雜情境會用 HTTP/WebSockets（lesson 62 細講）</li>
+</ul>
+<p>真正的好處是<strong>組合性（composability）</strong>。只要你有 MCP client，就能同時連 N 個不同的 MCP servers，把它們的 tools 拼成一個 agent——完全不用寫任何 schema。</p>
+<hr />
+<h2>這節課在整章的位置</h2>
+<p>Lesson 61 是概念介紹，後面會動手做：</p>
+<table>
+<thead>
+<tr>
+<th>Lesson</th>
+<th>重點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>61（本節）</td>
+<td>為什麼需要 MCP、它解決什麼問題</td>
+</tr>
+<tr>
+<td>62</td>
+<td>MCP client：transport 無關性、訊息類型</td>
+</tr>
+<tr>
+<td>63</td>
+<td>CLI MCP 範例專案的初始化</td>
+</tr>
+<tr>
+<td>64</td>
+<td>用 Python SDK 定義 tools</td>
+</tr>
+<tr>
+<td>65</td>
+<td>用 MCP inspector 除錯</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>把 MCP 當成 tool use 的替代品</strong> — MCP 是 tool use 之上的「分發層」，不是替代品。</li>
+<li><strong>生態系已有 server 還硬要自己寫</strong> — 先查 <code>sentry-mcp</code>、<code>playwright-mcp</code>、<code>mcp-atlassian</code> 等現成的。</li>
+<li><strong>以為 MCP server 跑在你的 process 裡</strong> — 它是獨立 process（通常是 subprocess），透過 transport 通訊。錯誤模式是網路型的。</li>
+<li><strong>以為 MCP 會幫你處理 auth</strong> — 它不會。credentials 還是透過你的環境變數傳，每個 server 都有自己的 auth 流程。</li>
+<li><strong>誤以為 MCP 是 Anthropic 專屬</strong> — 它是開放協定，任何 model provider、任何 application 都能使用。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>MCP 最好的心智模型是「<strong>工具的 package manager</strong>」。Tool use 給了 Claude 呼叫 function 的能力；MCP 給了整個生態系一個發行這些 function 的方法，讓你不用每次都重寫一遍。每次準備動手寫 tool schema 之前，先問：「有沒有人已經發佈 MCP server 了？」</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：MCP 的定義、三種 primitives（tools/prompts/resources）、MCP 和直接 tool use 的差別。</li>
+<li><strong>D1（Agentic Architecture）</strong>：MCP 作為跨系統 agent 的基礎建構單元。</li>
+<li>題目常見框架：「MCP 解決什麼問題？」——答案永遠是<em>撰寫和維護工具整合的負擔</em>。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 的全名是什麼？</td>
+<td>Model Context Protocol</td>
+</tr>
+<tr>
+<td>MCP 的核心價值是什麼？</td>
+<td>把撰寫和執行 tool 定義的負擔，從你的 server 轉移到專門的 MCP servers。</td>
+</tr>
+<tr>
+<td>MCP 的三種 primitives 是什麼？</td>
+<td>Tools、Prompts、Resources</td>
+</tr>
+<tr>
+<td>誰可以寫 MCP server？</td>
+<td>任何人——服務提供者常釋出官方 server；社群和內部團隊也會發佈。</td>
+</tr>
+<tr>
+<td>MCP 是 tool use 的替代品嗎？</td>
+<td>不是。MCP 是互補的——tool use 是 Claude API 協定，MCP 是在它之上的分發層。</td>
+</tr>
+<tr>
+<td>為什麼有人要寫 GitHub MCP server 而不是直接呼叫 GitHub API？</td>
+<td>讓每個使用者都拿到現成的 tool schemas 和實作，不用每個 app 各自重寫。</td>
+</tr>
+<tr>
+<td>從概念上 MCP server 扮演什麼角色？</td>
+<td>包在外部服務外面的 wrapper，打包出可重複使用的 tools、prompts、resources。</td>
+</tr>
+<tr>
+<td>生態系已有某服務的 MCP server 時該怎麼辦？</td>
+<td>直接用它，不要自己從頭寫 tool 定義。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

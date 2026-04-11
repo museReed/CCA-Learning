@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defining Tools With Mcp Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Tools with MCP — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1（tool schemas）、2.3（MCP primitives：tools）、1.2（agent loop 整合）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 64</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Lesson 64 是 tool 撰寫變<strong>便宜</strong>的時刻：Python MCP SDK 把手寫 JSON Schema 替換成 decorated function，把「寫出第一個 tool 的時間」從「一整天樣板」壓縮到「一段 Python」——這會改變 PM 該怎麼 scope AI 功能。</p>
+<hr />
+<h2>心智模型：從電路圖到名片</h2>
+<p>SDK 出現之前，加 tool 像在畫電路圖：</p>
+<table>
+<thead>
+<tr>
+<th>SDK 之前（手寫 JSON）</th>
+<th>有 SDK（decorator + type hints）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>長長的 JSON Schema 文件</td>
+<td>Decorated Python function</td>
+</tr>
+<tr>
+<td>很容易漏 <code>required</code> key</td>
+<td>SDK 從 function signature 自動填</td>
+</tr>
+<tr>
+<td>非作者工程師難讀</td>
+<td>讀起來像業務邏輯</td>
+</tr>
+<tr>
+<td>文件離 code 很遠</td>
+<td>Description 就在參數旁邊</td>
+</tr>
+</tbody>
+</table>
+<p>把 MCP tool（加上 SDK）想像成<strong>名片</strong>：小、標準化、易讀——新 tool 幾行就能寫完，直接遞給 Claude 用。</p>
+<hr />
+<h2>為什麼這節課對 PM 重要</h2>
+<p>SDK 的人體工學帶來三個產品層級的後果：</p>
+<ol>
+<li><strong>Tool 數量變便宜。</strong> 加一個新 tool 只要幾分鐘，PM 可以安全地要求更細緻的功能——每個 intent 一個 tool——而不是把行為塞在 mega-tool 裡。</li>
+<li><strong>Description 變成產品文案。</strong> <code>description</code> 是 Claude 的操作手冊；寫好它是 PM/writer 的工作，不只是工程的。它就是 tool 的 prompt engineering。</li>
+<li><strong>錯誤處理是 UX 的一部分。</strong> Tool 失敗時（<code>ValueError</code>），Claude 會把錯誤呈現給使用者。也就是說 tool 錯誤訊息是<strong>使用者可見的文案</strong>。PM 該 review。</li>
+</ol>
+<hr />
+<h2>兩個 Demo Tools 的走查</h2>
+<p>這節課針對記憶體文件集合實作了兩個 tools：</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>業務角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read_doc_contents</code></td>
+<td>「讓 Claude 用 ID 查特定文件」</td>
+</tr>
+<tr>
+<td><code>edit_document</code></td>
+<td>「讓 Claude 提議並執行 find/replace 編輯」</td>
+</tr>
+</tbody>
+</table>
+<p>Description 明確警告 Claude 注意細節陷阱——例如 <code>old_str</code> 指定「必須精確相符，包含空白」。PM 讀到這裡應該把 tool description 當成<strong>Claude 和真實世界副作用之間的 guardrail</strong>。</p>
+<h3>Find/Replace 的警告（產品警示）</h3>
+<p><code>edit_document</code> 用 Python 的 <code>str.replace</code>，會替換文件裡<strong>所有</strong>出現位置。Demo 這樣沒問題；真實產品裡這是槍自己的腳：</p>
+<blockquote>
+<p>「把 'budget' 這個字換成 'expenditure'」可能默默把整份文件的每個 budget 都換掉，而不是使用者原本想改的那一處。</p>
+</blockquote>
+<p>PM 該標記這一點。真實產品通常需要：</p>
+<ul>
+<li>對 match 做唯一性檢查</li>
+<li>套用前預覽</li>
+<li>所有編輯的 audit log</li>
+<li>破壞性動作的使用者確認</li>
+</ul>
+<hr />
+<h2>產品應用場景</h2>
+<h3>輕量 tool 撰寫有回報的地方</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>為什麼合適</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>快速功能迭代</td>
+<td>新 tool 只是約 10 行改動，PM 可以試驗</td>
+</tr>
+<tr>
+<td>Domain 專屬助理</td>
+<td>一個 domain 動作一個 tool（讀政策、提議編輯、發摘要）</td>
+</tr>
+<tr>
+<td>內部平台團隊</td>
+<td>透過共享 MCP server 標準化公司 tool 函式庫</td>
+</tr>
+<tr>
+<td>Tool 目錄</td>
+<td>多個 tool 各司其職，Claude 在 runtime 選擇</td>
+</tr>
+</tbody>
+</table>
+<h3>低摩擦是風險的地方</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>警告</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>變更 production 系統</td>
+<td>低摩擦讓風險 tool 很容易就 ship——要強制 review</td>
+</tr>
+<tr>
+<td>Tool 名字曖昧</td>
+<td>Claude 的選擇取決於 description 品質，草率的文案 = 選錯 tool</td>
+</tr>
+<tr>
+<td>Tool 重疊</td>
+<td>兩個 tool 做類似的事會讓 Claude 混淆；PM 該去重</td>
+</tr>
+<tr>
+<td>沉默的 side effect</td>
+<td><code>edit_document</code> 替換所有符合項；真實產品需要明確確認</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 決策框架：review 一個 Tool PR</h2>
+<p>團隊加新 MCP tool 時，PM 該檢查：</p>
+<ol>
+<li><strong>Tool <code>name</code> 清楚且動詞化了嗎？</strong>（<code>read_doc_contents</code>，不是 <code>docs_tool_3</code>）</li>
+<li><strong><code>description</code> 有告訴 Claude 它做什麼 AND 不做什麼嗎？</strong>（例如「必須精確相符，包含空白」）</li>
+<li><strong>每個參數都有 <code>Field(description=...)</code> 嗎？</strong> 缺 description 會降低 tool 品質。</li>
+<li><strong>失敗時會怎樣？</strong> Tool 應該 raise 使用者可讀的錯誤，而不是默默失敗。</li>
+<li><strong>Tool 是破壞性的嗎？</strong> 如果是，產品流程有核准/確認嗎？</li>
+<li><strong>和既有 tools 有重疊嗎？</strong> 有的話合併或改名釐清。</li>
+</ol>
+<hr />
+<h2>Description 就是文案撰寫</h2>
+<p>MCP tool description 大概是 Claude 產品裡最被低估的文案：</p>
+<table>
+<thead>
+<tr>
+<th>屬性</th>
+<th>含義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude 讀，不是使用者讀</td>
+<td>沒有行銷包裝；簡明宣示性語言勝出</td>
+</tr>
+<tr>
+<td>用於 tool 選擇</td>
+<td>曖昧的 description → 叫錯 tool</td>
+</tr>
+<tr>
+<td>約束 agent 行為</td>
+<td>你可以設定期待（「只有你有精確 doc ID 才用」）</td>
+</tr>
+<tr>
+<td>工程 reviewer 看不出來</td>
+<td>Code review 抓不到弱文案——PM 必須 review</td>
+</tr>
+</tbody>
+</table>
+<p>PM 的直覺法則：如果 tool description 過不了技術寫作的 review，它大概也過不了 Claude 的。</p>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>Review tool code 但不 review tool description</strong> — description 是和 Claude 的 API contract。</li>
+<li><strong>Scope mega-tools</strong> — 一個「什麼文件操作都做」的 tool 比三個專注的 tool 更難讓 Claude 使用。</li>
+<li><strong>忽略破壞性副作用</strong> — <code>edit_document</code> 默默替換所有符合項；需要產品 UX 來圍住它。</li>
+<li><strong>以為錯誤訊息只是內部的</strong> — <code>ValueError</code> 文字會透過 Claude 到達終端使用者；要寫清楚。</li>
+<li><strong>把 SDK 人體工學當成「只是工程問題」</strong> — 生產力贏面改變了 PM 能試驗的速度。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>用 Python SDK 做的 MCP tool 定義是 PM 的 surface，不只是工程 surface。<code>name</code>、<code>description</code>、和參數 doc 是產品文案，會形塑 Claude 行為和使用者可見的輸出。當 tool 撰寫變這麼便宜，瓶頸從工程努力轉移到產品判斷——那就是 PM 賺飯錢的地方。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：知道 SDK 模式是 <code>FastMCP</code> + <code>@mcp.tool(...)</code> + <code>Field(description=...)</code>。</li>
+<li><strong>D1（Agentic Architecture）</strong>：理解 tool error（raised exception）會透過 agent loop 傳遞，Claude 能把它納入下一輪。</li>
+<li>預期有情境題問 tool 命名、description 品質、錯誤呈現。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>從 SDK-based tool 模式 PM 該帶走什麼？</td>
+<td>Tool 撰寫現在夠便宜，PM 可以要求更多、更窄的 tool，不是 mega-tool。</td>
+</tr>
+<tr>
+<td>誰該 review tool 的 <code>description</code> 欄位？</td>
+<td>PM——它是形塑 Claude 行為的產品文案。</td>
+</tr>
+<tr>
+<td>這節課 <code>edit_document</code> 的隱藏風險是什麼？</td>
+<td>它叫 <code>str.replace</code>，會替換每個出現位置；真實產品需要唯一性或確認。</td>
+</tr>
+<tr>
+<td>Tool 錯誤為什麼在產品層級重要？</td>
+<td>Tool <code>raise ValueError</code> 時，Claude 會把訊息呈現給使用者——它是使用者可見文案。</td>
+</tr>
+<tr>
+<td>參數沒有 <code>Field</code> description 會怎樣？</td>
+<td>Claude 只看到參數名，所以 tool 選擇和使用品質下降。</td>
+</tr>
+<tr>
+<td>Demo server 對外提供幾個 tools，各做什麼？</td>
+<td>兩個：<code>read_doc_contents</code> 和 <code>edit_document</code>（find-and-replace）。</td>
+</tr>
+<tr>
+<td>PM 對 tool 重疊的規則是什麼？</td>
+<td>兩個 tool 做類似的事會讓 Claude 混淆——去重或改名。</td>
+</tr>
+<tr>
+<td>一句話框架 tool description 給 PM？</td>
+<td>它們是 Claude 的操作手冊，因此是產品文案。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

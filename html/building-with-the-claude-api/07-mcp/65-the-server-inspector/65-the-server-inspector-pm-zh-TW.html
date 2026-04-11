@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Server Inspector Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>The Server Inspector — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives）、2.1（tool schema 設計）、1.2（agent loop 整合）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 65</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>MCP Inspector 是你 AI 功能 tool 的「QA 站」——一個瀏覽器 UI，讓團隊任何人在 tool 還沒碰到 Claude 或真實使用者之前，就能直接演練——大幅降低 debug 和驗收測試成本。</p>
+<hr />
+<h2>心智模型：Tool 的產品測試實驗室</h2>
+<p>想像你要推出一個新實體產品。出貨前，你會把原型送進測試實驗室：按按鈕、確認輸出、檢查 edge cases。這就是 MCP Inspector 對軟體 tools 做的事：</p>
+<table>
+<thead>
+<tr>
+<th>產品測試實驗室</th>
+<th>MCP Inspector</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工作台上的原型</td>
+<td>用 <code>mcp dev</code> 跑的 MCP server</td>
+</tr>
+<tr>
+<td>按每個按鈕</td>
+<td>點「List Tools」和「Run Tool」</td>
+</tr>
+<tr>
+<td>驗證每個輸出</td>
+<td>讀 panel 裡的結果</td>
+</tr>
+<tr>
+<td>記錄缺陷</td>
+<td>收集失敗的輸入回饋給團隊</td>
+</tr>
+<tr>
+<td>出貨前簽核</td>
+<td>在接到 Claude 之前確認 tool 能動</td>
+</tr>
+</tbody>
+</table>
+<p>重點是：你不會把微波爐直接給顧客來發現它會爆炸。你也不該把壞掉的 MCP tool 直接推到 production 的 Claude flow 裡才發現。</p>
+<hr />
+<h2>為什麼這節課對 PM 重要</h2>
+<p>三個形塑產品的理由：</p>
+<ol>
+<li><strong>驗收測試變得 PM 也能做。</strong> Inspector 是一個 UI——PM 或 QA 不用跑 Claude API 呼叫、不用寫測試 code 就能演練 tool。意思是 PM 可以直接驗證 tool 行為。</li>
+<li><strong>Debug 成本下降。</strong> Claude「做錯事」時，第一個問題通常是「是 tool 壞掉，還是 Claude 用錯？」Inspector 秒級就能答。</li>
+<li><strong>Tool 可 demo。</strong> Inspector 也是一個 live demo surface。你可以對利害關係人展示「這個 tool 用真實輸入做什麼」——不需要協調跑完整 app。</li>
+</ol>
+<hr />
+<h2>產品應用場景</h2>
+<h3>什麼時候該把 Inspector-first 當團隊規範</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>為什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QA 在 release 前跑驗收測試</td>
+<td>新或改的 tool 都先在 Inspector 驗過</td>
+</tr>
+<tr>
+<td>PM 驗收工程 handoff</td>
+<td>PM 可以點每個 tool 確認符合 spec</td>
+</tr>
+<tr>
+<td>利害關係人 demo</td>
+<td>展示原始 tool 結果不需要 LLM 包裝</td>
+</tr>
+<tr>
+<td>Bug triage 會議</td>
+<td>在 Inspector 重現「tool X 回傳意外資料」，不需要 chatbot</td>
+</tr>
+</tbody>
+</table>
+<h3>只靠 Inspector 不夠的情境</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>還需要什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>End-to-end agent 行為</td>
+<td>完整 chatbot + prompts + Claude</td>
+</tr>
+<tr>
+<td>Tool description 品質</td>
+<td>Chatbot 看 Claude 會不會選對 tool</td>
+</tr>
+<tr>
+<td>多輪 workflow</td>
+<td>完整 agent loop；Inspector 只測單次呼叫</td>
+</tr>
+<tr>
+<td>Multi-tenant 或 auth 情境</td>
+<td>需要真實 client 連線路徑</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 決策框架：採用 Inspector-first 測試</h2>
+<p>你在做用 MCP tool 的 AI 功能時要問：</p>
+<ol>
+<li><strong>新 tool 能在 merge 前都在 Inspector 驗過嗎？</strong> 把它變成 PR 的檢查項。</li>
+<li><strong>QA 驗收流程裡有 Inspector 嗎？</strong> 訓練一次；每次 release 都有回報。</li>
+<li><strong>每個 tool 有標準化的 Inspector 測試 case 嗎？</strong> 標準化「list → call read → call edit → re-read」。</li>
+<li><strong>失敗 case 也有測嗎？</strong> 不只 happy path——丟假輸入驗證錯誤訊息。</li>
+<li><strong>Inspector URL 有放進團隊 onboarding 文件嗎？</strong> 讓新人發現它很簡單。</li>
+</ol>
+<hr />
+<h2>Inspector 在 PM 層級改變了什麼</h2>
+<p>歷史上，測試 AI 功能是：</p>
+<blockquote>
+<p>「問 chatbot 幾個問題，看答案對不對。」</p>
+</blockquote>
+<p>這純粹是 end-to-end——慢、不穩、遮住 bug 真正位置。Inspector 給一個不同的測試單位：</p>
+<blockquote>
+<p>「直接打 tool；它行為符合 spec 嗎？」</p>
+</blockquote>
+<p>這比較接近 PM 已經會做的正常軟體 QA。Inspector 把 MCP tools 帶進<strong>可測試軟體元件</strong>的領域，而不是「神奇黑盒 AI 輸出」。這對任何做 Claude 基礎功能的團隊是信心層級的轉變。</p>
+<hr />
+<h2>運營考量</h2>
+<table>
+<thead>
+<tr>
+<th>考量</th>
+<th>PM 為什麼該在意</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mcp dev</code> 只能 dev 用</td>
+<td>不要在 production 跑，它不是真實 client surface</td>
+</tr>
+<tr>
+<td>UI 在積極變動</td>
+<td>訓練概念（list、call、chain）而不是截圖</td>
+</tr>
+<tr>
+<td>Port <code>6277</code> 衝突</td>
+<td>被擋的話開發流程卡住——標記為 infra 項目</td>
+</tr>
+<tr>
+<td>Inspector 結果該記錄</td>
+<td>如果團隊用它做驗收，要留記錄</td>
+</tr>
+<tr>
+<td>Inspector 不測 prompts</td>
+<td>記得：只有透過 Claude 才會出的 bug，Inspector 無法重現</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>以為 end-to-end 測試就夠了。</strong> End-to-end 會藏住 bug 在哪；Inspector 會暴露它。</li>
+<li><strong>跳過負面測試 case。</strong> PM 驗收測試應該包含「壞輸入 → 看到合理錯誤」。</li>
+<li><strong>把 Inspector 當成只有工程用。</strong> 它是 UI，任何人都能用。讓 QA 和 PM 開車。</li>
+<li><strong>不 versioning Inspector 測試 case。</strong> 留一份標準測試清單——不然 regression 會溜進來。</li>
+<li><strong>把 Inspector 成功等同產品成功。</strong> Inspector 驗證 tool；你還需要 agent/chatbot 測試驗證體驗。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>MCP Inspector 把 MCP tool 測試從「AI 魔法的一部分」搬到「正常產品 QA 的一部分」。它把 tools 重新框成可檢視、可測試、可重現的元件——也讓 PM 不用跑 code 就能擁有 tool 驗收。任何 MCP 基礎的功能，「我們有 Inspector 測過嗎？」都該變成 definition-of-done 的一項。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：知道 <code>mcp dev mcp_server.py</code> 啟動瀏覽器基礎的 Inspector，且它暴露 Tools、Resources、Prompts 區塊。</li>
+<li><strong>D1（Agentic Architecture）</strong>：認識 Inspector 是無 LLM 的測試表面——在隔離 tool bug 和 agent bug 時有用。</li>
+<li>情境題：「一個 tool 在 Inspector 能動但在 chatbot 不行——bug 可能出在哪？」→ 不是 tool 本身，更可能是 prompt、tool description、或 agent loop。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用 PM 的話說，MCP Inspector 是什麼？</td>
+<td>一個瀏覽器基礎的 QA 站，讓團隊任何人直接演練 tools，不需要 Claude。</td>
+</tr>
+<tr>
+<td>為什麼 Inspector-first 測試是產品贏家？</td>
+<td>把 tool bug 和 LLM bug 隔離、降低 debug 成本、讓 PM/QA 不寫 code 就能做驗收測試。</td>
+</tr>
+<tr>
+<td>Inspector 能測試 prompts 或 agent 行為嗎？</td>
+<td>不能——它只測 MCP server 的 tools/resources/prompts primitives。</td>
+</tr>
+<tr>
+<td>PM 該在新 MCP tool 的 definition-of-done 加什麼？</td>
+<td>「Inspector 已測（happy path + 至少一個失敗 case）」。</td>
+</tr>
+<tr>
+<td>Inspector 能測哪三種 primitive？</td>
+<td>Tools、Resources、Prompts。</td>
+</tr>
+<tr>
+<td>為什麼 Inspector 通過後還要跑 chatbot 測試？</td>
+<td>驗證 Claude 會正確選擇並使用 tool——這是體驗層級的關注點。</td>
+</tr>
+<tr>
+<td>Inspector 的 demo 價值是什麼？</td>
+<td>利害關係人可以看到原始 tool 輸出，不需要完整 app runtime。</td>
+</tr>
+<tr>
+<td>Inspector 可以在 production 跑嗎？</td>
+<td>不行——它只能 dev 用（<code>mcp dev</code>）。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

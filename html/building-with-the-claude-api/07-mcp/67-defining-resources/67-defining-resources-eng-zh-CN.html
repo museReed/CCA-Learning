@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defining Resources Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Resources — Engineering Deep Dive（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration（18%）主；D1 — Agentic Architecture（22%）次</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives：tools vs resources vs prompts）、2.2（content block types）、1.2（把 context 注入 agent loop）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 67</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Resources 是 MCP 中"暴露数据"的原语，行为像 HTTP GET handler，用 URI 寻址，用 MIME type 决定序列化方式，分两种：direct（静态 URI）和 templated（带参数的 URI）。</p>
+<hr />
+<h2>Resource vs Tool：心智切分</h2>
+<p>MCP server 有三种原语：tools、resources、prompts。决定一个新能力属于哪种时，第一个要问的就是"它是 resource 还是 tool？"</p>
+<table>
+<thead>
+<tr>
+<th>方面</th>
+<th>Resource</th>
+<th>Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用途</td>
+<td>暴露数据（读）</td>
+<td>执行动作（读或写）</td>
+</tr>
+<tr>
+<td>类比</td>
+<td>HTTP GET</td>
+<td>HTTP POST / RPC</td>
+</tr>
+<tr>
+<td>标识</td>
+<td>URI（<code>docs://documents/{id}</code>）</td>
+<td>Named function + JSON schema</td>
+</tr>
+<tr>
+<td>典型用法</td>
+<td>取文档、列清单</td>
+<td>编辑、删除、发送</td>
+</tr>
+<tr>
+<td>谁决定调用</td>
+<td>Client / 应用，直接塞进 prompt</td>
+<td>Claude 在推理时自己决定</td>
+</tr>
+</tbody>
+</table>
+<p>经验法则：如果是 pure read、用户或应用想直接在 prompt 中引用，就做成 resource；如果是动作（尤其希望 Claude 在 agent loop 里自主调用），就做成 tool。</p>
+<hr />
+<h2>动机示例：<code>@document_name</code> mention</h2>
+<p>课程用一个具体功能切入 resources：用户在 CLI 输入 <code>@</code>，应用弹出文档 autocomplete；选好并提交后，应用把文档内容注入 prompt。</p>
+<p>需要两个操作：</p>
+<ol>
+<li><strong>列出所有文档</strong> → 给 autocomplete</li>
+<li><strong>取特定文档内容</strong> → 注入 prompt</li>
+</ol>
+<p>两个都是纯读，完美对应 resources。</p>
+<hr />
+<h2>Request / Response 流程</h2>
+<p>Resources 走 request-response 模式：client 发 <code>ReadResourceRequest</code> 带 URI，server 回数据。URI 就是 resource 的地址。</p>
+<pre><code>Client ── ReadResourceRequest(uri=&quot;docs://documents/report.pdf&quot;) ──▶ Server
+Client ◀──────── TextResourceContents(text=..., mimeType=...) ────── Server
+</code></pre>
+<p>故意做得很简单：没有 schema negotiation、没有 tool loop、没有第二次 Claude 调用。Resources 就是用 URI 拉数据。</p>
+<hr />
+<h2>两种 Resource</h2>
+<h3>Direct Resources</h3>
+<p>固定 URI，不会变。用于静态数据端点，例如"给我所有文档的清单"。</p>
+<h3>Templated Resources</h3>
+<p>URI 嵌入大括号参数。Python SDK 会解析 URI、抽出参数，以 keyword argument 传给你的 function。用于带参数的取值，例如"给我文档 X"。</p>
+<p>URI template 的参数名必须跟 function signature 完全一致——SDK 按名字配对。</p>
+<hr />
+<h2>用 <code>@mcp.resource()</code> 实现</h2>
+<h3>Direct Resource：列出文档</h3>
+<pre><code class="language-python">@mcp.resource(
+    &quot;docs://documents&quot;,
+    mime_type=&quot;application/json&quot;
+)
+def list_docs() -&gt; list[str]:
+    return list(docs.keys())
+</code></pre>
+<ul>
+<li>URI <code>docs://documents</code> 是静态的</li>
+<li>返回 Python list，SDK 看到 <code>application/json</code> 会自动序列化</li>
+<li>没有参数，就是纯粹的目录列表</li>
+</ul>
+<h3>Templated Resource：取单个文档</h3>
+<pre><code class="language-python">@mcp.resource(
+    &quot;docs://documents/{doc_id}&quot;,
+    mime_type=&quot;text/plain&quot;
+)
+def fetch_doc(doc_id: str) -&gt; str:
+    if doc_id not in docs:
+        raise ValueError(f&quot;Doc with id {doc_id} not found&quot;)
+    return docs[doc_id]
+</code></pre>
+<ul>
+<li>URI 中的 <code>{doc_id}</code> 变成 function keyword argument</li>
+<li><code>mime_type="text/plain"</code> 因为返回值是纯文本</li>
+<li>错误抛 Python exception，SDK 会转成正确的错误 response</li>
+</ul>
+<hr />
+<h2>MIME Types</h2>
+<p>Resources 可以返回任何数据类型：字符串、JSON、二进制。<code>mime_type</code> 告诉 client 怎么解析：</p>
+<ul>
+<li><code>application/json</code> — 结构化 JSON，SDK 自动序列化</li>
+<li><code>text/plain</code> — 纯文本</li>
+<li>其他任何合法 MIME type</li>
+</ul>
+<p>关键便利：<strong>SDK 会帮你序列化</strong>。你只要返回 Python 值（list、dict、str），SDK 根据 MIME type 转换，不用自己做 <code>json.dumps</code>。</p>
+<hr />
+<h2>用 MCP Inspector 测试</h2>
+<p>Dev mode 启动 server：</p>
+<pre><code class="language-bash">uv run mcp dev mcp_server.py
+</code></pre>
+<p>浏览器打开 Inspector，会看到两个相关区域：</p>
+<ul>
+<li><strong>Resources</strong> — 列出 direct / 静态 resources</li>
+<li><strong>Resource Templates</strong> — 列出 templated resources 与参数 schema</li>
+</ul>
+<p>点任何一个都可以跑一次，看到 client 实际会收到的 response 结构。这是验证 URI、MIME type、return shape 最快的方式，接 client 之前先测过。</p>
+<hr />
+<h2>关键规则</h2>
+<ul>
+<li>Resources 暴露数据；tools 执行动作</li>
+<li>Direct = 静态 URI；templated = 带 <code>{params}</code> 的 URI</li>
+<li>Templated URI 的参数名必须与 function argument 名字一致</li>
+<li>MIME type 指引 client 解析，并启用自动序列化</li>
+<li>Python SDK 自动序列化——不要自己转 JSON</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>用 resource 做有副作用的操作</strong> — 写入、发送、删除属于 tools，不是 resources</li>
+<li><strong>URI 参数和 function argument 名字不一致</strong> — <code>{doc_id}</code> 必须对应 <code>doc_id: str</code></li>
+<li><strong>自己做 JSON 序列化</strong> — 设了 <code>mime_type="application/json"</code> 后 SDK 会做，重复序列化会产生嵌套 JSON 字符串</li>
+<li><strong>忘了设 <code>mime_type</code></strong> — client 靠它决定怎么 parse，设错或默认会把本该是 JSON 的变成纯文本</li>
+<li><strong>不用 Inspector 先测</strong> — 跳过 MCP Inspector 意味着第一次真实调用就是第一次测试</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Resources 是 <strong>以 URI 寻址的数据端点</strong>。URI 就是整个 API 契约——选好 URI（如 <code>docs://documents/{doc_id}</code>）等同于设计 REST API。好的 resource 设计：稳定的 URI、清晰的 MIME type、明确的 tool/resource 切分。Resource 由 client 决定是否拉取；tool 由 Claude 决定是否调用。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：Resources 是 MCP 三个 primitives 之一（tools、resources、prompts）；认得 <code>@mcp.resource()</code> 装饰器、URI 与 <code>mime_type</code>；知道 direct vs templated 的差异</li>
+<li><strong>D1（Agentic Architecture）</strong>：Resources 是 MCP server 向 agent loop 提供 context 的方式，不需要 tool call——由 client 拉取后注入</li>
+<li>考题模式："Server 要以 ID 暴露文档内容，让 client 注入 prompt，该用 tool 还是 resource？" → resource</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 的 resources 是什么？</td>
+<td>Server 端以 URI 寻址的数据端点，类似 HTTP GET handler，用来暴露数据而非执行动作</td>
+</tr>
+<tr>
+<td>Resources 有哪两种？</td>
+<td>Direct（静态 URI 如 <code>docs://documents</code>）和 templated（带参数如 <code>docs://documents/{doc_id}</code>）</td>
+</tr>
+<tr>
+<td>定义 resource 的装饰器？</td>
+<td><code>@mcp.resource(uri, mime_type=...)</code></td>
+</tr>
+<tr>
+<td>Templated URI 参数怎么到你的 function？</td>
+<td>SDK 从 URI 解析后以 keyword argument 传入，按名字配对</td>
+</tr>
+<tr>
+<td>什么时候用 resource、什么时候用 tool？</td>
+<td>Resource 给 client 要拉的纯读；tool 给动作（尤其希望 Claude 自主调用的）</td>
+</tr>
+<tr>
+<td><code>mime_type</code> 参数做什么？</td>
+<td>告诉 client 怎么解析 response，并启用 SDK 自动序列化（如 <code>application/json</code>）</td>
+</tr>
+<tr>
+<td>怎么本地测试 resources？</td>
+<td><code>uv run mcp dev mcp_server.py</code>，用浏览器的 MCP Inspector，会看到 Resources 与 Resource Templates</td>
+</tr>
+<tr>
+<td>要不要自己 JSON 序列化返回值？</td>
+<td>不用，SDK 会根据 <code>mime_type</code> 自动处理</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

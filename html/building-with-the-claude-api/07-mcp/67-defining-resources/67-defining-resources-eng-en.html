@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defining Resources Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Resources — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP primitives: tools vs resources vs prompts), 2.2 (content block types), 1.2 (context injection into agent loop)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 67</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Resources are the MCP primitive for <strong>exposing data</strong> — they behave like HTTP GET handlers addressed by URI, let the server decide how to serialize the response via MIME type, and come in two flavors: direct (static URI) and templated (URI with parameters).</p>
+<hr />
+<h2>Resources vs Tools — The Mental Split</h2>
+<p>MCP gives servers three primitives: tools, resources, and prompts. The first decision when adding a new capability is whether it is a resource or a tool.</p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Resource</th>
+<th>Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Purpose</td>
+<td>Expose data (read)</td>
+<td>Perform actions (read or write)</td>
+</tr>
+<tr>
+<td>Analogy</td>
+<td>HTTP GET handler</td>
+<td>HTTP POST handler / RPC</td>
+</tr>
+<tr>
+<td>Identification</td>
+<td>URI (<code>docs://documents/{id}</code>)</td>
+<td>Named function + JSON schema</td>
+</tr>
+<tr>
+<td>Typical use</td>
+<td>Fetch a document, list items</td>
+<td>Edit, delete, send</td>
+</tr>
+<tr>
+<td>Who decides to call it</td>
+<td>Client/app inserts into prompt</td>
+<td>Claude decides at inference time</td>
+</tr>
+</tbody>
+</table>
+<p>A rule of thumb: if the capability is a pure read that the user (or the app) wants to reference directly in a prompt, make it a resource. If the capability performs an action — especially one Claude should choose autonomously during an agent loop — make it a tool.</p>
+<hr />
+<h2>Motivating Example: The <code>@document_name</code> Mention</h2>
+<p>The lesson anchors resources in a concrete product feature: users type <code>@</code> in the CLI and the app autocompletes available documents. When they pick one and submit, the app injects that document's content into the prompt.</p>
+<p>Two operations are needed:</p>
+<ol>
+<li><strong>List all documents</strong> → for autocomplete</li>
+<li><strong>Fetch a specific document's contents</strong> → for injection</li>
+</ol>
+<p>Both are pure reads. Both map cleanly to resources.</p>
+<hr />
+<h2>Resource Request/Response Flow</h2>
+<p>Resources follow a request-response pattern. The client sends a <code>ReadResourceRequest</code> with a URI; the server responds with the data. The URI is the address of the resource.</p>
+<pre><code>Client ── ReadResourceRequest(uri=&quot;docs://documents/report.pdf&quot;) ──▶ Server
+Client ◀──────── TextResourceContents(text=..., mimeType=...) ────── Server
+</code></pre>
+<p>This is deliberately simple: no schema negotiation, no tool loop, no second Claude call. Resources are pulled by URI and returned.</p>
+<hr />
+<h2>Two Kinds of Resources</h2>
+<h3>Direct Resources</h3>
+<p>A fixed URI that never changes. Used for static data endpoints — "give me the list of all documents."</p>
+<h3>Templated Resources</h3>
+<p>A URI with parameters embedded in curly braces. The Python SDK parses the URI, extracts the parameters, and passes them as keyword arguments to your function. Used for parameterized fetches — "give me document X."</p>
+<p>The naming of URI parameters in the template must match the function signature exactly — the SDK pairs them by name.</p>
+<hr />
+<h2>Implementing Resources with <code>@mcp.resource()</code></h2>
+<h3>Direct Resource: List Documents</h3>
+<pre><code class="language-python">@mcp.resource(
+    &quot;docs://documents&quot;,
+    mime_type=&quot;application/json&quot;
+)
+def list_docs() -&gt; list[str]:
+    return list(docs.keys())
+</code></pre>
+<ul>
+<li>URI <code>docs://documents</code> is static.</li>
+<li>Return value is a Python list of strings; the SDK serializes it to JSON automatically because <code>mime_type="application/json"</code>.</li>
+<li>No parameters — this is a pure directory listing.</li>
+</ul>
+<h3>Templated Resource: Fetch One Document</h3>
+<pre><code class="language-python">@mcp.resource(
+    &quot;docs://documents/{doc_id}&quot;,
+    mime_type=&quot;text/plain&quot;
+)
+def fetch_doc(doc_id: str) -&gt; str:
+    if doc_id not in docs:
+        raise ValueError(f&quot;Doc with id {doc_id} not found&quot;)
+    return docs[doc_id]
+</code></pre>
+<ul>
+<li><code>{doc_id}</code> in the URI becomes a keyword argument in the function.</li>
+<li><code>mime_type="text/plain"</code> because the return is raw document text.</li>
+<li>Errors surface as Python exceptions, which the SDK converts into proper error responses to the client.</li>
+</ul>
+<hr />
+<h2>MIME Types</h2>
+<p>Resources can return any type of data — strings, JSON, binary. The <code>mime_type</code> parameter tells the client how to parse the response:</p>
+<ul>
+<li><code>application/json</code> — structured JSON; SDK serializes return values automatically</li>
+<li><code>text/plain</code> — raw text</li>
+<li>Any other valid MIME type for different formats</li>
+</ul>
+<p>A critical convenience: <strong>the SDK handles serialization for you</strong>. You return a Python value (list, dict, str); the SDK converts it based on MIME type. You do not manually stringify JSON.</p>
+<hr />
+<h2>Testing Resources with the MCP Inspector</h2>
+<p>Run the server in dev mode:</p>
+<pre><code class="language-bash">uv run mcp dev mcp_server.py
+</code></pre>
+<p>The inspector opens in your browser with two relevant sections:</p>
+<ul>
+<li><strong>Resources</strong> — lists direct/static resources</li>
+<li><strong>Resource Templates</strong> — lists templated resources and their parameter schemas</li>
+</ul>
+<p>Clicking a resource runs it and shows the exact response structure the client will receive. This is the fastest way to validate your URI, MIME type, and return shape before wiring the client.</p>
+<hr />
+<h2>Key Rules to Remember</h2>
+<ul>
+<li>Resources expose data; tools perform actions.</li>
+<li>Direct resources = static URI; templated resources = URI with <code>{params}</code>.</li>
+<li>Parameter names in templated URIs become function arguments (matched by name).</li>
+<li>MIME type guides client parsing and enables automatic serialization.</li>
+<li>The Python SDK serializes return values — do not manually convert to JSON.</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Using a resource for a side-effect operation</strong> — writes, sends, deletes belong in tools, not resources.</li>
+<li><strong>Mismatched URI parameter and function argument</strong> — <code>{doc_id}</code> in the URI must match <code>doc_id: str</code> in the signature exactly.</li>
+<li><strong>Manually JSON-stringifying the return value</strong> — the SDK does this when <code>mime_type="application/json"</code>. Double serialization produces nested JSON strings.</li>
+<li><strong>Forgetting to set <code>mime_type</code></strong> — the client uses it to decide how to parse; defaulting it can silently return text when you expected JSON.</li>
+<li><strong>Building resources without the Inspector</strong> — skipping MCP Inspector means your first real client call is the first test.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Resources are <strong>data endpoints addressed by URI</strong>. The URI is the whole API contract — picking good URIs (like <code>docs://documents/{doc_id}</code>) is analogous to designing a REST API. Good resource design means stable URIs, clear MIME types, and a clean split from tools: resources are what the client decides to pull; tools are what Claude decides to call.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: know that resources are one of three MCP primitives (tools, resources, prompts); recognize <code>@mcp.resource()</code> decorator with URI and <code>mime_type</code>; understand direct vs templated resources.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: resources are how an MCP server provides context to the agent loop without requiring a tool call — they are pulled and injected by the client.</li>
+<li>Exam pattern: "The server needs to expose document contents by ID to be injected into the prompt. Should this be a tool or a resource?" → resource.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are resources in MCP?</td>
+<td>Server-side data endpoints addressed by URI, analogous to HTTP GET handlers, for exposing data rather than performing actions.</td>
+</tr>
+<tr>
+<td>What are the two types of resources?</td>
+<td>Direct (static URI like <code>docs://documents</code>) and templated (URI with parameters like <code>docs://documents/{doc_id}</code>).</td>
+</tr>
+<tr>
+<td>What decorator defines a resource?</td>
+<td><code>@mcp.resource(uri, mime_type=...)</code></td>
+</tr>
+<tr>
+<td>How do templated URI parameters reach your function?</td>
+<td>The SDK parses them from the URI and passes them as keyword arguments matched by name.</td>
+</tr>
+<tr>
+<td>When should you use a resource vs a tool?</td>
+<td>Resource for pure reads that the client pulls; tool for actions (especially ones Claude should choose autonomously).</td>
+</tr>
+<tr>
+<td>What does the <code>mime_type</code> parameter do?</td>
+<td>Tells the client how to parse the response and enables automatic SDK serialization (e.g., <code>application/json</code>).</td>
+</tr>
+<tr>
+<td>How do you test resources locally?</td>
+<td><code>uv run mcp dev mcp_server.py</code> and use the MCP Inspector in the browser, which lists direct resources and resource templates.</td>
+</tr>
+<tr>
+<td>Do you need to manually JSON-stringify return values?</td>
+<td>No — the SDK handles serialization automatically based on the declared <code>mime_type</code>.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

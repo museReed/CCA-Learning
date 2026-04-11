@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defining Prompts Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Prompts — PM Perspective（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration（18%）主；D1 — Agentic Architecture（22%）次</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives：prompts）、1.2（agent loop priming）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 69</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompts 是 MCP 的"精选集"——由 server 作者策划、专家级调优过的指令。让用户不必学 prompt engineering 也能稳定拿到高质量结果，把"自由输入、结果不稳"变成"可预期、品牌一致"的功能。</p>
+<hr />
+<h2>心智模型：食谱</h2>
+<ul>
+<li>用户自己写 prompt 像家里厨房即兴发挥，有时好吃，有时难以下咽</li>
+<li>Prompts 是餐厅老板给的食谱，照着做每次都是主厨水准</li>
+<li>用户还是能通过参数定制（<code>doc_id</code> 就像换食材），但方法是锁定的</li>
+</ul>
+<p>好的 MCP server 会为最常见的 use case 出食谱。用户从 slash menu 选，server 负责复杂的 prompt 工作。</p>
+<hr />
+<h2>为什么 PM 要关心</h2>
+<p>自由 prompt 相当于 AI 产品里的"打命令行"。专家爱用，其他人看到就跑。Prompts 把专家知识转成：</p>
+<ul>
+<li><strong>稳定质量</strong> — 每个用户都拿到同样测试过的结果</li>
+<li><strong>可发现的功能</strong> — prompts 变成 slash-command、快捷动作、按钮</li>
+<li><strong>品牌语气</strong> — 你的写作风格、格式、语调都内建在模板里</li>
+<li><strong>新手捷径</strong> — 新用户按"run prompt"立刻看到好结果</li>
+<li><strong>成本控制</strong> — 调优过的 prompt 通常比用户自己打的更短更聚焦</li>
+</ul>
+<p>对 PM 而言，prompts 是 tool 与 resource 之上的产品化层。</p>
+<hr />
+<h2>产品场景</h2>
+<h3>什么时候 Prompts 划算</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么适合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户重复做的任务（改格式、总结、翻译）</td>
+<td>一次写好最佳版本</td>
+</tr>
+<tr>
+<td>措辞至关重要的任务（语气、结构、合规）</td>
+<td>把措辞锁定</td>
+</tr>
+<tr>
+<td>希望暴露为 slash-command 或快捷动作的功能</td>
+<td>Prompts 天然对应 UI</td>
+</tr>
+<tr>
+<td>低信心用户想"就给我好的结果"</td>
+<td>把 prompt 复杂度藏在按钮后</td>
+</tr>
+</tbody>
+</table>
+<h3>Prompts 过头时</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>更适合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一次性任务、没有回头客</td>
+<td>自由输入即可</td>
+</tr>
+<tr>
+<td>任务变化大、约束反而碍事</td>
+<td>让用户自己写</td>
+</tr>
+<tr>
+<td>任务其实是查数据</td>
+<td>用 resource</td>
+</tr>
+<tr>
+<td>任务其实是执行动作</td>
+<td>用 tool</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>用户怎么体验一个 Prompt</h2>
+<p>从用户视角看，prompt 通常是：</p>
+<ol>
+<li>CLI 或 chat UI 的 slash-command（<code>/format</code>、<code>/summarize</code>）</li>
+<li>图形界面的按钮或快捷动作</li>
+<li>首次启动时的模板选择器</li>
+</ol>
+<p>他们选、填一两个参数（如哪份文档），系统就跑完整的预工程化指令。用户从不需要看、也从不需要写底层 prompt 文本。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<p>做 prompt 前问自己：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>若 Yes</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输出质量对措辞高度敏感？</td>
+<td>Yes</td>
+<td>出 prompt</td>
+</tr>
+<tr>
+<td>许多用户重复做的任务？</td>
+<td>Yes</td>
+<td>出 prompt</td>
+</tr>
+<tr>
+<td>只有你的团队有能力做好这件事？</td>
+<td>Yes</td>
+<td>出 prompt（外化专业）</td>
+</tr>
+<tr>
+<td>用户希望用很多创意方式做这件事？</td>
+<td>Yes</td>
+<td>不要做 prompt，保留自由输入</td>
+</tr>
+<tr>
+<td>Prompt 需要 live data？</td>
+<td>Yes</td>
+<td>Prompt 结合 resource 或 tool</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>质量门槛：什么时候 prompt"够好"能上线？</h2>
+<p>本课建议很严格：只上真的比用户自己写更好的 prompt。大致 checklist：</p>
+<ol>
+<li><strong>用 5+ 真实输入测过</strong> — 每次都产出好结果？</li>
+<li><strong>清晰的参数 schema</strong> — 每个参数都有 description，让 client 显示</li>
+<li><strong>与 server 的 tool / resource 协同</strong> — prompt 引用真实存在的 server 原语</li>
+<li><strong>扛得住边界情况</strong> — 空输入、非标准 doc ID、极端长度</li>
+<li><strong>一行描述</strong> — 用户靠这行挑</li>
+</ol>
+<p>若你的 prompt 赢不了用户临时敲的 30 秒版本，别上——会训练用户对 prompts 失去信任。</p>
+<hr />
+<h2>PM 常见错误</h2>
+<ol>
+<li><strong>上太多 prompts</strong> — 多到用户扫不完会 decision paralysis，3–10 个好 prompt 胜过 50 个平庸的</li>
+<li><strong>描述模糊</strong> — 用户看不出 prompt 做什么就不会选，要像按钮 label 一样写</li>
+<li><strong>把 prompts 当静态配置</strong> — 它们需要版本控制、eval、迭代，跟其他面向模型的 code 一样</li>
+<li><strong>把数据混进 prompt</strong> — 如果你发现要把文档内容写进 prompt，其实要的是 resource</li>
+<li><strong>不量化 prompt 质量</strong> — 跟踪哪些 prompt 被选、哪些导致 rework，淘汰失败者</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompts 是让 MCP 从"开发者 SDK"变成"产品表面"的原语。Tool 与 resource 让 server 有能力，prompts 让它好用。理解这点的 PM 会出"小而精的高质量动作清单"——AI 产品版的 Notion 或 Linear slash-menu——用户觉得拿到好用工具，而且从头到尾不必打开文本框。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：Prompts 是 tool / resource 之后的第三种 MCP 原语，知道它带参数、返回一串消息</li>
+<li><strong>D1（Agentic Architecture）</strong>：Prompts 用高质量对话开场 seed agent loop</li>
+<li>考题模式："Server 作者要上线一个可复用的'改写成 markdown'指令，哪个原语？" → prompt</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompts 的"食谱"比喻是什么？</td>
+<td>用户自己写 prompt 是即兴厨师；prompts 是餐厅老板给的食谱，用户换食材（参数），每次都拿主厨水准</td>
+</tr>
+<tr>
+<td>为什么 prompts 是产品化层？</td>
+<td>把专家 prompt engineering 转成用户能用的 slash-command 或快捷动作</td>
+</tr>
+<tr>
+<td>什么时候 PM 不该做 prompt？</td>
+<td>任务变异大、一次性任务，或其实是查数据（resource）或动作（tool）</td>
+</tr>
+<tr>
+<td>一个 prompt 要"可上线"需要什么？</td>
+<td>真实输入测过、清晰参数 schema、配合 server tool/resource、处理边界情况、一行清晰描述</td>
+</tr>
+<tr>
+<td>描述模糊为什么会杀死 prompt？</td>
+<td>用户按描述挑 prompt，模糊的没人选，浪费工程资源</td>
+</tr>
+<tr>
+<td>上 50 个平庸 prompt 还是 5 个精品？</td>
+<td>5 个精品——prompt 太多造成 decision paralysis 并稀释认知质量</td>
+</tr>
+<tr>
+<td>Prompts 怎么跟 tools 与 resources 组合？</td>
+<td>Prompt 可引用 tool（例如"用 <code>edit_document</code> 存结果"）或 resource，像多步 workflow 的食谱</td>
+</tr>
+<tr>
+<td>若 prompt 把文档内容写死而非参数化会怎样？</td>
+<td>你其实想要的是 resource——prompt 是模板、resource 是数据</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

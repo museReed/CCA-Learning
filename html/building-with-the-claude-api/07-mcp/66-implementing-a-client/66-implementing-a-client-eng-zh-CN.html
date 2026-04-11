@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implementing A Client Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Implementing a Client — Engineering Deep Dive（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration（18%）主；D1 — Agentic Architecture（22%）次</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives：client/server、list_tools、call_tool）、2.2（content block types）、1.2（agentic loop 集成）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 66</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP client 是对 MCP Python SDK <code>ClientSession</code> 的轻量封装，对外暴露两个核心方法 <code>list_tools()</code> 与 <code>call_tool()</code>，让应用程序可以发现并调用服务端 tools，而不必关心 transport、handshake 或资源清理。</p>
+<hr />
+<h2>为什么要自己写一个 Client class</h2>
+<p>真实项目中通常只会实作 <strong>MCP client 或 MCP server 之一</strong>，不会两边都写。本课程为了教学才两边都做。MCP client 有两层：</p>
+<ol>
+<li><strong><code>ClientSession</code></strong> — MCP Python SDK 提供的底层连接原语，负责协议 handshake、消息 framing、async 生命周期</li>
+<li><strong><code>MCPClient</code></strong> — 你自己写的 class，包裹在 <code>ClientSession</code> 外层：</li>
+<li>用 async context manager 管理 session 的启动与清理</li>
+<li>暴露好用的方法（<code>list_tools</code>、<code>call_tool</code>，之后还有 <code>read_resource</code>、<code>list_prompts</code>、<code>get_prompt</code>）</li>
+<li>把 transport 细节（stdio subprocess、command + args）隐藏起来</li>
+</ol>
+<p>最关键的理由是 <strong>资源清理</strong>：<code>ClientSession</code> 需要 async teardown。包在 context manager 里，调用端就绝对不会忘记关 subprocess。</p>
+<hr />
+<h2>Client 如何融入 Agent Loop</h2>
+<p>CLI 需要从 MCP server 获取两项能力：</p>
+<ol>
+<li>取得可用 tool 列表，转发给 Claude（让 Claude 知道自己能调用什么）</li>
+<li>当 Claude 发出 <code>tool_use</code> block 时，实际执行 tool（把结果喂回 agent loop）</li>
+</ol>
+<pre><code>┌────────────┐   list_tools()    ┌────────────┐
+│ CLI / App  │ ────────────────▶ │ MCPClient  │
+│            │ ◀──────────────── │            │
+│            │     [tools]       └────────────┘
+│            │                         │
+│            │   ── call_tool() ──────▶│
+│            │ ◀─── ToolResult ────────│
+└────────────┘                         ▼
+                                  MCP Server
+                                  (subprocess)
+</code></pre>
+<p>MCP client 就是桥梁：左侧是应用逻辑，右侧是 MCP server，agent loop 把两端包起来。</p>
+<hr />
+<h2>两个核心方法</h2>
+<h3><code>list_tools()</code></h3>
+<pre><code class="language-python">async def list_tools(self) -&gt; list[types.Tool]:
+    result = await self.session().list_tools()
+    return result.tools
+</code></pre>
+<ul>
+<li>调用 session 内建的 <code>list_tools()</code></li>
+<li>返回 <code>types.Tool</code> 数组，每个对象含 <code>name</code>、<code>description</code>、<code>inputSchema</code></li>
+<li>应用程序会把它们转成 Anthropic API 所需格式，放进 <code>client.messages.create(..., tools=...)</code></li>
+</ul>
+<h3><code>call_tool()</code></h3>
+<pre><code class="language-python">async def call_tool(
+    self, tool_name: str, tool_input: dict
+) -&gt; types.CallToolResult | None:
+    return await self.session().call_tool(tool_name, tool_input)
+</code></pre>
+<ul>
+<li>接收 Claude 在 <code>tool_use</code> block 中指定的 <code>name</code> 与 <code>input</code></li>
+<li>委派给 session 的 <code>call_tool()</code>，通过 MCP transport 发送请求并等待 server 响应</li>
+<li>返回的 <code>CallToolResult.content</code> 会变成下一轮 API 调用里的 <code>tool_result</code> 内容</li>
+</ul>
+<p>两个方法故意写得很薄——真正干活的是 SDK，你的 class 只负责提供稳定友好的接口。</p>
+<hr />
+<h2>直接测试 Client</h2>
+<p>同一个文件带有测试 harness，可以不经过 Claude 单独测试 client：</p>
+<pre><code class="language-python">async with MCPClient(
+    command=&quot;uv&quot;, args=[&quot;run&quot;, &quot;mcp_server.py&quot;]
+) as client:
+    result = await client.list_tools()
+    print(result)
+</code></pre>
+<p>跑起来应该会打印前几课定义的 <code>read_doc_contents</code> 与 <code>edit_document</code>。这是 smoke test——如果列表能拿回来，说明 handshake、transport、decoder 都正常。</p>
+<hr />
+<h2>End-to-End 流程（用户提问时会发生什么）</h2>
+<ol>
+<li><strong>启动</strong> — CLI 进入 <code>MCPClient</code> context manager，spawn <code>mcp_server.py</code> subprocess 并完成 MCP handshake</li>
+<li><strong>Tool 发现</strong> — CLI 调用 <code>client.list_tools()</code>，存起来或转为 Anthropic tool schema</li>
+<li><strong>第一次调用 Claude</strong> — 用户问题 + tool 定义送到 <code>client.messages.create()</code></li>
+<li><strong>Claude 发出 <code>tool_use</code></strong> — 例如 <code>read_doc_contents(doc_id="report.pdf")</code></li>
+<li><strong>Dispatch</strong> — CLI 调用 <code>client.call_tool("read_doc_contents", {"doc_id": "report.pdf"})</code></li>
+<li><strong>Server 执行</strong> — 返回 <code>CallToolResult</code>，里面包含文档内容</li>
+<li><strong>第二次调用 Claude</strong> — CLI 把 <code>tool_result</code> block（附带原本 <code>tool_use_id</code>）append 进 messages，再调一次 Claude</li>
+<li><strong>最终答复</strong> — Claude 生成用户看到的回答</li>
+</ol>
+<p>这就是第 4 章讲的 tool use 循环——MCP 只是把「本地 Python function dispatch」替换成「经由协议调用 server」。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>在 context 之外调用 <code>session()</code></strong> — <code>ClientSession</code> 必须在 <code>async with</code> 块内使用，否则 subprocess 会泄漏</li>
+<li><strong>把原始 <code>CallToolResult</code> 直接回给 Claude</strong> — 必须封装成 <code>tool_result</code> content block，并带上正确的 <code>tool_use_id</code></li>
+<li><strong>忘记传 subprocess command</strong> — <code>MCPClient</code> 需要 <code>command</code> 和 <code>args</code>（如 <code>command="uv", args=["run", "mcp_server.py"]</code>），路径错就拿不到任何 tool</li>
+<li><strong>把 <code>list_tools()</code> 当便宜操作</strong> — 它是 async round trip，应该 per session 缓存，别每条用户消息都重调</li>
+<li><strong>同步 / 异步混用</strong> — MCP SDK 全 async，sync 代码在没有 event loop 的情况下会报错</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>MCP client 不是重写你的 agent loop——它是 <strong>transport 替换</strong>。原本调用本地 Python function 的地方，改成调用 <code>client.call_tool(...)</code> 即可。Agent loop、<code>tool_use</code> / <code>tool_result</code> 协议、Anthropic API 契约完全不变。MCP 的威力正来自这种可分离性：你的 server 可被任何 Claude 应用复用，而无需改动 agent loop。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：要知道 MCP client 是 <code>ClientSession</code> 的封装，核心方法是 <code>list_tools()</code> / <code>call_tool()</code>，用来替代本地 tool dispatch</li>
+<li><strong>D1（Agentic Architecture）</strong>：agent loop 本身不因 MCP 改变，client 只是换了一种拿 tool、执行 tool 的方式</li>
+<li>考题模式："MCP-based 应用中 tool 实际在哪里执行？" → 在 server 上，通过 client 的 <code>call_tool()</code> 触发</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP client 分哪两层？</td>
+<td><code>ClientSession</code>（SDK 提供的 transport/handshake 原语）+ 自写的 <code>MCPClient</code> class（负责生命周期与友好 API）</td>
+</tr>
+<tr>
+<td>为什么要把 <code>ClientSession</code> 包进自己的 class？</td>
+<td>用 context manager 保证 async 清理，并提供稳定友好的对外接口</td>
+</tr>
+<tr>
+<td>MCP client 至少要实现哪两个方法？</td>
+<td><code>list_tools()</code> 与 <code>call_tool(tool_name, tool_input)</code></td>
+</tr>
+<tr>
+<td><code>list_tools()</code> 返回什么？</td>
+<td><code>types.Tool</code> 数组，含 <code>name</code>、<code>description</code>、<code>inputSchema</code>，可直接转发给 Claude</td>
+</tr>
+<tr>
+<td><code>call_tool()</code> 的参数与返回？</td>
+<td>参数：<code>tool_name</code> 与 <code>tool_input</code> dict；返回 <code>CallToolResult | None</code></td>
+</tr>
+<tr>
+<td>如何单独测试 client？</td>
+<td>直接运行该文件：<code>async with MCPClient(command="uv", args=["run", "mcp_server.py"]) as client: await client.list_tools()</code></td>
+</tr>
+<tr>
+<td>MCP 改变了 agent loop 吗？</td>
+<td>没有，只有 tool dispatch 那一步换成了 <code>client.call_tool(...)</code>，loop、stop_reason、tool_result 协议完全不变</td>
+</tr>
+<tr>
+<td>课程里使用的 command / args 组合？</td>
+<td><code>command="uv"</code>、<code>args=["run", "mcp_server.py"]</code>，通过 stdio spawn server subprocess</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

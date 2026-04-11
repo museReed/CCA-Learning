@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accessing Resources Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Accessing Resources — Engineering Deep Dive（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration（18%）主；D1 — Agentic Architecture（22%）次</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3（MCP primitives：client 端 resource 访问）、2.2（content block types）、1.2（context 注入 agent loop）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 68</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Accessing resources 是"定义 resources"的 client 对偶——你在 MCP client 上添加 <code>read_resource(uri)</code>，按 MIME type 解析返回的 <code>contents</code> list，把结果交给应用在 Claude 看到之前注入 prompt。</p>
+<hr />
+<h2>为什么 Resources 比 Tool Call 更适合注入 context</h2>
+<p>本课开篇的核心论点：resources 让 server 暴露"可直接塞进 prompt"的数据，无需 tool call。优势是效率：</p>
+<ul>
+<li><strong>不必第二次 round trip</strong> — 没有 <code>tool_use</code> / <code>tool_result</code> 循环</li>
+<li><strong>确定性</strong> — 数据一定存在，不用等 Claude 决定</li>
+<li><strong>调试简单</strong> — content block 更少，trace 容易读</li>
+</ul>
+<p>用户输入 <code>@report.pdf</code> 发送时，应用通过 MCP client 抓取 resource，把文本 inline 进 prompt，Claude 在第一次 API 调用就收到整份文档。</p>
+<hr />
+<h2>实现 <code>read_resource</code></h2>
+<p>在 MCP client 添加新方法：</p>
+<pre><code class="language-python">async def read_resource(self, uri: str) -&gt; Any:
+    result = await self.session().read_resource(AnyUrl(uri))
+    resource = result.contents[0]
+    # ... 按 MIME type 解析（见下一节）
+</code></pre>
+<p>要点：</p>
+<ul>
+<li>URI 要用 <code>AnyUrl</code>（pydantic）包一层再传给 SDK，保证类型正确</li>
+<li><code>session().read_resource(...)</code> 是底层 SDK 调用</li>
+<li>response 的 <code>contents</code> 是 <strong>list</strong>，通常取第一个元素——包含实际数据与 metadata（含 MIME type）</li>
+</ul>
+<p>返回类型标为 <code>Any</code>，因为不同 resource 会返回不同 Python 类型（字符串、dict、list、二进制），视 MIME type 而定。</p>
+<hr />
+<h2>按 MIME Type 解析</h2>
+<p>Resource 可能返回异构数据，client 必须按类型分支处理：</p>
+<pre><code class="language-python">if isinstance(resource, types.TextResourceContents):
+    if resource.mimeType == &quot;application/json&quot;:
+        return json.loads(resource.text)
+
+    return resource.text
+</code></pre>
+<p>本课涵盖两种情况：</p>
+<ol>
+<li><strong><code>application/json</code></strong> — server 返回结构化数据。用 <code>json.loads(resource.text)</code> 转成 Python 对象（dict 或 list）</li>
+<li><strong><code>text/plain</code></strong>（或其他文本）— 直接返回 <code>resource.text</code></li>
+</ol>
+<p>MIME type 是 server 通过 <code>@mcp.resource(mime_type=...)</code> 给 client 的契约，让 client 不用猜。</p>
+<p>其他内容类型（二进制、图像）可以增加分支，但本课专注 text 与 JSON——足以覆盖 document mention 场景。</p>
+<hr />
+<h2>必要 Imports</h2>
+<p>两个 import 缺一不可：</p>
+<pre><code class="language-python">import json
+from pydantic import AnyUrl
+</code></pre>
+<ul>
+<li><code>json</code> — 解析 JSON body</li>
+<li><code>AnyUrl</code> — pydantic 的 URL 类型；<code>read_resource</code> 需要类型化 URL，不接受原始字符串</li>
+</ul>
+<p>少了任一个都会报类型错误或运行时异常。</p>
+<hr />
+<h2>用 CLI 测试 Resource 访问</h2>
+<p>End-to-end 测试走 CLI：用户问"What's in the @report.pdf document?"时，系统会：</p>
+<ol>
+<li>用 autocomplete 列出可用 resources（<code>list_resources</code> 或类似）</li>
+<li>让用户选一个</li>
+<li>自动抓取 resource 内容（通过 <code>read_resource</code>）</li>
+<li>把内容放进送给 Claude 的 prompt</li>
+</ol>
+<p>Claude 收到时文档已经在 context 中——不需要 tool call。</p>
+<hr />
+<h2>与应用集成</h2>
+<p>关键设计点：MCP client 代码会被 <strong>应用其他部分</strong> 使用。<code>read_resource</code> 是基础构件，上层组件调用它来：</p>
+<ul>
+<li>抓文档内容注入 prompt</li>
+<li>填 @mention autocomplete</li>
+<li>把 resource 数据集成进 prompt</li>
+</ul>
+<p>这种分层很重要：</p>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP client</td>
+<td>跟 MCP server 沟通、解析响应</td>
+</tr>
+<tr>
+<td>应用层</td>
+<td>决定何时抓、注入到哪里</td>
+</tr>
+<tr>
+<td>Prompt builder</td>
+<td>组装最终发给 Claude 的消息</td>
+</tr>
+</tbody>
+</table>
+<p>Client 故意做得"笨"——只负责读。业务逻辑留在应用层。</p>
+<hr />
+<h2>为什么比 Tool Call 更高效</h2>
+<p>比较两种做法对应同一用户意图（"读 report.pdf"）：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>Round trips</th>
+<th>Content blocks</th>
+<th>确定性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool call（<code>read_doc_contents</code>）</td>
+<td>2（tool_use + tool_result）</td>
+<td>tool_use、tool_result、最终文本</td>
+<td>Claude 决定是否调用</td>
+</tr>
+<tr>
+<td>Resource fetch（<code>read_resource</code>）</td>
+<td>1</td>
+<td>只有 prompt 文本</td>
+<td>应用保证一定抓</td>
+</tr>
+</tbody>
+</table>
+<p>对于用户明确驱动的 context（"我在 @mention 这份文档"），resource 路径严格更优：更少 API 调用、更少 token、更快响应。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>传入原始字符串 URI</strong> — <code>read_resource</code> 需要 <code>AnyUrl</code>，跳过 <code>AnyUrl(uri)</code> 会引发类型错误</li>
+<li><strong>忘记按 MIME type 分支</strong> — 无条件返回 <code>resource.text</code> 会把 JSON 变成原始字符串，下游解析就坏了</li>
+<li><strong>假设 <code>contents</code> 一定只有一个元素</strong> — SDK 返回 list，通常取第一个但不保证，这个假设要写进注释</li>
+<li><strong>双重 parse JSON</strong> — server 若已用 <code>mime_type="application/json"</code> 序列化，text 本身就是 JSON；用 <code>json.loads</code> 正确，不要在 server 端再包一层</li>
+<li><strong>把业务逻辑放进 <code>read_resource</code></strong> — Client 要薄，"何时抓"归应用层</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p><code>read_resource</code> 是 <code>@mcp.resource()</code> 的对称镜像——一边序列化，另一边反序列化，MIME type 是粘合剂。理解这种对称性，resource 支持的功能就会像干净的数据通道，而不是权宜 tool call。每个 MCP client 都有这三行 pattern：调用 <code>read_resource</code>、取 <code>contents[0]</code>、按 <code>mimeType</code> 分支。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：<code>read_resource</code> 是 <code>@mcp.resource()</code> 的 client 对偶；知道 method signature、<code>AnyUrl</code> 的用法、MIME type 分支模式</li>
+<li><strong>D1（Agentic Architecture）</strong>：Resources 把 context 注入 agent loop 而无需 tool call，缩短 loop 并提高确定性</li>
+<li>考题模式："要传给 <code>session.read_resource()</code> 的类型是什么？" → <code>AnyUrl</code>（来自 pydantic），而不是原始 string</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client 读 resource 的核心方法？</td>
+<td><code>async def read_resource(self, uri: str)</code>，内部调用 <code>self.session().read_resource(AnyUrl(uri))</code></td>
+</tr>
+<tr>
+<td>传给 SDK 之前 URI 要用什么包一层？</td>
+<td>pydantic 的 <code>AnyUrl</code></td>
+</tr>
+<tr>
+<td>Response 的 <code>contents</code> 是什么？</td>
+<td>Resource content 对象 list，通常取 <code>result.contents[0]</code></td>
+</tr>
+<tr>
+<td>如何解析 JSON 型 resource 响应？</td>
+<td>检查 <code>resource.mimeType == "application/json"</code>，返回 <code>json.loads(resource.text)</code></td>
+</tr>
+<tr>
+<td>如何解析纯文本 resource 响应？</td>
+<td>直接返回 <code>resource.text</code></td>
+</tr>
+<tr>
+<td>Client 做 resource 访问需要哪两个 import？</td>
+<td><code>import json</code> 与 <code>from pydantic import AnyUrl</code></td>
+</tr>
+<tr>
+<td>为什么 resources 比 tool call 更高效？</td>
+<td>一次 round trip 就够，数据直接内嵌 prompt，跳过 tool_use / tool_result 循环</td>
+</tr>
+<tr>
+<td>谁决定调用 <code>read_resource</code>？</td>
+<td>应用（按用户动作或策略），不是 Claude——Claude 不看 URI，只看到结果文本</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748B"/>
+    </marker>
+    <marker id="arrowBack" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M10,0 L0,5 L10,10 Z" fill="#64748B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">MCP Client-Server Flow — Agent Loop</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">The full message path: User → Your App → MCP Client → MCP Server → Claude, then back</text>
+
+  <!-- Lane headers -->
+  <g font-size="12" font-weight="700" fill="white">
+    <rect x="40"  y="80" width="160" height="36" rx="8" fill="#6B7280" filter="url(#shadow)"/>
+    <text x="120" y="103" text-anchor="middle">User</text>
+
+    <rect x="220" y="80" width="160" height="36" rx="8" fill="#3B82F6" filter="url(#shadow)"/>
+    <text x="300" y="103" text-anchor="middle">Your App + MCP Client</text>
+
+    <rect x="400" y="80" width="160" height="36" rx="8" fill="#8B5CF6" filter="url(#shadow)"/>
+    <text x="480" y="103" text-anchor="middle">Claude (messages.create)</text>
+
+    <rect x="580" y="80" width="160" height="36" rx="8" fill="#22C55E" filter="url(#shadow)"/>
+    <text x="660" y="103" text-anchor="middle">MCP Server</text>
+
+    <rect x="760" y="80" width="200" height="36" rx="8" fill="#F59E0B" filter="url(#shadow)"/>
+    <text x="860" y="103" text-anchor="middle">External API (e.g. GitHub)</text>
+  </g>
+
+  <!-- Lifelines -->
+  <line x1="120" y1="120" x2="120" y2="560" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <line x1="300" y1="120" x2="300" y2="560" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <line x1="480" y1="120" x2="480" y2="560" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <line x1="660" y1="120" x2="660" y2="560" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <line x1="860" y1="120" x2="860" y2="560" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+  <!-- Step 1: user query -->
+  <line x1="120" y1="140" x2="300" y2="140" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="130" y="126" width="160" height="14" rx="3" fill="white"/>
+  <text x="210" y="136" text-anchor="middle" font-size="10" fill="#1E293B">1. "What repos do I have?"</text>
+
+  <!-- Step 2: client.list_tools() -->
+  <line x1="300" y1="168" x2="660" y2="168" stroke="#22C55E" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="330" y="154" width="300" height="14" rx="3" fill="white"/>
+  <text x="480" y="164" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#166534">2. await client.list_tools() → ListToolsRequest</text>
+
+  <!-- Step 3: tools list returned -->
+  <line x1="660" y1="192" x2="300" y2="192" stroke="#22C55E" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="330" y="178" width="300" height="14" rx="3" fill="white"/>
+  <text x="480" y="188" text-anchor="middle" font-size="10" fill="#166534">3. ListToolsResult — [list_repos, create_issue, ...]</text>
+
+  <!-- Step 4: messages.create(tools=...) -->
+  <line x1="300" y1="220" x2="480" y2="220" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="300" y="206" width="180" height="14" rx="3" fill="white"/>
+  <text x="390" y="216" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#6D28D9">4. messages.create(tools=...)</text>
+
+  <!-- Step 5: tool_use block -->
+  <line x1="480" y1="244" x2="300" y2="244" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="300" y="230" width="180" height="14" rx="3" fill="white"/>
+  <text x="390" y="240" text-anchor="middle" font-size="10" fill="#6D28D9">5. stop_reason="tool_use"</text>
+  <rect x="306" y="248" width="168" height="18" rx="3" fill="#F3E8FF" stroke="#8B5CF6" stroke-width="1"/>
+  <text x="390" y="260" text-anchor="middle" font-size="9" font-family="Menlo, monospace" fill="#6D28D9">{name:"list_repos", input:{}}</text>
+
+  <!-- Step 6: client.call_tool() -->
+  <line x1="300" y1="290" x2="660" y2="290" stroke="#22C55E" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="330" y="276" width="300" height="14" rx="3" fill="white"/>
+  <text x="480" y="286" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#166534">6. await client.call_tool("list_repos", {})</text>
+
+  <!-- Step 7: external API call -->
+  <line x1="660" y1="314" x2="860" y2="314" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="680" y="300" width="160" height="14" rx="3" fill="white"/>
+  <text x="760" y="310" text-anchor="middle" font-size="10" fill="#92400E">7. HTTP GET /user/repos</text>
+
+  <!-- Step 8: external API response -->
+  <line x1="860" y1="338" x2="660" y2="338" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="680" y="324" width="160" height="14" rx="3" fill="white"/>
+  <text x="760" y="334" text-anchor="middle" font-size="10" fill="#92400E">8. JSON [{"name":"repo1"},...]</text>
+
+  <!-- Step 9: CallToolResult -->
+  <line x1="660" y1="362" x2="300" y2="362" stroke="#22C55E" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="330" y="348" width="300" height="14" rx="3" fill="white"/>
+  <text x="480" y="358" text-anchor="middle" font-size="10" fill="#166534">9. CallToolResult — tool output blocks</text>
+
+  <!-- Step 10: follow-up messages.create with tool_result -->
+  <line x1="300" y1="400" x2="480" y2="400" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="290" y="386" width="200" height="14" rx="3" fill="white"/>
+  <text x="390" y="396" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#6D28D9">10. messages.create(+tool_result)</text>
+
+  <!-- Step 11: final text response -->
+  <line x1="480" y1="424" x2="300" y2="424" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="300" y="410" width="180" height="14" rx="3" fill="white"/>
+  <text x="390" y="420" text-anchor="middle" font-size="10" fill="#6D28D9">11. stop_reason="end_turn"</text>
+
+  <!-- Step 12: deliver to user -->
+  <line x1="300" y1="452" x2="120" y2="452" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="130" y="438" width="160" height="14" rx="3" fill="white"/>
+  <text x="210" y="448" text-anchor="middle" font-size="10" fill="#1E293B">12. "You have 14 repos: ..."</text>
+
+  <!-- Agent loop note box -->
+  <rect x="40" y="490" width="920" height="80" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="58" y="512" font-size="11" font-weight="700" fill="#1E40AF">Agent loop</text>
+  <text x="58" y="530" font-size="10" fill="#1E293B">Steps 4–10 repeat while Claude returns <tspan font-family="Menlo, monospace" fill="#6D28D9">stop_reason="tool_use"</tspan>. On each iteration the client calls <tspan font-family="Menlo, monospace" fill="#166534">call_tool()</tspan> and appends the</text>
+  <text x="58" y="545" font-size="10" fill="#1E293B">result to the message history. The loop exits when Claude returns <tspan font-family="Menlo, monospace" fill="#6D28D9">stop_reason="end_turn"</tspan> — the final text is delivered to the user.</text>
+  <text x="58" y="562" font-size="10" fill="#6B7280">MCPClient wraps ClientSession; <tspan font-family="Menlo, monospace" fill="#166534">list_tools()</tspan> and <tspan font-family="Menlo, monospace" fill="#166534">call_tool()</tspan> are the only two methods you implement.</text>
+</svg>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompts In The Client Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompts in the Client — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP primitives: client-side prompt access), 1.2 (seeding the agent loop), 2.2 (message content blocks)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 70</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Using prompts from the client is a two-method extension to your MCP client — <code>list_prompts()</code> to discover and <code>get_prompt(name, args)</code> to fetch a fully interpolated message list that you feed directly into Claude as the start of a new conversation.</p>
+<hr />
+<h2>The Client-Side Contract</h2>
+<p>Prompts defined on the server via <code>@mcp.prompt()</code> become invocable only when the client exposes two methods:</p>
+<ol>
+<li><strong><code>list_prompts()</code></strong> — returns every prompt the server knows about, with names, descriptions, and argument metadata.</li>
+<li><strong><code>get_prompt(prompt_name, args)</code></strong> — runs the server's prompt function with the supplied arguments and returns the resulting message list.</li>
+</ol>
+<p>With these in place, your application can build UIs like slash menus, show descriptions for each prompt, collect arguments from users, and then launch a fully formed Claude conversation.</p>
+<hr />
+<h2>Implementing <code>list_prompts</code></h2>
+<pre><code class="language-python">async def list_prompts(self) -&gt; list[types.Prompt]:
+    result = await self.session().list_prompts()
+    return result.prompts
+</code></pre>
+<p>This is a straight pass-through to the session:</p>
+<ul>
+<li><code>self.session().list_prompts()</code> calls the MCP SDK, which asks the server for its registered prompts.</li>
+<li>The SDK returns a <code>ListPromptsResult</code>; you return <code>result.prompts</code> as the list of <code>types.Prompt</code> objects.</li>
+</ul>
+<p>Each <code>types.Prompt</code> object carries:</p>
+<ul>
+<li><code>name</code> — the string identifier (e.g., <code>"format"</code>)</li>
+<li><code>description</code> — human-readable summary for UI</li>
+<li>Argument metadata — names, descriptions, required-ness</li>
+</ul>
+<p>Your app uses this information to render a picker, validate input, or gate access.</p>
+<hr />
+<h2>Implementing <code>get_prompt</code></h2>
+<pre><code class="language-python">async def get_prompt(self, prompt_name, args: dict[str, str]):
+    result = await self.session().get_prompt(prompt_name, args)
+    return result.messages
+</code></pre>
+<p>This method fetches a specific prompt with arguments interpolated:</p>
+<ul>
+<li><code>prompt_name</code> — the name you saw from <code>list_prompts()</code>.</li>
+<li><code>args</code> — a dict mapping argument names to string values (matching the server-side function parameters).</li>
+<li>The session's <code>get_prompt</code> sends the request to the server, which runs the prompt function with those args and returns the resulting <code>list[base.Message]</code>.</li>
+<li>You return <code>result.messages</code> — a conversation ready to send to Claude.</li>
+</ul>
+<hr />
+<h2>How Prompt Arguments Work</h2>
+<p>The server-side prompt function expects parameters. For example:</p>
+<pre><code class="language-python">def format_document(doc_id: str):
+    # doc_id gets interpolated into the prompt template
+</code></pre>
+<p>When the client calls <code>get_prompt("format", {"doc_id": "report.pdf"})</code>, the MCP SDK routes the dict as keyword arguments into <code>format_document(doc_id="report.pdf")</code>. The function runs, interpolates the arguments into its template, and returns the message list. The client never sees the intermediate template — only the final messages.</p>
+<p>This parameterization is what makes prompts reusable: one server-side template serves infinitely many parameter combinations.</p>
+<hr />
+<h2>Testing Prompts in the CLI</h2>
+<p>Once <code>list_prompts</code> and <code>get_prompt</code> are wired, the CLI exposes prompts as slash-commands. Typing <code>/</code> shows the available prompts as a menu. Selecting one might trigger a secondary picker (e.g., "which document do you want to format?") and then the completed prompt is sent to Claude.</p>
+<p>The canonical workflow:</p>
+<ol>
+<li><strong>User selects a prompt</strong> (e.g., <code>/format</code>)</li>
+<li><strong>System prompts for required arguments</strong> (e.g., which document)</li>
+<li><strong>Client calls <code>get_prompt(name, args)</code></strong> — receives interpolated messages</li>
+<li><strong>Client sends the messages to Claude</strong> — Claude begins the conversation with that seed</li>
+<li><strong>Claude proceeds normally</strong> — it may call tools, read resources, and compose its final answer</li>
+</ol>
+<hr />
+<h2>The Full Prompt-Powered Agent Loop</h2>
+<p>From the server author's perspective, a prompt is a recipe. From the client's perspective, it is a prebuilt conversation starter. Put together:</p>
+<pre><code>┌──────────┐   list_prompts()       ┌────────────┐   list_prompts()       ┌────────────┐
+│  User    │ ─────────────────────▶ │ Application│ ─────────────────────▶ │ MCP Server │
+│          │                        │ (+ client) │                        │            │
+│          │   picks &quot;format&quot;       │            │                        │            │
+│          │ ─────────────────────▶ │            │                        │            │
+│          │   doc_id=&quot;report.pdf&quot;  │            │    get_prompt(...)     │            │
+│          │ ─────────────────────▶ │            │ ─────────────────────▶ │            │
+│          │                        │            │ ◀───────────────────── │            │
+│          │                        │            │   messages=[...]       └────────────┘
+│          │                        │            │                              │
+│          │                        │            │   first Claude call          │
+│          │                        │            │ ─────────────────────▶ ┌──────────┐
+│          │                        │            │ ◀───────────────────── │  Claude  │
+│          │                        │            │   tool_use(...)        │   API    │
+│          │                        │            │                        └──────────┘
+│          │                        │            │   loop continues...
+└──────────┘                        └────────────┘
+</code></pre>
+<p>The prompt only seeds the conversation. Tool use, resource access, and multi-turn reasoning continue as usual afterward.</p>
+<hr />
+<h2>Prompt Best Practices (From the Lesson)</h2>
+<ul>
+<li>Make prompts relevant to your server's purpose</li>
+<li>Test thoroughly before deployment</li>
+<li>Use clear, specific instructions</li>
+<li>Design them to work well with your available tools</li>
+<li>Consider what arguments users will need to provide</li>
+</ul>
+<p>These mirror the server-side best practices from Lesson 69 — the client is simply the consumer of them.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Treating <code>get_prompt</code> result as plain text</strong> — it is a <strong>message list</strong>. You must send it via the Anthropic API's messages parameter, not as a single user string.</li>
+<li><strong>Passing wrong argument names</strong> — <code>args</code> keys must match the server prompt function's parameter names exactly. Mismatch → server-side error.</li>
+<li><strong>Calling <code>get_prompt</code> without first calling <code>list_prompts</code></strong> — you can technically do it, but you lose the ability to present a UI and validate arguments.</li>
+<li><strong>Caching prompt messages across sessions</strong> — prompt results are effectively pure, but the conversation state they create is per-session. Re-fetch when needed.</li>
+<li><strong>Ignoring the description metadata</strong> — the whole point of prompts is discoverability; propagate descriptions into your UI.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p><code>list_prompts</code> and <code>get_prompt</code> are tiny — two methods, half a dozen lines — yet they complete MCP's product surface. With them, your client gets a "menu of pre-engineered actions" that the server author maintains. Every time the server author improves a prompt, every client that uses it improves automatically. This is the asymmetric compounding that makes prompts the most PM-friendly of the three MCP primitives.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: know the two client-side methods (<code>list_prompts</code>, <code>get_prompt</code>), the dict-based arg passing, and the <code>list[base.Message]</code> return shape.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: prompts seed the agent loop with curated starting conversations; the loop proceeds normally afterward.</li>
+<li>Exam pattern: "How does the client fetch a prompt with arguments?" → <code>await self.session().get_prompt(prompt_name, args)</code> and return <code>result.messages</code>.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What two client methods are needed to use prompts?</td>
+<td><code>list_prompts()</code> to discover and <code>get_prompt(prompt_name, args)</code> to fetch an interpolated message list.</td>
+</tr>
+<tr>
+<td>What does <code>list_prompts()</code> return?</td>
+<td><code>result.prompts</code> — a list of <code>types.Prompt</code> objects containing name, description, and argument metadata.</td>
+</tr>
+<tr>
+<td>What does <code>get_prompt</code> return?</td>
+<td><code>result.messages</code> — a <code>list[base.Message]</code> ready to send to Claude.</td>
+</tr>
+<tr>
+<td>How are prompt arguments passed?</td>
+<td>As a <code>dict[str, str]</code> whose keys match the server prompt function's parameter names.</td>
+</tr>
+<tr>
+<td>What happens on the server when the client calls <code>get_prompt</code>?</td>
+<td>The server runs the decorated prompt function with the args as keyword arguments and returns the resulting message list.</td>
+</tr>
+<tr>
+<td>What does the client do with the returned messages?</td>
+<td>Sends them to Claude as the start of a new conversation; the agent loop proceeds normally (tools, resources, multi-turn).</td>
+</tr>
+<tr>
+<td>How do prompts appear to the user in a CLI?</td>
+<td>As slash-commands (e.g., <code>/format</code>), optionally followed by argument pickers before the prompt is sent to Claude.</td>
+</tr>
+<tr>
+<td>Why is caching <code>get_prompt</code> results across sessions risky?</td>
+<td>Prompt outputs are templates for new conversations; the conversation state that follows is per-session, so cached messages can mislead the app's state model.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

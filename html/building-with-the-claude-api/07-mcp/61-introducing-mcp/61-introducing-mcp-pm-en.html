@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing Mcp Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Introducing MCP — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP primitives), 2.1 (tool schemas), 1.2 (agent loop integration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 61</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP is the "don't reinvent the wheel" layer for Claude integrations: instead of your team authoring, testing, and maintaining tool definitions for every SaaS service you want to use, you plug in a pre-built MCP server and inherit its entire tool catalog for free.</p>
+<hr />
+<h2>Mental Model: The App Store for Claude</h2>
+<p>Think of tool use (Ch04) as having Claude learn how to use a single custom-built device. Think of MCP as the <strong>app store</strong> that device connects to:</p>
+<table>
+<thead>
+<tr>
+<th>Without MCP</th>
+<th>With MCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Every integration is a custom build</td>
+<td>Integrations are installable</td>
+</tr>
+<tr>
+<td>Your eng team owns every tool schema</td>
+<td>The service provider or community owns it</td>
+</tr>
+<tr>
+<td>Adding GitHub means writing dozens of schemas</td>
+<td>Adding GitHub means installing a server</td>
+</tr>
+<tr>
+<td>Every API change is your maintenance problem</td>
+<td>Upstream publishes a new server version</td>
+</tr>
+</tbody>
+</table>
+<p>The "app store" mental model is not official — it's a PM shortcut. But it captures the most important product truth: MCP changes the economics of integration work.</p>
+<hr />
+<h2>Why This Lesson Matters for PMs</h2>
+<p>For a product team evaluating "can we build an AI assistant that answers questions from our GitHub / Jira / Sentry / Notion data?", the answer has historically been:</p>
+<blockquote>
+<p>"Yes, but it will cost 3–6 months of engineering to write and maintain all the tool integrations."</p>
+</blockquote>
+<p>MCP collapses that timeline dramatically. Roughly:</p>
+<table>
+<thead>
+<tr>
+<th>Integration source</th>
+<th>Rough time to "Claude can use it"</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Custom-built tools for a single SaaS</td>
+<td>Weeks to months</td>
+</tr>
+<tr>
+<td>Install an official MCP server</td>
+<td>Hours</td>
+</tr>
+<tr>
+<td>Install a community MCP server</td>
+<td>Hours (plus due diligence)</td>
+</tr>
+<tr>
+<td>No MCP server exists yet</td>
+<td>Back to the original timeline</td>
+</tr>
+</tbody>
+</table>
+<p>The first product question a PM should ask when scoping an AI feature that touches external systems: "does an MCP server already exist for this?"</p>
+<hr />
+<h2>The GitHub Example in PM Language</h2>
+<p>The lesson uses GitHub as the motivating example. A PM should internalize it this way:</p>
+<blockquote>
+<p>"What would it cost to let Claude answer <em>any</em> GitHub question?"</p>
+</blockquote>
+<p>Without MCP, "any GitHub question" means committing to author, test, and maintain a tool for every feature the user might reference: repos, PRs, issues, projects, releases, actions, reviews, members, permissions, search, notifications. That's a multi-quarter project — before you even get to Jira or Slack.</p>
+<p>With MCP, "any GitHub question" means connecting to a GitHub MCP server — the tools are already authored, and the service-provider (or a trusted community) keeps them current.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When MCP is the right answer</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why MCP fits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI assistant that spans multiple SaaS tools</td>
+<td>MCP gives you N ecosystems for the price of N <code>install</code> commands</td>
+</tr>
+<tr>
+<td>Long-tail integration requests from stakeholders</td>
+<td>You can add integrations incrementally, without re-architecting</td>
+</tr>
+<tr>
+<td>Internal "AI for the company data" pilots</td>
+<td>Wrap internal APIs in one MCP server; every Claude-based product gets access</td>
+</tr>
+<tr>
+<td>Agent workflows that need many small actions</td>
+<td>Each action is a prebuilt MCP tool, not a new schema</td>
+</tr>
+</tbody>
+</table>
+<h3>When MCP is overkill</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>What to do instead</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One-shot lookup against a simple internal endpoint</td>
+<td>Write a direct tool; it's faster than pulling in a server</td>
+</tr>
+<tr>
+<td>You only need read access to one static doc</td>
+<td>Use a resource or plain context, not MCP</td>
+</tr>
+<tr>
+<td>Prototype to test whether users even want the feature</td>
+<td>Hard-code the tool until the signal is clear</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When someone proposes "let's add X integration", ask:</p>
+<ol>
+<li><strong>Is there an official MCP server from the vendor?</strong> Start here — it's the highest quality source.</li>
+<li><strong>Is there a community MCP server?</strong> Good, but do security and maintenance due diligence.</li>
+<li><strong>If not, does the feature justify writing one?</strong> Use the "weekly use or safety-critical" heuristic.</li>
+<li><strong>What subset of the vendor's API do we actually need?</strong> Prevent scope creep — don't install 80 tools if users only need 3.</li>
+<li><strong>What is our fallback when the MCP server goes down?</strong> MCP servers are separate processes; plan for failure.</li>
+</ol>
+<hr />
+<h2>The Hidden PM Wins</h2>
+<p>The three-primitive model (tools, prompts, resources) is also a PM lever:</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>What the PM is really buying</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tools</td>
+<td>Actions the assistant can take on the user's behalf</td>
+</tr>
+<tr>
+<td>Prompts</td>
+<td>Pre-authored workflows that load with one click</td>
+</tr>
+<tr>
+<td>Resources</td>
+<td>Curated data surfaces the assistant can read</td>
+</tr>
+</tbody>
+</table>
+<p>A PM can scope an MCP adoption as "install this server for the tools, and also expose these prompts to power-users" — the same server delivers multiple layers of value.</p>
+<hr />
+<h2>Ecosystem Positioning</h2>
+<p>A PM should also know:</p>
+<table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Product implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP is an open protocol</td>
+<td>You are not locked to Anthropic; your integrations travel to other model hosts</td>
+</tr>
+<tr>
+<td>Anyone can author a server</td>
+<td>Vendors, community, your own internal platform team</td>
+</tr>
+<tr>
+<td>Service providers often ship official servers</td>
+<td>First place to check when scoping a feature</td>
+</tr>
+<tr>
+<td>The ecosystem grows rapidly</td>
+<td>The "no MCP server yet" answer has a short half-life</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating MCP as a technical detail</strong> — it is a <em>buy vs build</em> decision at every integration.</li>
+<li><strong>Installing servers without asking what tools users actually need</strong> — tool sprawl bloats context and slows responses.</li>
+<li><strong>Assuming MCP solves auth</strong> — credential handling, rate limits, and permissions are still your product's problem.</li>
+<li><strong>Forgetting to budget for server updates</strong> — MCP servers get versioned; stale versions break silently.</li>
+<li><strong>Confusing MCP with tool use</strong> — tool use is the Claude protocol that MCP tools still ride on. You can't skip learning tool use.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>MCP is not a technical upgrade — it's an <strong>economic</strong> one. It takes the dominant cost of shipping AI features that touch real systems (writing and maintaining tool integrations) and hands it to someone else. The PM job is to notice when the answer to "should we build this integration?" has changed from "months of work" to "install command" — and reprioritize accordingly.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: Know what MCP is, who writes MCP servers, and the three primitives.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: Understand MCP as the reusable integration layer agents plug into.</li>
+<li>Exam questions often ask "what problem does MCP solve?" — the answer is <em>the burden of authoring/maintaining tool integrations</em>.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is MCP's one-sentence pitch?</td>
+<td>A protocol that lets you install pre-built tool integrations into Claude instead of writing them yourself.</td>
+</tr>
+<tr>
+<td>What is the PM's first question when scoping a new Claude integration?</td>
+<td>"Does an official or community MCP server already exist for this service?"</td>
+</tr>
+<tr>
+<td>What are MCP's three primitives?</td>
+<td>Tools, Prompts, Resources</td>
+</tr>
+<tr>
+<td>Does MCP replace tool use?</td>
+<td>No — it rides on top of tool use as a distribution layer.</td>
+</tr>
+<tr>
+<td>Who typically authors an MCP server?</td>
+<td>Service providers (official), community maintainers, or your own internal team</td>
+</tr>
+<tr>
+<td>What should a PM budget for when adopting MCP servers?</td>
+<td>Token cost, latency, failure surface, security review, version maintenance</td>
+</tr>
+<tr>
+<td>Is MCP Anthropic-proprietary?</td>
+<td>No — it is an open protocol; any model host or application can speak it.</td>
+</tr>
+<tr>
+<td>What was the primary problem shown in the GitHub example?</td>
+<td>Having to author and maintain dozens of custom tools for a single service's API.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

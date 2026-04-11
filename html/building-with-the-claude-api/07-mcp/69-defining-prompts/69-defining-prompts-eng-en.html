@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defining Prompts Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Defining Prompts — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.3 (MCP primitives: tools, resources, prompts), 1.2 (seeding the agent loop), 2.2 (base.Message content blocks)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 69</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompts are the third MCP primitive — pre-built, high-quality instruction templates that the server author has carefully developed so clients can invoke them by name instead of asking end users to write their own.</p>
+<hr />
+<h2>The Problem Prompts Solve</h2>
+<p>Users technically can write their own instructions — "convert report.pdf to markdown" will work. But the result quality depends entirely on how good their prompt is, and most users are not prompt engineers. The core insight from the lesson:</p>
+<blockquote>
+<p>Users can accomplish these tasks on their own, but they'll get more consistent and higher-quality results when using prompts that have been carefully developed and tested by the MCP server authors.</p>
+</blockquote>
+<p>Prompts externalize that expertise. A developer who knows exactly how to get a great markdown conversion bakes that knowledge into a reusable, server-side template.</p>
+<hr />
+<h2>Where Prompts Sit Among MCP Primitives</h2>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>Purpose</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool</td>
+<td>Perform an action</td>
+<td><code>edit_document(doc_id, new_content)</code></td>
+</tr>
+<tr>
+<td>Resource</td>
+<td>Expose data</td>
+<td><code>docs://documents/{doc_id}</code></td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Pre-built instruction template</td>
+<td><code>format(doc_id)</code> that reformats a document to markdown</td>
+</tr>
+</tbody>
+</table>
+<p>A prompt is not "text that Claude reads." It is a <strong>callable template</strong> the client can invoke, providing arguments, and receive back a list of messages ready to send to Claude.</p>
+<hr />
+<h2>How Prompts Work</h2>
+<ul>
+<li>Define prompts with the <code>@mcp.prompt()</code> decorator</li>
+<li>Give each prompt a <code>name</code> and <code>description</code></li>
+<li>Return a list of messages (user + assistant) that form the complete conversation starter</li>
+<li>These prompts should be high quality, well-tested, and central to the server's purpose</li>
+</ul>
+<p>When the client later requests a prompt by name, the server runs the decorated function with the client-supplied arguments and returns the resulting message list. The client forwards that list straight to Claude as the conversation.</p>
+<hr />
+<h2>Building a Format Command — Imports</h2>
+<p>First, import the base message types from the MCP SDK:</p>
+<pre><code class="language-python">from mcp.server.fastmcp import base
+</code></pre>
+<p><code>base</code> provides <code>UserMessage</code> and friends — the typed objects used to construct a prompt's message list.</p>
+<hr />
+<h2>Building a Format Command — Definition</h2>
+<pre><code class="language-python">@mcp.prompt(
+    name=&quot;format&quot;,
+    description=&quot;Rewrites the contents of the document in Markdown format.&quot;
+)
+def format_document(
+    doc_id: str = Field(description=&quot;Id of the document to format&quot;)
+) -&gt; list[base.Message]:
+    prompt = f&quot;&quot;&quot;
+Your goal is to reformat a document to be written with markdown syntax.
+
+The id of the document you need to reformat is:
+
+{doc_id}
+
+
+Add in headers, bullet points, tables, etc as necessary. Feel free to add in extra formatting.
+Use the 'edit_document' tool to edit the document. After the document has been reformatted...
+&quot;&quot;&quot;
+
+    return [
+        base.UserMessage(prompt)
+    ]
+</code></pre>
+<p>Breakdown:</p>
+<ul>
+<li><code>@mcp.prompt(name=..., description=...)</code> registers the prompt with the server. Clients see these strings when listing available prompts.</li>
+<li><code>doc_id: str = Field(description="...")</code> is a parameter with metadata — the description travels to the client so users know what to provide.</li>
+<li>The function body builds a multi-line template via f-string interpolation and returns a <strong>list of messages</strong>. In this case a single <code>UserMessage</code>.</li>
+<li>Notice how the prompt references the <code>edit_document</code> <strong>tool</strong> — prompts are designed to work in concert with the server's tools and resources. A prompt can be a recipe that uses the rest of the server's surface area.</li>
+</ul>
+<hr />
+<h2>Why the Return Type Is <code>list[base.Message]</code></h2>
+<p>Prompts can encode multi-turn conversations. For example, you could seed an assistant message as well:</p>
+<ul>
+<li><code>base.UserMessage(...)</code> — what the user "says"</li>
+<li><code>base.AssistantMessage(...)</code> — a pre-canned assistant turn (useful for few-shot conditioning)</li>
+</ul>
+<p>By returning a list, the server author controls the exact conversation state that Claude sees when the prompt starts. The client just plays the messages back.</p>
+<hr />
+<h2>Testing with the MCP Inspector</h2>
+<p>The MCP Inspector has a dedicated Prompts section. To test:</p>
+<ol>
+<li>Run <code>uv run mcp dev mcp_server.py</code></li>
+<li>Open the Inspector in your browser</li>
+<li>Navigate to Prompts, select your prompt, and fill in any parameters</li>
+<li>The inspector displays the generated messages that would be sent to Claude</li>
+</ol>
+<p>This lets you verify that your prompt interpolates variables correctly and produces the expected message structure <strong>before</strong> wiring it into the client.</p>
+<hr />
+<h2>Best Practices</h2>
+<p>From the lesson:</p>
+<ol>
+<li><strong>Focus on tasks central to your server's purpose</strong> — a document server should ship prompts like <code>format</code>, <code>summarize</code>, <code>outline</code>.</li>
+<li><strong>Write detailed, specific instructions</strong> — vague prompts produce vague output.</li>
+<li><strong>Test thoroughly with different inputs</strong> — use the Inspector.</li>
+<li><strong>Include clear descriptions</strong> — users pick prompts based on the description string.</li>
+<li><strong>Design prompts to work with your tools and resources</strong> — a well-scoped prompt naturally chains into the server's tools (e.g., the format prompt ends by calling <code>edit_document</code>).</li>
+</ol>
+<p>The framing is: <strong>prompts are your expertise as a server author</strong>, captured in a form clients can call. If a user could write it themselves in thirty seconds, it probably does not need to be a prompt. If it took you a week to dial in the wording, that is exactly the knowledge worth exposing.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Treating prompts as raw strings</strong> — a prompt is a callable that returns a list of <code>base.Message</code> objects, not just a template string.</li>
+<li><strong>Forgetting <code>Field(description=...)</code></strong> — without it, the client side cannot communicate to users what argument to supply.</li>
+<li><strong>Hardcoding data the prompt should fetch</strong> — if the prompt needs document text, reference the tool or resource that fetches it; do not bake data into the prompt.</li>
+<li><strong>Writing low-effort prompts</strong> — a prompt that is worse than what a user would type adds negative value. Only ship prompts that are demonstrably better than ad-hoc queries.</li>
+<li><strong>Mixing prompts and resources</strong> — a prompt is an instruction template; a resource is data. Do not return document text as a prompt.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompts are the missing primitive that most MCP discussions skip. Tools give Claude capabilities; resources give it context; prompts give it <strong>direction</strong>. A server with all three composes like a small product: the client discovers what can be done (tools), what data is available (resources), and which starting points are curated (prompts). In practice, prompts become the UX entry points users see as slash-commands or quick actions.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: prompts are the third MCP primitive alongside tools and resources; know the <code>@mcp.prompt()</code> decorator, <code>name</code>/<code>description</code>, the <code>list[base.Message]</code> return type, and <code>Field(description=...)</code> on parameters.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: prompts seed the agent loop with high-quality starting messages that the server author has pre-engineered.</li>
+<li>Exam pattern: "What MCP primitive should a server author use to ship a reusable, parameterized instruction to reformat documents?" → a prompt, defined via <code>@mcp.prompt()</code>.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are prompts in MCP?</td>
+<td>Pre-built, parameterized instruction templates defined on the server that clients can invoke by name to get a high-quality starting conversation for Claude.</td>
+</tr>
+<tr>
+<td>What decorator defines a prompt?</td>
+<td><code>@mcp.prompt(name=..., description=...)</code></td>
+</tr>
+<tr>
+<td>What does a prompt function return?</td>
+<td>A <code>list[base.Message]</code> — the sequence of user/assistant messages that forms the conversation starter.</td>
+</tr>
+<tr>
+<td>Where do the base message types come from?</td>
+<td><code>from mcp.server.fastmcp import base</code> — provides <code>base.UserMessage</code>, <code>base.AssistantMessage</code>, etc.</td>
+</tr>
+<tr>
+<td>How do parameter descriptions reach the user?</td>
+<td>Via <code>Field(description="...")</code> on the function parameter — the MCP SDK forwards them to the client.</td>
+</tr>
+<tr>
+<td>Why ship prompts instead of letting users write their own?</td>
+<td>Server authors have tested expert-level prompts; exposing them raises result quality without forcing every user to learn prompt engineering.</td>
+</tr>
+<tr>
+<td>How do you test a prompt before wiring it into the client?</td>
+<td>Run <code>uv run mcp dev mcp_server.py</code> and use the MCP Inspector's Prompts section to view the generated messages.</td>
+</tr>
+<tr>
+<td>How does the <code>format</code> example connect to other MCP primitives?</td>
+<td>It references the <code>edit_document</code> tool, showing prompts can orchestrate tools and resources to accomplish a task.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
