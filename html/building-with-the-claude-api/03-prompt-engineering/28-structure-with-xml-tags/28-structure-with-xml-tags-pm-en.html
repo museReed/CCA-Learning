@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Structure With Xml Tags Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Structure with XML Tags — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D2 — Tool Design (18%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (prompt design for reliability), 2.2 (structured content blocks)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 28</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>XML tags are the product-safe way to stitch user data into a prompt — they keep the AI focused on your instructions instead of accidentally reading the user's input as a new order.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Every AI feature that interpolates user data into a prompt shares one failure mode: the user's content blurs into your instructions and Claude does the wrong thing. XML tags are the lowest-effort, highest-leverage fix.</p>
+<table>
+<thead>
+<tr>
+<th>User Content Type</th>
+<th>Without Tags</th>
+<th>With Tags</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A long document</td>
+<td>Claude treats the document as part of the instructions</td>
+<td>Document is scoped inside <code>&lt;document&gt;</code> and analyzed as data</td>
+</tr>
+<tr>
+<td>Code snippets</td>
+<td>Claude confuses code syntax with natural-language directives</td>
+<td>Code is scoped inside <code>&lt;my_code&gt;</code> and debugged as data</td>
+</tr>
+<tr>
+<td>Forms with many fields</td>
+<td>Field values blend into prose</td>
+<td>All fields live in one <code>&lt;athlete_information&gt;</code> container</td>
+</tr>
+<tr>
+<td>Mixed inputs (code + docs)</td>
+<td>Claude cannot tell them apart</td>
+<td>Each type gets its own tag</td>
+</tr>
+</tbody>
+</table>
+<p>This is essentially the same reason product forms have labels: telling the user (or the AI) what each field is for.</p>
+<hr />
+<h2>Mental Model: Labelled Drawers in a Filing Cabinet</h2>
+<p>Imagine you drop 20 pages of sales records, 5 pages of company policy, and a question onto a colleague's desk in one pile. You will probably get back: "What am I looking at?"</p>
+<p>Now imagine you drop the same material into a filing cabinet with three labelled drawers: <strong>Sales Records</strong>, <strong>Company Policy</strong>, <strong>Question</strong>. Your colleague opens the Question drawer, reads it, then pulls only the drawers they need.</p>
+<p>XML tags are the drawer labels. <code>&lt;sales_records&gt;...&lt;/sales_records&gt;</code> is literally a drawer in the prompt. The AI knows what to pull and what to leave.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When XML Tags Help the Most</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Tags Matter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Document summarizer</td>
+<td>Raw document could be 20 pages — the instruction must not get lost inside it</td>
+</tr>
+<tr>
+<td>Code review assistant</td>
+<td>Code and documentation look different to humans but similar to a token stream</td>
+</tr>
+<tr>
+<td>Meal-plan or workout generator</td>
+<td>User profile has many fields that should be considered as one unit</td>
+</tr>
+<tr>
+<td>Customer support triage</td>
+<td>Ticket body and metadata need to stay distinct from the triage instructions</td>
+</tr>
+<tr>
+<td>Multi-variable templates</td>
+<td>Any slash command or template that interpolates 2+ variables</td>
+</tr>
+</tbody>
+</table>
+<h3>When XML Tags Are Overkill</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One-line translation or rewrite</td>
+<td>Plain prompt — no structure needed</td>
+</tr>
+<tr>
+<td>Freeform chat turn</td>
+<td>Let the user's message be the user's message</td>
+</tr>
+<tr>
+<td>Prompts that work fine in eval without tags</td>
+<td>Don't add complexity without evidence</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Four Product Benefits</h2>
+<ol>
+<li><strong>Reliability</strong> — the same template behaves consistently across very different user inputs, because the boundary between "what the user sent" and "what we told Claude to do" never shifts.</li>
+<li><strong>Safer data handling</strong> — user content is isolated inside a tagged region, giving you a natural place to sanitize, truncate, or log the interpolated block.</li>
+<li><strong>Reduced prompt-injection surface</strong> — instructions sit outside the tag; content sits inside. A malicious user who tries to inject new directives has to break out of the tag.</li>
+<li><strong>Maintainability</strong> — engineers reading the template can see exactly what variable goes where, just like a labelled form in a UI.</li>
+</ol>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When reviewing a prompt template in a PRD or during design review, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the template interpolate user content?</td>
+<td>Yes</td>
+<td>Wrap it in a descriptive XML tag</td>
+</tr>
+<tr>
+<td>Are there two or more types of input (code + docs, data + query)?</td>
+<td>Yes</td>
+<td>Each type gets its own tag</td>
+</tr>
+<tr>
+<td>Can the interpolated content be large (a whole document)?</td>
+<td>Yes</td>
+<td>Tags are critical — the instruction must not get lost</td>
+</tr>
+<tr>
+<td>Is the instruction short and the content long?</td>
+<td>Yes</td>
+<td>Tags make the instruction visible at the "top level"</td>
+</tr>
+<tr>
+<td>Is the feature already passing evals without tags?</td>
+<td>Yes</td>
+<td>Don't over-engineer</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating XML as an engineer-only concern</strong> — PMs should specify the tag structure in the PRD. The tag names are part of the product contract, not an implementation detail.</li>
+<li><strong>Using generic tag names</strong> — <code>&lt;data&gt;</code> tells Claude nothing. <code>&lt;customer_review&gt;</code> tells Claude "this is a review, apply sentiment reasoning." Push back on vague names.</li>
+<li><strong>Forgetting tags when the prompt changes</strong> — when a template adds a new interpolated field (e.g., <code>user_history</code>), it needs its own tag. This often regresses if the template grows without review.</li>
+<li><strong>Not running evals before and after</strong> — XML is a first-line reliability fix, but you still need eval data to prove it helped on your specific task.</li>
+<li><strong>Confusing input tags with output format</strong> — tags in the input do not automatically make Claude respond in XML. If you want XML output, that is a separate instruction.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>XML tags are the "labelled form fields" of prompt engineering. For PMs, they turn a prompt from an opaque string into a structured template with named slots — something you can reason about, review, and evolve. On the CCA exam, the cue is "Claude is confusing instructions with content" or "the prompt interpolates large data"; the answer is always "add XML tags with descriptive names."</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: XML tagging is a first-line iteration move when a prompt fails due to ambiguous boundaries.</li>
+<li><strong>D2 (Tool Design)</strong>: the same "named channel" principle applies to tool inputs and tool results.</li>
+<li>Watch for scenario phrases like "large amount of context," "mixing code and documentation," or "interpolating multiple variables" — these all point to XML tags.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In one sentence, what do XML tags do for a prompt?</td>
+<td>They create labelled boundaries so Claude knows which tokens are data and which are instructions.</td>
+</tr>
+<tr>
+<td>What is the filing-cabinet analogy for XML tags?</td>
+<td>Tags are labelled drawers — Claude opens the drawer it needs instead of rifling through one big pile.</td>
+</tr>
+<tr>
+<td>Name two product scenarios where XML tags are most valuable.</td>
+<td>Document summarizers (large context) and code review assistants (mixed content types).</td>
+</tr>
+<tr>
+<td>What makes a "good" XML tag name?</td>
+<td>Descriptive and specific — <code>&lt;sales_records&gt;</code> or <code>&lt;athlete_information&gt;</code>, not <code>&lt;data&gt;</code>.</td>
+</tr>
+<tr>
+<td>Why do XML tags reduce prompt-injection risk?</td>
+<td>User content is isolated inside a tag region, so directives outside the tag are harder to override.</td>
+</tr>
+<tr>
+<td>Do XML tags change the output format?</td>
+<td>No — they structure the input; output format needs its own instruction.</td>
+</tr>
+<tr>
+<td>When should a PM NOT insist on XML tags?</td>
+<td>Trivial one-line prompts or features already passing evals cleanly without them.</td>
+</tr>
+<tr>
+<td>Who should own the tag names in a PRD?</td>
+<td>The PM — tag names are part of the product contract, not an implementation detail.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

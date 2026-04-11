@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request Lifecycle Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>请求生命周期 Request Lifecycle — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D1 — Agentic Coding &amp; Architecture（22%）主要；D5 — Enterprise Deployment（20%）次要</td>
+</tr>
+<tr>
+<td>任务声明</td>
+<td>1.1（API request flow）、5.1（secure architecture）、5.3（stop reasons 与 token 限制）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 09-assessment / Lesson 87</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话重点</h2>
+<p>Claude request lifecycle 是你产品里每一次 AI 交互的解剖图 —— 看懂它，PM 就能在第一行 code 被写之前，把安全性、延迟预算、成本、事故应对的决策做对。</p>
+<hr />
+<h2>为什么 PM 要在意</h2>
+<p>PM 不需要写 <code>ast.parse</code> 也不需要实现 tokenization —— 但 PM <strong>需要</strong>决定架构、审 security、设 token 预算、owning 事故处理。上述每一个决策都藏在这五步流程里：</p>
+<table>
+<thead>
+<tr>
+<th>PM 决策</th>
+<th>对应生命周期步骤</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"API key 放在哪？"</td>
+<td>步骤 1-2（绝不能在 client）</td>
+</tr>
+<tr>
+<td>"最坏延迟是多少？"</td>
+<td>步骤 3（model）+ 1-2、4-5 的网络</td>
+</tr>
+<tr>
+<td>"每次请求的成本上限？"</td>
+<td>步骤 2（max_tokens）+ 步骤 4（usage）</td>
+</tr>
+<tr>
+<td>"答案被截断时 UX 怎么处理？"</td>
+<td>步骤 4（stop_reason）</td>
+</tr>
+<tr>
+<td>"事故 triage 流程？"</td>
+<td>每一步 —— 生命周期就是那张地图</td>
+</tr>
+</tbody>
+</table>
+<p>跳过这个知识，团队会在没有你的情况下做这些决策，而且通常做错。</p>
+<hr />
+<h2>心智模型：餐厅点餐</h2>
+<p>把每个 Claude request 想成在厨房讲不同语言的餐厅点餐：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>餐厅比喻</th>
+<th>生命周期步骤</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>客人告诉服务员要什么</td>
+<td>用户跟你的 app 对话</td>
+<td>Request to server</td>
+</tr>
+<tr>
+<td>服务员把点单翻成厨房听得懂的语言</td>
+<td>你的 server 调用 Anthropic API</td>
+<td>Request to API</td>
+</tr>
+<tr>
+<td>厨房做菜</td>
+<td>Claude 执行 tokenize、embed、contextualize、generate</td>
+<td>Model processing</td>
+</tr>
+<tr>
+<td>服务员把菜端出来</td>
+<td>API 返回 message、usage、stop_reason</td>
+<td>Response to server</td>
+</tr>
+<tr>
+<td>把菜放到客人面前</td>
+<td>你的 server 把文字转回 UI</td>
+<td>Response to client</td>
+</tr>
+</tbody>
+</table>
+<p>服务员（你的 server）是不可协商的。你不会让客人自己走进厨房 —— 也绝不让 client 直接调 Anthropic API，同样原因：会破坏厨房的安全和速度保证。</p>
+<hr />
+<h2>产品使用场景：每一步为什么重要</h2>
+<h3>安全（步骤 1-2）</h3>
+<p>来源立场明确：<strong>绝不从 client-side 代码调用 Anthropic API</strong>。Client 里的 API key 可以被挖出来做未授权请求。对 PM 而言，这在每个 AI feature 的 PRD 中都是不可协商的安全要求：</p>
+<ul>
+<li>API key 放在 server 的安全存储</li>
+<li>Client 只跟你的 server 讲话，绝不碰 Anthropic</li>
+<li>Server 加 authentication、rate limiting、audit logging</li>
+</ul>
+<h3>成本与延迟（步骤 2-3）</h3>
+<p>每个 request 都必须含 <code>max_tokens</code>。这是 PM 手上最重要的成本杠杆。设太高，脱缰的生成会毁掉 unit economics。设太低，Claude 会讲到一半被截断，用户沮丧。PM 常见做法是按 feature 分层：短回复 256、长解释 2048、文档草稿 8192。</p>
+<h3>Response 处理（步骤 4）</h3>
+<p>API response 有三个 PM 该在乎的字段：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>PM 关注点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Message</td>
+<td>用户实际看到的内容</td>
+</tr>
+<tr>
+<td>Usage</td>
+<td>驱动计费、预算追踪、per-user 额度</td>
+</tr>
+<tr>
+<td>Stop Reason</td>
+<td>决定 feature 是正常工作还是被悄悄截断</td>
+</tr>
+</tbody>
+</table>
+<p>stop_reason 是三者中最阴险的。如果 app 忽略它，<code>max_tokens</code> 截断看起来就跟完整答案一样 —— 只差一段文字不见了。永远在 UX 中明确处理 stop reason（例如"响应被切断 —— 要继续吗？"）。</p>
+<hr />
+<h2>四个内部阶段 —— PM 为什么要懂</h2>
+<p>Claude 内部处理有四阶段：<strong>tokenization、embedding、contextualization、generation</strong>。PM 不需要实现，但在概念层面懂它们能解锁更好的产品直觉：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>PM 洞察</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tokenization</strong></td>
+<td>成本和长度以 token 计，不是以字。含大量 code 或非英文的输入比你预想的贵。</td>
+</tr>
+<tr>
+<td><strong>Embedding</strong></td>
+<td>每个 token 起初承载<strong>所有</strong>可能意义 —— 所以短而有歧义的输入会产出不可靠的结果。</td>
+</tr>
+<tr>
+<td><strong>Contextualization</strong></td>
+<td>周围字词消歧义 —— 所以框架好的 prompt 胜过裸指令。</td>
+</tr>
+<tr>
+<td><strong>Generation</strong></td>
+<td>Claude 用受控随机性，不是纯最高概率 —— 所以同输入有时产不同输出，"deterministic"不是预设。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 决策框架</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>若答 Yes</th>
+<th>行动</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>我们的架构有 server 介于 client 和 Anthropic 之间吗？</td>
+<td>Yes</td>
+<td>通过安全审查</td>
+</tr>
+<tr>
+<td>每个 request 有合理的 <code>max_tokens</code> 吗？</td>
+<td>Yes</td>
+<td>通过成本审查</td>
+</tr>
+<tr>
+<td>App 有区分 <code>end_turn</code> 和 <code>max_tokens</code> 这些 stop reason 吗？</td>
+<td>Yes</td>
+<td>通过 UX 审查</td>
+</tr>
+<tr>
+<td>Per-user token usage 有 log 且有预算吗？</td>
+<td>Yes</td>
+<td>通过财务审查</td>
+</tr>
+<tr>
+<td>事故发生时团队知道是哪一步坏掉吗？</td>
+<td>Yes</td>
+<td>通过事故审查</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>放任工程 ship client 直连 API</strong> —— 即将发生的信息安全事故。这该在每个安全审查被挡下。</li>
+<li><strong>不 own max_tokens</strong> —— 留给工程 default，成本就会随使用线性扩张，没有产品输入。</li>
+<li><strong>UX spec 里忽略 stop_reason</strong> —— 答案悄悄截断，用户觉得 AI 很笨。</li>
+<li><strong>PRD 里把 words 和 tokens 搞混</strong> —— "200 字上限"不等于 <code>max_tokens=200</code>；token 可以是子字。</li>
+<li><strong>期待 deterministic 输出</strong> —— generation 步骤用受控随机性；同输入可能产不同输出，acceptance test 必须考虑这点。</li>
+</ol>
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>每一个高深的 Claude 模式 —— tool use、streaming、caching、agents —— 都是这同一个五步生命周期的变体。把这个模型装在脑里的 PM，拿到任何 AI feature 提案都能立刻问出对的问题：安全、成本、延迟、失败处理。跳过的 PM 只能猜，而且通常在最贵的那些上猜错。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：生命周期是所有 agentic 模式的基础。常考"X 发生在 request flow 的哪一步？"</li>
+<li><strong>D5（Enterprise Deployment）</strong>：安全架构、token 预算、stop-reason 处理是生产部署必备。</li>
+<li>注意："为什么 client 和 Anthropic 之间要有 server？"→ API key 安全性，永远是。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude request lifecycle 的五个步骤？</td>
+<td>Client 到 server → server 到 API → model 处理 → API 到 server → server 到 client。</td>
+</tr>
+<tr>
+<td>为什么 PM 必须要求 client 和 Anthropic API 之间有 server？</td>
+<td>为了保护 API key —— client 的 key 可被挖出来做未授权请求。</td>
+</tr>
+<tr>
+<td>Server 角色的餐厅比喻？</td>
+<td>服务员 —— 不可协商的中介，介于客人和厨房之间。</td>
+</tr>
+<tr>
+<td>每个 API request 必备的四个字段？</td>
+<td>API Key、Model、Messages、Max Tokens。</td>
+</tr>
+<tr>
+<td>Claude 内部处理的四个阶段？</td>
+<td>Tokenization、embedding、contextualization、generation。</td>
+</tr>
+<tr>
+<td>哪个 response 字段告诉你答案是否被悄悄截断？</td>
+<td><code>stop_reason</code> —— 如果是 <code>max_tokens</code> 就是被截断了。</td>
+</tr>
+<tr>
+<td>PM 在 request 层级拥有什么成本杠杆？</td>
+<td><code>max_tokens</code> —— 直接限制单次请求的成本和延迟。</td>
+</tr>
+<tr>
+<td>为什么 Claude 相同请求不总是 deterministic？</td>
+<td>Generation 步骤用概率和受控随机性的混合。</td>
+</tr>
+<tr>
+<td><code>usage</code> 字段让 PM 能做什么？</td>
+<td>计费、预算追踪、per-user 额度。</td>
+</tr>
+<tr>
+<td>PRD 里为什么要区分 words 和 tokens？</td>
+<td>Token 可能是子字、空白或符号 —— "200 words"不等于 <code>max_tokens=200</code>。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748B"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#F59E0B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">A Typical Eval Workflow — 5-Step Loop</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Draft → Dataset → Run → Grade → Iterate. Step 5 loops back to Step 3 until you're happy.</text>
+
+  <!-- Ring layout with 5 nodes -->
+  <!-- Step 1 -->
+  <rect x="60" y="100" width="180" height="130" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="90" cy="128" r="18" fill="#3B82F6"/>
+  <text x="90" y="134" text-anchor="middle" font-size="14" font-weight="700" fill="white">1</text>
+  <text x="116" y="125" font-size="12" font-weight="700" fill="#1E40AF">Draft Prompt</text>
+  <text x="116" y="142" font-size="10" fill="#6B7280">Start with a naive version</text>
+  <rect x="74" y="156" width="152" height="60" rx="4" fill="#0F172A"/>
+  <text x="82" y="173" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">prompt = f"""</text>
+  <text x="82" y="186" font-size="9" font-family="Menlo, monospace" fill="#FDE68A">Answer the user's question:</text>
+  <text x="82" y="199" font-size="9" font-family="Menlo, monospace" fill="#34D399">{question}</text>
+  <text x="82" y="212" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">"""</text>
+
+  <!-- Step 2 -->
+  <rect x="280" y="100" width="180" height="130" rx="12" fill="#F3E8FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="310" cy="128" r="18" fill="#8B5CF6"/>
+  <text x="310" y="134" text-anchor="middle" font-size="14" font-weight="700" fill="white">2</text>
+  <text x="336" y="125" font-size="12" font-weight="700" fill="#6B21A8">Eval Dataset</text>
+  <text x="336" y="142" font-size="10" fill="#6B7280">Representative test inputs</text>
+  <rect x="294" y="156" width="152" height="60" rx="4" fill="white" stroke="#DDD6FE"/>
+  <text x="304" y="172" font-size="10" fill="#1E293B">• "What's 2+2?"</text>
+  <text x="304" y="188" font-size="10" fill="#1E293B">• "How do I make oatmeal?"</text>
+  <text x="304" y="204" font-size="10" fill="#1E293B">• "How far is the Moon?"</text>
+
+  <!-- Step 3 -->
+  <rect x="500" y="100" width="180" height="130" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="530" cy="128" r="18" fill="#22C55E"/>
+  <text x="530" y="134" text-anchor="middle" font-size="14" font-weight="700" fill="white">3</text>
+  <text x="556" y="125" font-size="12" font-weight="700" fill="#166534">Run Through Claude</text>
+  <text x="556" y="142" font-size="10" fill="#6B7280">Merge template + inputs</text>
+  <rect x="514" y="156" width="152" height="60" rx="4" fill="white" stroke="#86EFAC"/>
+  <text x="522" y="173" font-size="10" fill="#1E293B">→ "2 + 2 = 4"</text>
+  <text x="522" y="189" font-size="10" fill="#1E293B">→ oatmeal recipe...</text>
+  <text x="522" y="205" font-size="10" fill="#1E293B">→ "384,400 km"</text>
+
+  <!-- Step 4 -->
+  <rect x="720" y="100" width="220" height="130" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="750" cy="128" r="18" fill="#F59E0B"/>
+  <text x="750" y="134" text-anchor="middle" font-size="14" font-weight="700" fill="white">4</text>
+  <text x="776" y="125" font-size="12" font-weight="700" fill="#92400E">Grader Scores Output</text>
+  <text x="776" y="142" font-size="10" fill="#6B7280">1-10 scale per test case</text>
+  <rect x="734" y="156" width="192" height="60" rx="4" fill="white" stroke="#FDE68A"/>
+  <text x="744" y="173" font-size="10" fill="#1E293B">• math → 10</text>
+  <text x="744" y="189" font-size="10" fill="#1E293B">• oatmeal → 4 (needs help)</text>
+  <text x="744" y="205" font-size="10" fill="#1E293B">• moon → 9</text>
+
+  <!-- Arrows 1→2→3→4 -->
+  <path d="M240,165 L278,165" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M460,165 L498,165" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M680,165 L718,165" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 5 (center bottom) -->
+  <rect x="310" y="310" width="380" height="140" rx="12" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="340" cy="338" r="18" fill="#EF4444"/>
+  <text x="340" y="344" text-anchor="middle" font-size="14" font-weight="700" fill="white">5</text>
+  <text x="366" y="335" font-size="13" font-weight="700" fill="#991B1B">Iterate Prompt → Repeat</text>
+  <text x="366" y="352" font-size="10" fill="#6B7280">Average: (10+4+9)/3 = 7.66 → try v2</text>
+  <rect x="324" y="366" width="352" height="72" rx="4" fill="#0F172A"/>
+  <text x="336" y="384" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">prompt = f"""</text>
+  <text x="336" y="398" font-size="9" font-family="Menlo, monospace" fill="#FDE68A">Answer the user's question:</text>
+  <text x="336" y="412" font-size="9" font-family="Menlo, monospace" fill="#34D399">{question}</text>
+  <text x="336" y="425" font-size="9" font-family="Menlo, monospace" fill="#F87171">Answer with ample detail</text>
+  <text x="550" y="425" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">  ← new</text>
+
+  <!-- Loop arrows -->
+  <path d="M830,230 Q830,280 690,380" stroke="#F59E0B" stroke-width="2" stroke-dasharray="5,3" fill="none" marker-end="url(#arrow-amber)"/>
+  <text x="810" y="280" text-anchor="end" font-size="10" fill="#92400E" font-weight="600">score → prompt change</text>
+
+  <path d="M310,380 Q200,380 200,280 Q200,220 498,180" stroke="#F59E0B" stroke-width="2" stroke-dasharray="5,3" fill="none" marker-end="url(#arrow-amber)"/>
+  <text x="190" y="270" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">re-run</text>
+  <text x="190" y="284" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">against</text>
+  <text x="190" y="298" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">same dataset</text>
+
+  <!-- Bottom: scoring comparison -->
+  <rect x="40" y="480" width="920" height="80" rx="12" fill="#F8FAFC" stroke="#CBD5E1" filter="url(#shadow)"/>
+  <text x="56" y="504" font-size="12" font-weight="700" fill="#1E293B">Prompt Scoring: Objective Version Comparison</text>
+  <rect x="56" y="514" width="430" height="36" rx="6" fill="#FEE2E2" stroke="#FCA5A5"/>
+  <text x="70" y="537" font-size="11" fill="#991B1B" font-weight="600">v1 (baseline)</text>
+  <text x="470" y="537" text-anchor="end" font-size="14" fill="#991B1B" font-weight="700">avg 7.66</text>
+  <rect x="500" y="514" width="444" height="36" rx="6" fill="#DCFCE7" stroke="#86EFAC"/>
+  <text x="514" y="537" font-size="11" fill="#166534" font-weight="600">v2 (+ "answer with ample detail")</text>
+  <text x="928" y="537" text-anchor="end" font-size="14" fill="#166534" font-weight="700">avg 8.70  ↑</text>
+</svg>

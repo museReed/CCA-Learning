@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Typical Eval Workflow Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>A Typical Eval Workflow — PM Perspective（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration（20%，主要）；D5 — Enterprise Deployment（20%，次要）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（eval 设计）、3.2（测试数据集）、3.3（eval 执行）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 18</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>Prompt eval 工作流是 AI 团队版的"产品上线 checklist" — 可重复的五步流程，产出一个 PM 能写进发布文档、OKR、优先级决策的单一质量数字。</p>
+<hr />
+<h2>心智模型：食谱试验厨房</h2>
+<p>专业试验厨房不会靠一次试吃就决定是否推出新款早餐麦片。他们有固定的试吃小组、固定的评分表，然后对每一个版本重复打分直到平均分跨过门槛。这就是 prompt evaluation 对 prompt 做的事。</p>
+<table>
+<thead>
+<tr>
+<th>试验厨房</th>
+<th>Prompt eval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>初版食谱</td>
+<td>起草的 prompt</td>
+</tr>
+<tr>
+<td>试吃小组</td>
+<td>Eval 数据集</td>
+</tr>
+<tr>
+<td>试吃员品尝每一匙</td>
+<td>喂进 Claude</td>
+</tr>
+<tr>
+<td>试吃员按评分表打 1-10 分</td>
+<td>喂进 grader</td>
+</tr>
+<tr>
+<td>主厨微调食谱、重新评分</td>
+<td>迭代 prompt 并重复</td>
+</tr>
+</tbody>
+</table>
+<p>数据集就是小组。Grader 就是评分表。Prompt 就是食谱。小组和评分表固定，只改食谱 — 这就是隔离"有效改动"的方法。</p>
+<hr />
+<h2>五个步骤 — PM 速查表</h2>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>产出</th>
+<th>PM 价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 起草 prompt</td>
+<td>Baseline 版本</td>
+<td>可度量、有可改进的基准</td>
+</tr>
+<tr>
+<td>2. 建立数据集</td>
+<td>N 条真实输入</td>
+<td>定义"质量"在此功能的含义</td>
+</tr>
+<tr>
+<td>3. 喂进 Claude</td>
+<td>N 条原始输出</td>
+<td>当前行为的证据</td>
+</tr>
+<tr>
+<td>4. 喂进 grader</td>
+<td>数值分数（每条 1-10，取平均）</td>
+<td>能写进发布文档的质量指标</td>
+</tr>
+<tr>
+<td>5. 迭代</td>
+<td>新 prompt + 新分数</td>
+<td>证明团队真的在改进产品</td>
+</tr>
+</tbody>
+</table>
+<p>Grader 吐出来的数字，就是你跟财务、市场、高层争论时的武器。没有第 4 步就没有数字，没有数字就没法争，没法争就没法排优先级。</p>
+<hr />
+<h2>课程实例（为什么这关键）</h2>
+<p>课程用三个问题的玩具数据集，示范改 prompt 一行让平均分从 <strong>7.66 升到 8.7</strong>。整个要点就浓缩为这件事：</p>
+<ul>
+<li>改动前："这更好吗？"→ 意见。</li>
+<li>改动后："平均分从 7.66 升到 8.7。"→ 事实。</li>
+</ul>
+<p>你现在可以用一个真实 delta 更新发布文档、OKR 仪表盘、工程 roadmap。那个数字让 prompt 工作对组织里其他人"可见、可读"。</p>
+<hr />
+<h2>产品场景</h2>
+<h3>必须跑完整流程的时候</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么不可省</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>评估是否把新版 prompt 上 GA</td>
+<td>发布评审需要 before/after 数字</td>
+</tr>
+<tr>
+<td>比较两位工程师提交的竞争 prompt</td>
+<td>分数客观打破平局</td>
+</tr>
+<tr>
+<td>决定是否从 Sonnet 降级到 Haiku 省钱</td>
+<td>分数告诉你质量损失多少</td>
+</tr>
+<tr>
+<td>Prompt-backed 功能的 CI regression 检查</td>
+<td>数字就是 regression 信号</td>
+</tr>
+</tbody>
+</table>
+<h3>可以用轻量做法的时候</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>注意事项</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>产品尚未通过立项的探索性原型</td>
+<td>依旧是陷阱 — 任何"看起来还行"的决定都要记录</td>
+</tr>
+<tr>
+<td>给管理层的快速内部 demo</td>
+<td>OK，但不能据此向客户推广</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 决策框架</h2>
+<p>当工程团队说新版 prompt 好了，走过这四个问题：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>好答案长什么样</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>当前 prompt 的 baseline 分数？</td>
+<td>来自固定数据集的 1-10 分数字</td>
+</tr>
+<tr>
+<td>提案 prompt 的新分数？</td>
+<td>来自<strong>同一</strong>数据集、同一 grader 的数字</td>
+</tr>
+<tr>
+<td>数据集跟上次跑相比有变过吗？</td>
+<td>没 — 若有，比较无效</td>
+</tr>
+<tr>
+<td>提升幅度值得上线吗？</td>
+<td>主观，但至少大家在讨论的是数字</td>
+</tr>
+</tbody>
+</table>
+<p>任何一个问题的答案是"我们没做"，你就该挡下来。团队现在要你上线的是意见，不是度量过的改进。</p>
+<hr />
+<h2>PM 常见错误</h2>
+<ol>
+<li><strong>接受"我们测过更好"</strong> — 永远要问 baseline 数字和新数字。</li>
+<li><strong>让团队在两次跑之间悄悄改数据集</strong> — 这会摧毁可比性，让所有声称的改进失效。</li>
+<li><strong>把 grader 当成"技术细节、PM 不用管"</strong> — Grader <em>就是</em>你的质量定义；不拥有它等于放弃产品判断权。</li>
+<li><strong>分数升一点点就庆祝"已上线"</strong> — 第一个改进很少是最佳的；要求持续迭代直到分数进入平台期。</li>
+<li><strong>忘记把分数写进发布文档</strong> — 没写下来，组织会忘记"好"的定义是什么。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>五步工作流把 prompt engineering 从"相信我们就好"变成"看这个数字"。CCA 考试里只要 D3 问到流程、可复现性、迭代，答案就是把五个步骤按顺序讲一遍，并强调数据集保持不变。对 PM 而言，这是让你不必变成 prompt engineer，也能让工程团队对 AI 质量负责的机制。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D3（Evaluation &amp; Iteration）</strong>：五步循环是 THE canonical workflow。考题可能把步骤打乱要你排序。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：这条循环是"工程觉得好了"与"上线"之间的闸门。</li>
+<li>注意"实验中途换 dataset"的情境 — 正确答案永远是数据集必须保持不变。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>典型 prompt eval 工作流的五个步骤顺序是？</td>
+<td>起草 prompt → 建立数据集 → 喂进 Claude → 喂进 grader → 迭代。</td>
+</tr>
+<tr>
+<td>Grader 产出什么？</td>
+<td>通常是 1-10 分的数值分数，10 代表完美答案。</td>
+</tr>
+<tr>
+<td>为什么数据集在迭代之间必须保持不变？</td>
+<td>这样分数差异才能归因于 prompt 改动，而不是输入改动。</td>
+</tr>
+<tr>
+<td>课程示范的具体 delta 是多少？</td>
+<td>加上 "Answer the question with ample detail" 之后，平均分从 7.66 升到 8.7。</td>
+</tr>
+<tr>
+<td>PM 看数据集的试验厨房类比？</td>
+<td>试吃小组 — 保持固定，让分数变化只反映食谱（prompt）的变化。</td>
+</tr>
+<tr>
+<td>PM 批准新版 prompt 前应该问什么？</td>
+<td>Baseline 分数、新分数、数据集未变、以及提升是否值得上线。</td>
+</tr>
+<tr>
+<td>两次跑之间改数据集的风险？</td>
+<td>可比性被摧毁 — 无法判断分数变动来自 prompt 还是输入。</td>
+</tr>
+<tr>
+<td>哪个 CCA domain 最直接测这个工作流？</td>
+<td>D3 Evaluation &amp; Iteration — 五步顺序是本章最可测的概念。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

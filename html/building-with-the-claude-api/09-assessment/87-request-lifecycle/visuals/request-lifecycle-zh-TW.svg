@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Claude API 請求生命週期 — 5 個階段</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Client → 你的 Server → Anthropic API → 模型推論 → 回應。絕對不要從瀏覽器直接呼叫 API。</text>
+
+  <rect x="30" y="95" width="180" height="150" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="60" cy="123" r="16" fill="#3B82F6"/>
+  <text x="60" y="129" text-anchor="middle" font-size="13" font-weight="700" fill="white">1</text>
+  <text x="86" y="120" font-size="12" font-weight="700" fill="#1E40AF">Client</text>
+  <text x="86" y="136" font-size="10" fill="#6B7280">瀏覽器 / 手機 App</text>
+  <rect x="44" y="152" width="152" height="80" rx="6" fill="white" stroke="#BFDBFE"/>
+  <text x="120" y="172" text-anchor="middle" font-size="10" fill="#1E293B">使用者按「送出」</text>
+  <rect x="56" y="180" width="128" height="40" rx="4" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text x="120" y="198" text-anchor="middle" font-size="9" font-family="Menlo, monospace" fill="#1E293B">POST /chat</text>
+  <text x="120" y="212" text-anchor="middle" font-size="9" fill="#6B7280">此處不帶 API key!</text>
+
+  <rect x="230" y="95" width="180" height="150" rx="12" fill="#F3E8FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="260" cy="123" r="16" fill="#8B5CF6"/>
+  <text x="260" y="129" text-anchor="middle" font-size="13" font-weight="700" fill="white">2</text>
+  <text x="286" y="120" font-size="12" font-weight="700" fill="#6B21A8">你的 Server</text>
+  <text x="286" y="136" font-size="10" fill="#6B7280">驗證 + 注入 key</text>
+  <rect x="244" y="152" width="152" height="80" rx="6" fill="white" stroke="#DDD6FE"/>
+  <text x="254" y="168" font-size="9" fill="#1E293B">• 驗證使用者身份</text>
+  <text x="254" y="182" font-size="9" fill="#1E293B">• 檢查請求內容</text>
+  <text x="254" y="196" font-size="9" fill="#1E293B">• 掛上 ANTHROPIC_API_KEY</text>
+  <text x="254" y="210" font-size="9" fill="#1E293B">• 選擇 model、max_tokens</text>
+  <text x="254" y="224" font-size="9" fill="#1E293B">• 流量控制 / 記錄 log</text>
+
+  <rect x="430" y="95" width="210" height="150" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="460" cy="123" r="16" fill="#22C55E"/>
+  <text x="460" y="129" text-anchor="middle" font-size="13" font-weight="700" fill="white">3</text>
+  <text x="486" y="120" font-size="12" font-weight="700" fill="#166534">Anthropic API</text>
+  <text x="486" y="136" font-size="10" fill="#6B7280">模型推論</text>
+  <rect x="444" y="152" width="182" height="80" rx="6" fill="white" stroke="#86EFAC"/>
+  <text x="454" y="168" font-size="9" fill="#1E293B">• 驗證 API key 和配額</text>
+  <text x="454" y="182" font-size="9" fill="#1E293B">• 路由到指定 model</text>
+  <text x="454" y="196" font-size="9" fill="#1E293B">• Tokenize → Embed → Context</text>
+  <text x="454" y="210" font-size="9" fill="#1E293B">• 在安全層下產生 token</text>
+  <text x="454" y="224" font-size="9" fill="#1E293B">• 檢查停止條件</text>
+
+  <rect x="660" y="95" width="150" height="150" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="690" cy="123" r="16" fill="#F59E0B"/>
+  <text x="690" y="129" text-anchor="middle" font-size="13" font-weight="700" fill="white">4</text>
+  <text x="716" y="120" font-size="12" font-weight="700" fill="#92400E">Server(後處理)</text>
+  <text x="716" y="136" font-size="10" fill="#6B7280">Tool / stream</text>
+  <rect x="674" y="152" width="122" height="80" rx="6" fill="white" stroke="#FDE68A"/>
+  <text x="682" y="168" font-size="9" fill="#1E293B">• 處理 tool_use</text>
+  <text x="682" y="182" font-size="9" fill="#1E293B">• Stream SSE chunk</text>
+  <text x="682" y="196" font-size="9" fill="#1E293B">• 補資料 / 去敏</text>
+  <text x="682" y="210" font-size="9" fill="#1E293B">• 記錄用量</text>
+  <text x="682" y="224" font-size="9" fill="#1E293B">• 錯誤處理</text>
+
+  <rect x="830" y="95" width="140" height="150" rx="12" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="860" cy="123" r="16" fill="#EF4444"/>
+  <text x="860" y="129" text-anchor="middle" font-size="13" font-weight="700" fill="white">5</text>
+  <text x="886" y="120" font-size="12" font-weight="700" fill="#991B1B">回應</text>
+  <text x="886" y="136" font-size="10" fill="#6B7280">回到 Client</text>
+  <rect x="844" y="152" width="112" height="80" rx="6" fill="white" stroke="#FCA5A5"/>
+  <text x="900" y="170" text-anchor="middle" font-size="9" fill="#1E293B">message(文字)</text>
+  <text x="900" y="184" text-anchor="middle" font-size="9" fill="#1E293B">stop_reason</text>
+  <text x="900" y="198" text-anchor="middle" font-size="9" fill="#1E293B">usage tokens</text>
+  <text x="900" y="216" text-anchor="middle" font-size="9" fill="#6B7280">UI 渲染</text>
+
+  <path d="M210,170 L228,170" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M410,170 L428,170" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M640,170 L658,170" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M810,170 L828,170" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="30" y="275" width="940" height="200" rx="12" fill="white" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="500" y="300" text-anchor="middle" font-size="13" font-weight="700" fill="#166534">放大階段 3 — 模型推論管線</text>
+
+  <rect x="60" y="320" width="200" height="140" rx="10" fill="#F0FDF4" stroke="#22C55E"/>
+  <text x="160" y="344" text-anchor="middle" font-size="12" font-weight="700" fill="#166534">a. Tokenize</text>
+  <text x="160" y="362" text-anchor="middle" font-size="10" fill="#6B7280">文字 → token</text>
+  <rect x="74" y="374" width="172" height="70" rx="4" fill="white" stroke="#BBF7D0"/>
+  <text x="84" y="392" font-size="9" font-family="Menlo, monospace" fill="#1E293B">"How far is the Moon?"</text>
+  <text x="84" y="408" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">↓</text>
+  <text x="84" y="424" font-size="9" font-family="Menlo, monospace" fill="#166534">["How"," far"," is"...]</text>
+  <text x="84" y="438" font-size="9" fill="#6B7280">字、子字、符號</text>
+
+  <rect x="280" y="320" width="200" height="140" rx="10" fill="#EFF6FF" stroke="#3B82F6"/>
+  <text x="380" y="344" text-anchor="middle" font-size="12" font-weight="700" fill="#1E40AF">b. Embed</text>
+  <text x="380" y="362" text-anchor="middle" font-size="10" fill="#6B7280">token → 向量</text>
+  <rect x="294" y="374" width="172" height="70" rx="4" fill="white" stroke="#BFDBFE"/>
+  <text x="304" y="392" font-size="9" font-family="Menlo, monospace" fill="#1E293B">"Moon" → [0.23,</text>
+  <text x="304" y="406" font-size="9" font-family="Menlo, monospace" fill="#1E293B">-0.81, 0.44, 0.09,</text>
+  <text x="304" y="420" font-size="9" font-family="Menlo, monospace" fill="#1E293B">0.67, ...]</text>
+  <text x="304" y="438" font-size="9" fill="#6B7280">所有可能的意思</text>
+
+  <rect x="500" y="320" width="200" height="140" rx="10" fill="#F3E8FF" stroke="#8B5CF6"/>
+  <text x="600" y="344" text-anchor="middle" font-size="12" font-weight="700" fill="#6B21A8">c. Contextualize</text>
+  <text x="600" y="362" text-anchor="middle" font-size="10" fill="#6B7280">依上下文修正向量</text>
+  <rect x="514" y="374" width="172" height="70" rx="4" fill="white" stroke="#DDD6FE"/>
+  <text x="524" y="392" font-size="9" fill="#1E293B">"Moon" 在 "far is" 旁</text>
+  <text x="524" y="406" font-size="9" fill="#1E293B">→ 指地球的月亮、</text>
+  <text x="524" y="420" font-size="9" fill="#1E293B">   天文意涵</text>
+  <text x="524" y="438" font-size="9" fill="#6B7280">讓向量更精確</text>
+
+  <rect x="720" y="320" width="220" height="140" rx="10" fill="#FEF3C7" stroke="#F59E0B"/>
+  <text x="830" y="344" text-anchor="middle" font-size="12" font-weight="700" fill="#92400E">d. Generate</text>
+  <text x="830" y="362" text-anchor="middle" font-size="10" fill="#6B7280">抽下一個 token,重複</text>
+  <rect x="734" y="374" width="192" height="70" rx="4" fill="white" stroke="#FDE68A"/>
+  <text x="744" y="392" font-size="9" fill="#1E293B">P("about") = 0.62</text>
+  <text x="744" y="406" font-size="9" fill="#1E293B">P("384") = 0.28</text>
+  <text x="744" y="420" font-size="9" fill="#1E293B">P("roughly") = 0.10</text>
+  <text x="744" y="438" font-size="9" fill="#6B7280">機率 + 受控隨機</text>
+
+  <rect x="30" y="490" width="940" height="70" rx="12" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text x="56" y="513" font-size="12" font-weight="700" fill="#1E293B">停止條件(每產生一個 token 都會檢查):</text>
+  <rect x="56" y="522" width="290" height="28" rx="6" fill="#FEF3C7" stroke="#FDE68A"/>
+  <text x="201" y="540" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">max_tokens 上限到了</text>
+  <rect x="356" y="522" width="290" height="28" rx="6" fill="#F0FDF4" stroke="#BBF7D0"/>
+  <text x="501" y="540" text-anchor="middle" font-size="10" fill="#166534" font-weight="600">end_turn(自然結束)</text>
+  <rect x="656" y="522" width="290" height="28" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+  <text x="801" y="540" text-anchor="middle" font-size="10" fill="#991B1B" font-weight="600">遇到 stop_sequence</text>
+</svg>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Caching In Action Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Caching in Action — PM Perspective（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>詳情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（成本／延遲優化）、5.2（production 效能）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 58</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>在真實產品裡開 caching 的意思是：和團隊講好哪段 tool list 與 system prompt 保持凍結、接好 cache 標記，然後到 production 監看 usage 計數器，驗證 business case 裡承諾的節省是否真的出現。</p>
+<hr />
+<h2>PM 為什麼要在意</h2>
+<p>Caching 是少數幾個「產品層級決策」能決定成敗的優化：我們承諾這段 context 在每次呼叫間保持一致。Engineering 把 tool list 和 system prompt 轉成可快取形式之後，這項功能要嘛省錢，要嘛靜默什麼都不做。結果完全取決於：</p>
+<ol>
+<li><strong>產品保證哪些東西穩定</strong> — 大型穩定 system prompt？穩定 tool schema？兩個都有？都沒有？</li>
+<li><strong>有沒有人在看數字</strong> — Cache 節省只有在有人盯著 dashboard 時才算數。</li>
+</ol>
+<p>真的懂這堂課的 PM，走進 roadmap 會議可以說：「caching 開了，這三件事會把它打翻，這個指標我會盯著證明它有用。」</p>
+<hr />
+<h2>Mental Model：會員杯折扣</h2>
+<p>想像星巴克的自帶杯折扣。第一次買咖啡沒什麼特別。第二次如果你帶著同一個杯子，就有折扣。忘記帶杯子？原價。杯子太小？不給折扣。太久沒用？優惠過期。</p>
+<table>
+<thead>
+<tr>
+<th>咖啡店比喻</th>
+<th>Caching 對應</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>帶同一個杯子</td>
+<td>送同樣的前綴</td>
+</tr>
+<tr>
+<td>續杯折扣</td>
+<td>Cache read 便宜</td>
+</tr>
+<tr>
+<td>第一次來付原價</td>
+<td>第一次 <code>cache_creation_input_tokens</code></td>
+</tr>
+<tr>
+<td>每次匹配都便宜</td>
+<td>後續 <code>cache_read_input_tokens</code></td>
+</tr>
+<tr>
+<td>杯子太小 → 沒折扣</td>
+<td>前綴 &lt; 1,024 tokens → 不 cache</td>
+</tr>
+<tr>
+<td>忘記帶一次 → 付原價</td>
+<td>改一個字 → cache miss</td>
+</tr>
+</tbody>
+</table>
+<p>會員計畫只有在顧客（你的 app）一直帶同一個杯子（同樣的前綴）時才有用。</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>三個最高價值的目標</h3>
+<table>
+<thead>
+<tr>
+<th>目標</th>
+<th>典型大小</th>
+<th>為什麼是好候選</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>大型 system prompt</td>
+<td>~6K tokens</td>
+<td>定義產品 persona；每次呼叫都穩定</td>
+</tr>
+<tr>
+<td>Tool schemas</td>
+<td>~1.7K tokens</td>
+<td>Tool 定義不會在 session 中途改</td>
+</tr>
+<tr>
+<td>重複的 message 內容</td>
+<td>視情況</td>
+<td>任何反覆送相同內容的 workflow（文件問答、滾動對話歷史）</td>
+</tr>
+</tbody>
+</table>
+<h3>部分命中是產品勝利</h3>
+<p>因為 tools、system prompt、messages 各自獨立快取，產品團隊可以：</p>
+<ul>
+<li><strong>調整 system prompt</strong>（可能是表現最差的一層）而不動 tools——tools 的 cache 節省不變。</li>
+<li><strong>新增一個 tool</strong>——知道只有 tools 層被 cache write，system prompt 的 cache 保持熱。</li>
+<li><strong>在 system prompt 層做 A/B 測試</strong>——清楚知道成本影響：一組付新 prompt 的 cache write，另一組繼續讀 cached 版。</li>
+</ul>
+<p>這種細粒度意味著 caching 不必是「全有全無」的實驗閘門。</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>真實上線時 scope caching 的決策：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>為什麼重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>哪一層（tools／system／messages）佔最大的穩定塊？</td>
+<td>那是你第一個 breakpoint 要放的位置；也是最大的省</td>
+</tr>
+<tr>
+<td>我們能承諾那一層至少凍結一週嗎？</td>
+<td>不斷編輯會毀掉節省；穩定就是契約</td>
+</tr>
+<tr>
+<td>誰擁有「cache 真的在用嗎」的 dashboard？</td>
+<td>沒人看 <code>cache_read_input_tokens</code>，節省就只是空口宣稱</td>
+</tr>
+<tr>
+<td>預期命中率是多少？</td>
+<td>用來設目標（例：上線後 70% 的非首次呼叫要是 cache read）</td>
+</tr>
+<tr>
+<td>如何在 cache 失效前通知團隊？</td>
+<td>改 system prompt 前在 Slack 講一聲，能省去成本圖表上的驚喜尖峰</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>要監看的商業指標</h2>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>追蹤內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cache 命中率</strong></td>
+<td><code>cache_read_input_tokens / (cache_read + cache_creation)</code>——越高越好</td>
+</tr>
+<tr>
+<td><strong>單次對話成本</strong></td>
+<td>Caching 上線後應下降；與 baseline 期間比較</td>
+</tr>
+<tr>
+<td><strong>Time-to-first-token</strong></td>
+<td>命中時應下降；對任何延遲敏感 UX 很重要</td>
+</tr>
+<tr>
+<td><strong>Cache 失效事件</strong></td>
+<td>每週有幾次 system prompt／tool 改動；太多就永遠拿不到節省</td>
+</tr>
+<tr>
+<td><strong>TTL 過期 miss</strong></td>
+<td>如果閒置數小時後的首次呼叫大多顯示 <code>cache_creation_input_tokens</code>，你的使用模式可能低於 1 小時頻率門檻</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>上線 caching 卻沒 dashboard</strong> — 看不到 <code>cache_read_input_tokens</code>，就無法向 finance 證明有省到錢。</li>
+<li><strong>讓文案團隊每週編輯 system prompt 而不事先通知</strong> — 每次改寫就是 1 小時 cache 歸零。要建變更流程。</li>
+<li><strong>忽視部分命中</strong> — 團隊常誤以為「改了 system prompt，caching 壞了」，其實 tools 那層還在命中。部分命中是正常且有價值的。</li>
+<li><strong>為第一次呼叫節省慶祝</strong> — 第一次永遠是 cache <em>write</em>，那比平常<strong>更貴</strong>，不是更便宜。節省只在 1 小時窗口內後續呼叫累積。</li>
+<li><strong>沒告訴 ops／on-call 1 小時 TTL</strong> — 夜間流量掉，早上第一批呼叫全是 cache write，成本圖表看起來會很怪。</li>
+<li><strong>把 caching 和 memory 混為一談</strong> — 有人聽到「cache」就以為 Claude 在記東西。它不是。要澄清：caching 是成本／延遲，不是產品記憶。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>實戰的 caching 重點不是「按開關」，而是<strong>擁有一份穩定性契約</strong>。產品團隊決定什麼凍結、平台寫入 <code>cache_control</code> 標記、可觀測層回報 <code>cache_read_input_tokens</code> 對 <code>cache_creation_input_tokens</code>。這三塊缺一不可，否則上線就只是口頭節省，沒有真的省錢。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5（Enterprise Deployment）</strong> — 考題會給「caching 開了卻沒看到節省」的情境，答案通常是產品層原因（system prompt 被改、前綴有變數、把部分命中誤判為全 miss）。</li>
+<li>記住 <code>cache_read_input_tokens</code> 是證明命中的欄位，<code>cache_creation_input_tokens</code> 是寫入的欄位。</li>
+<li>記住部分命中是預期行為，因為 tools、system prompt、messages 各自獨立快取。</li>
+<li>記住 1 小時 TTL 以及它與低頻流量的互動。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>開啟 caching 時 PM 實際承諾什麼？</td>
+<td>某些 context 層（tool list、system prompt、穩定前綴）在呼叫間會保持逐 byte 相同。</td>
+</tr>
+<tr>
+<td>哪個 usage 欄位證明這次呼叫讀取了 cache？</td>
+<td><code>cache_read_input_tokens</code>——Claude 從 cache 重用的 tokens。</td>
+</tr>
+<tr>
+<td>哪個 usage 欄位證明這次呼叫寫入了 cache？</td>
+<td><code>cache_creation_input_tokens</code>——Claude 剛寫入 cache 的 tokens。</td>
+</tr>
+<tr>
+<td>什麼是「部分命中」？為什麼對 PM 是好事？</td>
+<td>某一層（如 tools）命中、另一層（如 system prompt）寫入。讓你能調一層而不失去另一層的節省。</td>
+</tr>
+<tr>
+<td>為什麼 caching 上線後第一次呼叫更貴而不是更便宜？</td>
+<td>因為那是 cache write（<code>cache_creation_input_tokens</code>），不是 read。節省從 1 小時窗口內的後續呼叫開始。</td>
+</tr>
+<tr>
+<td>說出最受 caching 影響的三個產品層。</td>
+<td>大型 system prompt（~6K tokens）、tool schema（~1.7K tokens）、重複的 message 內容。</td>
+</tr>
+<tr>
+<td>團隊星期五下午改寫 system prompt 會發生什麼事？</td>
+<td>所有 system prompt cache 都失效；接下來每次呼叫都付 cache write，直到新 prompt 穩定。</td>
+</tr>
+<tr>
+<td>為什麼「cache 命中率」dashboard 是 PM checklist 的一部分？</td>
+<td>沒有它 caching 的效益無法驗證——沒證據就沒辦法向 finance 回報節省。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Typical Eval Workflow Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>A Typical Eval Workflow — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (eval design), 3.2 (test datasets), 3.3 (eval execution)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 18</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A prompt eval workflow is the AI team's equivalent of a product launch checklist — a repeatable five-step process that produces a single quality number every PM can use in launch docs, OKRs, and prioritization decisions.</p>
+<hr />
+<h2>Mental Model: The Recipe Testing Kitchen</h2>
+<p>A professional test kitchen doesn't ship a new cereal recipe based on one taste. They have a fixed panel of tasters, a fixed scoring rubric, and they re-score every variant until the average crosses a bar. That is exactly what prompt evaluation does for prompts.</p>
+<table>
+<thead>
+<tr>
+<th>Test kitchen</th>
+<th>Prompt eval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Initial recipe</td>
+<td>Draft prompt</td>
+</tr>
+<tr>
+<td>Panel of tasters</td>
+<td>Eval dataset</td>
+</tr>
+<tr>
+<td>Tasters try each spoonful</td>
+<td>Feed through Claude</td>
+</tr>
+<tr>
+<td>Tasters score 1–10 on rubric</td>
+<td>Feed through grader</td>
+</tr>
+<tr>
+<td>Chef tweaks recipe, re-scores</td>
+<td>Iterate prompt and repeat</td>
+</tr>
+</tbody>
+</table>
+<p>The dataset is the panel. The grader is the rubric. The prompt is the recipe. Keep the panel and rubric fixed; only change the recipe. That's how you isolate "what worked."</p>
+<hr />
+<h2>The Five Steps — PM Cheat Sheet</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What it produces</th>
+<th>PM value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Draft a prompt</td>
+<td>A baseline version</td>
+<td>Something measurable to improve</td>
+</tr>
+<tr>
+<td>2. Create a dataset</td>
+<td>N realistic inputs</td>
+<td>Defines what "quality" means for this feature</td>
+</tr>
+<tr>
+<td>3. Feed through Claude</td>
+<td>N raw outputs</td>
+<td>Evidence of current behavior</td>
+</tr>
+<tr>
+<td>4. Feed through grader</td>
+<td>A numeric score (1–10 per case; averaged)</td>
+<td>The quality metric you can put in launch doc</td>
+</tr>
+<tr>
+<td>5. Iterate</td>
+<td>A new prompt + new score</td>
+<td>Proof the team is actually improving the product</td>
+</tr>
+</tbody>
+</table>
+<p>The number the grader spits out is the thing you will argue with finance, marketing, and execs about. Without step 4, there is no number, so there is no argument, so there is no prioritization.</p>
+<hr />
+<h2>The Lesson's Worked Example (Why It Matters)</h2>
+<p>The lesson uses a toy dataset of three questions and shows that changing one line of the prompt moved the average score from <strong>7.66 to 8.7</strong>. That's the entire point in miniature:</p>
+<ul>
+<li>Before: "is this better?" → opinion.</li>
+<li>After: "the average score went from 7.66 to 8.7" → fact.</li>
+</ul>
+<p>You can now update the launch doc, the OKR dashboard, and the engineering roadmap with a real delta. That number is what makes prompt work legible to the rest of the org.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When to Run the Full Workflow</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why the full loop is non-negotiable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Evaluating whether to ship a new prompt version to GA</td>
+<td>You need a before/after number for the launch review</td>
+</tr>
+<tr>
+<td>Comparing two competing prompts from different engineers</td>
+<td>The score breaks the tie objectively</td>
+</tr>
+<tr>
+<td>Deciding whether to downgrade from Sonnet to Haiku for cost savings</td>
+<td>The score tells you how much quality you're giving up</td>
+</tr>
+<tr>
+<td>CI regression check on a prompt-backed feature</td>
+<td>The number is the regression signal</td>
+</tr>
+</tbody>
+</table>
+<h3>When a Lighter Approach Is OK</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Caveat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exploratory prototyping before product is greenlit</td>
+<td>Still a trap — document any "it looks fine" decisions</td>
+</tr>
+<tr>
+<td>Quick internal demo to leadership</td>
+<td>OK, but do not promote to customers on this basis</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When the engineering team tells you a new prompt version is ready, walk through these four questions:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>What a good answer looks like</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What's the baseline score for the current prompt?</td>
+<td>A number, on a 1–10 scale, from a fixed dataset</td>
+</tr>
+<tr>
+<td>What's the new score for the proposed prompt?</td>
+<td>A number, from the <strong>same</strong> dataset, same grader</td>
+</tr>
+<tr>
+<td>Did the dataset change since the last run?</td>
+<td>No — if yes, the comparison is invalid</td>
+</tr>
+<tr>
+<td>Is the lift big enough to justify the launch?</td>
+<td>Subjective, but at least the conversation is about a number</td>
+</tr>
+</tbody>
+</table>
+<p>If any answer is "we didn't do that," push back. The team is asking you to ship opinion, not measured improvement.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Accepting "we tested it and it's better"</strong> — always ask for the baseline number and the new number.</li>
+<li><strong>Letting the team change the dataset silently between runs</strong> — this destroys comparability and invalidates any claimed improvement.</li>
+<li><strong>Treating the grader as "too technical to care about"</strong> — the grader <em>is</em> your quality definition; a PM who doesn't own it is handing off product judgment.</li>
+<li><strong>Celebrating a small score bump as "shipped"</strong> — the first improvement is rarely the best; push for continued iteration until the score plateaus.</li>
+<li><strong>Forgetting to put the score in the launch doc</strong> — if you don't write the number down, the org forgets what "good" meant.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The five-step workflow converts prompt engineering from "trust us" into "look at the number." For the CCA exam, any question about process, reproducibility, or iteration in D3 is answered by naming the five steps in order and emphasizing that the dataset is held constant. For PMs, this is the mechanism that lets you hold engineering accountable for AI quality without having to be a prompt engineer yourself.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: the five-step loop is THE canonical workflow. Expect exam questions that list steps out of order and ask for the correct sequence.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: the loop is the gate between "engineering thinks it's ready" and "launch."</li>
+<li>Watch for exam scenarios where the dataset changes mid-experiment — the correct answer is always that the dataset must remain fixed.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the five steps of a typical prompt eval workflow, in order?</td>
+<td>Draft prompt → create dataset → feed through Claude → feed through grader → iterate.</td>
+</tr>
+<tr>
+<td>What does the grader produce?</td>
+<td>A numeric score, typically on a 1-10 scale, where 10 is a perfect answer.</td>
+</tr>
+<tr>
+<td>Why must the dataset stay fixed across iterations?</td>
+<td>So that score differences can be attributed to the prompt change, not to a change in inputs.</td>
+</tr>
+<tr>
+<td>What concrete delta does the lesson demonstrate?</td>
+<td>Average score rose from 7.66 to 8.7 after adding "Answer the question with ample detail" to the prompt.</td>
+</tr>
+<tr>
+<td>What is the PM-level test kitchen analogy for the dataset?</td>
+<td>The panel of tasters — kept constant so that changes in score only reflect changes in the recipe (prompt).</td>
+</tr>
+<tr>
+<td>What should a PM ask before approving a new prompt version?</td>
+<td>Baseline score, new score, dataset unchanged, and whether the lift justifies the launch.</td>
+</tr>
+<tr>
+<td>What is the risk of changing the dataset between two eval runs?</td>
+<td>Comparability is destroyed — you cannot tell if the score change came from the prompt or from the inputs.</td>
+</tr>
+<tr>
+<td>Which CCA domain tests this workflow most directly?</td>
+<td>D3 Evaluation &amp; Iteration — the five-step sequence is the most testable concept in this chapter.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

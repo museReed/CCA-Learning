@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Being Specific Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Being Specific — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D3 — Evaluation &amp; Iteration (20%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（prompt 設計與迭代）、1.1（指令遵循）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 27</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Specificity 就是一份 acceptance criteria——一條條告訴 Claude 「done」長什麼樣，把模糊要求變成可測試的合約。</p>
+<hr />
+<h2>PM 為什麼該在乎</h2>
+<p>每個 PM 都寫過模糊的 ticket、然後看著它被做錯——不是工程師爛，是「done」沒定義。Prompt 的失敗方式一樣。沒有 specificity 的 prompt 就像沒有 acceptance criteria 的 feature ticket——你會拿到「某個東西」，但你無法預測是什麼，也無法證明它是對的。</p>
+<p>課程量到的影響非常明顯：在 clear+direct prompt 上加一份 specificity 列表，eval 分數從 <strong>3.92 跳到 7.86</strong>——一次編輯讓品質翻倍有餘。這是整章 prompt engineering 裡最大的單點品質跳升。對 PM 來說，這是最高 ROI 的槓桿。</p>
+<hr />
+<h2>心智模型：Acceptance Criteria</h2>
+<table>
+<thead>
+<tr>
+<th>PM 產物</th>
+<th>Prompt 對應</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User story</td>
+<td>第一行 clear+direct</td>
+</tr>
+<tr>
+<td>Acceptance criteria</td>
+<td>Output quality guidelines</td>
+</tr>
+<tr>
+<td>Test plan / checklist</td>
+<td>Eval rubric（<code>extra_criteria</code>）</td>
+</tr>
+<tr>
+<td>Process doc / SOP</td>
+<td>Process steps</td>
+</tr>
+</tbody>
+</table>
+<p>當你讀課程的餐單 guidelines（「包含準確的每日卡路里、蛋白質/脂肪/碳水量、指定用餐時間……」），你讀的就是一個 AI 功能的 acceptance criteria。每一條都可測，每一條都關掉一個模糊來源。</p>
+<hr />
+<h2>兩個槓桿</h2>
+<h3>Output Quality Guidelines — 「做什麼」</h3>
+<p>告訴 Claude 完成的 artifact 必須含什麼：</p>
+<ul>
+<li>長度</li>
+<li>結構和 format</li>
+<li>具體元素或屬性</li>
+<li>Tone 或 style</li>
+</ul>
+<p>課程建議<strong>幾乎每個 prompt 都要用</strong>。這是一致性的 safety net。</p>
+<h3>Process Steps — 「怎麼做」</h3>
+<p>告訴 Claude 答前該怎麼想：</p>
+<ol>
+<li>腦力激盪選項</li>
+<li>選最好的</li>
+<li>勾勒細節</li>
+<li>考慮支援因素</li>
+</ol>
+<p>當任務複雜到 Claude 可能只 fix 在一個角度，而你希望它考慮多個角度時使用。課程的經典範例是「分析為什麼業務團隊業績下滑」——跳到單一原因會給出膚淺答案的任務。</p>
+<hr />
+<h2>產品應用場景</h2>
+<h3>一定要加 Output Guidelines</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>Guidelines 範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>會議摘要器</td>
+<td>「包含與會者、決議、action item 和負責人、下次會議時間，200 字內。」</td>
+</tr>
+<tr>
+<td>Support ticket 分類器</td>
+<td>「只回：category（billing/bug/feature/other 擇一）、priority（P0-P3）、一句話摘要。」</td>
+</tr>
+<tr>
+<td>週報產生器</td>
+<td>「包含 2 句 intro、3 則精選故事、一個數據表、一個 CTA 連結。上限 400 字。」</td>
+</tr>
+</tbody>
+</table>
+<h3>多角度分析時加 Process Steps</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>Process Steps 範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Root-cause 分析助理</td>
+<td>「1) 列可能原因 2) 依可能性排序 3) 指出每個要驗證的資料 4) 提出前 2 個假設」</td>
+</tr>
+<tr>
+<td>Design critique 工具</td>
+<td>「1) 辨識主要用戶目標 2) 對照評估 3) 記優點 4) 記缺點 5) 提一個改進」</td>
+</tr>
+<tr>
+<td>Sales ops 的 deal review</td>
+<td>「1) 檢查 pipeline stage 2) 看近期活動 3) 標風險訊號 4) 推薦下一步」</td>
+</tr>
+</tbody>
+</table>
+<h3>不要過度工程</h3>
+<p>簡單抽取或格式化（「抽簽名檔裡的 email」）不需要 process steps。加了只是增加延遲、沒有品質收穫。</p>
+<hr />
+<h2>PM 決策框架</h2>
+<p>設計 AI 功能的 prompt 時問：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>動作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>我能列出 output 必含的明確元素嗎？</td>
+<td>寫 output guidelines 編號列表</td>
+</tr>
+<tr>
+<td>有「正確答案」是需要考慮多因素的嗎？</td>
+<td>加 process steps</td>
+</tr>
+<tr>
+<td>Claude 有可能忽略某個重要角度嗎？</td>
+<td>為那個角度加一個 process step</td>
+</tr>
+<tr>
+<td>Eval rubric 能獨立評分每個 guideline 嗎？</td>
+<td>能——保持 guidelines 和 rubric 對齊</td>
+</tr>
+<tr>
+<td>所有 guidelines 都可測嗎？</td>
+<td>把模糊的換成可量測的</td>
+</tr>
+</tbody>
+</table>
+<p>如果 PM 寫不出一個功能的 acceptance criteria，prompt 就會失敗。列 output guidelines 的練習常常會揭露 PRD 的漏洞。</p>
+<hr />
+<h2>複利效應</h2>
+<p>Specificity 有兩層回報：</p>
+<ol>
+<li><strong>直接</strong> — eval 分數上升，因為 output 更貼近你要的。</li>
+<li><strong>間接</strong> — 因為每個 bullet 可測，你的 eval rubric 可以更緊，未來迭代改進更快。</li>
+</ol>
+<p>這和強 PRD 的複利一樣：清楚的 acceptance criteria 讓 QA 更快、bug 更具體、regression 更容易預防。Prompt 也受益於同樣的紀律。</p>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>模糊品質 bullet</strong> — 「should be professional」不是 guideline，「avoid contractions, use third-person voice, max 300 words」才是。</li>
+<li><strong>以為 clear+direct「有用」就跳過 specificity</strong> — 3.92/10 不是可發版的品質。Specificity 才是把你推到 7.86+ 的槓桿。</li>
+<li><strong>混淆 process steps 和 output structure</strong> — process steps 控制<em>Claude 怎麼想</em>，不是<em>答案怎麼格式化</em>。是分開的槓桿。</li>
+<li><strong>把所有東西塞進一條 bullet</strong> — 每個 guideline 該可獨立測試。過載 bullet 要拆。</li>
+<li><strong>Guidelines 和 eval rubric 不對齊</strong> — prompt 要 X、rubric 評 Y，你永遠無法可靠地發改進版本。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Specificity 是 prompt engineering 從「選字遊戲」變成 <strong>產品規格寫作</strong> 的分水嶺。Output guidelines 是 acceptance criteria，process steps 是 SOP，合起來把 prompt 從請求變成合約。課程的 3.92 → 7.86 跳升是整章最強的證據：這是 PM 在 AI 功能上能做的最高 ROI 動作。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>：要認得 specificity 是 clarity/directness 之後最高槓桿的技巧，並區分 output guidelines 和 process steps。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：agent system prompt 同樣用這兩個槓桿控制 agent 產什麼、怎麼想。</li>
+<li>考題可能描述一個缺其中一個槓桿的 prompt，要你補。線索：「格式不一致」→ output guidelines；「跳到結論」→ process steps。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Specificity output guidelines 最直接對應哪個 PM 產物？</td>
+<td>Acceptance criteria——一份可測的 bullet list 描述「done」長什麼樣。</td>
+</tr>
+<tr>
+<td>課程量到 specificity 帶來的分數變化？</td>
+<td>3.92 → 7.86，加 output guidelines 讓 eval 分數翻倍有餘。</td>
+</tr>
+<tr>
+<td>PM 什麼時候該用 process steps 而不只是 output guidelines？</td>
+<td>任務需要多角度考量時，如 root-cause 分析或決策——Claude 可能會 fix 在單一原因。</td>
+</tr>
+<tr>
+<td>好的 output guideline 的檢驗？</td>
+<td>每個 bullet 都能被 eval rubric 獨立測試；「be professional」這類模糊 bullet 過不了關。</td>
+</tr>
+<tr>
+<td>Output guidelines 該出現在幾乎每個 prompt 嗎？</td>
+<td>是——課程稱它為一致性的「safety net」，該是預設而不是最佳化。</td>
+</tr>
+<tr>
+<td>Deal-review 功能的 process step 序列範例？</td>
+<td>1) 檢查 pipeline stage 2) 看近期活動 3) 標風險訊號 4) 推薦下一步。</td>
+</tr>
+<tr>
+<td>Guidelines 和 eval rubric 不對齊會怎樣？</td>
+<td>分數無法反映 prompt 在最佳化什麼，迭代無法轉換成可發版的改進。</td>
+</tr>
+<tr>
+<td>Specificity 的兩層複利？</td>
+<td>直接（output 更貼近 spec、分數上升）和間接（更緊的 rubric 讓未來迭代更快）。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

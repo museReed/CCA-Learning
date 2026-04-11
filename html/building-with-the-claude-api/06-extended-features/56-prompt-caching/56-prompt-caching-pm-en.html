@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Caching Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Caching — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (cost/latency optimization), 5.2 (production performance)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 56</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt caching is the "bulk discount" of the Claude API — if your product keeps sending the same large chunk of context over and over, you can make every call after the first one noticeably faster and cheaper, with zero user-facing change.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Every time your app calls Claude, the model re-does a pile of expensive setup work (tokenization, embeddings, context analysis) before it writes a single word of output — and then throws that work away. If your product sends the same 6,000-token system prompt or the same long PDF on every call, you are <strong>paying for and waiting on that setup every single time</strong>.</p>
+<p>Prompt caching changes the economics. You pay for the setup once, then get the same setup "for free" (cheaper and faster) on every follow-up call within an hour. For any product doing repeat interactions over stable context, this is the biggest single lever on unit economics and perceived speed.</p>
+<hr />
+<h2>Mental Model: The Coffee Shop Pour-Over</h2>
+<p>Imagine a pour-over coffee shop that grinds beans fresh for every order:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Without caching</th>
+<th>With caching</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First customer orders an Ethiopia pour-over</td>
+<td>Grind beans, heat water, brew</td>
+<td>Grind beans, heat water, brew (pay full cost)</td>
+</tr>
+<tr>
+<td>Second customer orders the same thing</td>
+<td>Grind beans again, heat water again, brew</td>
+<td>Reuse the pre-ground beans and hot water (pay only for the brew)</td>
+</tr>
+</tbody>
+</table>
+<p>The grinding and water-heating are the preprocessing. The brewing is the actual generation. Prompt caching means you stop re-grinding identical orders. The customer still gets a fresh cup — they just get it faster and the shop's margins go up.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When Caching Pays Off</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why it works</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chat product with a long system persona / guidelines</td>
+<td>The persona is identical on every turn — cache it once.</td>
+</tr>
+<tr>
+<td>Document Q&amp;A (ask many questions about one PDF)</td>
+<td>The document is stable; only the question varies.</td>
+</tr>
+<tr>
+<td>Coding assistant with a big repo context</td>
+<td>The codebase context is sent on every request.</td>
+</tr>
+<tr>
+<td>Agent loop with fixed tool definitions</td>
+<td>The tool schemas are the same every turn.</td>
+</tr>
+<tr>
+<td>Iterative content editing (same draft, many edits)</td>
+<td>The draft is constant, the instructions change.</td>
+</tr>
+</tbody>
+</table>
+<h3>When Caching Does NOT Help</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why it does not help</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One-off prompts (no repeats)</td>
+<td>You pay the cache-write cost for nothing.</td>
+</tr>
+<tr>
+<td>Prompts that always change</td>
+<td>Cache never hits; nothing to reuse.</td>
+</tr>
+<tr>
+<td>Very low-frequency usage (calls hours apart)</td>
+<td>Cache expires after an hour — entries are gone before reuse.</td>
+</tr>
+<tr>
+<td>Tiny prompts</td>
+<td>Savings are negligible; overhead is not worth the complexity.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When deciding whether to turn on prompt caching for a feature:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is there a large, stable chunk of context sent on every request?</td>
+<td>Caching targets large, stable prefixes — that is where the savings live.</td>
+</tr>
+<tr>
+<td>Do users interact frequently within an hour?</td>
+<td>The 1-hour TTL rewards high-frequency repeat usage.</td>
+</tr>
+<tr>
+<td>Is input token cost a material share of my unit economics?</td>
+<td>If yes, caching can move the needle on gross margin.</td>
+</tr>
+<tr>
+<td>Is perceived latency a top user complaint?</td>
+<td>Caching reduces time-to-first-token on cached prefixes.</td>
+</tr>
+<tr>
+<td>Is the content genuinely identical across calls (byte for byte)?</td>
+<td>Caching is extremely sensitive to any change in the cached prefix.</td>
+</tr>
+</tbody>
+</table>
+<p>If most answers are yes, caching should be on the roadmap — likely ahead of other model-side optimizations.</p>
+<hr />
+<h2>Business Impact</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Typical effect of prompt caching</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cost per conversation</strong></td>
+<td>Drops — cached prefixes are billed at a significant discount.</td>
+</tr>
+<tr>
+<td><strong>Latency / time-to-first-token</strong></td>
+<td>Drops — preprocessing is skipped on cache hits.</td>
+</tr>
+<tr>
+<td><strong>Gross margin on AI features</strong></td>
+<td>Rises — the per-call unit cost falls on hot workflows.</td>
+</tr>
+<tr>
+<td><strong>User retention (indirect)</strong></td>
+<td>Can rise — faster responses feel snappier and more "polished."</td>
+</tr>
+</tbody>
+</table>
+<p>These are all production wins with no visible product change and no extra user friction. That is rare.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating caching as a "later" optimization</strong> — by the time you notice the bill, you have been paying twice for months of traffic. If your product has any repeat-context pattern, scope caching into v1.</li>
+<li><strong>Confusing caching with memory or personalization</strong> — caching is about <em>reusing computation</em>, not <em>remembering the user</em>. It does not change what Claude knows; it only speeds up what it already processes.</li>
+<li><strong>Ignoring the 1-hour TTL in metric modeling</strong> — projecting "x% of calls cached" without checking call frequency will overstate savings on low-traffic features.</li>
+<li><strong>Underinvesting in "context stability"</strong> — if your team rewrites the system prompt on every sprint, cache entries get invalidated constantly. Stable context is a pre-requisite.</li>
+<li><strong>Not telling finance / ops when caching ships</strong> — the cost curve suddenly bends. Make sure cost models reflect it so forecasts stay honest.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompt caching is an <strong>invisible product improvement</strong>: users never see it, but they feel it. Lower cost per call protects gross margin, and lower latency improves how snappy the product feels. For any AI feature built on a large stable context, caching is the single highest-leverage optimization a PM can push for — it is pure upside with no UX trade-off.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong> — caching sits squarely under task 5.1 (cost and latency). Expect questions that ask how to optimize repeat-context workflows.</li>
+<li>Know that caching reduces <strong>both</strong> cost and latency, not just one.</li>
+<li>Know the 1-hour TTL and that caching only helps when content is reused within that window.</li>
+<li>Watch for scenarios framed as "same long document, many questions" or "same system prompt on every turn" — the answer is prompt caching.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In plain terms, what does prompt caching do for a product?</td>
+<td>It saves and reuses Claude's expensive preprocessing work so repeat calls over the same context are faster and cheaper.</td>
+</tr>
+<tr>
+<td>What is the 1-hour rule PMs must remember?</td>
+<td>Cached content lives for one hour; after that it expires and must be recreated.</td>
+</tr>
+<tr>
+<td>Which two business metrics does caching move?</td>
+<td>Cost per call (down) and latency / time-to-first-token (down).</td>
+</tr>
+<tr>
+<td>Which product patterns benefit most from caching?</td>
+<td>Large stable system prompts, document Q&amp;A, coding assistants with repo context, agent loops with fixed tools, iterative editing.</td>
+</tr>
+<tr>
+<td>Which products do NOT benefit from caching?</td>
+<td>One-off prompts, content that always changes, low-frequency usage (calls more than an hour apart), tiny prompts.</td>
+</tr>
+<tr>
+<td>Is caching automatic?</td>
+<td>No — it must be explicitly enabled; without opt-in Claude throws preprocessing away.</td>
+</tr>
+<tr>
+<td>Does caching change what Claude "knows" about the user?</td>
+<td>No — it only reuses computation. It is not memory or personalization.</td>
+</tr>
+<tr>
+<td>Why should caching be scoped into v1, not "later"?</td>
+<td>Because every week without it is a week of paying twice on repeat-context traffic; the savings never accrue retroactively.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

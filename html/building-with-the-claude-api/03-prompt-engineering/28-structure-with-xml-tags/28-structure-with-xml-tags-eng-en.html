@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Structure With Xml Tags Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Structure with XML Tags — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D2 — Tool Design (18%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (prompt design for reliability), 2.2 (structured content blocks)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 28</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>XML tags act as explicit delimiters inside a prompt string, letting Claude parse which bytes are instructions, which are data, and which are examples — the simplest and most reliable structural technique in prompt engineering.</p>
+<hr />
+<h2>The Problem: Byte Soup</h2>
+<p>When you concatenate instructions, 20 pages of sales records, and a user question into a single prompt string, Claude sees one long undifferentiated sequence of tokens. Without boundaries, it must infer structure from prose cues alone. This inference is fragile:</p>
+<ul>
+<li>Instructions bleed into data</li>
+<li>Data bleeds into examples</li>
+<li>Claude may "follow" text that was meant to be analyzed, not executed</li>
+</ul>
+<p>The source lesson frames this as a parsing problem: Claude "can sometimes struggle to understand which pieces of text belong together or what different sections are supposed to represent."</p>
+<p>XML tags solve this by putting explicit markers in the token stream. <code>&lt;sales_records&gt;...&lt;/sales_records&gt;</code> tells Claude: everything inside is one logical unit of a specific kind.</p>
+<hr />
+<h2>The Canonical Example</h2>
+<p>From the lesson, the athlete meal-plan prompt:</p>
+<pre><code>&lt;athlete_information&gt;
+- Height: 6'2&quot;
+- Weight: 180 lbs
+- Goal: Build muscle
+- Dietary restrictions: Vegetarian
+&lt;/athlete_information&gt;
+
+Generate a meal plan based on the athlete information above.
+</code></pre>
+<p>Three things are happening:</p>
+<ol>
+<li><strong>Semantic grouping</strong> — height, weight, goal, and restrictions are bound together inside one container.</li>
+<li><strong>Role separation</strong> — the instruction ("Generate a meal plan...") sits outside the tag, so there is zero ambiguity about what is data and what is directive.</li>
+<li><strong>Referability</strong> — the instruction can literally say "the athlete information above," matching the tag name.</li>
+</ol>
+<hr />
+<h2>Code vs Docs: The Dramatic Case</h2>
+<p>The source highlights a second example: asking Claude to debug code with provided documentation. Mixing both into one blob creates a "Not Great" version where it is nearly impossible for Claude to distinguish code tokens from prose tokens. The "Better" version wraps each section:</p>
+<pre><code>&lt;my_code&gt;
+def calculate_total(items):
+    return sum(item.price for item in items)
+&lt;/my_code&gt;
+
+&lt;docs&gt;
+The Item class has fields: name (str), price (float), quantity (int).
+Prices are stored in cents as integers.
+&lt;/docs&gt;
+
+Using the documentation above, find the bug in my_code.
+</code></pre>
+<p>Now Claude knows: parse <code>my_code</code> as Python, consult <code>docs</code> as ground truth, find the mismatch (the docs say price is an integer in cents, but the code treats it as if the sum is final).</p>
+<hr />
+<h2>Custom Tag Names Matter</h2>
+<p>The lesson is explicit that you do not need "official" XML. The tag names are semantic hints, so more specific is better:</p>
+<table>
+<thead>
+<tr>
+<th>Weak</th>
+<th>Strong</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;data&gt;</code></td>
+<td><code>&lt;sales_records&gt;</code></td>
+<td>Tells Claude what kind of data</td>
+</tr>
+<tr>
+<td><code>&lt;info&gt;</code></td>
+<td><code>&lt;athlete_information&gt;</code></td>
+<td>Disambiguates from any other info</td>
+</tr>
+<tr>
+<td><code>&lt;text&gt;</code></td>
+<td><code>&lt;customer_review&gt;</code></td>
+<td>Implies domain (sentiment, tone)</td>
+</tr>
+<tr>
+<td><code>&lt;input&gt;</code></td>
+<td><code>&lt;my_code&gt;</code> / <code>&lt;docs&gt;</code></td>
+<td>Distinguishes co-located content</td>
+</tr>
+</tbody>
+</table>
+<p>Rule of thumb: if you can name the variable in your application code, use that exact name as the tag.</p>
+<hr />
+<h2>When XML Tags Are Most Valuable</h2>
+<p>Straight from the source, XML is most useful when:</p>
+<ul>
+<li>Including large amounts of context or data</li>
+<li>Mixing different types of content (code, documentation, data)</li>
+<li>You want to be extra clear about content boundaries</li>
+<li>Working with complex prompts that interpolate multiple variables</li>
+</ul>
+<p>For a one-line prompt ("Translate to French: hello"), tags are overkill. The payoff scales with prompt complexity.</p>
+<hr />
+<h2>Python Pattern: String Interpolation Safely</h2>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+athlete_info = &quot;&quot;&quot;- Height: 6'2&quot;
+- Weight: 180 lbs
+- Goal: Build muscle
+- Dietary restrictions: Vegetarian&quot;&quot;&quot;
+
+prompt = f&quot;&quot;&quot;&lt;athlete_information&gt;
+{athlete_info}
+&lt;/athlete_information&gt;
+
+Generate a meal plan based on the athlete information above.&quot;&quot;&quot;
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}],
+)
+</code></pre>
+<p>Notice the interpolation point is entirely inside the tag. User-supplied data cannot leak into the instruction region, which also helps limit prompt-injection surface area: an attacker who inserts text can contaminate <code>athlete_information</code>, but the directive outside the tag is fixed.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Vague tag names</strong> — using <code>&lt;data&gt;</code> or <code>&lt;text&gt;</code> instead of something descriptive like <code>&lt;sales_records&gt;</code>. Claude cannot exploit a hint that is not there.</li>
+<li><strong>Forgetting closing tags</strong> — an unclosed <code>&lt;my_code&gt;</code> may cause Claude to treat the rest of the prompt as code.</li>
+<li><strong>Mixing multiple sections without tags</strong> — co-locating code and docs with no delimiters is the exact failure case the lesson warns about.</li>
+<li><strong>Over-tagging trivial prompts</strong> — wrapping a one-sentence request in XML adds noise without benefit.</li>
+<li><strong>Assuming XML changes output format</strong> — tags structure the input; they do not automatically make Claude reply in XML. That requires a separate instruction.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>XML tags are the cheapest reliability upgrade in prompt engineering. They do not change what Claude can do; they change how confidently it can tell your instructions apart from your data. On the CCA exam, any scenario involving "large context," "multiple data types," or "Claude is confusing instructions with content" points to XML structuring as the answer.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: XML tagging is a first-line iteration move when evals show Claude misinterpreting input. Expect scenario questions where a prompt fails because of ambiguous boundaries.</li>
+<li><strong>D2 (Tool Design)</strong>: the same delimiting principle applies to <code>tool_use</code> / <code>tool_result</code> content blocks — structured channels beat free-form strings.</li>
+<li>Watch for the word "interpolating" or "mixing" in questions; the canonical answer is "use XML tags to delimit each section."</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What problem do XML tags solve in prompts?</td>
+<td>They mark explicit boundaries so Claude can distinguish instructions from data and from examples.</td>
+</tr>
+<tr>
+<td>Do XML tag names have to be from a standard?</td>
+<td>No — descriptive custom names like <code>&lt;sales_records&gt;</code> or <code>&lt;athlete_information&gt;</code> are preferred.</td>
+</tr>
+<tr>
+<td>When are XML tags most valuable?</td>
+<td>Large context, multiple content types, complex prompts with interpolated variables.</td>
+</tr>
+<tr>
+<td>Give a weak vs strong tag name pair.</td>
+<td>Weak: <code>&lt;data&gt;</code>; Strong: <code>&lt;sales_records&gt;</code>.</td>
+</tr>
+<tr>
+<td>What is the canonical code-vs-docs example?</td>
+<td>Wrap code in <code>&lt;my_code&gt;</code> and documentation in <code>&lt;docs&gt;</code>, then ask Claude to debug using the docs.</td>
+</tr>
+<tr>
+<td>Do XML tags change the output format of the response?</td>
+<td>No — they structure the input only. Output format requires its own instruction.</td>
+</tr>
+<tr>
+<td>What is the prompt-injection benefit of XML tags?</td>
+<td>User-supplied data stays inside a tag region, so directives outside the tag are harder to override.</td>
+</tr>
+<tr>
+<td>Is XML necessary for trivial prompts?</td>
+<td>No — the payoff scales with prompt complexity; for one-line prompts it adds noise.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

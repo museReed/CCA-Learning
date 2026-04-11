@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Being Clear And Direct Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Being Clear and Direct — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D3 — Evaluation &amp; Iteration (20%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（prompt 设计与迭代）、1.1（指令遵循）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 26</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Prompt 的第一行是 heavy lifting 的关键——用祈使动词开头、直接描述任务，让 Claude 对你要什么完全没有模糊空间。</p>
+<hr />
+<h2>第一行原则</h2>
+<p>课程直接断言：prompt 的第一行是整个 request 最重要的部分。后面所有的东西——context、constraints、examples——都是环绕这个开头指令的脚手架。第一行写对，Claude 立刻对齐意图；第一行写错，后面再多 context 也救不完全。</p>
+<p>管住第一行的两个原则：<strong>clarity（清楚）</strong> 和 <strong>directness（直接）</strong>。</p>
+<hr />
+<h2>Clarity：prompt 怎么用字</h2>
+<p>「清楚」关于选字与明确性：</p>
+<ul>
+<li>用任何人都看得懂的简单语言。</li>
+<li>直接说你要什么，不要绕路、不要清嗓子。</li>
+<li>开头就用一句直白描述 Claude 的任务。</li>
+</ul>
+<p>像「我需要知道那种人家放在屋顶上、用太阳的东西——我想叫太阳能板的那种」这种模糊开头，逼 Claude 猜主题、格式、深度都要猜。清楚改写——「Write three paragraphs about how solar panels work.」——一句话锁定全部三项。</p>
+<hr />
+<h2>Directness：prompt 怎么结构化</h2>
+<p>「直接」关于语法形式：</p>
+<ul>
+<li><strong>用指令，不要用问句</strong>。</li>
+<li>用 action verb 开头：Write、Create、Generate、Identify、Summarize、Extract、List。</li>
+</ul>
+<p>像「我在看可再生能源，地热听起来很酷。有哪些国家在用？」这种问句会让 Claude 用对话语气回答、没有结构。直接改写——「Identify three countries that use geothermal energy. Include generation stats for each.」——指定了数量（3）、限制（用地热）、必要输出（每国附统计）。</p>
+<p>语法从问句变命令是有实际作用的。问句引出回答，祈使句引出产出。</p>
+<hr />
+<h2>贯穿示例</h2>
+<p>套用到 Lesson 25 的餐单 prompt：</p>
+<p><strong>弱 baseline：</strong></p>
+<pre><code>What should this person eat?
+</code></pre>
+<p><strong>Clear and direct 改写：</strong></p>
+<pre><code>Generate a one-day meal plan for an athlete that meets their dietary restrictions.
+</code></pre>
+<p>改写版一句话告诉 Claude 三件事：</p>
+<table>
+<thead>
+<tr>
+<th>元素</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>动作</td>
+<td>Generate</td>
+</tr>
+<tr>
+<td>对象</td>
+<td>一份餐单</td>
+</tr>
+<tr>
+<td>限制</td>
+<td>一日份、给运动员、符合饮食限制</td>
+</tr>
+</tbody>
+</table>
+<p>问句版本这三个元素全都缺。</p>
+<hr />
+<h2>度量结果</h2>
+<p>课程给了跑 evaluator 的具体数字：</p>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>分数 (/10)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"What should this person eat?"</td>
+<td>2.32</td>
+</tr>
+<tr>
+<td>"Generate a one-day meal plan for an athlete that meets their dietary restrictions."</td>
+<td>3.92</td>
+</tr>
+</tbody>
+</table>
+<p>单单改一行就 <strong>+1.60 的绝对进步</strong>。这不是终点——后面的技巧（specificity、examples、structure）还会继续往上推——但证明了光第一行就值好几分。</p>
+<hr />
+<h2>为什么这在机制上有效</h2>
+<p>Claude 被训练成遵循指令。看到祈使句开头时，模型的 next-token 概率分布会往「服从、产出要求的 artifact」这类 response pattern 靠拢。看到模糊问句时，分布会散到多种可能的 response style：对话、澄清、推测、保留。祈使句把分布 collapse 到你要的模式。</p>
+<p>所以课程提的「把 Claude 当成需要明确指引的能干助理」比「正在聊天的朋友」好用。前者把互动 framing 成任务执行，后者邀请闲聊。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>开头先给 context</strong> — 「我在看 X……」把指令延后又稀释。指令先、context 后。</li>
+<li><strong>把任务写成问句</strong> — 问句看起来礼貌但结构模糊。</li>
+<li><strong>用模糊名词</strong> — 「那些东西」「一些」「合理就好」都把诠释 push 给 Claude。</li>
+<li><strong>以为后面指令会修好烂第一行</strong> — 后文能 refine 但不能 retro-frame 一个糊的开头。</li>
+<li><strong>叠加保留语</strong> — 「如果可以的话，可不可以也许……」把祈使句弱化成选配。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>祈使句开头是 prompt engineering 里最便宜、最快的胜利。在加 examples、加结构、加 XML tag 之前，先把第一行重写成 action verb 开头的命令句。课程示例中这个改动在 10 分制上贡献 +1.6 分——每个字符的投报率比其他任何技巧都高。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>：「问句 → 祈使句」是 prompt 改进 playbook 的第一招，也是最便宜的一招。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：agent 的 system prompt 同一个原则——先写 agent 的核心祈使，不要先写前言。</li>
+<li>题目可能给一个弱 prompt，要你选改进版——祈使句改写几乎永远是答案。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt 哪一行最重要？</td>
+<td>第一行。它为后续一切定调，决定 Claude 怎么 framing 回应。</td>
+</tr>
+<tr>
+<td>写好第一行的两个原则？</td>
+<td>Clarity（简单无歧义）和 Directness（用指令不用问句、action verb 开头）。</td>
+</tr>
+<tr>
+<td>太阳能板弱 vs 清楚开头各一例？</td>
+<td>弱：「屋顶上那个用太阳的东西」；清楚：「Write three paragraphs about how solar panels work.」</td>
+</tr>
+<tr>
+<td>Prompt 该用什么语法形式？</td>
+<td>祈使句（命令）用 Write、Create、Generate、Identify 这类 action verb 开头，不用问句。</td>
+</tr>
+<tr>
+<td>课程量到光靠 clarity + directness 的分数进步？</td>
+<td>2.32 → 3.92，改一行的 +1.6 分进步。</td>
+</tr>
+<tr>
+<td>为什么祈使句比问句对 Claude 更有效？</td>
+<td>它把 response 分布 collapse 到任务执行，而不是对话或澄清模式。</td>
+</tr>
+<tr>
+<td>改写后餐单开头告诉 Claude 哪三件事？</td>
+<td>动作（generate）、对象（meal plan）、限制（一日、运动员、符合饮食限制）。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Evaluation Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Evaluation — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (eval design), 3.2 (test datasets), 3.3 (eval execution)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 17</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt evaluation is the product-quality equivalent of A/B testing for AI features — it lets your team ship prompt changes with measured confidence instead of hoping the last tweak didn't break anything for real users.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Every AI feature your team ships depends on a prompt. Without an evaluation pipeline, "is this prompt good?" is an opinion your engineer has, not a fact your product has. That gap has direct business consequences.</p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Root cause</th>
+<th>Business impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Support tickets about "AI gave wrong answer"</td>
+<td>Prompt was never tested on realistic traffic</td>
+<td>Customer churn, brand trust erosion</td>
+</tr>
+<tr>
+<td>Engineers arguing about which prompt version is "better"</td>
+<td>No objective metric to end the debate</td>
+<td>Slow iteration, political decisions</td>
+</tr>
+<tr>
+<td>Fear of changing an existing prompt</td>
+<td>No safety net to catch regressions</td>
+<td>Feature stagnation, tech debt on prompts</td>
+</tr>
+<tr>
+<td>Inability to quote a quality number to execs</td>
+<td>No eval score to point at</td>
+<td>No AI quality OKR is possible</td>
+</tr>
+</tbody>
+</table>
+<p>Prompt evaluation turns every one of those "opinions" and "fears" into a number. Numbers are how PMs run products.</p>
+<hr />
+<h2>Mental Model: The Restaurant Kitchen</h2>
+<p>Think of a prompt as a recipe, and prompt evaluation as the tasting panel.</p>
+<table>
+<thead>
+<tr>
+<th>Kitchen concept</th>
+<th>Prompt concept</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Recipe card</td>
+<td>Prompt template</td>
+</tr>
+<tr>
+<td>Chef tweaks the recipe</td>
+<td>Prompt engineer tweaks the prompt</td>
+</tr>
+<tr>
+<td>Chef tastes once, ships the dish</td>
+<td>Option 1 — test once and ship</td>
+</tr>
+<tr>
+<td>Chef tastes five times, patches seasoning</td>
+<td>Option 2 — test a few times, patch corner cases</td>
+</tr>
+<tr>
+<td>Tasting panel scores 20 dishes on a rubric, chef iterates</td>
+<td>Option 3 — run through an eval pipeline</td>
+</tr>
+</tbody>
+</table>
+<p>Option 3 is the only path that gives you a Michelin-grade kitchen. Options 1 and 2 feel fast but produce inconsistent dinners.</p>
+<hr />
+<h2>The Three Paths — PM Framing</h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>What engineers actually do</th>
+<th>PM-visible risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Test once</td>
+<td>Run the prompt on one example, looks fine, ship</td>
+<td>High: every unusual user input is a potential incident</td>
+</tr>
+<tr>
+<td>2. Test and patch</td>
+<td>Run a handful of edge cases they thought of</td>
+<td>Medium: human imagination misses real tail behavior</td>
+</tr>
+<tr>
+<td>3. Eval pipeline</td>
+<td>Run hundreds/thousands of cases through an automated scorer</td>
+<td>Low: regressions are caught on dev machine, not in customer tickets</td>
+</tr>
+</tbody>
+</table>
+<p>When an engineer says "the prompt is ready," the PM's next question should always be: <em>which of these three paths did you take?</em></p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When Evaluation is Non-Negotiable</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Customer-facing AI feature</td>
+<td>Failures are visible to users; cost of incidents is high</td>
+</tr>
+<tr>
+<td>Prompt that handles money, health, legal, or safety decisions</td>
+<td>Accuracy is a compliance and liability issue</td>
+</tr>
+<tr>
+<td>Any feature you plan to iterate monthly</td>
+<td>Without eval, every iteration is a regression risk</td>
+</tr>
+<tr>
+<td>Feature where you want to compare two models (Haiku vs. Sonnet)</td>
+<td>Eval gives the objective comparison needed for the cost/quality trade-off</td>
+</tr>
+</tbody>
+</table>
+<h3>When You Can Defer (Briefly)</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Caveat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Internal prototype for a demo next week</td>
+<td>Defer, but do not ship to users without eval</td>
+</tr>
+<tr>
+<td>Single-use throwaway script</td>
+<td>Defer, but recognize you are creating tech debt if it sticks</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>Before approving any AI feature for GA, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If "No"</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Do we have a documented eval dataset that reflects real user inputs?</td>
+<td>Block the launch — you cannot measure quality</td>
+</tr>
+<tr>
+<td>Can we produce an objective score for the current prompt version?</td>
+<td>Block the launch — you have no baseline</td>
+</tr>
+<tr>
+<td>If we change the prompt next month, will CI tell us whether quality went up or down?</td>
+<td>Block the launch — you have no regression safety</td>
+</tr>
+<tr>
+<td>Can I cite a number in the quality section of the launch doc?</td>
+<td>Block the launch — your quality story is vibes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Accepting "it looks good" as a quality signal</strong> — you should require a number, not a vibe, before any prompt-backed feature goes to GA.</li>
+<li><strong>Letting engineers skip eval because of timeline pressure</strong> — every skipped eval becomes a production incident you will pay for later.</li>
+<li><strong>Not budgeting API spend for evals</strong> — eval runs cost money; include them in the feature's cost model from day one.</li>
+<li><strong>Conflating one good demo with production readiness</strong> — a demo is Option 1; Option 1 is a trap.</li>
+<li><strong>Not owning the eval dataset as a PM artifact</strong> — the dataset encodes what "good" means for your product. That is a PM decision, not a junior eng decision.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>As a PM, your job is to make "quality" a number. Prompt evaluation is the mechanism that turns AI quality from a subjective argument into an objective metric you can put in an OKR, a launch doc, and an incident postmortem. On the CCA exam, questions framed around "how do we know this prompt is ready for production?" are D3 questions, and the answer is always: run it through an eval pipeline.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: distinguish prompt engineering (how you write prompts) from prompt evaluation (how you measure prompts). The three-paths framing and why Option 3 wins.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: prompt eval is a prerequisite for production rollout — no eval, no launch.</li>
+<li>Watch for exam prompts framed as "how do we compare prompt versions," "how do we catch regressions," "how do we report quality" — all D3/D5 and all point at an eval pipeline.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What PM problem does prompt evaluation solve?</td>
+<td>It converts subjective "is this prompt good?" into an objective score you can put in launch docs, OKRs, and incident reviews.</td>
+</tr>
+<tr>
+<td>What is the restaurant analogy for prompt evaluation?</td>
+<td>A tasting panel scoring dishes on a rubric so the chef can iterate with confidence instead of trusting one taste test.</td>
+</tr>
+<tr>
+<td>What are the three paths a PM should ask about after a prompt is drafted?</td>
+<td>1) Test once, 2) Test a few corner cases, 3) Run through an eval pipeline — only #3 is safe for GA.</td>
+</tr>
+<tr>
+<td>What should a PM require before approving GA for an AI feature?</td>
+<td>A dataset, an objective score, regression safety, and a number they can cite in the launch doc.</td>
+</tr>
+<tr>
+<td>Why is "it looks good on the demo" insufficient?</td>
+<td>Demos are Option 1 — one example is not a random sample of production traffic and hides failure modes.</td>
+</tr>
+<tr>
+<td>When is deferring an eval pipeline acceptable?</td>
+<td>Only for internal prototypes or throwaway scripts — never for customer-facing features.</td>
+</tr>
+<tr>
+<td>Who owns the eval dataset?</td>
+<td>It is a PM-level artifact because it encodes what "good" means for the product, not just an engineering decision.</td>
+</tr>
+<tr>
+<td>Which CCA domain handles prompt evaluation?</td>
+<td>D3 Evaluation &amp; Iteration (primary), D5 Enterprise Deployment (secondary as a production gate).</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

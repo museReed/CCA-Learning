@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Code Execution + Files API — 資料進,圖表出</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">上傳 CSV/PDF → 用 file_id 引用 → Claude 寫 Python → 沙箱執行 → 下載產出的圖表</text>
+
+  <rect x="40" y="90" width="220" height="120" rx="12" fill="#F3E8FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="90" width="220" height="32" rx="12" fill="#8B5CF6"/>
+  <rect x="40" y="110" width="220" height="12" fill="#8B5CF6"/>
+  <text x="150" y="112" text-anchor="middle" font-size="13" font-weight="600" fill="white">① Files API 上傳</text>
+  <text x="54" y="146" font-size="11" fill="#1E293B" font-weight="600">Client 端 helper</text>
+  <rect x="54" y="154" width="192" height="22" rx="4" fill="#0F172A"/>
+  <text x="150" y="169" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#34D399">upload("streaming.csv")</text>
+  <text x="54" y="192" font-size="10" fill="#6B7280">→ 取得 file_metadata.id</text>
+
+  <rect x="290" y="90" width="220" height="120" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="290" y="90" width="220" height="32" rx="12" fill="#3B82F6"/>
+  <rect x="290" y="110" width="220" height="12" fill="#3B82F6"/>
+  <text x="400" y="112" text-anchor="middle" font-size="13" font-weight="600" fill="white">② 送請求給 Claude</text>
+  <text x="304" y="146" font-size="11" fill="#1E293B" font-weight="600">User 訊息包含:</text>
+  <text x="304" y="164" font-size="10" fill="#1E293B">• text:「分析流失原因」</text>
+  <text x="304" y="180" font-size="10" fill="#1E293B">• container_upload(file_id)</text>
+  <text x="304" y="196" font-size="10" fill="#1E293B">• tools=[code_execution_20250522]</text>
+
+  <rect x="540" y="90" width="420" height="120" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="540" y="90" width="420" height="32" rx="12" fill="#22C55E"/>
+  <rect x="540" y="110" width="420" height="12" fill="#22C55E"/>
+  <text x="750" y="112" text-anchor="middle" font-size="13" font-weight="600" fill="white">③ Anthropic 託管沙箱</text>
+  <rect x="554" y="136" width="180" height="60" rx="6" fill="white" stroke="#86EFAC"/>
+  <text x="644" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#166534">Docker 容器</text>
+  <text x="644" y="170" text-anchor="middle" font-size="9" fill="#14532D">Python runtime(隔離)</text>
+  <text x="644" y="184" text-anchor="middle" font-size="9" fill="#EF4444" font-weight="600">✗ 無網路存取</text>
+  <rect x="744" y="136" width="204" height="60" rx="6" fill="white" stroke="#86EFAC"/>
+  <text x="846" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#166534">Files ↔ 容器橋接</text>
+  <text x="846" y="170" text-anchor="middle" font-size="9" fill="#14532D">上傳的 file_id 掛載進容器</text>
+  <text x="846" y="184" text-anchor="middle" font-size="9" fill="#14532D">產出檔案 → 新的 file_id</text>
+
+  <path d="M260,150 L288,150" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M510,150 L538,150" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="40" y="240" width="920" height="210" rx="12" fill="white" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="60" y="264" font-size="12" font-weight="700" fill="#1E293B">迭代迴圈 — Claude 單次回應內可執行多次程式</text>
+
+  <rect x="60" y="280" width="210" height="150" rx="10" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="165" y="302" text-anchor="middle" font-size="12" font-weight="700" fill="#1E40AF">A. Claude 寫程式</text>
+  <text x="74" y="322" font-size="10" fill="#6B7280">server_tool_use block</text>
+  <rect x="74" y="330" width="182" height="90" rx="4" fill="#0F172A"/>
+  <text x="84" y="346" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">import pandas as pd</text>
+  <text x="84" y="360" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">df = pd.read_csv(</text>
+  <text x="84" y="374" font-size="9" font-family="Menlo, monospace" fill="#FDE68A">  "/mnt/user/streaming.csv"</text>
+  <text x="84" y="388" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">)</text>
+  <text x="84" y="402" font-size="9" font-family="Menlo, monospace" fill="#34D399">plt.savefig("churn.png")</text>
+
+  <rect x="300" y="280" width="210" height="150" rx="10" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <text x="405" y="302" text-anchor="middle" font-size="12" font-weight="700" fill="#166534">B. 沙箱執行</text>
+  <text x="314" y="322" font-size="10" fill="#6B7280">code_execution_tool_result</text>
+  <rect x="314" y="330" width="182" height="40" rx="4" fill="white" stroke="#86EFAC"/>
+  <text x="405" y="347" text-anchor="middle" font-size="10" fill="#14532D" font-weight="600">stdout + 回傳值</text>
+  <text x="405" y="361" text-anchor="middle" font-size="9" fill="#6B7280">回饋給 Claude</text>
+  <rect x="314" y="378" width="182" height="40" rx="4" fill="white" stroke="#86EFAC"/>
+  <text x="405" y="395" text-anchor="middle" font-size="10" fill="#14532D" font-weight="600">產出檔案 → 新 file_id</text>
+  <text x="405" y="409" text-anchor="middle" font-size="9" fill="#6B7280">例:churn.png、report.pdf</text>
+
+  <rect x="540" y="280" width="210" height="150" rx="10" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+  <text x="645" y="302" text-anchor="middle" font-size="12" font-weight="700" fill="#92400E">C. Claude 解讀結果</text>
+  <text x="554" y="322" font-size="10" fill="#6B7280">決定:繼續迭代 或 結案</text>
+  <rect x="554" y="330" width="182" height="38" rx="4" fill="white" stroke="#FDE68A"/>
+  <text x="645" y="347" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">迭代 → 回到步驟 A</text>
+  <text x="645" y="361" text-anchor="middle" font-size="9" fill="#78350F">需要時再跑更多程式</text>
+  <rect x="554" y="376" width="182" height="42" rx="4" fill="white" stroke="#FDE68A"/>
+  <text x="645" y="393" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">結案 → text block</text>
+  <text x="645" y="407" text-anchor="middle" font-size="9" fill="#78350F">分析結論 + 圖表連結</text>
+
+  <rect x="780" y="280" width="160" height="150" rx="10" fill="#F3E8FF" stroke="#8B5CF6" stroke-width="1.5"/>
+  <text x="860" y="302" text-anchor="middle" font-size="12" font-weight="700" fill="#6B21A8">D. 下載產出</text>
+  <text x="794" y="322" font-size="10" fill="#6B7280">code_execution_output</text>
+  <rect x="794" y="330" width="132" height="50" rx="4" fill="#0F172A"/>
+  <text x="860" y="350" text-anchor="middle" font-size="9" font-family="Menlo, monospace" fill="#34D399">download_file(</text>
+  <text x="860" y="363" text-anchor="middle" font-size="9" font-family="Menlo, monospace" fill="#FDE68A">  "file_id"</text>
+  <text x="860" y="374" text-anchor="middle" font-size="9" font-family="Menlo, monospace" fill="#34D399">)</text>
+  <text x="860" y="400" text-anchor="middle" font-size="10" fill="#6B21A8" font-weight="600">透過 Files API</text>
+  <text x="860" y="414" text-anchor="middle" font-size="9" fill="#6B7280">(churn.png 存到本機)</text>
+
+  <path d="M270,355 L298,355" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M510,355 L538,355" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M750,355 L778,355" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M645,280 Q645,255 165,255 L165,278" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#arrow)"/>
+  <text x="400" y="250" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">若需要進一步分析,回到步驟 A</text>
+
+  <rect x="40" y="470" width="920" height="90" rx="12" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text x="56" y="492" font-size="12" font-weight="700" fill="#1E293B">回應包含三種 block:</text>
+  <rect x="56" y="502" width="280" height="46" rx="6" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="196" y="520" text-anchor="middle" font-size="11" font-weight="600" fill="#1E40AF">text</text>
+  <text x="196" y="536" text-anchor="middle" font-size="9" fill="#6B7280">Claude 的分析與說明</text>
+  <rect x="346" y="502" width="280" height="46" rx="6" fill="#F0FDF4" stroke="#BBF7D0"/>
+  <text x="486" y="520" text-anchor="middle" font-size="11" font-weight="600" fill="#166534">server_tool_use</text>
+  <text x="486" y="536" text-anchor="middle" font-size="9" fill="#6B7280">Claude 實際選擇執行的 Python</text>
+  <rect x="636" y="502" width="304" height="46" rx="6" fill="#F3E8FF" stroke="#DDD6FE"/>
+  <text x="788" y="520" text-anchor="middle" font-size="11" font-weight="600" fill="#6B21A8">code_execution_tool_result</text>
+  <text x="788" y="536" text-anchor="middle" font-size="9" fill="#6B7280">stdout + 產出 file_id(用 Files API 下載)</text>
+</svg>

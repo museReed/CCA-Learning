@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Based Grading Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>模型評分 Model-Based Grading — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D3 — Evaluation（20%）主要；D5 — Enterprise Deployment（20%）次要</td>
+</tr>
+<tr>
+<td>任務聲明</td>
+<td>3.4（LLM-as-judge 評分）、3.3（測試案例執行）、5.4（eval 驅動迭代）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 21</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話重點</h2>
+<p>Model-based grading 就是把「這個 AI 輸出感覺不錯嗎？」變成 dashboard 上的一個數字 —— 讓 prompt engineering 不再靠 vibes，而是變成可衡量的產品 workflow。</p>
+<hr />
+<h2>為什麼 PM 要在意</h2>
+<p>沒有評分 eval，每次改 prompt 都是信仰之躍。有人動一下 system prompt、看十筆輸出、就上線。下列基本問題根本答不出來：</p>
+<ul>
+<li>這週的 prompt 改動到底有沒有提升 helpfulness？</li>
+<li>新指令是不是搞壞了 completeness？</li>
+<li>我們是不是在不知情的狀況下退化了 safety？</li>
+</ul>
+<p>Model-based grading 給你<strong>每個 prompt 版本的品質指標</strong> —— 一個可以像 DAU 或 conversion rate 一樣隨時間繪製的數字。它把 prompt engineering 從手藝變成工程。</p>
+<hr />
+<h2>心智模型：餐廳評論家</h2>
+<p>把三種 grader 想成三種餐廳評論系統：</p>
+<table>
+<thead>
+<tr>
+<th>Grader 類型</th>
+<th>餐廳比喻</th>
+<th>優點</th>
+<th>缺點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Code grader</strong></td>
+<td>帶檢查表的衛生稽查員</td>
+<td>快、便宜、100% 一致</td>
+<td>只能檢查規則、不能判斷味道</td>
+</tr>
+<tr>
+<td><strong>Model grader</strong></td>
+<td>用 email 寫評論的 freelance 美食評論家</td>
+<td>能判斷味道、可便宜擴展</td>
+<td>每次造訪意見略有不同</td>
+</tr>
+<tr>
+<td><strong>Human grader</strong></td>
+<td>親自到場的米其林密探</td>
+<td>最深入、最細膩</td>
+<td>慢又貴</td>
+</tr>
+</tbody>
+</table>
+<p>真正的連鎖餐廳三種都用。PM 在打造 AI 功能時也該如此：code graders 做規則遵守、model graders 做體驗品質、high stakes（安全、法務、品牌）時用 human graders。</p>
+<hr />
+<h2>產品使用情境</h2>
+<h3>何時用 Model Graders</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>為什麼 model grader 適合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「這個客服回應有沒有幫上忙？」</td>
+<td>Helpfulness 是代碼無法判斷的主觀題</td>
+</tr>
+<tr>
+<td>「AI 有沒有照我們的指令做？」</td>
+<td>指令遵循是語義層面的問題</td>
+</tr>
+<tr>
+<td>「這個摘要完整嗎？」</td>
+<td>Completeness 取決於意義，不是字數</td>
+</tr>
+<tr>
+<td>「這個回應感覺安全、符合品牌嗎？」</td>
+<td>語氣與安全需要 model 的判斷</td>
+</tr>
+</tbody>
+</table>
+<h3>何時<strong>不要</strong>用 Model Graders</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>更好的替代</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「輸出是不是合法的 JSON？」</td>
+<td>用 code grader —— deterministic 且免費</td>
+</tr>
+<tr>
+<td>「回應是不是 200 字以內？」</td>
+<td>用 code grader —— 很瑣碎</td>
+</tr>
+<tr>
+<td>「答案是不是跟已知正解相符？」</td>
+<td>用 code grader 做字串比對</td>
+</tr>
+<tr>
+<td>「這個有沒有違反我們最敏感的政策？」</td>
+<td>棘手 case 走 human graders</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>每個 PM 該爭取的那一招</h2>
+<p>來源的 grader prompt 依序要求 model 回傳四件事：</p>
+<ol>
+<li>Strengths（1-3 項）</li>
+<li>Weaknesses（1-3 項）</li>
+<li>Reasoning（簡短解釋）</li>
+<li>Score（1-10）</li>
+</ol>
+<p>這是<strong>整課最重要的設計決策</strong>。來源指出：沒有 strengths 和 weaknesses，model graders 都會打 6 分 —— 追蹤改善完全沒用。</p>
+<p>PM 應該堅持保留這個結構，即使工程端壓力要求「簡化 grader」。strengths 和 weaknesses 也直接可用作 PM 的產物：變成 prompt 修改 backlog，reasoning 也讓 CS 和 QA 在退化時能追溯原因。</p>
+<hr />
+<h2>PM 決策框架</h2>
+<p>當團隊提議加 model-based grading，請問：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>若答 Yes</th>
+<th>行動</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>我們有寫下清楚的評分標準嗎？</td>
+<td>Yes</td>
+<td>繼續 —— grader 需要先有標準</td>
+</tr>
+<tr>
+<td>要衡量的品質維度是主觀的（helpfulness、completeness）？</td>
+<td>Yes</td>
+<td>Model grader 是對的選擇</td>
+</tr>
+<tr>
+<td>要衡量的品質維度是 deterministic（valid JSON、長度）？</td>
+<td>Yes</td>
+<td>改用 code grader</td>
+</tr>
+<tr>
+<td>我們在乎<strong>絕對</strong>分數嗎？</td>
+<td>No</td>
+<td>很好 —— 信 delta，不信絕對數字</td>
+</tr>
+<tr>
+<td>reasoning 欄位有 log 而且可 review？</td>
+<td>Yes</td>
+<td>繼續 —— 這是評分可追溯的關鍵</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>把 grader 分數當 ground truth</strong> —— model graders 有隨機性。要信 prompt 版本之間的 delta，不要信絕對數字。</li>
+<li><strong>跳過標準定義</strong> —— 跟工程說「直接評就好」會產出一個到處打 6 分的 grader。一定要先定 rubric。</li>
+<li><strong>沒預留 grader 迭代預算</strong> —— grader 本身也是個 prompt，需要調。要排週期給它。</li>
+<li><strong>該用 code grader 卻用 model grader</strong> —— 浪費 token、拖慢迭代。規則類檢查一律優先 code grader。</li>
+<li><strong>沒記錄 reasoning</strong> —— 分數意外時，你需要辯護理由才能跟工程或 QA debug。</li>
+</ol>
+<blockquote>
+<p><strong>關鍵洞察</strong></p>
+<p>Model-based grading 把 prompt engineering 從手藝變成產品 workflow。Grader 本身不是 feature —— grader 是<strong>量測儀器</strong>，讓你有信心改善真正的 feature。懂這點的 PM 能在幾週內交付品質提升；跳過這步的 PM 只能交付 vibes 和希望。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D3（Evaluation）</strong>：Model-based grading 是 LLM-as-judge 的範式。要知道何時選 model vs code vs human，以及 grader prompt 必須包含什麼（strengths、weaknesses、reasoning、score）。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：Graders 支撐 eval 驅動迭代 —— 考題會圍繞生產環境量測 prompt 改善。</li>
+<li>注意：「你要衡量 helpfulness / instruction following / completeness」→ model grader。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model-based grading 解決什麼產品問題？</td>
+<td>把主觀的 AI 輸出品質變成 PM 可繪製、可迭代的數字。</td>
+</tr>
+<tr>
+<td>三種 grader 類型是什麼？</td>
+<td>Code graders、model graders、human graders。</td>
+</tr>
+<tr>
+<td>PM 何時該選 model grader 而非 code grader？</td>
+<td>當品質維度是主觀的 —— helpfulness、completeness、instruction following、safety。</td>
+</tr>
+<tr>
+<td>為什麼 model grader 必須回傳 strengths 和 weaknesses，而不只是分數？</td>
+<td>沒有它們，model 會退化到 6 分左右，指標失效。</td>
+</tr>
+<tr>
+<td>三種 grader 的餐廳比喻？</td>
+<td>衛生稽查員（code）、freelance 美食評論家（model）、米其林密探（human）。</td>
+</tr>
+<tr>
+<td>PM 該信哪種分數 —— 絕對或 delta？</td>
+<td>Prompt 版本之間的 delta —— model graders 絕對值有隨機性。</td>
+</tr>
+<tr>
+<td>Model graders 擅長哪些維度？</td>
+<td>Response quality、instruction following、completeness、helpfulness、safety。</td>
+</tr>
+<tr>
+<td>grader 到底是 feature 還是量測儀器？</td>
+<td>量測儀器 —— 它存在的目的是讓你有信心改善真正的 feature。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

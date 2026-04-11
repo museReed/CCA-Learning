@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generating Test Datasets Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Generating Test Datasets — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (test datasets), 3.1 (eval design), 3.3 (eval execution)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 19</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Your eval dataset encodes what "good" means for your AI feature — and the fastest way to get a usable first version is to have Claude draft it for you, then treat that draft as a living PM artifact you own and iterate on.</p>
+<hr />
+<h2>Mental Model: The Survey Questionnaire</h2>
+<p>Think of an eval dataset like a customer survey. A PM doesn't start user research from a blank page — they draft a questionnaire, test it on a few people, and refine. Same here:</p>
+<table>
+<thead>
+<tr>
+<th>Survey concept</th>
+<th>Eval dataset concept</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Draft survey questions</td>
+<td>Generate initial dataset with Haiku</td>
+</tr>
+<tr>
+<td>Pilot with a few users</td>
+<td>Run pilot eval on generated dataset</td>
+</tr>
+<tr>
+<td>Refine questions based on signal</td>
+<td>Edit dataset to strengthen weak spots</td>
+</tr>
+<tr>
+<td>Lock the final version</td>
+<td>Save <code>dataset.json</code> and version-control it</td>
+</tr>
+<tr>
+<td>Re-field the survey each quarter</td>
+<td>Re-run eval on every prompt change</td>
+</tr>
+</tbody>
+</table>
+<p>The dataset is the questionnaire. Every line in it is a decision about what your product should handle well.</p>
+<hr />
+<h2>The AWS Code Assistant Example</h2>
+<p>The lesson's running example is a prompt that helps users write AWS-specific <strong>Python, JSON, or regex</strong>. The requirement is clean output — no prose wrapping, no "here is your code" preamble. For a PM, three things are worth noticing about this setup:</p>
+<ol>
+<li><strong>The output format is a product requirement, not a technical detail.</strong> Clean code is what makes the feature usable in a copy-paste workflow; messy code breaks the use case.</li>
+<li><strong>The dataset exists to prove the prompt honors that product requirement on inputs the team did not hand-pick.</strong></li>
+<li><strong>The generation step creates a dataset that can surface formatting failures cheaply, before a customer ever sees them.</strong></li>
+</ol>
+<hr />
+<h2>Two Ways to Build a Dataset</h2>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Speed</th>
+<th>Fidelity</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hand-built</td>
+<td>Slow</td>
+<td>High — you control every case</td>
+<td>Specialized domains, regulated verticals, high-stakes features</td>
+</tr>
+<tr>
+<td>Claude-generated</td>
+<td>Fast</td>
+<td>Medium — coverage depends on prompt</td>
+<td>Bootstrapping, generic tasks, early-stage features</td>
+</tr>
+</tbody>
+</table>
+<p>The lesson picks Claude-generated for good reason: the initial cost is trivial, and you can always go back and edit the dataset by hand once you see what Claude produced. Hand-editing a generated dataset is much faster than writing one from scratch.</p>
+<p><strong>Cost lever:</strong> the lesson tells engineers to use <strong>Haiku</strong> (not Sonnet) for generation. For a PM, this maps directly to operating cost — bulk dataset work should never use your most expensive model.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When your team tells you they generated an eval dataset, walk through these questions:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>What a good answer looks like</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who generated it — human, or Claude?</td>
+<td>Either is fine, but the answer shapes the next questions</td>
+</tr>
+<tr>
+<td>If Claude: was it Haiku or Sonnet?</td>
+<td>Haiku — anything else is wasted spend on bulk work</td>
+</tr>
+<tr>
+<td>How many entries?</td>
+<td>Small (e.g., 3) to start; plan for tens/hundreds at production</td>
+</tr>
+<tr>
+<td>Does it cover the failure modes we're worried about?</td>
+<td>Explicit yes, with examples</td>
+</tr>
+<tr>
+<td>Is it committed to version control?</td>
+<td>Yes — the dataset is a PM artifact, not a notebook cell</td>
+</tr>
+<tr>
+<td>When a prompt change is proposed, will we re-run against THIS dataset?</td>
+<td>Yes — same dataset, different prompt</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When to Generate with Claude</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why generation wins</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New AI feature, no prior dataset</td>
+<td>Fastest path from zero to something measurable</td>
+</tr>
+<tr>
+<td>Exploring a new output format</td>
+<td>Claude suggests task varieties a PM might not think of</td>
+</tr>
+<tr>
+<td>Bootstrapping a dataset before hand-curating</td>
+<td>Saves hours of hand-writing</td>
+</tr>
+</tbody>
+</table>
+<h3>When to Hand-Build</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why hand-building wins</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Legal, medical, financial features</td>
+<td>Mistakes in the dataset become mistakes in the product</td>
+</tr>
+<tr>
+<td>Real-customer edge cases from support tickets</td>
+<td>Those are already the best test cases</td>
+</tr>
+<tr>
+<td>Production regression suite</td>
+<td>Each entry should correspond to a known failure mode</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Growing Dataset Pattern</h2>
+<p>A PM-friendly mental model for dataset evolution:</p>
+<ol>
+<li><strong>Bootstrap</strong> — generate ~3 entries with Haiku to prove the eval pipeline runs.</li>
+<li><strong>Expand</strong> — ask Haiku for 30 more to cover breadth; review and keep the good ones.</li>
+<li><strong>Curate</strong> — add hand-written cases from real customer complaints and edge cases.</li>
+<li><strong>Lock</strong> — version-control the dataset; every new prompt version runs against it.</li>
+<li><strong>Grow</strong> — whenever a production incident happens, add the failing case to the dataset so it can never regress again.</li>
+</ol>
+<p>Step 5 is how the dataset becomes a living quality contract between product and engineering.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Thinking the dataset is an engineering artifact</strong> — it encodes product definition-of-good, so it is a PM deliverable.</li>
+<li><strong>Accepting a dataset you have never read</strong> — if you cannot skim the cases and say "yes, these reflect real usage," the eval is not measuring the right thing.</li>
+<li><strong>Not adding production incidents to the dataset</strong> — every customer-visible failure should become a permanent test case.</li>
+<li><strong>Letting engineers regenerate the dataset between runs</strong> — this destroys comparability and hides regressions.</li>
+<li><strong>Under-budgeting for Haiku spend on dataset refresh</strong> — cheap, but not free; include it in the feature's operating cost.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The eval dataset is the clearest PM-owned answer to "what does quality mean for this feature?" Every case you include is an explicit promise that the product will handle inputs like this well. Because the CCA exam frames dataset work under D3, any question about "how should a team bootstrap test data for a new prompt" points at Haiku-generated datasets with prefilling, saved to disk for reuse.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: know the two dataset-building approaches, when to use each, and why Haiku is the default for generation.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: the versioned dataset on disk is a production artifact — it is what makes prompt regression detectable.</li>
+<li>Exam trigger: "bootstrap an eval dataset" → Haiku + prefilling + stop sequence + <code>json.loads</code> + save to disk.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Why should a PM consider the eval dataset a PM artifact, not an engineering one?</td>
+<td>It encodes what "good" means for the feature — that is a product judgment, not an implementation detail.</td>
+</tr>
+<tr>
+<td>What is the survey analogy for an eval dataset?</td>
+<td>A customer questionnaire — it is drafted, piloted, refined, locked, and re-fielded each time the product changes.</td>
+</tr>
+<tr>
+<td>What two approaches to dataset building does the lesson describe?</td>
+<td>Hand-built (slow, high fidelity) and Claude-generated (fast, medium fidelity).</td>
+</tr>
+<tr>
+<td>Which model should bulk dataset generation use?</td>
+<td>Haiku — it is the faster, cheaper choice for bulk creative work.</td>
+</tr>
+<tr>
+<td>What should a PM do when a production incident surfaces a new failure mode?</td>
+<td>Add the failing case to the eval dataset so the regression is caught on the next iteration.</td>
+</tr>
+<tr>
+<td>Why must the dataset stay fixed across prompt iterations?</td>
+<td>So that score differences between prompt versions can be attributed to the prompt change, not to a change in inputs.</td>
+</tr>
+<tr>
+<td>What is the minimum viable first dataset the lesson builds?</td>
+<td>Three Claude-generated tasks (one each for Python, JSON config, regex) for the AWS code-assistant prompt.</td>
+</tr>
+<tr>
+<td>Which CCA domain covers dataset generation?</td>
+<td>Primary: D3 Evaluation &amp; Iteration; the persisted dataset also touches D5 Enterprise Deployment as a production artifact.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

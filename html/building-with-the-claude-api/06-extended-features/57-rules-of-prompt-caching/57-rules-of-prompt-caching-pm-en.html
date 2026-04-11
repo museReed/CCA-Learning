@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rules Of Prompt Caching Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Rules of Prompt Caching — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (cost/latency optimization), 5.2 (production performance)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 57</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt caching has a rulebook you must follow to get any discount: opt in explicitly, keep cached content byte-identical, meet a 1,024-token minimum, and budget your four available "cache cuts" like a scarce resource.</p>
+<hr />
+<h2>Why PMs Should Care About the Rules</h2>
+<p>Engineering can turn on caching, but only a product-level decision about <strong>what stays stable</strong> actually makes caching pay off. If your product rewrites the system prompt every sprint, or lets users reorder tool definitions, or inserts the user's question into the middle of a "template," the cache breaks and the savings disappear.</p>
+<p>In other words: the rules of caching are really rules about <strong>how stable your context is</strong> — and that is a product decision, not an engineering one.</p>
+<hr />
+<h2>Mental Model: The Stamp-and-Ship Line at a Warehouse</h2>
+<p>Think of a shipping warehouse where boxes are stamped with labels. Every box moving down the conveyor belt has the same big company logo on the first three sides (stable) and a unique customer address on the fourth side (variable).</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Warehouse analogy</th>
+<th>Caching analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pre-stamped logo</td>
+<td>A rubber stamp with the company logo</td>
+<td>Tools + system prompt + stable context</td>
+</tr>
+<tr>
+<td>Custom label</td>
+<td>Hand-written customer address</td>
+<td>User's specific question</td>
+</tr>
+<tr>
+<td>Rule</td>
+<td>The logo must be identical — smudge one letter and you reprint the whole side</td>
+<td>Cached prefix must match byte-for-byte</td>
+</tr>
+<tr>
+<td>Batch size rule</td>
+<td>You can't pre-stamp tiny shipping slips — only full-size boxes</td>
+<td>Minimum 1,024 tokens before the breakpoint</td>
+</tr>
+<tr>
+<td>Cut-line rule</td>
+<td>Only four stamping stations on the line</td>
+<td>Up to four cache breakpoints per request</td>
+</tr>
+</tbody>
+</table>
+<p>The "stamp" only saves effort when everything to the left of it stays identical. The moment the stamp changes, you reprint everything.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>Product Patterns That Survive the Rules</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Why it fits the rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chat product with a locked system persona</td>
+<td>Stable prefix → byte-exact on every turn</td>
+</tr>
+<tr>
+<td>Coding assistant with versioned tool schemas</td>
+<td>Tools only change between deploys, not mid-session</td>
+</tr>
+<tr>
+<td>Document Q&amp;A with a canonical PDF</td>
+<td>Document is stable; only the user's question varies (and sits after the breakpoint)</td>
+</tr>
+<tr>
+<td>Agent loop with a fixed toolbox</td>
+<td>Tools + system prompt form a stable cacheable prefix every turn</td>
+</tr>
+</tbody>
+</table>
+<h3>Product Patterns That Break the Rules</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Why it breaks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Personalized greeting" injected at the top of every prompt</td>
+<td>User name is variable → cache miss every turn</td>
+</tr>
+<tr>
+<td>A/B test that rewrites the system prompt per user</td>
+<td>Prefixes differ → no one benefits from caching</td>
+</tr>
+<tr>
+<td>Short prompts (&lt; 1,024 tokens)</td>
+<td>Below the floor → caching is a no-op</td>
+</tr>
+<tr>
+<td>Feature that lets users reorder tool descriptions</td>
+<td>Byte order changes → cache invalidated</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>Before you scope caching into a feature, run through this checklist:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is there a stable chunk of context at least 1,024 tokens long?</td>
+<td>Below this, the cache does nothing.</td>
+</tr>
+<tr>
+<td>Can I guarantee that stable chunk sits at the <em>start</em> of the request?</td>
+<td>The breakpoint cuts a prefix; variables must live <em>after</em> it.</td>
+</tr>
+<tr>
+<td>Am I using fewer than 4 independent caching layers?</td>
+<td>4 is the hard cap — plan the budget.</td>
+</tr>
+<tr>
+<td>Can I commit to keeping that prefix byte-exact across releases?</td>
+<td>Even a whitespace rewrite breaks the cache.</td>
+</tr>
+<tr>
+<td>Is the context reused within an hour?</td>
+<td>TTL is 1 hour — cold features waste cache writes.</td>
+</tr>
+<tr>
+<td>Do I know what changes when — so I can place breakpoints where they minimize invalidation?</td>
+<td>Cache boundaries should align with change frequency.</td>
+</tr>
+</tbody>
+</table>
+<p>If you cannot answer "yes" to the first four, caching will underperform — or silently do nothing.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating caching as an engineering flag to flip</strong> — it is actually a <em>context stability contract</em>. Product decisions determine whether the cache ever hits.</li>
+<li><strong>Injecting variable content into the prefix</strong> — putting the user's name, timestamp, or session ID at the top of the system prompt destroys cache hits on every call. Move variables to the end.</li>
+<li><strong>Rewriting system prompts casually</strong> — every copy edit invalidates the cache. Treat the cached system prompt like a versioned asset with a change log.</li>
+<li><strong>Ignoring the 1,024-token floor in small features</strong> — "We added caching but cost didn't drop" is often because the prefix was too short to qualify.</li>
+<li><strong>Using all 4 breakpoints too early</strong> — a feature that consumes the full breakpoint budget leaves no headroom for later optimizations. Keep one spare.</li>
+<li><strong>Not communicating cache invalidation events</strong> — a single "polish pass" on the system prompt can reset cache savings across the whole fleet for an hour. Everyone should know when that happens.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The rules of prompt caching are really a contract about <em>what your product promises to keep stable</em>. A good PM reads this lesson and asks, "Which parts of my prompts, tools, and context can I genuinely freeze?" That answer — not the engineering flag — determines whether caching delivers its advertised savings.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong> — expect questions that test the mechanical rules: manual opt-in, byte-exact matching, 1,024-token floor, 4-breakpoint cap, 1-hour TTL, tools → system → messages ordering.</li>
+<li>Watch for scenarios where a PM is told "caching is on but we see no savings" — the answer is almost always a rule violation (e.g., variable content in the prefix, under-threshold content, or a casual edit to the system prompt).</li>
+<li>Know that system prompts and tool definitions are the <em>best</em> caching targets because they sit at the front of the processing order and rarely change.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is prompt caching automatic from a PM perspective?</td>
+<td>No — engineering must explicitly opt in per block, and product must keep the content stable for it to pay off.</td>
+</tr>
+<tr>
+<td>What minimum content length unlocks caching?</td>
+<td>1,024 tokens of cumulative content before and including the cache breakpoint.</td>
+</tr>
+<tr>
+<td>How many cache breakpoints can a single request use?</td>
+<td>Up to four.</td>
+</tr>
+<tr>
+<td>Why does the user's question belong <em>after</em> the breakpoint, not before?</td>
+<td>Because the cached prefix must be byte-identical; variable content in the prefix guarantees a cache miss.</td>
+</tr>
+<tr>
+<td>What product layers are the best caching targets?</td>
+<td>System prompts and tool definitions — large, stable, always first in the processing order.</td>
+</tr>
+<tr>
+<td>What breaks a cache hit even though nothing "meaningful" changed?</td>
+<td>Any whitespace edit, typo fix, added "please," or reordering of tool entries — caching is byte-exact.</td>
+</tr>
+<tr>
+<td>Why should a PM care about the 1-hour TTL?</td>
+<td>Low-frequency features expire their own cache entries before reuse, so caching yields nothing for them.</td>
+</tr>
+<tr>
+<td>What is the PM's real job with prompt caching?</td>
+<td>To guarantee context stability — the rules only pay off if product commits to keeping the cached prefix frozen.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

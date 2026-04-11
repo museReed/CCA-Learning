@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Based Grading Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Code-Based Grading — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.4 (deterministic scoring), 3.3 (test runner integration), 5.4 (combined eval metrics)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 22</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Code-based grading runs your model's output through deterministic parsers — JSON, Python AST, regex — and returns a 10 or a 0 per test case, giving you a cheap, reliable floor for eval quality that complements the fuzzier model grader.</p>
+<hr />
+<h2>Why Code Graders Exist</h2>
+<p>When evaluating AI models that generate code, you need more than "does the answer look right?" You need to verify that the generated code <strong>actually has valid syntax and follows the correct format</strong>. A model grader is too slow and too expensive for that — and it doesn't need a judgement call, it needs a parser.</p>
+<p>Code grading validates two aspects of AI-generated responses:</p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Format</strong></td>
+<td>The response should return only the requested code type (Python, JSON, or Regex) without explanations</td>
+</tr>
+<tr>
+<td><strong>Valid Syntax</strong></td>
+<td>The generated code should actually parse correctly as the intended language</td>
+</tr>
+<tr>
+<td><strong>Task Following</strong></td>
+<td>(handled by the model grader — not by code grading)</td>
+</tr>
+</tbody>
+</table>
+<p>The split is intentional: cheap/deterministic things go to code graders, subjective things go to model graders. Together they give a comprehensive evaluation.</p>
+<hr />
+<h2>The Three Validators</h2>
+<p>From the source, the three syntax validators each follow the same pattern — try to parse, return 10 on success, return 0 on failure:</p>
+<pre><code class="language-python">def validate_json(text):
+    try:
+        json.loads(text.strip())
+        return 10
+    except json.JSONDecodeError:
+        return 0
+
+def validate_python(text):
+    try:
+        ast.parse(text.strip())
+        return 10
+    except SyntaxError:
+        return 0
+
+def validate_regex(text):
+    try:
+        re.compile(text.strip())
+        return 10
+    except re.error:
+        return 0
+</code></pre>
+<p>Three engineering points:</p>
+<ol>
+<li><strong><code>.strip()</code> first</strong> — leading/trailing whitespace would otherwise cause false negatives on valid payloads.</li>
+<li><strong>Binary 10-or-0 output</strong> — keeps the scoring scale consistent with the model grader so they can be averaged later.</li>
+<li><strong>Catch-specific exceptions</strong> — <code>json.JSONDecodeError</code>, <code>SyntaxError</code>, <code>re.error</code>. A bare <code>except:</code> would mask bugs in the grader itself.</li>
+</ol>
+<p>All three validators use the standard library — no external dependencies, no API costs, latency measured in microseconds.</p>
+<hr />
+<h2>Dataset Format Requirement</h2>
+<p>For the code grader to know <em>which</em> validator to run, each test case must declare its expected format:</p>
+<pre><code class="language-python">{
+    &quot;task&quot;: &quot;Create a Python function to validate an AWS IAM username&quot;,
+    &quot;format&quot;: &quot;python&quot;
+}
+</code></pre>
+<p>The source recommends updating your dataset generation prompt to automatically include this <code>format</code> field in its example output structure, so new test cases always carry the hint needed for routing.</p>
+<hr />
+<h2>Improving Prompt Clarity</h2>
+<p>Code graders also push your underlying prompt engineering to be more disciplined. To increase pass rates, the source suggests two prompt-level moves:</p>
+<pre><code>* Respond only with Python, JSON, or a plain Regex
+* Do not add any comments or commentary or explanation
+</code></pre>
+<p>And a clever pre-fill trick — start the assistant message with a generic code fence opener that doesn't commit to a specific language:</p>
+<pre><code class="language-python">add_assistant_message(messages, &quot;```code&quot;)
+</code></pre>
+<p>This tells Claude to start generating code content without forcing the runner to know in advance whether the output is Python, JSON, or Regex. The validator called later depends on the <code>format</code> field in the test case, not on an a-priori fence choice.</p>
+<hr />
+<h2>Combining Model + Code Scores</h2>
+<p>The final step is merging the model grader score with the code grader score. The source's simple default is an unweighted average:</p>
+<pre><code class="language-python">model_grade = grade_by_model(test_case, output)
+model_score = model_grade[&quot;score&quot;]
+syntax_score = grade_syntax(output, test_case)
+
+score = (model_score + syntax_score) / 2
+</code></pre>
+<p>This gives equal weight to content quality (model grader) and technical correctness (code grader). The source explicitly notes you might adjust the weights based on what matters more for your specific use case — e.g., for a code-generation product, syntax correctness might carry 70% weight.</p>
+<hr />
+<h2>The Real Value of Code Graders</h2>
+<p>The source closes with the crucial framing: the score itself isn't inherently good or bad — <strong>what matters is whether you can improve it by refining your prompts.</strong> Code graders give you a quantitative way to measure prompt engineering progress rather than relying on subjective assessment. They are the quantitative spine of prompt iteration.</p>
+<p>Two practical properties to internalize:</p>
+<ul>
+<li><strong>Deterministic</strong> — same input produces the same score every time. No capriciousness like model graders.</li>
+<li><strong>Cheap</strong> — microsecond latency, no API cost. You can re-run the whole dataset on every prompt tweak.</li>
+</ul>
+<p>Together these mean code graders are the first line of defense in any eval pipeline. Fail the code grader? Don't even bother calling the model grader.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Using only a model grader for syntax</strong> — wastes tokens, introduces variance on a question that should be deterministic.</li>
+<li><strong>Not calling <code>.strip()</code></strong> — valid payloads with surrounding whitespace fail, false negatives pollute the metric.</li>
+<li><strong>Missing the <code>format</code> field in test cases</strong> — the runner cannot route to the correct validator.</li>
+<li><strong>Catching bare <code>Exception</code></strong> — hides bugs in the grader code itself; always catch the specific parser exception.</li>
+<li><strong>Not averaging with the model grader</strong> — code correctness alone is necessary but not sufficient; you also need content quality.</li>
+<li><strong>Using the same weights forever</strong> — different products value syntax vs. quality differently; tune the weighting.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Code graders are the cheap, deterministic spine of prompt evaluation. They cannot judge taste, but they catch every broken payload for free and in microseconds. Pair them with a model grader (for taste) and average the two — you now have a composite metric you can run on every prompt change without breaking the bank.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation)</strong>: Code graders are the deterministic half of a hybrid eval pipeline. Expect questions on when to use code vs. model graders and how to combine their scores.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: Deterministic scoring fits into CI/CD for prompts — cheap, fast, and reliable enough to run on every PR.</li>
+<li>Watch for: "You need to validate AI-generated JSON / Python / Regex" → always a code grader, never a model grader.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What two aspects does code grading validate?</td>
+<td>Format (only the requested code type) and Valid Syntax (actually parses).</td>
+</tr>
+<tr>
+<td>What score does a successful <code>validate_json</code> return?</td>
+<td>10</td>
+</tr>
+<tr>
+<td>What score does a failed <code>validate_python</code> return?</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Which Python module parses Python code for the validator?</td>
+<td><code>ast</code> — specifically <code>ast.parse(text.strip())</code>.</td>
+</tr>
+<tr>
+<td>Which exception does <code>validate_regex</code> catch?</td>
+<td><code>re.error</code></td>
+</tr>
+<tr>
+<td>What field must the dataset include so the runner knows which validator to use?</td>
+<td><code>format</code> — with values like <code>"python"</code>, <code>"json"</code>, or <code>"regex"</code>.</td>
+</tr>
+<tr>
+<td>What assistant prefill trick encourages raw-code output without committing to a language?</td>
+<td><code>add_assistant_message(messages, "```code")</code></td>
+</tr>
+<tr>
+<td>How does the source combine model grader and code grader scores?</td>
+<td>An unweighted average: <code>(model_score + syntax_score) / 2</code>.</td>
+</tr>
+<tr>
+<td>Why is the absolute code-grader score not inherently good or bad?</td>
+<td>Because what matters is whether you can improve it by refining your prompts — it's the direction that matters, not the level.</td>
+</tr>
+<tr>
+<td>What are the two main advantages of code graders over model graders?</td>
+<td>Deterministic (same input → same score) and extremely cheap (microseconds, no API cost).</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

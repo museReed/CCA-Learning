@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#F59E0B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Prompt Engineering — 四大支柱 + Eval 回饋迴圈</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">迭代:設目標 → 草擬 → 評估 → 套技巧 → 再評估。不要用猜的,每次修改都用數字驗證。</text>
+
+  <text x="500" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">四大支柱</text>
+
+  <rect x="30" y="115" width="225" height="170" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="30" y="115" width="225" height="36" rx="12" fill="#3B82F6"/>
+  <rect x="30" y="140" width="225" height="11" fill="#3B82F6"/>
+  <text x="142" y="139" text-anchor="middle" font-size="13" font-weight="600" fill="white">1. 清楚直接</text>
+  <text x="44" y="172" font-size="10" fill="#6B7280">明確說出你要什麼</text>
+  <rect x="44" y="182" width="197" height="36" rx="4" fill="#FEE2E2" stroke="#FCA5A5"/>
+  <text x="54" y="199" font-size="9" fill="#991B1B" font-weight="600">✗ 「告訴我關於貓的事」</text>
+  <text x="54" y="213" font-size="9" fill="#991B1B">(太模糊,沒有格式)</text>
+  <rect x="44" y="224" width="197" height="46" rx="4" fill="#DCFCE7" stroke="#86EFAC"/>
+  <text x="54" y="241" font-size="9" fill="#166534" font-weight="600">✓ 「列出 3 個關於家貓的</text>
+  <text x="54" y="254" font-size="9" fill="#166534" font-weight="600">事實,一行一個,純文字</text>
+  <text x="54" y="267" font-size="9" fill="#166534" font-weight="600">格式。」</text>
+
+  <rect x="265" y="115" width="225" height="170" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="265" y="115" width="225" height="36" rx="12" fill="#22C55E"/>
+  <rect x="265" y="140" width="225" height="11" fill="#22C55E"/>
+  <text x="377" y="139" text-anchor="middle" font-size="13" font-weight="600" fill="white">2. 具體明確</text>
+  <text x="279" y="172" font-size="10" fill="#6B7280">準則 + 流程步驟</text>
+  <rect x="279" y="182" width="197" height="88" rx="4" fill="white" stroke="#BBF7D0"/>
+  <text x="289" y="200" font-size="10" fill="#166534" font-weight="700">輸出準則</text>
+  <text x="289" y="214" font-size="9" fill="#1E293B">• 長度、格式、語氣</text>
+  <text x="289" y="226" font-size="9" fill="#1E293B">• 必要元素</text>
+  <text x="289" y="244" font-size="10" fill="#166534" font-weight="700">流程步驟</text>
+  <text x="289" y="258" font-size="9" fill="#1E293B">• 腦力激盪 → 挑選 → 大綱</text>
+  <text x="289" y="266" font-size="9" fill="#1E293B">• 用於多步推理任務</text>
+
+  <rect x="500" y="115" width="225" height="170" rx="12" fill="#F3E8FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="500" y="115" width="225" height="36" rx="12" fill="#8B5CF6"/>
+  <rect x="500" y="140" width="225" height="11" fill="#8B5CF6"/>
+  <text x="612" y="139" text-anchor="middle" font-size="13" font-weight="600" fill="white">3. 結構化(XML)</text>
+  <text x="514" y="172" font-size="10" fill="#6B7280">用 tag 標示不同段落</text>
+  <rect x="514" y="182" width="197" height="88" rx="4" fill="#0F172A"/>
+  <text x="524" y="200" font-size="9" font-family="Menlo, monospace" fill="#8B5CF6">&lt;instructions&gt;</text>
+  <text x="524" y="214" font-size="9" font-family="Menlo, monospace" fill="#FDE68A">  Summarize in 3 bullets</text>
+  <text x="524" y="226" font-size="9" font-family="Menlo, monospace" fill="#8B5CF6">&lt;/instructions&gt;</text>
+  <text x="524" y="242" font-size="9" font-family="Menlo, monospace" fill="#8B5CF6">&lt;document&gt;</text>
+  <text x="524" y="254" font-size="9" font-family="Menlo, monospace" fill="#FDE68A">  ...long text...</text>
+  <text x="524" y="266" font-size="9" font-family="Menlo, monospace" fill="#8B5CF6">&lt;/document&gt;</text>
+
+  <rect x="735" y="115" width="235" height="170" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="735" y="115" width="235" height="36" rx="12" fill="#F59E0B"/>
+  <rect x="735" y="140" width="235" height="11" fill="#F59E0B"/>
+  <text x="852" y="139" text-anchor="middle" font-size="13" font-weight="600" fill="white">4. 範例(few-shot)</text>
+  <text x="749" y="172" font-size="10" fill="#6B7280">用範例代替空談</text>
+  <rect x="749" y="182" width="207" height="88" rx="4" fill="white" stroke="#FDE68A"/>
+  <text x="759" y="200" font-size="9" fill="#78350F">Input: "great movie!"</text>
+  <text x="759" y="214" font-size="9" fill="#78350F">Output: POSITIVE</text>
+  <text x="759" y="230" font-size="9" fill="#78350F">Input: "boring plot"</text>
+  <text x="759" y="244" font-size="9" fill="#78350F">Output: NEGATIVE</text>
+  <text x="759" y="260" font-size="9" fill="#6B7280" font-style="italic">Claude 自動推出 pattern</text>
+
+  <text x="500" y="325" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">迭代迴圈(PE + Eval)</text>
+
+  <g>
+    <circle cx="145" cy="430" r="55" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+    <text x="145" y="418" text-anchor="middle" font-size="11" font-weight="700" fill="#1E40AF">1. 設目標</text>
+    <text x="145" y="434" text-anchor="middle" font-size="9" fill="#6B7280">這個 prompt</text>
+    <text x="145" y="446" text-anchor="middle" font-size="9" fill="#6B7280">要達成什麼?</text>
+
+    <circle cx="300" cy="430" r="55" fill="#F3E8FF" stroke="#8B5CF6" stroke-width="2"/>
+    <text x="300" y="418" text-anchor="middle" font-size="11" font-weight="700" fill="#6B21A8">2. 草擬 v1</text>
+    <text x="300" y="434" text-anchor="middle" font-size="9" fill="#6B7280">簡單天真的</text>
+    <text x="300" y="446" text-anchor="middle" font-size="9" fill="#6B7280">基線 prompt</text>
+
+    <circle cx="455" cy="430" r="55" fill="#F0FDF4" stroke="#22C55E" stroke-width="2"/>
+    <text x="455" y="418" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">3. 評估</text>
+    <text x="455" y="434" text-anchor="middle" font-size="9" fill="#6B7280">跑資料集 +</text>
+    <text x="455" y="446" text-anchor="middle" font-size="9" fill="#6B7280">評分 → 分數</text>
+
+    <circle cx="610" cy="430" r="55" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2"/>
+    <text x="610" y="418" text-anchor="middle" font-size="11" font-weight="700" fill="#92400E">4. 套技巧</text>
+    <text x="610" y="432" text-anchor="middle" font-size="9" fill="#6B7280">加入一項支柱</text>
+    <text x="610" y="444" text-anchor="middle" font-size="9" fill="#6B7280">(清楚、具體、</text>
+    <text x="610" y="456" text-anchor="middle" font-size="9" fill="#6B7280">XML、範例)</text>
+
+    <circle cx="765" cy="430" r="55" fill="#FEF2F2" stroke="#EF4444" stroke-width="2"/>
+    <text x="765" y="418" text-anchor="middle" font-size="11" font-weight="700" fill="#991B1B">5. 再評估</text>
+    <text x="765" y="434" text-anchor="middle" font-size="9" fill="#6B7280">分數有進步?</text>
+    <text x="765" y="446" text-anchor="middle" font-size="9" fill="#6B7280">留下。否則退回</text>
+  </g>
+
+  <path d="M200,430 L245,430" stroke="#64748B" stroke-width="2" marker-end="url(#arrow-amber)" fill="none"/>
+  <path d="M355,430 L400,430" stroke="#64748B" stroke-width="2" marker-end="url(#arrow-amber)" fill="none"/>
+  <path d="M510,430 L555,430" stroke="#64748B" stroke-width="2" marker-end="url(#arrow-amber)" fill="none"/>
+  <path d="M665,430 L710,430" stroke="#64748B" stroke-width="2" marker-end="url(#arrow-amber)" fill="none"/>
+
+  <path d="M765,485 Q765,540 455,540 Q455,510 455,485" stroke="#F59E0B" stroke-width="2" stroke-dasharray="5,3" fill="none" marker-end="url(#arrow-amber)"/>
+  <text x="610" y="562" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">在步驟 3 ↔ 4 之間循環,直到分數不再進步</text>
+
+  <rect x="830" y="370" width="140" height="180" rx="10" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text x="900" y="392" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">基本原則</text>
+  <text x="842" y="412" font-size="9" fill="#1E293B">• 一次只改一處</text>
+  <text x="842" y="424" font-size="9" fill="#1E293B">  (單一變數)</text>
+  <text x="842" y="440" font-size="9" fill="#1E293B">• 測試集保持</text>
+  <text x="842" y="452" font-size="9" fill="#1E293B">  不變</text>
+  <text x="842" y="468" font-size="9" fill="#1E293B">• 量測,不要猜</text>
+  <text x="842" y="484" font-size="9" fill="#1E293B">• v1 拿 2/10 分</text>
+  <text x="842" y="496" font-size="9" fill="#1E293B">  是正常的</text>
+  <text x="842" y="512" font-size="9" fill="#1E293B">• 分數不再進步</text>
+  <text x="842" y="524" font-size="9" fill="#1E293B">  就停下</text>
+</svg>

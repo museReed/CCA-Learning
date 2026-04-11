@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Based Grading Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Model-Based Grading — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.4 (LLM-as-judge grading), 3.3 (test case execution), 5.4 (eval-driven iteration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 21</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Model-based grading uses a second Claude call as a "judge" that returns a structured quality score (1-10) plus reasoning — turning subjective output quality into an objective, trackable metric you can iterate against.</p>
+<hr />
+<h2>The Grading Problem</h2>
+<p>When you build a prompt evaluation workflow, you need an <strong>objective signal</strong> about output quality. The source frames a grader as a function that takes model output and returns measurable feedback — typically a number between 1 and 10, where 10 is high quality and 1 is poor quality.</p>
+<p>Three grader families exist:</p>
+<table>
+<thead>
+<tr>
+<th>Grader Type</th>
+<th>What It Does</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Code grader</strong></td>
+<td>Programmatic checks (length, keywords, syntax, readability)</td>
+<td>Objective, rule-based properties</td>
+</tr>
+<tr>
+<td><strong>Model grader</strong></td>
+<td>Another AI model assesses quality via an API call</td>
+<td>Subjective quality, instruction following, helpfulness</td>
+</tr>
+<tr>
+<td><strong>Human grader</strong></td>
+<td>People manually review and score</td>
+<td>Nuanced judgement — but slow and tedious</td>
+</tr>
+</tbody>
+</table>
+<p>Model graders are the bridge: more flexible than code, faster and cheaper than humans.</p>
+<hr />
+<h2>When Model Graders Shine</h2>
+<p>The source lists the subjective dimensions model graders handle well:</p>
+<ul>
+<li>Response quality</li>
+<li>Quality of instruction following</li>
+<li>Completeness</li>
+<li>Helpfulness</li>
+<li>Safety</li>
+</ul>
+<p>These are all things code cannot check with a regex — they require judgement about meaning.</p>
+<hr />
+<h2>Evaluation Criteria Come First</h2>
+<p>Before writing any grader, you must define clear criteria. The source gives a code-generation prompt example with three criteria:</p>
+<ul>
+<li><strong>Format</strong> — response should return only Python, JSON, or Regex without explanation</li>
+<li><strong>Valid Syntax</strong> — produced code should parse correctly</li>
+<li><strong>Task Following</strong> — response should directly and accurately address the user's task</li>
+</ul>
+<p>The first two map to <strong>code graders</strong> (cheap, deterministic). The third — Task Following — is better suited for a <strong>model grader</strong> because it requires understanding whether the output actually solves the user's problem.</p>
+<hr />
+<h2>The Model Grader Function</h2>
+<p>From the source, nearly verbatim:</p>
+<pre><code class="language-python">def grade_by_model(test_case, output):
+    # Create evaluation prompt
+    eval_prompt = &quot;&quot;&quot;
+    You are an expert code reviewer. Evaluate this AI-generated solution.
+
+    Task: {task}
+    Solution: {solution}
+
+    Provide your evaluation as a structured JSON object with:
+    - &quot;strengths&quot;: An array of 1-3 key strengths
+    - &quot;weaknesses&quot;: An array of 1-3 key areas for improvement
+    - &quot;reasoning&quot;: A concise explanation of your assessment
+    - &quot;score&quot;: A number between 1-10
+    &quot;&quot;&quot;
+
+    messages = []
+    add_user_message(messages, eval_prompt)
+    add_assistant_message(messages, &quot;```json&quot;)
+
+    eval_text = chat(messages, stop_sequences=[&quot;```&quot;])
+    return json.loads(eval_text)
+</code></pre>
+<p>Three engineering details worth highlighting:</p>
+<ol>
+<li><strong>Assistant prefill with <code>```json</code></strong> — forces Claude to begin emitting JSON immediately, skipping any preamble.</li>
+<li><strong><code>stop_sequences=["```"]</code></strong> — cuts Claude off the moment it closes the JSON code fence, giving a clean, parseable string.</li>
+<li><strong>Structured output</strong> — requesting <code>strengths</code>, <code>weaknesses</code>, <code>reasoning</code> alongside <code>score</code> forces the model to justify itself. Without that context, the source notes models "tend to default to middling scores around 6."</li>
+</ol>
+<hr />
+<h2>Why Strengths + Weaknesses + Reasoning Matter</h2>
+<p>This is the single most important insight from the lesson. If you ask only for a score, model graders regress to the mean (score ≈ 6). Forcing the grader to write out strengths and weaknesses <em>before</em> committing to a number acts like a mini chain-of-thought: the model has to build a case, then pick a score consistent with that case. You get:</p>
+<ul>
+<li><strong>Less regression to 6</strong> — scores spread across the full range</li>
+<li><strong>Auditable grades</strong> — when a score surprises you, the reasoning tells you why</li>
+<li><strong>Actionable signal</strong> — weaknesses become your backlog of prompt-engineering fixes</li>
+</ul>
+<hr />
+<h2>Integrating Into the Test Runner</h2>
+<pre><code class="language-python">def run_test_case(test_case):
+    output = run_prompt(test_case)
+
+    # Grade the output
+    model_grade = grade_by_model(test_case, output)
+    score = model_grade[&quot;score&quot;]
+    reasoning = model_grade[&quot;reasoning&quot;]
+
+    return {
+        &quot;output&quot;: output,
+        &quot;test_case&quot;: test_case,
+        &quot;score&quot;: score,
+        &quot;reasoning&quot;: reasoning
+    }
+</code></pre>
+<p>Each test case now returns both the raw output and an objective score-plus-justification. The reasoning field is critical — it lets a human quickly sanity-check whether the grader is trustworthy for this task.</p>
+<hr />
+<h2>Averaging Across a Dataset</h2>
+<pre><code class="language-python">from statistics import mean
+
+def run_eval(dataset):
+    results = []
+
+    for test_case in dataset:
+        result = run_test_case(test_case)
+        results.append(result)
+
+    average_score = mean([result[&quot;score&quot;] for result in results])
+    print(f&quot;Average score: {average_score}&quot;)
+
+    return results
+</code></pre>
+<p>The average becomes the prompt's "quality metric." You change the prompt, re-run, and compare averages. The source is explicit that model graders are "somewhat capricious" — but capricious in a consistent way, so <em>deltas</em> are trustworthy even if absolute scores wobble.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Asking only for a score</strong> — the grader regresses to 6. Always require strengths, weaknesses, and reasoning first.</li>
+<li><strong>Forgetting the assistant prefill</strong> — without <code>```json</code> and a <code>stop_sequences=["```"]</code> pairing, you must parse arbitrary prose.</li>
+<li><strong>Treating the absolute score as ground truth</strong> — model graders are capricious. Trust <em>deltas</em> across prompt versions, not absolute numbers.</li>
+<li><strong>Using a model grader for deterministic checks</strong> — wasteful and slower than a code grader. Use code graders for syntax, length, and keyword checks.</li>
+<li><strong>Not logging the reasoning field</strong> — when a surprising score appears, you need the justification to debug.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Model graders work best when they must <em>argue their case</em> before picking a number. Force the grader to emit strengths, weaknesses, and reasoning — the score becomes a consequence of the argument, not an arbitrary guess. This single technique turns an unreliable 6-everywhere judge into an iteration-ready quality metric.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation)</strong>: Model-based grading is the canonical LLM-as-judge pattern. Expect questions on when to use model vs. code vs. human graders and how to structure the grader prompt.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: Automated grading underpins eval-driven prompt iteration and CI for prompts in production.</li>
+<li>Watch for scenarios like: "You need to measure instruction-following quality" → answer is model grader, not code grader.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three types of graders?</td>
+<td>Code graders, model graders, and human graders.</td>
+</tr>
+<tr>
+<td>What score range do graders typically return?</td>
+<td>A number between 1 and 10, where 10 is high quality and 1 is poor quality.</td>
+</tr>
+<tr>
+<td>Why request strengths/weaknesses/reasoning alongside the score?</td>
+<td>Without this context, model graders tend to default to middling scores around 6.</td>
+</tr>
+<tr>
+<td>Which grading criterion is best suited for a model grader in the code-gen example?</td>
+<td>Task Following — because it requires flexible judgement about whether the output actually solves the user's task.</td>
+</tr>
+<tr>
+<td>What two tricks clean up the grader's JSON output?</td>
+<td>Assistant prefill with <code>```json</code> and <code>stop_sequences=["```"]</code>.</td>
+</tr>
+<tr>
+<td>What dimensions do model graders evaluate well?</td>
+<td>Response quality, instruction following, completeness, helpfulness, and safety.</td>
+</tr>
+<tr>
+<td>How do you turn per-test-case scores into a prompt-level metric?</td>
+<td>Take the mean of all test case scores across the dataset.</td>
+</tr>
+<tr>
+<td>Why are model graders considered "capricious but useful"?</td>
+<td>Absolute scores wobble, but deltas across prompt versions remain a consistent baseline for tracking improvement.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

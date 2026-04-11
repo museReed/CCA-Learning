@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Being Clear And Direct Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Being Clear and Direct — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (prompt design &amp; iteration), 1.1 (instruction following)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 26</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Write prompts the way you write a design brief — start with an imperative verb and a concrete deliverable, not a polite question.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>The first line of a prompt is like the first line of a PRD or a design brief. If the engineer or designer can't tell from sentence one what they're supposed to produce, the rest of the document is damage control. The same is true for Claude. This lesson shows that the single most leveraged prompt edit — rewriting the first line from question to imperative — delivered a measurable score jump (2.32 → 3.92 on a 10-point eval). That is a larger product quality delta than most A/B tests will ever show, and it comes from editing one sentence.</p>
+<hr />
+<h2>Mental Model: The Design Brief</h2>
+<p>Compare how a weak vs strong brief lands with a designer:</p>
+<table>
+<thead>
+<tr>
+<th>Brief Style</th>
+<th>Designer Reaction</th>
+<th>Claude Reaction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"We were thinking about maybe revisiting the onboarding flow, it feels off?"</td>
+<td>"OK... what do you actually want?"</td>
+<td>Produces a vague response asking for clarification or guessing scope</td>
+</tr>
+<tr>
+<td>"Redesign the onboarding flow to reduce drop-off at step 2. Deliverable: 3 Figma frames by Friday."</td>
+<td>"Got it, starting now."</td>
+<td>Produces a structured artifact matching the ask</td>
+</tr>
+</tbody>
+</table>
+<p>Prompts are briefs. Claude is the collaborator. Briefs that open with a verb and a deliverable always outperform briefs that open with context or a question.</p>
+<hr />
+<h2>The Two Principles in Product Language</h2>
+<table>
+<thead>
+<tr>
+<th>Principle</th>
+<th>Definition</th>
+<th>PM Translation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Clarity</strong></td>
+<td>Simple language, no ambiguity about what you want</td>
+<td>The user story — "As a X, I want Y so that Z" — no one has to guess</td>
+</tr>
+<tr>
+<td><strong>Directness</strong></td>
+<td>Instructions not questions, start with action verbs</td>
+<td>The acceptance criteria — "Given / When / Then" — imperative, testable</td>
+</tr>
+</tbody>
+</table>
+<p>If a PM is used to writing Jira tickets well, they already know how to write clear and direct prompts. The skills transfer.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>Where Clarity + Directness Is the First Fix</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI summarizer produces inconsistent lengths</td>
+<td>The prompt asks "Can you summarize this?"</td>
+<td>Rewrite: "Write a 3-sentence summary covering the main argument, supporting evidence, and conclusion."</td>
+</tr>
+<tr>
+<td>AI writing assistant is too chatty</td>
+<td>Prompt opens with a question</td>
+<td>Rewrite as an imperative: "Draft a professional email declining the meeting."</td>
+</tr>
+<tr>
+<td>Internal doc extractor misses fields</td>
+<td>Prompt says "Tell me about the contract"</td>
+<td>Rewrite: "Extract the effective date, party names, and total value from the contract."</td>
+</tr>
+</tbody>
+</table>
+<h3>Where It's Not Enough</h3>
+<p>Clarity and directness alone cap out — the lesson only reaches 3.92/10. To go further you need specificity (Lesson 27), examples, and structure. Think of clear+direct as the <strong>minimum viable prompt</strong>, not the final product.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When reviewing a team's AI prompt during a PRD review, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If No, Flag It</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the first line start with a verb?</td>
+<td>Flag — rewrite as imperative</td>
+</tr>
+<tr>
+<td>Can I tell what Claude will produce from just the first sentence?</td>
+<td>Flag — the brief is unclear</td>
+</tr>
+<tr>
+<td>Are there any hedge words ("maybe," "if possible," "could you")?</td>
+<td>Flag — remove them</td>
+</tr>
+<tr>
+<td>Does the prompt specify the output format or length?</td>
+<td>Flag — add constraints</td>
+</tr>
+<tr>
+<td>Would a new team member understand the first line without context?</td>
+<td>Flag — simplify the wording</td>
+</tr>
+</tbody>
+</table>
+<p>This is essentially a PRD lint pass applied to prompts.</p>
+<hr />
+<h2>The Hidden Product Win</h2>
+<p>Clear + direct prompts don't just score higher — they fail more predictably. A vague prompt can fail in a hundred different ways (too long, too short, wrong topic, wrong format, chatty, off-brand). An imperative prompt fails in one: the requested artifact is wrong in a specific, debuggable way.</p>
+<p>Predictable failure is a product asset. It means your QA can write targeted tests, your on-call can recognize the shape of the bug, and your eval rubric can keep pace.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Polite prompts</strong> — "Could you please kindly..." PMs often write AI prompts like emails to strangers. Claude doesn't need politeness; it needs clarity.</li>
+<li><strong>Front-loading context</strong> — burying the instruction behind three sentences of background information. Instruction first, context second.</li>
+<li><strong>Asking instead of telling</strong> — treating Claude as if it might refuse. It won't; give it an imperative.</li>
+<li><strong>Skipping this fix because it "feels too simple"</strong> — the lesson's measured win is +1.6 on a 10-point scale from a one-line edit. Do not skip simple wins.</li>
+<li><strong>Calling "clear + direct" done</strong> — it's the floor, not the ceiling. You still need specificity and examples on top.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The cheapest product quality win in AI features is rewriting the first line of every prompt as a verb-led imperative. It costs zero engineering hours, produces a measurable score improvement, and transforms how predictably the feature fails. Every PM reviewing an AI prompt should audit the first line first.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: know "convert question → imperative" as the cheapest first step in the prompt-improvement loop.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: the same rule applies to agent system prompts — lead with the imperative, not the preamble.</li>
+<li>Exam scenarios that show a weak prompt will usually have a rewritten imperative version as the correct answer.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What part of a prompt should PMs audit first?</td>
+<td>The first line — it sets the stage and determines response quality more than any other part.</td>
+</tr>
+<tr>
+<td>What PM artifact is analogous to a clear-and-direct prompt?</td>
+<td>A good design brief or Jira ticket — starts with a verb and a concrete deliverable, no hedging.</td>
+</tr>
+<tr>
+<td>What score improvement did the lesson measure from clarity + directness alone?</td>
+<td>2.32 → 3.92 on the meal-planner eval — a +1.6 point absolute gain from one rewrite.</td>
+</tr>
+<tr>
+<td>Why is a vague prompt a product risk beyond quality?</td>
+<td>Because it fails unpredictably — failures can't be debugged, tested against, or anticipated.</td>
+</tr>
+<tr>
+<td>What's the "design brief" analogy?</td>
+<td>A vague brief leaves the designer guessing; a verb-led brief with a deliverable enables immediate execution. Claude behaves the same.</td>
+</tr>
+<tr>
+<td>List three hedge words PMs should strip from prompts.</td>
+<td>"Maybe," "if possible," "could you" — any word that makes the instruction feel optional.</td>
+</tr>
+<tr>
+<td>Is "clear and direct" sufficient on its own?</td>
+<td>No — it's the floor. You still need specificity, examples, and structure to reach high eval scores.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

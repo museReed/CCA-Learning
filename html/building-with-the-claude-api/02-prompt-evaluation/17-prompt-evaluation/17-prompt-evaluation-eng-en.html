@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Evaluation Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Evaluation — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (eval design), 3.2 (test datasets), 3.3 (eval execution)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 17</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt engineering gives you techniques for <em>writing</em> prompts; prompt evaluation is the automated measurement discipline that tells you <em>whether those prompts actually work</em> across a realistic input distribution.</p>
+<hr />
+<h2>The Two Disciplines: Engineering vs. Evaluation</h2>
+<p>Working with Claude splits cleanly into two concerns. Most beginners only master the first one and ship to production with no visibility into how their prompt will behave on real user traffic.</p>
+<table>
+<thead>
+<tr>
+<th>Discipline</th>
+<th>Focus</th>
+<th>Artifacts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt engineering</td>
+<td><em>How</em> to write effective prompts</td>
+<td>Multishot examples, XML tags, system prompts, structured output instructions</td>
+</tr>
+<tr>
+<td>Prompt evaluation</td>
+<td><em>How well</em> prompts actually perform</td>
+<td>Test datasets, graders, numeric scores, version comparisons</td>
+</tr>
+</tbody>
+</table>
+<p>Prompt engineering is the craft. Prompt evaluation is the measurement system that closes the feedback loop.</p>
+<hr />
+<h2>The Three Paths After Drafting a Prompt</h2>
+<p>Once you have a first draft of a prompt, you typically face three choices. Only one of them scales to production.</p>
+<p><strong>Option 1 — Test once, ship it.</strong><br />
+You run your prompt on one or two inputs, the output looks reasonable, and you ship. Risk: production users will immediately generate inputs you never tested, and the prompt silently breaks.</p>
+<p><strong>Option 2 — Test a few times, handle corner cases ad hoc.</strong><br />
+Slightly better. You iterate on a handful of edge cases you happen to think of. Risk: human imagination is a poor substitute for real input distributions. Users will still surprise you.</p>
+<p><strong>Option 3 — Run the prompt through an evaluation pipeline.</strong><br />
+You build a dataset, grade outputs with an objective scorer, and iterate based on metrics. Cost: more upfront work and API spend. Benefit: you ship with measured confidence rather than optimism.</p>
+<p>The course is unambiguous: Option 3 is the only path that produces reliable AI applications. Options 1 and 2 are "common traps that all engineers fall into."</p>
+<hr />
+<h2>Why the Testing Traps Are So Tempting</h2>
+<p>Options 1 and 2 feel productive because each prompt tweak gives an immediate dopamine hit — you see Claude produce a better answer on the one example you just ran. But this anecdotal validation is deeply misleading. Production traffic has two properties that manual testing cannot reproduce:</p>
+<ol>
+<li><strong>Volume</strong> — real users generate thousands of inputs per day, and the tail of that distribution is where prompts break.</li>
+<li><strong>Unpredictability</strong> — users phrase questions, inject edge cases, and chain context in ways the developer never imagines.</li>
+</ol>
+<p>A prompt that looks "pretty good" on three hand-picked inputs can have a 30% failure rate in production, and you will only find out through angry support tickets.</p>
+<hr />
+<h2>The Evaluation-First Approach</h2>
+<p>The systematic alternative is to invest in an evaluation pipeline before polishing the prompt. The payoff is four concrete capabilities:</p>
+<ul>
+<li><strong>Identify weaknesses before production</strong> — your dataset surfaces failure modes on your laptop, not in a customer ticket.</li>
+<li><strong>Compare prompt versions objectively</strong> — two prompts produce two numeric scores; you pick the higher one without debate.</li>
+<li><strong>Iterate with confidence</strong> — every change is validated against the dataset, so you know a tweak is genuinely an improvement rather than a lucky anecdote.</li>
+<li><strong>Build reliable applications</strong> — quality becomes a measurable property of the system, not a vibe.</li>
+</ul>
+<p>The cost is upfront investment in the eval harness, but this compounds: every future prompt change runs through the same pipeline for near-zero marginal effort.</p>
+<hr />
+<h2>Where This Fits in the CCA Curriculum</h2>
+<p>Prompt evaluation sits at the intersection of two domains:</p>
+<ul>
+<li><strong>D3 Evaluation &amp; Iteration (20%)</strong> — this lesson defines the discipline itself: measurement, dataset-driven iteration, objective comparison.</li>
+<li><strong>D5 Enterprise Deployment (20%)</strong> — evals are the quality gate before production rollout. You cannot responsibly deploy an LLM feature without an eval pipeline behind it.</li>
+</ul>
+<p>Later lessons in this chapter operationalize the workflow (18), show dataset generation (19), build the eval runner (20), and introduce model-based and code-based grading (21–22).</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Conflating prompt engineering with prompt evaluation</strong> — thinking that good prompt techniques alone are enough, with no measurement layer on top.</li>
+<li><strong>Testing on a single happy-path example</strong> — falling into Option 1 and calling it done.</li>
+<li><strong>Believing your hand-picked edge cases cover real usage</strong> — Option 2 gives false confidence because developer imagination is not a random sample of production traffic.</li>
+<li><strong>Skipping evals because they "cost too much"</strong> — the cost of a broken prompt in production (support load, brand damage, churn) vastly exceeds the cost of running an eval.</li>
+<li><strong>Treating eval scores as final rather than as a feedback signal</strong> — the goal is iteration, not a one-shot number.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompt evaluation is what transforms prompt engineering from a craft into an engineering discipline. Without evaluation, every prompt change is a guess; with evaluation, every prompt change is a measured improvement. For the CCA exam, any question that mentions "reliability," "iteration," or "version comparison" for a prompt is pointing at D3 and the answer is always: run it through an eval pipeline.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: know the distinction between prompt engineering and prompt evaluation; recognize the three paths and why Option 3 is correct.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: evals are a prerequisite for production readiness; be able to articulate why ad-hoc testing is insufficient.</li>
+<li>Exam trigger words: "reliable," "measure," "objective," "iterate," "compare versions" → the answer is an eval pipeline, not more prompt tweaking.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the difference between prompt engineering and prompt evaluation?</td>
+<td>Prompt engineering is a set of techniques for writing effective prompts; prompt evaluation is the automated measurement of how well those prompts perform.</td>
+</tr>
+<tr>
+<td>What are the three paths after drafting a prompt?</td>
+<td>1) Test once and ship, 2) Test a few times and patch corner cases, 3) Run through an evaluation pipeline and iterate on objective metrics.</td>
+</tr>
+<tr>
+<td>Why do Options 1 and 2 fail in production?</td>
+<td>Real users generate inputs developers never anticipate; manual testing cannot reproduce the volume and unpredictability of production traffic.</td>
+</tr>
+<tr>
+<td>What is the cost/benefit of Option 3?</td>
+<td>Higher upfront work and API spend, but produces measurable confidence and catches failures before deployment.</td>
+</tr>
+<tr>
+<td>What four capabilities does an evaluation-first approach unlock?</td>
+<td>Identify weaknesses before production, compare versions objectively, iterate with confidence, build reliable applications.</td>
+</tr>
+<tr>
+<td>Which CCA domain does prompt evaluation primarily map to?</td>
+<td>D3 — Evaluation &amp; Iteration (20%).</td>
+</tr>
+<tr>
+<td>Which testing techniques does prompt engineering include (per the lesson)?</td>
+<td>Multishot prompting, structuring with XML tags, and other best practices.</td>
+</tr>
+<tr>
+<td>What is the exam-level heuristic for "reliability" questions?</td>
+<td>If the question asks how to know a prompt is reliable, the answer is an evaluation pipeline, not additional prompt engineering.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

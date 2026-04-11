@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Providing Examples Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Providing Examples — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D2 — Tool Design (18%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (prompt design for reliability), 2.2 (structured content blocks)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 29</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Showing Claude a few examples of the outcome you want is the closest thing to "training" you can do from a PM seat — it turns vague quality bars into reproducible behavior, and it directly consumes your eval data as fuel.</p>
+<hr />
+<h2>Why PMs Should Care About Examples</h2>
+<p>Every PM has had this conversation: "The output is kind of right but it's not quite our voice," or "It handles the easy cases but fails on the tricky ones." Describing "our voice" or "the tricky cases" in words is genuinely hard. Showing the AI 2–4 examples is often faster and more reliable than iterating on prose instructions for a week.</p>
+<p>The course lesson is explicit: few-shot prompting is "one of the most effective prompt engineering techniques you'll use." It is also the technique with the tightest feedback loop to evals — your best eval outputs literally become the next prompt's examples.</p>
+<hr />
+<h2>Mental Model: The Style Guide with Worked Examples</h2>
+<p>Think of how a design system or brand voice doc actually works. The text rules matter (tone: confident but warm; use active voice), but the worked examples are what the team actually copies:</p>
+<table>
+<thead>
+<tr>
+<th>Without examples</th>
+<th>With examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Be concise"</td>
+<td>"Not this: 'We are pleased to announce…' — this: 'New today:'"</td>
+</tr>
+<tr>
+<td>"Be empathetic"</td>
+<td>Shows a refund email side-by-side with a bad version</td>
+</tr>
+<tr>
+<td>"Follow our format"</td>
+<td>Ships a filled-in template next to a blank one</td>
+</tr>
+</tbody>
+</table>
+<p>Few-shot prompts do the same thing for Claude. Instead of arguing over the definition of "concise" in a PRD, you put the good example and the bad example inside the prompt. The AI reads them every time.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When Examples Are the Right Move</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Examples Work</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sentiment analysis with sarcasm</td>
+<td>Sarcasm is too context-dependent to describe in prose — one example makes it obvious</td>
+</tr>
+<tr>
+<td>Specific JSON or schema output</td>
+<td>Showing a filled-in example beats listing field rules</td>
+</tr>
+<tr>
+<td>Matching brand voice</td>
+<td>A single on-brand example beats a paragraph of style guidance</td>
+</tr>
+<tr>
+<td>Extracting structured info from messy text</td>
+<td>Examples make the output shape unambiguous</td>
+</tr>
+<tr>
+<td>Any task where you already have "gold" outputs from eval</td>
+<td>Promote those outputs into the prompt as examples</td>
+</tr>
+</tbody>
+</table>
+<h3>When Examples Are Overkill</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Very simple transformations</td>
+<td>A clear instruction is enough</td>
+</tr>
+<tr>
+<td>Highly variable creative output</td>
+<td>Examples can over-constrain the model</td>
+</tr>
+<tr>
+<td>Tasks with no "right answer"</td>
+<td>Examples suggest a single correct path that may not exist</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Four Product Benefits</h2>
+<ol>
+<li><strong>Consistency on edge cases</strong> — the places where your feature is most likely to embarrass you (sarcasm, corner cases, ambiguous inputs) are exactly where examples shine.</li>
+<li><strong>Tighter quality bar</strong> — instead of writing "be high quality" in the prompt, you show Claude three high-quality outputs. The bar becomes concrete.</li>
+<li><strong>Eval-driven improvement</strong> — your eval harness produces the raw material for the next prompt version. Shipping high-scoring eval outputs back into the prompt is a free quality upgrade.</li>
+<li><strong>Fewer prose instructions</strong> — complex rules that were hard to describe in English can be replaced by a handful of examples, which are easier to review and revise.</li>
+</ol>
+<hr />
+<h2>The Eval-to-Example Loop</h2>
+<p>This is the single most important PM takeaway from Lesson 29:</p>
+<ol>
+<li>Run the current prompt through your eval set</li>
+<li>Identify the outputs that scored highest (perfect or near-perfect)</li>
+<li>Paste those input/output pairs into the prompt as few-shot examples</li>
+<li>Re-run the eval — the hard cases should improve because Claude now has "gold" reference behavior</li>
+</ol>
+<p>This is why Chapter 03 (Prompt Engineering) and the evaluation chapter are tied together. PMs who think of prompts as static strings miss the loop; PMs who treat evals as the feedstock for prompt updates get compounding improvements.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When reviewing a prompt template, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the task have corner cases that are hard to describe?</td>
+<td>Yes</td>
+<td>Add examples covering those cases</td>
+</tr>
+<tr>
+<td>Does the task require a specific output shape?</td>
+<td>Yes</td>
+<td>Show at least one fully-formed example</td>
+</tr>
+<tr>
+<td>Do you already have high-scoring eval outputs for this task?</td>
+<td>Yes</td>
+<td>Promote them into the prompt</td>
+</tr>
+<tr>
+<td>Is the style / tone / voice hard to pin down in writing?</td>
+<td>Yes</td>
+<td>Show an ideal example, not a rule</td>
+</tr>
+<tr>
+<td>Is the task simple and succeeding without examples?</td>
+<td>Yes</td>
+<td>Don't add them</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating examples as "engineer's business"</strong> — examples encode product decisions (tone, edge-case handling). PMs should own which examples go into the prompt.</li>
+<li><strong>Cherry-picking only pretty examples</strong> — the whole value of few-shot is covering your failure modes. Don't just show cases where Claude already wins.</li>
+<li><strong>Letting examples go stale</strong> — the eval set evolves; the few-shot examples should evolve with it. Build the update into the feature's maintenance rhythm.</li>
+<li><strong>Missing the "why this is good" annotation</strong> — a one-line rationale after each ideal output helps Claude generalize. PMs often forget this because it looks like documentation, not prompt.</li>
+<li><strong>Not using XML tags to wrap examples</strong> — without structure, Claude may confuse example inputs with the real task. PMs should insist on <code>&lt;sample_input&gt;</code> / <code>&lt;ideal_output&gt;</code> framing.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>For PMs, few-shot prompting is the shortest path from "we have an eval that measures quality" to "we have a prompt that hits that quality bar." Your highest-scoring eval outputs become the next prompt's examples. This is the loop the CCA exam is testing when it asks about iterating on prompt reliability — and it is the loop PMs can drive without writing code.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: few-shot is the canonical move when evals show failures on specific cases. The "promote high-scoring outputs into the prompt" pattern is directly testable.</li>
+<li><strong>D2 (Tool Design)</strong>: examples work hand-in-hand with XML-tagged content blocks and strict output formats.</li>
+<li>Watch for exam scenarios like "Claude fails on sarcasm," "output format varies between calls," or "we have eval scores but the prompt is not improving" — all point to few-shot examples.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In one sentence, what is few-shot prompting?</td>
+<td>Showing Claude sample input/output pairs in the prompt to guide its responses.</td>
+</tr>
+<tr>
+<td>What is the PM-level benefit of showing examples instead of writing rules?</td>
+<td>It replaces hard-to-describe quality bars (tone, edge cases) with concrete demonstrations Claude can copy and generalize from.</td>
+</tr>
+<tr>
+<td>Where should a PM source good examples for a prompt?</td>
+<td>From the highest-scoring outputs in the feature's eval set.</td>
+</tr>
+<tr>
+<td>What is the eval-to-example loop?</td>
+<td>Run eval → find highest-scoring outputs → paste them into the prompt as examples → re-run eval.</td>
+</tr>
+<tr>
+<td>Why should each ideal example include a short "why this is good" note?</td>
+<td>So Claude learns the criteria, not just the surface form — helps with generalization.</td>
+</tr>
+<tr>
+<td>When should a PM NOT push for more examples?</td>
+<td>When the task is simple and already passing evals, or when creativity would be over-constrained.</td>
+</tr>
+<tr>
+<td>What XML tags does the lesson recommend for examples?</td>
+<td><code>&lt;sample_input&gt;</code> and <code>&lt;ideal_output&gt;</code>.</td>
+</tr>
+<tr>
+<td>Which lesson does Lesson 29 directly build on?</td>
+<td>Lesson 28 (XML tags) — examples live inside XML-tagged structures.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

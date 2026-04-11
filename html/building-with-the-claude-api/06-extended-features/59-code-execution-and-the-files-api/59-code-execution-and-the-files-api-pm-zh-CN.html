@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Execution And The Files Api Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Code Execution and the Files API — PM Perspective（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4（server-side tools）、2.1（tool schema 设计）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 59</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Files API 和 Code Execution 合起来，能让你的产品上线「把文件丢给 Claude」型的功能——用户上传文件、用自然语言提问、拿回带图表的分析结果——而你的团队不用自建数据管道、沙箱或图表渲染器。</p>
+<hr />
+<h2>PM 为什么要关心</h2>
+<p>在这个功能之前，上线「上传 CSV 拿到分析」意味着要拥有整条管道：文件存储、沙箱 runtime、绘图库、结果 UI，以及任何一环坏掉时的值班工程师。Code Execution 把这些压缩成：<strong>声明一个 server-side tool、把 Files API 接起来做上传／下载</strong>。分析工作、图表生成、迭代——全由 Claude 在 Anthropic 操作的沙箱里搞定。</p>
+<p>这是「把计算委派给 Claude」的模式，能解锁原本需要几个季度才能做出来的产品功能：数据分析、图像处理、文档转换、数学建模。你的 roadmap 只要有任何「上传 X 拿回 Y」类型的功能，这堂课就是最短的上线路径。</p>
+<hr />
+<h2>Mental Model：可信承包商的封闭工坊</h2>
+<p>把 Code Execution 想象成雇佣一个在封闭工坊里工作的承包商：</p>
+<table>
+<thead>
+<tr>
+<th>承包商比喻</th>
+<th>API 对应</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>你在工坊门口把原料交给承包商</td>
+<td>用 Files API 上传文件，通过 <code>container_upload</code> 送入沙箱</td>
+</tr>
+<tr>
+<td>工坊没有电话、没有网络——不受外界干扰</td>
+<td>Docker 容器没有网络——安全、隔离</td>
+</tr>
+<tr>
+<td>承包商可以在里面建造、迭代、尝试不同做法</td>
+<td>Claude 可以在单次响应中多次执行 Python</td>
+</tr>
+<tr>
+<td>你在门口领取完成的产品</td>
+<td>你通过 Files API 下载生成文件</td>
+</tr>
+<tr>
+<td>你不用提供工具——承包商自带</td>
+<td>Code Execution 是 server-side tool，无需客户端实现</td>
+</tr>
+</tbody>
+</table>
+<p>封闭工坊不是限制——它就是<strong>你能放心把真正 runtime 交给 Claude 的理由</strong>。</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>课程点出的高价值模式</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>用户做什么</th>
+<th>Claude 做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据分析（流失、销售、实验）</td>
+<td>上传 CSV、用自然语言提问</td>
+<td>清洗、分析、绘图、总结</td>
+</tr>
+<tr>
+<td>图像处理</td>
+<td>上传图片、描述要做的转换</td>
+<td>在容器中跑图像库，返回处理后的图</td>
+</tr>
+<tr>
+<td>文档解析与转换</td>
+<td>上传 PDF、要求格式或脱敏</td>
+<td>提取、转换、重新输出文档</td>
+</tr>
+<tr>
+<td>数学建模</td>
+<td>描述问题、上传参数</td>
+<td>建立并执行模型，返回图和数字</td>
+</tr>
+<tr>
+<td>自定义报表生成</td>
+<td>上传原始数据、描述版式</td>
+<td>生成格式化的 HTML／PDF 输出</td>
+</tr>
+</tbody>
+</table>
+<h3>不适用的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么不行</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>需要实时外部 API 的功能</td>
+<td>沙箱没有网络</td>
+</tr>
+<tr>
+<td>需要跨 session 持久状态的功能</td>
+<td>容器是 ephemeral——状态要靠 Files API</td>
+</tr>
+<tr>
+<td>电子表格就能算的微小计算</td>
+<td>额外成本不划算；Claude 原生推理就够便宜</td>
+</tr>
+<tr>
+<td>高安全性数据不能离开你的 infra</td>
+<td>沙箱是 Anthropic hosted——要先跑合规审查</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>为「Claude 做计算」的功能 scope 时：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>为什么重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>功能需要处理、绘图、解析或转换数据吗？</td>
+<td>是就可能适合 code execution</td>
+</tr>
+<tr>
+<td>输入是文件（CSV、PDF、图片）吗？</td>
+<td>是就用 Files API 上传</td>
+</tr>
+<tr>
+<td>输出包含生成的 artifact（图表、报表）吗？</td>
+<td>是就要通过 <code>code_execution_output</code> block 接下载路径</td>
+</tr>
+<tr>
+<td>功能需要外部网络吗？</td>
+<td>是就不适合——沙箱没网络</td>
+</tr>
+<tr>
+<td>计算工作量有限（秒到分钟）吗？</td>
+<td>迭代分析会如此；UX 要设计 streaming 或进度指示器</td>
+</tr>
+<tr>
+<td>文件离开 infra 有合规顾虑吗？</td>
+<td>上线前要审查</td>
+</tr>
+</tbody>
+</table>
+<p>前三题是、后三题答案可接受，就是好下注。</p>
+<hr />
+<h2>UX 含义</h2>
+<p>Code execution 改变了「简单功能」能做到的事。单个 prompt 可以产出：</p>
+<ul>
+<li>含多个图表输出的分析。</li>
+<li>多步骤推理（读入 → 检视 → 清洗 → 绘图 → 总结），由 Claude 旁白。</li>
+<li>不需额外用户操作的迭代精修。</li>
+</ul>
+<p>对用户来说，这像随时有一个资深数据分析师在线。对产品来说，你可以承诺以前需要 services 团队或复杂 UI 才能交付的结果——通过一个文本框加一个文件上传就能做到。</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>承诺实时数据分析</strong> — 沙箱没网络，「获取最新股价并绘图」开箱即用不可行。要先在自己的 code 抓数据，上传结果，再调用 code execution。</li>
+<li><strong>改用自建管道</strong> — 团队常低估 code execution 的能力，建一套自家沙箱——结果更慢、更不稳、更难维护。</li>
+<li><strong>忘记把生成 artifact 暴露在 UI 上</strong> — 如果 UI 从不显示 Claude 产出的文件，用户只会看到文字说明，感觉功能没完成。要把 <code>code_execution_output</code> 文件渲染出来。</li>
+<li><strong>低估迭代</strong> — Claude 可能在单次响应跑 code 三到五次。UX 和 log 要接得住，不能假设只执行一次。</li>
+<li><strong>跳过合规审查</strong> — 只要文件离开你的 infra，法务和安全团队就要介入。企业客户上线前这关不能省。</li>
+<li><strong>没有同时规划 Files API</strong> — 没 Files API 的 code execution 就像没有出货门的工坊。要一起规划。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Code Execution + Files API 是<strong>产品捷径</strong>：把「我们要建一条沙箱运算管道」变成「我们要声明一个 tool、接好文件上下传」。Roadmap 上任何「用户上传 X、我们分析并返回 Y」的项目，这个组合能把几个月的工程压成一个 sprint。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong> — 要知道区别：server-side tool（如 code execution）不需客户端实现，client-side tool 则要。考题常问「什么时候你要自己实现 tool，什么时候是 Claude 在 server 端跑」。</li>
+<li>记住沙箱特性：隔离 Docker 容器、没有网络、Python。</li>
+<li>记住 Files API 是数据进（<code>container_upload</code>）、出（<code>download_file(file_id)</code>）的通道。</li>
+<li>题目若出现「把某个计算任务委派给 Claude」的情境，正确答案通常是 Code Execution + Files API 模式。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code Execution + Files API 解锁哪类产品功能？</td>
+<td>用户上传文件、用自然语言请求分析／转换／报表，而你的团队不用自建沙箱或管道。</td>
+</tr>
+<tr>
+<td>Files API 为产品做什么？</td>
+<td>提供「上传一次、用 ID 引用」的文件模式，同时作为 Code Execution 沙箱进／出的桥梁。</td>
+</tr>
+<tr>
+<td>Code Execution 是 server-side 还是 client-side tool？</td>
+<td>Server-side——无需客户端实现；Claude 替你在隔离容器跑 Python。</td>
+</tr>
+<tr>
+<td>为什么沙箱没有网络？</td>
+<td>那是隔离／安全特性——容器不能调用外部 API，执行环境因此安全。</td>
+</tr>
+<tr>
+<td>举一个这个模式不适合的功能。</td>
+<td>需要实时外部 API 的东西（沙箱没网络），或需要跨 session 持久状态的东西。</td>
+</tr>
+<tr>
+<td>哪个 mental model 很好地描述这个模式？</td>
+<td>可信承包商的封闭、离线工坊——你在门口交原料，他在里面工作，你在门口领产品。</td>
+</tr>
+<tr>
+<td>为什么 PM 不该改用自建沙箱？</td>
+<td>因为 server-side tool 把几个月的工作压成一次 tool 声明加 Files API 接线，团队也省下维护自家 runtime 的成本。</td>
+</tr>
+<tr>
+<td>哪种 block 把生成文件交还给你？</td>
+<td>带 file ID 的 <code>code_execution_output</code> block，通过 Files API 取回。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

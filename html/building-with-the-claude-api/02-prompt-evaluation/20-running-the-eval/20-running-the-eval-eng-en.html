@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Running The Eval Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Running the Eval — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.3 (eval execution), 3.1 (eval design), 3.2 (test datasets)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 20</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The core eval pipeline is three small functions — <code>run_prompt</code>, <code>run_test_case</code>, <code>run_eval</code> — that take a dataset, push every entry through Claude, and emit a structured result list ready for grading.</p>
+<hr />
+<h2>Three-Function Architecture</h2>
+<p>The lesson organizes the eval runner as three composable functions with clear separation of responsibilities:</p>
+<pre><code>┌─────────────────────┐
+│     run_eval        │  ← loads dataset, loops over cases
+│  (dataset)          │
+└──────────┬──────────┘
+           │ for each test_case
+           ▼
+┌─────────────────────┐
+│   run_test_case     │  ← orchestrates prompt + grader
+│  (test_case)        │
+└──────────┬──────────┘
+           │ calls
+           ▼
+┌─────────────────────┐
+│    run_prompt       │  ← merges template and input, calls Claude
+│  (test_case)        │
+└─────────────────────┘
+</code></pre>
+<p>Each function does exactly one thing. This is deliberate — as the eval grows more sophisticated (parallel execution, retries, model-based grading), you modify one function at a time without rewriting the whole pipeline.</p>
+<hr />
+<h2>Function 1: <code>run_prompt</code></h2>
+<p>The lowest-level function handles a single prompt execution:</p>
+<pre><code class="language-python">def run_prompt(test_case):
+    &quot;&quot;&quot;Merges the prompt and test case input, then returns the result&quot;&quot;&quot;
+    prompt = f&quot;&quot;&quot;
+Please solve the following task:
+
+{test_case[&quot;task&quot;]}
+&quot;&quot;&quot;
+
+    messages = []
+    add_user_message(messages, prompt)
+    output = chat(messages)
+    return output
+</code></pre>
+<p>Note the current state of the prompt — it is deliberately minimal. No formatting instructions, no output constraints. The lesson says: <em>"Right now, we're keeping the prompt extremely simple. We're not including any formatting instructions, so Claude will likely return more verbose output than we need. We'll refine this later as we iterate on our prompt design."</em></p>
+<p>That verbose-output baseline is the entire point — it is what you will measure against as you add structure in later lessons.</p>
+<hr />
+<h2>Function 2: <code>run_test_case</code></h2>
+<p>The middle layer orchestrates running a single test case and grading its result:</p>
+<pre><code class="language-python">def run_test_case(test_case):
+    &quot;&quot;&quot;Calls run_prompt, then grades the result&quot;&quot;&quot;
+    output = run_prompt(test_case)
+
+    # TODO - Grading
+    score = 10
+
+    return {
+        &quot;output&quot;: output,
+        &quot;test_case&quot;: test_case,
+        &quot;score&quot;: score
+    }
+</code></pre>
+<p>Two important observations:</p>
+<ol>
+<li><strong>Score is hardcoded to 10.</strong> This is a deliberate placeholder. The grading logic ships in lessons 21 (model-based grading) and 22 (code-based grading). Hardcoding 10 lets you run the end-to-end pipeline before the grader is ready — a classic "walking skeleton" technique.</li>
+<li><strong>The return shape is a tight contract.</strong> Every result carries <code>output</code>, <code>test_case</code>, and <code>score</code>. Downstream consumers (report generation, regression detection, dashboards) rely on this shape.</li>
+</ol>
+<hr />
+<h2>Function 3: <code>run_eval</code></h2>
+<p>The top-level function drives the whole loop:</p>
+<pre><code class="language-python">def run_eval(dataset):
+    &quot;&quot;&quot;Loads the dataset and calls run_test_case with each case&quot;&quot;&quot;
+    results = []
+
+    for test_case in dataset:
+        result = run_test_case(test_case)
+        results.append(result)
+
+    return results
+</code></pre>
+<p>This is intentionally trivial. It loops, calls <code>run_test_case</code>, collects results. Later chapters will upgrade it for parallel execution, but the synchronous version is enough to demonstrate the pattern.</p>
+<hr />
+<h2>Driving the Pipeline</h2>
+<p>Loading and running the full eval is a five-line script:</p>
+<pre><code class="language-python">with open(&quot;dataset.json&quot;, &quot;r&quot;) as f:
+    dataset = json.load(f)
+
+results = run_eval(dataset)
+</code></pre>
+<p>The dataset you persisted in Lesson 19 is picked up by <code>json.load</code>, handed to <code>run_eval</code>, and comes back as a list of result dicts.</p>
+<p><strong>Timing note:</strong> the lesson warns that even with Haiku, a full dataset can take around 30 seconds the first time you run it. At production scale (hundreds or thousands of entries), this becomes the first bottleneck and motivates parallelization.</p>
+<hr />
+<h2>Result Shape</h2>
+<p>Each result dict contains three keys:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Contents</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>output</code></td>
+<td>The complete text response from Claude</td>
+<td>What you are scoring</td>
+</tr>
+<tr>
+<td><code>test_case</code></td>
+<td>The original test case (the <code>task</code> dict)</td>
+<td>Context for graders and reports</td>
+</tr>
+<tr>
+<td><code>score</code></td>
+<td>Numeric score (hardcoded 10 for now)</td>
+<td>The quality metric</td>
+</tr>
+</tbody>
+</table>
+<p>To inspect results:</p>
+<pre><code class="language-python">print(json.dumps(results, indent=2))
+</code></pre>
+<p>The lesson notes that outputs are "quite verbose" because the prompt has no formatting instructions — this is the baseline condition the rest of the chapter improves against.</p>
+<hr />
+<h2>What You Have Built vs. What Is Missing</h2>
+<p>The lesson is explicit: <em>"you've just built the majority of what an eval pipeline actually does."</em> The skeleton works — dataset in, results out. What remains is three layers of sophistication:</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Current state</th>
+<th>Coming later</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grading</td>
+<td>Hardcoded 10</td>
+<td>Lessons 21 (model-based) and 22 (code-based)</td>
+</tr>
+<tr>
+<td>Prompt quality</td>
+<td>Verbose baseline</td>
+<td>Iterated against eval scores</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Sequential, ~30s</td>
+<td>Parallel batching</td>
+</tr>
+</tbody>
+</table>
+<p>The key insight is that the <em>pipeline</em> is simple — the complexity lives in the details of each stage, not in how the stages connect.</p>
+<hr />
+<h2>Why This Minimal Pipeline Is the Right Starting Point</h2>
+<p>A "walking skeleton" has three properties that a fully-featured runner does not:</p>
+<ol>
+<li><strong>End-to-end proof</strong> — you can demonstrate the whole loop works before any grader is implemented, catching integration bugs early.</li>
+<li><strong>Isolated upgrades</strong> — you can replace the hardcoded grader with a real one without touching <code>run_prompt</code> or <code>run_eval</code>.</li>
+<li><strong>Stable contract</strong> — downstream tooling (dashboards, regression CI, report generation) can rely on the result shape from day one.</li>
+</ol>
+<p>This is exactly the pattern you want for production AI systems: ship the trivial pipeline first, then replace each function with its sophisticated version as the product matures.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Skipping the walking skeleton</strong> — trying to build grader, parallelism, and dashboards in one pass leads to debugging hell.</li>
+<li><strong>Mixing grading into <code>run_prompt</code></strong> — the separation of concerns is what lets you upgrade the grader independently.</li>
+<li><strong>Not persisting <code>results</code></strong> — in production you want the results saved to disk so you can diff them across runs.</li>
+<li><strong>Synchronous loops at production scale</strong> — fine for 3 entries, fatal for 3,000; plan for <code>asyncio</code> or thread pools early.</li>
+<li><strong>Forgetting to fix the grader placeholder</strong> — shipping <code>score = 10</code> to CI would make the eval meaningless; this is for learning only.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The power of the three-function architecture is not complexity — it is the separation of concerns. <code>run_prompt</code> owns Claude calls, <code>run_test_case</code> owns scoring, <code>run_eval</code> owns iteration. Each function is independently replaceable, which is exactly what you need as you move from a notebook demo to a production eval pipeline. For the CCA exam, the structured result shape (<code>output</code> / <code>test_case</code> / <code>score</code>) is a testable detail of D3 task 3.3.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: know the three-function decomposition and the fixed result shape; understand that a hardcoded grader is a stepping stone, not an endpoint.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: this pipeline is the operational substrate for every production prompt eval; recognize that the walking-skeleton pattern scales to real systems by replacing functions one at a time.</li>
+<li>Exam trigger: any question about "how do you actually run an eval over a dataset" points at the <code>run_eval → run_test_case → run_prompt</code> layering.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three functions in the eval runner, from outer to inner?</td>
+<td><code>run_eval</code> (loops over dataset) → <code>run_test_case</code> (orchestrates prompt + grader) → <code>run_prompt</code> (calls Claude).</td>
+</tr>
+<tr>
+<td>What does <code>run_prompt</code> do?</td>
+<td>Merges the prompt template with a test case's <code>task</code> input, sends it to Claude via <code>chat()</code>, and returns the output text.</td>
+</tr>
+<tr>
+<td>What does <code>run_test_case</code> return?</td>
+<td>A dict with three keys: <code>output</code> (Claude's response), <code>test_case</code> (the original input), and <code>score</code> (numeric score, hardcoded 10 for now).</td>
+</tr>
+<tr>
+<td>Why is the grading score hardcoded to 10 in this lesson?</td>
+<td>To keep the walking-skeleton pipeline runnable before the real grader (lessons 21–22) is implemented.</td>
+</tr>
+<tr>
+<td>How is the dataset loaded at runtime?</td>
+<td><code>with open("dataset.json", "r") as f: dataset = json.load(f)</code> — the file produced in Lesson 19.</td>
+</tr>
+<tr>
+<td>What is the approximate runtime of the first eval run with Haiku?</td>
+<td>Around 30 seconds for a full (small) dataset, per the lesson.</td>
+</tr>
+<tr>
+<td>Why does the baseline prompt produce verbose outputs?</td>
+<td>Because it has no formatting instructions — this is intentional so that prompt iteration can later demonstrate measurable improvement.</td>
+</tr>
+<tr>
+<td>What is the "walking skeleton" pattern this lesson demonstrates?</td>
+<td>Build the full pipeline with placeholder implementations first, then replace each function with its production version without changing the contract.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request Lifecycle Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Request Lifecycle — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding &amp; Architecture (22%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (API request flow), 5.1 (secure architecture), 5.3 (stop reasons and token limits)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 09-assessment / Lesson 87</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The Claude request lifecycle is the anatomy of every AI interaction in your product — understanding it lets PMs make sound decisions on security, latency budget, cost, and incident response before the first line of code is written.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>PMs do not need to write the <code>ast.parse</code> call or implement tokenization — but PMs <em>do</em> need to decide architecture, review security, set token budgets, and own incident response. Every one of those decisions lives inside this five-step lifecycle:</p>
+<table>
+<thead>
+<tr>
+<th>PM Decision</th>
+<th>Which Lifecycle Step Informs It</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Where does our API key live?"</td>
+<td>Steps 1-2 (never in the client)</td>
+</tr>
+<tr>
+<td>"What is our worst-case latency?"</td>
+<td>Step 3 (model) + network on 1-2, 4-5</td>
+</tr>
+<tr>
+<td>"What is our per-request cost ceiling?"</td>
+<td>Step 2 (max_tokens) + Step 4 (usage)</td>
+</tr>
+<tr>
+<td>"How do we handle a truncated answer?"</td>
+<td>Step 4 (stop_reason)</td>
+</tr>
+<tr>
+<td>"What's our incident triage flow?"</td>
+<td>Every step — the lifecycle is the map</td>
+</tr>
+</tbody>
+</table>
+<p>Skip this knowledge and your team will make these decisions without you, usually badly.</p>
+<hr />
+<h2>Mental Model: The Restaurant Order</h2>
+<p>Think of every Claude request as ordering food at a restaurant with a kitchen that speaks a different language:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Restaurant Analogy</th>
+<th>Lifecycle Step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Customer tells waiter what they want</td>
+<td>User talks to your app</td>
+<td>Request to server</td>
+</tr>
+<tr>
+<td>Waiter writes the order in the kitchen's language</td>
+<td>Your server calls the Anthropic API</td>
+<td>Request to API</td>
+</tr>
+<tr>
+<td>Kitchen prepares the dish</td>
+<td>Claude tokenizes, embeds, contextualizes, generates</td>
+<td>Model processing</td>
+</tr>
+<tr>
+<td>Waiter carries the plate back</td>
+<td>API returns message, usage, stop_reason</td>
+<td>Response to server</td>
+</tr>
+<tr>
+<td>Plate placed in front of customer</td>
+<td>Your server forwards text to the UI</td>
+<td>Response to client</td>
+</tr>
+</tbody>
+</table>
+<p>The waiter (your server) is non-negotiable. You would never let the customer walk into the kitchen themselves — and you never let the client call the Anthropic API directly, for the same reason: it breaks the kitchen's safety and speed guarantees.</p>
+<hr />
+<h2>Product Use Cases: Where Each Step Matters</h2>
+<h3>Security (Steps 1-2)</h3>
+<p>The source is categorical: <strong>never call the Anthropic API from client-side code</strong>. API keys in client code can be extracted and used for unauthorized requests. For a PM, this translates into non-negotiable security requirements in every PRD for an AI feature:</p>
+<ul>
+<li>API key lives on the server in secure storage</li>
+<li>Client only talks to your server, never to Anthropic</li>
+<li>Server adds authentication, rate limiting, and audit logging</li>
+</ul>
+<h3>Cost &amp; Latency (Steps 2-3)</h3>
+<p>Every request must include a <code>max_tokens</code> value. This is the single most important cost lever a PM owns. Set it too high and runaway generations blow your unit economics. Set it too low and Claude gets cut off mid-sentence, frustrating users. A common PM move is to tier it by feature: short replies get 256, long explanations get 2048, document drafts get 8192.</p>
+<h3>Response Handling (Step 4)</h3>
+<p>The API response contains three fields the PM cares about:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>PM Concern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Message</td>
+<td>The actual content the user sees</td>
+</tr>
+<tr>
+<td>Usage</td>
+<td>Drives billing, budget tracking, per-user quotas</td>
+</tr>
+<tr>
+<td>Stop Reason</td>
+<td>Determines whether the feature worked or silently truncated</td>
+</tr>
+</tbody>
+</table>
+<p>The stop_reason is the sneakiest of the three. If your app ignores it, a <code>max_tokens</code> truncation looks exactly like a complete answer — except half the paragraph is missing. Always handle stop reasons explicitly in the UX (e.g., "Response was cut off — continue?").</p>
+<hr />
+<h2>The Four Internal Stages — Why PMs Should Care</h2>
+<p>Claude's internal processing has four stages: <strong>tokenization, embedding, contextualization, generation</strong>. A PM does not need to implement these, but understanding them at a conceptual level unlocks better product intuition:</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>PM Insight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tokenization</strong></td>
+<td>Cost and length are measured in tokens, not words. Inputs with lots of code or non-English text cost more than you'd guess.</td>
+</tr>
+<tr>
+<td><strong>Embedding</strong></td>
+<td>Every token carries <em>all</em> its meanings at first — which is why short, ambiguous inputs produce unreliable outputs.</td>
+</tr>
+<tr>
+<td><strong>Contextualization</strong></td>
+<td>Surrounding words disambiguate meaning — which is why well-framed prompts beat bare instructions.</td>
+</tr>
+<tr>
+<td><strong>Generation</strong></td>
+<td>Claude uses controlled randomness, not pure max probability — which is why identical requests sometimes produce different answers, and why "deterministic" is not the default.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does our architecture have a server between client and Anthropic?</td>
+<td>Yes</td>
+<td>Pass security review</td>
+</tr>
+<tr>
+<td>Does every request have a sensible <code>max_tokens</code>?</td>
+<td>Yes</td>
+<td>Pass cost review</td>
+</tr>
+<tr>
+<td>Does the app differentiate <code>end_turn</code> from <code>max_tokens</code> stop reasons?</td>
+<td>Yes</td>
+<td>Pass UX review</td>
+</tr>
+<tr>
+<td>Is per-user token usage logged and budgeted?</td>
+<td>Yes</td>
+<td>Pass financial review</td>
+</tr>
+<tr>
+<td>Does the team know which lifecycle step failed when an incident hits?</td>
+<td>Yes</td>
+<td>Pass incident review</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Letting engineering ship client-direct API calls</strong> — instant security incident waiting to happen. This should fail every security review.</li>
+<li><strong>Not owning max_tokens</strong> — leaving it at engineering defaults means costs scale linearly with usage with no product input.</li>
+<li><strong>Ignoring stop_reason in UX spec</strong> — the answer silently truncates and users blame the AI for being dumb.</li>
+<li><strong>Confusing words with tokens in the PRD</strong> — a "200-word limit" is not the same as <code>max_tokens=200</code>; tokens can be sub-word.</li>
+<li><strong>Expecting deterministic output</strong> — the generation step uses controlled randomness; identical inputs can produce different outputs, and your acceptance tests must account for that.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Every sophisticated Claude pattern — tool use, streaming, caching, agents — is a variation on the same five-step lifecycle. A PM who holds this model in their head can read any proposal for an AI feature and instantly ask the right questions about security, cost, latency, and failure handling. A PM who skips it has to guess, and usually guesses wrong on the expensive ones.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Architecture)</strong>: The lifecycle is the foundation of every agentic pattern. Questions will often be framed as "where does X happen in the request flow?"</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: Secure architecture, token budgeting, and stop-reason handling are production deployment essentials.</li>
+<li>Watch for: "Why do you need a server between the client and Anthropic?" → API key security, always.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the five steps of the Claude request lifecycle?</td>
+<td>Client to server → server to API → model processing → API to server → server to client.</td>
+</tr>
+<tr>
+<td>Why must a PM require a server between client and Anthropic API?</td>
+<td>To protect the API key — client-side keys can be extracted and used for unauthorized requests.</td>
+</tr>
+<tr>
+<td>What is the restaurant analogy for the server's role?</td>
+<td>The waiter — the non-negotiable intermediary between the customer and the kitchen.</td>
+</tr>
+<tr>
+<td>What are the four required fields in every API request?</td>
+<td>API Key, Model, Messages, Max Tokens.</td>
+</tr>
+<tr>
+<td>What are the four internal processing stages inside Claude?</td>
+<td>Tokenization, embedding, contextualization, generation.</td>
+</tr>
+<tr>
+<td>Which response field tells you whether the answer was silently truncated?</td>
+<td><code>stop_reason</code> — if it is <code>max_tokens</code> the answer was cut off.</td>
+</tr>
+<tr>
+<td>What cost lever does a PM own at the request level?</td>
+<td><code>max_tokens</code> — it directly caps per-request cost and latency.</td>
+</tr>
+<tr>
+<td>Why are identical Claude requests not always deterministic?</td>
+<td>The generation step uses a mix of probability and controlled randomness.</td>
+</tr>
+<tr>
+<td>What does the <code>usage</code> field enable for PMs?</td>
+<td>Billing, budget tracking, and per-user quotas.</td>
+</tr>
+<tr>
+<td>Why should a PM distinguish words from tokens in a PRD?</td>
+<td>Tokens can be sub-word, whitespace, or symbols — "200 words" is not the same as <code>max_tokens=200</code>.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

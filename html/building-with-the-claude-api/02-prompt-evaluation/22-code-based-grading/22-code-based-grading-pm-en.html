@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Based Grading Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Code-Based Grading — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.4 (deterministic scoring), 3.3 (test runner integration), 5.4 (combined eval metrics)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 22</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Code-based grading is the cheap, deterministic floor of your AI quality metric — it automatically rejects broken outputs in microseconds so your team stops shipping regressions that a quick demo would have caught.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Imagine shipping a code-generation feature and learning from a user tweet that half the outputs have syntax errors. That should never happen. Code-based grading makes this class of regression <strong>impossible to ship</strong> — every test case is parsed automatically before your prompt change goes live.</p>
+<p>The three things code graders catch that model graders cannot reliably catch:</p>
+<ul>
+<li>"Is this actually parseable JSON / Python / Regex?"</li>
+<li>"Did the model sneak in commentary when I asked for raw code only?"</li>
+<li>"Did we accidentally regress on format discipline this week?"</li>
+</ul>
+<p>These are quality regressions that a human demo might miss but a CI pipeline running on every prompt PR will catch every time.</p>
+<hr />
+<h2>Mental Model: The Spell-Checker Before the Editor</h2>
+<p>Think of code graders and model graders as a two-stage editing pipeline:</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Role</th>
+<th>Cost</th>
+<th>Catches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Spell-checker</strong> (code grader)</td>
+<td>Auto-reject syntactically broken output</td>
+<td>Microseconds, free</td>
+<td>JSON parse errors, Python syntax errors, regex errors</td>
+</tr>
+<tr>
+<td><strong>Editor</strong> (model grader)</td>
+<td>Judge clarity, helpfulness, instruction following</td>
+<td>API call per case</td>
+<td>Subjective quality issues</td>
+</tr>
+</tbody>
+</table>
+<p>Every piece of writing goes through spell-check before a human editor even sees it. The same logic applies to AI output — the cheap deterministic check runs first, and only output that passes gets the expensive judgement call.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When to Use Code Graders</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Code Graders Work</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shipping a JSON API where the AI must return valid JSON</td>
+<td>Parseability is non-negotiable and free to check</td>
+</tr>
+<tr>
+<td>Code-generation features (SQL, Python, regex)</td>
+<td>Invalid syntax breaks the product immediately</td>
+</tr>
+<tr>
+<td>"Raw output only, no commentary" instructions</td>
+<td>Easy to verify with a strict parser</td>
+</tr>
+<tr>
+<td>Length or format constraints</td>
+<td>Boolean checks, not judgement calls</td>
+</tr>
+<tr>
+<td>CI/CD eval gates on every prompt PR</td>
+<td>Microsecond latency makes it cheap to run everywhere</td>
+</tr>
+</tbody>
+</table>
+<h3>When NOT to Use Code Graders</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Is the response helpful?"</td>
+<td>Use a model grader — this is subjective</td>
+</tr>
+<tr>
+<td>"Does the output follow brand voice?"</td>
+<td>Use a model grader</td>
+</tr>
+<tr>
+<td>"Is the answer correct?"</td>
+<td>Use a model grader unless you have a ground-truth string to compare</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Hybrid Score Is the Feature</h2>
+<p>The source's final move is to average the model grader score and the code grader score:</p>
+<pre><code>score = (model_score + syntax_score) / 2
+</code></pre>
+<p>This composite metric is what PMs should actually chart. It rewards prompts that are both correct in form (syntax) and good in substance (quality), and it penalizes prompts that cheat on either axis.</p>
+<p>A critical PM decision: <strong>the weighting</strong>. An equal 50/50 is the default. For a pure code-generation product, you might push syntax to 70%. For a customer-service tone feature, you might push quality to 80% and only use the code grader as a hard floor. This weighting is a product decision, not an engineering one — own it explicitly in your PRD.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the output have a deterministic structure (JSON, code, regex)?</td>
+<td>Yes</td>
+<td>Add a code grader — it's free and deterministic</td>
+</tr>
+<tr>
+<td>Do we have a test-case format field (<code>format: "python"</code>)?</td>
+<td>Yes</td>
+<td>Great — the runner can route automatically</td>
+</tr>
+<tr>
+<td>Is the eval pipeline gated in CI?</td>
+<td>Yes</td>
+<td>Code graders are the cheapest gate to run on every PR</td>
+</tr>
+<tr>
+<td>Do we care about content quality too?</td>
+<td>Yes</td>
+<td>Combine with a model grader via averaged score</td>
+</tr>
+<tr>
+<td>Does one dimension matter much more than the other?</td>
+<td>Yes</td>
+<td>Tune the combination weights in the PRD — don't default to 50/50</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Skipping code graders because "model graders can do everything"</strong> — you waste tokens on deterministic checks and introduce variance where none should exist.</li>
+<li><strong>Not gating CI on the code grader</strong> — a broken JSON regression will ship because nothing catches it before review.</li>
+<li><strong>Defaulting to 50/50 weighting forever</strong> — not every product values syntax and quality equally. Tune deliberately.</li>
+<li><strong>Owning the test case format in engineering alone</strong> — the <code>format</code> field is a product decision (what do we promise the user?) and belongs in the PRD.</li>
+<li><strong>Treating the score as a goal</strong> — the source is clear: the score itself isn't inherently good or bad. What matters is whether prompt iterations move it in the right direction.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Code graders exist because some quality properties are binary: the JSON parses or it doesn't, the Python compiles or it doesn't. Paying a model grader for those is like paying a book editor to spell-check. Put the cheap deterministic check first, then spend your model grader tokens only on the things that actually require judgement.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation)</strong>: Code graders are the deterministic half of a hybrid eval pipeline. Know which tasks belong to code graders (format, syntax, length) vs. model graders (quality, helpfulness).</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: Deterministic scoring is what makes eval automation cheap enough to gate CI.</li>
+<li>Watch for: "You need to validate AI-generated JSON / Python / Regex" → the answer is always a code grader.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What product problem do code graders solve that model graders cannot reliably?</td>
+<td>Catching broken deterministic output (invalid JSON, unparseable Python, bad regex) before it ships.</td>
+</tr>
+<tr>
+<td>What are the two main advantages of code graders?</td>
+<td>Deterministic (same input → same score) and extremely cheap (microseconds, no API cost).</td>
+</tr>
+<tr>
+<td>What is the mental model for code grader + model grader?</td>
+<td>Spell-checker (code grader) runs first, human editor (model grader) runs second.</td>
+</tr>
+<tr>
+<td>What is the default way to combine model and code grader scores?</td>
+<td>Unweighted average: <code>(model_score + syntax_score) / 2</code>.</td>
+</tr>
+<tr>
+<td>Who should own the weighting between model and code grader scores?</td>
+<td>The PM — it's a product decision about what matters more for this feature.</td>
+</tr>
+<tr>
+<td>What field must test cases include for the runner to route to the right validator?</td>
+<td><code>format</code> — with values like <code>"python"</code>, <code>"json"</code>, or <code>"regex"</code>.</td>
+</tr>
+<tr>
+<td>Why is the absolute score not inherently good or bad?</td>
+<td>Because what matters is whether prompt iterations can move it — the delta, not the level.</td>
+</tr>
+<tr>
+<td>When should you skip code graders entirely?</td>
+<td>When the output has no deterministic structure to validate (e.g., free-form helpful responses).</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

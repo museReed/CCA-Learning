@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Why Prompt Evaluation? — Vibe-Checking vs Systematic</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Testing a prompt once feels fine in dev; real users break it. Eval replaces gut feel with measurable metrics.</text>
+
+  <!-- Column 1: Vibe-checking -->
+  <rect x="40" y="90" width="440" height="230" rx="12" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="90" width="440" height="44" rx="12" fill="#EF4444"/>
+  <rect x="40" y="120" width="440" height="14" fill="#EF4444"/>
+  <text x="260" y="119" text-anchor="middle" font-size="15" font-weight="600" fill="white">Option 1-2: Vibe-Checking</text>
+
+  <rect x="60" y="150" width="400" height="30" rx="6" fill="white" stroke="#FCA5A5"/>
+  <text x="260" y="170" text-anchor="middle" font-size="11" fill="#991B1B" font-weight="600">"Tested it a few times, looks good — ship it."</text>
+
+  <text x="60" y="202" font-size="11" fill="#1E293B" font-weight="700">What it is</text>
+  <text x="60" y="220" font-size="10" fill="#1E293B">• Eyeball output from 2-3 hand-picked inputs</text>
+  <text x="60" y="236" font-size="10" fill="#1E293B">• Tweak wording, try again on same inputs</text>
+  <text x="60" y="252" font-size="10" fill="#1E293B">• Call it done when "it looks right"</text>
+
+  <text x="260" y="202" font-size="11" fill="#991B1B" font-weight="700">Risks</text>
+  <text x="260" y="220" font-size="10" fill="#1E293B">• Breaks on unexpected user input</text>
+  <text x="260" y="236" font-size="10" fill="#1E293B">• Edge cases discovered in production</text>
+  <text x="260" y="252" font-size="10" fill="#1E293B">• No way to compare prompt versions</text>
+
+  <rect x="60" y="272" width="400" height="34" rx="4" fill="#FEE2E2"/>
+  <text x="260" y="293" text-anchor="middle" font-size="11" fill="#991B1B" font-weight="600">→ Easy trap every engineer falls into</text>
+
+  <!-- Column 2: Systematic eval -->
+  <rect x="520" y="90" width="440" height="230" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="520" y="90" width="440" height="44" rx="12" fill="#22C55E"/>
+  <rect x="520" y="120" width="440" height="14" fill="#22C55E"/>
+  <text x="740" y="119" text-anchor="middle" font-size="15" font-weight="600" fill="white">Option 3: Systematic Evaluation</text>
+
+  <rect x="540" y="150" width="400" height="30" rx="6" fill="white" stroke="#86EFAC"/>
+  <text x="740" y="170" text-anchor="middle" font-size="11" fill="#166534" font-weight="600">"Scored against a dataset, v2 = 8.7 > v1 = 7.6 → ship v2."</text>
+
+  <text x="540" y="202" font-size="11" fill="#1E293B" font-weight="700">What it is</text>
+  <text x="540" y="220" font-size="10" fill="#1E293B">• Test dataset of representative inputs</text>
+  <text x="540" y="236" font-size="10" fill="#1E293B">• Grader scores each output objectively</text>
+  <text x="540" y="252" font-size="10" fill="#1E293B">• Compare prompt versions by average score</text>
+
+  <text x="740" y="202" font-size="11" fill="#166534" font-weight="700">Payoff</text>
+  <text x="740" y="220" font-size="10" fill="#1E293B">• Catch failures before production</text>
+  <text x="740" y="236" font-size="10" fill="#1E293B">• Iterate with confidence</text>
+  <text x="740" y="252" font-size="10" fill="#1E293B">• Reliable AI apps at scale</text>
+
+  <rect x="540" y="272" width="400" height="34" rx="4" fill="#DCFCE7"/>
+  <text x="740" y="293" text-anchor="middle" font-size="11" fill="#166534" font-weight="600">→ More upfront work, huge reliability gains</text>
+
+  <!-- Three questions -->
+  <rect x="40" y="350" width="920" height="210" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="500" y="380" text-anchor="middle" font-size="15" font-weight="600" fill="#1E293B">The Three Questions Eval Answers</text>
+  <text x="500" y="398" text-anchor="middle" font-size="11" fill="#6B7280">Vibe-checking can't answer these reliably. A scored dataset can.</text>
+
+  <!-- Q1 -->
+  <rect x="60" y="415" width="290" height="130" rx="10" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <circle cx="90" cy="445" r="18" fill="#3B82F6"/>
+  <text x="90" y="451" text-anchor="middle" font-size="16" font-weight="700" fill="white">?</text>
+  <text x="118" y="442" font-size="13" font-weight="700" fill="#1E40AF">Is the output correct?</text>
+  <text x="118" y="460" font-size="10" fill="#6B7280">Did Claude actually solve the task?</text>
+  <text x="74" y="490" font-size="10" fill="#1E293B">Measured with: code graders (exact match,</text>
+  <text x="74" y="505" font-size="10" fill="#1E293B">syntax checks) or model graders (rubric-based</text>
+  <text x="74" y="520" font-size="10" fill="#1E293B">quality assessment on a 1-10 scale).</text>
+
+  <!-- Q2 -->
+  <rect x="360" y="415" width="290" height="130" rx="10" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <circle cx="390" cy="445" r="18" fill="#22C55E"/>
+  <text x="390" y="451" text-anchor="middle" font-size="16" font-weight="700" fill="white">?</text>
+  <text x="418" y="442" font-size="13" font-weight="700" fill="#166534">Does my change help?</text>
+  <text x="418" y="460" font-size="10" fill="#6B7280">Is v2 actually better than v1?</text>
+  <text x="374" y="490" font-size="10" fill="#1E293B">Measured with: average score delta across</text>
+  <text x="374" y="505" font-size="10" fill="#1E293B">the full test dataset. Removes guesswork from</text>
+  <text x="374" y="520" font-size="10" fill="#1E293B">iterative prompt refinement.</text>
+
+  <!-- Q3 -->
+  <rect x="660" y="415" width="290" height="130" rx="10" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+  <circle cx="690" cy="445" r="18" fill="#F59E0B"/>
+  <text x="690" y="451" text-anchor="middle" font-size="16" font-weight="700" fill="white">?</text>
+  <text x="718" y="442" font-size="13" font-weight="700" fill="#92400E">Am I over-fitting?</text>
+  <text x="718" y="460" font-size="10" fill="#6B7280">Tailoring to a few cases → brittle</text>
+  <text x="674" y="490" font-size="10" fill="#1E293B">Measured with: holdout test cases that were</text>
+  <text x="674" y="505" font-size="10" fill="#1E293B">not seen during prompt iteration. Scores on</text>
+  <text x="674" y="520" font-size="10" fill="#1E293B">unseen data reveal true generalization.</text>
+</svg>

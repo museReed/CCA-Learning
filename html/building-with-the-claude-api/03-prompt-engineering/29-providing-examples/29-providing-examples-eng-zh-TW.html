@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Providing Examples Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>提供範例 — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D3 — Evaluation &amp; Iteration（20%）主；D2 — Tool Design（18%）次</td>
+</tr>
+<tr>
+<td>任務陳述</td>
+<td>3.1（提升可靠性的 prompt 設計）、2.2（結構化內容區塊）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 29</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>Few-shot prompting（one-shot / multi-shot）是把「輸入/輸出」範例丟給 Claude，而不是用文字描述想要的行為——這是處理 corner case、格式和語氣最有效的 prompt engineering 技巧。</p>
+<hr />
+<h2>為什麼「示範」比「描述」更有效</h2>
+<p>指令是「告訴」，範例是「展示」。當任務的細微之處很難用文字精確表達——諷刺、特定 JSON 結構、公司風格——示範預期行為比描述它更可靠。課程原文稱 few-shot 是「你最常用的 prompt engineering 技巧之一」。</p>
+<p>課程裡的經典失敗案例是帶有諷刺意味的情感分析。這則推文：</p>
+<blockquote>
+<p>"Yeah, sure, that was the best movie I've seen since 'Plan 9 from Outer Space'"</p>
+</blockquote>
+<p>表面看起來像正面（best、since、sure），但實際上是諷刺、是負面。不管你寫多短的「請偵測諷刺」指令都難以穩定修好，但加一個諷刺範例就可以。</p>
+<hr />
+<h2>結構化的諷刺範例</h2>
+<p>課程中改進後的 prompt 包含：</p>
+<ul>
+<li>一個明確的正面範例：<code>"Great game tonight!"</code> → <code>"Positive"</code></li>
+<li>一個諷刺範例：<code>"Oh yeah, I really needed a flight delay tonight! Excellent!"</code> → <code>"Negative"</code></li>
+<li>解釋為什麼諷刺要被小心處理的 context</li>
+</ul>
+<p>關鍵是，這些範例都包在 XML 標籤裡：<code>&lt;sample_input&gt;</code> 和 <code>&lt;ideal_output&gt;</code>。這直接扣回 Lesson 28——XML 標籤分隔範例輸入、範例輸出和真正的任務。沒有結構的 few-shot 會讓 Claude 猜哪段文字才是「答案」。</p>
+<pre><code>&lt;example&gt;
+  &lt;sample_input&gt;Great game tonight!&lt;/sample_input&gt;
+  &lt;ideal_output&gt;Positive&lt;/ideal_output&gt;
+&lt;/example&gt;
+
+&lt;example&gt;
+  &lt;sample_input&gt;Oh yeah, I really needed a flight delay tonight! Excellent!&lt;/sample_input&gt;
+  &lt;ideal_output&gt;Negative&lt;/ideal_output&gt;
+&lt;/example&gt;
+
+Classify the following tweet. Sarcasm should be treated as negative.
+
+&lt;tweet&gt;
+{user_tweet}
+&lt;/tweet&gt;
+</code></pre>
+<hr />
+<h2>One-Shot vs Multi-Shot</h2>
+<p>直接引用課程：</p>
+<ul>
+<li><strong>One-shot</strong>——單一範例，足以建立模式</li>
+<li><strong>Multi-shot</strong>——多個範例，涵蓋不同情境和 edge case</li>
+</ul>
+<p>當你需要處理多種 corner case、或示範多種有效的回應類型時用 multi-shot。原則：每多加一個範例，都應該「付清自己的成本」——也就是能覆蓋前面範例沒覆蓋到的失敗模式。</p>
+<hr />
+<h2>什麼時候範例是對的工具</h2>
+<p>根據課程，範例對以下情況特別有用：</p>
+<ul>
+<li>處理 corner case 或邊緣情境（諷刺、模糊輸入）</li>
+<li>定義複雜的輸出格式（如特定 JSON 結構）</li>
+<li>展示精確的風格或語氣</li>
+<li>示範如何處理模糊輸入</li>
+</ul>
+<p>注意共通點：任何「給我看」比「精確描述我要什麼」更快的場景。</p>
+<hr />
+<h2>從 Evaluations 收割範例</h2>
+<p>實務上最重要的一點：當你跑 prompt eval 時，看<strong>得分最高的輸出</strong>，然後把它們升級成 prompt 裡的範例。課程原文明確寫：「找出得 10 分（或你最高分）的回應，把這些輸入/輸出對當作 prompt 的範例」。</p>
+<p>這形成一個良性迴圈：</p>
+<ol>
+<li>用現有 prompt 跑 eval</li>
+<li>找出 Claude 已經產出理想輸出的 case</li>
+<li>把那些（input, output）對複製到 prompt 裡當 few-shot 範例</li>
+<li>重跑 eval——難 case 的分數應該會上升</li>
+</ol>
+<p>這就是 Lesson 29 被放在本章「prompt engineering → evaluation」流程裡的原因：範例和 eval 是同一個迭代迴圈。</p>
+<hr />
+<h2>不只是展示，還要解釋</h2>
+<p>課程強調一個理想範例應該附上「為什麼這是好的」的說明。原文：</p>
+<pre><code>&lt;ideal_output&gt;
+[Your example output here]
+&lt;/ideal_output&gt;
+
+This example is well-structured, provides detailed information
+on food choices and quantities, and aligns with the athlete's
+goals and restrictions.
+</code></pre>
+<p>範例後面的短註解告訴 Claude 這個輸出「好在哪裡」，而不只是「長什麼樣子」。這有助於 generalization——Claude 學到的是判斷標準，不只是表面形式。</p>
+<hr />
+<h2>Python 模式</h2>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+few_shot = &quot;&quot;&quot;&lt;example&gt;
+  &lt;sample_input&gt;Great game tonight!&lt;/sample_input&gt;
+  &lt;ideal_output&gt;Positive&lt;/ideal_output&gt;
+&lt;/example&gt;
+
+&lt;example&gt;
+  &lt;sample_input&gt;Oh yeah, I really needed a flight delay tonight! Excellent!&lt;/sample_input&gt;
+  &lt;ideal_output&gt;Negative&lt;/ideal_output&gt;
+&lt;/example&gt;
+
+Sarcasm should be treated as negative.&quot;&quot;&quot;
+
+tweet = &quot;Yeah, sure, that was the best movie I've seen since 'Plan 9 from Outer Space'&quot;
+
+prompt = f&quot;&quot;&quot;{few_shot}
+
+Classify the following tweet as Positive or Negative.
+
+&lt;tweet&gt;
+{tweet}
+&lt;/tweet&gt;&quot;&quot;&quot;
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=64,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}],
+)
+</code></pre>
+<p>兩個重點：範例放在真實任務上方，而且範例和真實輸入都用 XML 標籤包起來。</p>
+<hr />
+<h2>課程的最佳實踐</h2>
+<ul>
+<li>永遠用 XML 標籤結構化範例</li>
+<li>明確說明你在展示什麼（「Here is an example input with an ideal response」）</li>
+<li>範例要針對最常見的失敗 case</li>
+<li>解釋為什麼範例輸出是理想的</li>
+<li>範例要跟你的實際任務相關</li>
+</ul>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>範例沒用 XML 結構</strong>——Claude 得猜哪段是輸入、哪段是輸出、哪段是真正的問題。</li>
+<li><strong>挑選太容易的範例</strong>——示範的全是 Claude 已經做得很好的 case，卻忽略真正的失敗模式。</li>
+<li><strong>範例和任務飄移</strong>——用的範例接近但不完全等同真實輸入的形狀。</li>
+<li><strong>只展示不解釋</strong>——理想輸出沒有註解會讓 Claude 只會「複製」而不是「推理」。</li>
+<li><strong>Eval 後沒重新收割範例</strong>——eval set 變了但範例沒更新，prompt 就不再對準難 case。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Few-shot prompting 是 Lesson 28（XML 結構）和 Chapter 04（tool use）之間的橋樑。CCA 考試預期會出現這類情境題：「prompt 能處理正常 case 但在諷刺／JSON 格式／特定語氣上失敗」。答案幾乎都是：加 XML 標籤的範例來覆蓋那些失敗模式，最好來自 eval 分數最高的輸出。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D3（Evaluation &amp; Iteration）</strong>：當 eval 暴露出系統性失敗模式時，few-shot 是主要的迭代手段。「把高分 eval 輸出升級成範例」的迴圈是考點。</li>
+<li><strong>D2（Tool Design）</strong>：設計嚴格輸出格式（包含 tool-like 行為的 JSON）時，範例比文字描述 schema 更可靠。</li>
+<li>題目關鍵字：「sarcasm」「specific format」「corner case」「style or tone」——都指向 few-shot 範例。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>反面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>什麼是 few-shot prompting？</td>
+<td>在 prompt 裡提供輸入/輸出範例對來引導 Claude 回應（one-shot = 1 個範例，multi-shot = 多個）。</td>
+</tr>
+<tr>
+<td>為什麼範例比指令更適合處理諷刺偵測？</td>
+<td>諷刺很難用文字描述；示範一個諷刺範例比叫 Claude「注意諷刺」更可靠。</td>
+</tr>
+<tr>
+<td>課程為範例使用哪些 XML 標籤？</td>
+<td><code>&lt;sample_input&gt;</code> 和 <code>&lt;ideal_output&gt;</code>（實務上外層再包一個 <code>&lt;example&gt;</code>）。</td>
+</tr>
+<tr>
+<td>什麼時候該用 multi-shot 而非 one-shot？</td>
+<td>需要覆蓋多個 edge case 或示範不同有效回應類型時。</td>
+</tr>
+<tr>
+<td>怎麼從 eval 取得好範例？</td>
+<td>找出得分最高（例如 10/10）的回應，把那些輸入/輸出對升級成 prompt 範例。</td>
+</tr>
+<tr>
+<td>為什麼要解釋範例為什麼是理想的？</td>
+<td>幫助 Claude 學到背後的判斷標準，而不只是複製表面形式。</td>
+</tr>
+<tr>
+<td>列出四個範例特別有用的情境</td>
+<td>Corner case、複雜輸出格式、特定風格/語氣、模糊輸入。</td>
+</tr>
+<tr>
+<td>Lesson 28 和 Lesson 29 的關係是什麼？</td>
+<td>XML 標籤（28）提供結構；範例（29）在結構裡填入示範——設計上就是配套使用。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

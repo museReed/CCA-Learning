@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Caching Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Caching — PM Perspective（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（成本／延迟优化）、5.2（生产性能）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 56</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt caching 是 Claude API 的「批发折扣」——只要你的产品反复发送同一大段 context，开启之后每一次非首次调用都会更快、更便宜，而且用户完全感觉不到任何变化。</p>
+<hr />
+<h2>PM 为什么要关心？</h2>
+<p>你的 app 每次调用 Claude，模型都要先做一堆昂贵的前置处理（tokenization、embeddings、上下文分析）才吐出第一个字——然后把这些结果全部丢弃。如果你的产品每次调用都发同一份 6,000 token 的 system prompt 或同一份长 PDF，你就是<strong>每次都在重付这笔设置费，还要重等一遍</strong>。</p>
+<p>Prompt caching 改变了这个经济模型。这笔设置费只付一次，之后一小时内的后续调用就「免费」（更便宜、更快）地复用。对任何「在稳定 context 上反复交互」的产品，这是单位经济和体感速度上最大的一根杠杆。</p>
+<hr />
+<h2>Mental Model：手冲咖啡店</h2>
+<p>想象一家每杯都现磨的手冲咖啡店：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>没有 caching</th>
+<th>有 caching</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一位客人点埃塞俄比亚手冲</td>
+<td>磨豆、烧水、冲煮</td>
+<td>磨豆、烧水、冲煮（付全额）</td>
+</tr>
+<tr>
+<td>第二位客人点同样的</td>
+<td>重新磨豆、重新烧水、再冲</td>
+<td>复用已磨好的豆和热水（只付冲煮）</td>
+</tr>
+</tbody>
+</table>
+<p>磨豆与烧水 = preprocessing。冲煮 = 真正的生成。Prompt caching 就是「别再为同样的订单重复磨豆」。客人仍然拿到现做的咖啡——只是出杯更快，店铺毛利更高。</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>适合开 caching 的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么有用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>带长 persona／指南的聊天产品</td>
+<td>Persona 每轮都一样——cache 一次就够</td>
+</tr>
+<tr>
+<td>文档问答（对同一份 PDF 问多个问题）</td>
+<td>文档稳定，只有问题在变</td>
+</tr>
+<tr>
+<td>带大 repo context 的编程助手</td>
+<td>每次请求都带同样的代码库 context</td>
+</tr>
+<tr>
+<td>带固定 tool 的 agent loop</td>
+<td>Tool schema 每轮都一样</td>
+</tr>
+<tr>
+<td>反复编辑同一份草稿</td>
+<td>Base content 固定，指令在变</td>
+</tr>
+</tbody>
+</table>
+<h3>不适合的场景</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么没用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一次性 prompt（不会重复）</td>
+<td>白白付 cache-write 成本</td>
+</tr>
+<tr>
+<td>Prompt 每次都变</td>
+<td>Cache 永远 miss</td>
+</tr>
+<tr>
+<td>调用频率极低（间隔几小时）</td>
+<td>Cache 一小时就过期</td>
+</tr>
+<tr>
+<td>Prompt 很短</td>
+<td>节省的几乎可忽略</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>判断是否为某个功能开启 prompt caching：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>为什么重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每次请求是否都带一段「大而稳定」的 context？</td>
+<td>Caching 就是靠大而稳定的前缀在省</td>
+</tr>
+<tr>
+<td>用户在一小时内是否频繁交互？</td>
+<td>1 小时 TTL 奖励高频复用</td>
+</tr>
+<tr>
+<td>Input token 成本是否是单位经济中的显著部分？</td>
+<td>如果是，caching 直接影响毛利</td>
+</tr>
+<tr>
+<td>体感延迟是用户的主要抱怨吗？</td>
+<td>Caching 降低 time-to-first-token</td>
+</tr>
+<tr>
+<td>Cached 内容是否真的每次一字不差？</td>
+<td>Cache 对任何改动都极度敏感</td>
+</tr>
+</tbody>
+</table>
+<p>大多答案为是，就该排进 roadmap——通常应该排在其他模型端优化之前。</p>
+<hr />
+<h2>商业影响</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>Prompt caching 的典型影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>单次对话成本</strong></td>
+<td>下降——cached 前缀按显著折扣计费</td>
+</tr>
+<tr>
+<td><strong>延迟／time-to-first-token</strong></td>
+<td>下降——命中时跳过 preprocessing</td>
+</tr>
+<tr>
+<td><strong>AI 功能毛利率</strong></td>
+<td>上升——热门 workflow 单位成本下降</td>
+</tr>
+<tr>
+<td><strong>留存率（间接）</strong></td>
+<td>可能上升——更快的响应让产品更「顺手」</td>
+</tr>
+</tbody>
+</table>
+<p>这些全是生产收益，完全不需要改产品、也不增加用户摩擦。这种机会很稀有。</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>把 caching 当作「以后再做」的优化</strong> — 等你注意到账单时，已经多付了好几个月。只要你的产品有任何重复 context 的模式，就应该排进 v1。</li>
+<li><strong>把 caching 和 memory 或个性化混淆</strong> — caching 是「复用计算」，不是「记住用户」。它不会改变 Claude 知道什么。</li>
+<li><strong>算指标时忽略 1 小时 TTL</strong> — 不看调用频率就估算「x% 调用被 cache」，低流量功能会高估节省。</li>
+<li><strong>不投资 context 稳定性</strong> — 如果团队每个 sprint 都在改 system prompt，cache 一直被打翻。稳定 context 是前提。</li>
+<li><strong>没告诉 finance／ops caching 上线</strong> — 成本曲线会突然变形。确保成本模型跟上。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompt caching 是<strong>隐形的产品改善</strong>：用户看不到，但感受得到。更低的单次成本保护毛利，更低的延迟让产品用起来更顺。对任何建立在「大而稳定 context」之上的 AI 功能，caching 是 PM 能推动的杠杆最大的优化——纯粹的上行，没有 UX 代价。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5（Enterprise Deployment）</strong> — caching 稳稳落在 task 5.1（成本与延迟）之下。考题会问如何优化重复 context 的 workflow。</li>
+<li>记住 caching <strong>同时</strong>降低成本与延迟，不是只降一个。</li>
+<li>记住 1 小时 TTL，以及只有在这时间窗内复用才有用。</li>
+<li>题目若出现「对同一份长文档问多个问题」或「每轮都发同样 system prompt」的情境，答案通常是 prompt caching。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用最白话说，prompt caching 为产品做了什么？</td>
+<td>把 Claude 昂贵的 preprocessing 结果存起来复用，让重复 context 的调用更快更便宜。</td>
+</tr>
+<tr>
+<td>PM 必记的 1 小时规则是什么？</td>
+<td>Cache 内容只存活一小时，过后就过期必须重建。</td>
+</tr>
+<tr>
+<td>Caching 影响哪两个商业指标？</td>
+<td>每次调用成本（下降）以及延迟／time-to-first-token（下降）。</td>
+</tr>
+<tr>
+<td>哪些产品模式最受益？</td>
+<td>大型稳定 system prompt、文档问答、带 repo context 的编程助手、带固定 tool 的 agent loop、迭代编辑。</td>
+</tr>
+<tr>
+<td>哪些产品不受益？</td>
+<td>一次性 prompt、内容每次都变、低频使用（间隔超过一小时）、极短 prompt。</td>
+</tr>
+<tr>
+<td>Caching 是自动的吗？</td>
+<td>不是——必须明确启用；不 opt-in Claude 就照常丢弃 preprocessing。</td>
+</tr>
+<tr>
+<td>Caching 会改变 Claude 对用户的「了解」吗？</td>
+<td>不会——它只复用计算，不是 memory 或个性化。</td>
+</tr>
+<tr>
+<td>为什么 caching 应排进 v1 而不是「以后再说」？</td>
+<td>因为没有它的每一周都是在「重复 context 流量上重付两次」，省下的钱不会回补过去。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

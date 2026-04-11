@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Providing Examples Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Providing Examples — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D2 — Tool Design (18%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (prompt design for reliability), 2.2 (structured content blocks)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 29</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Few-shot prompting (one-shot / multi-shot) shows Claude input/output pairs instead of describing the desired behavior — the single most effective prompt engineering technique for corner cases, formats, and tone.</p>
+<hr />
+<h2>Why Examples Beat Instructions</h2>
+<p>Instructions tell; examples show. When a task has subtleties that are hard to pin down in words — sarcasm, a specific JSON shape, a house style — demonstrating the expected behavior is more reliable than trying to describe it. The source lesson calls few-shot prompting "one of the most effective prompt engineering techniques you'll use."</p>
+<p>The canonical failure case in the lesson is sentiment analysis with sarcasm. The tweet:</p>
+<blockquote>
+<p>"Yeah, sure, that was the best movie I've seen since 'Plan 9 from Outer Space'"</p>
+</blockquote>
+<p>reads positive on the surface (best, since, sure) but is sarcastic and actually negative. No short instruction like "detect sarcasm" reliably fixes this. Showing a sarcastic example does.</p>
+<hr />
+<h2>The Sarcasm Example, Structured</h2>
+<p>The improved prompt from the lesson contains:</p>
+<ul>
+<li>A clear positive example: <code>"Great game tonight!"</code> → <code>"Positive"</code></li>
+<li>A sarcastic example: <code>"Oh yeah, I really needed a flight delay tonight! Excellent!"</code> → <code>"Negative"</code></li>
+<li>Context explaining why sarcasm should be treated carefully</li>
+</ul>
+<p>Critically, these examples are wrapped in XML tags: <code>&lt;sample_input&gt;</code> and <code>&lt;ideal_output&gt;</code>. This chains directly to Lesson 28 — XML tags delimit what is an example input vs. an example output vs. the real task. Few-shot without structure is a recipe for Claude guessing which piece of text is supposed to be "the answer."</p>
+<pre><code>&lt;example&gt;
+  &lt;sample_input&gt;Great game tonight!&lt;/sample_input&gt;
+  &lt;ideal_output&gt;Positive&lt;/ideal_output&gt;
+&lt;/example&gt;
+
+&lt;example&gt;
+  &lt;sample_input&gt;Oh yeah, I really needed a flight delay tonight! Excellent!&lt;/sample_input&gt;
+  &lt;ideal_output&gt;Negative&lt;/ideal_output&gt;
+&lt;/example&gt;
+
+Classify the following tweet. Sarcasm should be treated as negative.
+
+&lt;tweet&gt;
+{user_tweet}
+&lt;/tweet&gt;
+</code></pre>
+<hr />
+<h2>One-Shot vs Multi-Shot</h2>
+<p>Straight from the source:</p>
+<ul>
+<li><strong>One-shot</strong> — a single example, enough to establish the pattern</li>
+<li><strong>Multi-shot</strong> — multiple examples, covering different scenarios and edge cases</li>
+</ul>
+<p>Use multi-shot when you need to handle various corner cases or demonstrate different types of valid responses. Rule of thumb: each example you add should "pay for itself" by covering a failure mode that the prior examples did not.</p>
+<hr />
+<h2>When Examples Are the Right Tool</h2>
+<p>From the source, examples are particularly useful for:</p>
+<ul>
+<li>Capturing corner cases or edge scenarios (sarcasm, ambiguous inputs)</li>
+<li>Defining complex output formats (e.g., specific JSON structures)</li>
+<li>Showing the exact style or tone you want</li>
+<li>Demonstrating how to handle ambiguous inputs</li>
+</ul>
+<p>Notice the theme: anything where "show me" is faster than "describe exactly what I want."</p>
+<hr />
+<h2>Harvesting Examples from Evaluations</h2>
+<p>One of the most important practical points: when you run prompt evals, look at your <strong>highest-scoring outputs</strong> and promote them into the prompt as examples. The lesson is explicit — "Find responses that scored 10 (or your highest available score) and use those input/output pairs as examples in your prompt."</p>
+<p>This closes a virtuous loop:</p>
+<ol>
+<li>Run eval with current prompt</li>
+<li>Find the cases where Claude already produced ideal output</li>
+<li>Copy those (input, output) pairs into the prompt as few-shot examples</li>
+<li>Re-run eval — scores on the hard cases should rise</li>
+</ol>
+<p>This is why Lesson 29 sits inside the "prompt engineering → evaluation" flow of the chapter: examples and evals are the same iterative loop.</p>
+<hr />
+<h2>Don't Just Show — Explain</h2>
+<p>The source emphasizes that an ideal example is paired with a reason. From the lesson:</p>
+<pre><code>&lt;ideal_output&gt;
+[Your example output here]
+&lt;/ideal_output&gt;
+
+This example is well-structured, provides detailed information
+on food choices and quantities, and aligns with the athlete's
+goals and restrictions.
+</code></pre>
+<p>The short annotation after the example tells Claude what makes it good, not just what it looks like. This helps generalization — Claude is learning the criteria, not just copying the surface form.</p>
+<hr />
+<h2>Python Pattern</h2>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+few_shot = &quot;&quot;&quot;&lt;example&gt;
+  &lt;sample_input&gt;Great game tonight!&lt;/sample_input&gt;
+  &lt;ideal_output&gt;Positive&lt;/ideal_output&gt;
+&lt;/example&gt;
+
+&lt;example&gt;
+  &lt;sample_input&gt;Oh yeah, I really needed a flight delay tonight! Excellent!&lt;/sample_input&gt;
+  &lt;ideal_output&gt;Negative&lt;/ideal_output&gt;
+&lt;/example&gt;
+
+Sarcasm should be treated as negative.&quot;&quot;&quot;
+
+tweet = &quot;Yeah, sure, that was the best movie I've seen since 'Plan 9 from Outer Space'&quot;
+
+prompt = f&quot;&quot;&quot;{few_shot}
+
+Classify the following tweet as Positive or Negative.
+
+&lt;tweet&gt;
+{tweet}
+&lt;/tweet&gt;&quot;&quot;&quot;
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=64,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}],
+)
+</code></pre>
+<p>Two things to notice: the examples live above the real task, and both the examples and the real input use XML tags.</p>
+<hr />
+<h2>Best Practices from the Source</h2>
+<ul>
+<li>Always use XML tags to structure your examples clearly</li>
+<li>Be explicit about what you are showing ("Here is an example input with an ideal response")</li>
+<li>Include examples that address your most common failure cases</li>
+<li>Explain why your example outputs are considered ideal</li>
+<li>Keep examples relevant to your specific task</li>
+</ul>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>No XML structure around examples</strong> — Claude has to guess which string is input, which is output, and which is the real question.</li>
+<li><strong>Cherry-picked easy examples</strong> — demonstrating cases Claude already handles well while ignoring your real failure modes.</li>
+<li><strong>Examples drift from the task</strong> — using examples that are close to, but not exactly, the shape of the real input.</li>
+<li><strong>Showing without explaining</strong> — an ideal output without an annotation tells Claude "copy this" instead of "reason like this."</li>
+<li><strong>Not re-harvesting after evals</strong> — leaving examples static while the eval set evolves, so the prompt stops matching the hard cases.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Few-shot prompting is the bridge between Lesson 28 (XML structure) and Chapter 04 (tool use). On the CCA exam, expect scenario questions like "the prompt handles normal cases but fails on sarcasm / JSON formatting / a specific tone." The answer is almost always: add XML-tagged examples that cover those failure modes, ideally sourced from your highest-scoring eval outputs.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: few-shot is the primary iteration lever when evals expose a systematic failure mode. The "promote high-scoring eval outputs into examples" loop is exam-relevant.</li>
+<li><strong>D2 (Tool Design)</strong>: when designing prompts that define strict output shapes (including JSON for tool-like behavior), examples are more reliable than prose schemas.</li>
+<li>Watch for exam phrases like "sarcasm," "specific format," "corner case," "style or tone" — all point to few-shot examples.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is few-shot prompting?</td>
+<td>Providing sample input/output pairs in the prompt to guide Claude's responses (one-shot = 1 example, multi-shot = multiple).</td>
+</tr>
+<tr>
+<td>Why do examples beat instructions for sarcasm detection?</td>
+<td>Sarcasm is hard to describe in prose; showing a sarcastic example is more reliable than telling Claude "watch for sarcasm."</td>
+</tr>
+<tr>
+<td>What XML tags does the lesson use for examples?</td>
+<td><code>&lt;sample_input&gt;</code> and <code>&lt;ideal_output&gt;</code> (wrapped inside an <code>&lt;example&gt;</code> container in practice).</td>
+</tr>
+<tr>
+<td>When should you use multi-shot instead of one-shot?</td>
+<td>When you need to cover multiple edge cases or different valid response types.</td>
+</tr>
+<tr>
+<td>How do you source good examples from evaluations?</td>
+<td>Find responses that scored highest (e.g., 10/10) and promote those input/output pairs into the prompt.</td>
+</tr>
+<tr>
+<td>Why should you explain why an example is ideal?</td>
+<td>It helps Claude learn the underlying criteria instead of only copying the surface form.</td>
+</tr>
+<tr>
+<td>Name four situations where examples are especially useful.</td>
+<td>Corner cases, complex output formats, specific style/tone, ambiguous inputs.</td>
+</tr>
+<tr>
+<td>What is the relationship between Lesson 28 and Lesson 29?</td>
+<td>XML tags (28) provide the structure; examples (29) fill that structure with demonstrations — they are designed to be used together.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

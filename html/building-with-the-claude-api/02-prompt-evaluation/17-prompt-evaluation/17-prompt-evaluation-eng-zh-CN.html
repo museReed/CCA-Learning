@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Evaluation Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Evaluation — Engineering Deep Dive（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration（20%，主要）；D5 — Enterprise Deployment（20%，次要）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（eval 设计）、3.2（测试数据集）、3.3（eval 执行）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 17</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>Prompt engineering 教你"如何写"prompt；prompt evaluation 则是自动化度量手段，告诉你"这些 prompt 在真实输入分布下到底表现如何"。</p>
+<hr />
+<h2>两种不同的学科：工程 vs. 评估</h2>
+<p>使用 Claude 的工作可以清晰地分成两块。大多数初学者只掌握第一块就把东西推到生产环境，对 prompt 在真实流量下的表现毫无可见性。</p>
+<table>
+<thead>
+<tr>
+<th>学科</th>
+<th>核心关注</th>
+<th>产物</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt engineering</td>
+<td><em>如何</em>写出有效的 prompt</td>
+<td>Multishot 示例、XML 标签、系统提示、结构化输出指令</td>
+</tr>
+<tr>
+<td>Prompt evaluation</td>
+<td>Prompt <em>到底</em>表现多好</td>
+<td>测试数据集、grader、数值分数、版本比较</td>
+</tr>
+</tbody>
+</table>
+<p>Prompt engineering 是手艺；prompt evaluation 是闭合反馈循环的度量系统。</p>
+<hr />
+<h2>写完 Prompt 之后的三条路</h2>
+<p>写完第一版 prompt 后通常面临三个选择，但只有一个能扩展到生产环境。</p>
+<p><strong>选项 1 — 测一次就上线。</strong> 跑一两个输入看起来没问题就直接上线。风险：真实用户会立即送来你没测过的输入，prompt 悄无声息地崩掉。</p>
+<p><strong>选项 2 — 测几次，零散地处理边角情况。</strong> 比选项 1 好一点。你针对自己能想到的几个边角情况迭代。风险：人类的想象力代替不了真实的输入分布，用户还是会让你意外。</p>
+<p><strong>选项 3 — 把 prompt 丢进 evaluation pipeline。</strong> 建数据集，用客观 grader 打分，基于指标迭代。代价：前期工作量和 API 开销更大。收益：带着"度量出来的信心"而非"乐观"上线。</p>
+<p>课程说得很直白：选项 3 是唯一能产出可靠 AI 应用的路径。选项 1 和 2 是"所有工程师都会掉进去的常见陷阱"。</p>
+<hr />
+<h2>为什么测试陷阱如此诱人</h2>
+<p>选项 1 和 2 感觉"很有生产力"，因为每一次 prompt 调整都会立刻让 Claude 在你刚跑的那个例子上输出更好的答案 — 立即的多巴胺反馈。但这种"轶事式验证"极具误导性。生产流量有两个手动测试无法重现的特性：</p>
+<ol>
+<li><strong>量</strong> — 真实用户每天生成数千条输入，分布的尾部正是 prompt 崩溃的地方。</li>
+<li><strong>不可预测性</strong> — 用户会用开发者从未想过的方式提问、注入边角情况、串联上下文。</li>
+</ol>
+<p>一个在三个手挑输入上看起来"还不错"的 prompt，在生产环境可能有 30% 的失败率，而你只会从一堆愤怒的客服工单里得知这件事。</p>
+<hr />
+<h2>Evaluation-First 的方法论</h2>
+<p>系统化的替代方案是：在打磨 prompt 之前先投资一条 evaluation pipeline。回报是四项具体能力：</p>
+<ul>
+<li><strong>在生产之前发现弱点</strong> — 失败案例出现在你的笔记本上，而不是客户工单里。</li>
+<li><strong>客观比较 prompt 版本</strong> — 两个 prompt 产出两个数字，你选分数高的那个，没有争论空间。</li>
+<li><strong>带信心迭代</strong> — 每次改动都对数据集验证，你知道这是真正的改进而不是运气。</li>
+<li><strong>建造可靠的应用</strong> — 质量成为系统的可度量属性，不再靠感觉。</li>
+</ul>
+<p>代价是前期要花力气搭建 eval harness，但这会复利累积：未来每一次 prompt 改动都走同一条 pipeline，边际成本几乎为零。</p>
+<hr />
+<h2>在 CCA 课纲中的位置</h2>
+<p>Prompt evaluation 正好落在两个 domain 的交界：</p>
+<ul>
+<li><strong>D3 Evaluation &amp; Iteration（20%）</strong> — 本节课定义了这门学科本身：度量、数据集驱动的迭代、客观比较。</li>
+<li><strong>D5 Enterprise Deployment（20%）</strong> — Eval 是生产发布前的质量闸门。没有 eval pipeline 的 LLM 功能不应上线。</li>
+</ul>
+<p>后面几节课把这个流程 operationalize：18 讲典型工作流、19 讲数据集生成、20 搭建 eval runner、21–22 讲 model-based 与 code-based grading。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>把 prompt engineering 和 prompt evaluation 混为一谈</strong> — 以为只靠写 prompt 的技巧就够，没有度量层。</li>
+<li><strong>只在一个 happy-path 例子上测试</strong> — 掉进选项 1 然后宣告完工。</li>
+<li><strong>相信自己手挑的边角情况涵盖真实使用</strong> — 选项 2 给你假信心，因为开发者的想象力不是生产流量的随机抽样。</li>
+<li><strong>因为"太贵"而跳过 eval</strong> — Prompt 在生产崩溃的代价（客服负担、品牌损伤、流失）远远超过跑一次 eval 的开销。</li>
+<li><strong>把 eval 分数当成最终答案而非反馈信号</strong> — 目标是迭代，不是一次性的数字。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompt evaluation 是把 prompt engineering 从手艺变成工程学科的关键。没有 eval，每次改 prompt 都是猜测；有了 eval，每次改 prompt 都是可度量的改进。CCA 考试中凡是提到 "reliability"、"iteration"、"version comparison" 的题目都指向 D3，答案永远是：把 prompt 跑进 eval pipeline。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D3（Evaluation &amp; Iteration）</strong>：要能区分 prompt engineering 与 prompt evaluation；要能辨认三条路并理解为什么选项 3 才正确。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：Eval 是生产就绪的前提条件；要能说明为什么 ad-hoc 测试不够。</li>
+<li>考题关键词："reliable"、"measure"、"objective"、"iterate"、"compare versions" → 答案是 eval pipeline，而不是再多调几次 prompt。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt engineering 和 prompt evaluation 有什么区别？</td>
+<td>Prompt engineering 是写有效 prompt 的技巧集合；prompt evaluation 是自动化度量 prompt 表现的方法。</td>
+</tr>
+<tr>
+<td>写完 prompt 之后有哪三条路？</td>
+<td>1) 测一次就上线、2) 测几次补边角情况、3) 跑进 eval pipeline 并基于客观指标迭代。</td>
+</tr>
+<tr>
+<td>为什么选项 1 和 2 在生产会失败？</td>
+<td>真实用户会送来开发者从未想过的输入；手动测试无法重现生产的量和不可预测性。</td>
+</tr>
+<tr>
+<td>选项 3 的成本和收益？</td>
+<td>前期工作量和 API 开销较高，但能产出可度量的信心，在部署前抓出失败案例。</td>
+</tr>
+<tr>
+<td>Evaluation-first 解锁哪四项能力？</td>
+<td>提前识别弱点、客观比较版本、带信心迭代、建造可靠应用。</td>
+</tr>
+<tr>
+<td>Prompt evaluation 主要对应哪个 CCA domain？</td>
+<td>D3 — Evaluation &amp; Iteration（20%）。</td>
+</tr>
+<tr>
+<td>课程中提到 prompt engineering 包含哪些技巧？</td>
+<td>Multishot prompting、XML 标签结构化，以及其他 best practices。</td>
+</tr>
+<tr>
+<td>考题看到 "reliability" 要怎么答？</td>
+<td>要保证 prompt 可靠，答案是 evaluation pipeline，而不是更多 prompt 调整。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

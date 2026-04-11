@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Based Grading Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Model-Based Grading — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.4 (LLM-as-judge grading), 3.3 (test case execution), 5.4 (eval-driven iteration)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 21</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Model-based grading is how you turn "does this AI output feel good?" into a number on a dashboard — so prompt engineering stops being vibes and starts being a measurable product workflow.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Without graded evals, every prompt change is a leap of faith. Someone tweaks the system prompt, eyeballs ten outputs, and ships. There is no way to answer basic product questions:</p>
+<ul>
+<li>Did this week's prompt change actually improve helpfulness?</li>
+<li>Did our new instructions break completeness?</li>
+<li>Are we regressing on safety without knowing it?</li>
+</ul>
+<p>Model-based grading gives you a <strong>quality metric per prompt version</strong> — a single number you can chart over time, just like DAU or conversion rate. It converts prompt engineering from craft into engineering.</p>
+<hr />
+<h2>Mental Model: The Restaurant Critic</h2>
+<p>Think of the three grader types as three different restaurant review systems:</p>
+<table>
+<thead>
+<tr>
+<th>Grader Type</th>
+<th>Restaurant Analogy</th>
+<th>Strength</th>
+<th>Weakness</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Code grader</strong></td>
+<td>Health inspector with a checklist</td>
+<td>Fast, cheap, 100% consistent</td>
+<td>Can only check rules, not taste</td>
+</tr>
+<tr>
+<td><strong>Model grader</strong></td>
+<td>Freelance food critic working by email</td>
+<td>Judges taste, scales cheaply</td>
+<td>Slightly different opinion each visit</td>
+</tr>
+<tr>
+<td><strong>Human grader</strong></td>
+<td>Michelin inspector visiting in person</td>
+<td>Deepest, most nuanced verdict</td>
+<td>Slow and expensive</td>
+</tr>
+</tbody>
+</table>
+<p>A real restaurant chain uses all three. A PM building an AI feature should too: code graders for rule compliance, model graders for quality of experience, human graders when the stakes are high (safety, legal, brand).</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When to Use Model Graders</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Model Graders Work</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Is this customer service response helpful?"</td>
+<td>Helpfulness is a judgement call code cannot make</td>
+</tr>
+<tr>
+<td>"Did the AI follow the instructions we gave it?"</td>
+<td>Instruction-following is a semantic question</td>
+</tr>
+<tr>
+<td>"Is this summary complete?"</td>
+<td>Completeness depends on meaning, not word count</td>
+</tr>
+<tr>
+<td>"Does this response feel safe and on-brand?"</td>
+<td>Tone and safety need a model's judgement</td>
+</tr>
+</tbody>
+</table>
+<h3>When NOT to Use Model Graders</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Better Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Is the output valid JSON?"</td>
+<td>Use a code grader — deterministic and free</td>
+</tr>
+<tr>
+<td>"Is the response under 200 words?"</td>
+<td>Use a code grader — trivial</td>
+</tr>
+<tr>
+<td>"Does the answer match a known correct answer?"</td>
+<td>Use a code grader with string comparison</td>
+</tr>
+<tr>
+<td>"Does this violate our most sensitive policies?"</td>
+<td>Use human graders for the hard cases</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The One Trick Every PM Should Push For</h2>
+<p>In the source, the grader prompt asks the model for four things in order:</p>
+<ol>
+<li>Strengths (1-3 items)</li>
+<li>Weaknesses (1-3 items)</li>
+<li>Reasoning (a short explanation)</li>
+<li>Score (1-10)</li>
+</ol>
+<p>This is the <strong>most important design decision in the whole lesson</strong>. Without strengths and weaknesses, the source notes, model graders default to middling scores around 6 — useless for tracking improvement.</p>
+<p>PMs should push engineers to keep this structure even under pressure to "simplify" the grader. The strengths and weaknesses are also directly usable as PM artifacts: they become a backlog of prompt fixes, and the reasoning gives customer success and QA auditable explanations when something regresses.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When a team proposes adding model-based grading, ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If Yes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Do we have clear evaluation criteria written down?</td>
+<td>Yes</td>
+<td>Proceed — graders need criteria first</td>
+</tr>
+<tr>
+<td>Is the quality dimension subjective (helpfulness, completeness)?</td>
+<td>Yes</td>
+<td>Model grader is the right choice</td>
+</tr>
+<tr>
+<td>Is the quality dimension deterministic (valid JSON, length)?</td>
+<td>Yes</td>
+<td>Push for a code grader instead</td>
+</tr>
+<tr>
+<td>Do we care about <em>absolute</em> scores?</td>
+<td>No</td>
+<td>Good — trust the <em>deltas</em>, not the absolute numbers</td>
+</tr>
+<tr>
+<td>Is the reasoning field logged and reviewable?</td>
+<td>Yes</td>
+<td>Proceed — this is what makes grades auditable</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating grader scores as ground truth</strong> — model graders are capricious. Trust deltas between prompt versions, not absolute numbers.</li>
+<li><strong>Skipping criteria definition</strong> — telling engineers "just grade it" produces a grader that scores everything 6. You must define the rubric first.</li>
+<li><strong>Not budgeting for grader iteration</strong> — the grader itself is a prompt that needs tuning. Plan cycles for it.</li>
+<li><strong>Using model graders where code graders work</strong> — wastes tokens and slows iteration. For rule-based checks, always prefer code graders.</li>
+<li><strong>Not logging reasoning</strong> — when a surprising score appears, you need the justification to debug with engineering or QA.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Model-based grading turns prompt engineering from a craft into a product workflow. The grader is not the feature — the grader is the <strong>measurement instrument</strong> that lets you improve the real feature with confidence. PMs who understand this ship quality improvements in weeks; PMs who skip it ship vibes and hope.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation)</strong>: Model-based grading is the canonical LLM-as-judge pattern. Know when to pick model vs code vs human, and what the grader prompt must contain (strengths, weaknesses, reasoning, score).</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: Graders underpin eval-driven iteration — expect questions framed around measuring prompt improvements in production.</li>
+<li>Watch for: "You need to measure helpfulness / instruction following / completeness" → model grader.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What product problem does model-based grading solve?</td>
+<td>Turning subjective AI output quality into a number PMs can chart and iterate against.</td>
+</tr>
+<tr>
+<td>What are the three grader types?</td>
+<td>Code graders, model graders, human graders.</td>
+</tr>
+<tr>
+<td>When should a PM choose a model grader over a code grader?</td>
+<td>When the quality dimension is subjective — helpfulness, completeness, instruction following, safety.</td>
+</tr>
+<tr>
+<td>Why must a model grader return strengths and weaknesses, not just a score?</td>
+<td>Without them, the model regresses to middling scores around 6 and the metric becomes useless.</td>
+</tr>
+<tr>
+<td>What is the restaurant analogy for the three grader types?</td>
+<td>Health inspector (code), freelance food critic (model), Michelin inspector (human).</td>
+</tr>
+<tr>
+<td>Which score should PMs trust — absolute or delta?</td>
+<td>Deltas between prompt versions — model graders are capricious on absolutes.</td>
+</tr>
+<tr>
+<td>What dimensions do model graders handle well?</td>
+<td>Response quality, instruction following, completeness, helpfulness, safety.</td>
+</tr>
+<tr>
+<td>What is the grader actually — a feature or a measurement instrument?</td>
+<td>A measurement instrument — it exists to help you improve the real feature with confidence.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

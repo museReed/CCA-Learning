@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748B"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#F59E0B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">標準 Eval 工作流 — 5 步驟迴圈</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Draft → Dataset → Run → Grade → Iterate。步驟 5 回到步驟 3,直到分數滿意為止。</text>
+
+  <rect x="60" y="100" width="180" height="130" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="90" cy="128" r="18" fill="#3B82F6"/>
+  <text x="90" y="134" text-anchor="middle" font-size="14" font-weight="700" fill="white">1</text>
+  <text x="116" y="125" font-size="12" font-weight="700" fill="#1E40AF">草擬 Prompt</text>
+  <text x="116" y="142" font-size="10" fill="#6B7280">先寫個天真版本</text>
+  <rect x="74" y="156" width="152" height="60" rx="4" fill="#0F172A"/>
+  <text x="82" y="173" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">prompt = f"""</text>
+  <text x="82" y="186" font-size="9" font-family="Menlo, monospace" fill="#FDE68A">Answer the user's question:</text>
+  <text x="82" y="199" font-size="9" font-family="Menlo, monospace" fill="#34D399">{question}</text>
+  <text x="82" y="212" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">"""</text>
+
+  <rect x="280" y="100" width="180" height="130" rx="12" fill="#F3E8FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="310" cy="128" r="18" fill="#8B5CF6"/>
+  <text x="310" y="134" text-anchor="middle" font-size="14" font-weight="700" fill="white">2</text>
+  <text x="336" y="125" font-size="12" font-weight="700" fill="#6B21A8">建立資料集</text>
+  <text x="336" y="142" font-size="10" fill="#6B7280">具代表性的測試輸入</text>
+  <rect x="294" y="156" width="152" height="60" rx="4" fill="white" stroke="#DDD6FE"/>
+  <text x="304" y="172" font-size="10" fill="#1E293B">• 「2+2 是多少?」</text>
+  <text x="304" y="188" font-size="10" fill="#1E293B">• 「怎麼煮燕麥?」</text>
+  <text x="304" y="204" font-size="10" fill="#1E293B">• 「月亮多遠?」</text>
+
+  <rect x="500" y="100" width="180" height="130" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="530" cy="128" r="18" fill="#22C55E"/>
+  <text x="530" y="134" text-anchor="middle" font-size="14" font-weight="700" fill="white">3</text>
+  <text x="556" y="125" font-size="12" font-weight="700" fill="#166534">丟給 Claude 跑</text>
+  <text x="556" y="142" font-size="10" fill="#6B7280">template + 輸入合併後送出</text>
+  <rect x="514" y="156" width="152" height="60" rx="4" fill="white" stroke="#86EFAC"/>
+  <text x="522" y="173" font-size="10" fill="#1E293B">→ 「2 + 2 = 4」</text>
+  <text x="522" y="189" font-size="10" fill="#1E293B">→ 燕麥食譜...</text>
+  <text x="522" y="205" font-size="10" fill="#1E293B">→ 「384,400 公里」</text>
+
+  <rect x="720" y="100" width="220" height="130" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="750" cy="128" r="18" fill="#F59E0B"/>
+  <text x="750" y="134" text-anchor="middle" font-size="14" font-weight="700" fill="white">4</text>
+  <text x="776" y="125" font-size="12" font-weight="700" fill="#92400E">Grader 評分</text>
+  <text x="776" y="142" font-size="10" fill="#6B7280">每個 case 給 1-10 分</text>
+  <rect x="734" y="156" width="192" height="60" rx="4" fill="white" stroke="#FDE68A"/>
+  <text x="744" y="173" font-size="10" fill="#1E293B">• 數學 → 10</text>
+  <text x="744" y="189" font-size="10" fill="#1E293B">• 燕麥 → 4(有待加強)</text>
+  <text x="744" y="205" font-size="10" fill="#1E293B">• 月亮 → 9</text>
+
+  <path d="M240,165 L278,165" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M460,165 L498,165" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M680,165 L718,165" stroke="#64748B" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="310" y="310" width="380" height="140" rx="12" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="340" cy="338" r="18" fill="#EF4444"/>
+  <text x="340" y="344" text-anchor="middle" font-size="14" font-weight="700" fill="white">5</text>
+  <text x="366" y="335" font-size="13" font-weight="700" fill="#991B1B">修改 Prompt → 重新迭代</text>
+  <text x="366" y="352" font-size="10" fill="#6B7280">平均 (10+4+9)/3 = 7.66 → 試 v2</text>
+  <rect x="324" y="366" width="352" height="72" rx="4" fill="#0F172A"/>
+  <text x="336" y="384" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">prompt = f"""</text>
+  <text x="336" y="398" font-size="9" font-family="Menlo, monospace" fill="#FDE68A">Answer the user's question:</text>
+  <text x="336" y="412" font-size="9" font-family="Menlo, monospace" fill="#34D399">{question}</text>
+  <text x="336" y="425" font-size="9" font-family="Menlo, monospace" fill="#F87171">Answer with ample detail</text>
+  <text x="550" y="425" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">  ← 新增</text>
+
+  <path d="M830,230 Q830,280 690,380" stroke="#F59E0B" stroke-width="2" stroke-dasharray="5,3" fill="none" marker-end="url(#arrow-amber)"/>
+  <text x="810" y="280" text-anchor="end" font-size="10" fill="#92400E" font-weight="600">由分數決定改哪裡</text>
+
+  <path d="M310,380 Q200,380 200,280 Q200,220 498,180" stroke="#F59E0B" stroke-width="2" stroke-dasharray="5,3" fill="none" marker-end="url(#arrow-amber)"/>
+  <text x="190" y="270" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">用相同</text>
+  <text x="190" y="284" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">資料集</text>
+  <text x="190" y="298" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">重跑</text>
+
+  <rect x="40" y="480" width="920" height="80" rx="12" fill="#F8FAFC" stroke="#CBD5E1" filter="url(#shadow)"/>
+  <text x="56" y="504" font-size="12" font-weight="700" fill="#1E293B">Prompt 評分:客觀比較不同版本</text>
+  <rect x="56" y="514" width="430" height="36" rx="6" fill="#FEE2E2" stroke="#FCA5A5"/>
+  <text x="70" y="537" font-size="11" fill="#991B1B" font-weight="600">v1(基線)</text>
+  <text x="470" y="537" text-anchor="end" font-size="14" fill="#991B1B" font-weight="700">平均 7.66</text>
+  <rect x="500" y="514" width="444" height="36" rx="6" fill="#DCFCE7" stroke="#86EFAC"/>
+  <text x="514" y="537" font-size="11" fill="#166534" font-weight="600">v2(加上「詳細回答」指示)</text>
+  <text x="928" y="537" text-anchor="end" font-size="14" fill="#166534" font-weight="700">平均 8.70  ↑</text>
+</svg>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generating Test Datasets Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Generating Test Datasets — PM Perspective（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration（20%，主要）；D5 — Enterprise Deployment（20%，次要）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2（测试数据集）、3.1（eval 设计）、3.3（eval 执行）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 19</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>Eval 数据集编码了你的 AI 功能"什么叫好" — 最快拿到可用第一版的方法是让 Claude 帮你打草稿，然后把那个草稿当成一份 PM 拥有并持续迭代的活产物。</p>
+<hr />
+<h2>心智模型：用户问卷</h2>
+<p>把 eval 数据集想成客户访谈问卷。PM 不会从白纸开始做用户研究 — 他们会先起草问卷、测试几个人、然后精修。数据集的做法完全一样：</p>
+<table>
+<thead>
+<tr>
+<th>问卷概念</th>
+<th>Eval 数据集概念</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>起草问卷题目</td>
+<td>用 Haiku 生成初版数据集</td>
+</tr>
+<tr>
+<td>找几个人试答</td>
+<td>对生成的数据集跑一次 pilot eval</td>
+</tr>
+<tr>
+<td>根据信号精修题目</td>
+<td>编辑数据集补强薄弱点</td>
+</tr>
+<tr>
+<td>锁定最终版</td>
+<td>存成 <code>dataset.json</code> 并 commit 进版控</td>
+</tr>
+<tr>
+<td>每季度重新跑问卷</td>
+<td>每次 prompt 改动都重跑 eval</td>
+</tr>
+</tbody>
+</table>
+<p>数据集就是问卷。每一条 entry 都是一个"你产品要好好处理这种输入"的决定。</p>
+<hr />
+<h2>AWS Code Assistant 示例</h2>
+<p>课程的 running example 是一个帮用户写 AWS 专属 <strong>Python、JSON、regex</strong> 的 prompt。要求是干净输出 — 没有前言、没有"这是你的代码"开场白。对 PM 来说，这个设定有三点值得注意：</p>
+<ol>
+<li><strong>输出格式是产品需求，不是技术细节。</strong> 干净代码让功能能在复制粘贴工作流里可用；杂乱代码会毁掉整个 use case。</li>
+<li><strong>数据集存在的意义，就是证明 prompt 能在非团队手挑的输入上遵守这个产品需求。</strong></li>
+<li><strong>生成步骤产出的数据集能在客户看到之前就以极低成本暴露格式失败。</strong></li>
+</ol>
+<hr />
+<h2>构建数据集的两种做法</h2>
+<table>
+<thead>
+<tr>
+<th>做法</th>
+<th>速度</th>
+<th>保真度</th>
+<th>何时用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>手工构造</td>
+<td>慢</td>
+<td>高 — 每个案例你都掌控</td>
+<td>专业领域、受监管行业、高风险功能</td>
+</tr>
+<tr>
+<td>Claude 生成</td>
+<td>快</td>
+<td>中 — 覆盖取决于 prompt</td>
+<td>Bootstrapping、通用任务、早期功能</td>
+</tr>
+</tbody>
+</table>
+<p>课程选 Claude 生成是有道理的：初始成本极低，而且你永远可以事后手工编辑 — 编辑已生成的数据集比从零写快得多。</p>
+<p><strong>成本杠杆：</strong> 课程让工程师用 <strong>Haiku</strong>（不是 Sonnet）来生成。对 PM 来说，这直接对应到运营成本 — 批量数据集工作绝对不该用最贵的模型。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<p>当团队说他们生成了一份 eval 数据集，走过这些问题：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>好答案长什么样</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>谁生成的 — 人类还是 Claude？</td>
+<td>都可以，但答案会影响后续问题</td>
+</tr>
+<tr>
+<td>如果是 Claude：用 Haiku 还是 Sonnet？</td>
+<td>Haiku — 其他都是批量工作上的浪费</td>
+</tr>
+<tr>
+<td>多少条？</td>
+<td>起步可以很少（如 3 条）；生产要规划几十到几百条</td>
+</tr>
+<tr>
+<td>有覆盖我们担心的失败模式吗？</td>
+<td>明确的"是"，附示例</td>
+</tr>
+<tr>
+<td>有 commit 进版控吗？</td>
+<td>有 — 数据集是 PM 产物，不是 notebook cell</td>
+</tr>
+<tr>
+<td>下次改 prompt 时会跑"同一份"数据集吗？</td>
+<td>会 — 同数据集、不同 prompt</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>产品场景</h2>
+<h3>适合用 Claude 生成的情境</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么生成胜出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全新 AI 功能、没有先前数据集</td>
+<td>从 0 到"可度量"的最快路径</td>
+</tr>
+<tr>
+<td>探索新的输出格式</td>
+<td>Claude 会提出 PM 可能没想到的任务变体</td>
+</tr>
+<tr>
+<td>手工策划前先 bootstrap</td>
+<td>省下数小时手写时间</td>
+</tr>
+</tbody>
+</table>
+<h3>适合手工构造的情境</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么手工胜出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>法律、医疗、金融功能</td>
+<td>数据集错误会变成产品错误</td>
+</tr>
+<tr>
+<td>来自客服工单的真实客户边角情况</td>
+<td>那些本来就是最好的测试案例</td>
+</tr>
+<tr>
+<td>生产 regression suite</td>
+<td>每一条都该对应一个已知失败模式</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>"成长中数据集"模式</h2>
+<p>给 PM 用的数据集演化心智模型：</p>
+<ol>
+<li><strong>Bootstrap</strong> — 用 Haiku 生成约 3 条，先证明 eval pipeline 跑得起来。</li>
+<li><strong>扩展</strong> — 让 Haiku 再生成 30 条以拓展广度；审核并保留好的。</li>
+<li><strong>策划</strong> — 从真实客户投诉与边角情况加入手写案例。</li>
+<li><strong>锁定</strong> — 把数据集 commit 进版控；每个新 prompt 版本都对它跑。</li>
+<li><strong>成长</strong> — 每当生产出事故，把失败案例加进数据集，让它不再 regression。</li>
+</ol>
+<p>第 5 步是让数据集变成产品与工程之间活的"质量合约"。</p>
+<hr />
+<h2>PM 常见错误</h2>
+<ol>
+<li><strong>把数据集当成工程产物</strong> — 它编码了产品的 definition-of-good，所以是 PM 交付物。</li>
+<li><strong>接受一份你从未读过的数据集</strong> — 如果你没法扫过案例然后说"这就是真实使用"，那 eval 度量的就不是对的东西。</li>
+<li><strong>没把生产事故加进数据集</strong> — 每一个客户可见的失败都该成为永久测试案例。</li>
+<li><strong>让工程师在两次跑之间重新生成数据集</strong> — 这摧毁可比性并隐藏 regression。</li>
+<li><strong>没把 Haiku 的数据集刷新花费算进预算</strong> — 便宜但不免费；算进功能的运营成本。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Eval 数据集是 PM 拥有的、对"这个功能的质量是什么"最清晰的答案。你纳入的每一条案例都是"我们保证产品会处理好这类输入"的明确承诺。CCA 考试把数据集工作归在 D3，凡是问"团队要如何为新 prompt bootstrap 测试数据"的题目，答案都指向用 Haiku 生成 + prefilling + 存盘重用。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D3（Evaluation &amp; Iteration）</strong>：知道两种建数据集的做法、何时用哪一种，以及为什么 Haiku 是生成的默认。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：存在磁盘上的版本化数据集是生产产物 — 它才让 prompt regression 可被检测。</li>
+<li>考题触发词："bootstrap eval dataset" → Haiku + prefilling + stop sequence + <code>json.loads</code> + 存盘。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>为什么 PM 该把 eval 数据集当成 PM 产物而不是工程产物？</td>
+<td>它编码了"这个功能什么叫好" — 那是产品判断，不是实现细节。</td>
+</tr>
+<tr>
+<td>Eval 数据集的问卷类比？</td>
+<td>客户问卷 — 起草、试行、精修、锁定，每次产品改动都重新发放。</td>
+</tr>
+<tr>
+<td>课程描述的两种建数据集做法是什么？</td>
+<td>手工构造（慢、高保真）和 Claude 生成（快、中保真）。</td>
+</tr>
+<tr>
+<td>批量数据集生成该用哪个模型？</td>
+<td>Haiku — 批量创意工作的又快又便宜选择。</td>
+</tr>
+<tr>
+<td>当生产事故暴露新失败模式时 PM 该做什么？</td>
+<td>把失败案例加进 eval 数据集，下次迭代就能抓到 regression。</td>
+</tr>
+<tr>
+<td>为什么数据集在 prompt 迭代间必须保持不变？</td>
+<td>这样 prompt 版本间的分数差异才能归因于 prompt 改动，而不是输入改动。</td>
+</tr>
+<tr>
+<td>课程构建的最小可行第一版数据集是什么？</td>
+<td>三个 Claude 生成的任务（Python、JSON config、regex 各一）给 AWS code-assistant prompt。</td>
+</tr>
+<tr>
+<td>哪个 CCA domain 涵盖数据集生成？</td>
+<td>主要：D3 Evaluation &amp; Iteration；持久化的数据集也触及 D5 Enterprise Deployment 作为生产产物。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

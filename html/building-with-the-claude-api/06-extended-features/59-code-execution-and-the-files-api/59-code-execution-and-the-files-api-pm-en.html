@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Execution And The Files Api Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Code Execution and the Files API — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 (server-side tools), 2.1 (tool schema design)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 59</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Together, the Files API and the Code Execution tool let your product ship "hand it to Claude" features — users upload a file, ask a question in plain English, and get back an analysis complete with plots — without your team having to build a data pipeline, a sandbox, or a chart renderer.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Before this feature, shipping "upload a CSV and get an analysis" meant owning a whole pipeline: file storage, a sandboxed runtime, a charting library, a results UI, and an engineer on call when any of those broke. Code Execution collapses that into <strong>declare a server-side tool, wire the Files API for uploads and downloads</strong>. The analysis work, the plot generation, the iteration — all handled by Claude inside a sandbox Anthropic operates.</p>
+<p>This is the "delegate computation to Claude" pattern, and it unlocks product features that would otherwise take quarters to build: data analysis, image manipulation, document transformation, mathematical modeling. If your roadmap has any "upload X and get Y" feature, this lesson is the shortest path to shipping it.</p>
+<hr />
+<h2>Mental Model: A Trustworthy Contractor's Closed Workshop</h2>
+<p>Think of Code Execution as hiring a contractor who works inside a locked workshop:</p>
+<table>
+<thead>
+<tr>
+<th>Contractor analogy</th>
+<th>API mechanic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You hand the contractor raw materials at the workshop door</td>
+<td>You upload files via the Files API and pass them to the sandbox via <code>container_upload</code></td>
+</tr>
+<tr>
+<td>The workshop has no phone or internet — no outside distractions</td>
+<td>The Docker container has no network access — safe, isolated</td>
+</tr>
+<tr>
+<td>The contractor can build and iterate inside, trying different approaches</td>
+<td>Claude can run Python multiple times in one response</td>
+</tr>
+<tr>
+<td>You collect finished products at the door</td>
+<td>You download generated files via the Files API</td>
+</tr>
+<tr>
+<td>You do not need to supply tools — the contractor brings them</td>
+<td>Code Execution is a server-side tool, no client implementation</td>
+</tr>
+</tbody>
+</table>
+<p>The closed workshop is not a limitation — it is the <em>reason</em> you can trust giving Claude a real runtime.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>High-Value Patterns the Lesson Highlights</h3>
+<table>
+<thead>
+<tr>
+<th>Use case</th>
+<th>What the user does</th>
+<th>What Claude does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data analysis (churn, sales, experiments)</td>
+<td>Upload CSV, ask a natural-language question</td>
+<td>Cleans, analyzes, plots, summarizes</td>
+</tr>
+<tr>
+<td>Image processing</td>
+<td>Upload image, describe the transformation</td>
+<td>Runs image libs inside the container, returns processed image</td>
+</tr>
+<tr>
+<td>Document parsing and transformation</td>
+<td>Upload PDF, request a format or redaction</td>
+<td>Extracts, transforms, re-emits the document</td>
+</tr>
+<tr>
+<td>Mathematical modeling</td>
+<td>Describe the problem, upload parameters</td>
+<td>Builds and runs the model, returns plots and numbers</td>
+</tr>
+<tr>
+<td>Custom report generation</td>
+<td>Upload raw data, describe the report layout</td>
+<td>Generates formatted HTML/PDF output</td>
+</tr>
+</tbody>
+</table>
+<h3>Where the Pattern Does NOT Fit</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Features that need live external APIs</td>
+<td>The sandbox has no network access.</td>
+</tr>
+<tr>
+<td>Features that need persistent state across sessions</td>
+<td>The container is ephemeral — state must go through the Files API.</td>
+</tr>
+<tr>
+<td>Tiny one-off computations a user could do in a spreadsheet</td>
+<td>The overhead is not worth it; Claude's native reasoning is cheaper.</td>
+</tr>
+<tr>
+<td>High-security data that cannot leave your infra</td>
+<td>The sandbox is Anthropic-hosted — run through your compliance review.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When scoping a "Claude does the computation" feature:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the feature need to crunch, plot, parse, or transform data?</td>
+<td>If yes, code execution probably fits.</td>
+</tr>
+<tr>
+<td>Is the input a file (CSV, PDF, image)?</td>
+<td>If yes, the Files API is the natural upload path.</td>
+</tr>
+<tr>
+<td>Does the output include generated artifacts (plots, reports)?</td>
+<td>If yes, wire the download path via <code>code_execution_output</code> blocks.</td>
+</tr>
+<tr>
+<td>Does the feature need external network access?</td>
+<td>If yes, this tool does not fit — sandbox has no network.</td>
+</tr>
+<tr>
+<td>Is the compute workload bounded (seconds to minutes)?</td>
+<td>Expected for iterative analysis; plan UX around streaming or progress indicators.</td>
+</tr>
+<tr>
+<td>Are there compliance concerns with files leaving your infra?</td>
+<td>Review before shipping.</td>
+</tr>
+</tbody>
+</table>
+<p>If the first three are yes and the next three have acceptable answers, code execution is a strong product bet.</p>
+<hr />
+<h2>User Experience Implications</h2>
+<p>Code execution changes what a "simple feature" can accomplish. A single prompt can produce:</p>
+<ul>
+<li>An analysis with multiple chart outputs.</li>
+<li>Multi-step reasoning (load → inspect → clean → plot → summarize) narrated by Claude.</li>
+<li>Iterated refinement without extra user effort.</li>
+</ul>
+<p>For users, this feels like having a junior data analyst on call. For the product, it means you can promise results that used to require a services team or a complex UI — delivered through a single text box and a file upload.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Promising live-data analysis</strong> — the sandbox has no network, so "get the latest stock data and graph it" will not work out of the box. Fetch the data in your own code first, upload the result, then invoke code execution.</li>
+<li><strong>Building a custom pipeline instead</strong> — teams often under-estimate what code execution delivers and build a homegrown sandbox that is slower, less reliable, and more expensive to maintain.</li>
+<li><strong>Forgetting to expose generated artifacts</strong> — if your UI never surfaces the files Claude produced, users see only text explanations and feel short-changed. Render the <code>code_execution_output</code> files in the UI.</li>
+<li><strong>Underestimating iteration</strong> — Claude may run code three or five times in a single response. UX and logs should handle that, not assume a single execution.</li>
+<li><strong>Skipping compliance review</strong> — any time files leave your infra, legal and security should weigh in. Do not ship without this step for enterprise customers.</li>
+<li><strong>Not pairing with the Files API upfront</strong> — code execution without the Files API is like a workshop with no delivery door. Plan both at the same time.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Code Execution + Files API is a <strong>product shortcut</strong>: it turns "we need to build a sandboxed computation pipeline" into "we need to declare a tool and wire a file upload/download." For any roadmap item of the form "user uploads X, we analyze and return Y," this pairing collapses months of engineering into a single sprint.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong> — know the distinction: server-side tools (like code execution) require no client implementation, whereas client-side tools do. Exam scenarios often ask when you need to implement a tool yourself vs. when Claude runs it on the server.</li>
+<li>Know the sandbox characteristics: isolated Docker container, no network access, Python.</li>
+<li>Know the Files API is how you get data in (<code>container_upload</code>) and out (<code>download_file(file_id)</code>).</li>
+<li>Expect scenarios framed as "delegate a computational task to Claude" where the right answer is the Code Execution + Files API pattern.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What kind of product features does Code Execution + Files API unlock?</td>
+<td>Features where users upload a file and ask in plain English for analysis, transformation, or report generation — without your team building a sandbox or pipeline.</td>
+</tr>
+<tr>
+<td>What does the Files API do for a product?</td>
+<td>It provides an upload-once, reference-by-ID pattern for files, and it serves as the in/out bridge for the Code Execution sandbox.</td>
+</tr>
+<tr>
+<td>Is Code Execution a server-side or client-side tool?</td>
+<td>Server-side — no client implementation; Claude runs Python for you in an isolated container.</td>
+</tr>
+<tr>
+<td>Why does the sandbox have no network access?</td>
+<td>It is an isolation/security feature — the container cannot make external API calls, which keeps the execution environment safe.</td>
+</tr>
+<tr>
+<td>Name a feature this pattern is NOT suitable for.</td>
+<td>Anything that requires live external API access (the sandbox has no network), or anything needing persistent state across sessions.</td>
+</tr>
+<tr>
+<td>What mental model captures this pattern well?</td>
+<td>A trustworthy contractor in a locked, offline workshop — you hand them materials at the door, they work inside, you collect the finished product at the door.</td>
+</tr>
+<tr>
+<td>Why should a PM not build a custom sandbox instead?</td>
+<td>Because the server-side tool collapses months of work into a tool declaration plus Files API wiring, and the team avoids maintaining a bespoke runtime.</td>
+</tr>
+<tr>
+<td>What block type delivers a generated file back to you?</td>
+<td>A <code>code_execution_output</code> block containing a file ID, which you then retrieve via the Files API.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

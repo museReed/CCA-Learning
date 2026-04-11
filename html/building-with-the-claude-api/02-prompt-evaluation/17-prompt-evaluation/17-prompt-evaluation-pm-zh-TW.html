@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Evaluation Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Evaluation — PM Perspective（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration（20%，主要）；D5 — Enterprise Deployment（20%，次要）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（eval 設計）、3.2（測試資料集）、3.3（eval 執行）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 17</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>Prompt evaluation 是 AI 功能的「產品品質版 A/B 測試」— 它讓團隊改 prompt 時能帶著「量測出來的信心」上線，而不是祈禱上次那個小調整沒把真實用戶搞壞。</p>
+<hr />
+<h2>PM 為什麼要在意</h2>
+<p>每一個 AI 功能背後都有一個 prompt。沒有 evaluation pipeline，「這個 prompt 好不好？」就只是工程師的意見，不是產品的事實。這個落差會直接造成商業後果。</p>
+<table>
+<thead>
+<tr>
+<th>症狀</th>
+<th>根因</th>
+<th>商業衝擊</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>客戶反映「AI 答錯了」</td>
+<td>Prompt 從沒在真實流量上測過</td>
+<td>客戶流失、品牌信任受損</td>
+</tr>
+<tr>
+<td>工程師爭論哪版 prompt「比較好」</td>
+<td>沒有客觀指標終結辯論</td>
+<td>迭代變慢、變成政治決策</td>
+</tr>
+<tr>
+<td>不敢改現有 prompt</td>
+<td>沒有安全網抓 regression</td>
+<td>功能停滯、prompt tech debt</td>
+</tr>
+<tr>
+<td>無法跟高層報一個品質數字</td>
+<td>根本沒有 eval 分數</td>
+<td>沒辦法設 AI 品質 OKR</td>
+</tr>
+</tbody>
+</table>
+<p>Prompt evaluation 把上面每一個「意見」和「恐懼」變成一個數字。PM 就是靠數字管產品的。</p>
+<hr />
+<h2>心智模型：餐廳廚房</h2>
+<p>把 prompt 想成食譜，prompt evaluation 想成試菜團隊。</p>
+<table>
+<thead>
+<tr>
+<th>廚房概念</th>
+<th>Prompt 概念</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>食譜卡</td>
+<td>Prompt template</td>
+</tr>
+<tr>
+<td>主廚調整食譜</td>
+<td>Prompt engineer 調整 prompt</td>
+</tr>
+<tr>
+<td>主廚試一次就出菜</td>
+<td>選項 1 — 測一次就上</td>
+</tr>
+<tr>
+<td>主廚試五次、補一點調味</td>
+<td>選項 2 — 測幾次、補邊角案例</td>
+</tr>
+<tr>
+<td>試菜小組對 20 道菜打分，主廚據此迭代</td>
+<td>選項 3 — 跑 eval pipeline</td>
+</tr>
+</tbody>
+</table>
+<p>選項 3 是唯一能讓你擁有米其林等級廚房的路。選項 1 和 2 感覺快，但做出來的晚餐品質不穩定。</p>
+<hr />
+<h2>三條路 — PM 視角</h2>
+<table>
+<thead>
+<tr>
+<th>選項</th>
+<th>工程師實際做了什麼</th>
+<th>PM 看得到的風險</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 測一次</td>
+<td>跑一個例子看起來還行就上</td>
+<td>高：任何不尋常的用戶輸入都可能變成故障</td>
+</tr>
+<tr>
+<td>2. 測幾次補洞</td>
+<td>跑幾個他想得到的邊角案例</td>
+<td>中：人類想像力抓不到真實長尾</td>
+</tr>
+<tr>
+<td>3. Eval pipeline</td>
+<td>跑數百、數千個案例進自動化 scorer</td>
+<td>低：regression 在開發機就被抓到，不是客服工單</td>
+</tr>
+</tbody>
+</table>
+<p>工程師說「prompt 好了」，PM 下一個問題永遠該是：<em>你剛剛走的是三條路裡的哪一條？</em></p>
+<hr />
+<h2>產品場景</h2>
+<h3>Evaluation 不可省</h3>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>面向客戶的 AI 功能</td>
+<td>失敗對用戶可見，事故代價高</td>
+</tr>
+<tr>
+<td>涉及金錢、健康、法律、安全的 prompt</td>
+<td>正確性是法遵和責任問題</td>
+</tr>
+<tr>
+<td>計畫每月迭代的功能</td>
+<td>沒有 eval，每次迭代都是 regression 風險</td>
+</tr>
+<tr>
+<td>想比較兩個模型的功能（Haiku vs. Sonnet）</td>
+<td>Eval 提供 cost/quality trade-off 所需的客觀比較</td>
+</tr>
+</tbody>
+</table>
+<h3>可以短暫延後</h3>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>注意事項</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>下週 demo 的內部原型</td>
+<td>可延後，但沒 eval 就不能正式上線</td>
+</tr>
+<tr>
+<td>一次性拋棄腳本</td>
+<td>可延後，但要知道你在欠技術債</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 決策框架</h2>
+<p>批准任何 AI 功能 GA 之前問：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>如果「沒有」</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>有一份反映真實用戶輸入的 eval 資料集嗎？</td>
+<td>擋下發佈 — 你根本沒法量品質</td>
+</tr>
+<tr>
+<td>能產出目前 prompt 版本的客觀分數嗎？</td>
+<td>擋下發佈 — 你沒有 baseline</td>
+</tr>
+<tr>
+<td>下個月改 prompt 時 CI 會告訴你品質升降嗎？</td>
+<td>擋下發佈 — 你沒有 regression 安全網</td>
+</tr>
+<tr>
+<td>能在發佈文件的品質章節引用一個數字嗎？</td>
+<td>擋下發佈 — 你的品質敘事全靠感覺</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 常見錯誤</h2>
+<ol>
+<li><strong>把「看起來還不錯」當品質訊號</strong> — GA 前應該要求的是一個數字，不是感覺。</li>
+<li><strong>因時程壓力讓工程師跳過 eval</strong> — 每跳過一次 eval 就是未來要付的 production 故障。</li>
+<li><strong>沒把 eval 的 API 花費算進預算</strong> — Eval 要錢，從第一天起就應該納入功能成本模型。</li>
+<li><strong>把一次好 demo 當成 production 準備度</strong> — 一次 demo 就是選項 1，而選項 1 是陷阱。</li>
+<li><strong>沒把 eval 資料集當成 PM 的產出物</strong> — 資料集編碼了「什麼才叫好」，那是 PM 的決策，不是 junior eng 的決定。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>PM 的工作就是把「品質」變成一個數字。Prompt evaluation 就是那個機制，把 AI 品質從主觀論戰變成能寫進 OKR、發佈文件、事故回顧的客觀指標。CCA 考題只要問「我們怎麼知道這個 prompt 可以上 production 了？」那就是 D3 題，答案永遠是：跑 eval pipeline。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D3（Evaluation &amp; Iteration）</strong>：區分 prompt engineering（怎麼寫）與 prompt evaluation（怎麼量）；知道三條路和為什麼選項 3 贏。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：Prompt eval 是 production 發佈的前置條件 — 沒 eval 就不上線。</li>
+<li>考題常見話術：「怎麼比較 prompt 版本」「怎麼抓 regression」「怎麼回報品質」都是 D3/D5，都指向 eval pipeline。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt evaluation 解決的 PM 問題是什麼？</td>
+<td>把「這 prompt 好不好？」這種主觀判斷，變成能寫進發佈文件、OKR 與事故回顧的客觀分數。</td>
+</tr>
+<tr>
+<td>Prompt evaluation 的餐廳比喻是什麼？</td>
+<td>試菜小組按評分表給菜打分，主廚帶著信心迭代，而不是只靠一次試吃。</td>
+</tr>
+<tr>
+<td>Prompt 寫好後 PM 該問哪三條路？</td>
+<td>1) 測一次、2) 測幾個邊角案例、3) 跑 eval pipeline — 只有 3 才適合 GA。</td>
+</tr>
+<tr>
+<td>PM 在批准 GA 前必須要求什麼？</td>
+<td>資料集、客觀分數、regression 安全網，以及能寫進發佈文件的數字。</td>
+</tr>
+<tr>
+<td>為什麼「demo 看起來不錯」不夠？</td>
+<td>Demo 就是選項 1 — 一個例子不是真實流量的隨機抽樣，會隱藏失敗模式。</td>
+</tr>
+<tr>
+<td>什麼情況下可以延後做 eval pipeline？</td>
+<td>只有內部原型或一次性腳本 — 面向客戶的功能絕對不行。</td>
+</tr>
+<tr>
+<td>Eval 資料集歸誰擁有？</td>
+<td>這是 PM 級別的產出，因為它編碼了「什麼才叫好」，不是純工程決策。</td>
+</tr>
+<tr>
+<td>Prompt evaluation 對應哪個 CCA domain？</td>
+<td>D3 Evaluation &amp; Iteration（主要）、D5 Enterprise Deployment（次要，作為 production 閘門）。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

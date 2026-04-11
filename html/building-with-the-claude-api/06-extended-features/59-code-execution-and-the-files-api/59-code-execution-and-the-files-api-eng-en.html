@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Execution And The Files Api Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Code Execution and the Files API — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.4 (server-side tools), 2.1 (tool schema design), 1.2 (multi-turn tool loops)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 59</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The Files API lets you upload files once and reference them by ID in future requests, and the Code Execution tool is a server-side Python sandbox (isolated Docker container, no network) that Claude can drive — combined, they let you hand off real computational work to Claude without wiring a custom execution environment.</p>
+<hr />
+<h2>Files API — Upload Once, Reference Many Times</h2>
+<p>Normally you embed files in messages as base64 (for images or PDFs). The Files API is an alternative: upload the file separately, get back a file metadata object with a unique <strong>file ID</strong>, and then reference that ID in future messages.</p>
+<p>The flow:</p>
+<ol>
+<li>Upload your file (image, PDF, text, CSV, etc.) via a dedicated API call.</li>
+<li>Receive a file metadata object containing a <strong>file ID</strong>.</li>
+<li>Reference the file ID in future messages instead of inlining raw file bytes.</li>
+</ol>
+<p>Why this matters:</p>
+<ul>
+<li>You do not have to resend the file on every request — one upload, many references.</li>
+<li>Large files become cheap to reuse — no base64 bloat in each request.</li>
+<li>It is the primary way to get data <em>into and out of</em> the Code Execution sandbox, because the sandbox has no network access.</li>
+</ul>
+<hr />
+<h2>Code Execution Tool — Server-Side Python Sandbox</h2>
+<p>Code Execution is a <strong>server-side tool</strong>. Unlike a normal client-side tool, you do not implement it yourself — you just declare the predefined tool schema in your request, and Claude can optionally execute Python code in an isolated environment.</p>
+<p>The execution environment has very deliberate properties:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Runtime</strong></td>
+<td>Python in an isolated Docker container.</td>
+</tr>
+<tr>
+<td><strong>Network access</strong></td>
+<td><strong>None.</strong> The container cannot make external API calls.</td>
+</tr>
+<tr>
+<td><strong>Iteration</strong></td>
+<td>Claude can execute code multiple times during a single conversation, iterating as the analysis unfolds.</td>
+</tr>
+<tr>
+<td><strong>Integration</strong></td>
+<td>Results are captured and interpreted by Claude for the final response.</td>
+</tr>
+<tr>
+<td><strong>Implementation required</strong></td>
+<td><strong>None on your side</strong> — it is a server-side tool provided by Anthropic.</td>
+</tr>
+</tbody>
+</table>
+<p>The isolation is a feature, not a limitation: it means you can let Claude run code safely without exposing your infrastructure, keys, or network.</p>
+<hr />
+<h2>Combining Files API + Code Execution</h2>
+<p>Because the Docker container has <strong>no network access</strong>, the Files API is the natural bridge: it is the primary way to get data <em>in</em> and generated artifacts <em>out</em>.</p>
+<p>A typical workflow:</p>
+<ol>
+<li>Upload your data file (e.g., a CSV) using the Files API.</li>
+<li>Include a <code>container_upload</code> block in your message with the file ID so the sandbox receives the file.</li>
+<li>Ask Claude to analyze the data.</li>
+<li>Claude writes and executes Python code inside the container to process the file.</li>
+<li>Claude can generate outputs (plots, reports) and make them available for download via the Files API.</li>
+</ol>
+<p>This is a clean delegation pattern: you control the inputs and outputs, Claude handles the code.</p>
+<hr />
+<h2>Practical Example: Churn Analysis</h2>
+<p>The lesson walks through a streaming-service dataset (<code>streaming.csv</code>) containing user information — subscription tiers, viewing habits, and churn labels.</p>
+<p>First, upload the file with a helper function:</p>
+<pre><code class="language-python">file_metadata = upload('streaming.csv')
+</code></pre>
+<p>Then create a message that pairs a text instruction with a <code>container_upload</code> block referencing the uploaded file, and enable the code execution tool:</p>
+<pre><code class="language-python">messages = []
+add_user_message(
+    messages,
+    [
+        {
+            &quot;type&quot;: &quot;text&quot;,
+            &quot;text&quot;: &quot;&quot;&quot;Run a detailed analysis to determine major drivers of churn.
+            Your final output should include at least one detailed plot summarizing your findings.&quot;&quot;&quot;
+        },
+        {&quot;type&quot;: &quot;container_upload&quot;, &quot;file_id&quot;: file_metadata.id},
+    ],
+)
+
+chat(
+    messages,
+    tools=[{&quot;type&quot;: &quot;code_execution_20250522&quot;, &quot;name&quot;: &quot;code_execution&quot;}]
+)
+</code></pre>
+<p>Key pieces:</p>
+<ul>
+<li>The <code>container_upload</code> block is how you inject the uploaded file into the sandbox.</li>
+<li>The <code>tools</code> list contains a single entry with <code>type: "code_execution_20250522"</code> — this is the predefined server-side tool schema; you do not implement it.</li>
+<li>Claude receives both the instruction and the file reference and can now run Python to analyze it.</li>
+</ul>
+<hr />
+<h2>Understanding the Response Structure</h2>
+<p>When Claude uses code execution, the response contains multiple block types interleaved:</p>
+<table>
+<thead>
+<tr>
+<th>Block type</th>
+<th>What it holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Text blocks</strong></td>
+<td>Claude's analysis, reasoning, and natural-language explanations.</td>
+</tr>
+<tr>
+<td><strong>Server tool use blocks</strong></td>
+<td>The actual Python code Claude decided to run.</td>
+</tr>
+<tr>
+<td><strong>Code execution tool result blocks</strong></td>
+<td>The output from running the code (stdout, errors, file handles).</td>
+</tr>
+</tbody>
+</table>
+<p>Claude might execute code <strong>multiple times</strong> during a single response, iteratively building up its analysis (load → inspect → clean → plot → summarize). Each execution cycle appears as a <code>server tool use</code> block followed by a <code>code execution tool result</code> block.</p>
+<hr />
+<h2>Downloading Generated Files</h2>
+<p>One of the most powerful features is Claude's ability to generate files (plots, reports, transformed CSVs) and make them downloadable. When Claude creates a visualization inside the container, it gets stored there and you can retrieve it via the Files API.</p>
+<p>Look for blocks with <code>type: "code_execution_output"</code> in the response — these contain file IDs for the generated content. You then use a Files API call to download them:</p>
+<pre><code class="language-python">download_file(&quot;file_id_from_response&quot;)
+</code></pre>
+<p>This completes the round trip: CSV in (via Files API), plot out (via Files API), with Claude doing all the pandas/matplotlib work in between.</p>
+<hr />
+<h2>Beyond Data Analysis</h2>
+<p>While churn analysis is the canonical example, the combination opens up many other delegation patterns:</p>
+<ul>
+<li><strong>Image processing and manipulation</strong> — resize, convert, extract features.</li>
+<li><strong>Document parsing and transformation</strong> — PDF extraction, format conversion, redaction.</li>
+<li><strong>Mathematical computations and modeling</strong> — simulations, optimizations, statistical tests.</li>
+<li><strong>Report generation with custom formatting</strong> — build HTML or PDF outputs from raw data.</li>
+</ul>
+<p>The underlying pattern is the same: the Files API controls the <em>data boundary</em>, Code Execution handles the <em>computation</em>, and Claude orchestrates both through natural language.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Forgetting the sandbox has no network access</strong> — writing code that tries to <code>requests.get(...)</code> will fail; data must come in via the Files API.</li>
+<li><strong>Inlining large files when a file ID would do</strong> — base64-embedding a big CSV on every request wastes tokens and cost; upload once and reference by ID.</li>
+<li><strong>Assuming you must implement the code execution tool</strong> — it is server-side. You only declare the schema; Anthropic runs the Python.</li>
+<li><strong>Missing generated outputs</strong> — failing to scan the response for <code>code_execution_output</code> blocks means you never see the plots and reports Claude produced.</li>
+<li><strong>Expecting the sandbox to persist across sessions</strong> — the container is ephemeral; file IDs from the Files API are the durable handle, not container state.</li>
+<li><strong>Not iterating</strong> — Claude is allowed to run code multiple times in a single response; designing your handler to only expect one execution block will miss data from the later ones.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Code Execution is a <strong>server-side tool with zero client implementation</strong> — you declare the schema, Claude runs Python in an isolated container, you read the result blocks. The Files API is the data boundary that replaces the container's missing network. Together they let you delegate entire computational workflows to Claude: upload data in, get analysis and artifacts out, without ever standing up your own execution infrastructure.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design)</strong> — Code Execution is the canonical <strong>server-side tool</strong> example. Know that you do not implement it; you declare <code>{"type": "code_execution_20250522", "name": "code_execution"}</code> in the <code>tools</code> list and Claude runs Python for you.</li>
+<li><strong>D1 (Agentic Architecture)</strong> — multi-turn code execution (Claude executes code multiple times in one response) is an agentic loop running entirely on the server side.</li>
+<li>Know the sandbox properties: isolated Docker container, no network access, Python runtime, ephemeral.</li>
+<li>Know that the Files API is the in/out bridge: files go in via <code>container_upload</code>, artifacts come out via <code>code_execution_output</code> → <code>download_file(file_id)</code>.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does the Files API let you do?</td>
+<td>Upload a file once (image, PDF, CSV, etc.), receive a file ID, and reference that ID in future messages instead of inlining raw file data.</td>
+</tr>
+<tr>
+<td>Is Code Execution a client-side or server-side tool?</td>
+<td>Server-side — you do not implement it; you declare the predefined schema and Claude runs Python in an isolated container.</td>
+</tr>
+<tr>
+<td>What runtime and environment does Code Execution use?</td>
+<td>Python inside an isolated Docker container with <strong>no network access</strong>.</td>
+</tr>
+<tr>
+<td>Why is the Files API essential when using Code Execution?</td>
+<td>Because the sandbox has no network access, so the only way to get data in and artifacts out is to upload/download through the Files API.</td>
+</tr>
+<tr>
+<td>What block type injects an uploaded file into the sandbox?</td>
+<td><code>container_upload</code> with the <code>file_id</code> from a Files API upload.</td>
+</tr>
+<tr>
+<td>What tool schema entry enables code execution?</td>
+<td><code>{"type": "code_execution_20250522", "name": "code_execution"}</code> in the <code>tools</code> list.</td>
+</tr>
+<tr>
+<td>Can Claude execute code multiple times in a single response?</td>
+<td>Yes — iteratively, interleaving text, server tool use blocks, and code execution result blocks.</td>
+</tr>
+<tr>
+<td>Which three block types appear in a code execution response?</td>
+<td>Text blocks (Claude's explanations), server tool use blocks (the Python code), and code execution tool result blocks (the output).</td>
+</tr>
+<tr>
+<td>How do you retrieve a file Claude generated inside the container?</td>
+<td>Look for <code>code_execution_output</code> blocks containing file IDs, then call <code>download_file(file_id)</code> via the Files API.</td>
+</tr>
+<tr>
+<td>Name three non-data-analysis use cases for Code Execution + Files API.</td>
+<td>Image processing and manipulation, document parsing and transformation, mathematical computation and modeling, report generation with custom formatting.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

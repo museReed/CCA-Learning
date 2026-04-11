@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Structure With Xml Tags Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>使用 XML 標籤建立結構 — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D3 — Evaluation &amp; Iteration（20%）主；D2 — Tool Design（18%）次</td>
+</tr>
+<tr>
+<td>任務陳述</td>
+<td>3.1（提升可靠性的 prompt 設計）、2.2（結構化內容區塊）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 28</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>XML 標籤是 prompt 字串裡的明確分隔符，讓 Claude 能清楚區分哪些 token 是指令、哪些是資料、哪些是範例——是 prompt engineering 裡最簡單也最可靠的結構化技巧。</p>
+<hr />
+<h2>問題：一鍋 Token 粥</h2>
+<p>當你把指令、20 頁銷售紀錄、以及使用者問題全部串接成一個 prompt 字串時，Claude 看到的是一長串沒有區隔的 token 序列。沒有邊界，它只能從文字本身推敲結構，而這種推敲非常脆弱：</p>
+<ul>
+<li>指令會滲進資料</li>
+<li>資料會滲進範例</li>
+<li>Claude 可能會「執行」原本只是要分析的內容</li>
+</ul>
+<p>課程原文的描述是：Claude「有時會難以判斷哪些文字屬於同一組、各段落又分別代表什麼」。</p>
+<p>XML 標籤透過在 token 流裡插入明確的標記解決這個問題。<code>&lt;sales_records&gt;...&lt;/sales_records&gt;</code> 告訴 Claude：這裡面的東西是同一個邏輯單位，而且是某種特定類型。</p>
+<hr />
+<h2>經典範例</h2>
+<p>課程中的運動員飲食計畫 prompt：</p>
+<pre><code>&lt;athlete_information&gt;
+- Height: 6'2&quot;
+- Weight: 180 lbs
+- Goal: Build muscle
+- Dietary restrictions: Vegetarian
+&lt;/athlete_information&gt;
+
+Generate a meal plan based on the athlete information above.
+</code></pre>
+<p>這裡有三件事同時發生：</p>
+<ol>
+<li><strong>語意群組</strong>——身高、體重、目標、飲食限制被綁在同一個容器內。</li>
+<li><strong>角色分離</strong>——指令（"Generate a meal plan..."）放在標籤外，完全不會有「這是資料還是指令」的模糊地帶。</li>
+<li><strong>可指涉性</strong>——指令可以直接說「the athlete information above」，剛好對應標籤名稱。</li>
+</ol>
+<hr />
+<h2>程式碼 vs 文件：最戲劇化的例子</h2>
+<p>課程裡第二個例子：請 Claude 用提供的文件 debug 程式碼。如果把兩者混成一坨（"Not Great" 版本），幾乎無法讓 Claude 分辨哪些是程式碼、哪些是散文。"Better" 版本用標籤把兩段內容包起來：</p>
+<pre><code>&lt;my_code&gt;
+def calculate_total(items):
+    return sum(item.price for item in items)
+&lt;/my_code&gt;
+
+&lt;docs&gt;
+Item class 有三個欄位：name (str)、price (float)、quantity (int)。
+價格以整數分（cents）儲存。
+&lt;/docs&gt;
+
+請使用上述文件，找出 my_code 中的 bug。
+</code></pre>
+<p>現在 Claude 知道：把 <code>my_code</code> 當 Python 解析，把 <code>docs</code> 當作 ground truth，找出不一致的地方（文件說 price 是整數分，但程式碼直接把總和當成最終價格）。</p>
+<hr />
+<h2>標籤名稱很重要</h2>
+<p>課程明確表示你不需要用「官方」XML。標籤名稱是語意提示，所以越具體越好：</p>
+<table>
+<thead>
+<tr>
+<th>弱</th>
+<th>強</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;data&gt;</code></td>
+<td><code>&lt;sales_records&gt;</code></td>
+<td>告訴 Claude 是什麼類型的資料</td>
+</tr>
+<tr>
+<td><code>&lt;info&gt;</code></td>
+<td><code>&lt;athlete_information&gt;</code></td>
+<td>避免與其他 info 混淆</td>
+</tr>
+<tr>
+<td><code>&lt;text&gt;</code></td>
+<td><code>&lt;customer_review&gt;</code></td>
+<td>隱含領域（情感、語氣）</td>
+</tr>
+<tr>
+<td><code>&lt;input&gt;</code></td>
+<td><code>&lt;my_code&gt;</code> / <code>&lt;docs&gt;</code></td>
+<td>區分並列的內容</td>
+</tr>
+</tbody>
+</table>
+<p>原則：如果你能在程式裡幫這個變數取名，就用同一個名字當標籤。</p>
+<hr />
+<h2>何時 XML 標籤最有價值</h2>
+<p>直接引用課程內容，XML 最有用的場景是：</p>
+<ul>
+<li>包含大量 context 或資料</li>
+<li>混合不同類型的內容（程式碼、文件、資料）</li>
+<li>你想特別清楚地標示內容邊界</li>
+<li>複雜 prompt 中內插多個變數</li>
+</ul>
+<p>對於單行 prompt（「翻譯成法文：hello」），加標籤是殺雞用牛刀。收益會隨 prompt 複雜度放大。</p>
+<hr />
+<h2>Python 模式：安全的字串內插</h2>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+athlete_info = &quot;&quot;&quot;- Height: 6'2&quot;
+- Weight: 180 lbs
+- Goal: Build muscle
+- Dietary restrictions: Vegetarian&quot;&quot;&quot;
+
+prompt = f&quot;&quot;&quot;&lt;athlete_information&gt;
+{athlete_info}
+&lt;/athlete_information&gt;
+
+Generate a meal plan based on the athlete information above.&quot;&quot;&quot;
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}],
+)
+</code></pre>
+<p>注意內插點完全在標籤內。使用者提供的資料沒辦法滲到指令區——這也能降低 prompt injection 的攻擊面：攻擊者塞進來的文字最多污染 <code>athlete_information</code>，標籤外的指令仍然固定。</p>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>模糊的標籤名稱</strong>——用 <code>&lt;data&gt;</code> 或 <code>&lt;text&gt;</code> 而不是 <code>&lt;sales_records&gt;</code>。Claude 無法利用沒被給出的提示。</li>
+<li><strong>忘記關閉標籤</strong>——沒有關閉的 <code>&lt;my_code&gt;</code> 可能讓 Claude 把後面全部都當成程式碼。</li>
+<li><strong>多段內容不加標籤</strong>——把程式碼和文件並排放但沒有分隔符，正是課程警告的失敗場景。</li>
+<li><strong>對簡單 prompt 過度加標籤</strong>——為一句話的請求加 XML 只會增加雜訊。</li>
+<li><strong>以為 XML 會改變輸出格式</strong>——標籤只管輸入結構；要 Claude 回 XML 還需要另外的指令。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>XML 標籤是 prompt engineering 裡最便宜的可靠性升級。它不會改變 Claude 能做什麼，但會改變它「多有把握地」區分你的指令和你的資料。在 CCA 考試中，任何牽涉「大量 context」「多種資料類型」或「Claude 把指令和內容搞混」的情境，都指向 XML 結構化這個答案。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D3（Evaluation &amp; Iteration）</strong>：當 eval 顯示 Claude 誤判輸入時，XML 加標籤是第一道改善手段。預期會有情境題描述某個 prompt 失敗，原因是邊界模糊。</li>
+<li><strong>D2（Tool Design）</strong>：同樣的分隔原則也適用於 <code>tool_use</code> / <code>tool_result</code> 的 content blocks——結構化通道優於自由字串。</li>
+<li>留意題目中出現「interpolating」或「mixing」——標準答案是「用 XML 標籤分隔每一段」。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>反面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>XML 標籤在 prompt 裡解決什麼問題？</td>
+<td>用明確邊界讓 Claude 能區分指令、資料、範例。</td>
+</tr>
+<tr>
+<td>XML 標籤名稱必須符合某個標準嗎？</td>
+<td>不需要——偏好用 <code>&lt;sales_records&gt;</code>、<code>&lt;athlete_information&gt;</code> 這類描述性自訂名稱。</td>
+</tr>
+<tr>
+<td>XML 標籤何時最有價值？</td>
+<td>大量 context、多種內容類型、內插多個變數的複雜 prompt。</td>
+</tr>
+<tr>
+<td>舉一組弱/強標籤名稱對比</td>
+<td>弱：<code>&lt;data&gt;</code>；強：<code>&lt;sales_records&gt;</code>。</td>
+</tr>
+<tr>
+<td>程式碼 vs 文件的經典範例長什麼樣？</td>
+<td>用 <code>&lt;my_code&gt;</code> 包程式碼、<code>&lt;docs&gt;</code> 包文件，再請 Claude 依文件找 bug。</td>
+</tr>
+<tr>
+<td>XML 標籤會改變回應的輸出格式嗎？</td>
+<td>不會——它只管輸入結構；輸出格式需要另外指令。</td>
+</tr>
+<tr>
+<td>XML 標籤對 prompt injection 有什麼好處？</td>
+<td>使用者資料被關在標籤內，標籤外的指令較難被覆寫。</td>
+</tr>
+<tr>
+<td>簡單 prompt 也要用 XML 嗎？</td>
+<td>不一定——收益隨複雜度放大；一行 prompt 加標籤反而是雜訊。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

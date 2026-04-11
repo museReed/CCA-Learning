@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Being Specific Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Being Specific — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D3 — Evaluation &amp; Iteration (20%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（prompt 设计与迭代）、1.1（指令遵循）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 27</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Specificity 在收束 Claude 的 search space——output guidelines 锁定「结果长什么样」，process steps 锁定「Claude 该怎么想」。</p>
+<hr />
+<h2>核心问题：没有边界的诠释空间</h2>
+<p>Clear and direct 本身还不够。例如「Write a short story about a character who discovers a hidden talent.」这个 prompt 清楚、直接、是祈使句——但 Claude 还是可以自由选：</p>
+<ul>
+<li>长度（200 字或 2,000 字）</li>
+<li>角色数量（一人或五人）</li>
+<li>类型和场景</li>
+<li>「hidden talent」是哪个、怎么揭露</li>
+</ul>
+<p>每一个自由轴都是 output 可能在跑多次时漂移的轴。Specificity 就是把这些轴关起来的方法。</p>
+<hr />
+<h2>两种 Specificity</h2>
+<p>课程点出两个互补的杠杆。实务 prompt 通常会同时用。</p>
+<h3>1. Output Quality Guidelines</h3>
+<p>一个列表，列出 output 必须具备的质量。这在控制 artifact 本身：</p>
+<ul>
+<li><strong>长度</strong></li>
+<li><strong>结构</strong>和 format</li>
+<li><strong>必须包含的具体属性或元素</strong></li>
+<li><strong>Tone</strong> 或 style 要求</li>
+</ul>
+<p>以短篇小说为例：「1,000 字以内、包含一个揭露才能的清楚动作、至少一个配角」。每一条都收掉一个自由轴。</p>
+<h3>2. Process Steps</h3>
+<p>给 Claude 在产出最终答案前要跑的动作序列。这在控制 reasoning path：</p>
+<ol>
+<li>头脑风暴三个会制造戏剧张力的才能。</li>
+<li>选最有趣的那个。</li>
+<li>勾勒出揭露才能的关键场景。</li>
+<li>头脑风暴能放大冲击的配角类型。</li>
+</ol>
+<p>Process steps 在任务受益于「先多角度思考再下笔」的情境特别有用，而不是一次到底生出答案。</p>
+<hr />
+<h2>贯穿示例：餐单 Guidelines</h2>
+<p>叠加在 Lesson 26 的 clear+direct prompt 上，课程示范的 output guidelines：</p>
+<pre><code>Guidelines:
+1. Include accurate daily calorie amount
+2. Show protein, fat, and carb amounts
+3. Specify when to eat each meal
+4. Use only foods that fit restrictions
+5. List all portion sizes in grams
+6. Keep budget-friendly if mentioned
+</code></pre>
+<p>每一条都可测。每一条都关掉前一版 prompt 没关的质量自由轴。</p>
+<hr />
+<h2>度量结果</h2>
+<p>课程给了迭代 prompt 的 evaluator 分数：</p>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>分数 (/10)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Baseline（「What should this person eat?」）</td>
+<td>2.32</td>
+</tr>
+<tr>
+<td>Clear and direct（「Generate a one-day meal plan...」）</td>
+<td>3.92</td>
+</tr>
+<tr>
+<td><strong>+ Specificity guidelines</strong></td>
+<td><strong>7.86</strong></td>
+</tr>
+</tbody>
+</table>
+<p>加上 specificity <strong>让分数翻倍</strong>——从 3.92 到 7.86，比 clarity/directness 的进步还大，也是课程把 specificity 列为「几乎每次都要用」的原因。</p>
+<hr />
+<h2>何时用哪一招</h2>
+<table>
+<thead>
+<tr>
+<th>技巧</th>
+<th>什么时候用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Output Quality Guidelines</strong></td>
+<td>几乎每个 prompt。这是你保持一致性的安全网。</td>
+</tr>
+<tr>
+<td><strong>Process Steps</strong></td>
+<td>复杂问题——troubleshooting、决策、critical thinking，或任何你希望 Claude 在答前多角度思考的任务。</td>
+</tr>
+</tbody>
+</table>
+<p>课程对 process steps 的示例：要 Claude 分析为什么一个业务团队业绩下滑。没有 process steps，Claude 可能会 fix 在某一个原因。用 process steps 引导它走过市场指标 → 行业变化 → 个人绩效 → 组织变动 → 客户反馈，分析变得周延而平衡。</p>
+<hr />
+<h2>同时用两招</h2>
+<p>Professional prompt 通常两个杠杆一起上：</p>
+<ul>
+<li><strong>Process steps</strong> 放在上面，告诉 Claude 怎么想。</li>
+<li><strong>Output guidelines</strong> 放在下面，告诉 Claude 最终 artifact 必须含什么。</li>
+</ul>
+<p>这个组合同时给你 output 的一致性和 Claude 考虑过所有重要因素的信心。</p>
+<hr />
+<h2>为什么 Specificity 是复利</h2>
+<p>Guidelines 里每一条都像是 output 的一个 unit test。Grader（不管是人还是 model-based evaluator）可以独立检查每一项，这正是你的 eval <code>extra_criteria</code> 打分的方式。Prompt 的 guidelines 越对齐 evaluator 的 rubric，每次 eval 迭代就越能直接转换成 prompt 改进。</p>
+<p>所以资深 prompt engineer 常同时写 rubric 和 guidelines——它们是同一份合约的两个视图。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>停在 clear + direct</strong> — 留给 Claude 自己猜长度、结构、要含的元素，把 eval 分数上限压低。</li>
+<li><strong>Specify 太少、太模糊</strong> — 「include details」不是 guideline，「list all portion sizes in grams」才是。</li>
+<li><strong>在琐碎任务上用 process steps</strong> — 简单抽取或格式化用 steps 只是增加延迟、没有质量收获。</li>
+<li><strong>Prompt guidelines 和 eval rubric 对不上</strong> — prompt 要 X，evaluator 打 Y 的分。要对齐。</li>
+<li><strong>Process steps 堆太多</strong> — 超过约 5 步 Claude 可能会 drop 或 merge 步骤。保持 process sequence 聚焦。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Specificity 是课程 playbook 里单点影响最大的技巧——把 eval 分数从 3.92 翻倍到 7.86。Guidelines 每一条都关掉一个 output 漂移轴，每关掉一个轴 prompt 就可度量地更可靠。Output guidelines 几乎该出现在每个 prompt；process steps 在任务需要多角度推理时加入。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>：要认得 specificity 是 clarity/directness 之后最高杠杆的技巧，要知道两个变体（output guidelines vs process steps）。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：agent system prompt 同样靠这两个杠杆——guidelines 约束 output，process steps 约束 reasoning。</li>
+<li>考题会问「哪种任务该用哪招」。「多角度分析」→ process steps。「一致的 artifact format」→ output guidelines。「两者都要」→ 组合。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Specificity 两种 guidelines 是什么？</td>
+<td>Output quality guidelines（结果该长什么样）和 process steps（Claude 该怎么思考）。</td>
+</tr>
+<tr>
+<td>Output quality guidelines 控制什么？</td>
+<td>长度、结构、格式、必须包含的属性/元素、tone 或 style。</td>
+</tr>
+<tr>
+<td>什么时候用 process steps？</td>
+<td>复杂问题——troubleshooting、决策、critical thinking，或任何该在答前多角度考量的任务。</td>
+</tr>
+<tr>
+<td>餐单示例中 specificity 带来的分数进步？</td>
+<td>3.92 → 7.86，光加具体 guidelines 就让分数翻倍。</td>
+</tr>
+<tr>
+<td>Output guidelines 该每个 prompt 都加吗？</td>
+<td>几乎是——课程把它称为一致性的「safety net」。</td>
+</tr>
+<tr>
+<td>课程的 process steps 示例序列？</td>
+<td>1) 头脑风暴三个制造张力的才能 2) 选最有趣 3) 勾勒关键场景 4) 头脑风暴配角类型。</td>
+</tr>
+<tr>
+<td>Prompt guidelines 和 evaluator rubric 没对齐会怎样？</td>
+<td>分数无法反映 prompt 真正在最优化什么——两者必须保持对齐。</td>
+</tr>
+<tr>
+<td>两招一起用的 professional pattern？</td>
+<td>Process steps 放上面（怎么想），output guidelines 放下面（最终 artifact 该含什么）。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

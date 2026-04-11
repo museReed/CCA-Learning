@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Based Grading Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>代码评分 Code-Based Grading — 工程深入</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D3 — Evaluation（20%）主要；D5 — Enterprise Deployment（20%）次要</td>
+</tr>
+<tr>
+<td>任务声明</td>
+<td>3.4（deterministic 评分）、3.3（test runner 集成）、5.4（综合 eval 指标）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 22</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话重点</h2>
+<p>Code-based grading 把 model 输出丢进 deterministic parser —— JSON、Python AST、regex —— 每个 test case 返回 10 或 0，给你一个便宜可靠的 eval 质量底线，与较模糊的 model grader 互补。</p>
+<hr />
+<h2>为什么需要 Code Grader</h2>
+<p>评估会产生代码的 AI model 时，"答案看起来对吗？"还不够。你需要验证产出的代码<strong>有合法 syntax 且符合正确格式</strong>。用 model grader 做这件事又慢又贵 —— 而且这问题根本不需要判断，需要的是 parser。</p>
+<p>Code grading 验证 AI 响应的两个面向：</p>
+<table>
+<thead>
+<tr>
+<th>面向</th>
+<th>检查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Format</strong></td>
+<td>响应只能返回指定的 code 类型（Python、JSON 或 Regex），不能有解释</td>
+</tr>
+<tr>
+<td><strong>Valid Syntax</strong></td>
+<td>产出的代码必须能被正确 parse</td>
+</tr>
+<tr>
+<td><strong>Task Following</strong></td>
+<td>（由 model grader 处理 —— 不是 code grader）</td>
+</tr>
+</tbody>
+</table>
+<p>这个分工是故意的：便宜/deterministic 的东西交给 code grader，主观的东西交给 model grader。两者合起来提供完整评估。</p>
+<hr />
+<h2>三个 Validator</h2>
+<p>来源的三个 syntax validator 都走同一模式 —— 尝试 parse、成功返回 10、失败返回 0：</p>
+<pre><code class="language-python">def validate_json(text):
+    try:
+        json.loads(text.strip())
+        return 10
+    except json.JSONDecodeError:
+        return 0
+
+def validate_python(text):
+    try:
+        ast.parse(text.strip())
+        return 10
+    except SyntaxError:
+        return 0
+
+def validate_regex(text):
+    try:
+        re.compile(text.strip())
+        return 10
+    except re.error:
+        return 0
+</code></pre>
+<p>三个工程要点：</p>
+<ol>
+<li><strong>先 <code>.strip()</code></strong> —— 不然前后空白会让合法 payload 被误判为 false negative。</li>
+<li><strong>binary 10 或 0 的输出</strong> —— 让分数尺度与 model grader 一致，后面才能平均。</li>
+<li><strong>catch 特定 exception</strong> —— <code>json.JSONDecodeError</code>、<code>SyntaxError</code>、<code>re.error</code>。裸 <code>except:</code> 会掩盖 grader 本身的 bug。</li>
+</ol>
+<p>三个 validator 都用标准库 —— 没有外部依赖、没有 API 成本、延迟以微秒计。</p>
+<hr />
+<h2>Dataset 格式要求</h2>
+<p>为了让 code grader 知道<strong>该跑哪个</strong> validator，每个 test case 必须声明它期待的格式：</p>
+<pre><code class="language-python">{
+    &quot;task&quot;: &quot;Create a Python function to validate an AWS IAM username&quot;,
+    &quot;format&quot;: &quot;python&quot;
+}
+</code></pre>
+<p>来源建议更新你的 dataset 生成 prompt，让它自动把这个 <code>format</code> 字段加进示例输出结构，这样新 test case 永远带有 routing 所需的提示。</p>
+<hr />
+<h2>改善 Prompt 清晰度</h2>
+<p>Code grader 也反过来逼你把底层 prompt engineering 写得更严谨。为了提升通过率，来源建议在 prompt 层面做两件事：</p>
+<pre><code>* Respond only with Python, JSON, or a plain Regex
+* Do not add any comments or commentary or explanation
+</code></pre>
+<p>还有一个聪明的 pre-fill 技巧 —— 用不指定语言的通用 code fence 作为 assistant 消息开头：</p>
+<pre><code class="language-python">add_assistant_message(messages, &quot;```code&quot;)
+</code></pre>
+<p>这告诉 Claude 直接开始吐 code content，runner 不必事先知道输出是 Python、JSON 还是 Regex。后面要调用哪个 validator 靠 test case 的 <code>format</code> 字段决定，不是靠这个 fence。</p>
+<hr />
+<h2>合并 Model + Code 分数</h2>
+<p>最后一步是把 model grader 分数和 code grader 分数合起来。来源的简单预设是非加权平均：</p>
+<pre><code class="language-python">model_grade = grade_by_model(test_case, output)
+model_score = model_grade[&quot;score&quot;]
+syntax_score = grade_syntax(output, test_case)
+
+score = (model_score + syntax_score) / 2
+</code></pre>
+<p>这给内容质量（model grader）和技术正确性（code grader）同等权重。来源也直说：依产品需求不同可调整权重 —— 例如 code-generation 产品，syntax 正确性可能占 70% 权重。</p>
+<hr />
+<h2>Code Grader 的真正价值</h2>
+<p>来源收尾给出最关键的定位：分数本身无所谓好坏 —— <strong>重要的是你能不能靠调整 prompt 让它提升</strong>。Code grader 给你量化的方式衡量 prompt engineering 进展，不再靠主观感觉。它们是 prompt 迭代的量化骨干。</p>
+<p>两个实务属性要内化：</p>
+<ul>
+<li><strong>Deterministic</strong> —— 同一输入永远得到同一分数。没有 model grader 那种随机性。</li>
+<li><strong>便宜</strong> —— 微秒延迟、无 API 成本。每次改 prompt 都能跑全 dataset。</li>
+</ul>
+<p>合起来就代表 code grader 是任何 eval pipeline 的第一道防线。code grader 没过？连调用 model grader 都不用浪费。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>只用 model grader 验 syntax</strong> —— 浪费 token，还给一个本该 deterministic 的问题引入 variance。</li>
+<li><strong>没调用 <code>.strip()</code></strong> —— 前后有空白的合法 payload 会 fail，false negative 污染指标。</li>
+<li><strong>test case 缺 <code>format</code> 字段</strong> —— runner 无法 route 到正确的 validator。</li>
+<li><strong>catch 裸 <code>Exception</code></strong> —— 掩盖 grader 代码本身的 bug；一律 catch 特定 parser exception。</li>
+<li><strong>没跟 model grader 平均</strong> —— 代码正确性必要但不充分，还需要内容质量。</li>
+<li><strong>一组权重用到底</strong> —— 不同产品看重 syntax vs 质量的比例不同；权重要调。</li>
+</ol>
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>Code graders 是 prompt evaluation 的便宜、deterministic 骨干。它们不能评"味道"，但能用微秒的时间免费抓出每一个坏 payload。搭 model grader（评味道）取平均 —— 你就拥有一个可以在每次 prompt 改动上跑、而不会烧钱的综合指标。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D3（Evaluation）</strong>：Code graders 是混合 eval pipeline 的 deterministic 那一半。会考何时用 code vs model grader、以及如何合并分数。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：Deterministic 评分适合塞进 prompt 的 CI/CD —— 便宜、快、够可靠，每个 PR 都能跑。</li>
+<li>注意："你要验证 AI 产生的 JSON / Python / Regex"→ 永远是 code grader，绝对不是 model grader。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code grading 验证哪两个面向？</td>
+<td>Format（只能返回指定 code 类型）和 Valid Syntax（能实际 parse）。</td>
+</tr>
+<tr>
+<td>成功的 <code>validate_json</code> 返回什么分数？</td>
+<td>10</td>
+</tr>
+<tr>
+<td>失败的 <code>validate_python</code> 返回什么分数？</td>
+<td>0</td>
+</tr>
+<tr>
+<td>哪个 Python 模块用来 parse Python code？</td>
+<td><code>ast</code> —— 具体是 <code>ast.parse(text.strip())</code>。</td>
+</tr>
+<tr>
+<td><code>validate_regex</code> 捕捉哪个 exception？</td>
+<td><code>re.error</code></td>
+</tr>
+<tr>
+<td>Dataset 必须带哪个字段让 runner 知道用哪个 validator？</td>
+<td><code>format</code> —— 值像 <code>"python"</code>、<code>"json"</code>、<code>"regex"</code>。</td>
+</tr>
+<tr>
+<td>哪个 assistant prefill 技巧能鼓励输出纯 code 又不指定语言？</td>
+<td><code>add_assistant_message(messages, "```code")</code></td>
+</tr>
+<tr>
+<td>来源如何合并 model grader 和 code grader 分数？</td>
+<td>非加权平均：<code>(model_score + syntax_score) / 2</code>。</td>
+</tr>
+<tr>
+<td>为什么绝对 code-grader 分数无所谓好坏？</td>
+<td>因为重要的是能不能靠 prompt 调整让它提升 —— 看方向不看绝对值。</td>
+</tr>
+<tr>
+<td>Code grader 相对 model grader 的两大优势？</td>
+<td>Deterministic（同输入同分数）和极便宜（微秒、无 API 成本）。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

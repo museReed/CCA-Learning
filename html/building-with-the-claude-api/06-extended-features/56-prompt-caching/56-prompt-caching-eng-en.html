@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Caching Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Caching — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (cost/latency optimization), 5.2 (production performance), 1.2 (multi-turn efficiency)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 56</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt caching is a production optimization that saves Claude's per-request preprocessing work (tokenization, embeddings, context analysis) so identical prefixes on follow-up requests run faster and cost less instead of being recomputed from scratch.</p>
+<hr />
+<h2>How Claude Normally Processes Requests</h2>
+<p>Every message you send to Claude goes through an expensive preprocessing pipeline <em>before</em> any output tokens are generated:</p>
+<ol>
+<li><strong>Tokenization</strong> — the prompt is broken into smaller pieces (tokens).</li>
+<li><strong>Embedding</strong> — each token is turned into a high-dimensional vector.</li>
+<li><strong>Context analysis</strong> — the model adds context from surrounding tokens so later attention layers can reason over the sequence.</li>
+<li><strong>Generation</strong> — only after steps 1-3 does Claude actually start producing output text.</li>
+</ol>
+<p>The important bit: after the response is streamed back, <strong>all of that preprocessing work is thrown away</strong>. The tokenization, the embeddings, the context — discarded. If you send the same 6K-token prompt one minute later, Claude redoes every step.</p>
+<hr />
+<h2>The Problem with Discarding Work</h2>
+<p>This waste becomes obvious in any workflow that reuses the same base content:</p>
+<ul>
+<li>A conversation where you keep asking Claude to refine the same summary.</li>
+<li>A document-analysis loop asking 20 questions about one 50-page PDF.</li>
+<li>An agent that carries the same system prompt + tool schema across every turn.</li>
+</ul>
+<p>On request #2, Claude has to redo all the preprocessing on content it just analyzed seconds ago. As the lesson phrases it: <em>"I just processed that message and threw away all the work I did — I could have reused it!"</em></p>
+<p>The cost is paid twice: once in latency (input processing time), once in dollars (input token billing).</p>
+<hr />
+<h2>How Prompt Caching Solves This</h2>
+<p>Prompt caching changes the workflow by <strong>saving the preprocessing results instead of discarding them</strong>.</p>
+<ul>
+<li>On the first request, Claude does the usual preprocessing, but stores the intermediate state in a cache.</li>
+<li>The cache acts like a lookup table: "If I ever see this exact prefix again, reuse the work I already did."</li>
+<li>Follow-up requests that send the same prefix hit the cache and skip straight to generation, charging only for new (uncached) tokens.</li>
+</ul>
+<p>The net effect: the expensive preprocessing is amortized across many calls instead of being paid on every single call.</p>
+<hr />
+<h2>Key Benefits</h2>
+<table>
+<thead>
+<tr>
+<th>Benefit</th>
+<th>What it means in production</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Faster responses</strong></td>
+<td>Cached requests skip tokenization/embedding/context work, reducing time-to-first-token.</td>
+</tr>
+<tr>
+<td><strong>Lower costs</strong></td>
+<td>Cached portions of requests are billed at a significant discount vs. fresh input tokens.</td>
+</tr>
+<tr>
+<td><strong>Automatic optimization</strong></td>
+<td>The first request writes to the cache; subsequent requests read from it — no client-side cache management needed.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Important Limitations</h2>
+<table>
+<thead>
+<tr>
+<th>Limitation</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cache duration: 1 hour</strong></td>
+<td>Useful only for workflows with frequent repeat calls within the same hour. Idle conversations get purged.</td>
+</tr>
+<tr>
+<td><strong>Limited use cases</strong></td>
+<td>Caching only helps when you send the <em>same</em> content repeatedly; one-off prompts see no benefit.</td>
+</tr>
+<tr>
+<td><strong>High-frequency requirement</strong></td>
+<td>The more often the same prefix is reused, the bigger the savings — sporadic calls may not justify the setup.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>When Prompt Caching Works Best</h2>
+<p>The lesson highlights two canonical patterns where caching pays off:</p>
+<ol>
+<li><strong>Document analysis workflows</strong> — the same large document is referenced while you ask many different questions. The document gets cached once, then read cheaply on every follow-up.</li>
+<li><strong>Iterative editing tasks</strong> — the base content (e.g., a draft) stays constant while you refine specific aspects. The draft is cached, edits are incremental.</li>
+</ol>
+<p>More broadly, any workflow where <strong>a large, stable prefix is paired with a small, variable suffix</strong> is a strong candidate.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Caching one-off prompts</strong> — paying the cache-write surcharge on content that is never read back. The cache only saves money if reused within one hour.</li>
+<li><strong>Assuming caching is automatic</strong> — it is not. Without an explicit opt-in (cache breakpoints, covered in lesson 57), Claude discards preprocessing as usual.</li>
+<li><strong>Ignoring the 1-hour TTL</strong> — building cache-reliant workflows that run at low frequency means cache entries expire before they are reused.</li>
+<li><strong>Treating cache savings as latency-only</strong> — you also get substantial cost savings on cached input tokens, which is often the bigger production win.</li>
+<li><strong>Underestimating preprocessing cost</strong> — believing input token processing is "free." For large system prompts and tool schemas, it is a significant share of total cost and latency.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompt caching is an <strong>amortization trick</strong>: the expensive preprocessing of a large, stable prefix is paid once and reused across every subsequent call that shares that prefix, up to one hour. In production, this is the single biggest cost/latency optimization for agent loops, RAG pipelines, and any workflow where the same context is hit repeatedly. It is a D5 Enterprise Deployment fundamental.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong> — caching is one of the core production optimizations tested under task 5.1 (cost/latency). Know that caching reduces <em>both</em> cost and latency on the cached prefix.</li>
+<li><strong>D1 (Agentic Architecture)</strong> — agent loops with stable system prompts and tool schemas are the prototypical caching beneficiary; the same context is sent on every turn of the loop.</li>
+<li>Watch for exam questions framed as: "How do you reduce cost and latency when the same large prompt is sent repeatedly?" → answer is prompt caching.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What problem does prompt caching solve?</td>
+<td>Claude redoes expensive preprocessing (tokenization, embeddings, context analysis) on every request, even when the same content was just processed. Caching reuses that work.</td>
+</tr>
+<tr>
+<td>What are the four preprocessing steps Claude normally performs?</td>
+<td>Tokenization, embedding creation, context analysis based on surrounding text, then output generation.</td>
+</tr>
+<tr>
+<td>How long does a cached prompt live?</td>
+<td>One hour.</td>
+</tr>
+<tr>
+<td>What two benefits does prompt caching deliver?</td>
+<td>Faster responses (lower latency) and lower costs on the cached portion of the request.</td>
+</tr>
+<tr>
+<td>When does prompt caching NOT help?</td>
+<td>One-off prompts, sporadic workflows that do not hit the same prefix within one hour, or content that changes on every request.</td>
+</tr>
+<tr>
+<td>Name two canonical use cases for prompt caching.</td>
+<td>Document analysis workflows (many questions about the same long document) and iterative editing tasks (same base content refined repeatedly).</td>
+</tr>
+<tr>
+<td>Is prompt caching automatic?</td>
+<td>No — it must be enabled explicitly; without opt-in Claude discards preprocessing work as usual.</td>
+</tr>
+<tr>
+<td>What happens on the initial request when caching is enabled?</td>
+<td>Claude performs normal preprocessing but stores the intermediate state so follow-up requests can reuse it instead of recomputing.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

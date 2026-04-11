@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <linearGradient id="spectrum" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#EF4444"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#22C55E"/>
+    </linearGradient>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">具體程度光譜 — 從模糊到具體,輸出變異度越來越小</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">測試題:「跟我講關於貓的事」。加越多約束,Claude 的輸出就越一致。</text>
+
+  <rect x="60" y="100" width="880" height="28" rx="14" fill="url(#spectrum)"/>
+  <text x="70" y="118" font-size="11" fill="white" font-weight="700">模糊</text>
+  <text x="930" y="118" text-anchor="end" font-size="11" fill="white" font-weight="700">非常具體</text>
+  <line x1="170" y1="96" x2="170" y2="132" stroke="#1E293B" stroke-width="1.5"/>
+  <line x1="400" y1="96" x2="400" y2="132" stroke="#1E293B" stroke-width="1.5"/>
+  <line x1="630" y1="96" x2="630" y2="132" stroke="#1E293B" stroke-width="1.5"/>
+  <line x1="860" y1="96" x2="860" y2="132" stroke="#1E293B" stroke-width="1.5"/>
+  <text x="170" y="150" text-anchor="middle" font-size="10" fill="#991B1B" font-weight="700">v1</text>
+  <text x="400" y="150" text-anchor="middle" font-size="10" fill="#B45309" font-weight="700">v2</text>
+  <text x="630" y="150" text-anchor="middle" font-size="10" fill="#92400E" font-weight="700">v3</text>
+  <text x="860" y="150" text-anchor="middle" font-size="10" fill="#166534" font-weight="700">v4</text>
+
+  <rect x="30" y="170" width="225" height="280" rx="12" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="30" y="170" width="225" height="32" rx="12" fill="#EF4444"/>
+  <rect x="30" y="192" width="225" height="10" fill="#EF4444"/>
+  <text x="142" y="192" text-anchor="middle" font-size="12" font-weight="600" fill="white">v1 — 模糊</text>
+  <rect x="44" y="216" width="197" height="50" rx="4" fill="white" stroke="#FCA5A5"/>
+  <text x="54" y="234" font-size="10" fill="#1E293B">「寫一些關於貓的</text>
+  <text x="54" y="248" font-size="10" fill="#1E293B">東西。」</text>
+
+  <text x="44" y="286" font-size="10" font-weight="700" fill="#991B1B">可能的輸出</text>
+  <text x="44" y="302" font-size="9" fill="#1E293B">• 200 字短文</text>
+  <text x="44" y="316" font-size="9" fill="#1E293B">• 2,000 字歷史文</text>
+  <text x="44" y="330" font-size="9" fill="#1E293B">• 一首詩</text>
+  <text x="44" y="344" font-size="9" fill="#1E293B">• 條列清單</text>
+  <text x="44" y="358" font-size="9" fill="#1E293B">• 甚至一張梗圖</text>
+
+  <text x="44" y="386" font-size="10" font-weight="700" fill="#991B1B">變異度</text>
+  <rect x="44" y="394" width="197" height="10" rx="5" fill="#FEE2E2"/>
+  <rect x="44" y="394" width="190" height="10" rx="5" fill="#EF4444"/>
+  <text x="44" y="420" font-size="9" fill="#6B7280">評分範例:2.1 / 10</text>
+  <text x="44" y="436" font-size="9" fill="#6B7280">不可預測</text>
+
+  <rect x="265" y="170" width="225" height="280" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="265" y="170" width="225" height="32" rx="12" fill="#F59E0B"/>
+  <rect x="265" y="192" width="225" height="10" fill="#F59E0B"/>
+  <text x="377" y="192" text-anchor="middle" font-size="12" font-weight="600" fill="white">v2 — 加上輸出準則</text>
+  <rect x="279" y="216" width="197" height="50" rx="4" fill="white" stroke="#FDE68A"/>
+  <text x="289" y="232" font-size="10" fill="#1E293B">「寫 3 個關於貓的事實</text>
+  <text x="289" y="246" font-size="10" fill="#1E293B">,每項一句話,純文字</text>
+  <text x="289" y="260" font-size="10" fill="#1E293B">無格式。」</text>
+
+  <text x="279" y="286" font-size="10" font-weight="700" fill="#B45309">新增</text>
+  <text x="279" y="302" font-size="9" fill="#1E293B">• 長度(3 項)</text>
+  <text x="279" y="316" font-size="9" fill="#1E293B">• 格式(句子)</text>
+  <text x="279" y="330" font-size="9" fill="#1E293B">• 結構(條列)</text>
+
+  <text x="279" y="358" font-size="10" font-weight="700" fill="#B45309">還沒鎖的</text>
+  <text x="279" y="374" font-size="9" fill="#6B7280">• 主題(任何貓的事實)</text>
+  <text x="279" y="386" font-size="9" fill="#6B7280">• 語氣(輕鬆?正式?)</text>
+
+  <text x="279" y="406" font-size="10" font-weight="700" fill="#B45309">變異度</text>
+  <rect x="279" y="414" width="197" height="10" rx="5" fill="#FEF3C7"/>
+  <rect x="279" y="414" width="130" height="10" rx="5" fill="#F59E0B"/>
+  <text x="279" y="438" font-size="9" fill="#6B7280">評分範例:5.4 / 10</text>
+
+  <rect x="500" y="170" width="225" height="280" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="500" y="170" width="225" height="32" rx="12" fill="#F59E0B"/>
+  <rect x="500" y="192" width="225" height="10" fill="#F59E0B"/>
+  <text x="612" y="192" text-anchor="middle" font-size="12" font-weight="600" fill="white">v3 — 加上語氣與對象</text>
+  <rect x="514" y="216" width="197" height="50" rx="4" fill="white" stroke="#FDE68A"/>
+  <text x="524" y="230" font-size="9" fill="#1E293B">「3 個關於家貓生物學的</text>
+  <text x="524" y="244" font-size="9" fill="#1E293B">事實條列,每項 ≤ 15 字,</text>
+  <text x="524" y="258" font-size="9" fill="#1E293B">正式語氣。」</text>
+
+  <text x="514" y="286" font-size="10" font-weight="700" fill="#B45309">新增</text>
+  <text x="514" y="302" font-size="9" fill="#1E293B">• 字數上限(≤15)</text>
+  <text x="514" y="316" font-size="9" fill="#1E293B">• 主題(生物學)</text>
+  <text x="514" y="330" font-size="9" fill="#1E293B">• 語氣(正式)</text>
+
+  <text x="514" y="358" font-size="10" font-weight="700" fill="#B45309">Edge case 收斂</text>
+  <text x="514" y="374" font-size="9" fill="#6B7280">留下詮釋空間變少</text>
+
+  <text x="514" y="406" font-size="10" font-weight="700" fill="#B45309">變異度</text>
+  <rect x="514" y="414" width="197" height="10" rx="5" fill="#FEF3C7"/>
+  <rect x="514" y="414" width="70" height="10" rx="5" fill="#F59E0B"/>
+  <text x="514" y="438" font-size="9" fill="#6B7280">評分範例:7.8 / 10</text>
+
+  <rect x="735" y="170" width="235" height="280" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="735" y="170" width="235" height="32" rx="12" fill="#22C55E"/>
+  <rect x="735" y="192" width="235" height="10" fill="#22C55E"/>
+  <text x="852" y="192" text-anchor="middle" font-size="12" font-weight="600" fill="white">v4 — 加上流程步驟</text>
+  <rect x="749" y="216" width="207" height="50" rx="4" fill="white" stroke="#86EFAC"/>
+  <text x="759" y="230" font-size="9" fill="#1E293B">「...同 v3。先列 6 個候</text>
+  <text x="759" y="244" font-size="9" fill="#1E293B">選,再挑出最令人驚訝的</text>
+  <text x="759" y="258" font-size="9" fill="#1E293B">3 個。」</text>
+
+  <text x="749" y="286" font-size="10" font-weight="700" fill="#166534">新增</text>
+  <text x="749" y="302" font-size="9" fill="#1E293B">• 多步推理</text>
+  <text x="749" y="316" font-size="9" fill="#1E293B">• 明確的篩選規則</text>
+  <text x="749" y="330" font-size="9" fill="#1E293B">• 逼 Claude 展示思路</text>
+
+  <text x="749" y="358" font-size="10" font-weight="700" fill="#166534">最適合</text>
+  <text x="749" y="374" font-size="9" fill="#6B7280">多步驟 / 推理型任務</text>
+
+  <text x="749" y="406" font-size="10" font-weight="700" fill="#166534">變異度</text>
+  <rect x="749" y="414" width="207" height="10" rx="5" fill="#DCFCE7"/>
+  <rect x="749" y="414" width="30" height="10" rx="5" fill="#22C55E"/>
+  <text x="749" y="438" font-size="9" fill="#6B7280">評分範例:8.9 / 10</text>
+
+  <rect x="30" y="470" width="940" height="100" rx="12" fill="#F8FAFC" stroke="#CBD5E1" filter="url(#shadow)"/>
+  <text x="500" y="494" text-anchor="middle" font-size="12" font-weight="700" fill="#1E293B">越具體,輸出變異度越小</text>
+
+  <g transform="translate(120,520)">
+    <ellipse cx="0" cy="20" rx="80" ry="22" fill="#FEE2E2" stroke="#EF4444" stroke-dasharray="3,2"/>
+    <text x="0" y="24" text-anchor="middle" font-size="9" fill="#991B1B">範圍極廣</text>
+  </g>
+  <g transform="translate(350,520)">
+    <ellipse cx="0" cy="20" rx="60" ry="18" fill="#FEF3C7" stroke="#F59E0B" stroke-dasharray="3,2"/>
+    <text x="0" y="24" text-anchor="middle" font-size="9" fill="#B45309">範圍縮小</text>
+  </g>
+  <g transform="translate(580,520)">
+    <ellipse cx="0" cy="20" rx="40" ry="14" fill="#FEF3C7" stroke="#F59E0B" stroke-dasharray="3,2"/>
+    <text x="0" y="24" text-anchor="middle" font-size="9" fill="#92400E">收緊</text>
+  </g>
+  <g transform="translate(810,520)">
+    <ellipse cx="0" cy="20" rx="22" ry="10" fill="#DCFCE7" stroke="#22C55E" stroke-dasharray="3,2"/>
+    <text x="0" y="24" text-anchor="middle" font-size="9" fill="#166534">鎖定</text>
+  </g>
+  <path d="M200,540 L285,540" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+  <path d="M410,540 L515,540" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+  <path d="M620,540 L780,540" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+
+  <text x="500" y="558" text-anchor="middle" font-size="10" fill="#6B7280">同一個模板、不同程度的約束。變異度越低 = 上線後可靠度越高。</text>
+</svg>

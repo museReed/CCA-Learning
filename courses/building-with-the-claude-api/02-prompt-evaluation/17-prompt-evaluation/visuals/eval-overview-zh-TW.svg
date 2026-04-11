@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">為什麼要做 Prompt Evaluation? — 憑感覺 vs 系統化</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">測一兩次就上線、感覺沒問題,其實會被真實使用者打爆。Eval 把「感覺」換成可量測的指標。</text>
+
+  <rect x="40" y="90" width="440" height="230" rx="12" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="90" width="440" height="44" rx="12" fill="#EF4444"/>
+  <rect x="40" y="120" width="440" height="14" fill="#EF4444"/>
+  <text x="260" y="119" text-anchor="middle" font-size="15" font-weight="600" fill="white">Option 1-2:憑感覺測試</text>
+
+  <rect x="60" y="150" width="400" height="30" rx="6" fill="white" stroke="#FCA5A5"/>
+  <text x="260" y="170" text-anchor="middle" font-size="11" fill="#991B1B" font-weight="600">「測了幾次,看起來不錯 — 就上線吧。」</text>
+
+  <text x="60" y="202" font-size="11" fill="#1E293B" font-weight="700">做法</text>
+  <text x="60" y="220" font-size="10" fill="#1E293B">• 手挑 2-3 個輸入,用眼睛看輸出</text>
+  <text x="60" y="236" font-size="10" fill="#1E293B">• 改改字,再測同一批輸入</text>
+  <text x="60" y="252" font-size="10" fill="#1E293B">• 「看起來對」就收工</text>
+
+  <text x="260" y="202" font-size="11" fill="#991B1B" font-weight="700">風險</text>
+  <text x="260" y="220" font-size="10" fill="#1E293B">• 遇到沒想到的輸入就壞</text>
+  <text x="260" y="236" font-size="10" fill="#1E293B">• Edge case 要等到 prod 才發現</text>
+  <text x="260" y="252" font-size="10" fill="#1E293B">• 沒辦法比較 prompt 版本差異</text>
+
+  <rect x="60" y="272" width="400" height="34" rx="4" fill="#FEE2E2"/>
+  <text x="260" y="293" text-anchor="middle" font-size="11" fill="#991B1B" font-weight="600">→ 每個工程師都會踩的陷阱</text>
+
+  <rect x="520" y="90" width="440" height="230" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="520" y="90" width="440" height="44" rx="12" fill="#22C55E"/>
+  <rect x="520" y="120" width="440" height="14" fill="#22C55E"/>
+  <text x="740" y="119" text-anchor="middle" font-size="15" font-weight="600" fill="white">Option 3:系統化 Evaluation</text>
+
+  <rect x="540" y="150" width="400" height="30" rx="6" fill="white" stroke="#86EFAC"/>
+  <text x="740" y="170" text-anchor="middle" font-size="11" fill="#166534" font-weight="600">「跑完資料集,v2 = 8.7 > v1 = 7.6 → 上 v2。」</text>
+
+  <text x="540" y="202" font-size="11" fill="#1E293B" font-weight="700">做法</text>
+  <text x="540" y="220" font-size="10" fill="#1E293B">• 建立代表性測試資料集</text>
+  <text x="540" y="236" font-size="10" fill="#1E293B">• Grader 對每筆輸出客觀評分</text>
+  <text x="540" y="252" font-size="10" fill="#1E293B">• 用平均分數比較不同 prompt 版本</text>
+
+  <text x="740" y="202" font-size="11" fill="#166534" font-weight="700">回報</text>
+  <text x="740" y="220" font-size="10" fill="#1E293B">• 上線前就抓到問題</text>
+  <text x="740" y="236" font-size="10" fill="#1E293B">• 有信心做迭代改進</text>
+  <text x="740" y="252" font-size="10" fill="#1E293B">• 打造穩定的 AI 應用</text>
+
+  <rect x="540" y="272" width="400" height="34" rx="4" fill="#DCFCE7"/>
+  <text x="740" y="293" text-anchor="middle" font-size="11" fill="#166534" font-weight="600">→ 前期多投資,可靠度大幅提升</text>
+
+  <rect x="40" y="350" width="920" height="210" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="500" y="380" text-anchor="middle" font-size="15" font-weight="600" fill="#1E293B">Eval 能回答的三個關鍵問題</text>
+  <text x="500" y="398" text-anchor="middle" font-size="11" fill="#6B7280">憑感覺很難可靠回答這些;資料集 + 評分可以。</text>
+
+  <rect x="60" y="415" width="290" height="130" rx="10" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <circle cx="90" cy="445" r="18" fill="#3B82F6"/>
+  <text x="90" y="451" text-anchor="middle" font-size="16" font-weight="700" fill="white">?</text>
+  <text x="118" y="442" font-size="13" font-weight="700" fill="#1E40AF">輸出正確嗎?</text>
+  <text x="118" y="460" font-size="10" fill="#6B7280">Claude 有真的解決任務嗎?</text>
+  <text x="74" y="490" font-size="10" fill="#1E293B">量測方式:code grader(精確比對、</text>
+  <text x="74" y="505" font-size="10" fill="#1E293B">語法檢查)或 model grader(依照 rubric</text>
+  <text x="74" y="520" font-size="10" fill="#1E293B">給 1-10 分的品質評分)。</text>
+
+  <rect x="360" y="415" width="290" height="130" rx="10" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <circle cx="390" cy="445" r="18" fill="#22C55E"/>
+  <text x="390" y="451" text-anchor="middle" font-size="16" font-weight="700" fill="white">?</text>
+  <text x="418" y="442" font-size="13" font-weight="700" fill="#166534">我的修改有幫助嗎?</text>
+  <text x="418" y="460" font-size="10" fill="#6B7280">v2 真的比 v1 好嗎?</text>
+  <text x="374" y="490" font-size="10" fill="#1E293B">量測方式:整個測試集的平均分數差異。</text>
+  <text x="374" y="505" font-size="10" fill="#1E293B">讓迭代改 prompt 不再靠猜,而是看數字</text>
+  <text x="374" y="520" font-size="10" fill="#1E293B">走。</text>
+
+  <rect x="660" y="415" width="290" height="130" rx="10" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+  <circle cx="690" cy="445" r="18" fill="#F59E0B"/>
+  <text x="690" y="451" text-anchor="middle" font-size="16" font-weight="700" fill="white">?</text>
+  <text x="718" y="442" font-size="13" font-weight="700" fill="#92400E">我是否 over-fit?</text>
+  <text x="718" y="460" font-size="10" fill="#6B7280">只針對幾個 case 調 → 脆弱</text>
+  <text x="674" y="490" font-size="10" fill="#1E293B">量測方式:保留一批「沒參與迭代」的</text>
+  <text x="674" y="505" font-size="10" fill="#1E293B">holdout 測試。在未見資料上的分數才能</text>
+  <text x="674" y="520" font-size="10" fill="#1E293B">顯示真實的泛化能力。</text>
+</svg>

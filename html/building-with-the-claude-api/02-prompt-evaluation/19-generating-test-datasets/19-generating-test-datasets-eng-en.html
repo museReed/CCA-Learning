@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generating Test Datasets Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Generating Test Datasets — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2 (test datasets), 3.1 (eval design), 3.3 (eval execution)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 19</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>You can bootstrap an eval dataset in minutes by asking Claude to generate realistic test cases for you — using a fast model like Haiku, JSON prefilling, and stop sequences to get parseable output on the first try.</p>
+<hr />
+<h2>The Scenario: AWS Code Assistant</h2>
+<p>The lesson builds an eval system for a prompt that helps users write <strong>AWS-specific code</strong> in three output formats:</p>
+<ul>
+<li>Python code</li>
+<li>JSON configuration files</li>
+<li>Regular expressions</li>
+</ul>
+<p>The key requirement: the output must be <strong>clean</strong> — no extra explanations, headers, or footers around the code. That clean-output requirement is exactly the kind of property an eval dataset is meant to stress-test.</p>
+<p>The starting (v1) prompt:</p>
+<pre><code class="language-python">prompt = f&quot;&quot;&quot;
+Please provide a solution to the following task:
+{task}
+&quot;&quot;&quot;
+</code></pre>
+<hr />
+<h2>Dataset Shape: An Array of Tasks</h2>
+<p>The dataset is an array of JSON objects where each object has a <code>task</code> property describing what we want Claude to accomplish:</p>
+<pre><code class="language-json">[
+  { &quot;task&quot;: &quot;Description of task&quot; },
+  ...additional
+]
+</code></pre>
+<p>This minimal shape is deliberate. At evaluation time you will loop over the array, interpolate each <code>task</code> into the prompt template, and run it through Claude. Adding fields later (expected output, category, difficulty) is easy; starting simple is faster.</p>
+<hr />
+<h2>Why Use Haiku for Dataset Generation</h2>
+<p>The lesson explicitly recommends <strong>Haiku</strong> for dataset generation rather than the full Claude model. The reasoning is economic:</p>
+<ul>
+<li>Dataset generation is a bulk, creative task that doesn't need frontier-model reasoning.</li>
+<li>Haiku is faster and cheaper per call.</li>
+<li>A 100-entry dataset on Sonnet is expensive; on Haiku it's trivial.</li>
+</ul>
+<p>This is a general pattern in the CCA curriculum: <strong>use a fast model for bulk work, save the frontier model for the task under evaluation.</strong></p>
+<hr />
+<h2>Helper Functions for Claude Interaction</h2>
+<p>The lesson introduces three helpers that will be reused throughout the chapter:</p>
+<pre><code class="language-python">def add_user_message(messages, text):
+    user_message = {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: text}
+    messages.append(user_message)
+
+def add_assistant_message(messages, text):
+    assistant_message = {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: text}
+    messages.append(assistant_message)
+
+def chat(messages, system=None, temperature=1.0, stop_sequences=[]):
+    params = {
+        &quot;model&quot;: model,
+        &quot;max_tokens&quot;: 1000,
+        &quot;messages&quot;: messages,
+        &quot;temperature&quot;: temperature
+    }
+    if system:
+        params[&quot;system&quot;] = system
+    if stop_sequences:
+        params[&quot;stop_sequences&quot;] = stop_sequences
+
+    response = client.messages.create(**params)
+    return response.content[0].text
+</code></pre>
+<p>Three observations:</p>
+<ol>
+<li><strong><code>temperature=1.0</code> by default</strong> — high entropy is good for dataset generation because you want <em>diverse</em> test cases, not a repetitive list.</li>
+<li><strong><code>stop_sequences</code> is wired in</strong> — this is what lets the prefilling trick work cleanly (see below).</li>
+<li><strong><code>chat()</code> returns <code>.content[0].text</code></strong> — it abstracts away the content-block structure so the caller gets plain text.</li>
+</ol>
+<hr />
+<h2>The Dataset Generation Function</h2>
+<p>The lesson's main function:</p>
+<pre><code class="language-python">def generate_dataset():
+    prompt = &quot;&quot;&quot;
+Generate an evaluation dataset for a prompt evaluation. The dataset will be used to evaluate prompts that generate Python, JSON, or Regex specifically for AWS-related tasks. Generate an array of JSON objects, each representing task that requires Python, JSON, or a Regex to complete.
+
+Example output:
+```json
+[
+  {
+    &quot;task&quot;: &quot;Description of task&quot;,
+  },
+  ...additional
+]
+</code></pre>
+<ul>
+<li>Focus on tasks that can be solved by writing a single Python function, a single JSON object, or a single regex</li>
+<li>Focus on tasks that do not require writing much code</li>
+</ul>
+<p>Please generate 3 objects.<br />
+"""</p>
+<pre><code>
+Three prompt-engineering choices worth noting:
+
+- **Example output in fenced block** — Claude gets a concrete shape to match, not just a description.
+- **Two explicit constraints** — &quot;single function/object/regex&quot; and &quot;don't require much code.&quot; These narrow the generation space so the dataset stays focused.
+- **Exact count** — &quot;Please generate 3 objects&quot; gives deterministic output size.
+
+---
+
+## The JSON Prefilling + Stop Sequence Trick
+
+The most important technique in the lesson:
+
+```python
+messages = []
+add_user_message(messages, prompt)
+add_assistant_message(messages, &quot;```json&quot;)
+text = chat(messages, stop_sequences=[&quot;```&quot;])
+return json.loads(text)
+</code></pre>
+<p>This is a canonical pattern for getting parseable JSON out of Claude. The mechanics:</p>
+<ol>
+<li><strong>Append an assistant message containing <code>```json</code></strong> — Claude is told "you have already started writing a JSON code block, now continue."</li>
+<li><strong>Set <code>stop_sequences=["```"]</code></strong> — Claude will stop generation the moment it tries to close the code fence.</li>
+<li><strong>Parse the raw text with <code>json.loads</code></strong> — what comes back is pure JSON, no surrounding prose, no closing fence.</li>
+</ol>
+<p>Why this matters: without prefilling, Claude often wraps output in prose ("Here is your dataset:") or forgets to close the fence. Prefilling + stop sequences turn JSON extraction from a regex-parsing problem into a trivial <code>json.loads</code> call.</p>
+<p>This is a <strong>D5 production pattern</strong> as well as a D3 technique — you will use it anywhere you need structured output from Claude without tool use.</p>
+<hr />
+<h2>Running It</h2>
+<pre><code class="language-python">dataset = generate_dataset()
+print(dataset)
+</code></pre>
+<p>This returns three test cases covering Python, JSON configs, and regex patterns for AWS-specific tasks.</p>
+<hr />
+<h2>Persisting the Dataset</h2>
+<pre><code class="language-python">with open('dataset.json', 'w') as f:
+    json.dump(dataset, f, indent=2)
+</code></pre>
+<p>Saving the dataset to a file is essential because:</p>
+<ul>
+<li><strong>Reproducibility</strong> — the same dataset must be reused across prompt iterations (otherwise comparisons are invalid, as covered in Lesson 18).</li>
+<li><strong>Version control</strong> — you can commit <code>dataset.json</code> into the repo so every engineer scores against the same canonical input set.</li>
+<li><strong>Decoupling</strong> — generation and execution become separate steps; you generate once, run evals many times.</li>
+</ul>
+<p>The file lives next to the notebook so the eval runner in Lesson 20 can load it with <code>open("dataset.json", "r")</code>.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Using Sonnet for dataset generation</strong> — wasted money; Haiku is the correct choice for bulk creative work.</li>
+<li><strong>Skipping the JSON prefilling trick</strong> — your parser will break on Claude's prose preamble and postamble.</li>
+<li><strong>Forgetting <code>stop_sequences</code></strong> — without it, Claude closes the fence and may keep writing, corrupting the parse.</li>
+<li><strong>Generating a dataset then regenerating it between prompt iterations</strong> — this destroys comparability; generate once, persist to disk, reuse.</li>
+<li><strong>Not specifying an exact count in the prompt</strong> — "generate some test cases" gives you unpredictable sizes, breaking batch-processing assumptions.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The prefilling + stop-sequence trick is the single most reusable technique in this lesson. It turns "ask Claude for JSON" from a brittle parsing problem into a one-liner. Memorize it — it appears in D3 (dataset generation), D5 (structured output in production), and anywhere else you need machine-readable output without invoking the full tool-use protocol.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: dataset generation is a named sub-step of the eval workflow; know both the "generate with Claude" and "generate by hand" options.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: the prefilling + stop-sequence pattern is a go-to for structured output in production systems.</li>
+<li>Be ready for exam questions like: "How do you bootstrap an eval dataset for a new prompt?" → generate with Haiku, prefill the JSON code fence, use stop sequences, <code>json.loads</code>, save to disk.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which model does the lesson recommend for dataset generation, and why?</td>
+<td>Haiku — it is faster and cheaper than the full Claude model for bulk creative work like generating test cases.</td>
+</tr>
+<tr>
+<td>What three output formats does the AWS code assistant prompt target?</td>
+<td>Python code, JSON configuration files, and regular expressions.</td>
+</tr>
+<tr>
+<td>What is the minimal shape of the dataset?</td>
+<td>An array of JSON objects, each with a <code>task</code> property describing what Claude should accomplish.</td>
+</tr>
+<tr>
+<td>How do you get clean JSON out of Claude without tool use?</td>
+<td>Prefill an assistant message with <code>```json</code>, set <code>stop_sequences=["```"]</code>, then call <code>json.loads(text)</code> on the result.</td>
+</tr>
+<tr>
+<td>What does <code>stop_sequences=["```"]</code> accomplish in this pattern?</td>
+<td>It stops generation as soon as Claude writes the closing code fence, so the returned text is pure JSON.</td>
+</tr>
+<tr>
+<td>Why is the dataset saved to disk?</td>
+<td>So the same dataset can be reused across prompt iterations, which is required for valid score comparisons.</td>
+</tr>
+<tr>
+<td>What two explicit constraints does the generation prompt include?</td>
+<td>"Single Python function / JSON object / regex" and "do not require writing much code."</td>
+</tr>
+<tr>
+<td>Default temperature in the <code>chat()</code> helper, and why?</td>
+<td><code>temperature=1.0</code> — higher entropy produces more diverse test cases, which is desirable for an eval dataset.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

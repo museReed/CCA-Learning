@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Typical Eval Workflow Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>A Typical Eval Workflow — Engineering Deep Dive（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration（20%，主要）；D5 — Enterprise Deployment（20%，次要）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（eval 設計）、3.2（測試資料集）、3.3（eval 執行）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 18</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>Prompt evaluation 工作流是一個五步驟循環 — draft、dataset、run、grade、iterate — 把主觀的 prompt engineering 變成可量測、可重現、甚至可以放進 CI 的流程。</p>
+<hr />
+<h2>五步驟工作流</h2>
+<p>課程定義了「最小可行」的 eval 工作流。市面上每一個開源或付費的 eval 工具，本質上都是這五個步驟的更精緻實作。</p>
+<pre><code>┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+│ 1. Draft     │ → │ 2. Dataset   │ → │ 3. Run       │ → │ 4. Grade     │ → │ 5. Iterate   │
+│   a prompt   │   │              │   │   Claude     │   │   outputs    │   │   prompt     │
+└──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘
+        ▲                                                                             │
+        └─────────────────────────────────────────────────────────────────────────────┘
+                                  迭代直到分數進入平台期
+</code></pre>
+<hr />
+<h2>Step 1：起草 Prompt</h2>
+<p>從你本來就會寫的 prompt 開始。課程刻意用了一個極簡 baseline：</p>
+<pre><code class="language-python">prompt = f&quot;&quot;&quot;
+Please answer the user's question:
+
+{question}
+&quot;&quot;&quot;
+</code></pre>
+<p>Baseline 的價值不在於它寫得好，而在於它「可量測」。有了 baseline，你才能證明後續迭代真的是改善。</p>
+<hr />
+<h2>Step 2：建立 Eval Dataset</h2>
+<p>資料集是一組能代表 production 流量的範例輸入。每一筆都是要被插進 prompt template 的槽位。</p>
+<p>課程用的三個問題：</p>
+<ul>
+<li>"What's 2+2?"</li>
+<li>"How do I make oatmeal?"</li>
+<li>"How far away is the Moon?"</li>
+</ul>
+<p>實務上你可能有數十、數百甚至數千筆紀錄。兩種建法：<br />
+- 手工打造（高保真、低產能）；<br />
+- 用 Claude 自動生成（較低保真、高產能 — 見 Lesson 19）。</p>
+<p>最重要的特性是資料集要<strong>反映真實輸入分布</strong>，不能只有 happy path。</p>
+<hr />
+<h2>Step 3：餵進 Claude</h2>
+<p>對每一筆資料集輸入，把它內插進 template 然後把完整 prompt 送給 Claude。以第一題為例：</p>
+<pre><code>Please answer the user's question:
+What's 2+2?
+</code></pre>
+<p>Claude 會回出例如「2 + 2 = 4」、煮燕麥片的步驟、月球距離等。這就是 grader 要評分的原始輸出。</p>
+<p>Lesson 20 會把這步包進 <code>run_prompt(test_case)</code> 函式。</p>
+<hr />
+<h2>Step 4：餵進 Grader</h2>
+<p>Grader 才是把這個循環從「意見」變成「工程流程」的關鍵元件。它檢視原始輸入和 Claude 的輸出，吐出一個數值分數 — 課程用 <strong>1 到 10 分</strong>，10 代表完美答案。</p>
+<p>課程範例的分數：</p>
+<table>
+<thead>
+<tr>
+<th>測試案例</th>
+<th>Grader 分數</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>數學：「What's 2+2?」</td>
+<td>10（完美）</td>
+</tr>
+<tr>
+<td>燕麥：「How do I make oatmeal?」</td>
+<td>4（需要改進）</td>
+</tr>
+<tr>
+<td>月球：「How far away is the Moon?」</td>
+<td>9（非常好）</td>
+</tr>
+</tbody>
+</table>
+<p>彙總分數：<code>(10 + 4 + 9) / 3 = 7.66</code>。</p>
+<p>Grader 本身可以是 code-based（regex、JSON schema 檢查）或 model-based（用另一個 LLM 來評分），後面章節會介紹。</p>
+<hr />
+<h2>Step 5：改 Prompt 並重跑</h2>
+<p>有了 7.66 的 baseline，你改 prompt 的某個東西然後重跑整條 pipeline。課程示範了一個簡單改進 — 多加一行指引：</p>
+<pre><code class="language-python">prompt = f&quot;&quot;&quot;
+Please answer the user's question:
+
+{question}
+
+Answer the question with ample detail
+&quot;&quot;&quot;
+</code></pre>
+<p>同一個資料集跑 v2 prompt，新的平均分變成 <strong>8.7</strong>。因為差異是數值，沒得吵 — v2 在這個資料集上客觀優於 v1。</p>
+<p>一直迭代直到分數進入平台期，或者「足夠 production」為止。</p>
+<hr />
+<h2>為什麼這個工作流很重要</h2>
+<p>這個流程提供三個 ad-hoc 測試做不到的能力：</p>
+<ol>
+<li><strong>Prompt 版本的數值比較</strong> — 你挑分數高的那個，不是感覺順的那個。</li>
+<li><strong>挑出最佳版本</strong> — 你能把客觀最高分的 prompt 上線，而不是某個運氣好的。</li>
+<li><strong>持續迭代</strong> — 每次改動都對同一個資料集量測，形成 regression 安全網。</li>
+</ol>
+<p>這個工作流「把 prompt engineering 的猜測成分移除」，讓你有信心說改動真的是改善而不是另一種變體。</p>
+<hr />
+<h2>規模化考量（超出課程範圍）</h2>
+<p>五個步驟是最小集。真實 production eval pipeline 會再疊上：</p>
+<ul>
+<li><strong>版本化資料集</strong> — 每次資料集修訂都存 checkpoint，可以重現舊分數。</li>
+<li><strong>平行執行</strong> — 數千筆資料集受益於並行 API 呼叫。</li>
+<li><strong>CI 整合</strong> — 每個改動 prompt 的 PR 都跑 pipeline，擋 regression。</li>
+<li><strong>多個 grader</strong> — 單一分數會隱藏維度上的 trade-off；production 會用多個 rubric（正確性、格式、語氣）。</li>
+<li><strong>分層抽樣</strong> — 資料集內有加權桶，讓稀有類別不會被常見類別淹沒。</li>
+</ul>
+<p>這些都不改變核心循環，只是把它在規模上 operationalize。</p>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>沒有 baseline 分數</strong> — 沒 baseline 的迭代等於無法驗證改動是否真的有改善。</li>
+<li><strong>資料集只有 happy path</strong> — 資料集的意義是暴露失敗模式，不是證明容易的題目可以過。</li>
+<li><strong>憑眼睛看輸出、跳過 grader</strong> — 沒有數值 scorer，「迭代」只是意見洗牌。</li>
+<li><strong>同時改 prompt 和 dataset</strong> — 你不會知道分數變動是來自 prompt 還是 dataset。</li>
+<li><strong>分數一升就停</strong> — 第一個改善很少是最佳改善；持續迭代直到進入平台期。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>五步驟工作流的全部威力在於「資料集保持不變、只變 prompt」。這讓 prompt 被隔離成自變數，分數的每次變動都能歸因到 prompt。若在兩次跑之間同時動了 dataset，你就摧毀了這個實驗。CCA 考試裡，draft → dataset → run → grade → iterate 這個順序是 D3 最可測的序列。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D3（Evaluation &amp; Iteration）</strong>：記住五步驟順序；知道 baseline 是為了啟用數值比較；理解「feed through grader」輸出 1-10 分。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：認知到這個工作流就是 production 準備度的閘門 — 沒 eval 迴圈就不能部署。</li>
+<li>考題觸發詞：「用客觀數據改進 prompt 的流程是什麼」→ 答案就是這個五步驟循環。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>典型 eval 工作流的五個步驟是什麼？</td>
+<td>1) 起草 prompt、2) 建立 eval 資料集、3) 餵進 Claude、4) 餵進 grader、5) 改 prompt 並重複。</td>
+</tr>
+<tr>
+<td>課程用的 grader 分數尺度是什麼？</td>
+<td>1 到 10 分，10 為完美答案，分數越低代表越需要改進。</td>
+</tr>
+<tr>
+<td>課程用的 baseline prompt 是什麼？</td>
+<td><code>Please answer the user's question: {question}</code> 內插進 f-string。</td>
+</tr>
+<tr>
+<td>課程如何示範迭代？</td>
+<td>在 prompt 裡加一句「Answer the question with ample detail」，平均分從 7.66 升到 8.7。</td>
+</tr>
+<tr>
+<td>為什麼資料集要在迭代之間保持不變？</td>
+<td>這樣分數差異才能歸因於 prompt 改動，而不是輸入改動。</td>
+</tr>
+<tr>
+<td>Step 3 做什麼？</td>
+<td>把每筆資料集輸入內插進 prompt template 並送進 Claude；完整回應成為 grading 的原料。</td>
+</tr>
+<tr>
+<td>這個工作流解鎖哪三個好處？</td>
+<td>版本的數值比較、客觀挑出最佳版本、可持續量測的迭代。</td>
+</tr>
+<tr>
+<td>建資料集的兩種方式？</td>
+<td>手工建立，或用 Claude 自動生成（Lesson 19 會介紹）。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

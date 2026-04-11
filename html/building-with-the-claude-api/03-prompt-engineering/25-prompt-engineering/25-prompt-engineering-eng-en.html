@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Engineering Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Engineering — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (prompt design &amp; iteration), 1.1 (instruction following)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 25</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt engineering is a measurable, iterative loop — write a baseline, score it with an evaluator, apply one technique at a time, and re-score — not a guessing game of clever wording.</p>
+<hr />
+<h2>The Iterative Improvement Loop</h2>
+<p>The lesson frames prompt engineering as a disciplined cycle you repeat until the score crosses your quality bar:</p>
+<ol>
+<li><strong>Set a goal</strong> — define what the prompt must accomplish.</li>
+<li><strong>Write an initial prompt</strong> — a deliberately naive baseline.</li>
+<li><strong>Evaluate the prompt</strong> — run it against a dataset and criteria.</li>
+<li><strong>Apply a technique</strong> — clarity, specificity, examples, XML tags, etc.</li>
+<li><strong>Re-evaluate</strong> — confirm the change actually improved the score.</li>
+</ol>
+<p>Steps 4 and 5 repeat. The discipline is: <strong>one change per iteration</strong>, so you can attribute the score delta to the technique, not to a mix of edits.</p>
+<p>This is the same scientific-method loop used for ML model development — the prompt is the hypothesis, the eval dataset is the test set, and the score is the objective function.</p>
+<hr />
+<h2>The Running Example: Athlete Meal Planner</h2>
+<p>The lesson uses one concrete task all the way through: generate a one-day meal plan for an athlete given height, weight, goal, and dietary restrictions. Using a single task across iterations is deliberate — it lets you compare scores meaningfully.</p>
+<hr />
+<h2>The Evaluation Harness</h2>
+<p>A <code>PromptEvaluator</code> class drives the loop. You instantiate it with a concurrency cap:</p>
+<pre><code class="language-python">evaluator = PromptEvaluator(max_concurrent_tasks=5)
+</code></pre>
+<p>The course explicitly warns to start low (around 3) to avoid rate-limit errors, and raise it only if your API quota permits faster parallelism. Concurrency is an orthogonal knob to prompt quality — it affects wall-clock time, not scores.</p>
+<hr />
+<h2>Generating the Test Dataset</h2>
+<p>Instead of hand-writing test cases, the evaluator can synthesize them from a task description and an input spec:</p>
+<pre><code class="language-python">dataset = evaluator.generate_dataset(
+    task_description=&quot;Write a compact, concise 1 day meal plan for a single athlete&quot;,
+    prompt_inputs_spec={
+        &quot;height&quot;: &quot;Athlete's height in cm&quot;,
+        &quot;weight&quot;: &quot;Athlete's weight in kg&quot;,
+        &quot;goal&quot;: &quot;Goal of the athlete&quot;,
+        &quot;restrictions&quot;: &quot;Dietary restrictions of the athlete&quot;
+    },
+    output_file=&quot;dataset.json&quot;,
+    num_cases=3
+)
+</code></pre>
+<p>Critical guidance from the lesson: <strong>keep <code>num_cases</code> small (2-3) during iteration</strong>. You are optimizing iteration speed, not statistical rigor. Bump the count only for a final validation run.</p>
+<hr />
+<h2>The Baseline Prompt</h2>
+<p>A deliberately weak baseline is the whole point — you need something bad to measure improvement against:</p>
+<pre><code class="language-python">def run_prompt(prompt_inputs):
+    prompt = f&quot;&quot;&quot;
+What should this person eat?
+
+- Height: {prompt_inputs[&quot;height&quot;]}
+- Weight: {prompt_inputs[&quot;weight&quot;]}
+- Goal: {prompt_inputs[&quot;goal&quot;]}
+- Dietary restrictions: {prompt_inputs[&quot;restrictions&quot;]}
+&quot;&quot;&quot;
+    messages = []
+    add_user_message(messages, prompt)
+    return chat(messages)
+</code></pre>
+<p>"What should this person eat?" is a question, not an instruction. It gives Claude no target for length, format, nutritional detail, or timing. A typical first score is around <strong>2.3 / 10</strong>, which the lesson explicitly calls normal.</p>
+<hr />
+<h2>Running the Evaluation with Extra Criteria</h2>
+<p>Beyond the dataset, you can inject domain-specific grading criteria so the judge model scores against what actually matters:</p>
+<pre><code class="language-python">results = evaluator.run_evaluation(
+    run_prompt_function=run_prompt,
+    dataset_file=&quot;dataset.json&quot;,
+    extra_criteria=&quot;&quot;&quot;
+The output should include:
+- Daily caloric total
+- Macronutrient breakdown
+- Meals with exact foods, portions, and timing
+&quot;&quot;&quot;
+)
+</code></pre>
+<p><code>extra_criteria</code> is your rubric. Without it, the judge invents a generic "is this a reasonable meal plan?" scale. With it, the score reflects whether your prompt hits the business requirements.</p>
+<hr />
+<h2>Reading the Results</h2>
+<p>The evaluator returns two artifacts: a numerical score and a detailed HTML report. The report shows per-case model output plus the grader's reasoning — this is where you learn <em>why</em> a case failed, not just <em>that</em> it did. That "why" is the raw material for the next iteration.</p>
+<hr />
+<h2>Why One Change Per Iteration</h2>
+<p>If you apply clarity + specificity + examples + XML structure in a single edit and the score jumps from 2.3 to 6.8, you cannot attribute the gain. Next time you face a new prompt you will not know which technique to reach for. Single-technique iterations build a personal playbook of which moves matter for which tasks.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>No baseline</strong> — jumping straight to a "good" prompt leaves you with no score to improve against.</li>
+<li><strong>Multi-change iterations</strong> — changing several things at once obscures which technique drove the improvement.</li>
+<li><strong>Too many test cases too early</strong> — slows iteration and burns API quota before the prompt is worth validating at scale.</li>
+<li><strong>Ignoring the judge's reasoning</strong> — looking only at the numeric score wastes the most valuable signal in the report.</li>
+<li><strong>Missing <code>extra_criteria</code></strong> — the default rubric often doesn't reflect your actual requirements, so the score is noise.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompt engineering is not "write a better prompt." It is <strong>instrument a loop</strong>: baseline, score, change one thing, re-score. The evaluator is the microscope; without it you're guessing. A 2.3/10 first attempt is normal — the metric to watch is the delta per iteration, not the absolute starting score.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: recognize the baseline → eval → iterate cycle as the canonical prompt improvement pattern.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: prompts are how you steer agent behavior; the iteration loop applies identically when tuning an agent's system prompt.</li>
+<li>Expect questions framed as: "The team has a prompt scoring 2.3/10, what do they do next?" → answer is never "rewrite from scratch," it is "apply one technique and re-evaluate."</li>
+<li>Know that <code>max_concurrent_tasks</code> is a rate-limit knob, not a quality knob.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the five steps of the prompt engineering loop?</td>
+<td>1) Set goal, 2) Write initial prompt, 3) Evaluate, 4) Apply technique, 5) Re-evaluate. Repeat 4-5 until satisfied.</td>
+</tr>
+<tr>
+<td>Why change only one thing per iteration?</td>
+<td>So the score delta is attributable to that specific technique, building a reliable mental model of what works.</td>
+</tr>
+<tr>
+<td>What is a typical score for a first-attempt prompt?</td>
+<td>Around 2.3/10 — the lesson says low initial scores are normal and not a reason to be discouraged.</td>
+</tr>
+<tr>
+<td>Why keep the test dataset small (2-3 cases) during iteration?</td>
+<td>Iteration speed. Small datasets let you test many techniques quickly; you scale up only for final validation.</td>
+</tr>
+<tr>
+<td>What does <code>max_concurrent_tasks</code> control?</td>
+<td>Parallelism of API calls in the evaluator. Start low (around 3) to avoid rate-limit errors; raise only if quota allows.</td>
+</tr>
+<tr>
+<td>What is the purpose of <code>extra_criteria</code> in <code>run_evaluation</code>?</td>
+<td>It tells the grading model which domain-specific qualities to score against, aligning the score with actual requirements.</td>
+</tr>
+<tr>
+<td>What two artifacts does an evaluation run produce?</td>
+<td>A numerical score and a detailed HTML report showing per-case outputs and the grader's reasoning.</td>
+</tr>
+<tr>
+<td>Why use a deliberately weak baseline prompt?</td>
+<td>Because you need a measurable starting point — improvement is only visible as a delta from the baseline.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rules Of Prompt Caching Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Rules of Prompt Caching — Engineering Deep Dive（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>詳情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D5 — Enterprise Deployment (20%) 主要；D2 — Tool Design (18%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（成本／延遲優化）、5.2（production 效能）、2.1（tool schema 設計）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 57</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt caching 只有在你照規則玩時才有用：你必須手動加上 cache breakpoint、cached 內容必須逐 byte 一致、breakpoint 之前至少要有 1024 tokens、每次 request 最多 4 個 breakpoint。</p>
+<hr />
+<h2>Cache 不是自動的——要加 Breakpoint</h2>
+<p>Caching 預設<strong>不</strong>啟用。你必須在 request 裡的某個 block 上明確加入 <strong>cache breakpoint</strong> 才會觸發。</p>
+<p>運作原則：</p>
+<ul>
+<li>Message 上的處理工作<strong>不會被自動快取</strong>。</li>
+<li>你要手動在某個 block 上加 <code>cache_control</code> 欄位。</li>
+<li>該 breakpoint <strong>之前與包含本身</strong> 的所有內容會被快取。</li>
+<li>後續 request 只有在到 breakpoint 為止的內容<strong>完全一致</strong>時才能讀取 cache。</li>
+</ul>
+<p>換句話說，breakpoint 就是一條「切線」：上面的是可快取的前綴，下面的每次都是新的、要重新 preprocess。</p>
+<hr />
+<h2>必須使用 Longhand Block 形式</h2>
+<p>Message 的簡短形式（純字串）沒地方塞 <code>cache_control</code>。你必須用 <strong>longhand block 形式</strong>：</p>
+<pre><code class="language-python"># Shorthand — 無法快取
+messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;這是一份長文件...&quot;}]
+
+# Longhand — 可以快取
+messages = [{
+    &quot;role&quot;: &quot;user&quot;,
+    &quot;content&quot;: [
+        {
+            &quot;type&quot;: &quot;text&quot;,
+            &quot;text&quot;: &quot;這是一份長文件...&quot;,
+            &quot;cache_control&quot;: {&quot;type&quot;: &quot;ephemeral&quot;},
+        }
+    ],
+}]
+</code></pre>
+<p><code>cache_control</code> 欄位值設為 <code>{"type": "ephemeral"}</code>。<code>ephemeral</code> 是目前支援的 cache 類型，對應 lesson 56 的 1 小時 TTL。</p>
+<hr />
+<h2>逐 Byte 精確比對</h2>
+<p>Cache 極度敏感。到 breakpoint 為止的內容必須在後續 request 中<strong>完全一致</strong>才能重用。</p>
+<p>即使很小的改動都會讓 cache 失效：</p>
+<ul>
+<li>多加一個「please」→ cache miss。</li>
+<li>改一個空白字元 → cache miss。</li>
+<li>把兩句話順序對調 → cache miss。</li>
+</ul>
+<p>只要前綴一變，Claude 就得從分歧點重新 preprocess，你還要再付一次 cache write 的錢。</p>
+<p><strong>設計啟示：</strong> 穩定內容放前面，變動內容放後面。使用者當下的問題應該放在 breakpoint <strong>之後</strong>，絕對不要放進快取前綴裡。</p>
+<hr />
+<h2>跨訊息 Caching</h2>
+<p>Cache breakpoint 可以橫跨多則 message，也可以跨不同 message 型態。如果你把 breakpoint 放在較後面的 message 上，<strong>所有前面的 message</strong>（user、assistant 等）都會被納入 cached 內容。</p>
+<p>這對對話型 agent 特別有用：你可以把到某個穩定點為止的整個對話歷史都快取起來，然後後面繼續 append 新回合。</p>
+<hr />
+<h2>可快取的 Block 類型</h2>
+<p>不限於 text block。Cache breakpoint 可以加在：</p>
+<ul>
+<li>System prompts</li>
+<li>Tool definitions</li>
+<li>Image blocks</li>
+<li>Tool use blocks</li>
+<li>Tool result blocks</li>
+</ul>
+<p>System prompt 與 tool definition 是<strong>最佳</strong>候選，因為它們在不同 request 之間幾乎不變，通常也是快取收益最大的地方。</p>
+<hr />
+<h2>Cache Ordering：Tools → System → Messages</h2>
+<p>Claude 在幕後是按固定順序處理 request 的組件：</p>
+<ol>
+<li><strong>Tools</strong>（若有）</li>
+<li><strong>System prompt</strong>（若有）</li>
+<li><strong>Messages</strong></li>
+</ol>
+<p>這個順序決定了什麼東西會被快取到哪。如果你第一個 breakpoint 放在 messages 區，Claude 仍會把 tools 跟 system prompt 視為 cached 前綴的一部分，因為它們在處理順序上排前面。</p>
+<p>每個 request 最多可以放 <strong>4 個 cache breakpoint</strong>。常見的 production layout：</p>
+<ul>
+<li>Breakpoint 1 → tools 結尾（快取所有 tool schemas）</li>
+<li>Breakpoint 2 → system prompt 結尾（快取 system prompt）</li>
+<li>Breakpoint 3 → message history 某處（快取穩定的對話前綴）</li>
+<li>Breakpoint 4 → 保留給更細粒度的快取</li>
+</ul>
+<p>細分 breakpoint 讓 request 不同段可以各自獨立快取——某段變了只失效那一段，不會整份 cache 打翻。</p>
+<hr />
+<h2>最小內容長度：1024 Tokens</h2>
+<p>有一條底線：<strong>breakpoint 之前與含本身的內容加總至少要 1024 tokens</strong> 才會被快取。</p>
+<ul>
+<li>一句短短「Hi there!」跨不過這個門檻。</li>
+<li>你需要真的大的內容——長 system prompt、完整文件、或詳盡的 tool schema——才能觸發 caching。</li>
+<li>1024 token 是所有要 cache 的 block <strong>總和</strong>，不是單一 block。</li>
+</ul>
+<p>不到門檻時 <code>cache_control</code> 等於 no-op：不會建 cache，也不會省錢。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>用 shorthand 字串形式</strong> — 沒地方放 <code>cache_control</code>，什麼都不會被快取。先改成 longhand block 形式。</li>
+<li><strong>把變動內容放在 breakpoint 之前</strong> — 使用者的新問題絕對不能放進 cached 前綴裡，否則每次都 miss。</li>
+<li><strong>低於門檻就想快取</strong> — 想快取少於 1024 tokens 的 prompt 卻期待省錢。它會靜默什麼都不做。</li>
+<li><strong>超過 4 個 breakpoint</strong> — Request 會被拒絕。設計時要抓住 4 個名額的預算。</li>
+<li><strong>不懂處理順序</strong> — 把 breakpoint 放在 messages 上卻心理假設 tools 區「沒被快取」。它有——tools 跟 system prompt 在處理順序上排前面，永遠是 message 層級前綴的一部分。</li>
+<li><strong>依賴 fuzzy matching</strong> — Caching 是逐 byte 精確。先正規化空白、標點、順序，再說前綴是穩定的。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>定義快取成敗的四條規則：(1) 用 breakpoint 明確 opt in、(2) 逐 byte 比對、(3) 達到 1024 token 底線、(4) 遵守 tools → system → messages 的順序與 4 breakpoint 上限。任一條沒達成，cache 就靜默沒用——更糟的是你還為永遠不會被重用的內容付了 cache write。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5（Enterprise Deployment）</strong> — 考題會測你是否知道 caching 是手動、逐 byte、1024 token 底線。</li>
+<li><strong>D2（Tool Design）</strong> — tool definition 是 caching 的頭號目標，因為它跨 request 穩定；考題可能問「tool 量大的 workflow 要把 breakpoint 放哪？」</li>
+<li>記住處理順序：tools、system prompt、messages。這順序直接對應「我該先快取什麼？」</li>
+<li>4 個 breakpoint、<code>{"type": "ephemeral"}</code>、1024 token 底線——這些是常考數字。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt caching 是自動的嗎？</td>
+<td>不是——必須手動在 request 的某個 block 上加 <code>cache_control</code> 欄位（cache breakpoint）。</td>
+</tr>
+<tr>
+<td><code>cache_control</code> 該填什麼值？</td>
+<td><code>{"type": "ephemeral"}</code>——目前支援的 cache 類型，對應 1 小時 TTL。</td>
+</tr>
+<tr>
+<td>哪種 message 形式支援 cache breakpoint？</td>
+<td>Longhand block 形式（<code>content</code> 是 block 的 list）。Shorthand 字串形式無法攜帶 <code>cache_control</code>。</td>
+</tr>
+<tr>
+<td>放了 breakpoint 後 Claude 會 cache 多少內容？</td>
+<td>Breakpoint 之前與包含本身的所有內容。</td>
+</tr>
+<tr>
+<td>Follow-up 呼叫時 cached 內容要完全一樣嗎？</td>
+<td>要——逐 byte 相同。加一個「please」都會失效。</td>
+</tr>
+<tr>
+<td>可 cache 前綴的最小 token 數是多少？</td>
+<td>1024 tokens（breakpoint 之前與含本身的所有 block 總和）。</td>
+</tr>
+<tr>
+<td>一個 request 最多可以放幾個 breakpoint？</td>
+<td>最多 4 個。</td>
+</tr>
+<tr>
+<td>Claude 處理 request 組件的順序是什麼？</td>
+<td>先 tools、再 system prompt、再 messages。</td>
+</tr>
+<tr>
+<td>哪些是最佳 caching 候選？為什麼？</td>
+<td>System prompt 與 tool definition——它們跨 request 很少變動，通常是最大塊穩定輸入。</td>
+</tr>
+<tr>
+<td>後面的 message 上放 breakpoint 可以 cache 之前的 message 嗎？</td>
+<td>可以——跨訊息 caching 會把 breakpoint 之前所有 message（user、assistant 等）都納入。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

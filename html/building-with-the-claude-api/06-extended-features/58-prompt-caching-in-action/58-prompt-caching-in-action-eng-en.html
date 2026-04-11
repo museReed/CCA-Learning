@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Caching In Action Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Caching in Action — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) — primary; D2 — Tool Design (18%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (cost/latency optimization), 5.2 (production performance), 2.1 (tool schema design)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 58</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt caching in practice means converting your tools list and system prompt into cacheable longhand blocks with <code>cache_control</code>, then watching the <code>cache_creation_input_tokens</code> / <code>cache_read_input_tokens</code> usage fields to verify cache hits and misses.</p>
+<hr />
+<h2>Where Caching Pays Off in Real Apps</h2>
+<p>The lesson highlights three high-value targets:</p>
+<ul>
+<li><strong>Large system prompts</strong> — e.g., a ~6K-token coding assistant system prompt.</li>
+<li><strong>Complex tool schemas</strong> — e.g., ~1.7K tokens for multiple tool definitions.</li>
+<li><strong>Repeated message content</strong> — conversations or workflows that keep sending the same prefix.</li>
+</ul>
+<p>The rule of thumb: caching only helps if you are repeatedly sending identical content — and in many real applications, this happens <strong>extremely frequently</strong>.</p>
+<hr />
+<h2>Setting Up Tool Schema Caching</h2>
+<p>To cache tool schemas, add <code>cache_control</code> to <strong>the last tool in the list</strong>. Everything before and including that tool gets cached.</p>
+<pre><code class="language-python">if tools:
+    tools_clone = tools.copy()
+    last_tool = tools_clone[-1].copy()
+    last_tool[&quot;cache_control&quot;] = {&quot;type&quot;: &quot;ephemeral&quot;}
+    tools_clone[-1] = last_tool
+    params[&quot;tools&quot;] = tools_clone
+</code></pre>
+<p>Why the copy-then-mutate dance:</p>
+<ul>
+<li><code>tools.copy()</code> creates a shallow copy of the tools list so the caller's list is not mutated.</li>
+<li><code>tools_clone[-1].copy()</code> creates a shallow copy of the last tool dict so its original version stays clean.</li>
+<li>Only the copy gets the <code>cache_control</code> field.</li>
+</ul>
+<p>You <em>could</em> write <code>tools[-1]["cache_control"] = ...</code> directly, but the copying approach prevents subtle bugs if you later reorder tools, reuse the list across calls, or share tool definitions between parts of the app.</p>
+<p>The <code>cache_control</code> field is set to <code>{"type": "ephemeral"}</code> — the standard 1-hour cache type.</p>
+<hr />
+<h2>Setting Up System Prompt Caching</h2>
+<p>For the system prompt, you need to convert it from a plain string into the longhand structured block form so you have somewhere to attach <code>cache_control</code>:</p>
+<pre><code class="language-python">if system:
+    params[&quot;system&quot;] = [
+        {
+            &quot;type&quot;: &quot;text&quot;,
+            &quot;text&quot;: system,
+            &quot;cache_control&quot;: {&quot;type&quot;: &quot;ephemeral&quot;},
+        }
+    ]
+</code></pre>
+<p>The string-form system prompt has no field for <code>cache_control</code>; the block-form does. Once the system prompt is structured this way, the entire system prompt becomes part of the cached prefix.</p>
+<hr />
+<h2>Understanding Cache Behavior in the Response</h2>
+<p>When you run requests with caching enabled, the API's <code>usage</code> block exposes new token counters that tell you whether you wrote to or read from the cache:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cache_creation_input_tokens</code></td>
+<td>Tokens Claude <strong>wrote</strong> into the cache on this request (first call or cache miss forcing a rewrite).</td>
+</tr>
+<tr>
+<td><code>cache_read_input_tokens</code></td>
+<td>Tokens Claude <strong>read</strong> from the cache on this request (cache hit — the savings event).</td>
+</tr>
+</tbody>
+</table>
+<p>Typical usage patterns:</p>
+<ul>
+<li><strong>First request</strong>: <code>cache_creation_input_tokens=1772</code>, <code>cache_read_input_tokens=0</code> — Claude is writing to the cache.</li>
+<li><strong>Follow-up request, same content</strong>: <code>cache_creation_input_tokens=0</code>, <code>cache_read_input_tokens=1772</code> — Claude is reading from the cache.</li>
+<li><strong>Changed content</strong>: new <code>cache_creation_input_tokens</code> appear for the changed section, because it was not in the cache yet.</li>
+</ul>
+<p>The cache is <strong>extremely sensitive</strong>: changing even a single character in your tools or system prompt invalidates the entire cache for that component.</p>
+<hr />
+<h2>Cache Ordering and Partial Hits</h2>
+<p>You can set multiple cache breakpoints in a single request. The order Claude processes them is fixed:</p>
+<ol>
+<li><strong>Tools</strong> (if provided)</li>
+<li><strong>System prompt</strong> (if provided)</li>
+<li><strong>Messages</strong></li>
+</ol>
+<p>This ordering enables <strong>partial cache hits</strong>. Suppose you change the system prompt but leave the tools unchanged:</p>
+<ul>
+<li>The tools section is still byte-identical → <strong>cache read</strong> for tools.</li>
+<li>The system prompt differs → <strong>cache write</strong> for the new system prompt.</li>
+<li>The message section is processed normally.</li>
+</ul>
+<p>You only pay for the parts that actually changed. This granular caching is one of the biggest wins of the feature: it degrades gracefully instead of all-or-nothing.</p>
+<hr />
+<h2>Practical Considerations</h2>
+<p>Prompt caching is most effective when you have:</p>
+<ul>
+<li><strong>Consistent tool schemas across requests</strong> — a production agent with a stable toolbox.</li>
+<li><strong>Stable system prompts</strong> — locked personas, locked instructions.</li>
+<li><strong>Applications that make multiple requests with similar context</strong> — chat, iterative workflows, batch evaluations.</li>
+</ul>
+<p>Remember: the cache only lasts for one hour. This is designed for applications with <strong>relatively frequent API usage</strong>, not long-term storage. If your product makes a call every few hours, the cache will expire between calls and you will pay the cache-write fee repeatedly with no read benefit.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Mutating the caller's tool list in place</strong> — writing <code>tools[-1]["cache_control"] = ...</code> directly can silently affect other parts of the app that share the same list. Use the copy-then-assign pattern.</li>
+<li><strong>Leaving the system prompt as a plain string</strong> — a string cannot carry <code>cache_control</code>. You must wrap it in a <code>{"type": "text", "text": ..., "cache_control": ...}</code> block.</li>
+<li><strong>Assuming the whole request is one cache unit</strong> — it is not. Tools, system prompt, and messages cache independently in processing order, so you can get partial hits.</li>
+<li><strong>Forgetting to check <code>usage</code> fields in production</strong> — without monitoring <code>cache_creation_input_tokens</code> vs. <code>cache_read_input_tokens</code>, you cannot tell whether the cache is actually being used.</li>
+<li><strong>Making trivial edits to cached sections</strong> — a single whitespace or punctuation change to a tool description or system prompt forces a cache rewrite. Treat cached sections as versioned, immutable assets.</li>
+<li><strong>Caching for low-frequency workloads</strong> — entries expire before they are reused, so you only pay the write penalty with no read savings.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Real-world caching is about three things: (1) wrap the last tool in <code>cache_control</code> to cache the full tool schema, (2) convert the system prompt to longhand block form so it can carry <code>cache_control</code>, and (3) inspect <code>cache_creation_input_tokens</code> / <code>cache_read_input_tokens</code> in the response to verify that cache hits are actually happening. The processing order (tools → system → messages) gives you partial hits for free.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong> — expect questions about which API fields prove a cache hit (<code>cache_read_input_tokens</code>) vs. a cache write (<code>cache_creation_input_tokens</code>).</li>
+<li><strong>D2 (Tool Design)</strong> — know that the <code>cache_control</code> field goes on the <strong>last</strong> tool in the list, which caches <em>all</em> tools before it thanks to the processing order.</li>
+<li>Know the partial-hit behavior: changing only the system prompt preserves the cache on tools and produces a split usage pattern (read for tools, create for system).</li>
+<li>The phrase "extremely sensitive" about byte-exact matching is an exam-style warning — any edit invalidates.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which API response field tells you the cache was written on this request?</td>
+<td><code>cache_creation_input_tokens</code> — the number of tokens Claude just wrote into the cache.</td>
+</tr>
+<tr>
+<td>Which API response field tells you the cache was read on this request?</td>
+<td><code>cache_read_input_tokens</code> — the number of tokens Claude reused from the cache.</td>
+</tr>
+<tr>
+<td>Where do you add <code>cache_control</code> to cache an entire tools list?</td>
+<td>On the <strong>last</strong> tool in the list. Everything before and including it becomes part of the cached prefix because tools are processed first.</td>
+</tr>
+<tr>
+<td>Why copy the tools list and the last tool before adding <code>cache_control</code>?</td>
+<td>To avoid mutating the caller's original list or the original tool dict, which prevents bugs if tools are reordered or shared elsewhere.</td>
+</tr>
+<tr>
+<td>How do you make a system prompt cacheable?</td>
+<td>Convert it from a plain string to the longhand block form <code>[{"type": "text", "text": ..., "cache_control": {"type": "ephemeral"}}]</code>.</td>
+</tr>
+<tr>
+<td>What is the value of <code>cache_control</code> you use for 1-hour caching?</td>
+<td><code>{"type": "ephemeral"}</code></td>
+</tr>
+<tr>
+<td>In what order are tools, system prompt, and messages processed for caching?</td>
+<td>Tools first, then system prompt, then messages.</td>
+</tr>
+<tr>
+<td>What happens to the cache when you change only the system prompt?</td>
+<td>You get a partial hit: cache read on tools (unchanged) and cache write on the new system prompt.</td>
+</tr>
+<tr>
+<td>What does "extremely sensitive" mean in the context of caching?</td>
+<td>Any change — even a single character — to the cached section invalidates the cache and forces a rewrite.</td>
+</tr>
+<tr>
+<td>Why is caching a bad fit for long-term, low-frequency workloads?</td>
+<td>Because the cache only lives for one hour, so entries expire between calls and you pay cache-write without ever getting a cache read.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

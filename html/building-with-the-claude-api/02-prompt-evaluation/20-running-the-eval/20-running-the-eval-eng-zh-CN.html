@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Running The Eval Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Running the Eval — Engineering Deep Dive（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration（20%，主要）；D5 — Enterprise Deployment（20%，次要）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.3（eval 执行）、3.1（eval 设计）、3.2（测试数据集）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 20</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>核心 eval pipeline 由三个小函数构成 — <code>run_prompt</code>、<code>run_test_case</code>、<code>run_eval</code> — 拿一份数据集，把每一条推进 Claude，吐出一份可以交给 grader 的结构化结果列表。</p>
+<hr />
+<h2>三函数架构</h2>
+<p>课程把 eval runner 组织成三个职责分离清晰的可组合函数：</p>
+<pre><code>┌─────────────────────┐
+│     run_eval        │  ← 加载数据集、遍历每一条
+│  (dataset)          │
+└──────────┬──────────┘
+           │ 对每个 test_case
+           ▼
+┌─────────────────────┐
+│   run_test_case     │  ← 串接 prompt + grader
+│  (test_case)        │
+└──────────┬──────────┘
+           │ 调用
+           ▼
+┌─────────────────────┐
+│    run_prompt       │  ← 把 template 和输入合并、调用 Claude
+│  (test_case)        │
+└─────────────────────┘
+</code></pre>
+<p>每个函数只做一件事。这是刻意的 — 当 eval 变复杂（并行执行、重试、model-based grading），你一次只改一个函数，不用重写整条 pipeline。</p>
+<hr />
+<h2>函数 1：<code>run_prompt</code></h2>
+<p>最底层的函数处理单次 prompt 执行：</p>
+<pre><code class="language-python">def run_prompt(test_case):
+    &quot;&quot;&quot;Merges the prompt and test case input, then returns the result&quot;&quot;&quot;
+    prompt = f&quot;&quot;&quot;
+Please solve the following task:
+
+{test_case[&quot;task&quot;]}
+&quot;&quot;&quot;
+
+    messages = []
+    add_user_message(messages, prompt)
+    output = chat(messages)
+    return output
+</code></pre>
+<p>注意此时 prompt 的状态 — 刻意极简。没有格式指令、没有输出约束。课程说：<em>"现在我们让 prompt 极其简单。没有包含任何格式指令，所以 Claude 很可能返回比我们需要的更冗长的输出。我们会在后面迭代 prompt 设计时改善这点。"</em></p>
+<p>那个冗长输出的 baseline 正是重点 — 它就是你后面加结构时要度量的对照组。</p>
+<hr />
+<h2>函数 2：<code>run_test_case</code></h2>
+<p>中间层负责跑一条测试案例并评分：</p>
+<pre><code class="language-python">def run_test_case(test_case):
+    &quot;&quot;&quot;Calls run_prompt, then grades the result&quot;&quot;&quot;
+    output = run_prompt(test_case)
+
+    # TODO - Grading
+    score = 10
+
+    return {
+        &quot;output&quot;: output,
+        &quot;test_case&quot;: test_case,
+        &quot;score&quot;: score
+    }
+</code></pre>
+<p>两个重要观察点：</p>
+<ol>
+<li><strong>Score 硬编码为 10。</strong> 这是刻意的 placeholder。真正的 grading 逻辑在 Lesson 21（model-based）和 22（code-based）。硬编码 10 让 pipeline 在 grader 还没准备好之前就能端到端跑 — 这是经典的"walking skeleton"技巧。</li>
+<li><strong>返回结构是一个紧凑的合约。</strong> 每条结果都带 <code>output</code>、<code>test_case</code>、<code>score</code>。下游消费者（报表生成、regression 检测、dashboards）都依赖这个形状。</li>
+</ol>
+<hr />
+<h2>函数 3：<code>run_eval</code></h2>
+<p>最上层驱动整个循环：</p>
+<pre><code class="language-python">def run_eval(dataset):
+    &quot;&quot;&quot;Loads the dataset and calls run_test_case with each case&quot;&quot;&quot;
+    results = []
+
+    for test_case in dataset:
+        result = run_test_case(test_case)
+        results.append(result)
+
+    return results
+</code></pre>
+<p>刻意写得很琐碎。就是循环、调用 <code>run_test_case</code>、收集结果。后面章节会把它升级成并行执行，但这个同步版已经足以示范模式。</p>
+<hr />
+<h2>驱动整条 Pipeline</h2>
+<p>加载并跑完整 eval 只需要五行 script：</p>
+<pre><code class="language-python">with open(&quot;dataset.json&quot;, &quot;r&quot;) as f:
+    dataset = json.load(f)
+
+results = run_eval(dataset)
+</code></pre>
+<p>Lesson 19 保存下来的数据集被 <code>json.load</code> 读进来，交给 <code>run_eval</code>，返回一串 result dict。</p>
+<p><strong>时间备注：</strong> 课程提醒即使用 Haiku，第一次跑完整数据集大约要 30 秒。生产规模（几百到几千条）下这会成为第一个瓶颈，这就是为什么要引入并行化。</p>
+<hr />
+<h2>结果结构</h2>
+<p>每个 result dict 有三个 key：</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>内容</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>output</code></td>
+<td>Claude 的完整文本响应</td>
+<td>你要评分的对象</td>
+</tr>
+<tr>
+<td><code>test_case</code></td>
+<td>原始测试案例（<code>task</code> dict）</td>
+<td>Grader 和报表的上下文</td>
+</tr>
+<tr>
+<td><code>score</code></td>
+<td>数值分数（当前硬编码 10）</td>
+<td>质量指标</td>
+</tr>
+</tbody>
+</table>
+<p>检查结果：</p>
+<pre><code class="language-python">print(json.dumps(results, indent=2))
+</code></pre>
+<p>课程说输出"相当冗长"，因为 prompt 没有格式指令 — 这就是整章后半要改进的 baseline 条件。</p>
+<hr />
+<h2>你搭了什么 vs. 还缺什么</h2>
+<p>课程讲得很明白：<em>"你刚刚搭好的几乎就是 eval pipeline 实际会做的大部分事情。"</em> 骨架可以跑 — 数据集进、结果出。剩下的是三层深化：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>当前状态</th>
+<th>后续课程</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grading</td>
+<td>硬编码 10</td>
+<td>Lesson 21（model-based）与 22（code-based）</td>
+</tr>
+<tr>
+<td>Prompt 质量</td>
+<td>冗长 baseline</td>
+<td>依 eval 分数迭代</td>
+</tr>
+<tr>
+<td>性能</td>
+<td>串行、~30 秒</td>
+<td>并行 batching</td>
+</tr>
+</tbody>
+</table>
+<p>关键 insight 是：<em>pipeline</em> 本身很简单 — 复杂度在每一阶段的细节里，不在阶段间的连接方式。</p>
+<hr />
+<h2>为什么这个最小 pipeline 是正确起点</h2>
+<p>"Walking skeleton"有三个完整版 runner 没有的特性：</p>
+<ol>
+<li><strong>端到端证明</strong> — 你可以在任何 grader 实现前就演示整个循环能跑，早期抓到集成 bug。</li>
+<li><strong>隔离升级</strong> — 你可以把硬编码 grader 换成真的，而不碰到 <code>run_prompt</code> 或 <code>run_eval</code>。</li>
+<li><strong>稳定合约</strong> — 下游工具（dashboards、regression CI、报表）从第一天起就能依赖结果结构。</li>
+</ol>
+<p>这正是生产 AI 系统想要的模式：先上最简 pipeline，随着产品成熟再一个一个函数替换成精细版。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>跳过 walking skeleton</strong> — 想一次搭完 grader、并行、dashboard，会陷入 debugging 地狱。</li>
+<li><strong>把 grading 混进 <code>run_prompt</code></strong> — 职责分离才让你能独立升级 grader。</li>
+<li><strong>没把 <code>results</code> 存盘</strong> — 生产里你会想把结果存盘，方便跨跑比对 diff。</li>
+<li><strong>生产规模下还用同步循环</strong> — 3 条没问题，3,000 条致命；早点规划 <code>asyncio</code> 或线程池。</li>
+<li><strong>忘了修掉 grader placeholder</strong> — 把 <code>score = 10</code> 上 CI 会让 eval 失去意义；这只是教学用。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>三函数架构的力量不在于复杂，而在于职责分离。<code>run_prompt</code> 管 Claude 调用、<code>run_test_case</code> 管评分、<code>run_eval</code> 管迭代。每个函数都能独立替换，这正是从 notebook demo 迈向生产 eval pipeline 所需要的特性。CCA 考试会考结构化结果形状（<code>output</code> / <code>test_case</code> / <code>score</code>）这个 D3 task 3.3 的细节。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D3（Evaluation &amp; Iteration）</strong>：知道三函数分解和固定的结果形状；理解硬编码 grader 是跳板不是终点。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：这个 pipeline 就是每一个生产 prompt eval 的运作基底；要认识到 walking-skeleton 模式可以通过逐一替换函数扩展到真实系统。</li>
+<li>考题触发词：任何问"你实际怎么对数据集跑 eval"都指向 <code>run_eval → run_test_case → run_prompt</code> 的分层。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Eval runner 的三个函数从外到内是什么？</td>
+<td><code>run_eval</code>（遍历数据集）→ <code>run_test_case</code>（串 prompt 和 grader）→ <code>run_prompt</code>（调用 Claude）。</td>
+</tr>
+<tr>
+<td><code>run_prompt</code> 做什么？</td>
+<td>把 prompt 模板跟测试案例的 <code>task</code> 输入合并，用 <code>chat()</code> 送进 Claude，返回输出文本。</td>
+</tr>
+<tr>
+<td><code>run_test_case</code> 返回什么？</td>
+<td>一个三键 dict：<code>output</code>（Claude 响应）、<code>test_case</code>（原始输入）、<code>score</code>（数值分数，当前硬编码 10）。</td>
+</tr>
+<tr>
+<td>为什么这课的 grading score 硬编码 10？</td>
+<td>为了在真正的 grader（lesson 21-22）实现前让 walking-skeleton pipeline 能跑。</td>
+</tr>
+<tr>
+<td>执行时如何加载数据集？</td>
+<td><code>with open("dataset.json", "r") as f: dataset = json.load(f)</code> — 就是 Lesson 19 生成的文件。</td>
+</tr>
+<tr>
+<td>用 Haiku 第一次跑 eval 大概多久？</td>
+<td>课程说完整（小）数据集大约 30 秒。</td>
+</tr>
+<tr>
+<td>为什么 baseline prompt 产出冗长响应？</td>
+<td>因为没有格式指令 — 这是刻意的，让后续 prompt 迭代能展示可度量的改进。</td>
+</tr>
+<tr>
+<td>本课示范的"walking skeleton"模式是什么？</td>
+<td>先用 placeholder 把整条 pipeline 搭起来，再把每个函数换成生产版，但合约不变。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Prompt Caching — Reuse Preprocessing Work</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Without cache: re-tokenize &amp; re-embed every request. With cache: skip cached prefix, pay fraction of input cost.</text>
+
+  <!-- Column 1: Without cache -->
+  <rect x="40" y="90" width="440" height="470" rx="12" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="90" width="440" height="48" rx="12" fill="#EF4444"/>
+  <rect x="40" y="126" width="440" height="12" fill="#EF4444"/>
+  <text x="260" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">Without Cache</text>
+
+  <rect x="75" y="152" width="370" height="26" rx="13" fill="#FEE2E2"/>
+  <text x="260" y="170" text-anchor="middle" font-size="11" font-weight="600" fill="#991B1B">Full prompt re-processed on every request</text>
+
+  <!-- Request 1 -->
+  <text x="60" y="200" font-size="11" fill="#6B7280" font-weight="600">Request 1 →</text>
+  <rect x="60" y="210" width="400" height="54" rx="6" fill="white" stroke="#FCA5A5" stroke-width="1.5"/>
+  <rect x="70" y="220" width="100" height="16" rx="3" fill="#DBEAFE"/>
+  <text x="120" y="232" text-anchor="middle" font-size="9" fill="#1E40AF">tools</text>
+  <rect x="176" y="220" width="130" height="16" rx="3" fill="#DBEAFE"/>
+  <text x="241" y="232" text-anchor="middle" font-size="9" fill="#1E40AF">system prompt</text>
+  <rect x="312" y="220" width="138" height="16" rx="3" fill="#DBEAFE"/>
+  <text x="381" y="232" text-anchor="middle" font-size="9" fill="#1E40AF">long document</text>
+  <text x="70" y="254" font-size="10" fill="#991B1B" font-weight="600">Tokenize → Embed → Contextualize (full cost)</text>
+
+  <!-- Request 2 -->
+  <text x="60" y="284" font-size="11" fill="#6B7280" font-weight="600">Request 2 →</text>
+  <rect x="60" y="294" width="400" height="54" rx="6" fill="white" stroke="#FCA5A5" stroke-width="1.5"/>
+  <rect x="70" y="304" width="100" height="16" rx="3" fill="#DBEAFE"/>
+  <text x="120" y="316" text-anchor="middle" font-size="9" fill="#1E40AF">tools</text>
+  <rect x="176" y="304" width="130" height="16" rx="3" fill="#DBEAFE"/>
+  <text x="241" y="316" text-anchor="middle" font-size="9" fill="#1E40AF">system prompt</text>
+  <rect x="312" y="304" width="138" height="16" rx="3" fill="#DBEAFE"/>
+  <text x="381" y="316" text-anchor="middle" font-size="9" fill="#1E40AF">long document</text>
+  <text x="70" y="338" font-size="10" fill="#991B1B" font-weight="600">Same work repeated — all tokens billed again</text>
+
+  <!-- Billing -->
+  <rect x="60" y="368" width="400" height="120" rx="8" fill="white" stroke="#FCA5A5"/>
+  <text x="76" y="390" font-size="11" font-weight="700" fill="#991B1B">Token Billing (per request)</text>
+  <rect x="76" y="402" width="180" height="26" rx="4" fill="#FEE2E2"/>
+  <text x="166" y="419" text-anchor="middle" font-size="10" fill="#991B1B" font-weight="600">input_tokens: 10,000</text>
+  <rect x="264" y="402" width="180" height="26" rx="4" fill="#F3F4F6"/>
+  <text x="354" y="419" text-anchor="middle" font-size="10" fill="#374151">cache_read: 0</text>
+  <text x="76" y="450" font-size="10" fill="#1E293B">• Full input cost on request 1</text>
+  <text x="76" y="466" font-size="10" fill="#1E293B">• Full input cost on request 2</text>
+  <text x="76" y="482" font-size="10" fill="#1E293B">• Higher latency (re-embedding every time)</text>
+
+  <rect x="76" y="502" width="370" height="40" rx="4" fill="#0F172A"/>
+  <text x="261" y="520" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#FCA5A5">messages=[{"role":"user","content":"..."}]</text>
+  <text x="261" y="534" text-anchor="middle" font-size="9" font-family="Menlo, monospace" fill="#94A3B8">no cache_control</text>
+
+  <!-- Column 2: With cache -->
+  <rect x="520" y="90" width="440" height="470" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="520" y="90" width="440" height="48" rx="12" fill="#22C55E"/>
+  <rect x="520" y="126" width="440" height="12" fill="#22C55E"/>
+  <text x="740" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">With Cache (cache_control)</text>
+
+  <rect x="555" y="152" width="370" height="26" rx="13" fill="#DCFCE7"/>
+  <text x="740" y="170" text-anchor="middle" font-size="11" font-weight="600" fill="#14532D">Cache breakpoint → reuse preprocessing work</text>
+
+  <!-- Request 1 (cache write) -->
+  <text x="540" y="200" font-size="11" fill="#6B7280" font-weight="600">Request 1 (cache write) →</text>
+  <rect x="540" y="210" width="400" height="54" rx="6" fill="white" stroke="#86EFAC" stroke-width="1.5"/>
+  <rect x="550" y="220" width="100" height="16" rx="3" fill="#DBEAFE"/>
+  <text x="600" y="232" text-anchor="middle" font-size="9" fill="#1E40AF">tools</text>
+  <rect x="656" y="220" width="130" height="16" rx="3" fill="#DBEAFE"/>
+  <text x="721" y="232" text-anchor="middle" font-size="9" fill="#1E40AF">system prompt</text>
+  <rect x="792" y="220" width="138" height="16" rx="3" fill="#DBEAFE"/>
+  <text x="861" y="232" text-anchor="middle" font-size="9" fill="#1E40AF">long document</text>
+  <line x1="932" y1="214" x2="932" y2="242" stroke="#F59E0B" stroke-width="2" stroke-dasharray="3,2"/>
+  <text x="932" y="256" text-anchor="middle" font-size="9" fill="#B45309" font-weight="700">⚑ bp</text>
+  <text x="550" y="254" font-size="10" fill="#14532D" font-weight="600">Tokenize + store processed prefix in cache</text>
+
+  <!-- Request 2 (cache read) -->
+  <text x="540" y="284" font-size="11" fill="#6B7280" font-weight="600">Request 2 (cache read) →</text>
+  <rect x="540" y="294" width="400" height="54" rx="6" fill="white" stroke="#86EFAC" stroke-width="1.5"/>
+  <rect x="550" y="304" width="380" height="16" rx="3" fill="#DCFCE7" stroke="#22C55E" stroke-dasharray="4,2"/>
+  <text x="740" y="316" text-anchor="middle" font-size="9" fill="#14532D" font-weight="700">CACHED PREFIX (read at ~10% cost)</text>
+  <text x="550" y="338" font-size="10" fill="#14532D" font-weight="600">Skip re-processing → only new messages billed fully</text>
+
+  <!-- Billing -->
+  <rect x="540" y="368" width="400" height="120" rx="8" fill="white" stroke="#86EFAC"/>
+  <text x="556" y="390" font-size="11" font-weight="700" fill="#166534">Token Billing Breakdown</text>
+  <rect x="556" y="402" width="180" height="26" rx="4" fill="#FEF3C7"/>
+  <text x="646" y="419" text-anchor="middle" font-size="10" fill="#92400E" font-weight="600">cache_creation: 10,000</text>
+  <rect x="744" y="402" width="180" height="26" rx="4" fill="#DCFCE7"/>
+  <text x="834" y="419" text-anchor="middle" font-size="10" fill="#14532D" font-weight="600">cache_read: 10,000</text>
+  <text x="556" y="450" font-size="10" fill="#1E293B">• Request 1: pay 1.25× for write (one-time)</text>
+  <text x="556" y="466" font-size="10" fill="#1E293B">• Request 2+: pay ~0.1× for reads</text>
+  <text x="556" y="482" font-size="10" fill="#1E293B">• Lower latency — skip tokenize + embed</text>
+
+  <rect x="556" y="502" width="370" height="40" rx="4" fill="#0F172A"/>
+  <text x="741" y="520" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#34D399">{"type":"text","text":"...",</text>
+  <text x="741" y="534" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#34D399">"cache_control":{"type":"ephemeral"}}</text>
+
+  <!-- Bottom note -->
+  <text x="500" y="582" text-anchor="middle" font-size="11" fill="#6B7280">Cache lives ~5 min (default) or 1 hr. Best for repeated queries over the same large document / system prompt / tools.</text>
+</svg>

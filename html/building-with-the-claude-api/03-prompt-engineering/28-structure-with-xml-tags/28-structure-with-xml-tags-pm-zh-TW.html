@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Structure With Xml Tags Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>使用 XML 標籤建立結構 — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D3 — Evaluation &amp; Iteration（20%）主；D2 — Tool Design（18%）次</td>
+</tr>
+<tr>
+<td>任務陳述</td>
+<td>3.1（提升可靠性的 prompt 設計）、2.2（結構化內容區塊）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 28</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>XML 標籤是「把使用者資料安全塞進 prompt」的產品級做法——它讓 AI 繼續聽你的指令，而不是把使用者輸入誤解成新的命令。</p>
+<hr />
+<h2>PM 為什麼要關心 XML 標籤</h2>
+<p>每一個把使用者資料內插進 prompt 的 AI 功能都共享同一種失敗模式：使用者內容會和你的指令糊在一起，Claude 做出錯誤行為。XML 標籤是最省力、最高 leverage 的修法。</p>
+<table>
+<thead>
+<tr>
+<th>使用者內容類型</th>
+<th>沒有標籤</th>
+<th>有標籤</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>長文件</td>
+<td>Claude 把文件當成指令的一部分</td>
+<td>文件被關在 <code>&lt;document&gt;</code> 內作為資料分析</td>
+</tr>
+<tr>
+<td>程式碼片段</td>
+<td>Claude 把程式碼語法當成自然語言指令</td>
+<td>程式碼關在 <code>&lt;my_code&gt;</code> 內作為資料 debug</td>
+</tr>
+<tr>
+<td>多欄位的表單</td>
+<td>欄位值混進散文</td>
+<td>所有欄位被放進一個 <code>&lt;athlete_information&gt;</code> 容器</td>
+</tr>
+<tr>
+<td>混合輸入（code + docs）</td>
+<td>Claude 無法區分</td>
+<td>每種類型各自有標籤</td>
+</tr>
+</tbody>
+</table>
+<p>這跟產品表單要加 label 是同一個道理：告訴使用者（或 AI）每一格欄位是做什麼用的。</p>
+<hr />
+<h2>心智模型：貼了標籤的檔案櫃抽屜</h2>
+<p>想像你把 20 頁銷售紀錄、5 頁公司政策和一個問題堆在同事桌上，一起遞過去。你大概會得到一句：「這是什麼？」</p>
+<p>現在把同樣的材料放進一個有三個貼了標籤的抽屜的檔案櫃：<strong>銷售紀錄</strong>、<strong>公司政策</strong>、<strong>問題</strong>。你的同事會打開「問題」抽屜、讀完、然後只拉出他需要的那幾個抽屜。</p>
+<p>XML 標籤就是抽屜上的標籤。<code>&lt;sales_records&gt;...&lt;/sales_records&gt;</code> 在 prompt 裡就是一格抽屜。AI 知道要拉哪一格、哪一格可以先放著。</p>
+<hr />
+<h2>產品使用情境</h2>
+<h3>XML 標籤最有用的場景</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>為什麼標籤很重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文件摘要器</td>
+<td>原始文件可能 20 頁長——指令不能被淹沒在裡面</td>
+</tr>
+<tr>
+<td>程式碼 review 助手</td>
+<td>對人來說程式碼和文件長得不一樣，對 token 流來說很像</td>
+</tr>
+<tr>
+<td>飲食/訓練計畫生成器</td>
+<td>使用者的檔案有很多欄位，需要被當成一組整體考慮</td>
+</tr>
+<tr>
+<td>客服工單分類</td>
+<td>工單內容和 metadata 要和分類指令分開</td>
+</tr>
+<tr>
+<td>多變數模板</td>
+<td>任何內插 2+ 變數的 slash command 或模板</td>
+</tr>
+</tbody>
+</table>
+<h3>什麼時候 XML 是殺雞用牛刀</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>更好的做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一行翻譯或改寫</td>
+<td>純文字 prompt 即可</td>
+</tr>
+<tr>
+<td>自由對話</td>
+<td>使用者訊息就讓它是使用者訊息</td>
+</tr>
+<tr>
+<td>Eval 結果沒標籤也 OK 的 prompt</td>
+<td>不要為了結構而結構</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>四個產品好處</h2>
+<ol>
+<li><strong>可靠性</strong>——同一個模板在各種差異很大的使用者輸入下都表現一致，因為「使用者送進來的內容」和「我們告訴 Claude 要做什麼」的邊界永遠不會跑掉。</li>
+<li><strong>更安全的資料處理</strong>——使用者內容被隔離在一個有標籤的區塊裡，你就有個天然的地方可以 sanitize、截斷或 log。</li>
+<li><strong>降低 prompt injection 攻擊面</strong>——指令在標籤外，內容在標籤內。想注入新指令的攻擊者得先跳出標籤才行。</li>
+<li><strong>可維護性</strong>——讀到模板的工程師一眼就能看出哪個變數放哪裡，就像 UI 上有 label 的表單。</li>
+</ol>
+<hr />
+<h2>PM 決策框架</h2>
+<p>在 PRD 或設計 review 中審視一個 prompt 模板時，問自己：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>如果是「是」</th>
+<th>行動</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>這個模板有內插使用者內容嗎？</td>
+<td>是</td>
+<td>用描述性 XML 標籤包起來</td>
+</tr>
+<tr>
+<td>有兩種以上類型的輸入嗎（code + docs、data + query）？</td>
+<td>是</td>
+<td>每種類型各自有標籤</td>
+</tr>
+<tr>
+<td>內插的內容可能很長嗎（整份文件）？</td>
+<td>是</td>
+<td>標籤是必備——指令不能被淹沒</td>
+</tr>
+<tr>
+<td>指令短、內容長嗎？</td>
+<td>是</td>
+<td>標籤讓指令在「頂層」可見</td>
+</tr>
+<tr>
+<td>功能現在沒加標籤 eval 就過了嗎？</td>
+<td>是</td>
+<td>不要過度工程</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 常見錯誤</h2>
+<ol>
+<li><strong>把 XML 當成純工程議題</strong>——PM 應該在 PRD 裡規範標籤結構。標籤名稱是產品契約的一部分，不是實作細節。</li>
+<li><strong>用太泛的標籤名稱</strong>——<code>&lt;data&gt;</code> 什麼都沒說。<code>&lt;customer_review&gt;</code> 告訴 Claude「這是評論，請用情感推理」。看到模糊的名字要 push back。</li>
+<li><strong>Prompt 改版時忘了加標籤</strong>——當模板新增一個內插欄位（例如 <code>user_history</code>），它也需要自己的標籤。這在模板成長過程中很容易 regress。</li>
+<li><strong>沒有做前後 eval 比較</strong>——XML 是第一道可靠性修法，但仍需要 eval 資料證明它對你的任務有幫助。</li>
+<li><strong>把輸入標籤誤當成輸出格式</strong>——在輸入加標籤不會自動讓 Claude 回 XML。要 XML 輸出得另外下指令。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>XML 標籤是 prompt engineering 裡的「有 label 的表單欄位」。對 PM 而言，它把一個不透明的字串轉成一個有命名 slot 的結構化模板——是你可以推理、review 和演進的東西。CCA 考試的觸發詞是「Claude 把指令和內容搞混」或「prompt 內插大量資料」，答案永遠是「加有描述性名稱的 XML 標籤」。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D3（Evaluation &amp; Iteration）</strong>：當 prompt 因為邊界模糊失敗時，XML 標籤是第一道改善手段。</li>
+<li><strong>D2（Tool Design）</strong>：同樣的「命名通道」原則也適用於 tool 的輸入和結果。</li>
+<li>注意情境描述裡出現「large amount of context」「mixing code and documentation」「interpolating multiple variables」——這些都指向 XML 標籤。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>反面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一句話解釋 XML 標籤對 prompt 的作用？</td>
+<td>在 prompt 裡建立有標示的邊界，讓 Claude 知道哪些 token 是資料、哪些是指令。</td>
+</tr>
+<tr>
+<td>XML 標籤的檔案櫃比喻是什麼？</td>
+<td>標籤是抽屜上的 label——Claude 打開需要的抽屜，而不是在一大堆東西裡翻。</td>
+</tr>
+<tr>
+<td>舉兩個 XML 標籤最有用的產品情境</td>
+<td>文件摘要器（大量 context）和程式碼 review 助手（混合內容類型）。</td>
+</tr>
+<tr>
+<td>什麼叫「好」的 XML 標籤名稱？</td>
+<td>描述性且具體——<code>&lt;sales_records&gt;</code> 或 <code>&lt;athlete_information&gt;</code>，不是 <code>&lt;data&gt;</code>。</td>
+</tr>
+<tr>
+<td>為什麼 XML 標籤可以降低 prompt injection 風險？</td>
+<td>使用者內容被隔離在標籤區塊內，標籤外的指令較難被覆寫。</td>
+</tr>
+<tr>
+<td>XML 標籤會改變輸出格式嗎？</td>
+<td>不會——它只管輸入結構；輸出格式需要另外的指令。</td>
+</tr>
+<tr>
+<td>PM 什麼時候不該堅持加 XML 標籤？</td>
+<td>一行簡單 prompt，或 eval 沒加標籤就過得很好的功能。</td>
+</tr>
+<tr>
+<td>PRD 裡的標籤名稱應該由誰負責？</td>
+<td>PM——標籤名稱是產品契約的一部分，不是實作細節。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

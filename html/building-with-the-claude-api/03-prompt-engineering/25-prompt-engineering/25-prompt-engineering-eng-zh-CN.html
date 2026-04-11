@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Engineering Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Engineering — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D3 — Evaluation &amp; Iteration (20%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（prompt 设计与迭代）、1.1（指令遵循）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 25</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Prompt engineering 是一个可度量、可迭代的循环——写 baseline、用 evaluator 打分、一次只套用一个技巧、再重新打分——不是靠凑字眼的猜谜游戏。</p>
+<hr />
+<h2>迭代改进循环</h2>
+<p>课程把 prompt engineering 定义成一个严谨的 cycle，重复跑到分数过关为止：</p>
+<ol>
+<li><strong>设定目标</strong> — 定义 prompt 要完成什么。</li>
+<li><strong>写初版 prompt</strong> — 故意写一个「简陋 baseline」。</li>
+<li><strong>评估 prompt</strong> — 用数据集和评分标准跑一遍。</li>
+<li><strong>套用一个技巧</strong> — clarity、specificity、examples、XML tags 等。</li>
+<li><strong>重新评估</strong> — 确认改动真的让分数上升。</li>
+</ol>
+<p>第 4、5 步会一直重复。纪律是：<strong>每次迭代只改一件事</strong>，这样才能把分数变化归因到那个技巧，而不是一堆修改的混合结果。</p>
+<p>这跟 ML 模型开发是同一套科学方法循环——prompt 是假设、evaluation dataset 是测试集、score 是目标函数。</p>
+<hr />
+<h2>贯穿示例：运动员餐单生成器</h2>
+<p>课程整堂用同一个具体任务：根据身高、体重、目标、饮食限制，生成一日餐单。用同一个任务跑所有迭代是故意设计的——这样分数才有可比性。</p>
+<hr />
+<h2>Evaluation Harness</h2>
+<p><code>PromptEvaluator</code> 类负责驱动整个循环。创建时要指定并发上限：</p>
+<pre><code class="language-python">evaluator = PromptEvaluator(max_concurrent_tasks=5)
+</code></pre>
+<p>课程明确提醒：先从低数字（约 3）开始避免 rate limit，只有 API quota 允许时才拉高。Concurrency 是与 prompt 质量正交的旋钮——只影响墙钟时间，不影响分数。</p>
+<hr />
+<h2>生成测试数据集</h2>
+<p>不用手写 test case，evaluator 可以根据任务描述和输入规格自动生成：</p>
+<pre><code class="language-python">dataset = evaluator.generate_dataset(
+    task_description=&quot;Write a compact, concise 1 day meal plan for a single athlete&quot;,
+    prompt_inputs_spec={
+        &quot;height&quot;: &quot;Athlete's height in cm&quot;,
+        &quot;weight&quot;: &quot;Athlete's weight in kg&quot;,
+        &quot;goal&quot;: &quot;Goal of the athlete&quot;,
+        &quot;restrictions&quot;: &quot;Dietary restrictions of the athlete&quot;
+    },
+    output_file=&quot;dataset.json&quot;,
+    num_cases=3
+)
+</code></pre>
+<p>关键指引：<strong>迭代阶段 <code>num_cases</code> 保持在 2-3</strong>。你要最优化的是迭代速度，不是统计严谨度。最终验证阶段再拉高数量。</p>
+<hr />
+<h2>Baseline Prompt</h2>
+<p>故意写烂的 baseline 本身就是重点——你需要一个够差的起点才量得出进步：</p>
+<pre><code class="language-python">def run_prompt(prompt_inputs):
+    prompt = f&quot;&quot;&quot;
+What should this person eat?
+
+- Height: {prompt_inputs[&quot;height&quot;]}
+- Weight: {prompt_inputs[&quot;weight&quot;]}
+- Goal: {prompt_inputs[&quot;goal&quot;]}
+- Dietary restrictions: {prompt_inputs[&quot;restrictions&quot;]}
+&quot;&quot;&quot;
+    messages = []
+    add_user_message(messages, prompt)
+    return chat(messages)
+</code></pre>
+<p>「What should this person eat?」是问句不是指令，没给 Claude 任何长度、格式、营养细节、时间的目标。第一轮典型分数大约 <strong>2.3 / 10</strong>，课程明说这完全正常。</p>
+<hr />
+<h2>加入评分标准跑评估</h2>
+<p>除了数据集，还可以注入领域专属的评分 criteria，让 judge model 按你真正在乎的标准打分：</p>
+<pre><code class="language-python">results = evaluator.run_evaluation(
+    run_prompt_function=run_prompt,
+    dataset_file=&quot;dataset.json&quot;,
+    extra_criteria=&quot;&quot;&quot;
+The output should include:
+- Daily caloric total
+- Macronutrient breakdown
+- Meals with exact foods, portions, and timing
+&quot;&quot;&quot;
+)
+</code></pre>
+<p><code>extra_criteria</code> 就是你的 rubric。不给的话，judge 会自己编一个通用的「这个餐单合不合理？」scale。给了以后，分数才会反映业务需求。</p>
+<hr />
+<h2>解读结果</h2>
+<p>Evaluator 会产出两样东西：数字分数和详细 HTML 报告。报告列出每个 case 的 model output，以及 grader 的推理过程——这里才看得到 case 为什么失败，不是只看到它失败了。这份「为什么」就是下一次迭代的原料。</p>
+<hr />
+<h2>为什么一次只改一个技巧</h2>
+<p>如果你一次同时套用 clarity + specificity + examples + XML 结构，分数从 2.3 跳到 6.8，你无法归因。下次遇到新 prompt 时，你不会知道哪个技巧才是对的。单技巧迭代才能累积出「哪种任务要用哪招」的个人 playbook。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>没有 baseline</strong> — 直接写「好 prompt」，结果没有分数可以比对。</li>
+<li><strong>多技巧一次改</strong> — 同时改一堆东西，无法归因哪个技巧有效。</li>
+<li><strong>太早用太多 test case</strong> — 迭代变慢、还没值得大规模验证就烧掉 API 额度。</li>
+<li><strong>忽略 judge 的推理</strong> — 只看数字分数，浪费报告里最有价值的信号。</li>
+<li><strong>没给 <code>extra_criteria</code></strong> — 默认 rubric 跟你的实际需求对不上，分数变噪声。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompt engineering 不是「写一个更好的 prompt」，而是 <strong>instrument 一个循环</strong>：baseline、打分、改一件事、再打分。Evaluator 是显微镜，没有它就是在猜。2.3/10 的第一次尝试完全正常——真正要盯的是每次迭代的 delta，不是起点的绝对数字。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>：认得出 baseline → eval → iterate 这个标准流程。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：prompt 是你操纵 agent 行为的杠杆；同一套迭代逻辑直接套用到 agent 的 system prompt 调校。</li>
+<li>题目可能这样出：「团队有个 prompt 得分 2.3/10，下一步该做什么？」答案永远不是「从头重写」，而是「套一个技巧再评估」。</li>
+<li>要知道 <code>max_concurrent_tasks</code> 是 rate-limit 旋钮，不是质量旋钮。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt engineering 循环的五个步骤？</td>
+<td>1) 设目标、2) 写初版 prompt、3) 评估、4) 套用技巧、5) 重新评估。重复 4-5。</td>
+</tr>
+<tr>
+<td>为什么一次只改一件事？</td>
+<td>才能把分数变化归因到那个技巧，建立可靠的技巧选择模型。</td>
+</tr>
+<tr>
+<td>第一次尝试的典型分数是多少？</td>
+<td>大约 2.3/10——课程说低分很正常，不用气馁。</td>
+</tr>
+<tr>
+<td>迭代时为什么 dataset 只放 2-3 个 case？</td>
+<td>为了迭代速度。最终验证阶段才拉高数量。</td>
+</tr>
+<tr>
+<td><code>max_concurrent_tasks</code> 控制什么？</td>
+<td>Evaluator API 调用的并发数。先从 3 开始避免 rate limit。</td>
+</tr>
+<tr>
+<td><code>extra_criteria</code> 的用途？</td>
+<td>告诉 grading model 要用什么领域专属标准打分，让分数反映实际需求。</td>
+</tr>
+<tr>
+<td>Evaluation 会产出哪两个东西？</td>
+<td>数字分数和详细 HTML 报告（含每个 case 的 output 和 grader 推理）。</td>
+</tr>
+<tr>
+<td>为什么要故意写烂的 baseline？</td>
+<td>因为进步只能以 delta 衡量，没有差的起点就没有衡量基准。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

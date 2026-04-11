@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rules Of Prompt Caching Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Rules of Prompt Caching — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) — primary; D2 — Tool Design (18%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (cost/latency optimization), 5.2 (production performance), 2.1 (tool schema design)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 57</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt caching only works if you play by its rules: you opt in manually with cache breakpoints, the cached content must match byte-for-byte, a minimum of 1024 tokens must precede the breakpoint, and you get at most four breakpoints per request.</p>
+<hr />
+<h2>Cache is Not Automatic — You Add Breakpoints</h2>
+<p>Caching is <strong>not</strong> enabled by default. You must explicitly mark where the cache should be taken by adding a <strong>cache breakpoint</strong> to a block in your request.</p>
+<p>The mechanics:</p>
+<ul>
+<li>Work done on messages is <strong>not cached automatically</strong>.</li>
+<li>You manually add a <code>cache_control</code> field to a specific block.</li>
+<li>Everything <strong>before and including</strong> that breakpoint is cached.</li>
+<li>Follow-up requests can only read from the cache if the content up to and including the breakpoint is <strong>identical</strong>.</li>
+</ul>
+<p>In other words, a breakpoint is a "cut line": everything above it is a cacheable prefix; everything below it is fresh and reprocessed every time.</p>
+<hr />
+<h2>Longhand Block Form is Required</h2>
+<p>The shorthand message form (a plain string) has no place to attach <code>cache_control</code>. You must use the <strong>longhand block form</strong>:</p>
+<pre><code class="language-python"># Shorthand — cannot cache
+messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Here is a long document...&quot;}]
+
+# Longhand — can cache
+messages = [{
+    &quot;role&quot;: &quot;user&quot;,
+    &quot;content&quot;: [
+        {
+            &quot;type&quot;: &quot;text&quot;,
+            &quot;text&quot;: &quot;Here is a long document...&quot;,
+            &quot;cache_control&quot;: {&quot;type&quot;: &quot;ephemeral&quot;},
+        }
+    ],
+}]
+</code></pre>
+<p>The <code>cache_control</code> field is set to <code>{"type": "ephemeral"}</code>. "Ephemeral" is the currently supported cache type and maps to the 1-hour TTL from lesson 56.</p>
+<hr />
+<h2>Byte-Exact Matching</h2>
+<p>The cache is extremely sensitive. The content up to and including the breakpoint must be <strong>identical</strong> in follow-up requests for the cache to be reused.</p>
+<p>Even small changes invalidate the cache:</p>
+<ul>
+<li>Adding the word "please" → cache miss.</li>
+<li>Changing one whitespace character → cache miss.</li>
+<li>Reordering two sentences → cache miss.</li>
+</ul>
+<p>If the prefix changes, Claude has to reprocess everything from the point of divergence, and you pay to re-create the cache entry.</p>
+<p><strong>Design implication:</strong> put stable content first, variable content last. The user's specific question belongs <em>after</em> the breakpoint, not in the cached prefix.</p>
+<hr />
+<h2>Cross-Message Caching</h2>
+<p>Cache breakpoints can span across multiple messages and message types. If you place a breakpoint in a later message, <strong>all previous messages</strong> (user, assistant, etc.) are included in the cached content.</p>
+<p>This is especially useful for conversational agents: you can cache the entire rolling history up to a stable point, then keep appending new turns after it.</p>
+<hr />
+<h2>Cacheable Block Types</h2>
+<p>You are not limited to text blocks. Cache breakpoints can be added to:</p>
+<ul>
+<li>System prompts</li>
+<li>Tool definitions</li>
+<li>Image blocks</li>
+<li>Tool use blocks</li>
+<li>Tool result blocks</li>
+</ul>
+<p>System prompts and tool definitions are the <strong>best</strong> candidates because they rarely change between requests. They are often where you get the biggest win from caching.</p>
+<hr />
+<h2>Cache Ordering: Tools → System → Messages</h2>
+<p>Behind the scenes, Claude processes request components in a fixed order:</p>
+<ol>
+<li><strong>Tools</strong> (if provided)</li>
+<li><strong>System prompt</strong> (if provided)</li>
+<li><strong>Messages</strong></li>
+</ol>
+<p>This order dictates what is cached when. If your first breakpoint lives in the messages section, Claude still treats the tools and system prompt as part of the cached prefix because they come first.</p>
+<p>You can place up to <strong>four cache breakpoints total</strong> in a single request. A common production layout is:</p>
+<ul>
+<li>Breakpoint 1 → end of tools (cache all tool schemas)</li>
+<li>Breakpoint 2 → end of system prompt (cache the system prompt)</li>
+<li>Breakpoint 3 → partway through message history (cache the stable conversation prefix)</li>
+<li>Breakpoint 4 → reserved for finer-grained caching if needed</li>
+</ul>
+<p>Granular breakpoints let different parts of your request cache independently, so when one section changes you only lose the cache for that section — not for everything.</p>
+<hr />
+<h2>Minimum Content Length: 1024 Tokens</h2>
+<p>There is a floor: <strong>content must be at least 1024 tokens</strong> (cumulative across everything before and including the breakpoint) to be cached.</p>
+<ul>
+<li>A short "Hi there!" message will not cross the threshold.</li>
+<li>You need genuinely large content — a long system prompt, a full document, or a verbose tool schema — to trigger caching.</li>
+<li>The 1024-token total is the <strong>sum</strong> of all the blocks being cached, not any single block.</li>
+</ul>
+<p>If you are below the threshold, the cache_control field is a no-op: no cache is created, and no savings are realized.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Using the shorthand string form</strong> — with no place to attach <code>cache_control</code>, nothing gets cached. Convert to the longhand block form first.</li>
+<li><strong>Placing variable content before the breakpoint</strong> — the user's fresh question should never live inside the cached prefix; it guarantees a miss on every call.</li>
+<li><strong>Under-threshold caching</strong> — trying to cache prompts smaller than 1024 tokens and expecting savings. It silently does nothing.</li>
+<li><strong>Exceeding four breakpoints</strong> — the request will be rejected. Plan the layout around the four-breakpoint budget.</li>
+<li><strong>Not knowing the processing order</strong> — placing a breakpoint on messages but mentally assuming the tools section is <em>not</em> cached. It is — tools and system prompt come before messages in the processing order and are always part of a message-level prefix.</li>
+<li><strong>Relying on fuzzy matching</strong> — caching is byte-exact. Normalize whitespace, punctuation, and ordering before you consider a prefix stable.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The four rules that define cache success: (1) opt in explicitly with a breakpoint, (2) match byte-for-byte, (3) hit the 1024-token floor, (4) respect the tools → system → messages ordering and the 4-breakpoint cap. Miss any one and the cache silently does nothing — or worse, you pay cache-write fees on content that never gets reused.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong> — expect questions that test whether you know caching is manual, byte-exact, and floored at 1024 tokens.</li>
+<li><strong>D2 (Tool Design)</strong> — tool definitions are a prime caching target because they are stable across requests; exam questions may ask where to put a breakpoint in a tool-heavy workflow.</li>
+<li>Remember the processing order: tools, then system prompt, then messages. This order maps directly to "what should I cache first?"</li>
+<li>Four breakpoints total, <code>{"type": "ephemeral"}</code>, 1024-token floor — these are frequently tested numbers.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is prompt caching automatic?</td>
+<td>No — you must manually add a <code>cache_control</code> field to a block in your request (a cache breakpoint).</td>
+</tr>
+<tr>
+<td>What value goes in <code>cache_control</code>?</td>
+<td><code>{"type": "ephemeral"}</code> — this is the currently supported cache type and maps to the 1-hour TTL.</td>
+</tr>
+<tr>
+<td>Which message form supports cache breakpoints?</td>
+<td>The longhand block form (<code>content</code> is a list of blocks). The shorthand string form cannot carry <code>cache_control</code>.</td>
+</tr>
+<tr>
+<td>How much content does Claude cache when you place a breakpoint?</td>
+<td>Everything before and including the breakpoint.</td>
+</tr>
+<tr>
+<td>Does the cached content need to match exactly on follow-up calls?</td>
+<td>Yes — byte-exact. Even adding "please" invalidates the cache.</td>
+</tr>
+<tr>
+<td>What is the minimum token count for a cacheable prefix?</td>
+<td>1024 tokens (the sum of all blocks before and including the breakpoint).</td>
+</tr>
+<tr>
+<td>How many cache breakpoints can you place in a single request?</td>
+<td>Up to four.</td>
+</tr>
+<tr>
+<td>In what order does Claude process request components for caching purposes?</td>
+<td>Tools first, then system prompt, then messages.</td>
+</tr>
+<tr>
+<td>What are the best candidates for caching and why?</td>
+<td>System prompts and tool definitions — they rarely change between requests and often account for the largest stable input.</td>
+</tr>
+<tr>
+<td>Can a breakpoint in a later message cache earlier messages too?</td>
+<td>Yes — cross-message caching includes all previous messages (user, assistant, etc.) up to the breakpoint.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

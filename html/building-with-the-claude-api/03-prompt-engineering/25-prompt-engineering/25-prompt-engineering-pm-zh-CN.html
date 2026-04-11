@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Engineering Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Engineering — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D3 — Evaluation &amp; Iteration (20%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（prompt 设计与迭代）、1.1（指令遵循）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 25</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Prompt engineering 是有计分板的产品迭代——建 baseline、打分、改一件事、再打分——让每次发版都靠数据，不是靠感觉。</p>
+<hr />
+<h2>PM 为什么该在乎</h2>
+<p>大多数 AI 功能上线后就把 prompt 丢着不再度量。这等同于你上线一个 landing page 却从来不看转化率。这堂课把 prompt 视为<strong>一个值得自己的 CI、自己的 regression test、自己的 KPI 的产品工件</strong>——evaluator 字面上就是一个 10 分制的分数。</p>
+<p>没有 eval loop 会发生：</p>
+<ul>
+<li><strong>漂移</strong>——模型升级悄悄让输出质量退步。</li>
+<li><strong>各说各话</strong>——RD 说「有用」，客服说「用户在抱怨」，没人指得出一个数字。</li>
+<li><strong>不敢动</strong>——没人敢碰 prompt，因为没人能证明改动是安全的。</li>
+</ul>
+<p>有了 eval loop，prompt 改动就跟其他产品改动一样：看得到 delta、胜的就上、退步就 roll back。</p>
+<hr />
+<h2>心智模型：健身追踪器</h2>
+<p>把 prompt engineering 当成用健身追踪器训练：</p>
+<table>
+<thead>
+<tr>
+<th>活动</th>
+<th>没追踪器</th>
+<th>有追踪器</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>开始新计划</td>
+<td>「感觉有变强」</td>
+<td>Baseline 卧推 = 60 kg</td>
+</tr>
+<tr>
+<td>试新技巧</td>
+<td>「比较累应该有用」</td>
+<td>技巧 A → 62 kg (+2)</td>
+</tr>
+<tr>
+<td>再试另一招</td>
+<td>「刚刚哪一招比较好？」</td>
+<td>技巧 B → 70 kg (+10)，采用</td>
+</tr>
+</tbody>
+</table>
+<p>Evaluator 就是追踪器，prompt 是训练计划，各种技巧是不同运动。你只有在每次单独量体重后才知道哪个动作真的有效。</p>
+<hr />
+<h2>五步骤循环（翻译成 PM 语言）</h2>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>做什么</th>
+<th>PM 翻译</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>设目标</td>
+<td>「好」长什么样？定 acceptance criteria。</td>
+</tr>
+<tr>
+<td>2</td>
+<td>写初版 prompt</td>
+<td>就算知道很烂也先出 v0。</td>
+</tr>
+<tr>
+<td>3</td>
+<td>评估</td>
+<td>跑测试、拿一个分数。</td>
+</tr>
+<tr>
+<td>4</td>
+<td>套用一个技巧</td>
+<td>只改一件事。一件。</td>
+</tr>
+<tr>
+<td>5</td>
+<td>重新评估</td>
+<td>分数上去？留下。下去？回滚。</td>
+</tr>
+</tbody>
+</table>
+<p>这就是 Lean Startup 的 build-measure-learn 套用在 prompt 粒度上。</p>
+<hr />
+<h2>产品应用场景</h2>
+<h3>什么时候值得建 eval loop</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>质量主观的用户功能（摘要、推荐）</td>
+<td>人对「质量」看法不同，你需要共同计分板</td>
+</tr>
+<tr>
+<td>受监管或高风险领域（医疗、金融、法务）</td>
+<td>必须能证明 prompt 行为一致</td>
+</tr>
+<tr>
+<td>会被多位工程师在几个月内修改的 prompt</td>
+<td>Regression safety，改动得可证明无害</td>
+</tr>
+<tr>
+<td>喂给下游 pipeline 的 prompt（prompt → tool call → DB 写入）</td>
+<td>上游质量退步在没有分数时很难察觉</td>
+</tr>
+</tbody>
+</table>
+<h3>什么时候是 overkill</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>更好的做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一次性内部脚本</td>
+<td>手动 spot-check 就好</td>
+</tr>
+<tr>
+<td>PMF 前的丢弃型 prototype</td>
+<td>优先迭代速度，不是 prompt 质量</td>
+</tr>
+<tr>
+<td>只上给五个内部用户的 prompt</td>
+<td>用户本身就是 eval</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>计分板思维</h2>
+<p>课程给了具体数字：baseline 2.3/10 很正常。PM 该内化几个锚点：</p>
+<table>
+<thead>
+<tr>
+<th>分数 (/10)</th>
+<th>代表什么</th>
+<th>可以发吗</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2-3</td>
+<td>初版 baseline</td>
+<td>绝对不行</td>
+</tr>
+<tr>
+<td>5-6</td>
+<td>套了 clarity + specificity</td>
+<td>内部试吃</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>加了 examples + 结构</td>
+<td>Beta</td>
+</tr>
+<tr>
+<td>9+</td>
+<td>Edge case 都硬化了</td>
+<td>正式上</td>
+</tr>
+</tbody>
+</table>
+<p>这是有立场的——课程示范 2.3 → 3.92 → 7.86 连跳两个技巧。PM 的重点是：<strong>把分数门槛绑到每个发版 gate</strong>，不是模糊的「看起来 OK」。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<p>准备发 AI 功能时问：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>如果是，你需要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>这个 prompt 上线后会被改超过一次吗？</td>
+<td>Eval loop + regression tracking</td>
+</tr>
+<tr>
+<td>不同利害关系人对质量有分歧吗？</td>
+<td>用 <code>extra_criteria</code> 把 rubric 写死</td>
+</tr>
+<tr>
+<td>质量是主观的（tone、格式、完整度）吗？</td>
+<td>Model-graded evaluator，不是只跑 unit test</td>
+</tr>
+<tr>
+<td>未来模型升级会影响这个功能吗？</td>
+<td>固定 baseline 分数，让升级自己证明</td>
+</tr>
+<tr>
+<td>我们在乎 p95 质量还是只在乎平均值？</td>
+<td>最终验证跑大一点的数据集</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>「在我的示例上有用」</strong> — 一个 happy path 不是 eval，那是 demo。</li>
+<li><strong>跳过 baseline</strong> — 上线时就用一个「好」prompt，结果你永远无法证明下一版更好。</li>
+<li><strong>改动 rubric</strong> — 在迭代中途改 <code>extra_criteria</code>，前后分数失去可比性。Rubric 冻结、迭代 prompt。</li>
+<li><strong>太早投资</strong> — 还没发 baseline 就去盖 500 case 的 eval harness 是烧 runway。先从 2-3 case 开始。</li>
+<li><strong>只看分数不看报告</strong> — PM 只盯数字就错过 grader 的推理，那才是产品洞察的来源。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompt engineering 把一个主观的产品工件变成可度量的。对 PM 来说这就是「靠感觉发版」和「靠数据发版」的差距。一旦有分数，你就能拥有它、保卫它、回滚退步、推动改进——这会把 AI 功能从魔法变成工程。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>：要认得出 eval-driven loop 是「怎么改善一个 prompt？」的标准答案。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：同一套 loop 也用来调 agent system prompt。题目可能把 agent 行为错误包装成 prompt 调校问题。</li>
+<li>题目会问：「团队 prompt 得 2.3/10，下一步？」答案永远是「套一个技巧再评估」，不是「重写」。</li>
+<li>要知道迭代早期用小数据集（2-3 case）是故意设计，不是缺陷。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>这堂课 prompt engineering 的核心概念？</td>
+<td>可迭代的 loop：baseline → 评估 → 套技巧 → 重新评估。可度量，不是靠感觉。</td>
+</tr>
+<tr>
+<td>PM 为什么要帮每次 prompt 发版绑分数？</td>
+<td>没分数就不知道改动是进步还是退步，分数把 prompt 变成可管理的产品工件。</td>
+</tr>
+<tr>
+<td>典型 baseline 分数是多少？PM 该怎么反应？</td>
+<td>约 2.3/10，把它当起点不是警报。</td>
+</tr>
+<tr>
+<td>为什么每次迭代只套一个技巧？</td>
+<td>才能归因分数变化，建立可靠的未来 playbook。</td>
+</tr>
+<tr>
+<td><code>extra_criteria</code> 翻译成 PM 语言？</td>
+<td>Rubric，grader 要评分的必备项清单，是把业务需求编码进 eval 的方式。</td>
+</tr>
+<tr>
+<td>「健身追踪器」类比是什么？</td>
+<td>Evaluator 是体重计/追踪器，prompt 是训练计划，每个技巧是一个动作，每次单独量。</td>
+</tr>
+<tr>
+<td>什么时候建 eval loop 是 overkill？</td>
+<td>一次性脚本、PMF 前 prototype、只上给少数内部用户的 prompt。</td>
+</tr>
+<tr>
+<td>这堂课支持什么样的发版 gate 模式？</td>
+<td>把每个发版阶段（内部、beta、GA）绑到最低分数门槛。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

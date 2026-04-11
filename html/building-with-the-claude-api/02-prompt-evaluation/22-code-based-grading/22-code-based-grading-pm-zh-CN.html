@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Based Grading Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>代码评分 Code-Based Grading — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D3 — Evaluation（20%）主要；D5 — Enterprise Deployment（20%）次要</td>
+</tr>
+<tr>
+<td>任务声明</td>
+<td>3.4（deterministic 评分）、3.3（test runner 集成）、5.4（综合 eval 指标）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 22</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话重点</h2>
+<p>Code-based grading 是你 AI 质量指标中便宜、deterministic 的底层 —— 用微秒时间自动挡下坏掉的输出，让团队不会再上线那些 demo 就能抓到的退化。</p>
+<hr />
+<h2>为什么 PM 要在意</h2>
+<p>想象一下：你上线了一个 code-generation feature，结果从用户推文才发现有一半输出 syntax 错。这种事不该发生。Code-based grading 让这类退化<strong>无法上线</strong> —— 每个 test case 在 prompt 改动正式发布前就自动被 parse 过。</p>
+<p>Code grader 能抓、model grader 无法可靠抓的三件事：</p>
+<ul>
+<li>"这到底能不能 parse 成 JSON / Python / Regex？"</li>
+<li>"当我要求纯 code 时，model 有没有偷塞 commentary？"</li>
+<li>"这周我们是不是不小心在 format 纪律上退化了？"</li>
+</ul>
+<p>这些退化人类 demo 可能 miss，但跑在每个 prompt PR 上的 CI pipeline 绝对会抓到。</p>
+<hr />
+<h2>心智模型：上编辑之前先拼写检查</h2>
+<p>把 code grader 和 model grader 想成两阶段编辑 pipeline：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>角色</th>
+<th>成本</th>
+<th>抓什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>拼写检查</strong>（code grader）</td>
+<td>自动挡下 syntax 坏掉的输出</td>
+<td>微秒、免费</td>
+<td>JSON parse 错误、Python syntax 错误、regex 错误</td>
+</tr>
+<tr>
+<td><strong>编辑</strong>（model grader）</td>
+<td>判断清晰度、有用度、指令遵循</td>
+<td>每个 case 一次 API</td>
+<td>主观质量问题</td>
+</tr>
+</tbody>
+</table>
+<p>每一篇文字在交给真人编辑前都会先过拼写检查。AI 输出也一样 —— 便宜的 deterministic 检查先跑，过关的才进昂贵的判断环节。</p>
+<hr />
+<h2>产品使用场景</h2>
+<h3>何时用 Code Graders</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>为什么 code grader 适合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>要上线 JSON API、AI 必须返回合法 JSON</td>
+<td>Parseable 是不可协商的，而且检查免费</td>
+</tr>
+<tr>
+<td>Code-generation 功能（SQL、Python、regex）</td>
+<td>无效 syntax 会立刻让产品坏掉</td>
+</tr>
+<tr>
+<td>"只要 raw output、不要 commentary"的指令</td>
+<td>用严格 parser 很好验</td>
+</tr>
+<tr>
+<td>长度或格式限制</td>
+<td>是布尔检查，不是判断题</td>
+</tr>
+<tr>
+<td>每个 prompt PR 上 CI/CD eval gate</td>
+<td>微秒延迟让它可以到处跑</td>
+</tr>
+</tbody>
+</table>
+<h3>何时<strong>不要</strong>用 Code Graders</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>更好的替代</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"这个响应有没有帮上忙？"</td>
+<td>用 model grader —— 这是主观题</td>
+</tr>
+<tr>
+<td>"输出符不符合品牌语气？"</td>
+<td>用 model grader</td>
+</tr>
+<tr>
+<td>"答案对不对？"</td>
+<td>除非你有 ground-truth 字符串可比对，否则用 model grader</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>综合分数才是 feature</h2>
+<p>来源最后一步是把 model grader 和 code grader 分数取平均：</p>
+<pre><code>score = (model_score + syntax_score) / 2
+</code></pre>
+<p>这个综合指标才是 PM 该追踪的。它奖励同时在形式（syntax）和内容（quality）都对的 prompt，并惩罚任一轴作弊的 prompt。</p>
+<p>一个关键 PM 决策：<strong>权重</strong>。预设是 50/50。纯 code-generation 产品可能要把 syntax 拉到 70%。客服语气功能可能要把 quality 拉到 80%，code grader 只当硬底线。这个权重是<strong>产品决策</strong>，不是工程决策 —— 明确写在 PRD 里。</p>
+<hr />
+<h2>PM 决策框架</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>若答 Yes</th>
+<th>行动</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输出有 deterministic 结构（JSON、code、regex）吗？</td>
+<td>Yes</td>
+<td>加 code grader —— 免费又 deterministic</td>
+</tr>
+<tr>
+<td>test case 有 <code>format: "python"</code> 这类格式字段吗？</td>
+<td>Yes</td>
+<td>很好 —— runner 可以自动 route</td>
+</tr>
+<tr>
+<td>Eval pipeline 有 gate 在 CI 吗？</td>
+<td>Yes</td>
+<td>Code graders 是最便宜、最适合每个 PR 跑的 gate</td>
+</tr>
+<tr>
+<td>我们也在乎内容质量吗？</td>
+<td>Yes</td>
+<td>和 model grader 合并取平均分数</td>
+</tr>
+<tr>
+<td>有某个维度比另一个重要很多吗？</td>
+<td>Yes</td>
+<td>在 PRD 里调权重 —— 不要永远预设 50/50</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>因为"model grader 什么都能做"就跳过 code grader</strong> —— 在 deterministic 检查上浪费 token，还引入不该有的 variance。</li>
+<li><strong>CI 没 gate code grader</strong> —— 坏掉的 JSON 退化会上线，没任何东西在 review 前挡它。</li>
+<li><strong>永远预设 50/50 权重</strong> —— 不是每个产品都平等看重 syntax 和质量。要刻意调。</li>
+<li><strong>把 test case format 当成工程独占</strong> —— <code>format</code> 字段是产品决策（我们对用户承诺什么？），该在 PRD 里拥有。</li>
+<li><strong>把分数当目标</strong> —— 来源讲得很清楚：分数本身无所谓好坏。重点是 prompt 迭代能不能把它往对的方向推。</li>
+</ol>
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p>Code graders 存在是因为某些质量属性是二元的：JSON 不是能 parse 就是不能，Python 不是能编译就是不能。花 model grader 去检查这些就像花钱请书籍编辑做拼写检查。便宜的 deterministic 检查放前面，model grader 的 token 只花在真的需要判断的地方。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D3（Evaluation）</strong>：Code graders 是混合 eval pipeline 的 deterministic 那一半。要知道哪些任务属 code grader（format、syntax、长度）vs model grader（质量、helpfulness）。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：Deterministic 评分让 eval 自动化便宜到可以 gate CI。</li>
+<li>注意："你要验证 AI 产的 JSON / Python / Regex"→ 答案永远是 code grader。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code graders 解决了 model graders 无法可靠处理的什么产品问题？</td>
+<td>在上线前抓出坏掉的 deterministic 输出（无效 JSON、不能 parse 的 Python、坏 regex）。</td>
+</tr>
+<tr>
+<td>Code graders 的两大优势？</td>
+<td>Deterministic（同输入同分数）和极便宜（微秒、无 API 成本）。</td>
+</tr>
+<tr>
+<td>Code grader + model grader 的心智模型？</td>
+<td>拼写检查（code grader）先跑，真人编辑（model grader）后跑。</td>
+</tr>
+<tr>
+<td>合并 model 和 code grader 分数的预设方式？</td>
+<td>非加权平均：<code>(model_score + syntax_score) / 2</code>。</td>
+</tr>
+<tr>
+<td>Model 和 code grader 分数的权重该由谁拥有？</td>
+<td>PM —— 这是关于功能"哪一轴更重要"的产品决策。</td>
+</tr>
+<tr>
+<td>test case 必须带哪个字段，runner 才能 route 到正确 validator？</td>
+<td><code>format</code> —— 值像 <code>"python"</code>、<code>"json"</code>、<code>"regex"</code>。</td>
+</tr>
+<tr>
+<td>为什么绝对分数无所谓好坏？</td>
+<td>因为重点是 prompt 迭代能不能移动它 —— 看 delta，不看绝对值。</td>
+</tr>
+<tr>
+<td>什么时候应完全跳过 code grader？</td>
+<td>当输出没有 deterministic 结构可验（例如自由格式的有用响应）。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

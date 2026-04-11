@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Typical Eval Workflow Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>A Typical Eval Workflow — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (eval design), 3.2 (test datasets), 3.3 (eval execution)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 18</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A prompt evaluation workflow is a five-step loop — draft, dataset, run, grade, iterate — that turns subjective prompt engineering into a measurable, reproducible process you can actually put under CI.</p>
+<hr />
+<h2>The Five-Step Workflow</h2>
+<p>The lesson defines the minimal viable eval workflow. Every open-source and paid eval tool on the market is essentially a more sophisticated implementation of these same five steps.</p>
+<pre><code>┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+│ 1. Draft     │ → │ 2. Dataset   │ → │ 3. Run       │ → │ 4. Grade     │ → │ 5. Iterate   │
+│   a prompt   │   │              │   │  through     │   │  outputs     │   │  prompt      │
+│              │   │              │   │  Claude      │   │              │   │              │
+└──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘
+        ▲                                                                             │
+        └─────────────────────────────────────────────────────────────────────────────┘
+                                   loop until score plateaus
+</code></pre>
+<hr />
+<h2>Step 1: Draft a Prompt</h2>
+<p>Start with whatever prompt you would have written anyway. The lesson uses a deliberately minimal baseline:</p>
+<pre><code class="language-python">prompt = f&quot;&quot;&quot;
+Please answer the user's question:
+
+{question}
+&quot;&quot;&quot;
+</code></pre>
+<p>The value of the baseline is not that it is good — it is that it is <em>measurable</em>. A baseline lets you prove that your later iterations are actually improvements.</p>
+<hr />
+<h2>Step 2: Create an Eval Dataset</h2>
+<p>Your dataset is a collection of sample inputs that represent the kinds of questions or requests your prompt will handle in production. Each entry is a slot that will be interpolated into the prompt template.</p>
+<p>The lesson uses three questions:</p>
+<ul>
+<li>"What's 2+2?"</li>
+<li>"How do I make oatmeal?"</li>
+<li>"How far away is the Moon?"</li>
+</ul>
+<p>In production you may have tens, hundreds, or thousands of records. You can either:<br />
+- assemble them by hand (high-fidelity, low-throughput), or<br />
+- use Claude itself to generate them (lower-fidelity, high-throughput — covered in Lesson 19).</p>
+<p>The important property is that the dataset <strong>reflects the real input distribution</strong> your prompt will see, not just the happy path.</p>
+<hr />
+<h2>Step 3: Feed Through Claude</h2>
+<p>For each dataset entry, interpolate it into the template and send the fully-formed prompt to Claude. Example for the first question:</p>
+<pre><code>Please answer the user's question:
+What's 2+2?
+</code></pre>
+<p>Claude produces a response — something like "2 + 2 = 4" for the math question, cooking instructions for oatmeal, and a distance figure for the Moon. This is the raw output that the grader will score.</p>
+<p>The implementation in Lesson 20 will wrap this in a <code>run_prompt(test_case)</code> function.</p>
+<hr />
+<h2>Step 4: Feed Through a Grader</h2>
+<p>The grader is the critical component that makes this loop an engineering process rather than an opinion. It inspects both the original input and Claude's output and emits a numeric score — the lesson uses a <strong>1-to-10 scale</strong> where 10 is a perfect answer.</p>
+<p>Example scores from the lesson:</p>
+<table>
+<thead>
+<tr>
+<th>Test case</th>
+<th>Grader score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Math: "What's 2+2?"</td>
+<td>10 (perfect)</td>
+</tr>
+<tr>
+<td>Oatmeal: "How do I make oatmeal?"</td>
+<td>4 (needs improvement)</td>
+</tr>
+<tr>
+<td>Moon: "How far away is the Moon?"</td>
+<td>9 (very good)</td>
+</tr>
+</tbody>
+</table>
+<p>Aggregate score: <code>(10 + 4 + 9) / 3 = 7.66</code>.</p>
+<p>The grader itself can be code-based (regex, JSON schema check, etc.) or model-based (another LLM judging the output). Both are covered later in the chapter.</p>
+<hr />
+<h2>Step 5: Change Prompt and Repeat</h2>
+<p>Now that you have a baseline score (7.66), you change something about the prompt and re-run the entire pipeline. The lesson demonstrates a simple improvement — adding a guidance line:</p>
+<pre><code class="language-python">prompt = f&quot;&quot;&quot;
+Please answer the user's question:
+
+{question}
+
+Answer the question with ample detail
+&quot;&quot;&quot;
+</code></pre>
+<p>Running the same dataset through this v2 prompt yields a new average: <strong>8.7</strong>. Because the delta is numeric, there is no debate — v2 is objectively better on this dataset.</p>
+<p>You keep iterating until the score plateaus, or until it is good enough for production.</p>
+<hr />
+<h2>Why This Workflow Matters</h2>
+<p>The workflow delivers three capabilities that ad-hoc testing cannot:</p>
+<ol>
+<li><strong>Numeric comparison of prompt versions</strong> — you pick the higher score, not the one that "feels" better.</li>
+<li><strong>Best-version selection</strong> — you can ship the objectively highest-scoring prompt, not a lucky one.</li>
+<li><strong>Continuous iteration</strong> — every new change is measured against the same dataset, creating a regression safety net.</li>
+</ol>
+<p>The workflow "removes guesswork from prompt engineering" and gives you confidence that changes are actually improvements rather than just different variations.</p>
+<hr />
+<h2>Scaling Considerations (Beyond the Lesson)</h2>
+<p>The five steps are minimal. Real production eval pipelines layer on:</p>
+<ul>
+<li><strong>Versioned datasets</strong> — each dataset revision is checkpointed so you can reproduce old scores.</li>
+<li><strong>Parallel execution</strong> — datasets of thousands of entries benefit from concurrent API calls.</li>
+<li><strong>CI integration</strong> — the pipeline runs on every PR that touches a prompt, blocking regressions.</li>
+<li><strong>Multiple graders</strong> — a single score hides dimensional trade-offs; production uses several rubrics (correctness, format, tone).</li>
+<li><strong>Stratified sampling</strong> — the dataset contains weighted buckets so rare categories are not drowned by common ones.</li>
+</ul>
+<p>None of this changes the core loop — it just operationalizes it at scale.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>No baseline score</strong> — iterating without a baseline means you never know if a change is actually an improvement.</li>
+<li><strong>Dataset that only contains happy-path examples</strong> — the whole point of the dataset is to surface failure modes, not validate the easy wins.</li>
+<li><strong>Eyeballing the outputs and skipping the grader</strong> — without a numeric scorer, "iteration" is just opinion laundering.</li>
+<li><strong>Changing prompt and dataset at the same time</strong> — you will not know whether a score change came from the prompt or the dataset.</li>
+<li><strong>Stopping as soon as the score ticks up</strong> — the first improvement is rarely the best improvement; keep iterating until the score plateaus.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The whole power of the five-step workflow is that the dataset stays fixed while the prompt varies. This isolates the prompt as the independent variable, so every change in score can be attributed to a change in prompt. If you mutate the dataset between runs, you destroy the experiment. For the CCA exam, the canonical ordering — draft → dataset → run → grade → iterate — is the single most testable sequence in D3.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: memorize the five-step sequence; know that the baseline score exists to enable numeric comparison; understand that "feed through grader" outputs a 1-10 score.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: recognize that this workflow is the production-readiness gate — no eval loop, no deployment.</li>
+<li>Exam trigger: any question that asks "what is the process for improving a prompt with objective data" is answered by this five-step loop.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the five steps of a typical eval workflow?</td>
+<td>1) Draft a prompt, 2) Create an eval dataset, 3) Feed through Claude, 4) Feed through a grader, 5) Change prompt and repeat.</td>
+</tr>
+<tr>
+<td>What scale does the lesson use for grader scores?</td>
+<td>1 to 10, where 10 is a perfect answer and lower scores indicate room for improvement.</td>
+</tr>
+<tr>
+<td>What baseline prompt does the lesson use?</td>
+<td><code>Please answer the user's question: {question}</code> interpolated into an f-string.</td>
+</tr>
+<tr>
+<td>How does the lesson demonstrate iteration?</td>
+<td>By adding "Answer the question with ample detail" to the prompt, the average score rose from 7.66 to 8.7.</td>
+</tr>
+<tr>
+<td>Why is the dataset held constant across iterations?</td>
+<td>So that score differences can be attributed to the prompt change, not to a change in inputs.</td>
+</tr>
+<tr>
+<td>What happens in Step 3 of the workflow?</td>
+<td>Each dataset entry is interpolated into the prompt template and sent to Claude; the full responses become the raw material for grading.</td>
+</tr>
+<tr>
+<td>What three benefits does the workflow unlock?</td>
+<td>Numeric comparison of versions, objective best-version selection, continuous measurable iteration.</td>
+</tr>
+<tr>
+<td>What are two ways to assemble an eval dataset?</td>
+<td>By hand, or generated automatically by Claude (covered in Lesson 19).</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

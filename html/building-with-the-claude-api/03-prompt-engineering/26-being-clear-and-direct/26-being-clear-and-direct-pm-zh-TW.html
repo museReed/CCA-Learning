@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Being Clear And Direct Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Being Clear and Direct — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D3 — Evaluation &amp; Iteration (20%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（prompt 設計與迭代）、1.1（指令遵循）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 26</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>寫 prompt 就像寫 design brief——用祈使動詞開頭、講清楚要什麼交付物，不要用客氣的問句。</p>
+<hr />
+<h2>PM 為什麼該在乎</h2>
+<p>Prompt 的第一行就像 PRD 或 design brief 的第一句。如果工程師或設計師從第一句看不出要產什麼，後面整份文件都在救火。Claude 也一樣。這堂課顯示：單一最高槓桿的 prompt 編輯——把第一行從問句改成祈使句——在 10 分制 eval 上帶來可量測的分數跳升（2.32 → 3.92）。這個產品品質 delta 比大多數 A/B test 看得到的還大，而且只要改一句話。</p>
+<hr />
+<h2>心智模型：Design Brief</h2>
+<p>比較弱 vs 強 brief 對設計師的落地感：</p>
+<table>
+<thead>
+<tr>
+<th>Brief 風格</th>
+<th>設計師反應</th>
+<th>Claude 反應</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「我們在想或許可以重做 onboarding flow，感覺怪怪的？」</td>
+<td>「好喔……你到底想要什麼？」</td>
+<td>產出模糊回應，要求澄清或猜範圍</td>
+</tr>
+<tr>
+<td>「Redesign onboarding flow，目標降低 step 2 drop-off。交付物：3 個 Figma frame，週五前。」</td>
+<td>「收到，開始了。」</td>
+<td>產出對齊的結構化 artifact</td>
+</tr>
+</tbody>
+</table>
+<p>Prompt 就是 brief，Claude 是合作者。動詞+交付物開頭的 brief 永遠贏過用 context 或問句開頭的 brief。</p>
+<hr />
+<h2>兩個原則翻成產品語言</h2>
+<table>
+<thead>
+<tr>
+<th>原則</th>
+<th>定義</th>
+<th>PM 翻譯</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Clarity</strong></td>
+<td>簡單語言、對要什麼沒有模糊</td>
+<td>User story：「As a X, I want Y so that Z」，沒人要用猜的</td>
+</tr>
+<tr>
+<td><strong>Directness</strong></td>
+<td>指令而非問句、action verb 開頭</td>
+<td>Acceptance criteria：「Given / When / Then」，祈使、可測</td>
+</tr>
+</tbody>
+</table>
+<p>PM 如果已經會寫好 Jira ticket，其實已經會寫 clear and direct 的 prompt。能力可以 transfer。</p>
+<hr />
+<h2>產品應用場景</h2>
+<h3>什麼時候 clarity + directness 是第一個要改的</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>症狀</th>
+<th>修法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI 摘要長度不一致</td>
+<td>Prompt 問「Can you summarize this?」</td>
+<td>改：「Write a 3-sentence summary covering the main argument, supporting evidence, and conclusion.」</td>
+</tr>
+<tr>
+<td>AI 寫手太話嘮</td>
+<td>Prompt 用問句開頭</td>
+<td>改祈使：「Draft a professional email declining the meeting.」</td>
+</tr>
+<tr>
+<td>內部文件抽取漏欄位</td>
+<td>Prompt 說「Tell me about the contract」</td>
+<td>改：「Extract the effective date, party names, and total value from the contract.」</td>
+</tr>
+</tbody>
+</table>
+<h3>什麼時候這招不夠</h3>
+<p>光靠 clarity and directness 有上限——課程只跑到 3.92/10。要再上去需要 specificity（Lesson 27）、examples、structure。把 clear+direct 當成<strong>最小可用 prompt</strong>，不是最終產品。</p>
+<hr />
+<h2>PM 決策框架</h2>
+<p>在 PRD review 看團隊的 AI prompt 時問：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>如果 No，就 flag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一行是動詞開頭嗎？</td>
+<td>Flag——改祈使句</td>
+</tr>
+<tr>
+<td>從第一句看得出 Claude 會產什麼嗎？</td>
+<td>Flag——brief 不清楚</td>
+</tr>
+<tr>
+<td>有保留語嗎（「maybe」「if possible」「could you」）？</td>
+<td>Flag——拿掉</td>
+</tr>
+<tr>
+<td>Prompt 有指定輸出格式或長度嗎？</td>
+<td>Flag——加 constraint</td>
+</tr>
+<tr>
+<td>新進同事看第一行不需 context 就懂嗎？</td>
+<td>Flag——簡化用字</td>
+</tr>
+</tbody>
+</table>
+<p>本質上就是對 prompt 做一次 PRD lint。</p>
+<hr />
+<h2>隱藏的產品勝利</h2>
+<p>Clear + direct prompt 不只分數比較高——它<strong>失敗得更可預測</strong>。模糊 prompt 可以用一百種方式失敗（太長、太短、主題跑掉、格式錯、太話嘮、離品牌調性）。祈使 prompt 只用一種方式失敗：要的 artifact 在某個具體、可除錯的點錯了。</p>
+<p>可預測的失敗是產品資產。QA 可以寫針對性測試、on-call 看得出 bug 形狀、eval rubric 也跟得上。</p>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>太客氣的 prompt</strong> — 「Could you please kindly...」PM 常把 AI prompt 當成寫信給陌生人。Claude 不需要禮貌，它需要清楚。</li>
+<li><strong>Context 前置</strong> — 把指令埋在三句背景後面。指令先、context 後。</li>
+<li><strong>用問不用命</strong> — 把 Claude 當成可能拒絕你。它不會，直接下祈使句。</li>
+<li><strong>覺得「太簡單所以跳過」</strong> — 課程測出一行改動 +1.6 分，不要跳過簡單的勝利。</li>
+<li><strong>以為 clear+direct 就結束了</strong> — 這是地板不是天花板，上面還需要 specificity 和 examples。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>AI 功能裡最便宜的產品品質勝利，就是把每個 prompt 的第一行改寫成動詞開頭的祈使句。零工程成本、可量測的分數提升、讓功能失敗模式變可預測。PM 在 review AI prompt 時第一個該 audit 的就是第一行。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>：「問句 → 祈使句」是 prompt 改進迴圈中最便宜的第一步。</li>
+<li><strong>D1 (Agentic Architecture)</strong>：同一條規則套用到 agent system prompt——先祈使，再 preamble。</li>
+<li>考題給弱 prompt 時，改寫成祈使句的版本通常就是正解。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PM 第一個該 audit 的是 prompt 哪部分？</td>
+<td>第一行——它定調且影響回應品質比其他部分都大。</td>
+</tr>
+<tr>
+<td>跟 clear-and-direct prompt 類比的 PM 產物是什麼？</td>
+<td>好的 design brief 或 Jira ticket——動詞開頭、有具體交付物、不保留。</td>
+</tr>
+<tr>
+<td>光靠 clarity + directness 量到的分數進步？</td>
+<td>2.32 → 3.92 的 +1.6 分，改一行來的。</td>
+</tr>
+<tr>
+<td>為什麼模糊 prompt 的產品風險不只是品質？</td>
+<td>因為它失敗模式不可預測，無法 debug、測試、預防。</td>
+</tr>
+<tr>
+<td>「Design brief」類比？</td>
+<td>模糊 brief 讓設計師用猜的，動詞+交付物 brief 可以立刻開工；Claude 一樣。</td>
+</tr>
+<tr>
+<td>列三個 PM 該從 prompt 移除的保留語？</td>
+<td>「Maybe」「if possible」「could you」，任何讓指令看起來選配的字。</td>
+</tr>
+<tr>
+<td>Clear and direct 夠用嗎？</td>
+<td>不夠，這是地板。還需要 specificity、examples、structure 才能拿高分。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Caching In Action Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Caching in Action — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (cost/latency optimization), 5.2 (production performance)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 58</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Turning caching on in a real product means agreeing on which tool list and system prompt stay frozen, wiring the cache markers in, and watching the usage counters in production to verify that the savings you promised in the business case actually show up.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Caching is one of the few optimizations where the product-level decision — "we promise this chunk of context will stay identical across calls" — does most of the work. Once engineering has converted the tools list and system prompt to the cacheable form, the feature either saves money or silently does nothing. That outcome depends entirely on:</p>
+<ol>
+<li><strong>What the product keeps stable.</strong> Large stable system prompt? Stable tool schemas? Both? Neither?</li>
+<li><strong>Whether anyone is watching.</strong> Cache savings only count if someone checks the dashboards.</li>
+</ol>
+<p>A PM who owns this lesson can walk into a roadmap meeting and say, "caching is on, here are the three things that would break it, and here is the number we are watching to prove it works."</p>
+<hr />
+<h2>Mental Model: The Subscription Coffee Mug</h2>
+<p>Think of the Starbucks reusable-mug discount. The first time you buy a coffee, nothing special happens. The second time, if you bring the same mug, you get a discount. If you forget the mug, you pay full price. If the mug is tiny, they do not bother. If the deal has been sitting dormant too long, it expires.</p>
+<table>
+<thead>
+<tr>
+<th>Coffee shop analogy</th>
+<th>Caching analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bring the same mug</td>
+<td>Send the same prefix</td>
+</tr>
+<tr>
+<td>Discount on refill</td>
+<td>Lower cost on cache read</td>
+</tr>
+<tr>
+<td>First visit pays normal price</td>
+<td><code>cache_creation_input_tokens</code> on first call</td>
+</tr>
+<tr>
+<td>Each matching visit is cheaper</td>
+<td><code>cache_read_input_tokens</code> on follow-up calls</td>
+</tr>
+<tr>
+<td>Mug too small → no discount</td>
+<td>Prefix under 1,024 tokens → no cache</td>
+</tr>
+<tr>
+<td>Forget the mug once → pay full price</td>
+<td>Change a character → cache miss</td>
+</tr>
+</tbody>
+</table>
+<p>The loyalty program only works if the customer (your app) consistently brings the same mug (same prefix).</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>The Three Highest-Value Targets</h3>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Typical size</th>
+<th>Why it is a good caching candidate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Large system prompt</td>
+<td>~6K tokens</td>
+<td>Defines the product persona; stable across every call.</td>
+</tr>
+<tr>
+<td>Tool schemas</td>
+<td>~1.7K tokens</td>
+<td>Tool definitions do not change mid-session.</td>
+</tr>
+<tr>
+<td>Repeated message content</td>
+<td>Varies</td>
+<td>Any workflow that re-sends the same chunks (document Q&amp;A, rolling chat history).</td>
+</tr>
+</tbody>
+</table>
+<h3>Partial Hits as a Product Win</h3>
+<p>Because tools, system prompt, and messages cache independently, a product team can:</p>
+<ul>
+<li><strong>Tune the system prompt</strong> (maybe the weakest-performing layer) while leaving the tools layer untouched — and keep the cache savings on tools.</li>
+<li><strong>Add a new tool</strong> and know that only the tools layer takes a cache-write hit; the system prompt cache stays warm.</li>
+<li><strong>Deploy A/B tests at the system-prompt layer</strong> with a clear idea of the cost impact: one group pays cache-write on the new prompt, the other continues reading from the cached version.</li>
+</ul>
+<p>This granularity means caching does not have to be an "all or nothing" gate on experimentation.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When scoping caching in a real launch:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which layer (tools / system / messages) owns the biggest stable chunk?</td>
+<td>That is where you place the first breakpoint; that is where the biggest savings live.</td>
+</tr>
+<tr>
+<td>Can we commit to freezing that layer for at least a week at a time?</td>
+<td>Constant edits destroy the savings; stability is the contract.</td>
+</tr>
+<tr>
+<td>Who owns the "is the cache actually working?" dashboard?</td>
+<td>Without someone watching <code>cache_read_input_tokens</code>, the savings are invisible and claim-only.</td>
+</tr>
+<tr>
+<td>What is the expected hit rate?</td>
+<td>Use this to set a target (e.g., "after launch, 70% of non-first calls should be cache reads").</td>
+</tr>
+<tr>
+<td>How will we notify the team before a cache-invalidating change?</td>
+<td>A quick Slack message before a system-prompt rewrite saves a surprise spike in the cost chart.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Business Metrics to Watch</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>What to track</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cache hit rate</strong></td>
+<td><code>cache_read_input_tokens / (cache_read + cache_creation)</code> — higher is better.</td>
+</tr>
+<tr>
+<td><strong>Cost per conversation</strong></td>
+<td>Should drop after caching ships; compare against a baseline period.</td>
+</tr>
+<tr>
+<td><strong>Time-to-first-token</strong></td>
+<td>Should drop on cached requests; good for any latency-sensitive UX.</td>
+</tr>
+<tr>
+<td><strong>Cache invalidation events</strong></td>
+<td>Count how many system-prompt / tool edits land per week; if it is too high, savings will never materialize.</td>
+</tr>
+<tr>
+<td><strong>TTL-expiry misses</strong></td>
+<td>If most first calls after idle hours show <code>cache_creation_input_tokens</code>, your usage pattern may be below the 1-hour frequency threshold.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Launching caching without dashboards</strong> — if you cannot see <code>cache_read_input_tokens</code>, you cannot tell finance whether caching paid off.</li>
+<li><strong>Letting copy teams edit the system prompt weekly without a heads-up</strong> — every rewrite is a 1-hour cache reset. Establish a change process.</li>
+<li><strong>Ignoring partial hits</strong> — teams often think "we changed the system prompt, caching is broken" when in reality the tools layer is still hitting. Partial hits are normal and valuable.</li>
+<li><strong>Celebrating first-call savings</strong> — the first call is always a cache <em>write</em>, which costs <em>more</em>, not less. Savings only accrue on follow-up calls within the hour.</li>
+<li><strong>Not communicating the 1-hour TTL to ops / on-call</strong> — if overnight traffic drops, the morning's first calls will all be cache-writes, and the cost chart will look weird.</li>
+<li><strong>Mixing caching with memory expectations</strong> — stakeholders sometimes hear "cache" and assume Claude is remembering things. It is not. Clarify: caching is cost/latency, not product memory.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Caching in action is less about flipping a switch and more about <strong>owning a stability contract</strong>. The product team decides what stays frozen; the platform writes the <code>cache_control</code> markers; the observability layer reports <code>cache_read_input_tokens</code> vs. <code>cache_creation_input_tokens</code>. If any of those three pieces is missing, the launch does not actually save money — it just claims to.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong> — expect scenarios where caching is enabled but no savings are seen; the answer is usually a product-level cause (system prompt being edited, variable content in the prefix, partial hits misread as full misses).</li>
+<li>Know that <code>cache_read_input_tokens</code> is the field that proves a hit; <code>cache_creation_input_tokens</code> is the field that shows a write.</li>
+<li>Know that partial hits are expected behavior because tools, system prompt, and messages cache independently.</li>
+<li>Remember the 1-hour TTL and how it interacts with low-frequency traffic patterns.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does a PM actually commit to when turning on caching?</td>
+<td>That certain layers of context (tools list, system prompt, stable prefixes) will stay byte-identical across calls.</td>
+</tr>
+<tr>
+<td>Which usage field proves the cache was read on a call?</td>
+<td><code>cache_read_input_tokens</code> — the tokens Claude reused from the cache.</td>
+</tr>
+<tr>
+<td>Which usage field proves the cache was written on a call?</td>
+<td><code>cache_creation_input_tokens</code> — the tokens Claude just wrote into the cache.</td>
+</tr>
+<tr>
+<td>What is a "partial hit" and why is it a good thing for PMs?</td>
+<td>A cache hit on one layer (e.g., tools) and a cache write on another (e.g., system prompt). It lets you tune one layer without losing savings on another.</td>
+</tr>
+<tr>
+<td>Why is the first call after caching ships always more expensive, not less?</td>
+<td>Because it is a cache write (<code>cache_creation_input_tokens</code>), not a read. Savings begin on follow-up calls within the 1-hour window.</td>
+</tr>
+<tr>
+<td>Name the three product layers that benefit most from caching.</td>
+<td>Large system prompt (~6K tokens), tool schemas (~1.7K tokens), and repeated message content.</td>
+</tr>
+<tr>
+<td>What happens when the team rewrites the system prompt on a Friday afternoon?</td>
+<td>All system-prompt caches are invalidated; every next call pays cache-write until the new prompt stabilizes.</td>
+</tr>
+<tr>
+<td>Why is a "cache hit rate" dashboard part of the PM checklist?</td>
+<td>Because without it, caching claims are unverifiable — the savings cannot be reported to finance without evidence.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

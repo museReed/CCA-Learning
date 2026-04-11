@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Providing Examples Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>提供範例 — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D3 — Evaluation &amp; Iteration（20%）主；D2 — Tool Design（18%）次</td>
+</tr>
+<tr>
+<td>任務陳述</td>
+<td>3.1（提升可靠性的 prompt 設計）、2.2（結構化內容區塊）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 03-prompt-engineering / Lesson 29</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>給 Claude 看幾個「你要的結果長什麼樣」的範例，是 PM 角度最接近「訓練模型」的動作——它把模糊的品質標準變成可重現的行為，而且直接把你的 eval 資料當成燃料。</p>
+<hr />
+<h2>PM 為什麼要關心範例</h2>
+<p>每個 PM 都有過這種對話：「輸出大概對，但不是我們的語氣」或「簡單 case 會過，但難 case 會掛」。用文字去描述「我們的語氣」或「那些難 case」其實很難。示範 2–4 個範例常常比花一週調指令更快、更穩。</p>
+<p>課程原文明確指出 few-shot 是「你最常用的 prompt engineering 技巧之一」。它也是和 eval 回饋迴圈最緊的技巧——你 eval 裡最高分的輸出會直接變成下一版 prompt 的範例。</p>
+<hr />
+<h2>心智模型：帶 worked example 的風格指南</h2>
+<p>想想設計系統或品牌語氣 doc 實際怎麼運作。文字規則有用（語氣：自信但溫暖；使用主動語態），但團隊真正會去複製的是 worked example：</p>
+<table>
+<thead>
+<tr>
+<th>沒有範例</th>
+<th>有範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「要簡潔」</td>
+<td>「不要這樣寫：『我們很高興宣布…』；要這樣寫：『今日新上線：』」</td>
+</tr>
+<tr>
+<td>「要有同理心」</td>
+<td>並排放好的退款信和壞版本</td>
+</tr>
+<tr>
+<td>「遵守我們的格式」</td>
+<td>填好的模板和空白模板並排</td>
+</tr>
+</tbody>
+</table>
+<p>Few-shot prompt 對 Claude 做的是同一件事。與其在 PRD 裡爭論「簡潔」的定義，不如把好範例和壞範例直接放進 prompt。AI 每次呼叫都會讀到。</p>
+<hr />
+<h2>產品使用情境</h2>
+<h3>範例是對的選擇</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>為什麼範例有用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>含諷刺的情感分析</td>
+<td>諷刺太依賴 context，沒辦法用文字描述——一個範例就搞定</td>
+</tr>
+<tr>
+<td>特定 JSON 或 schema 輸出</td>
+<td>給一個填好的範例比列欄位規則更有效</td>
+</tr>
+<tr>
+<td>對齊品牌語氣</td>
+<td>一個 on-brand 的範例勝過一段語氣指南</td>
+</tr>
+<tr>
+<td>從雜亂文字中抽結構化資訊</td>
+<td>範例讓輸出形狀不再模糊</td>
+</tr>
+<tr>
+<td>已經有 eval 產出「金標」輸出的任務</td>
+<td>把那些輸出升級到 prompt 裡當範例</td>
+</tr>
+</tbody>
+</table>
+<h3>範例是殺雞用牛刀</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>更好的做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>很簡單的轉換</td>
+<td>清楚的指令就夠</td>
+</tr>
+<tr>
+<td>高度變化的創意輸出</td>
+<td>範例會過度限制模型</td>
+</tr>
+<tr>
+<td>沒有「標準答案」的任務</td>
+<td>範例會暗示一條可能不存在的正確路徑</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>四個產品好處</h2>
+<ol>
+<li><strong>Edge case 的一致性</strong>——功能最容易出糗的地方（諷刺、corner case、模糊輸入）正好是範例最能發揮的地方。</li>
+<li><strong>更精準的品質標準</strong>——與其在 prompt 裡寫「要高品質」，不如給 Claude 三個高品質輸出。標準變成具體的。</li>
+<li><strong>Eval 驅動的改進</strong>——你的 eval harness 產出下一版 prompt 的原料。把高分 eval 輸出丟回 prompt 是免費的品質升級。</li>
+<li><strong>更少的文字指令</strong>——難以用英文描述的複雜規則可以被幾個範例取代，而範例比散文更容易 review 和修改。</li>
+</ol>
+<hr />
+<h2>Eval-to-Example 迴圈</h2>
+<p>這是 Lesson 29 對 PM 最重要的收穫：</p>
+<ol>
+<li>用目前的 prompt 跑 eval set</li>
+<li>找出得分最高（接近滿分）的輸出</li>
+<li>把那些 input/output pair 貼進 prompt 當 few-shot 範例</li>
+<li>重跑 eval——難 case 應該會改善，因為 Claude 現在有了「金標」參考行為</li>
+</ol>
+<p>這就是為什麼 Chapter 03（Prompt Engineering）和 Evaluation chapter 綁在一起。把 prompt 當成靜態字串的 PM 會錯過這個迴圈；把 eval 當成 prompt 更新原料的 PM 會拿到複利式的改進。</p>
+<hr />
+<h2>PM 決策框架</h2>
+<p>審視 prompt 模板時問自己：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>如果是「是」</th>
+<th>行動</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>任務有難以描述的 corner case 嗎？</td>
+<td>是</td>
+<td>加覆蓋那些 case 的範例</td>
+</tr>
+<tr>
+<td>任務需要特定輸出形狀嗎？</td>
+<td>是</td>
+<td>至少展示一個完整填好的範例</td>
+</tr>
+<tr>
+<td>這個任務已經有高分 eval 輸出嗎？</td>
+<td>是</td>
+<td>把它們升級進 prompt</td>
+</tr>
+<tr>
+<td>風格/語氣/聲音很難用文字定下來嗎？</td>
+<td>是</td>
+<td>給一個理想範例，而不是規則</td>
+</tr>
+<tr>
+<td>任務很簡單、沒範例也過得去嗎？</td>
+<td>是</td>
+<td>不要加</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 常見錯誤</h2>
+<ol>
+<li><strong>把範例當成「工程師的事」</strong>——範例編碼了產品決策（語氣、edge case 處理）。PM 應該擁有「要哪些範例進 prompt」這個決定。</li>
+<li><strong>只挑漂亮的範例</strong>——few-shot 的整個價值就是覆蓋失敗模式。不要只展示 Claude 已經贏的 case。</li>
+<li><strong>讓範例變 stale</strong>——eval set 會演進，few-shot 範例也要跟著演進。把更新節奏排進功能的維護 rhythm。</li>
+<li><strong>忘了「為什麼這是好的」的註解</strong>——每個理想輸出後面的一行理由會幫助 Claude generalize。PM 常常漏掉，因為看起來像文件而不像 prompt。</li>
+<li><strong>範例沒包在 XML 標籤裡</strong>——沒有結構，Claude 可能會把範例輸入當成真正的任務。PM 應該堅持 <code>&lt;sample_input&gt;</code> / <code>&lt;ideal_output&gt;</code> 的包法。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>對 PM 而言，few-shot prompting 是從「我們有個衡量品質的 eval」到「我們有個命中品質標準的 prompt」最短的路徑。你 eval 裡最高分的輸出就是下一版 prompt 的範例。CCA 考試問「如何迭代 prompt 可靠性」時就是在考這個迴圈——而這是 PM 不用寫程式就能驅動的迴圈。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D3（Evaluation &amp; Iteration）</strong>：當 eval 顯示特定 case 失敗時，few-shot 是經典解法。「把高分輸出升級進 prompt」的模式可直接考。</li>
+<li><strong>D2（Tool Design）</strong>：範例和 XML 標籤內容區塊以及嚴格輸出格式緊密搭配。</li>
+<li>考試情境：「Claude 在諷刺上失敗」「輸出格式每次呼叫都不同」「我們有 eval 分數但 prompt 沒改善」——都指向 few-shot 範例。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>反面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一句話解釋 few-shot prompting 是什麼？</td>
+<td>在 prompt 裡給 Claude 看輸入/輸出範例對，以引導回應。</td>
+</tr>
+<tr>
+<td>PM 角度，給範例而不是寫規則的好處是什麼？</td>
+<td>它用具體示範取代難以描述的品質標準（語氣、edge case），Claude 可以複製和 generalize。</td>
+</tr>
+<tr>
+<td>PM 應該從哪裡取得好範例？</td>
+<td>從功能 eval set 中得分最高的輸出。</td>
+</tr>
+<tr>
+<td>Eval-to-example 迴圈是什麼？</td>
+<td>跑 eval → 找最高分輸出 → 貼進 prompt 當範例 → 重跑 eval。</td>
+</tr>
+<tr>
+<td>為什麼每個理想範例要加「為什麼這是好的」註解？</td>
+<td>幫助 Claude 學到判斷標準，而不只是表面形式——促進 generalization。</td>
+</tr>
+<tr>
+<td>PM 什麼時候不該推加更多範例？</td>
+<td>任務簡單且已經過 eval 時，或會過度限制創意時。</td>
+</tr>
+<tr>
+<td>課程建議範例用哪些 XML 標籤？</td>
+<td><code>&lt;sample_input&gt;</code> 和 <code>&lt;ideal_output&gt;</code>。</td>
+</tr>
+<tr>
+<td>Lesson 29 直接建立在哪一課上？</td>
+<td>Lesson 28（XML 標籤）——範例住在 XML 標籤結構裡。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

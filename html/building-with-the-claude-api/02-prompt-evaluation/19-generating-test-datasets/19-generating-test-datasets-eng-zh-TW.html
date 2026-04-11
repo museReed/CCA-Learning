@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generating Test Datasets Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Generating Test Datasets — Engineering Deep Dive（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration（20%，主要）；D5 — Enterprise Deployment（20%，次要）</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.2（測試資料集）、3.1（eval 設計）、3.3（eval 執行）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 19</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>你可以在幾分鐘內用 Claude 幫自己產出 eval 資料集 — 用 Haiku 這種較快的模型、JSON prefilling 技巧、配合 stop sequences，一次就能拿到可 parse 的乾淨輸出。</p>
+<hr />
+<h2>情境：AWS Code Assistant</h2>
+<p>課程建構的 eval 系統是給一個幫用戶寫 <strong>AWS 專屬程式碼</strong>的 prompt，輸出格式有三種：</p>
+<ul>
+<li>Python 程式碼</li>
+<li>JSON 設定檔</li>
+<li>正規表示式（regex）</li>
+</ul>
+<p>核心需求：輸出必須<strong>乾淨</strong> — 不能有多餘的解釋、前言、後記。這個「乾淨輸出」需求，正是 eval 資料集要壓力測試的屬性。</p>
+<p>起始版（v1）prompt：</p>
+<pre><code class="language-python">prompt = f&quot;&quot;&quot;
+Please provide a solution to the following task:
+{task}
+&quot;&quot;&quot;
+</code></pre>
+<hr />
+<h2>資料集格式：Task 陣列</h2>
+<p>資料集是一個 JSON 物件陣列，每個物件有一個 <code>task</code> 欄位描述要 Claude 完成什麼：</p>
+<pre><code class="language-json">[
+  { &quot;task&quot;: &quot;Description of task&quot; },
+  ...additional
+]
+</code></pre>
+<p>這種最小結構是刻意的。執行 eval 時你會走過整個陣列，把每個 <code>task</code> 內插進 prompt template 後送進 Claude。之後要加欄位（expected output、分類、難度）很容易；從簡單開始更快。</p>
+<hr />
+<h2>為什麼用 Haiku 產資料集</h2>
+<p>課程明確建議用 <strong>Haiku</strong> 而不是完整版 Claude 來產資料集。理由是經濟考量：</p>
+<ul>
+<li>資料集生成是批次、創意性任務，不需要 frontier-model 的推理能力。</li>
+<li>Haiku 每次呼叫更快、更便宜。</li>
+<li>一百筆資料集在 Sonnet 上很貴，在 Haiku 上幾乎免費。</li>
+</ul>
+<p>這是 CCA 課綱的通用模式：<strong>批次工作用快模型，被評估的任務本身才用 frontier 模型。</strong></p>
+<hr />
+<h2>與 Claude 互動的輔助函式</h2>
+<p>課程介紹三個會在整章重複使用的輔助函式：</p>
+<pre><code class="language-python">def add_user_message(messages, text):
+    user_message = {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: text}
+    messages.append(user_message)
+
+def add_assistant_message(messages, text):
+    assistant_message = {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: text}
+    messages.append(assistant_message)
+
+def chat(messages, system=None, temperature=1.0, stop_sequences=[]):
+    params = {
+        &quot;model&quot;: model,
+        &quot;max_tokens&quot;: 1000,
+        &quot;messages&quot;: messages,
+        &quot;temperature&quot;: temperature
+    }
+    if system:
+        params[&quot;system&quot;] = system
+    if stop_sequences:
+        params[&quot;stop_sequences&quot;] = stop_sequences
+
+    response = client.messages.create(**params)
+    return response.content[0].text
+</code></pre>
+<p>三個觀察點：</p>
+<ol>
+<li><strong><code>temperature=1.0</code> 為預設</strong> — 資料集生成需要高熵產出多樣的測試案例，不是重複的清單。</li>
+<li><strong><code>stop_sequences</code> 已預接好</strong> — 這就是讓 prefilling 技巧能乾淨運作的關鍵（下面說明）。</li>
+<li><strong><code>chat()</code> 回傳 <code>.content[0].text</code></strong> — 幫呼叫端抽象掉 content-block 結構，直接拿到純文字。</li>
+</ol>
+<hr />
+<h2>資料集生成函式</h2>
+<p>課程主函式：</p>
+<pre><code class="language-python">def generate_dataset():
+    prompt = &quot;&quot;&quot;
+Generate an evaluation dataset for a prompt evaluation. The dataset will be used to evaluate prompts that generate Python, JSON, or Regex specifically for AWS-related tasks. Generate an array of JSON objects, each representing task that requires Python, JSON, or a Regex to complete.
+
+Example output:
+```json
+[
+  {
+    &quot;task&quot;: &quot;Description of task&quot;,
+  },
+  ...additional
+]
+</code></pre>
+<ul>
+<li>Focus on tasks that can be solved by writing a single Python function, a single JSON object, or a single regex</li>
+<li>Focus on tasks that do not require writing much code</li>
+</ul>
+<p>Please generate 3 objects.<br />
+"""</p>
+<pre><code>
+三個值得注意的 prompt engineering 決策：
+
+- **Example output 放在圍籬碼區塊裡** — Claude 得到具體的形狀範本，而不是抽象描述。
+- **兩個明確約束** — 「單一 function / object / regex」和「不用寫太多程式碼」。這兩條把生成空間收窄，讓資料集保持聚焦。
+- **明確數量** — 「Please generate 3 objects」給出確定的輸出大小。
+
+---
+
+## JSON Prefilling + Stop Sequence 技巧
+
+本課最重要的技術：
+
+```python
+messages = []
+add_user_message(messages, prompt)
+add_assistant_message(messages, &quot;```json&quot;)
+text = chat(messages, stop_sequences=[&quot;```&quot;])
+return json.loads(text)
+</code></pre>
+<p>這是從 Claude 取得可 parse JSON 的經典模式。運作方式：</p>
+<ol>
+<li><strong>加一則 assistant message 內容為 <code>```json</code></strong> — 等於告訴 Claude「你已經開始寫一個 JSON code block 了，繼續寫下去」。</li>
+<li><strong>設定 <code>stop_sequences=["```"]</code></strong> — Claude 一旦要關閉 code fence 就會立刻停下。</li>
+<li><strong>用 <code>json.loads</code> 解析原始文字</strong> — 拿回來的就是純 JSON，沒有前言後語，沒有收尾圍籬。</li>
+</ol>
+<p>為什麼重要：沒有 prefilling 的話，Claude 常會包一句前言（"Here is your dataset:"）或忘記關圍籬。Prefilling + stop sequences 把「從 Claude 取 JSON」從 regex parsing 問題，變成一行 <code>json.loads</code>。</p>
+<p>這同時是 <strong>D5 production 模式</strong>，也是 D3 技巧 — 任何你要從 Claude 取結構化輸出但又不想動用 tool use 的場景都可以用。</p>
+<hr />
+<h2>執行</h2>
+<pre><code class="language-python">dataset = generate_dataset()
+print(dataset)
+</code></pre>
+<p>這會回出三個涵蓋 Python、JSON config、regex 的 AWS 測試案例。</p>
+<hr />
+<h2>持久化資料集</h2>
+<pre><code class="language-python">with open('dataset.json', 'w') as f:
+    json.dump(dataset, f, indent=2)
+</code></pre>
+<p>把資料集存檔很重要，原因有三：</p>
+<ul>
+<li><strong>可重現性</strong> — 同一份資料集必須在 prompt 迭代間重用（否則比較無效，見 Lesson 18）。</li>
+<li><strong>版本控制</strong> — 你可以把 <code>dataset.json</code> commit 進 repo，每個工程師都對同一個正典輸入集打分。</li>
+<li><strong>解耦</strong> — 生成和執行變成兩個獨立步驟；生成一次、eval 跑很多次。</li>
+</ul>
+<p>檔案就放在 notebook 旁邊，讓 Lesson 20 的 eval runner 用 <code>open("dataset.json", "r")</code> 直接讀。</p>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>用 Sonnet 來產資料集</strong> — 浪費錢；Haiku 才是批次創意工作的正確選擇。</li>
+<li><strong>跳過 JSON prefilling 技巧</strong> — parser 會被 Claude 的前言後語弄壞。</li>
+<li><strong>忘了 <code>stop_sequences</code></strong> — 沒設定時，Claude 會關圍籬然後繼續寫，毀掉 parse。</li>
+<li><strong>生成後在每次迭代重新生成</strong> — 這會摧毀可比性；生成一次、存檔、重用。</li>
+<li><strong>沒在 prompt 裡指定確切數量</strong> — 「產一些測試案例」會給你不可預測的大小，搞壞批次處理假設。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prefilling + stop-sequence 技巧是本課最值得重用的技術。它把「叫 Claude 輸出 JSON」從脆弱的 parse 問題變成一行程式。背起來 — 它會出現在 D3（資料集生成）、D5（production 結構化輸出），以及任何需要機器可讀輸出但又不想啟動完整 tool use 協定的地方。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D3（Evaluation &amp; Iteration）</strong>：Dataset generation 是 eval 工作流的一個命名子步驟；要知道「用 Claude 產生」和「手工建」兩種選項。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：Prefilling + stop-sequence 模式是 production 系統取結構化輸出的首選做法。</li>
+<li>準備好回答類似「如何為新 prompt bootstrap 一份 eval 資料集？」→ 用 Haiku 生成、prefill JSON 圍籬、用 stop sequence、<code>json.loads</code>、存檔。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>課程建議用哪個模型產資料集？為什麼？</td>
+<td>Haiku — 對批次創意工作（如產生測試案例），它比完整版 Claude 更快、更便宜。</td>
+</tr>
+<tr>
+<td>AWS code assistant prompt 的三種輸出格式是？</td>
+<td>Python 程式碼、JSON 設定檔、正規表示式。</td>
+</tr>
+<tr>
+<td>資料集的最小結構是什麼？</td>
+<td>一個 JSON 物件陣列，每個物件有一個 <code>task</code> 欄位描述 Claude 要完成什麼。</td>
+</tr>
+<tr>
+<td>如何從 Claude 取得乾淨 JSON 而不用 tool use？</td>
+<td>Prefill 一則 assistant message 為 <code>```json</code>、設 <code>stop_sequences=["```"]</code>、對結果呼叫 <code>json.loads(text)</code>。</td>
+</tr>
+<tr>
+<td><code>stop_sequences=["```"]</code> 在這個模式中的作用是什麼？</td>
+<td>Claude 一寫下收尾的 code fence 就停止生成，所以回傳文字是純 JSON。</td>
+</tr>
+<tr>
+<td>為什麼資料集要存檔？</td>
+<td>這樣同一份資料集可以在 prompt 迭代間重用，這是分數可比較的前提。</td>
+</tr>
+<tr>
+<td>生成 prompt 裡的兩個明確約束是什麼？</td>
+<td>「單一 Python function / JSON object / regex」以及「不用寫太多程式碼」。</td>
+</tr>
+<tr>
+<td><code>chat()</code> helper 的預設 temperature 為何？原因？</td>
+<td><code>temperature=1.0</code> — 高熵產生更多樣的測試案例，這正是 eval 資料集所需要的。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

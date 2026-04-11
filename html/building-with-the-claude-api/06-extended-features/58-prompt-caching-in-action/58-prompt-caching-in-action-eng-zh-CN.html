@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Caching In Action Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Caching in Action — Engineering Deep Dive（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D5 — Enterprise Deployment (20%) 主要；D2 — Tool Design (18%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（成本／延迟优化）、5.2（生产性能）、2.1（tool schema 设计）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 58</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>实战上的 prompt caching 就是：把 tools list 和 system prompt 转成可缓存的 longhand block 形式并加上 <code>cache_control</code>，然后看 response 里的 <code>cache_creation_input_tokens</code> / <code>cache_read_input_tokens</code> 去验证命中与写入。</p>
+<hr />
+<h2>真实 app 中哪里最能省</h2>
+<p>课程点出三个高价值目标：</p>
+<ul>
+<li><strong>大型 system prompt</strong> — 例如约 6K token 的编程助手 system prompt。</li>
+<li><strong>复杂 tool schema</strong> — 例如约 1.7K tokens 的多个 tool 定义。</li>
+<li><strong>重复的 message 内容</strong> — 持续重发相同前缀的对话或 workflow。</li>
+</ul>
+<p>原则：caching 只在你重复发送一模一样的内容时才有用——而在许多真实 app 中，这种情况<strong>极其频繁</strong>。</p>
+<hr />
+<h2>Tool Schema Caching 的设置</h2>
+<p>要缓存 tool schema，把 <code>cache_control</code> 加到 <strong>list 的最后一个 tool</strong>。这个 tool 之前（包括本身）的所有东西都会被缓存。</p>
+<pre><code class="language-python">if tools:
+    tools_clone = tools.copy()
+    last_tool = tools_clone[-1].copy()
+    last_tool[&quot;cache_control&quot;] = {&quot;type&quot;: &quot;ephemeral&quot;}
+    tools_clone[-1] = last_tool
+    params[&quot;tools&quot;] = tools_clone
+</code></pre>
+<p>为什么要先 copy 再改：</p>
+<ul>
+<li><code>tools.copy()</code> 创建 tools list 的浅拷贝，不会影响调用方的原始 list。</li>
+<li><code>tools_clone[-1].copy()</code> 创建最后一个 tool dict 的浅拷贝，原来那个保持干净。</li>
+<li>只有拷贝会被加上 <code>cache_control</code>。</li>
+</ul>
+<p>你<strong>也可以</strong>直接写 <code>tools[-1]["cache_control"] = ...</code>，但 copy 的做法能避免之后重排 tool、跨调用共用 list、或 app 不同部分共享 tool 定义时出现的诡异 bug。</p>
+<p><code>cache_control</code> 值设为 <code>{"type": "ephemeral"}</code>——标准的 1 小时 cache 类型。</p>
+<hr />
+<h2>System Prompt Caching 的设置</h2>
+<p>System prompt 要从纯字符串转成 longhand 结构化 block 形式，才有地方放 <code>cache_control</code>：</p>
+<pre><code class="language-python">if system:
+    params[&quot;system&quot;] = [
+        {
+            &quot;type&quot;: &quot;text&quot;,
+            &quot;text&quot;: system,
+            &quot;cache_control&quot;: {&quot;type&quot;: &quot;ephemeral&quot;},
+        }
+    ]
+</code></pre>
+<p>字符串形式的 system prompt 没有字段能放 <code>cache_control</code>；block 形式有。一旦把 system prompt 这样结构化，整个 system prompt 就会成为 cached prefix 的一部分。</p>
+<hr />
+<h2>从 Response 读取 Cache 行为</h2>
+<p>启用 caching 后，API 的 <code>usage</code> block 会新增几个 token 计数器，告诉你这一次是写入还是读取 cache：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cache_creation_input_tokens</code></td>
+<td>这次请求 Claude <strong>写入</strong> cache 的 token 数（第一次或 cache miss 被迫重写）。</td>
+</tr>
+<tr>
+<td><code>cache_read_input_tokens</code></td>
+<td>这次请求 Claude 从 cache <strong>读取</strong> 的 token 数（命中——省钱事件）。</td>
+</tr>
+</tbody>
+</table>
+<p>常见模式：</p>
+<ul>
+<li><strong>第一次请求</strong>：<code>cache_creation_input_tokens=1772</code>、<code>cache_read_input_tokens=0</code>——正在写入 cache。</li>
+<li><strong>后续请求，内容相同</strong>：<code>cache_creation_input_tokens=0</code>、<code>cache_read_input_tokens=1772</code>——正在读取 cache。</li>
+<li><strong>内容改变</strong>：改过的段会产生新的 <code>cache_creation_input_tokens</code>，因为那段还不在 cache 里。</li>
+</ul>
+<p>Cache <strong>极度敏感</strong>：tools 或 system prompt 改一个字符就会让那个组件的整份 cache 失效。</p>
+<hr />
+<h2>Cache Ordering 与部分命中</h2>
+<p>你可以在单个请求里设置多个 cache breakpoint。Claude 的处理顺序是固定的：</p>
+<ol>
+<li><strong>Tools</strong>（如果有）</li>
+<li><strong>System prompt</strong>（如果有）</li>
+<li><strong>Messages</strong></li>
+</ol>
+<p>这个顺序让<strong>部分命中</strong>成为可能。假设你改了 system prompt 但 tools 没动：</p>
+<ul>
+<li>Tools 仍然逐字节一致 → tools 段 <strong>cache read</strong>。</li>
+<li>System prompt 不同 → 新的 system prompt <strong>cache write</strong>。</li>
+<li>Messages 正常处理。</li>
+</ul>
+<p>你只为真的改变的部分付费。这种细粒度缓存是本功能最大的优点之一：它是渐进失效，而不是全有全无。</p>
+<hr />
+<h2>实用考量</h2>
+<p>Prompt caching 在以下情况最有效：</p>
+<ul>
+<li><strong>Tool schema 跨请求一致</strong> — 带稳定工具箱的生产 agent。</li>
+<li><strong>System prompt 稳定</strong> — 锁定的 persona 与指令。</li>
+<li><strong>App 会发出多个带相似 context 的请求</strong> — 聊天、迭代工作流、批量 eval。</li>
+</ul>
+<p>记住：cache 只活一小时。这个设计是给<strong>相对高频的 API 使用</strong>，不是长期存储。如果你的产品每几小时才调用一次，cache 会在调用间过期，你会不断付 cache write 却没拿到 read 的好处。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>原地修改调用方的 tool list</strong> — 直接写 <code>tools[-1]["cache_control"] = ...</code> 可能悄悄影响 app 其他地方共用的同一份 list。用 copy-then-assign 模式。</li>
+<li><strong>System prompt 继续用纯字符串</strong> — 字符串没地方放 <code>cache_control</code>。必须包进 <code>{"type": "text", "text": ..., "cache_control": ...}</code> block。</li>
+<li><strong>以为整个请求是一个 cache 单元</strong> — 它不是。Tools、system prompt、messages 按处理顺序各自独立缓存，你可以拿到部分命中。</li>
+<li><strong>生产没检查 <code>usage</code> 字段</strong> — 不监控 <code>cache_creation_input_tokens</code> 对 <code>cache_read_input_tokens</code>，你根本不知道 cache 有没有真的在用。</li>
+<li><strong>对 cached 段做琐碎编辑</strong> — tool description 或 system prompt 一个空白、一个标点，就强制 cache 重写。把 cached 段当成有版本、不可变的 asset。</li>
+<li><strong>对低频 workload 启用 caching</strong> — Entry 在被复用前就过期，你只付写入、拿不到读取。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>实战的 caching 只有三件事：(1) 把最后一个 tool 包上 <code>cache_control</code> 以缓存整份 tool schema、(2) 把 system prompt 转成 longhand block 形式以放 <code>cache_control</code>、(3) 检查 response 的 <code>cache_creation_input_tokens</code> / <code>cache_read_input_tokens</code> 验证命中确实发生。处理顺序（tools → system → messages）自然送你部分命中。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5（Enterprise Deployment）</strong> — 考题会测哪个 API 字段证明 cache 命中（<code>cache_read_input_tokens</code>）、哪个证明 cache 写入（<code>cache_creation_input_tokens</code>）。</li>
+<li><strong>D2（Tool Design）</strong> — 记住 <code>cache_control</code> 放在 list 的<strong>最后一个</strong> tool，由于处理顺序，它会把前面所有 tools 都纳入 cache。</li>
+<li>记住部分命中行为：只改 system prompt 时 tools 的 cache 会保留，usage 会呈现 split 模式（tools 读、system 写）。</li>
+<li>「extremely sensitive」的逐字节比对是常考警语——任何编辑都会失效。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>哪个 API response 字段告诉你这次请求写入了 cache？</td>
+<td><code>cache_creation_input_tokens</code>——Claude 刚刚写入 cache 的 token 数。</td>
+</tr>
+<tr>
+<td>哪个 API response 字段告诉你这次请求读取了 cache？</td>
+<td><code>cache_read_input_tokens</code>——Claude 从 cache 复用的 token 数。</td>
+</tr>
+<tr>
+<td><code>cache_control</code> 要加在 tools list 的哪里才能缓存整份 tools？</td>
+<td>放在 list 的<strong>最后一个</strong> tool 上。由于 tools 最先被处理，它前面（含本身）的所有东西都会成为 cached prefix。</td>
+</tr>
+<tr>
+<td>为什么要 copy tools list 和最后一个 tool 再加 <code>cache_control</code>？</td>
+<td>避免修改调用方原本的 list 或原本的 tool dict，防止重排 tool 或其他地方共享时出现 bug。</td>
+</tr>
+<tr>
+<td>System prompt 怎么变成可缓存的？</td>
+<td>把字符串换成 longhand block 形式 <code>[{"type": "text", "text": ..., "cache_control": {"type": "ephemeral"}}]</code>。</td>
+</tr>
+<tr>
+<td>1 小时缓存用的 <code>cache_control</code> 值是什么？</td>
+<td><code>{"type": "ephemeral"}</code></td>
+</tr>
+<tr>
+<td>Tools、system prompt、messages 的 caching 处理顺序是什么？</td>
+<td>先 tools、再 system prompt、再 messages。</td>
+</tr>
+<tr>
+<td>只改 system prompt 时 cache 会发生什么？</td>
+<td>部分命中：tools 拿到 cache read（没变），新的 system prompt 拿到 cache write。</td>
+</tr>
+<tr>
+<td>Caching context 下「extremely sensitive」是什么意思？</td>
+<td>任何 cached 段的改动——哪怕一个字符——都会让 cache 失效，强制重写。</td>
+</tr>
+<tr>
+<td>为什么 caching 不适合长期、低频 workload？</td>
+<td>因为 cache 只存活一小时，调用之间就过期，你只付 cache write 却永远拿不到 read。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

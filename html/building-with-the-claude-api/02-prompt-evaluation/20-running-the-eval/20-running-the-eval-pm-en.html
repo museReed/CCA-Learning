@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Running The Eval Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Running the Eval — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Evaluation &amp; Iteration (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.3 (eval execution), 3.1 (eval design), 3.2 (test datasets)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 02-prompt-evaluation / Lesson 20</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>The eval runner is the AI team's "assembly line" — the minimal three-step machine that takes a dataset and emits structured quality data, turning what used to be opinion into something you can dashboard, diff, and ship against.</p>
+<hr />
+<h2>Mental Model: The Assembly Line</h2>
+<p>Think of the eval runner as a small factory floor with three stations:</p>
+<table>
+<thead>
+<tr>
+<th>Station</th>
+<th>Engineering name</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Workbench</td>
+<td><code>run_prompt</code></td>
+<td>Assembles the full prompt from a template + one test case, sends it to Claude, collects the raw output</td>
+</tr>
+<tr>
+<td>Quality check</td>
+<td><code>run_test_case</code></td>
+<td>Takes the output, runs it past the scorer, attaches a quality score</td>
+</tr>
+<tr>
+<td>Conveyor belt</td>
+<td><code>run_eval</code></td>
+<td>Feeds every test case through the line, collects a tidy report at the end</td>
+</tr>
+</tbody>
+</table>
+<p>A PM does not need to write the code, but should know the three stations exist — because the three stations are what separate "we ran some tests" from "we have an eval pipeline."</p>
+<hr />
+<h2>The "Walking Skeleton" Pattern</h2>
+<p>The most important PM concept in this lesson is the walking skeleton: a pipeline where every function exists but some have placeholder implementations. In this lesson, the grader is temporarily hardcoded to <code>score = 10</code> so the rest of the pipeline can be validated end-to-end before any real grading logic is built.</p>
+<p>Why PMs should care:</p>
+<ul>
+<li><strong>Integration risk is de-risked early</strong> — you can demo the pipeline to stakeholders before grading is ready.</li>
+<li><strong>Scope is protected</strong> — each later phase (real grader, parallel execution, dashboards) plugs in without touching the skeleton.</li>
+<li><strong>Timeline is honest</strong> — "we have a walking skeleton" is a real milestone; "we have something that looks like eval" is not.</li>
+</ul>
+<p>When an engineer says "we built an eval pipeline," ask: is it a walking skeleton, or is it production-ready? The two are months apart and should be tracked separately.</p>
+<hr />
+<h2>The Result Shape Is a PM Contract</h2>
+<p>Every result dict the pipeline produces has three keys:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>What's inside</th>
+<th>Why a PM cares</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>output</code></td>
+<td>The complete text response from Claude</td>
+<td>This is what a customer would have seen</td>
+</tr>
+<tr>
+<td><code>test_case</code></td>
+<td>The original input</td>
+<td>Context for reviewing why a case failed</td>
+</tr>
+<tr>
+<td><code>score</code></td>
+<td>Numeric quality score</td>
+<td>The headline metric for launch/OKR</td>
+</tr>
+</tbody>
+</table>
+<p>The PM value is that once the result shape is locked, you can layer on dashboards, regression tracking, and launch reports without asking engineering to re-instrument anything. The shape is a product-quality contract.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When the Walking-Skeleton Runner Is Enough</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Internal demo of "we have an eval" to execs</td>
+<td>Pipeline works end-to-end, score is placeholder — fine for storytelling</td>
+</tr>
+<tr>
+<td>Early scoping of a new AI feature</td>
+<td>Shows the team can iterate even before the grader is real</td>
+</tr>
+<tr>
+<td>Regression-free refactor of the runner itself</td>
+<td>The contract is stable; swapping internals is safe</td>
+</tr>
+</tbody>
+</table>
+<h3>When You Need the Real Grader (Lessons 21–22)</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Any customer-facing release</td>
+<td>Hardcoded 10 means no quality signal; you cannot ship on it</td>
+</tr>
+<tr>
+<td>Comparing two prompt versions</td>
+<td>Placeholder grader always gives a tie — useless for iteration</td>
+</tr>
+<tr>
+<td>Regression CI for prompt changes</td>
+<td>You need a real number to detect when a change makes things worse</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When the team reports "the eval ran successfully," ask:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Good answer</th>
+<th>Bad answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is the grader real or placeholder?</td>
+<td>Real (lessons 21/22)</td>
+<td>"Hardcoded 10 for now" (fine for dev, not launch)</td>
+</tr>
+<tr>
+<td>Are the results persisted somewhere we can diff between runs?</td>
+<td>Yes, saved to disk or a DB</td>
+<td>"Only printed to the notebook"</td>
+</tr>
+<tr>
+<td>How long does one eval run take?</td>
+<td>Acceptable for iteration cadence</td>
+<td>Too slow to run on every prompt change</td>
+</tr>
+<tr>
+<td>Can I see the three-key result format?</td>
+<td>Yes, shown in a dashboard</td>
+<td>"It's just a list of outputs"</td>
+</tr>
+<tr>
+<td>If I rerun with the same inputs, do I get the same outputs?</td>
+<td>Mostly yes (reproducibility for comparisons)</td>
+<td>"Results vary randomly" → needs <code>temperature</code> discussion</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Performance Reality Check</h2>
+<p>The lesson notes that a full eval run on Haiku can take around <strong>30 seconds</strong> even on a small dataset. For a PM, this is an early warning:</p>
+<ul>
+<li><strong>30 seconds × 1,000 test cases = 8 hours.</strong> Production-scale eval will need parallelization.</li>
+<li><strong>Rerun cost matters.</strong> If every prompt PR triggers an 8-hour eval, engineers will stop running it. Design the pipeline so it fits the iteration cadence.</li>
+<li><strong>Cost budget.</strong> Each run is money, especially at scale. Build that into the feature's operating cost from day one.</li>
+</ul>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Celebrating the walking skeleton as "eval is done"</strong> — it is the foundation, not the shipped feature; lessons 21–22 add the real grader.</li>
+<li><strong>Not persisting <code>results</code></strong> — if every run disappears after the notebook closes, there is no history, no diff, no regression signal.</li>
+<li><strong>Ignoring runtime</strong> — at scale, sequential loops become unusable; push for parallelization before the dataset grows.</li>
+<li><strong>Forgetting the result shape is a contract</strong> — when downstream tools depend on <code>output / test_case / score</code>, changing that shape silently breaks dashboards.</li>
+<li><strong>Confusing "walking skeleton" with "production pipeline"</strong> — they are months apart; track them as separate milestones.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>A walking-skeleton eval runner is the cheapest way to turn prompt quality into a dashboard-ready metric, even before the grader is real. The minute you have the three-function pipeline and a stable result shape, you can layer observability, CI, and regression tracking on top without further engineering changes. CCA exam questions about "how do you actually execute an eval against a dataset" are D3 task 3.3 — the answer is always the <code>run_eval → run_test_case → run_prompt</code> layering with a structured result dict.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Evaluation &amp; Iteration)</strong>: understand the three-function decomposition; know that the result dict has <code>output</code>, <code>test_case</code>, and <code>score</code>; recognize the walking-skeleton pattern.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: the pipeline is the substrate for production eval; stable contracts enable dashboards, CI, and regression gates.</li>
+<li>Exam trigger: any question about the <em>mechanics</em> of running an eval maps to this lesson's three functions.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three functions in the eval runner, and what does each do?</td>
+<td><code>run_eval</code> loops over the dataset, <code>run_test_case</code> orchestrates prompt + grader, <code>run_prompt</code> merges template with input and calls Claude.</td>
+</tr>
+<tr>
+<td>What is a "walking skeleton" in this lesson?</td>
+<td>A full pipeline with placeholder implementations (e.g., <code>score = 10</code>) so integration can be validated end-to-end before each stage is production-ready.</td>
+</tr>
+<tr>
+<td>What three keys does every result dict contain?</td>
+<td><code>output</code> (Claude's response), <code>test_case</code> (the original input), <code>score</code> (numeric quality score).</td>
+</tr>
+<tr>
+<td>Why is the stable result shape valuable for PMs?</td>
+<td>It is a contract — dashboards, regression tracking, and launch reports can be built on top without asking engineering to re-instrument.</td>
+</tr>
+<tr>
+<td>How long does one eval run roughly take on Haiku (per the lesson)?</td>
+<td>Around 30 seconds for a full small dataset.</td>
+</tr>
+<tr>
+<td>Why should a PM care about parallelization?</td>
+<td>Because sequential loops scale linearly with dataset size, and at production scale they become too slow to run on every prompt change.</td>
+</tr>
+<tr>
+<td>When is the walking-skeleton runner NOT enough for launch?</td>
+<td>When you need a real quality signal — i.e., any customer-facing release where the placeholder score would make the eval meaningless.</td>
+</tr>
+<tr>
+<td>What PM-level risk does "results printed but not persisted" create?</td>
+<td>No historical diff, no regression detection, and no way to attribute quality changes to specific prompt versions.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

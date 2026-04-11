@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rules Of Prompt Caching Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Rules of Prompt Caching — Engineering Deep Dive（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D5 — Enterprise Deployment (20%) 主要；D2 — Tool Design (18%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（成本／延迟优化）、5.2（生产性能）、2.1（tool schema 设计）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 57</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt caching 只有在你遵守规则时才有用：必须手动加 cache breakpoint、cached 内容必须逐字节相同、breakpoint 之前至少要有 1024 tokens、每次请求最多 4 个 breakpoint。</p>
+<hr />
+<h2>Cache 不是自动的——要加 Breakpoint</h2>
+<p>Caching 默认<strong>不</strong>启用。你必须在请求里的某个 block 上明确加上 <strong>cache breakpoint</strong> 才会触发。</p>
+<p>运行原则：</p>
+<ul>
+<li>Message 上的处理工作<strong>不会被自动缓存</strong>。</li>
+<li>你要手动在某个 block 上加 <code>cache_control</code> 字段。</li>
+<li>该 breakpoint <strong>之前与包含本身</strong> 的所有内容会被缓存。</li>
+<li>后续请求只有在到 breakpoint 为止的内容<strong>完全一致</strong>时才能读取 cache。</li>
+</ul>
+<p>换句话说，breakpoint 就是一条「切线」：上面的是可缓存的前缀，下面的每次都是新的、要重新 preprocess。</p>
+<hr />
+<h2>必须使用 Longhand Block 形式</h2>
+<p>Message 的简短形式（纯字符串）没有地方放 <code>cache_control</code>。你必须用 <strong>longhand block 形式</strong>：</p>
+<pre><code class="language-python"># Shorthand — 无法缓存
+messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;这是一份长文档...&quot;}]
+
+# Longhand — 可以缓存
+messages = [{
+    &quot;role&quot;: &quot;user&quot;,
+    &quot;content&quot;: [
+        {
+            &quot;type&quot;: &quot;text&quot;,
+            &quot;text&quot;: &quot;这是一份长文档...&quot;,
+            &quot;cache_control&quot;: {&quot;type&quot;: &quot;ephemeral&quot;},
+        }
+    ],
+}]
+</code></pre>
+<p><code>cache_control</code> 字段值设为 <code>{"type": "ephemeral"}</code>。<code>ephemeral</code> 是目前支持的缓存类型，对应 lesson 56 的 1 小时 TTL。</p>
+<hr />
+<h2>逐字节精确匹配</h2>
+<p>Cache 非常敏感。到 breakpoint 为止的内容必须在后续请求中<strong>完全一致</strong>才能复用。</p>
+<p>即使很小的改动都会使 cache 失效：</p>
+<ul>
+<li>多加一个「please」→ cache miss。</li>
+<li>改一个空白字符 → cache miss。</li>
+<li>把两句话顺序调换 → cache miss。</li>
+</ul>
+<p>只要前缀一变，Claude 就得从分歧点开始重新 preprocess，你还要再付一次 cache write 的费用。</p>
+<p><strong>设计启示：</strong> 稳定内容放前面，可变内容放后面。用户当下的问题应该放在 breakpoint <strong>之后</strong>，绝对不要放进缓存前缀里。</p>
+<hr />
+<h2>跨消息 Caching</h2>
+<p>Cache breakpoint 可以横跨多条 message，也可以跨不同 message 类型。如果你把 breakpoint 放在较靠后的 message 上，<strong>所有前面的 message</strong>（user、assistant 等）都会被纳入 cached 内容。</p>
+<p>这对对话型 agent 特别有用：你可以把到某个稳定点为止的整个对话历史都缓存下来，然后后面继续 append 新回合。</p>
+<hr />
+<h2>可缓存的 Block 类型</h2>
+<p>不限于 text block。Cache breakpoint 可以加在：</p>
+<ul>
+<li>System prompts</li>
+<li>Tool definitions</li>
+<li>Image blocks</li>
+<li>Tool use blocks</li>
+<li>Tool result blocks</li>
+</ul>
+<p>System prompt 和 tool definition 是<strong>最佳</strong>候选，因为它们在不同请求之间几乎不变，通常也是缓存收益最大的地方。</p>
+<hr />
+<h2>Cache Ordering：Tools → System → Messages</h2>
+<p>Claude 在幕后按固定顺序处理请求的各个组件：</p>
+<ol>
+<li><strong>Tools</strong>（如果有）</li>
+<li><strong>System prompt</strong>（如果有）</li>
+<li><strong>Messages</strong></li>
+</ol>
+<p>这个顺序决定了什么会被缓存到哪。如果你第一个 breakpoint 放在 messages 区，Claude 仍会把 tools 和 system prompt 视为 cached 前缀的一部分，因为它们在处理顺序上排在前面。</p>
+<p>每个请求最多可以放 <strong>4 个 cache breakpoint</strong>。常见的生产 layout：</p>
+<ul>
+<li>Breakpoint 1 → tools 末尾（缓存所有 tool schemas）</li>
+<li>Breakpoint 2 → system prompt 末尾（缓存 system prompt）</li>
+<li>Breakpoint 3 → message history 某处（缓存稳定的对话前缀）</li>
+<li>Breakpoint 4 → 保留给更细粒度的缓存</li>
+</ul>
+<p>细分 breakpoint 让请求不同段可以各自独立缓存——某段变了只失效那一段，不会整份 cache 打翻。</p>
+<hr />
+<h2>最小内容长度：1024 Tokens</h2>
+<p>有一条底线：<strong>breakpoint 之前与含本身的内容总和至少要 1024 tokens</strong> 才会被缓存。</p>
+<ul>
+<li>一句短短「Hi there!」跨不过这个门槛。</li>
+<li>你需要真的大的内容——长 system prompt、完整文档、或详尽的 tool schema——才能触发 caching。</li>
+<li>1024 token 是所有要 cache 的 block <strong>总和</strong>，不是单个 block。</li>
+</ul>
+<p>不到门槛时 <code>cache_control</code> 等于 no-op：不会建 cache，也不会省钱。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>用 shorthand 字符串形式</strong> — 没地方放 <code>cache_control</code>，什么都不会被缓存。先改成 longhand block 形式。</li>
+<li><strong>把可变内容放在 breakpoint 之前</strong> — 用户的新问题绝对不能放进 cached 前缀里，否则每次都 miss。</li>
+<li><strong>低于门槛就想缓存</strong> — 想缓存小于 1024 tokens 的 prompt 还期待省钱。它会静默什么都不做。</li>
+<li><strong>超过 4 个 breakpoint</strong> — 请求会被拒绝。设计时要抓住 4 个名额的预算。</li>
+<li><strong>不懂处理顺序</strong> — 把 breakpoint 放在 messages 上却心理假设 tools 区「没被缓存」。它被缓存了——tools 和 system prompt 在处理顺序上排前面，永远是 message 层级前缀的一部分。</li>
+<li><strong>依赖 fuzzy matching</strong> — Caching 是逐字节精确。先规范化空白、标点、顺序，再说前缀是稳定的。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>定义缓存成败的四条规则：(1) 用 breakpoint 明确 opt in、(2) 逐字节比对、(3) 达到 1024 token 底线、(4) 遵守 tools → system → messages 的顺序与 4 breakpoint 上限。任一条没达成，cache 就静默没用——更糟的是你还为永远不会被复用的内容付了 cache write。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5（Enterprise Deployment）</strong> — 考题会测你是否知道 caching 是手动、逐字节、1024 token 底线。</li>
+<li><strong>D2（Tool Design）</strong> — tool definition 是 caching 的头号目标，因为它跨请求稳定；考题可能问「tool 量大的 workflow 要把 breakpoint 放哪？」</li>
+<li>记住处理顺序：tools、system prompt、messages。这顺序直接对应「我该先缓存什么？」</li>
+<li>4 个 breakpoint、<code>{"type": "ephemeral"}</code>、1024 token 底线——这些是常考数字。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt caching 是自动的吗？</td>
+<td>不是——必须手动在请求的某个 block 上加 <code>cache_control</code> 字段（cache breakpoint）。</td>
+</tr>
+<tr>
+<td><code>cache_control</code> 填什么值？</td>
+<td><code>{"type": "ephemeral"}</code>——目前支持的缓存类型，对应 1 小时 TTL。</td>
+</tr>
+<tr>
+<td>哪种 message 形式支持 cache breakpoint？</td>
+<td>Longhand block 形式（<code>content</code> 是 block 的 list）。Shorthand 字符串形式无法携带 <code>cache_control</code>。</td>
+</tr>
+<tr>
+<td>放了 breakpoint 后 Claude 会缓存多少内容？</td>
+<td>Breakpoint 之前与包含本身的所有内容。</td>
+</tr>
+<tr>
+<td>Follow-up 调用时 cached 内容要完全一样吗？</td>
+<td>要——逐字节相同。加一个「please」都会失效。</td>
+</tr>
+<tr>
+<td>可缓存前缀的最小 token 数是多少？</td>
+<td>1024 tokens（breakpoint 之前与含本身的所有 block 总和）。</td>
+</tr>
+<tr>
+<td>一个请求最多放几个 breakpoint？</td>
+<td>最多 4 个。</td>
+</tr>
+<tr>
+<td>Claude 处理请求组件的顺序是什么？</td>
+<td>先 tools、再 system prompt、再 messages。</td>
+</tr>
+<tr>
+<td>哪些是最佳缓存候选？为什么？</td>
+<td>System prompt 与 tool definition——它们跨请求很少变动，通常是最大的稳定输入块。</td>
+</tr>
+<tr>
+<td>后面的 message 上放 breakpoint 可以缓存前面的 message 吗？</td>
+<td>可以——跨消息缓存会把 breakpoint 之前所有 message（user、assistant 等）都纳入。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

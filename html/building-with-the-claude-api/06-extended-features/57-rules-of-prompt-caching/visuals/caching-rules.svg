@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Rules of Prompt Caching</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Five constraints you must respect to get a cache hit — size, TTL, exact prefix, breakpoint count, ordering</text>
+
+  <!-- Rule 1: Minimum size -->
+  <rect x="40" y="90" width="300" height="150" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+  <circle cx="70" cy="120" r="16" fill="#3B82F6"/>
+  <text x="70" y="125" text-anchor="middle" font-size="14" font-weight="700" fill="white">1</text>
+  <text x="96" y="120" font-size="14" font-weight="600" fill="#1E293B">Minimum Block Size</text>
+  <text x="96" y="138" font-size="11" fill="#6B7280">Content must clear the token floor</text>
+  <rect x="56" y="152" width="268" height="34" rx="6" fill="white" stroke="#BFDBFE"/>
+  <text x="70" y="173" font-size="11" fill="#1E293B" font-weight="600">1,024 tokens</text>
+  <text x="180" y="173" font-size="10" fill="#6B7280">Haiku / most models</text>
+  <rect x="56" y="192" width="268" height="34" rx="6" fill="white" stroke="#BFDBFE"/>
+  <text x="70" y="213" font-size="11" fill="#1E293B" font-weight="600">2,048 tokens</text>
+  <text x="180" y="213" font-size="10" fill="#6B7280">Opus (larger min threshold)</text>
+
+  <!-- Rule 2: TTL -->
+  <rect x="350" y="90" width="300" height="150" rx="12" fill="#F3E8FF" stroke="#8B5CF6" stroke-width="1.5" filter="url(#shadow)"/>
+  <circle cx="380" cy="120" r="16" fill="#8B5CF6"/>
+  <text x="380" y="125" text-anchor="middle" font-size="14" font-weight="700" fill="white">2</text>
+  <text x="406" y="120" font-size="14" font-weight="600" fill="#1E293B">Cache TTL</text>
+  <text x="406" y="138" font-size="11" fill="#6B7280">How long entries survive</text>
+  <rect x="366" y="152" width="268" height="34" rx="6" fill="white" stroke="#DDD6FE"/>
+  <text x="380" y="173" font-size="11" fill="#1E293B" font-weight="600">5 minutes</text>
+  <text x="470" y="173" font-size="10" fill="#6B7280">default, cheapest write</text>
+  <rect x="366" y="192" width="268" height="34" rx="6" fill="white" stroke="#DDD6FE"/>
+  <text x="380" y="213" font-size="11" fill="#1E293B" font-weight="600">1 hour</text>
+  <text x="470" y="213" font-size="10" fill="#6B7280">opt-in, higher write cost</text>
+
+  <!-- Rule 3: Exact prefix -->
+  <rect x="660" y="90" width="300" height="150" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5" filter="url(#shadow)"/>
+  <circle cx="690" cy="120" r="16" fill="#F59E0B"/>
+  <text x="690" y="125" text-anchor="middle" font-size="14" font-weight="700" fill="white">3</text>
+  <text x="716" y="120" font-size="14" font-weight="600" fill="#1E293B">Exact-Match Prefix</text>
+  <text x="716" y="138" font-size="11" fill="#6B7280">One character off → cache miss</text>
+  <rect x="676" y="152" width="268" height="34" rx="6" fill="white" stroke="#FDE68A"/>
+  <text x="690" y="173" font-size="10" font-family="Menlo, monospace" fill="#166534">"Summarize the document."</text>
+  <text x="920" y="173" text-anchor="end" font-size="11" fill="#22C55E" font-weight="700">✓ hit</text>
+  <rect x="676" y="192" width="268" height="34" rx="6" fill="white" stroke="#FDE68A"/>
+  <text x="690" y="213" font-size="10" font-family="Menlo, monospace" fill="#991B1B">"Please summarize the doc."</text>
+  <text x="920" y="213" text-anchor="end" font-size="11" fill="#EF4444" font-weight="700">✗ miss</text>
+
+  <!-- Rule 4: Breakpoints -->
+  <rect x="40" y="258" width="460" height="150" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+  <circle cx="70" cy="288" r="16" fill="#22C55E"/>
+  <text x="70" y="293" text-anchor="middle" font-size="14" font-weight="700" fill="white">4</text>
+  <text x="96" y="288" font-size="14" font-weight="600" fill="#1E293B">Max 4 Cache Breakpoints</text>
+  <text x="96" y="306" font-size="11" fill="#6B7280">Each one caches everything before it (cumulative)</text>
+  <g transform="translate(56,322)">
+    <rect x="0" y="0" width="80" height="30" rx="4" fill="#DBEAFE" stroke="#3B82F6"/>
+    <text x="40" y="19" text-anchor="middle" font-size="10" fill="#1E40AF" font-weight="600">tools</text>
+    <line x1="86" y1="15" x2="94" y2="15" stroke="#64748B" stroke-width="1.5"/>
+    <rect x="96" y="0" width="80" height="30" rx="4" fill="#DBEAFE" stroke="#3B82F6"/>
+    <text x="136" y="19" text-anchor="middle" font-size="10" fill="#1E40AF" font-weight="600">system</text>
+    <line x1="182" y1="15" x2="190" y2="15" stroke="#64748B" stroke-width="1.5"/>
+    <rect x="192" y="0" width="80" height="30" rx="4" fill="#DBEAFE" stroke="#3B82F6"/>
+    <text x="232" y="19" text-anchor="middle" font-size="10" fill="#1E40AF" font-weight="600">msg[0]</text>
+    <line x1="278" y1="15" x2="286" y2="15" stroke="#64748B" stroke-width="1.5"/>
+    <rect x="288" y="0" width="80" height="30" rx="4" fill="#DBEAFE" stroke="#3B82F6"/>
+    <text x="328" y="19" text-anchor="middle" font-size="10" fill="#1E40AF" font-weight="600">msg[n]</text>
+    <!-- breakpoint flags -->
+    <text x="40" y="50" text-anchor="middle" font-size="12" fill="#F59E0B" font-weight="700">⚑</text>
+    <text x="136" y="50" text-anchor="middle" font-size="12" fill="#F59E0B" font-weight="700">⚑</text>
+    <text x="232" y="50" text-anchor="middle" font-size="12" fill="#F59E0B" font-weight="700">⚑</text>
+    <text x="328" y="50" text-anchor="middle" font-size="12" fill="#F59E0B" font-weight="700">⚑</text>
+  </g>
+  <text x="270" y="395" text-anchor="middle" font-size="10" fill="#14532D">Example: 4 breakpoints across tools + system + conversation history</text>
+
+  <!-- Rule 5: Ordering -->
+  <rect x="510" y="258" width="450" height="150" rx="12" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5" filter="url(#shadow)"/>
+  <circle cx="540" cy="288" r="16" fill="#EF4444"/>
+  <text x="540" y="293" text-anchor="middle" font-size="14" font-weight="700" fill="white">5</text>
+  <text x="566" y="288" font-size="14" font-weight="600" fill="#1E293B">Processing Order (fixed)</text>
+  <text x="566" y="306" font-size="11" fill="#6B7280">Place breakpoints with this order in mind</text>
+
+  <g transform="translate(526,322)">
+    <rect x="0" y="0" width="100" height="36" rx="6" fill="white" stroke="#FCA5A5"/>
+    <text x="50" y="22" text-anchor="middle" font-size="11" fill="#991B1B" font-weight="600">tools</text>
+    <path d="M102,18 L118,18" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <rect x="120" y="0" width="100" height="36" rx="6" fill="white" stroke="#FCA5A5"/>
+    <text x="170" y="22" text-anchor="middle" font-size="11" fill="#991B1B" font-weight="600">system</text>
+    <path d="M222,18 L238,18" stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <rect x="240" y="0" width="100" height="36" rx="6" fill="white" stroke="#FCA5A5"/>
+    <text x="290" y="22" text-anchor="middle" font-size="11" fill="#991B1B" font-weight="600">messages</text>
+  </g>
+  <text x="735" y="395" text-anchor="middle" font-size="10" fill="#991B1B">Tip: cache stable prefix (tools + system) first — they rarely change</text>
+
+  <!-- Bottom: cache_control snippet -->
+  <rect x="40" y="430" width="920" height="130" rx="12" fill="#0F172A" filter="url(#shadow)"/>
+  <text x="56" y="456" font-size="11" font-weight="700" fill="#94A3B8">Longhand block with cache_control (required to set a breakpoint)</text>
+  <text x="56" y="482" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">{</text>
+  <text x="76" y="498" font-size="11" font-family="Menlo, monospace" fill="#34D399">"type"</text>
+  <text x="132" y="498" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">:</text>
+  <text x="146" y="498" font-size="11" font-family="Menlo, monospace" fill="#FDE68A">"text"</text>
+  <text x="192" y="498" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">,</text>
+  <text x="206" y="498" font-size="11" font-family="Menlo, monospace" fill="#34D399">"text"</text>
+  <text x="252" y="498" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">: </text>
+  <text x="272" y="498" font-size="11" font-family="Menlo, monospace" fill="#FDE68A">"&lt;long system prompt ≥ 1024 tokens&gt;"</text>
+  <text x="594" y="498" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">,</text>
+  <text x="76" y="514" font-size="11" font-family="Menlo, monospace" fill="#34D399">"cache_control"</text>
+  <text x="208" y="514" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">: { </text>
+  <text x="240" y="514" font-size="11" font-family="Menlo, monospace" fill="#34D399">"type"</text>
+  <text x="296" y="514" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">: </text>
+  <text x="316" y="514" font-size="11" font-family="Menlo, monospace" fill="#FDE68A">"ephemeral"</text>
+  <text x="416" y="514" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">, </text>
+  <text x="436" y="514" font-size="11" font-family="Menlo, monospace" fill="#34D399">"ttl"</text>
+  <text x="476" y="514" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">: </text>
+  <text x="496" y="514" font-size="11" font-family="Menlo, monospace" fill="#FDE68A">"5m"</text>
+  <text x="532" y="514" font-size="11" font-family="Menlo, monospace" fill="#E2E8F0">}</text>
+  <text x="56" y="530" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">}</text>
+  <text x="56" y="550" font-size="10" fill="#94A3B8">Shorthand (bare string) has no place for cache_control — you must use the longhand object form.</text>
+</svg>

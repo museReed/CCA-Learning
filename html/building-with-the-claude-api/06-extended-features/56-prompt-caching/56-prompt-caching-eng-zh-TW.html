@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Caching Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Prompt Caching — Engineering Deep Dive（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>詳情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D5 — Enterprise Deployment (20%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（成本／延遲優化）、5.2（production 效能）、1.2（multi-turn 效率）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 06-extended-features / Lesson 56</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Prompt caching 是 production 等級的優化機制，把 Claude 每次 request 要做的 preprocessing 工作（tokenization、embeddings、context 分析）存起來，讓後續同前綴的 request 能直接重用，而不是每次從零重算——結果就是更快、更便宜。</p>
+<hr />
+<h2>Claude 一般怎麼處理 request？</h2>
+<p>每條你送給 Claude 的訊息，在真正產出任何輸出 token 之前，都要先走一條昂貴的 preprocessing pipeline：</p>
+<ol>
+<li><strong>Tokenization（斷詞）</strong> — 把 prompt 切成一個個 token。</li>
+<li><strong>Embedding（向量化）</strong> — 每個 token 轉成高維向量。</li>
+<li><strong>Context 分析</strong> — 根據上下文補充語境，讓後面的 attention 能推理整個序列。</li>
+<li><strong>生成</strong> — 前三步做完，才開始真正產出文字。</li>
+</ol>
+<p>關鍵點：回傳完答案之後，<strong>這些 preprocessing 結果全部被丟掉</strong>。一分鐘後你再送同一份 6K token 的 prompt，Claude 會把所有步驟重跑一次。</p>
+<hr />
+<h2>為什麼「丟掉」會是問題</h2>
+<p>只要你的 workflow 重複用到同一份 base content，這種浪費就很明顯：</p>
+<ul>
+<li>一個對話裡你不斷要 Claude 改寫同一份 summary。</li>
+<li>對同一份 50 頁 PDF 連問 20 個問題的文件分析流程。</li>
+<li>Agent loop 每一輪都要帶同樣的 system prompt + tool schema。</li>
+</ul>
+<p>第 2 次 request 時，Claude 得把剛剛幾秒前才分析過的內容再 preprocess 一遍。課程原話：「<em>我剛剛才處理過那段訊息、然後把結果全丟了——明明可以重用！</em>」</p>
+<p>這個成本要付兩次：一次是延遲（input 處理時間），一次是金錢（input token 計費）。</p>
+<hr />
+<h2>Prompt Caching 怎麼解？</h2>
+<p>Prompt caching 改寫這條 workflow，核心是：<strong>preprocessing 的結果不再丟掉，而是存起來</strong>。</p>
+<ul>
+<li>第一次 request，Claude 照常 preprocess，但把中間結果寫入 cache。</li>
+<li>Cache 像一張對照表：「如果我之後再看到一模一樣的前綴，就直接重用結果。」</li>
+<li>後續 request 如果送了一模一樣的前綴，命中 cache，就跳過 preprocessing 直接進入生成，只為新的（未 cache 的）token 計費。</li>
+</ul>
+<p>結果：昂貴的 preprocessing 費用被攤平在許多次呼叫之間，而不是每次都重新付一次。</p>
+<hr />
+<h2>主要好處</h2>
+<table>
+<thead>
+<tr>
+<th>好處</th>
+<th>Production 意義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>更快的回應</strong></td>
+<td>Cache 命中的 request 跳過 tokenization／embedding／context，time-to-first-token 下降。</td>
+</tr>
+<tr>
+<td><strong>更低的成本</strong></td>
+<td>命中的部分以顯著折扣計費，不再按 fresh input token 收費。</td>
+</tr>
+<tr>
+<td><strong>自動化優化</strong></td>
+<td>第一次 request 寫入 cache，後續 request 自動讀取——不用自己寫 client 端快取邏輯。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>重要限制</h2>
+<table>
+<thead>
+<tr>
+<th>限制</th>
+<th>含義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cache 存活 1 小時</strong></td>
+<td>只對「同一小時內頻繁重複呼叫」的 workflow 有用。閒置對話過期就沒了。</td>
+</tr>
+<tr>
+<td><strong>使用場景有限</strong></td>
+<td>只有你「重複送同樣內容」時才有用，一次性 prompt 沒有幫助。</td>
+</tr>
+<tr>
+<td><strong>需要高頻率</strong></td>
+<td>同一前綴重用越頻繁，省得越多；零星呼叫可能連設定成本都不划算。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Prompt Caching 什麼時候最有用？</h2>
+<p>課程點出兩個典型場景：</p>
+<ol>
+<li><strong>文件分析 workflow</strong> — 同一份大型文件被多次引用，你在上面問不同問題。文件只 cache 一次，後續問題便宜地讀。</li>
+<li><strong>反覆編輯任務</strong> — base content（例如草稿）不變，你只針對特定段落反覆微調。草稿被 cache，修訂是增量。</li>
+</ol>
+<p>更廣義地說，只要是「<strong>大而穩定的前綴 + 小而變動的後綴</strong>」的 workflow，都是強力候選。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>對一次性 prompt 開 cache</strong> — 為永遠不會再被讀的內容付 cache-write 附加費。Cache 只有「一小時內被重用」才省錢。</li>
+<li><strong>以為 caching 會自動發生</strong> — 不會。沒有明確 opt-in（cache breakpoint，見 lesson 57），Claude 照常丟掉 preprocessing。</li>
+<li><strong>忽略 1 小時 TTL</strong> — 把依賴 cache 的 workflow 設計成低頻執行，cache entry 重用前就過期。</li>
+<li><strong>以為 cache 只省延遲</strong> — 它同時省可觀的 input token 成本，通常這才是 production 最大的勝利。</li>
+<li><strong>低估 preprocessing 成本</strong> — 以為 input token 「免錢」。面對大型 system prompt 和 tool schema，它佔總成本和總延遲比想像中大很多。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prompt caching 本質是<strong>攤平（amortization）技巧</strong>：大而穩定前綴的昂貴 preprocessing 只付一次，之後一小時內所有共用這段前綴的呼叫都可重用。在 production，這是 agent loop、RAG pipeline、以及任何重複送同樣 context 的 workflow 最大單一的成本／延遲優化手段。是 D5 Enterprise Deployment 的基本功。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5（Enterprise Deployment）</strong> — caching 是 task 5.1（成本／延遲）下核心的 production 優化。要知道 caching 同時降<strong>成本和延遲</strong>。</li>
+<li><strong>D1（Agentic Architecture）</strong> — agent loop 帶穩定的 system prompt 和 tool schema，是 caching 的典型受益者；同樣的 context 每輪都要送一次。</li>
+<li>考題常見問法：「同一個大 prompt 要被重複送時，怎麼降低成本與延遲？」→ 答案是 prompt caching。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt caching 解什麼問題？</td>
+<td>Claude 每次 request 都要重跑昂貴的 preprocessing（tokenization、embeddings、context 分析），即使剛剛才處理過同樣內容。Caching 重用那份工作。</td>
+</tr>
+<tr>
+<td>Claude 一般做哪四個 preprocessing 步驟？</td>
+<td>Tokenization、embedding、基於上下文的 context 分析，然後才是輸出生成。</td>
+</tr>
+<tr>
+<td>Cache 存活多久？</td>
+<td>一小時。</td>
+</tr>
+<tr>
+<td>Prompt caching 提供哪兩個好處？</td>
+<td>更快的回應（更低延遲）以及 cache 部分更低的成本。</td>
+</tr>
+<tr>
+<td>什麼情境下 prompt caching 沒用？</td>
+<td>一次性 prompt、一小時內打不到同一前綴的零星 workflow、或每次都在變的內容。</td>
+</tr>
+<tr>
+<td>說兩個典型的 prompt caching 場景。</td>
+<td>文件分析 workflow（對同一份長文件問很多問題）和反覆編輯任務（同一份 base content 反覆微調）。</td>
+</tr>
+<tr>
+<td>Prompt caching 是自動的嗎？</td>
+<td>不是——必須明確啟用；不 opt-in 的話 Claude 照常丟掉 preprocessing。</td>
+</tr>
+<tr>
+<td>啟用 caching 後，第一次 request 發生什麼事？</td>
+<td>Claude 照常做 preprocessing，但把中間結果存起來，後續 request 便可重用而不用重算。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

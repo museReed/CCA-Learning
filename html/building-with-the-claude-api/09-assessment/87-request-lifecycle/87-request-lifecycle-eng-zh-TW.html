@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request Lifecycle Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>請求生命週期 Request Lifecycle — 工程深入</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D1 — Agentic Coding &amp; Architecture（22%）主要；D5 — Enterprise Deployment（20%）次要</td>
+</tr>
+<tr>
+<td>任務聲明</td>
+<td>1.1（API request flow）、5.1（secure architecture）、5.3（stop reasons 與 token 限制）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 09-assessment / Lesson 87</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話重點</h2>
+<p>每次 Claude 互動都是一個五步驟來回：client → 你的 server → Anthropic API → Claude 內部 pipeline（tokenize、embed、contextualize、generate）→ 回到 client —— 看懂每一步，你才能設計安全架構、快速 debug 生產問題。</p>
+<hr />
+<h2>五步驟請求流程</h2>
+<p>每一次與 Claude 的互動都遵循可預測的五個階段：</p>
+<ol>
+<li><strong>Request to server</strong> —— client app 把使用者輸入送到你的 backend</li>
+<li><strong>Request to Anthropic API</strong> —— 你的 server 帶著 API key 轉發請求</li>
+<li><strong>Model processing</strong> —— Claude 執行 tokenize、embed、contextualize、generate</li>
+<li><strong>Response to server</strong> —— Anthropic 回傳結構化的 response，包含 message、usage、stop_reason</li>
+<li><strong>Response to client</strong> —— 你的 server 把產生的文字轉回 UI</li>
+</ol>
+<p>不論你在打造 chatbot、IDE 整合、或 agentic workflow，這個形狀都一樣。CCA 課綱的每一個進階模式都是建在這個 loop 上。</p>
+<hr />
+<h2>為什麼一定要有 Server（不可直連）</h2>
+<p>來源立場明確：<strong>絕對不要從 client-side 程式碼直接呼叫 Anthropic API</strong>。理由：</p>
+<ul>
+<li>API request 需要 secret API key 做認證</li>
+<li>把 key 放在 client code 中是嚴重的資安漏洞</li>
+<li>任何人都可以把 key 挖出來做未授權的請求</li>
+</ul>
+<p>正確做法：你的 web 或 mobile app 把請求送到<strong>你自己的 server</strong>，server 把 API key 保存在安全儲存中，再對上游發送經過清理的請求。這不是便利性建議 —— 這是唯一安全的架構。</p>
+<p>這個分層也給你地方可以加 observability、rate limiting、per-user 額度、prompt template、audit logging。每一個生產環境的 Claude app 都有一層 server 介於使用者和 Anthropic 之間。</p>
+<hr />
+<h2>發出 API Request</h2>
+<p>Server 對 Anthropic API 發請求時，可以用官方 SDK（Python、TypeScript、JavaScript、Go、Ruby）或原生 HTTP。每個 request 都必須帶四個核心欄位：</p>
+<table>
+<thead>
+<tr>
+<th>欄位</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API Key</strong></td>
+<td>讓 Anthropic 辨識你的請求</td>
+</tr>
+<tr>
+<td><strong>Model</strong></td>
+<td>要用的 model 名稱（例如 <code>"claude-3-sonnet"</code>）</td>
+</tr>
+<tr>
+<td><strong>Messages</strong></td>
+<td>含使用者輸入的 list</td>
+</tr>
+<tr>
+<td><strong>Max Tokens</strong></td>
+<td>Claude 可生成的 token 數上限</td>
+</tr>
+</tbody>
+</table>
+<p>最小 Python 範例：</p>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()  # 從環境變數讀 ANTHROPIC_API_KEY
+
+response = client.messages.create(
+    model=&quot;claude-3-sonnet&quot;,
+    max_tokens=1024,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello, Claude&quot;}],
+)
+print(response.content[0].text)
+</code></pre>
+<p>API key 放在 server 的環境變數或 secret manager —— 永遠不要出現在 client 打包的程式碼中。</p>
+<hr />
+<h2>Claude 內部處理</h2>
+<p>Anthropic 收到請求後，Claude 走四個內部階段：</p>
+<h3>1. Tokenization</h3>
+<p>Claude 先把輸入文字切成 token。token 可以是整個字、字的一部分、空格或符號。來源建議「一個字約等於一個 token」作為直覺。</p>
+<h3>2. Embedding</h3>
+<p>每個 token 被轉成 embedding —— 代表該字所有可能意義的長串數字。把 embedding 想成「數值化定義」，捕捉語義關係。重點是：一個 token 起初承載了<strong>所有</strong>可能意義，消歧義在下一步。</p>
+<p>字常常有多重意義。來源以 "quantum" 為例：</p>
+<ul>
+<li>物理學中的離散量</li>
+<li>量子力學或量子物理概念</li>
+<li>極小的、次原子層級的</li>
+<li>量子計算應用</li>
+</ul>
+<h3>3. Contextualization</h3>
+<p>Claude 根據周圍字詞來調整每個 embedding，決定在當前情境下最可能的意義。這個過程調整數值表示以凸顯對的定義。這就是 model 如何為手上這句話挑出<strong>這個</strong>意義的 "quantum"。</p>
+<h3>4. Generation</h3>
+<p>Contextualized embeddings 通過 output layer，計算每個可能的下一個字的機率。Claude 不會永遠挑最高機率的字 —— 它混用機率和受控的隨機性，產生自然、多變的回應。選出一個字後，加進序列，對下一個字重複整個流程。</p>
+<hr />
+<h2>Claude 何時停止生成</h2>
+<p>每產出一個 token，Claude 檢查幾個條件決定要不要繼續：</p>
+<ul>
+<li><strong>Max tokens reached</strong> —— 達到你指定的上限了嗎？</li>
+<li><strong>Natural ending</strong> —— 產生了 end-of-sequence token？</li>
+<li><strong>Stop sequence</strong> —— 碰到預設的停止片語？</li>
+</ul>
+<p>這三種情況在 response 裡會產生不同的 <code>stop_reason</code>。在應用程式碼中區分處理，是「健壯整合」和「悄悄截斷答案」的差別。</p>
+<hr />
+<h2>API Response</h2>
+<p>生成結束後，API 回傳結構化 response，內容包含：</p>
+<table>
+<thead>
+<tr>
+<th>欄位</th>
+<th>意義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Message</strong></td>
+<td>產生的文字</td>
+</tr>
+<tr>
+<td><strong>Usage</strong></td>
+<td>input/output token 數（用於計費和預算追蹤）</td>
+</tr>
+<tr>
+<td><strong>Stop Reason</strong></td>
+<td>為什麼停止生成（<code>end_turn</code>、<code>max_tokens</code>、<code>stop_sequence</code>、<code>tool_use</code>）</td>
+</tr>
+</tbody>
+</table>
+<p>Server 收到後把產生的文字轉回 client 應用，最終出現在 UI 上。</p>
+<hr />
+<h2>實務上為什麼重要</h2>
+<p>來源列出看懂這個流程的四個好處：</p>
+<ul>
+<li>設計保護 API key 的安全架構</li>
+<li>為你的使用情境設適當的 token 上限</li>
+<li>在程式碼中處理不同 stop reason</li>
+<li>透過了解 pipeline 中問題可能發生的位置來 debug</li>
+</ul>
+<p>換句話說，生命週期是「出事時你需要的那張地圖」。延遲飆高？你可以推斷是網路（1-2、4-5 步）還是 model（3 步）。輸出被截斷？看 stop_reason。帳單爆炸？看 usage。沒這張地圖，每一次故障都只能瞎猜。</p>
+<hr />
+<h2>常見錯誤</h2>
+<ol>
+<li><strong>從 client code 直接呼 Anthropic API</strong> —— 洩漏 API key；來源明確說這絕對不行。</li>
+<li><strong>不處理不同 stop reason</strong> —— 把所有 response 當自然結束，會悄悄掩蓋 <code>max_tokens</code> 截斷。</li>
+<li><strong>忽略 usage 欄位</strong> —— 帳單爆炸是必然的，per-user 預算也壞掉。</li>
+<li><strong>寫死 model 名稱</strong> —— model 升級會很痛苦；應透過環境變數設定。</li>
+<li><strong>忘了 max_tokens</strong> —— 不設上限的請求會帶來未預期的成本和延遲。</li>
+<li><strong>誤把 tokenization 當 word split</strong> —— token 可能是子字、空白或符號；「一字 ≈ 一 token」是直覺，不是規則。</li>
+</ol>
+<blockquote>
+<p><strong>關鍵洞察</strong></p>
+<p>Request lifecycle 是讓 CCA 課綱中所有其他主題變得可理解的心智模型。Tool use、streaming、caching、agents —— 它們全都是這五步流程的變體。記熟一次，每個進階模式都變成「這一步，稍作修改」。跳過這步，每一種失敗模式都像魔法。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：生命週期是所有 agentic 模式的基礎。會考「X 發生在 request flow 的哪一步？」</li>
+<li><strong>D5（Enterprise Deployment）</strong>：安全架構（server 介於 client 和 API）、token 預算、stop-reason 處理是生產部署必備。</li>
+<li>注意：「為什麼 client 和 Anthropic 之間要有 server？」→ API key 安全性。「Claude 內部做什麼？」→ tokenize、embed、contextualize、generate。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude request lifecycle 的五個步驟是什麼？</td>
+<td>Request to server → request to Anthropic API → model processing → response to server → response to client。</td>
+</tr>
+<tr>
+<td>為什麼 request 一定要走你自己的 server，不能從 client 直接發？</td>
+<td>Client-side 的 API key 可以被挖出來，造成嚴重資安漏洞，讓任何人發未授權請求。</td>
+</tr>
+<tr>
+<td>每個 API request 必須包含哪四個核心欄位？</td>
+<td>API Key、Model、Messages、Max Tokens。</td>
+</tr>
+<tr>
+<td>Claude 內部處理的四個階段是什麼？</td>
+<td>Tokenization、embedding、contextualization、generation。</td>
+</tr>
+<tr>
+<td>什麼是 tokenization？</td>
+<td>把輸入文字切成更小的 chunk（整字、字的一部分、空格或符號），叫 token。</td>
+</tr>
+<tr>
+<td>什麼是 embedding？</td>
+<td>代表一個 token 所有可能意義的長串數字 —— 數值化的定義。</td>
+</tr>
+<tr>
+<td>Contextualization 做什麼？</td>
+<td>根據周圍字詞調整每個 embedding，決定當前情境下最可能的意義。</td>
+</tr>
+<tr>
+<td>為什麼 Claude 不永遠挑最高機率的下一個字？</td>
+<td>它混用機率和受控的隨機性，產生自然、多變的回應。</td>
+</tr>
+<tr>
+<td>哪三個條件讓 Claude 停止生成？</td>
+<td>達到 max tokens、自然結束（end-of-sequence token）、或碰到預設的 stop sequence。</td>
+</tr>
+<tr>
+<td>API response 含哪三個欄位？</td>
+<td>Message（產生的文字）、Usage（input/output token 數）、Stop Reason（停止原因）。</td>
+</tr>
+<tr>
+<td>為什麼懂生命週期有助於 debug？</td>
+<td>讓你能定位故障發生在哪一環 —— 網路、認證、model 處理、或 response 處理。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
