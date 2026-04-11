@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="SF Pro Display, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748B"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">Fine-Grained Tool Calling — Streaming Behavior</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">Default validates &amp; buffers top-level keys; fine_grained=True streams chunks immediately (you handle invalid JSON)</text>
+
+  <!-- Column 1: Default (buffered + validated) -->
+  <rect x="40" y="90" width="440" height="470" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="90" width="440" height="48" rx="12" fill="#3B82F6"/>
+  <rect x="40" y="126" width="440" height="12" fill="#3B82F6"/>
+  <text x="260" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">Default Streaming (validated)</text>
+
+  <rect x="95" y="152" width="330" height="26" rx="13" fill="#DBEAFE"/>
+  <text x="260" y="170" text-anchor="middle" font-size="11" font-weight="600" fill="#1E40AF">API buffers until top-level key-value pair is complete</text>
+
+  <!-- Timeline: tokens -->
+  <text x="60" y="202" font-size="11" fill="#6B7280" font-weight="600">Claude generates →</text>
+  <rect x="60" y="212" width="400" height="32" rx="6" fill="#FFFFFF" stroke="#93C5FD" stroke-width="1"/>
+  <text x="68" y="232" font-size="10" font-family="Menlo, monospace" fill="#1E293B">"abstract": "This paper..." · "meta": { "word_count": 847, ... }</text>
+
+  <!-- Validation gate -->
+  <text x="60" y="268" font-size="11" fill="#6B7280" font-weight="600">API validates →</text>
+  <rect x="60" y="278" width="400" height="56" rx="6" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+  <circle cx="80" cy="306" r="10" fill="#F59E0B"/>
+  <text x="80" y="310" text-anchor="middle" font-size="12" font-weight="700" fill="white">✓</text>
+  <text x="100" y="302" font-size="11" fill="#92400E" font-weight="600">Wait for full "abstract" value</text>
+  <text x="100" y="318" font-size="10" fill="#78350F">Validate against schema → flush as burst</text>
+
+  <!-- Client receives -->
+  <text x="60" y="360" font-size="11" fill="#6B7280" font-weight="600">Client receives →</text>
+  <g transform="translate(60,370)">
+    <rect x="0"   y="0" width="85" height="26" rx="4" fill="#DBEAFE" stroke="#3B82F6"/>
+    <text x="42" y="17" text-anchor="middle" font-size="10" fill="#1E40AF">delay...</text>
+    <rect x="95"  y="0" width="85" height="26" rx="4" fill="#3B82F6"/>
+    <text x="137" y="17" text-anchor="middle" font-size="10" fill="white">burst 1</text>
+    <rect x="190" y="0" width="85" height="26" rx="4" fill="#DBEAFE" stroke="#3B82F6"/>
+    <text x="232" y="17" text-anchor="middle" font-size="10" fill="#1E40AF">delay...</text>
+    <rect x="285" y="0" width="85" height="26" rx="4" fill="#3B82F6"/>
+    <text x="327" y="17" text-anchor="middle" font-size="10" fill="white">burst 2</text>
+  </g>
+
+  <!-- Pros/Cons -->
+  <rect x="60" y="420" width="400" height="124" rx="8" fill="white" stroke="#BFDBFE"/>
+  <text x="76" y="442" font-size="11" font-weight="700" fill="#166534">✓ Pros</text>
+  <text x="76" y="460" font-size="10" fill="#1E293B">• Guaranteed valid JSON per top-level key</text>
+  <text x="76" y="476" font-size="10" fill="#1E293B">• No client-side parse errors</text>
+  <text x="76" y="492" font-size="10" fill="#1E293B">• Safer for schema-strict downstream</text>
+  <text x="260" y="442" font-size="11" font-weight="700" fill="#991B1B">✗ Cons</text>
+  <text x="260" y="460" font-size="10" fill="#1E293B">• Visible "pauses" then bursts</text>
+  <text x="260" y="476" font-size="10" fill="#1E293B">• Can't show live progress</text>
+  <text x="260" y="492" font-size="10" fill="#1E293B">• Higher perceived latency</text>
+
+  <rect x="76" y="510" width="365" height="22" rx="4" fill="#0F172A"/>
+  <text x="258" y="525" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#34D399">fine_grained=False  (default)</text>
+
+  <!-- Column 2: fine_grained=True -->
+  <rect x="520" y="90" width="440" height="470" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="520" y="90" width="440" height="48" rx="12" fill="#22C55E"/>
+  <rect x="520" y="126" width="440" height="12" fill="#22C55E"/>
+  <text x="740" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">fine_grained=True (immediate)</text>
+
+  <rect x="575" y="152" width="330" height="26" rx="13" fill="#DCFCE7"/>
+  <text x="740" y="170" text-anchor="middle" font-size="11" font-weight="600" fill="#14532D">Validation OFF — chunks flushed as soon as generated</text>
+
+  <!-- Timeline: tokens -->
+  <text x="540" y="202" font-size="11" fill="#6B7280" font-weight="600">Claude generates →</text>
+  <rect x="540" y="212" width="400" height="32" rx="6" fill="#FFFFFF" stroke="#86EFAC" stroke-width="1"/>
+  <text x="548" y="232" font-size="10" font-family="Menlo, monospace" fill="#1E293B">"abstract": "This paper..." · "meta": { "word_count": 847, ... }</text>
+
+  <!-- No gate, passthrough -->
+  <text x="540" y="268" font-size="11" fill="#6B7280" font-weight="600">API passthrough →</text>
+  <rect x="540" y="278" width="400" height="56" rx="6" fill="#FEF9C3" stroke="#84CC16" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <circle cx="560" cy="306" r="10" fill="#84CC16"/>
+  <text x="560" y="310" text-anchor="middle" font-size="12" font-weight="700" fill="white">⚡</text>
+  <text x="580" y="302" font-size="11" fill="#3F6212" font-weight="600">No buffering, no JSON check</text>
+  <text x="580" y="318" font-size="10" fill="#365314">Emit every chunk as Claude produces it</text>
+
+  <!-- Client receives: continuous flow -->
+  <text x="540" y="360" font-size="11" fill="#6B7280" font-weight="600">Client receives →</text>
+  <g transform="translate(540,370)">
+    <rect x="0"   y="0" width="50" height="26" rx="4" fill="#22C55E"/>
+    <text x="25"  y="17" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="55"  y="0" width="50" height="26" rx="4" fill="#22C55E"/>
+    <text x="80"  y="17" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="110" y="0" width="50" height="26" rx="4" fill="#22C55E"/>
+    <text x="135" y="17" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="165" y="0" width="50" height="26" rx="4" fill="#22C55E"/>
+    <text x="190" y="17" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="220" y="0" width="50" height="26" rx="4" fill="#22C55E"/>
+    <text x="245" y="17" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="275" y="0" width="50" height="26" rx="4" fill="#22C55E"/>
+    <text x="300" y="17" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="330" y="0" width="50" height="26" rx="4" fill="#22C55E"/>
+    <text x="355" y="17" text-anchor="middle" font-size="9" fill="white">chunk</text>
+  </g>
+
+  <!-- Pros/Cons -->
+  <rect x="540" y="420" width="400" height="124" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="556" y="442" font-size="11" font-weight="700" fill="#166534">✓ Pros</text>
+  <text x="556" y="460" font-size="10" fill="#1E293B">• Immediate partial_json / snapshot</text>
+  <text x="556" y="476" font-size="10" fill="#1E293B">• Show live tool-arg progress in UI</text>
+  <text x="556" y="492" font-size="10" fill="#1E293B">• Start processing partial results</text>
+  <text x="740" y="442" font-size="11" font-weight="700" fill="#991B1B">✗ Cons</text>
+  <text x="740" y="460" font-size="10" fill="#1E293B">• JSON may be invalid mid-stream</text>
+  <text x="740" y="476" font-size="10" fill="#1E293B">• Client must json.loads in try/except</text>
+  <text x="740" y="492" font-size="10" fill="#1E293B">• e.g. "word_count": undefined</text>
+
+  <rect x="556" y="510" width="365" height="22" rx="4" fill="#0F172A"/>
+  <text x="738" y="525" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#34D399">fine_grained=True</text>
+
+  <!-- Bottom note -->
+  <text x="500" y="578" text-anchor="middle" font-size="11" fill="#6B7280">InputJsonEvent carries <tspan font-family="Menlo, monospace" fill="#1E293B">partial_json</tspan> (this chunk) and <tspan font-family="Menlo, monospace" fill="#1E293B">snapshot</tspan> (cumulative JSON so far)</text>
+</svg>

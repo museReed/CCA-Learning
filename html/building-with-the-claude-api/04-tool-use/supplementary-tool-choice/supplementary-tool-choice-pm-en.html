@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supplementary Tool Choice Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Tool Choice Parameter — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (tool schema design), 2.2 (content blocks), 1.2 (agentic loop control)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>Supplementary — fills curriculum gap in building-with-the-claude-api / 04-tool-use</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p><code>tool_choice</code> is the product lever that decides how much freedom Claude gets to pick its next action — use it to trade conversational flexibility for workflow reliability.</p>
+<hr />
+<h2>Mental Model — Ordering at a Restaurant</h2>
+<p>Think of <code>tool_choice</code> as how you order food at a restaurant:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Restaurant Analogy</th>
+<th>Product Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auto</code></td>
+<td>"Surprise me — maybe chat, maybe food"</td>
+<td>Claude decides whether this turn needs a tool or just a friendly reply</td>
+</tr>
+<tr>
+<td><code>any</code></td>
+<td>"I must order from your menu — you pick which dish"</td>
+<td>Every turn must produce a tool call; Claude chooses which</td>
+</tr>
+<tr>
+<td><code>tool</code></td>
+<td>"I want the lasagna, specifically"</td>
+<td>Force a specific tool — guaranteed structured output</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>"Just tell me what's good today — no ordering"</td>
+<td>Claude replies with text only; tools are off for this turn</td>
+</tr>
+</tbody>
+</table>
+<p>The tension: <code>auto</code> is the most natural user experience, but the least predictable. <code>tool</code> is the most predictable, but kills the conversation feel. Your product needs both, at different moments.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When to use <code>auto</code> — Conversational Agents</h3>
+<ul>
+<li>Customer support chatbots that sometimes need to look up an order and sometimes just need to chat.</li>
+<li>Coding assistants that answer general questions directly and only call tools when the user asks for file operations.</li>
+<li><strong>Why</strong>: users expect natural conversation. Forcing a tool call on "thanks!" feels broken.</li>
+</ul>
+<h3>When to use <code>any</code> — Action-Oriented Workflows</h3>
+<ul>
+<li>Agentic task runners ("book me a flight, then a hotel, then a car") where every turn must advance the plan.</li>
+<li>Back-office automation where human chat is out of scope — every Claude turn should be an API call.</li>
+<li><strong>Why</strong>: removes the risk that Claude stops mid-workflow to "explain" instead of acting.</li>
+</ul>
+<h3>When to use <code>tool</code> — Structured Data Extraction</h3>
+<ul>
+<li>Resume parsing, invoice OCR, form-fill from unstructured emails, classification into a taxonomy.</li>
+<li>Anywhere you previously would have used "JSON mode" or a strict output schema.</li>
+<li><strong>Why</strong>: the tool's <code>input_schema</code> becomes a typed output contract. No prompt brittleness, no "please respond in JSON" hack.</li>
+</ul>
+<h3>When to use <code>none</code> — Summary &amp; Reflection Turns</h3>
+<ul>
+<li>After a multi-step agent has gathered all the data it needs, use <code>none</code> for the final user-facing message to prevent Claude from triggering yet another tool call.</li>
+<li>In evaluation harnesses where you want Claude to grade a response without calling anything.</li>
+<li><strong>Why</strong>: gives your agent a clean "stop and talk" signal.</li>
+</ul>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>Ask these four questions in order:</p>
+<ol>
+<li><strong>Does this turn ever need to be pure conversation?</strong></li>
+<li>Yes → start with <code>auto</code>.</li>
+<li>No → continue.</li>
+<li><strong>Does this turn need to produce exactly one named output shape?</strong></li>
+<li>Yes → <code>tool</code> with that tool's name.</li>
+<li>No → continue.</li>
+<li><strong>Does this turn need to pick from a menu of actions, but definitely take one?</strong></li>
+<li>Yes → <code>any</code>.</li>
+<li>No → continue.</li>
+<li><strong>Is this a reflection, summary, or final user-facing reply turn?</strong></li>
+<li>Yes → <code>none</code>.</li>
+</ol>
+<p>In agent products, different turns in the same loop will use different modes. A common pattern: start with <code>auto</code>, switch to <code>any</code> when entering an execution phase, switch to <code>none</code> for the final summary.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Forcing <code>any</code> when users expect conversation</strong> — your chatbot starts replying to "hello" with a weird tool call. Users think the product is broken.</li>
+<li><strong>Forgetting that <code>tool</code> and <code>any</code> kill reasoning transparency</strong> — when Claude is forced, it does not "think out loud" before acting. You lose the explainability that the <code>auto</code> mode gives you for free. This matters for regulated industries (finance, healthcare) where audit trails need to show <em>why</em> an action was taken.</li>
+<li><strong>Using <code>auto</code> for structured data extraction</strong> — Claude might reply with chatty text ("Sure! Here's the data you asked for...") instead of a clean tool call, breaking your downstream parser. Use <code>tool</code> instead.</li>
+<li><strong>Treating <code>tool_choice</code> as a global setting</strong> — it is per API call. Smart agent products switch modes turn-by-turn based on what phase the agent is in.</li>
+<li><strong>Not setting <code>disable_parallel_tool_use</code> when your backend can't handle parallel actions</strong> — Claude may fire two tool calls at once and your single-threaded executor will misbehave. If your backend is not parallel-safe, enforce serial execution explicitly.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p><code>tool_choice</code> is the dial between <strong>user delight</strong> and <strong>product reliability</strong>. <code>auto</code> maximizes delight (natural conversation, transparent reasoning) but sacrifices guarantees. <code>any</code> and <code>tool</code> maximize reliability (guaranteed structured action) but sacrifice conversational feel and reasoning transparency. The best agent products do not pick one — they switch modes <em>within a single user session</em>, using <code>auto</code> for chat, <code>any</code> for execution, and <code>none</code> for summaries.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: PM-style questions may ask "which setting should you choose to guarantee the model returns structured data?" — the answer is <code>{"type": "tool", "name": "..."}</code>.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: expect scenario questions about agent loops where the right answer is switching <code>tool_choice</code> between turns.</li>
+<li><strong>Trap to watch for</strong>: the exam may describe a chat assistant that "sometimes needs to look up data". The correct answer is <code>auto</code>, not <code>any</code>.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which <code>tool_choice</code> mode feels most like a normal conversation?</td>
+<td><code>auto</code> — Claude decides whether to chat or call a tool, so small talk still works naturally.</td>
+</tr>
+<tr>
+<td>Which mode should you pick if every turn in your workflow must produce a structured action?</td>
+<td><code>any</code> — Claude must call one of the provided tools, but picks which.</td>
+</tr>
+<tr>
+<td>Which mode is the best fit for structured data extraction (the "JSON mode" use case)?</td>
+<td><code>tool</code> with a specific name — the tool's schema is the typed output contract.</td>
+</tr>
+<tr>
+<td>What does <code>none</code> do, and when is it useful?</td>
+<td>Disables tools for this turn; useful for summary/reflection turns at the end of an agent loop.</td>
+</tr>
+<tr>
+<td>What reasoning behavior do you lose when you use <code>any</code> or <code>tool</code>?</td>
+<td>Chain-of-thought text before the tool call — Claude emits the tool_use block directly, so you lose explainability.</td>
+</tr>
+<tr>
+<td>Why is <code>any</code> a bad default for a customer-support chatbot?</td>
+<td>It forces a tool call on every turn, so "hello" or "thanks" will trigger nonsensical tool calls.</td>
+</tr>
+<tr>
+<td>When would a well-designed agent product switch <code>tool_choice</code> mid-session?</td>
+<td>Use <code>auto</code> for chat, <code>any</code> for execution phases, and <code>none</code> for final summaries — different phases, different modes.</td>
+</tr>
+<tr>
+<td>What product risk does <code>disable_parallel_tool_use</code> mitigate?</td>
+<td>Prevents Claude from firing multiple simultaneous actions when your backend cannot safely execute tools in parallel.</td>
+</tr>
+<tr>
+<td>Your legal team needs to audit <em>why</em> Claude took an action. Which mode preserves reasoning?</td>
+<td><code>auto</code> — only <code>auto</code> lets Claude emit natural chain-of-thought text before the tool call.</td>
+</tr>
+<tr>
+<td>Does <code>tool_choice: none</code> mean you should omit <code>tools=</code> from the request?</td>
+<td>No — still declare the tools; <code>none</code> only disables calling them on this specific turn.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supplementary Tool Choice Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Tool Choice 参数 — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试范围</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>任务陈述</td>
+<td>2.1（tool schema 设计）、2.2（content blocks）、1.2（agentic loop 控制）</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>补充教材 — 填补 building-with-the-claude-api / 04-tool-use 的课程空缺</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p><code>tool_choice</code> 是 Claude 工具调用行为的方向盘 — 让你声明 Claude 在这一轮"可以"、"必须"或"不可以"调用工具，并可选择性指定调用哪一个工具。</p>
+<hr />
+<h2>四种模式</h2>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>语法</th>
+<th>行为</th>
+<th><code>stop_reason</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auto</code></td>
+<td><code>{"type": "auto"}</code></td>
+<td><strong>默认值。</strong> Claude 自行决定是否调用工具。响应可能是 TextBlock（对话）或 ToolUseBlock。</td>
+<td><code>end_turn</code> 或 <code>tool_use</code></td>
+</tr>
+<tr>
+<td><code>any</code></td>
+<td><code>{"type": "any"}</code></td>
+<td>Claude 必须调用其中一个提供的工具，由它自己挑选。响应一定是 ToolUseBlock。</td>
+<td><code>tool_use</code></td>
+</tr>
+<tr>
+<td><code>tool</code></td>
+<td><code>{"type": "tool", "name": "get_weather"}</code></td>
+<td>强制 Claude 调用某个指定名称的工具。</td>
+<td><code>tool_use</code></td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td><code>{"type": "none"}</code></td>
+<td>停用本轮的工具调用；Claude 只会以纯文本响应。</td>
+<td><code>end_turn</code></td>
+</tr>
+</tbody>
+</table>
+<h3><code>auto</code> — 让 Claude 决定</h3>
+<pre><code class="language-python">response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,
+    tool_choice={&quot;type&quot;: &quot;auto&quot;},  # 等同于省略 tool_choice
+    messages=messages,
+)
+</code></pre>
+<p>最适合通用 agent 与聊天界面。Claude 决定要调用工具时，会先产出自然的 chain-of-thought 推理文本，让你看得到它的思路。</p>
+<h3><code>any</code> — Claude 必须调用某个工具</h3>
+<pre><code class="language-python">response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,
+    tool_choice={&quot;type&quot;: &quot;any&quot;},
+    messages=messages,
+)
+# response.content[0].type == &quot;tool_use&quot; — 保证成立
+</code></pre>
+<p>最适合每一轮都必须产出结构化动作的工作流。Claude 仍然会根据消息自行挑工具，但无法逃逸到纯文本响应。</p>
+<h3><code>tool</code> — 强制使用特定工具</h3>
+<pre><code class="language-python">response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,
+    tool_choice={&quot;type&quot;: &quot;tool&quot;, &quot;name&quot;: &quot;extract_invoice&quot;},
+    messages=messages,
+)
+</code></pre>
+<p>最适合结构化数据抽取 — 该工具的 <code>input_schema</code> 就变成一份有类型的输出契约。这是 Claude API 中最接近"JSON mode"的惯用做法。</p>
+<h3><code>none</code> — 本轮停用工具</h3>
+<pre><code class="language-python">response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,  # 仍然声明
+    tool_choice={&quot;type&quot;: &quot;none&quot;},
+    messages=messages,
+)
+</code></pre>
+<p>在 agent loop 里面很好用 — 当你想让 Claude 总结、反思，或在所有工具结果都收集完毕后产出最终给用户看的文本时，用这个模式阻止它又去调用工具。</p>
+<hr />
+<h2>与 <code>stop_reason</code> 的交互</h2>
+<p>tool_choice 模式会直接决定你必须处理哪些 <code>stop_reason</code>：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>可能的 <code>stop_reason</code></th>
+<th>你的代码必须处理的分支</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auto</code></td>
+<td><code>end_turn</code>、<code>tool_use</code>、<code>max_tokens</code>、<code>stop_sequence</code></td>
+<td>两大分支：纯文本响应 vs 工具调用</td>
+</tr>
+<tr>
+<td><code>any</code></td>
+<td><code>tool_use</code>（加上 <code>max_tokens</code> 边界情况）</td>
+<td>单一分支：永远执行工具</td>
+</tr>
+<tr>
+<td><code>tool</code></td>
+<td><code>tool_use</code>（加上 <code>max_tokens</code> 边界情况）</td>
+<td>单一分支：永远执行被强制的工具</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td><code>end_turn</code>、<code>max_tokens</code>、<code>stop_sequence</code></td>
+<td>单一分支：只有纯文本响应</td>
+</tr>
+</tbody>
+</table>
+<p>这对 loop 控制很重要。使用 <code>auto</code> 时，你的 agent loop 在 <code>end_turn</code> 时退出。使用 <code>any</code> 时，loop 只能通过切换到 <code>auto</code> 或 <code>none</code>，或是你的代码根据工具结果判定为终止状态来中止。</p>
+<hr />
+<h2><code>disable_parallel_tool_use</code></h2>
+<pre><code class="language-python">tool_choice={&quot;type&quot;: &quot;any&quot;, &quot;disable_parallel_tool_use&quot;: True}
+</code></pre>
+<p>默认情况下，Claude 在单次响应中可以发出多个 <code>tool_use</code> block（parallel tool use）。设为 <code>disable_parallel_tool_use: true</code> 会强制<strong>每轮最多只能有一个</strong> <code>tool_use</code> block。</p>
+<ul>
+<li>与 <code>any</code> 或 <code>tool</code> 搭配，适合需要严格"一次一个动作"的场景（状态机、事务型流程）。</li>
+<li>与 <code>auto</code> 搭配也合法 — 当你的执行器无法安全地并行调用工具时很有用。</li>
+<li>代价：失去了并行调用带来的延迟优势。</li>
+</ul>
+<hr />
+<h2>何时用哪个模式 — 决策指南</h2>
+<pre><code>有时需要实时数据、有时纯聊天？              → auto
+每一轮都必须产出结构化动作？                 → any
+从非结构化输入中抽取有类型数据？             → tool（指定名称）
+Agent loop 中的总结/反思轮？                 → none
+严格一次一个动作的状态机？                   → any + disable_parallel_tool_use
+</code></pre>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>在聊天 agent 上用 <code>any</code></strong> — 会在每一轮都强制工具调用，包含"你好""谢谢"这种闲聊，产出毫无意义的 tool_use block。</li>
+<li><strong>预期 <code>tool</code> 或 <code>any</code> 模式会产出 chain-of-thought</strong> — 当 Claude 被强制调用工具时，不会在 tool_use block 之前输出推理文本，你会失去可观察性。只有 <code>auto</code> 允许自然的 CoT。</li>
+<li><strong>忘了 <code>none</code> 模式仍然需要声明 <code>tools=</code></strong> — 工具列表还是要带；<code>none</code> 只是停用本轮的调用行为。</li>
+<li><strong>以为 <code>auto</code> 在有工具可用时一定会调用</strong> — <code>auto</code> 代表 Claude 可以"选择不调用"。如果你的使用场景一定要调用工具，请用 <code>any</code> 或 <code>tool</code>。</li>
+<li><strong>执行器不支持并行时没设 <code>disable_parallel_tool_use</code></strong> — Claude 可能同时发出两个 tool_use block，你的串行执行器会卡死或造成状态重复应用。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>关键洞察</strong></p>
+<p><code>tool_choice</code> 是你把 Claude 从"对话助理"转换成"确定性组件"的开关。<code>auto</code> 把方向盘交给 Claude（灵活、推理透明）；<code>any</code>/<code>tool</code> 把方向盘交回给你的代码（结构化、保证动作，但推理不透明）。选对模式是在"灵活性"与"控制力"之间做 trade-off — 而这个 trade-off 正是 CCA D1（agent 设计）与 D2（tool 设计）的核心。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：四种模式的语法、行为与使用时机都是直接可考的。预期会看到"哪个 <code>tool_choice</code> 设定能保证 Claude 会调用工具？"这类题目。</li>
+<li><strong>D1（Agentic Architecture）</strong>：<code>tool_choice</code> 控制 loop 的终止与结构。用 <code>none</code> 做总结轮、用 <code>any</code> 做动作轮是核心的 agent pattern。</li>
+<li><strong>陷阱题</strong>：考题可能描述一个"JSON 抽取"场景 — 正确答案是 <code>{"type": "tool", "name": "..."}</code>，不是 <code>any</code>，也不是靠 prompt 技巧。</li>
+</ul>
+<hr />
+<h2>闪卡</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tool_choice</code> 的默认值是什么？</td>
+<td><code>{"type": "auto"}</code> — Claude 自行决定是否调用工具。</td>
+</tr>
+<tr>
+<td>哪个 <code>tool_choice</code> 模式能保证 Claude 会调用工具？</td>
+<td><code>{"type": "any"}</code> — Claude 必须从提供的工具中挑一个。</td>
+</tr>
+<tr>
+<td>如何强制 Claude 调用某个指定名称的工具？</td>
+<td><code>{"type": "tool", "name": "&lt;tool_name&gt;"}</code></td>
+</tr>
+<tr>
+<td><code>{"type": "none"}</code> 的作用是什么？</td>
+<td>停用本轮的工具调用；Claude 只会以纯文本响应，<code>stop_reason</code> 为 <code>end_turn</code>。</td>
+</tr>
+<tr>
+<td>哪个模式会保留 Claude 在工具调用前的 chain-of-thought 推理？</td>
+<td>只有 <code>auto</code>。<code>any</code> 与 <code>tool</code> 会抑制推理文本，直接输出 tool_use block。</td>
+</tr>
+<tr>
+<td><code>tool_choice: auto</code> 下可能的 <code>stop_reason</code> 有哪些？</td>
+<td><code>end_turn</code>（文本响应）或 <code>tool_use</code>（工具调用）。</td>
+</tr>
+<tr>
+<td><code>disable_parallel_tool_use: true</code> 强制了什么？</td>
+<td>每轮最多只能有一个 <code>tool_use</code> block，即使 Claude 本来可以并行调用多个工具。</td>
+</tr>
+<tr>
+<td>什么时候会在 agent loop 中使用 <code>tool_choice: none</code>？</td>
+<td>在所有工具结果都收集完后的总结/反思轮，强制产出最终文本答案。</td>
+</tr>
+<tr>
+<td>为什么 <code>any</code> 不适合通用聊天 agent？</td>
+<td>它会在每一轮都强制工具调用，连闲聊都会产出毫无意义的 tool_use block。</td>
+</tr>
+<tr>
+<td>Claude API 中最接近"JSON mode"的 <code>tool_choice</code> 模式是哪个？</td>
+<td><code>{"type": "tool", "name": "..."}</code> — 工具的 <code>input_schema</code> 就是有类型的输出契约。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

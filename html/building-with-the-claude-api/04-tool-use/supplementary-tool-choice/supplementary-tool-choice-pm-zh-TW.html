@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supplementary Tool Choice Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Tool Choice 參數 — PM 觀點</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試範圍</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>任務陳述</td>
+<td>2.1（tool schema 設計）、2.2（content blocks）、1.2（agentic loop 控制）</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>補充教材 — 填補 building-with-the-claude-api / 04-tool-use 的課程空缺</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p><code>tool_choice</code> 是產品層面的控制桿，決定了 Claude 在選擇下一步動作時擁有多少自由度 — 用它在「對話彈性」與「工作流可靠度」之間做取捨。</p>
+<hr />
+<h2>心智模型 — 在餐廳點餐</h2>
+<p>把 <code>tool_choice</code> 想像成在餐廳怎麼點餐：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>餐廳類比</th>
+<th>產品意義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auto</code></td>
+<td>「給我一個驚喜 — 聊聊天也好，吃東西也好」</td>
+<td>Claude 自行判斷這一輪要呼叫工具還是純聊天</td>
+</tr>
+<tr>
+<td><code>any</code></td>
+<td>「我一定要從你菜單點菜，但你幫我挑」</td>
+<td>每一輪都必須產出工具呼叫，由 Claude 挑選</td>
+</tr>
+<tr>
+<td><code>tool</code></td>
+<td>「我就是要千層麵，不要其他的」</td>
+<td>強制呼叫特定工具 — 保證結構化輸出</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>「告訴我今天有什麼好東西就好，不點餐」</td>
+<td>Claude 只會用純文字回應，本輪工具關閉</td>
+</tr>
+</tbody>
+</table>
+<p>關鍵張力在於：<code>auto</code> 的使用體驗最自然，但最不可預測；<code>tool</code> 最可預測，但會殺掉對話感。你的產品在不同時機都會需要這兩種模式。</p>
+<hr />
+<h2>產品使用情境</h2>
+<h3>何時使用 <code>auto</code> — 對話式 Agent</h3>
+<ul>
+<li>客服聊天機器人 — 有時需要查訂單，有時只是純聊天。</li>
+<li>寫程式助手 — 一般問題直接回答，只在使用者要求檔案操作時才呼叫工具。</li>
+<li><strong>理由</strong>：使用者期待自然對話。對「謝謝！」強制呼叫工具會讓人覺得產品壞掉。</li>
+</ul>
+<h3>何時使用 <code>any</code> — 動作導向的工作流</h3>
+<ul>
+<li>Agentic 任務執行器（「幫我訂機票、再訂飯店、再訂車」），每一輪都必須推進計畫。</li>
+<li>後台自動化場景 — 人類閒聊不在範圍內，每一輪 Claude 都應該發 API。</li>
+<li><strong>理由</strong>：排除 Claude 在工作流中途「解釋」而不是「行動」的風險。</li>
+</ul>
+<h3>何時使用 <code>tool</code> — 結構化資料抽取</h3>
+<ul>
+<li>履歷解析、發票 OCR、從非結構化 email 填表、分類到標籤體系。</li>
+<li>任何你過去會用「JSON mode」或嚴格輸出 schema 的場景。</li>
+<li><strong>理由</strong>：該工具的 <code>input_schema</code> 變成一份有型別的輸出契約。不會有 prompt 脆弱性，也不用靠「請用 JSON 回覆」這種黑魔法。</li>
+</ul>
+<h3>何時使用 <code>none</code> — 總結與反思輪</h3>
+<ul>
+<li>多步驟 agent 收集完所有資料後，最後要輸出給使用者看的那一輪用 <code>none</code>，防止 Claude 又觸發一次工具呼叫。</li>
+<li>評估框架中，你要 Claude 為某個回應打分但不要它呼叫任何東西。</li>
+<li><strong>理由</strong>：給你的 agent 一個明確的「停下來講話」訊號。</li>
+</ul>
+<hr />
+<h2>PM 決策框架</h2>
+<p>依序問自己這四個問題：</p>
+<ol>
+<li><strong>這一輪有可能純粹是對話嗎？</strong></li>
+<li>是 → 從 <code>auto</code> 開始。</li>
+<li>否 → 往下。</li>
+<li><strong>這一輪需要產出恰好一種命名的輸出格式嗎？</strong></li>
+<li>是 → <code>tool</code> 並指定工具名稱。</li>
+<li>否 → 往下。</li>
+<li><strong>這一輪需要從動作菜單中挑一個，但一定要做一個？</strong></li>
+<li>是 → <code>any</code>。</li>
+<li>否 → 往下。</li>
+<li><strong>這一輪是反思、總結、或最終要給使用者看的回覆嗎？</strong></li>
+<li>是 → <code>none</code>。</li>
+</ol>
+<p>在 agent 產品中，同一個 loop 的不同輪次會使用不同模式。常見 pattern：從 <code>auto</code> 開始，進入執行階段時切到 <code>any</code>，最後總結時切到 <code>none</code>。</p>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>使用者期待對話時卻強制 <code>any</code></strong> — 你的聊天機器人開始對「你好」回覆奇怪的工具呼叫，使用者會以為產品壞了。</li>
+<li><strong>忘了 <code>tool</code> 和 <code>any</code> 會殺掉推理透明度</strong> — 當 Claude 被強制時，它不會在動作前「想出聲」。你會失去 <code>auto</code> 模式免費提供的可解釋性。這對受監管產業（金融、醫療）很重要 — 稽核軌跡必須展示某個動作「為什麼」被採取。</li>
+<li><strong>用 <code>auto</code> 做結構化資料抽取</strong> — Claude 可能用聊天文字回覆（「好的！以下是你要的資料⋯⋯」），而不是乾淨的工具呼叫，下游 parser 就爆了。應該用 <code>tool</code>。</li>
+<li><strong>把 <code>tool_choice</code> 當成全域設定</strong> — 它是每次 API 呼叫各自設定的。聰明的 agent 產品會逐輪切換模式，根據當前 agent 處於什麼階段。</li>
+<li><strong>後端無法並行時沒設 <code>disable_parallel_tool_use</code></strong> — Claude 可能同時發出兩個工具呼叫，你的單執行緒執行器會出狀況。後端不支援並行時，明確強制序列執行。</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>關鍵洞察</strong></p>
+<p><code>tool_choice</code> 是「使用者體驗」與「產品可靠度」之間的旋鈕。<code>auto</code> 最大化體驗（自然對話、透明推理）但犧牲保證；<code>any</code> 和 <code>tool</code> 最大化可靠度（保證結構化動作）但犧牲對話感與推理透明度。最好的 agent 產品不會只選一種 — 它們會<strong>在同一個使用者 session 內</strong>切換模式：用 <code>auto</code> 聊天、用 <code>any</code> 執行、用 <code>none</code> 總結。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D2（Tool Design &amp; MCP Integration）</strong>：PM 風格的題目可能會問「哪個設定能保證模型回傳結構化資料？」— 答案是 <code>{"type": "tool", "name": "..."}</code>。</li>
+<li><strong>D1（Agentic Architecture）</strong>：預期會看到情境題問 agent loop 中應該如何在不同輪次切換 <code>tool_choice</code>。</li>
+<li><strong>陷阱題</strong>：考題可能描述一個「有時需要查資料」的聊天助手，正確答案是 <code>auto</code>，不是 <code>any</code>。</li>
+</ul>
+<hr />
+<h2>快閃卡</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>哪個 <code>tool_choice</code> 模式最像正常的對話？</td>
+<td><code>auto</code> — Claude 自行決定要聊天還是呼叫工具，閒聊還能自然運作。</td>
+</tr>
+<tr>
+<td>如果你的工作流每一輪都必須產出結構化動作，應該選哪個模式？</td>
+<td><code>any</code> — Claude 必須呼叫所提供工具中的一個，由它自行挑選。</td>
+</tr>
+<tr>
+<td>結構化資料抽取（「JSON mode」情境）最適合用哪個模式？</td>
+<td>指定名稱的 <code>tool</code> — 工具的 schema 就是有型別的輸出契約。</td>
+</tr>
+<tr>
+<td><code>none</code> 的作用是什麼？什麼時候有用？</td>
+<td>停用本輪的工具呼叫；適合 agent loop 最後的總結／反思輪。</td>
+</tr>
+<tr>
+<td>使用 <code>any</code> 或 <code>tool</code> 時，你會失去什麼推理行為？</td>
+<td>工具呼叫前的 chain-of-thought 文字 — Claude 會直接輸出 tool_use block，可解釋性就沒了。</td>
+</tr>
+<tr>
+<td>為什麼 <code>any</code> 不適合當作客服聊天機器人的預設值？</td>
+<td>它會在每一輪都強制工具呼叫，連「你好」或「謝謝」都會觸發毫無意義的呼叫。</td>
+</tr>
+<tr>
+<td>設計良好的 agent 產品什麼時候會在 session 中途切換 <code>tool_choice</code>？</td>
+<td>聊天用 <code>auto</code>、執行階段用 <code>any</code>、最後總結用 <code>none</code> — 不同階段用不同模式。</td>
+</tr>
+<tr>
+<td><code>disable_parallel_tool_use</code> 緩解了什麼產品風險？</td>
+<td>防止 Claude 在後端無法安全並行執行時同時觸發多個動作。</td>
+</tr>
+<tr>
+<td>法務團隊需要稽核 Claude 為什麼採取某個動作，哪個模式能保留推理？</td>
+<td><code>auto</code> — 只有 <code>auto</code> 允許 Claude 在工具呼叫前輸出自然的 chain-of-thought 文字。</td>
+</tr>
+<tr>
+<td><code>tool_choice: none</code> 代表你應該從 request 中省略 <code>tools=</code> 嗎？</td>
+<td>不是 — 工具列表還是要宣告；<code>none</code> 只是停用本輪的呼叫行為。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supplementary Tool Choice Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Tool Choice Parameter — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (tool schema design), 2.2 (content blocks), 1.2 (agentic loop control)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>Supplementary — fills curriculum gap in building-with-the-claude-api / 04-tool-use</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p><code>tool_choice</code> is the steering wheel for Claude's tool-calling behavior — it lets you declare whether Claude <em>may</em>, <em>must</em>, or <em>must not</em> call a tool on this turn, and optionally which specific tool.</p>
+<hr />
+<h2>The Four Modes</h2>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Syntax</th>
+<th>Behavior</th>
+<th><code>stop_reason</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auto</code></td>
+<td><code>{"type": "auto"}</code></td>
+<td><strong>Default.</strong> Claude decides whether to call a tool. Response can be a TextBlock (chat) or a ToolUseBlock.</td>
+<td><code>end_turn</code> OR <code>tool_use</code></td>
+</tr>
+<tr>
+<td><code>any</code></td>
+<td><code>{"type": "any"}</code></td>
+<td>Claude MUST call one of the provided tools. It picks which. Response is always a ToolUseBlock.</td>
+<td><code>tool_use</code></td>
+</tr>
+<tr>
+<td><code>tool</code></td>
+<td><code>{"type": "tool", "name": "get_weather"}</code></td>
+<td>Force Claude to call a SPECIFIC named tool.</td>
+<td><code>tool_use</code></td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td><code>{"type": "none"}</code></td>
+<td>Tools disabled for this turn; Claude replies with text only.</td>
+<td><code>end_turn</code></td>
+</tr>
+</tbody>
+</table>
+<h3><code>auto</code> — Claude Decides</h3>
+<pre><code class="language-python">response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,
+    tool_choice={&quot;type&quot;: &quot;auto&quot;},  # same as omitting tool_choice
+    messages=messages,
+)
+</code></pre>
+<p>Best for general-purpose agents and chat interfaces. Claude produces natural chain-of-thought text before a tool call when it decides one is needed, giving you reasoning transparency.</p>
+<h3><code>any</code> — Claude Must Call Some Tool</h3>
+<pre><code class="language-python">response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,
+    tool_choice={&quot;type&quot;: &quot;any&quot;},
+    messages=messages,
+)
+# response.content[0].type == &quot;tool_use&quot; — guaranteed
+</code></pre>
+<p>Best for workflows where every turn must yield a structured action. Claude still picks which tool based on the message, but cannot escape into free text.</p>
+<h3><code>tool</code> — Force a Specific Tool</h3>
+<pre><code class="language-python">response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,
+    tool_choice={&quot;type&quot;: &quot;tool&quot;, &quot;name&quot;: &quot;extract_invoice&quot;},
+    messages=messages,
+)
+</code></pre>
+<p>Best for structured data extraction — the tool's <code>input_schema</code> acts as a typed output contract. This is the idiomatic "JSON mode" equivalent in the Claude API.</p>
+<h3><code>none</code> — Tools Disabled This Turn</h3>
+<pre><code class="language-python">response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    tools=tools,  # still declared
+    tool_choice={&quot;type&quot;: &quot;none&quot;},
+    messages=messages,
+)
+</code></pre>
+<p>Useful inside an agent loop when you want Claude to summarize, reflect, or "think out loud" without triggering more tool calls — for example, producing the final user-facing message after all tool results have been gathered.</p>
+<hr />
+<h2>Interaction with <code>stop_reason</code></h2>
+<p>The tool_choice mode directly constrains which <code>stop_reason</code> values you must handle:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Possible <code>stop_reason</code></th>
+<th>Branches you must code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auto</code></td>
+<td><code>end_turn</code>, <code>tool_use</code>, <code>max_tokens</code>, <code>stop_sequence</code></td>
+<td>Two main branches: text reply vs tool call</td>
+</tr>
+<tr>
+<td><code>any</code></td>
+<td><code>tool_use</code> (plus <code>max_tokens</code> edge case)</td>
+<td>Single branch: always execute a tool</td>
+</tr>
+<tr>
+<td><code>tool</code></td>
+<td><code>tool_use</code> (plus <code>max_tokens</code> edge case)</td>
+<td>Single branch: always execute the forced tool</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td><code>end_turn</code>, <code>max_tokens</code>, <code>stop_sequence</code></td>
+<td>Single branch: text reply only</td>
+</tr>
+</tbody>
+</table>
+<p>This matters for loop control. When using <code>auto</code>, your agent loop exits on <code>end_turn</code>. When using <code>any</code>, the loop can only be broken by switching <code>tool_choice</code> to <code>auto</code> or <code>none</code>, or by the tool results reaching a terminal state your code recognizes.</p>
+<hr />
+<h2><code>disable_parallel_tool_use</code></h2>
+<pre><code class="language-python">tool_choice={&quot;type&quot;: &quot;any&quot;, &quot;disable_parallel_tool_use&quot;: True}
+</code></pre>
+<p>By default, Claude may emit multiple <code>tool_use</code> blocks in a single response (parallel tool use). Setting <code>disable_parallel_tool_use: true</code> forces <strong>at most one</strong> <code>tool_use</code> block per turn.</p>
+<ul>
+<li>Pairs naturally with <code>any</code> or <code>tool</code> when you need strict single-action enforcement (e.g., state machines, transactional workflows).</li>
+<li>Also valid with <code>auto</code> when your executor cannot safely run tools in parallel.</li>
+<li>Trade-off: you lose the latency benefit of parallel calls.</li>
+</ul>
+<hr />
+<h2>When to Use Each Mode — Decision Guide</h2>
+<pre><code>Need live data sometimes, chat other times?         → auto
+Every turn MUST produce a structured action?         → any
+Extracting typed data from unstructured input?       → tool (specific)
+Summary / reflection turn inside an agent loop?      → none
+Strict one-action-at-a-time state machine?           → any + disable_parallel_tool_use
+</code></pre>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Using <code>any</code> for a chat agent</strong> — forces a tool call on every turn, including "hello" and "thanks", which produces nonsensical tool_use blocks.</li>
+<li><strong>Expecting chain-of-thought with <code>tool</code> or <code>any</code></strong> — when Claude is forced, it does not emit reasoning text before the tool_use block. You lose transparency. Only <code>auto</code> permits natural CoT.</li>
+<li><strong>Forgetting that <code>none</code> still requires <code>tools=</code> to be declared</strong> — the tools list stays; <code>none</code> only disables calling them on this specific turn.</li>
+<li><strong>Assuming <code>auto</code> always calls a tool when one is available</strong> — <code>auto</code> means Claude may <em>choose not to</em>. If your use case requires a tool call, use <code>any</code> or <code>tool</code>.</li>
+<li><strong>Not setting <code>disable_parallel_tool_use</code> when your executor is not parallel-safe</strong> — Claude may emit two tool_use blocks simultaneously and your serial executor will either deadlock or double-apply state.</li>
+</ol>
+<hr />
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p><code>tool_choice</code> is how you convert Claude from a conversational assistant into a deterministic component. <code>auto</code> keeps Claude in the driver's seat (flexible, transparent reasoning). <code>any</code>/<code>tool</code> put your code in the driver's seat (structured, guaranteed action, but opaque reasoning). Choosing the right mode is a trade-off between flexibility and control — and this trade-off is at the heart of CCA D1 (agent design) and D2 (tool design).</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (Tool Design &amp; MCP Integration)</strong>: knowing all four modes, their syntax, and when each is appropriate is directly testable. Expect questions framed as "Which <code>tool_choice</code> setting guarantees Claude will call a tool?".</li>
+<li><strong>D1 (Agentic Architecture)</strong>: <code>tool_choice</code> controls loop termination and structure. Using <code>none</code> for summary turns and <code>any</code> for action turns is a core agent pattern.</li>
+<li><strong>Trap to watch for</strong>: exam questions may describe a "JSON extraction" use case — the correct answer is <code>{"type": "tool", "name": "..."}</code>, not <code>any</code> and not a prompt trick.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the default value of <code>tool_choice</code>?</td>
+<td><code>{"type": "auto"}</code> — Claude decides whether to call a tool.</td>
+</tr>
+<tr>
+<td>Which <code>tool_choice</code> mode guarantees Claude calls some tool?</td>
+<td><code>{"type": "any"}</code> — Claude must pick one of the provided tools.</td>
+</tr>
+<tr>
+<td>How do you force Claude to call a specific named tool?</td>
+<td><code>{"type": "tool", "name": "&lt;tool_name&gt;"}</code></td>
+</tr>
+<tr>
+<td>What does <code>{"type": "none"}</code> do?</td>
+<td>Disables tool calling for this turn; Claude replies with text only and <code>stop_reason</code> is <code>end_turn</code>.</td>
+</tr>
+<tr>
+<td>Which mode preserves Claude's chain-of-thought reasoning before a tool call?</td>
+<td>Only <code>auto</code>. <code>any</code> and <code>tool</code> suppress reasoning text and emit the tool_use block directly.</td>
+</tr>
+<tr>
+<td>Which <code>stop_reason</code> values are possible under <code>tool_choice: auto</code>?</td>
+<td><code>end_turn</code> (text reply) or <code>tool_use</code> (tool call).</td>
+</tr>
+<tr>
+<td>What does <code>disable_parallel_tool_use: true</code> enforce?</td>
+<td>At most one <code>tool_use</code> block per turn, even when Claude could call multiple tools in parallel.</td>
+</tr>
+<tr>
+<td>When would you use <code>tool_choice: none</code> inside an agent loop?</td>
+<td>On a summary/reflection turn after all tool results have been collected, to force a final text answer.</td>
+</tr>
+<tr>
+<td>Why is <code>any</code> a bad choice for a general chat agent?</td>
+<td>It forces a tool call on every turn, including small talk, producing nonsensical tool_use blocks.</td>
+</tr>
+<tr>
+<td>Which <code>tool_choice</code> mode is the idiomatic "JSON mode" equivalent in the Claude API?</td>
+<td><code>{"type": "tool", "name": "..."}</code> — the tool's <code>input_schema</code> acts as the typed output contract.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
