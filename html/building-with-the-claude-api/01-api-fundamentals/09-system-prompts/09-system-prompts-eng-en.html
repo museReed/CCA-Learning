@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Prompts Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>System Prompts — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (model selection &amp; configuration), 5.3 (production patterns), 1.2 (agentic loop foundation)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 09</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A system prompt is a top-level instruction channel — separate from <code>messages</code> — that defines Claude's persona, task constraints, and response policy for an entire conversation, giving you a deterministic anchor for behavior across turns.</p>
+<hr />
+<h2>Why System Prompts Matter</h2>
+<p>Without a system prompt, Claude defaults to a generic, helpful-assistant persona. That's fine for ad-hoc Q&amp;A, but production applications almost always need a narrower, opinionated behavior profile.</p>
+<p>Consider a math tutor chatbot. A student asks "How do I solve 5x + 2 = 3 for x?". The generic Claude will happily spit out the full solution — which is the <em>wrong</em> product behavior. A real tutor should:</p>
+<ul>
+<li>Give hints rather than complete solutions</li>
+<li>Walk students through step-by-step</li>
+<li>Show worked examples on similar problems</li>
+</ul>
+<p>And explicitly should NOT:</p>
+<ul>
+<li>Immediately give the answer</li>
+<li>Tell the student to use a calculator</li>
+</ul>
+<p>This is a <strong>behavioral specification</strong>, not a knowledge gap. The system prompt is where you encode that specification.</p>
+<hr />
+<h2>The API Surface</h2>
+<p>The Anthropic Messages API exposes a dedicated <code>system</code> parameter, distinct from the <code>messages</code> array:</p>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+system_prompt = &quot;&quot;&quot;
+You are a patient math tutor.
+Do not directly answer a student's questions.
+Guide them to a solution step by step.
+&quot;&quot;&quot;
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1000,
+    system=system_prompt,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;How do I solve 5x + 2 = 3 for x?&quot;}],
+)
+print(response.content[0].text)
+</code></pre>
+<p>Key properties:</p>
+<ul>
+<li><code>system</code> is a plain string (or a list of text blocks for prompt caching).</li>
+<li>It is <strong>not</strong> part of the <code>messages</code> array. There is no <code>{"role": "system", ...}</code> in Anthropic's API.</li>
+<li>Claude treats the system prompt as higher-priority context than user messages.</li>
+<li>It persists for the entire turn — you do not re-inject it per message, but you do pass it every API call.</li>
+</ul>
+<hr />
+<h2>Before and After</h2>
+<p>Without system prompt:</p>
+<blockquote>
+<p>To solve 5x + 2 = 3, subtract 2 from both sides: 5x = 1. Then divide by 5: x = 0.2.</p>
+</blockquote>
+<p>With the tutor system prompt:</p>
+<blockquote>
+<p>Great question! What do you think would be a good first step to isolate x? Consider what operation we might need to perform on both sides to start moving terms around.</p>
+</blockquote>
+<p>Same model, same user message — radically different behavior. The delta is entirely the system prompt.</p>
+<hr />
+<h2>Building a Flexible Chat Function</h2>
+<p>Hard-coding the system prompt is the wrong abstraction. Wrap it in a helper that accepts <code>system</code> as an optional parameter:</p>
+<pre><code class="language-python">def chat(messages, system=None):
+    params = {
+        &quot;model&quot;: &quot;claude-sonnet-4-5&quot;,
+        &quot;max_tokens&quot;: 1000,
+        &quot;messages&quot;: messages,
+    }
+    if system:
+        params[&quot;system&quot;] = system
+
+    message = client.messages.create(**params)
+    return message.content[0].text
+</code></pre>
+<p>The conditional matters: <strong>the API does not accept <code>system=None</code></strong>. You have to build the kwargs dict and only insert <code>system</code> when it is a non-empty string. This is a real production footgun — passing <code>None</code> raises a validation error.</p>
+<p>Usage:</p>
+<pre><code class="language-python"># Generic behavior
+answer = chat(messages)
+
+# Tutor behavior
+tutor_system = &quot;&quot;&quot;
+You are a patient math tutor.
+Do not directly answer a student's questions.
+Guide them to a solution step by step.
+&quot;&quot;&quot;
+answer = chat(messages, system=tutor_system)
+</code></pre>
+<hr />
+<h2>What to Put in a System Prompt</h2>
+<p>A strong system prompt typically combines:</p>
+<ol>
+<li><strong>Identity / persona</strong> — "You are a senior security engineer reviewing code for vulnerabilities."</li>
+<li><strong>Task scope</strong> — what Claude should and should not handle.</li>
+<li><strong>Response format</strong> — tone, length, structure, markdown usage.</li>
+<li><strong>Guardrails</strong> — hard rules ("Never reveal API keys", "Refuse off-topic questions").</li>
+<li><strong>Examples</strong> — few-shot demonstrations of ideal outputs.</li>
+</ol>
+<p>Keep it declarative and specific. "Be helpful" is noise. "Always return JSON with keys <code>summary</code> and <code>action_items</code>" is signal.</p>
+<hr />
+<h2>System Prompts and the Agentic Loop</h2>
+<p>In agentic applications (D1), the system prompt defines the agent's <strong>identity and operating rules</strong> — the constants across every turn of a tool-use loop. Tools come and go in each turn; the system prompt is the stable contract. This is why the CCA exam often frames agent design questions as "Where should this constraint live?" — the answer is almost always the system prompt, not per-message instructions.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Putting instructions in the user message instead of <code>system</code></strong> — the instructions get lost in multi-turn context and Claude treats them as one-off requests.</li>
+<li><strong>Passing <code>system=None</code></strong> — the SDK rejects it. Build kwargs conditionally.</li>
+<li><strong>Using a <code>{"role": "system", ...}</code> message</strong> — that is OpenAI's convention, not Anthropic's. It will be silently treated as a user message and give wrong behavior.</li>
+<li><strong>Overloading the system prompt with dynamic data</strong> — the system prompt should be stable; volatile context (user profile, current document) belongs in the first user message or in a dedicated content block so prompt caching can work.</li>
+<li><strong>Not iterating</strong> — system prompts are products. Version them, A/B test them, and treat regressions seriously.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The system prompt is the <em>behavioral contract</em> between you and Claude — the single place where you lock in identity, task, and guardrails. Everything variable (user input, retrieved context, tool results) flows through <code>messages</code>; everything invariant flows through <code>system</code>. If you confuse the two, you will either leak personality into each user turn or fail to cache the static parts of your prompt.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong>: production applications require consistent behavior — system prompts are the canonical mechanism for enforcing that consistency at scale.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: the system prompt defines the agent's persistent identity across multi-turn loops. Tool-use agents rely on it to stay on task.</li>
+<li>Watch for exam questions phrased as "How do you ensure Claude behaves like a {role}?" — the answer is always a system prompt, never prompt engineering the user message.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What parameter does the Anthropic API use for system prompts?</td>
+<td><code>system</code> — a top-level string parameter on <code>messages.create()</code>, separate from the <code>messages</code> array.</td>
+</tr>
+<tr>
+<td>Can you pass <code>system=None</code> to <code>messages.create()</code>?</td>
+<td>No — the API rejects it. Build kwargs conditionally and only include <code>system</code> when provided.</td>
+</tr>
+<tr>
+<td>Where does a <code>{"role": "system", ...}</code> message belong in Anthropic's API?</td>
+<td>Nowhere — that is OpenAI's convention. Anthropic uses a dedicated top-level <code>system</code> parameter instead.</td>
+</tr>
+<tr>
+<td>Why does a math tutor chatbot need a system prompt?</td>
+<td>To override Claude's default behavior of giving direct answers and instead enforce step-by-step Socratic guidance.</td>
+</tr>
+<tr>
+<td>What are five things a system prompt should typically contain?</td>
+<td>Identity/persona, task scope, response format, guardrails, optionally few-shot examples.</td>
+</tr>
+<tr>
+<td>In an agentic loop, what role does the system prompt play?</td>
+<td>It is the stable behavioral contract across every turn — tools and user messages vary, but the system prompt anchors identity and rules.</td>
+</tr>
+<tr>
+<td>Should volatile user context go in the system prompt?</td>
+<td>No — volatile context belongs in <code>messages</code> so it does not invalidate prompt caching and so it can evolve per turn.</td>
+</tr>
+<tr>
+<td>What is the difference between a system prompt and a user instruction?</td>
+<td>A system prompt persists for the whole conversation and is higher-priority; a user instruction is one turn of input and is treated as request-level context.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

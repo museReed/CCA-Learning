@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Making A Request Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Making a Request — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (model selection), 5.3 (production patterns), 1.2 (agentic loop foundation)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 06</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A single Claude request is the smallest unit of product value in any AI feature — three parameters decide the feature's quality, cost, and failure modes, so PMs need to sign off on <code>model</code>, <code>max_tokens</code>, and <code>messages</code> just like they sign off on copy and UX.</p>
+<hr />
+<h2>Mental Model: The Vending Machine Transaction</h2>
+<p>Think of <code>client.messages.create()</code> as a vending machine:</p>
+<table>
+<thead>
+<tr>
+<th>Vending Machine</th>
+<th>Claude Request</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pick the machine (coffee vs soda)</td>
+<td>Pick the <code>model</code> (Sonnet, Haiku, Opus)</td>
+</tr>
+<tr>
+<td>Insert correct change</td>
+<td>Provide API key</td>
+</tr>
+<tr>
+<td>Press a button (which product)</td>
+<td>Send <code>messages</code> (the prompt)</td>
+</tr>
+<tr>
+<td>Machine dispenses up to one item</td>
+<td>Claude responds up to <code>max_tokens</code></td>
+</tr>
+<tr>
+<td>Receipt with price</td>
+<td><code>response.usage</code> with input/output token counts</td>
+</tr>
+</tbody>
+</table>
+<p>Every feature in your product is a thousands-of-these-transactions system. Quality, cost, and latency are emergent properties of the three parameters you pick.</p>
+<hr />
+<h2>The Three Parameters As Product Decisions</h2>
+<h3>Model</h3>
+<p>Choosing the model is a product decision disguised as a technical one. It trades off speed, capability, and cost.</p>
+<table>
+<thead>
+<tr>
+<th>Model tier</th>
+<th>Good for</th>
+<th>PM considerations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sonnet (balanced)</td>
+<td>Default for most features</td>
+<td>Good baseline; start here</td>
+</tr>
+<tr>
+<td>Haiku (fast, cheap)</td>
+<td>Summaries, classification, high-volume</td>
+<td>Cheaper per call, might miss nuance on hard prompts</td>
+</tr>
+<tr>
+<td>Opus (most capable)</td>
+<td>Reasoning-heavy features, complex drafting</td>
+<td>Higher cost per call; reserve for high-value flows</td>
+</tr>
+</tbody>
+</table>
+<p>Note: model names in the course are examples; always confirm the current generation (e.g. <code>claude-sonnet-4-5</code>) with engineering.</p>
+<h3><code>max_tokens</code></h3>
+<p>This is your per-call cost ceiling. PMs who don't have an opinion on <code>max_tokens</code> are letting engineering silently decide feature quality.</p>
+<table>
+<thead>
+<tr>
+<th>Feature type</th>
+<th>Suggested max_tokens</th>
+<th>Reasoning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chat reply</td>
+<td>500–1000</td>
+<td>Short responses; room for nuance</td>
+</tr>
+<tr>
+<td>Summary of a document</td>
+<td>1000–2000</td>
+<td>Summaries are bounded but need breathing room</td>
+</tr>
+<tr>
+<td>Long-form draft (email, blog)</td>
+<td>2000–4000</td>
+<td>Worth paying for unless feature needs to be fast</td>
+</tr>
+<tr>
+<td>Classification / routing</td>
+<td>50–100</td>
+<td>Single token answers; wasted tokens = wasted money</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Critical clarification</strong>: <code>max_tokens</code> is a ceiling, not a target. If you want longer outputs, you need to ask for them in the prompt itself, not bump the ceiling.</p>
+<h3><code>messages</code></h3>
+<p>The messages list is your "conversation state." For single-turn features (Q&amp;A, summarize), it has one entry. For multi-turn features (chat, agent), it grows. Lesson 07 covers the multi-turn case in detail.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When a Single Request Is Enough</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Why single-turn works</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Summarize this document"</td>
+<td>One question, one answer</td>
+</tr>
+<tr>
+<td>"Translate this text"</td>
+<td>Stateless transformation</td>
+</tr>
+<tr>
+<td>"Classify this ticket"</td>
+<td>Routing decision, no follow-up</td>
+</tr>
+<tr>
+<td>"Rewrite this email in a friendlier tone"</td>
+<td>Fire-and-forget transformation</td>
+</tr>
+</tbody>
+</table>
+<h3>When You Need More Than One Call</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Why single-turn is not enough</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chat with history</td>
+<td>Needs <code>messages</code> growing over time (Lesson 07)</td>
+</tr>
+<tr>
+<td>Tool-using agent</td>
+<td>Needs a loop that branches on <code>stop_reason</code> (Lesson 32+)</td>
+</tr>
+<tr>
+<td>Streaming output</td>
+<td>Same call with <code>stream=True</code> flag</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework: The Pre-Launch Questionnaire</h2>
+<p>Before shipping any feature that calls Claude, answer these in the PRD:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which model are we calling?</td>
+<td>Start with Sonnet unless there's a reason</td>
+</tr>
+<tr>
+<td>What is <code>max_tokens</code> set to?</td>
+<td>The max length of a valid response × 1.5</td>
+</tr>
+<tr>
+<td>Is this single-turn or multi-turn?</td>
+<td>Single-turn unless user needs follow-ups</td>
+</tr>
+<tr>
+<td>How much does a typical call cost?</td>
+<td>Compute: (avg input + output tokens) × pricing</td>
+</tr>
+<tr>
+<td>What do we show during the call?</td>
+<td>Loading state, streaming, or optimistic UI</td>
+</tr>
+<tr>
+<td>What if <code>stop_reason == "max_tokens"</code>?</td>
+<td>Define truncation UX</td>
+</tr>
+<tr>
+<td>How do we test prompt quality?</td>
+<td>Eval harness or human review loop</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Cost Economics in Plain English</h2>
+<p>Every call has two cost components:</p>
+<ul>
+<li><strong>Input tokens</strong> — the length of everything you send (system prompt + messages)</li>
+<li><strong>Output tokens</strong> — the length of Claude's response</li>
+</ul>
+<p>You pay per-million tokens per direction. The PM implications:</p>
+<table>
+<thead>
+<tr>
+<th>Lever</th>
+<th>Effect on cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shorter prompts</td>
+<td>Linearly cheaper inputs</td>
+</tr>
+<tr>
+<td>Tighter <code>max_tokens</code></td>
+<td>Caps worst-case output cost</td>
+</tr>
+<tr>
+<td>Smaller model</td>
+<td>Significantly cheaper but may reduce quality</td>
+</tr>
+<tr>
+<td>Batching multiple questions into one call</td>
+<td>Saves per-call overhead but couples failures</td>
+</tr>
+<tr>
+<td>Using tool use vs huge context windows</td>
+<td>Fewer input tokens per call (Lesson 32+)</td>
+</tr>
+</tbody>
+</table>
+<p>Rule of thumb: for most features, input tokens dominate the bill because you keep resending context. Lesson 07 (multi-turn) will make this dramatic.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Not having an opinion on <code>max_tokens</code></strong> — lets engineering pick silently, which caps feature quality you didn't know you were capping.</li>
+<li><strong>Assuming a bigger model is always better</strong> — Haiku beats Sonnet on cost for classification and routing, and the user never notices.</li>
+<li><strong>Skipping prompt iteration in the PRD</strong> — prompts are product copy; they deserve the same review as UI text.</li>
+<li><strong>Not budgeting for prompt eval infrastructure</strong> — you need some way to measure quality, or you can't A/B prompts safely.</li>
+<li><strong>Thinking single-turn is always cheaper</strong> — for long-running chats, forced single-turn patterns often waste tokens by re-sending context in a worse format than multi-turn.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The three parameters of <code>messages.create()</code> are not technical trivia — they are the three biggest product decisions in any Claude feature: capability (model), cost ceiling (max_tokens), and conversation design (messages). A PM who signs off on all three explicitly in the PRD ships features that hit cost and quality targets. A PM who delegates all three to engineering ships features that quietly miss their targets and get blamed on "the AI."</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong>: scenario questions about model selection, sizing <code>max_tokens</code>, and cost tradeoffs.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: every agent is a loop over this single call; knowing the atomic unit is a prerequisite.</li>
+<li>Scenario trigger: "The AI feature is too slow / too expensive / too short" → the answer usually lives in one of the three parameters.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three product-relevant parameters on <code>messages.create()</code>?</td>
+<td><code>model</code> (capability), <code>max_tokens</code> (cost ceiling), <code>messages</code> (conversation design)</td>
+</tr>
+<tr>
+<td>Does <code>max_tokens</code> set a target or a ceiling?</td>
+<td>A ceiling — if you want longer output, ask for it in the prompt, not by bumping the ceiling</td>
+</tr>
+<tr>
+<td>Why should a PM have an opinion on model choice?</td>
+<td>It trades off cost, speed, and capability; engineering will default to one without PM input</td>
+</tr>
+<tr>
+<td>When is a smaller model (Haiku) the right call?</td>
+<td>Classification, routing, high-volume summarization — places where the user never sees the difference</td>
+</tr>
+<tr>
+<td>What are the two cost components of every call?</td>
+<td>Input tokens (what you send) and output tokens (what Claude writes)</td>
+</tr>
+<tr>
+<td>What vending machine analogy fits a Claude call?</td>
+<td>Pick machine (model), insert coins (API key), press button (messages), get item up to one serving (max_tokens), receipt (usage)</td>
+</tr>
+<tr>
+<td>Why is prompt quality a PM concern?</td>
+<td>Prompts are product copy — they determine output quality and deserve PRD-level attention</td>
+</tr>
+<tr>
+<td>What do you need before you can A/B test prompts?</td>
+<td>A prompt evaluation infrastructure to measure quality changes</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

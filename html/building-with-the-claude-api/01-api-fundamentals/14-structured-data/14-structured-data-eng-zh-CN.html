@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Structured Data Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Structured Data — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D5 — Enterprise Deployment (20%) 主要；D2 — Tool Design &amp; MCP Integration (18%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.3（production 模式）、1.3（prompt engineering）、2.1（tools 的结构化输出）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 14</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>当你需要 Claude 返回纯 JSON、代码或其他结构化数据，而不要它自然包在输出外面的闲聊时，你用 <strong>assistant message prefilling</strong> 加 <strong>stop sequences</strong> 强制 Claude 进入你要的格式。</p>
+<hr />
+<h2>问题：Claude 天生想帮忙</h2>
+<p>请 Claude 给 JSON，你通常会拿到这种东西：</p>
+<pre><code>```json
+{
+  &quot;source&quot;: [&quot;aws.ec2&quot;],
+  &quot;detail-type&quot;: [&quot;EC2 Instance State-change Notification&quot;],
+  &quot;detail&quot;: {
+    &quot;state&quot;: [&quot;running&quot;]
+  }
+}
+```
+
+This rule captures EC2 instance state changes when instances start running.
+</code></pre>
+<p>JSON 是对的，但包在 markdown code fences 里<strong>而且</strong>后面还接一段英文解释。对于 AWS EventBridge 规则生成器——用户预期按「复制」就能直接粘到 AWS console——这是糟糕 UX。用户得手动选 JSON、去掉 fences、记得不要包含解释。</p>
+<p>这不是 Claude 的 bug——这是 Claude 默认 helpful 行为漏进了你需要 raw data 的场景。你单靠 <code>temperature</code> 或更好的 system prompt 修不了；Claude 还是会想解释自己。</p>
+<hr />
+<h2>解法：Prefill + Stop Sequences</h2>
+<p>诀窍是给 Claude 一个<strong>已经起头的 assistant message</strong>——就像 Claude 已经用你要的开头起手了。然后用 <strong>stop sequence</strong> 在 Claude 加上任何尾巴文字之前切断生成。</p>
+<pre><code class="language-python">messages = []
+
+add_user_message(messages, &quot;Generate a very short event bridge rule as json&quot;)
+add_assistant_message(messages, &quot;```json&quot;)
+
+text = chat(messages, stop_sequences=[&quot;```&quot;])
+</code></pre>
+<p>流程：</p>
+<ol>
+<li><strong>User message</strong>——告诉 Claude 要生成什么</li>
+<li><strong>Prefilled assistant message</strong>——<code>```json</code> 让 Claude 以为自己已经开了 markdown code block。接下来生成的 tokens 必须延续那个 block</li>
+<li><strong>Claude 生成 JSON 内容</strong>——被 prefill 约束成吐 JSON（不是散文）</li>
+<li><strong>Stop sequence</strong>——当 Claude 试图用 <code>```</code> 关闭 code block，API 立刻停止生成。尾巴解释永远不会出现</li>
+</ol>
+<p>结果是干净 JSON，没有 markdown fences、没有解说、没有东西要 strip：</p>
+<pre><code class="language-json">{
+  &quot;source&quot;: [&quot;aws.ec2&quot;],
+  &quot;detail-type&quot;: [&quot;EC2 Instance State-change Notification&quot;],
+  &quot;detail&quot;: {
+    &quot;state&quot;: [&quot;running&quot;]
+  }
+}
+</code></pre>
+<hr />
+<h2>为什么 Prefilling 有效</h2>
+<p>Claude 是下一个 token 的预测器。当你交给它一个 assistant message，它把那个 message 当成「我已经说过的」，从那继续。如果 prefill 是 <code>```json</code>，那么统计上下一个 tokens 压倒性地可能是 valid JSON——因为训练分布中，markdown fence 开头后面就是 JSON。</p>
+<p>Prefilling 是一种 prompt engineering，绕过「helpful 前言」本能。Claude 无法致歉或介绍它的答案，因为从它的视角它已经开始写 JSON 了。没有「code block 之前」可以回去。</p>
+<hr />
+<h2>为什么 Stop Sequences 重要</h2>
+<p>没有 stop sequence，Claude 会开心地把 code block 结束然后继续写解释。Prefill 解决输出的开头；stop sequence 解决结尾。</p>
+<p><code>stop_sequences</code> 是一串 strings，当 Claude 吐出它们时，API 立刻结束生成。吐出的 stop sequence 本身<strong>不</strong>包含在输出里。所以你传 <code>stop_sequences=["```"]</code>，Claude 试着关 fence 时，生成就在那些 backticks 出现在返回文字之前停止。</p>
+<p>你可以传最多（少数几个）stop sequences，任何一个都会触发结束。常见用法：</p>
+<ul>
+<li><code>"```"</code> 停在结束的 markdown fence</li>
+<li><code>"\n\n"</code> 停在段落断行</li>
+<li>通过 prefill 注入的自定义 delimiters</li>
+</ul>
+<hr />
+<h2>把它串进 chat() helper</h2>
+<p>接着 Lessons 09 和 11 的 chat 函数，加上 <code>stop_sequences</code>：</p>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+def chat(messages, system=None, temperature=1.0, stop_sequences=None):
+    params = {
+        &quot;model&quot;: &quot;claude-sonnet-4-5&quot;,
+        &quot;max_tokens&quot;: 1000,
+        &quot;messages&quot;: messages,
+        &quot;temperature&quot;: temperature,
+    }
+    if system:
+        params[&quot;system&quot;] = system
+    if stop_sequences:
+        params[&quot;stop_sequences&quot;] = stop_sequences
+
+    message = client.messages.create(**params)
+    return message.content[0].text
+
+def add_user_message(messages, text):
+    messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: text})
+
+def add_assistant_message(messages, text):
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: text})
+</code></pre>
+<p>和 <code>system</code> 一样的条件模式：只在有提供时才插入 <code>stop_sequences</code>。</p>
+<hr />
+<h2>解析结果</h2>
+<p>因为 Claude 在开头 fence 后立刻生成 JSON 内容，raw 返回文字通常含前置空白或换行。parse 前先 strip：</p>
+<pre><code class="language-python">import json
+
+text = chat(messages, stop_sequences=[&quot;```&quot;])
+clean_json = json.loads(text.strip())
+</code></pre>
+<p>或者你可以更积极，用 regex 抽第一个 <code>{...}</code> 或 <code>[...]</code> block，但 <code>text.strip() + json.loads()</code> 涵盖常见场景。</p>
+<hr />
+<h2>不只 JSON</h2>
+<p>这个技巧和格式无关。任何需要干净结构化输出的地方都能用：</p>
+<table>
+<thead>
+<tr>
+<th>目标格式</th>
+<th>Prefill</th>
+<th>Stop sequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JSON</td>
+<td><code>```json</code></td>
+<td><code>```</code></td>
+</tr>
+<tr>
+<td>Python code</td>
+<td><code>```python</code></td>
+<td><code>```</code></td>
+</tr>
+<tr>
+<td>YAML</td>
+<td><code>```yaml</code></td>
+<td><code>```</code></td>
+</tr>
+<tr>
+<td>CSV</td>
+<td><code>```csv</code></td>
+<td><code>```</code></td>
+</tr>
+<tr>
+<td>条列清单</td>
+<td><code>-</code></td>
+<td><code>\n\n</code></td>
+</tr>
+<tr>
+<td>自定义 XML</td>
+<td><code>&lt;output&gt;</code></td>
+<td><code>&lt;/output&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>模式是：找出 Claude 自然会包在内容外面的东西，用开头当 prefill，用结尾当 stop sequence。</p>
+<hr />
+<h2>Prefill + Stop Sequences vs Tool Use</h2>
+<p>对 JSON 来说，还有第二个（通常更好的）方法：用 <strong>tool use</strong> 强制 Claude 把结构化数据当作 tool input 返回。这给你 schema 验证过的 JSON object，不用 prefill 把戏——Claude 把 JSON 当成 tool call，SDK 帮你 parse 好。</p>
+<p>什么时候用哪个？</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>最适合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prefill + stop sequence</td>
+<td>快速、无 schema 的结构化输出；简单脚本；非 JSON 格式如 Python 或 CSV</td>
+</tr>
+<tr>
+<td>Tool use (input schema)</td>
+<td>Production JSON 生成，要 schema 验证、type 保证、agent 式集成</td>
+</tr>
+</tbody>
+</table>
+<p>Lesson 14 讲 prefill 技巧因为它是基础——任何格式都能用，不需学 tool use protocol。Tool use 在课程后面介绍。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>忘了 stop sequence</strong>——prefill 解决开头，但没 <code>stop_sequences</code> Claude 会关 fence 并加解释</li>
+<li><strong>Prefill 和 stop sequence 的 fence 不匹配</strong>——如果你 prefill <code>```json</code> 但 stop 在 <code>"\n\n"</code>，你会把结束 fence 抓进输出</li>
+<li><strong>parse 前不 strip whitespace</strong>——<code>json.loads(text)</code> 遇到前置换行会 fail；永远先 <code>text.strip()</code></li>
+<li><strong>期待 100% valid JSON 而没有 retry loop</strong>——Claude 偶尔还是会吐 malformed JSON；production code 要 catch <code>json.JSONDecodeError</code> 并用较低 temperature retry</li>
+<li><strong>有 tool use 可用时还用 prefill</strong>——production JSON 用 tool use + <code>input_schema</code> 免费拿到验证</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prefilling 是约束 Claude 输出格式最老、最简单的方法。有效是因为 Claude 是序列预测器——你把话塞进它嘴里，它就会从那些话继续，而不会重启它惯常的前言。搭配 <code>stop_sequences</code> 切掉尾巴解释，你不需要 tool use 或 JSON mode 就能精确控制输出结构。每位 CCA 考生都该对这个模式滚瓜烂熟。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D5.3（production 模式）</strong>：prefill + stop sequences 是从 Claude 抽干净结构化输出的标准模式</li>
+<li><strong>D2 (Tool Design)</strong>：这堂课暗示 tool use 是 JSON 生成的下一级方法；考试可能对比两者</li>
+<li><strong>D1.3（结构化输出的 prompt engineering）</strong>：预期考如何强制特定输出格式而不加解释文字</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>哪两个技巧结合起来强制 Claude 进入特定输出格式？</td>
+<td>Assistant message prefilling 和 stop sequences</td>
+</tr>
+<tr>
+<td>Assistant message prefilling 做什么？</td>
+<td>加一个 assistant message 含部分响应（如 <code>```json</code>），让 Claude 从那里继续而不是从 preamble 重新开始</td>
+</tr>
+<tr>
+<td><code>stop_sequences</code> 做什么？</td>
+<td>列出 strings，Claude 吐出时立刻结束生成——stop sequence 本身不包含在输出里</td>
+</tr>
+<tr>
+<td>抽纯 JSON 典型的 prefill + stop sequence 是什么？</td>
+<td>Prefill 用 <code>```json</code>，stop 在 <code>```</code></td>
+</tr>
+<tr>
+<td>Prefilling 在机制上为什么有效？</td>
+<td>Claude 是下一个 token 预测器；给定部分 assistant message，它从那继续而不是重新自我介绍</td>
+</tr>
+<tr>
+<td>调用 <code>json.loads()</code> 前要对结果做什么？</td>
+<td>Strip 前后空白——<code>text.strip()</code>——移除 Claude 在开头 fence 后吐的换行</td>
+</tr>
+<tr>
+<td>什么时候 tool use 比 prefill + stop sequences 更好？</td>
+<td>Production JSON 生成，当 schema 验证和 type 保证重要时</td>
+</tr>
+<tr>
+<td>这个技巧对非 JSON 格式有用吗？</td>
+<td>有用——Python、YAML、CSV、条列清单、自定义 XML。模式是 prefill 开头，stop 结尾</td>
+</tr>
+<tr>
+<td>只靠 prefill 不加 stop sequence 的主要风险是什么？</td>
+<td>Claude 会关 code block 然后加英文解释，打败 prefill 的意义</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

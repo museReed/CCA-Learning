@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accessing The Api Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Accessing the API — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) — primary; D3 — Claude Code Configuration (20%) — secondary; D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (model selection), 5.3 (production patterns), 3.1 (API key management), 1.2 (agentic loop foundation)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 04</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Every Claude feature in your product is really a five-hop journey through client, server, API, model, and back — and PMs who understand the hops make smarter trade-offs around latency, cost, security, and failure UX.</p>
+<hr />
+<h2>Mental Model: The Airport Connection</h2>
+<p>Think of a Claude request as a passenger flying from their phone to the model and back:</p>
+<table>
+<thead>
+<tr>
+<th>Hop</th>
+<th>Airport Analogy</th>
+<th>PM Stake</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Client → Your Server</td>
+<td>Passenger boards local flight</td>
+<td>UX latency budget starts ticking</td>
+</tr>
+<tr>
+<td>2. Your Server → Anthropic</td>
+<td>International transfer (with passport = API key)</td>
+<td>Security, rate limiting, logging</td>
+</tr>
+<tr>
+<td>3. Inside Claude</td>
+<td>Customs / baggage handling</td>
+<td>You can't see inside, but it costs time &amp; money</td>
+</tr>
+<tr>
+<td>4. Anthropic → Your Server</td>
+<td>Plane lands, bags unload</td>
+<td>You get <code>stop_reason</code> + <code>usage</code> metadata</td>
+</tr>
+<tr>
+<td>5. Server → Client</td>
+<td>Passenger catches taxi home</td>
+<td>Render streaming, show cost to user if needed</td>
+</tr>
+</tbody>
+</table>
+<p>Every hop adds latency. Every hop is a place something can go wrong. The PM job is to design around the reality that none of this is instant or free.</p>
+<hr />
+<h2>Why a Server Is a Non-Negotiable Product Requirement</h2>
+<p>PMs often get asked "can we just call the API from the mobile app?" The answer is always no, and the reason is a business one, not just a technical one:</p>
+<table>
+<thead>
+<tr>
+<th>Risk of client-side calls</th>
+<th>Business Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API key extracted from app binary</td>
+<td>Credits drained overnight, unexpected invoice</td>
+</tr>
+<tr>
+<td>Key committed to a public repo</td>
+<td>Auto-revoked, feature broken, embarrassing incident</td>
+</tr>
+<tr>
+<td>No rate limiting on client</td>
+<td>Abusive users cost you more than they pay</td>
+</tr>
+<tr>
+<td>No audit logs</td>
+<td>Can't satisfy enterprise compliance asks (SOC2, HIPAA)</td>
+</tr>
+</tbody>
+</table>
+<p>The server is where you enforce all the things legal, finance, and security will eventually demand. Build it on day one, not after the breach.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When the Five-Step Flow Matters Most</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why PMs Care About the Flow</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chatbot for enterprise customers</td>
+<td>Audit logs, PII redaction must happen at server hop</td>
+</tr>
+<tr>
+<td>Mobile app with AI feature</td>
+<td>API key cannot ship in binary; you need a BFF</td>
+</tr>
+<tr>
+<td>Cost-sensitive free tier</td>
+<td><code>usage</code> in response lets you meter per-user without extra calls</td>
+</tr>
+<tr>
+<td>Regulated industries (health, finance)</td>
+<td>Server hop is the only place you can enforce data residency</td>
+</tr>
+<tr>
+<td>Long-form generation feature</td>
+<td><code>stop_reason == max_tokens</code> needs a "continue" UX pattern</td>
+</tr>
+</tbody>
+</table>
+<h3>When It Matters Less (But Still Matters)</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Internal tool for 10 engineers</td>
+<td>Security still matters, but cost/latency tuning can wait</td>
+</tr>
+<tr>
+<td>One-shot experiments</td>
+<td>The flow is the same; you just skip the production hardening</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When scoping a Claude-powered feature, walk these questions:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Why It Matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Where does the API key live?</td>
+<td>Answer must be server. If engineering says "client," flag it.</td>
+</tr>
+<tr>
+<td>What is our <code>max_tokens</code> budget per feature?</td>
+<td>Drives cost ceiling and UX (truncation handling).</td>
+</tr>
+<tr>
+<td>How do we handle <code>stop_reason == max_tokens</code>?</td>
+<td>Do we auto-continue? Show "see more"? Silent truncate?</td>
+</tr>
+<tr>
+<td>How do we meter usage per user?</td>
+<td><code>response.usage</code> is free; a separate billing system is not.</td>
+</tr>
+<tr>
+<td>Where do we log prompts?</td>
+<td>Must be server, with PII redaction.</td>
+</tr>
+<tr>
+<td>What do we show while waiting?</td>
+<td>The five hops take seconds; streaming UX or loaders required.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Cost-Transparency Advantage</h2>
+<p>Every response Anthropic sends back includes <code>usage.input_tokens</code> and <code>usage.output_tokens</code>. This is a quiet superpower for PMs:</p>
+<ul>
+<li>You can show cost to enterprise users per interaction.</li>
+<li>You can enforce per-user quotas without asking engineering to instrument everything.</li>
+<li>You can A/B test prompt changes and measure cost delta immediately.</li>
+<li>You can build dashboards showing which features are most expensive.</li>
+</ul>
+<p>In other SaaS products, you'd need a separate billing pipeline for this. With Anthropic, it's a field on every response.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating AI features as instant</strong> — the five hops take real time; design loading states, streaming, or optimistic UI from day one.</li>
+<li><strong>Scoping without a <code>max_tokens</code> decision</strong> — leaves engineering to pick a number, which quietly caps your feature's quality.</li>
+<li><strong>Forgetting the truncation UX</strong> — <code>stop_reason == max_tokens</code> will happen in production; the PRD must describe what users see.</li>
+<li><strong>Not requiring cost metering in v1</strong> — retrofitting per-user cost tracking later is 10x harder than using <code>usage</code> from the start.</li>
+<li><strong>Assuming the client can call Anthropic directly</strong> — blocks your mobile and web launches until security reviews the BFF.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>As a PM, the five-step flow is your map for every incident, cost review, and security audit you will ever face on a Claude feature. When an engineer says "the AI is slow" or "the AI broke," your first question should always be "which hop?" That single question forces the team to isolate client vs server vs Anthropic vs model, and it unblocks every post-mortem faster than any other framing.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong>: expect scenario questions about where the key lives, how to size <code>max_tokens</code>, and how production code handles <code>stop_reason</code>.</li>
+<li><strong>D3 (Claude Code Configuration)</strong>: API key management patterns — the answer is always server-side storage.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: every agent loop is a for-loop over this five-step envelope.</li>
+<li>Scenario trigger: "A developer puts the key in the mobile app" → the correct answer is always "move it to a backend service."</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the five-step Claude request flow, in PM terms?</td>
+<td>Client → Server → Anthropic API → Model → back through Server → Client</td>
+</tr>
+<tr>
+<td>Why can't a mobile app call Anthropic directly?</td>
+<td>The API key would be extractable from the app binary, letting anyone drain your credits</td>
+</tr>
+<tr>
+<td>Which hop is the only place PII redaction can happen?</td>
+<td>The server hop (before data leaves your perimeter)</td>
+</tr>
+<tr>
+<td>What PM-relevant metadata does every response include?</td>
+<td><code>usage.input_tokens</code>, <code>usage.output_tokens</code>, <code>stop_reason</code></td>
+</tr>
+<tr>
+<td>What does <code>stop_reason == max_tokens</code> mean for UX?</td>
+<td>Claude was cut off mid-answer; PRD must describe the truncation UI (e.g. "Continue" button)</td>
+</tr>
+<tr>
+<td>Why is <code>usage</code> in the response a PM superpower?</td>
+<td>It enables per-user cost metering and A/B cost comparisons without extra infrastructure</td>
+</tr>
+<tr>
+<td>When scoping an AI feature, what's the first security question to ask?</td>
+<td>"Where does the API key live?" — the only correct answer is a server</td>
+</tr>
+<tr>
+<td>What do PMs lose by assuming AI responses are instant?</td>
+<td>They skip loading / streaming UX, and users perceive the feature as broken during the 2–5 second round trip</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

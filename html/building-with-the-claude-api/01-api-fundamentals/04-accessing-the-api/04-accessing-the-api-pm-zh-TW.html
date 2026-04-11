@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accessing The Api Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Accessing the API — PM Perspective（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) 主要；D3 — Claude Code Configuration (20%) 次要；D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（model selection）、5.3（production patterns）、3.1（API key 管理）、1.2（agentic loop 基礎）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 04</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>產品裡每一個 Claude feature 其實都是一趟五跳旅程——client、server、API、model、回來。搞懂這五跳的 PM，才能在延遲、成本、安全、失敗 UX 之間做出聰明的取捨。</p>
+<hr />
+<h2>Mental Model：機場轉機</h2>
+<p>把 Claude 請求想成乘客從手機飛到模型再飛回來：</p>
+<table>
+<thead>
+<tr>
+<th>跳點</th>
+<th>機場比喻</th>
+<th>PM 該在意什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Client → 你的 Server</td>
+<td>上國內線</td>
+<td>UX 延遲預算開始倒數</td>
+</tr>
+<tr>
+<td>2. Server → Anthropic</td>
+<td>國際轉機（護照＝API key）</td>
+<td>安全、rate limit、logging</td>
+</tr>
+<tr>
+<td>3. Claude 內部</td>
+<td>海關 / 行李處理</td>
+<td>看不見內部，但花時間和錢</td>
+</tr>
+<tr>
+<td>4. Anthropic → Server</td>
+<td>飛機降落、拿行李</td>
+<td>拿到 <code>stop_reason</code> 與 <code>usage</code> metadata</td>
+</tr>
+<tr>
+<td>5. Server → Client</td>
+<td>乘客叫計程車回家</td>
+<td>渲染 streaming、需要的話把成本顯示給使用者</td>
+</tr>
+</tbody>
+</table>
+<p>每一跳都加延遲，每一跳都可能出錯。PM 的工作就是圍繞這個事實設計：這整段過程既不即時也不免費。</p>
+<hr />
+<h2>為什麼「必須有 server」是產品規格的硬需求</h2>
+<p>PM 常被問「我們能不能直接從 mobile app 呼叫 API？」答案永遠是不行，而且理由是商業的，不只是技術的：</p>
+<table>
+<thead>
+<tr>
+<th>Client-side 呼叫的風險</th>
+<th>商業影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API key 被從 app binary 挖出來</td>
+<td>Credits 一夜被抽乾，帳單爆表</td>
+</tr>
+<tr>
+<td>Key commit 到 public repo</td>
+<td>被自動 revoke，feature 壞掉，丟臉事件</td>
+</tr>
+<tr>
+<td>Client 沒有 rate limit</td>
+<td>濫用的使用者花你的錢比他付的還多</td>
+</tr>
+<tr>
+<td>沒有 audit log</td>
+<td>無法滿足企業合規需求（SOC2、HIPAA）</td>
+</tr>
+</tbody>
+</table>
+<p>Server 是你未來要應付法務、財務、安全部門所有要求的地方。<strong>Day 1 就要有，不是等出事才補。</strong></p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>五步驟流程最重要的場景</h3>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>PM 為什麼該懂這條流程</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>給企業客戶的 chatbot</td>
+<td>Audit log 跟 PII 脫敏都要在 server 那跳做</td>
+</tr>
+<tr>
+<td>有 AI feature 的 mobile app</td>
+<td>Key 不能包進 binary，需要 BFF 層</td>
+</tr>
+<tr>
+<td>成本敏感的免費方案</td>
+<td><code>usage</code> 讓你不用再拉計費系統就能按使用者計費</td>
+</tr>
+<tr>
+<td>法規產業（醫療、金融）</td>
+<td>Server 是唯一可以控管資料落地的地方</td>
+</tr>
+<tr>
+<td>長篇生成 feature</td>
+<td><code>stop_reason == max_tokens</code> 要有「繼續」的 UX pattern</td>
+</tr>
+</tbody>
+</table>
+<h3>沒那麼關鍵的場景（但還是要注意）</h3>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>為什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>只給 10 個工程師用的內部工具</td>
+<td>安全還是重要，但成本/延遲調校可以晚點做</td>
+</tr>
+<tr>
+<td>一次性實驗</td>
+<td>流程一樣，只是省略生產環境硬化</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>設計 Claude feature 時走一遍這些問題：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>為什麼重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API key 放哪裡？</td>
+<td>答案必須是 server。工程師講「client」就要舉紅旗。</td>
+</tr>
+<tr>
+<td>這個 feature 的 <code>max_tokens</code> 預算是多少？</td>
+<td>決定成本上限和截斷 UX。</td>
+</tr>
+<tr>
+<td><code>stop_reason == max_tokens</code> 怎麼處理？</td>
+<td>自動續寫？顯示「看更多」？默默截斷？</td>
+</tr>
+<tr>
+<td>每個使用者的用量怎麼計？</td>
+<td><code>response.usage</code> 是免費的，另開一個計費系統不是。</td>
+</tr>
+<tr>
+<td>Prompt log 寫在哪？</td>
+<td>必須是 server，而且要做 PII 脫敏。</td>
+</tr>
+<tr>
+<td>等待時給使用者看什麼？</td>
+<td>五跳總共好幾秒，streaming UX 或 loader 必備。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>成本透明化的優勢</h2>
+<p>Anthropic 每個 response 都會回 <code>usage.input_tokens</code> 與 <code>usage.output_tokens</code>。這是 PM 的隱藏超能力：</p>
+<ul>
+<li>可以讓企業使用者看到每次互動的成本。</li>
+<li>可以不用叫工程師埋點就做每使用者配額。</li>
+<li>可以立即 A/B 測試 prompt 變更的成本差異。</li>
+<li>可以建 dashboard 看哪個 feature 最貴。</li>
+</ul>
+<p>在其他 SaaS 產品裡，這些都需要另開計費 pipeline。Anthropic 直接塞在每個 response 裡。</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>以為 AI feature 是即時的</strong> —— 五跳是真的要花時間，loading state、streaming、optimistic UI 第一天就要設計。</li>
+<li><strong>scope 的時候沒決定 <code>max_tokens</code></strong> —— 工程師會隨便給一個數字，悄悄蓋住 feature 品質上限。</li>
+<li><strong>忘了截斷 UX</strong> —— <code>stop_reason == max_tokens</code> 生產環境一定會遇到，PRD 必須說明使用者會看到什麼。</li>
+<li><strong>V1 不做成本計量</strong> —— 之後補比一開始就用 <code>usage</code> 困難十倍。</li>
+<li><strong>以為 client 可以直接打 Anthropic</strong> —— 會卡住 mobile 和 web launch，直到 security 審 BFF 為止。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>PM 的角度看，五步驟流程就是你未來面對每個事故、成本審查、安全稽核的地圖。工程師講「AI 很慢」或「AI 壞了」，你第一個問題永遠該是「哪一跳？」這一句話能強迫團隊把 client、server、Anthropic、model 區分開，比任何其他 post-mortem framing 都更快解鎖問題。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5（Enterprise Deployment）</strong>：情境題會問 API key 放哪、<code>max_tokens</code> 怎麼設、生產程式碼怎麼處理 <code>stop_reason</code>。</li>
+<li><strong>D3（Claude Code Configuration）</strong>：API key 管理模式——答案永遠是 server 儲存。</li>
+<li><strong>D1（Agentic Architecture）</strong>：每個 agent loop 都是在這個五步驟 envelope 上跑 for-loop。</li>
+<li>觸發條件：題目說「工程師把 key 放進 mobile app」→ 正確答案永遠是「搬到後端 service」。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用 PM 語言講五步驟 Claude 請求流程？</td>
+<td>Client → Server → Anthropic API → Model → 回 Server → Client</td>
+</tr>
+<tr>
+<td>為什麼 mobile app 不能直接打 Anthropic？</td>
+<td>API key 會被從 binary 抽走，誰都能抽乾你的 credits</td>
+</tr>
+<tr>
+<td>PII 脫敏唯一能做的位置是哪一跳？</td>
+<td>Server 那一跳（在資料離開你的邊界之前）</td>
+</tr>
+<tr>
+<td>每個 response 都會給哪些 PM 相關的 metadata？</td>
+<td><code>usage.input_tokens</code>、<code>usage.output_tokens</code>、<code>stop_reason</code></td>
+</tr>
+<tr>
+<td><code>stop_reason == max_tokens</code> 對 UX 的意義？</td>
+<td>Claude 被中途截斷；PRD 要描述截斷 UI（例如「繼續」按鈕）</td>
+</tr>
+<tr>
+<td>為什麼 response 的 <code>usage</code> 是 PM 超能力？</td>
+<td>不用另外加 infra 就能做每使用者計費和 prompt A/B 成本比較</td>
+</tr>
+<tr>
+<td>scope AI feature 時第一個該問的安全問題？</td>
+<td>「API key 放哪？」——唯一正確答案是 server</td>
+</tr>
+<tr>
+<td>假設 AI 回應是即時的會失去什麼？</td>
+<td>會省略 loading / streaming UX，使用者在 2–5 秒 round trip 裡覺得 feature 壞掉</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

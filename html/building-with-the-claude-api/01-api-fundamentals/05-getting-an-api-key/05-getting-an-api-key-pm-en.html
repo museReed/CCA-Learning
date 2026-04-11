@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting An Api Key Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Getting an API Key — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (API key lifecycle), 3.2 (workspace strategy), 5.3 (secret hygiene in production)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 05</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>An Anthropic API key is the spending card for your Claude feature — treating key creation, workspace selection, and rotation as product concerns (not just devops) prevents 3am billing surprises and security incidents.</p>
+<hr />
+<h2>Mental Model: The Physical Safe-Deposit Key</h2>
+<p>An Anthropic API key is like a safe-deposit box key at a bank:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Safe-Deposit Key</th>
+<th>Anthropic API Key</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shown only once</td>
+<td>You take the key home from the bank</td>
+<td>Plaintext is displayed exactly once at creation</td>
+</tr>
+<tr>
+<td>Not recoverable</td>
+<td>If lost, you drill out the box and get a new one</td>
+<td>If lost, you delete and create a new one</td>
+</tr>
+<tr>
+<td>Bank can verify but not duplicate</td>
+<td>Bank keeps a hash, not the key</td>
+<td>Anthropic keeps a hash, not the plaintext</td>
+</tr>
+<tr>
+<td>Whoever holds it can access</td>
+<td>No ID check at the box</td>
+<td>Whoever has the key can spend your budget</td>
+</tr>
+</tbody>
+</table>
+<p>The PM implication: treat keys like cash. You would not leave physical cash in a repository — don't leave API keys there either.</p>
+<hr />
+<h2>Why PMs Should Care About Keys</h2>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>PM Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cost attribution</td>
+<td>You cannot report "how much did Feature X cost?" without workspace discipline</td>
+</tr>
+<tr>
+<td>Security incidents</td>
+<td>A leaked key is a real-dollar exposure that shows up in next month's invoice</td>
+</tr>
+<tr>
+<td>Launch blockers</td>
+<td>Compliance teams will ask "where are keys stored?" before any enterprise launch</td>
+</tr>
+<tr>
+<td>Team onboarding</td>
+<td>New engineers need keys; the process must be documented and auditable</td>
+</tr>
+<tr>
+<td>Vendor review</td>
+<td>Enterprise customers will ask about your key management as part of procurement</td>
+</tr>
+</tbody>
+</table>
+<p>If you ship a Claude feature without a key management plan, you are shipping a cost and security liability disguised as a feature.</p>
+<hr />
+<h2>Product Use Cases: Workspace Strategy as a Product Decision</h2>
+<h3>One Workspace Per Product Line</h3>
+<p>Use when you have multiple products sharing one Anthropic account and need clean per-product billing.</p>
+<table>
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Easy answer to "how much is Claude costing Product A?"</td>
+<td>Engineers need to switch workspaces in the console</td>
+</tr>
+<tr>
+<td>Per-product quotas prevent one product starving another</td>
+<td>Slightly more admin overhead</td>
+</tr>
+</tbody>
+</table>
+<h3>One Workspace Per Environment</h3>
+<p>Use when operational safety matters (almost always for production).</p>
+<table>
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A dev runaway loop can't drain production quota</td>
+<td>More keys to rotate</td>
+</tr>
+<tr>
+<td>Clear blast radius during incidents</td>
+<td>More audit surface to monitor</td>
+</tr>
+</tbody>
+</table>
+<h3>Shared Default Workspace</h3>
+<p>Use only for prototypes and courses.</p>
+<table>
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Zero setup</td>
+<td>No cost attribution; any incident affects everything</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Key Lifecycle: A PM Checklist</h2>
+<pre><code>     Create
+        │
+        ▼
+     Copy once → store in secret manager
+        │
+        ▼
+     Document: name, owner, purpose
+        │
+        ▼
+     Use in service → monitor usage/cost
+        │
+        ▼
+     Rotate on schedule (quarterly)
+        │
+        ▼
+     Delete when service decommissioned
+</code></pre>
+<p>Each step is a product concern:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>PM Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create</td>
+<td>Ensure naming convention exists and is followed</td>
+</tr>
+<tr>
+<td>Store</td>
+<td>Require secret manager usage in the PRD</td>
+</tr>
+<tr>
+<td>Document</td>
+<td>Maintain a key inventory (who owns what)</td>
+</tr>
+<tr>
+<td>Monitor</td>
+<td>Dashboards for unusual spend</td>
+</tr>
+<tr>
+<td>Rotate</td>
+<td>Quarterly rotation as a scheduled engineering ticket</td>
+</tr>
+<tr>
+<td>Delete</td>
+<td>Decommission checklist when a feature sunsets</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When a new Claude feature is proposed, run this questionnaire:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Default Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which workspace will this key live in?</td>
+<td>A dedicated per-feature or per-env workspace</td>
+</tr>
+<tr>
+<td>Who is the human owner of this key?</td>
+<td>Named engineer on the feature team, not "the team"</td>
+</tr>
+<tr>
+<td>Where is the key stored in production?</td>
+<td>Secret manager (never env vars on bare metal)</td>
+</tr>
+<tr>
+<td>How will we rotate it?</td>
+<td>Quarterly, as a scheduled ticket</td>
+</tr>
+<tr>
+<td>How do we know if it leaks?</td>
+<td>Billing anomaly alerts + GitHub secret scanning</td>
+</tr>
+<tr>
+<td>What's the incident playbook?</td>
+<td>Delete in console → create new → redeploy → post-mortem</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating key management as devops-only</strong> — it is a product concern because it drives cost attribution, security posture, and launch readiness.</li>
+<li><strong>Skipping the naming convention</strong> — when the first incident hits, "My Key 3" costs hours of detective work.</li>
+<li><strong>Not budgeting rotation work</strong> — rotation never happens if it isn't on the roadmap; schedule it quarterly.</li>
+<li><strong>Mixing dev and prod in one workspace</strong> — saves ten minutes today, costs a runaway invoice later.</li>
+<li><strong>No incident playbook</strong> — when a key leaks, the team loses time improvising the rotation steps under pressure.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Key management is not below your pay grade — it's a product design decision disguised as plumbing. The PMs who lose sleep over Claude features are usually the ones who treated API keys as "engineering's problem" and then discovered a $40K dev runaway or a public-repo leak the hard way. Add "workspace + key plan" to your feature launch checklist, right next to "privacy review."</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Claude Code Configuration)</strong>: creation flow, storage patterns, recovery path (you can't — you rotate).</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: workspace as a billing/quota boundary; key hygiene as a production requirement.</li>
+<li>Scenario trigger: "A key leaked into a public repo" → delete in console, create new, redeploy, and review how it leaked.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Why should a PM care about API key management?</td>
+<td>It drives cost attribution, security incidents, and enterprise launch readiness</td>
+</tr>
+<tr>
+<td>What is the mental model for an Anthropic API key?</td>
+<td>A safe-deposit box key — shown once, not recoverable, bank keeps only a hash</td>
+</tr>
+<tr>
+<td>What's the default PM answer to "which workspace?"</td>
+<td>A dedicated per-feature or per-environment workspace, not shared Default</td>
+</tr>
+<tr>
+<td>What goes in a key inventory?</td>
+<td>Name, owner (named human), purpose, workspace, rotation date</td>
+</tr>
+<tr>
+<td>What is the correct incident response to a leaked key?</td>
+<td>Delete in console → create new → redeploy → post-mortem</td>
+</tr>
+<tr>
+<td>Why does quarterly rotation need PM sponsorship?</td>
+<td>Because rotation work only happens when it's on a roadmap with a scheduled ticket</td>
+</tr>
+<tr>
+<td>What's wrong with mixing dev and prod in one workspace?</td>
+<td>A dev runaway loop can drain production quota, causing a customer incident</td>
+</tr>
+<tr>
+<td>What should a PM add to the feature launch checklist?</td>
+<td>A workspace + key plan alongside privacy and security review</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

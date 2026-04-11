@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="40" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">存取 Claude API 的三種方式</text>
+  <text x="500" y="62" text-anchor="middle" font-size="13" fill="#6B7280">Python SDK、TypeScript SDK 或原始 HTTP — 依你的技術棧挑選</text>
+
+  <!-- Column 1: Python SDK (Blue) -->
+  <rect x="30" y="90" width="305" height="410" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="30" y="90" width="305" height="46" rx="12" fill="#3B82F6"/>
+  <rect x="30" y="124" width="305" height="12" fill="#3B82F6"/>
+  <text x="182" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">Python SDK</text>
+
+  <rect x="65" y="150" width="235" height="26" rx="13" fill="#DBEAFE"/>
+  <text x="182" y="168" text-anchor="middle" font-size="11" font-weight="600" fill="#1E40AF">Python 應用程式首選</text>
+
+  <!-- Code snippet -->
+  <rect x="50" y="190" width="265" height="88" rx="6" fill="#0F172A"/>
+  <text x="62" y="212" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">pip install anthropic</text>
+  <text x="62" y="234" font-size="10" font-family="Menlo, monospace" fill="#34D399">from anthropic import</text>
+  <text x="62" y="248" font-size="10" font-family="Menlo, monospace" fill="#34D399">    Anthropic</text>
+  <text x="62" y="266" font-size="10" font-family="Menlo, monospace" fill="#34D399">client = Anthropic()</text>
+
+  <!-- Key properties -->
+  <text x="65" y="308" font-size="11" font-weight="700" fill="#1E40AF">主要特色</text>
+  <circle cx="72" cy="326" r="3" fill="#3B82F6"/>
+  <text x="82" y="330" font-size="11" fill="#1E293B">型別化回應（Pydantic）</text>
+  <circle cx="72" cy="346" r="3" fill="#3B82F6"/>
+  <text x="82" y="350" font-size="11" fill="#1E293B">支援同步與非同步</text>
+  <circle cx="72" cy="366" r="3" fill="#3B82F6"/>
+  <text x="82" y="370" font-size="11" fill="#1E293B">5xx 錯誤自動重試</text>
+  <circle cx="72" cy="386" r="3" fill="#3B82F6"/>
+  <text x="82" y="390" font-size="11" fill="#1E293B">內建串流輔助函式</text>
+  <circle cx="72" cy="406" r="3" fill="#3B82F6"/>
+  <text x="82" y="410" font-size="11" fill="#1E293B">IDE 自動完成</text>
+
+  <rect x="50" y="432" width="265" height="50" rx="8" fill="white" stroke="#BFDBFE"/>
+  <text x="182" y="452" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">適合場景</text>
+  <text x="182" y="470" text-anchor="middle" font-size="11" fill="#1E293B">資料科學、後端服務、代理</text>
+
+  <!-- Column 2: TypeScript SDK (Green) -->
+  <rect x="347" y="90" width="305" height="410" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="347" y="90" width="305" height="46" rx="12" fill="#22C55E"/>
+  <rect x="347" y="124" width="305" height="12" fill="#22C55E"/>
+  <text x="499" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">TypeScript SDK</text>
+
+  <rect x="382" y="150" width="235" height="26" rx="13" fill="#DCFCE7"/>
+  <text x="499" y="168" text-anchor="middle" font-size="11" font-weight="600" fill="#14532D">JS / TS 應用程式專用</text>
+
+  <!-- Code snippet -->
+  <rect x="367" y="190" width="265" height="88" rx="6" fill="#0F172A"/>
+  <text x="379" y="212" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">npm i @anthropic-ai/sdk</text>
+  <text x="379" y="234" font-size="10" font-family="Menlo, monospace" fill="#34D399">import Anthropic from</text>
+  <text x="379" y="248" font-size="10" font-family="Menlo, monospace" fill="#34D399">  "@anthropic-ai/sdk";</text>
+  <text x="379" y="266" font-size="10" font-family="Menlo, monospace" fill="#34D399">const client = new Anthropic();</text>
+
+  <!-- Key properties -->
+  <text x="382" y="308" font-size="11" font-weight="700" fill="#14532D">主要特色</text>
+  <circle cx="389" cy="326" r="3" fill="#22C55E"/>
+  <text x="399" y="330" font-size="11" fill="#1E293B">完整 TypeScript 型別</text>
+  <circle cx="389" cy="346" r="3" fill="#22C55E"/>
+  <text x="399" y="350" font-size="11" fill="#1E293B">以非同步迭代器串流</text>
+  <circle cx="389" cy="366" r="3" fill="#22C55E"/>
+  <text x="399" y="370" font-size="11" fill="#1E293B">支援 Node、Deno、瀏覽器</text>
+  <circle cx="389" cy="386" r="3" fill="#22C55E"/>
+  <text x="399" y="390" font-size="11" fill="#1E293B">相容 Edge runtime</text>
+  <circle cx="389" cy="406" r="3" fill="#22C55E"/>
+  <text x="399" y="410" font-size="11" fill="#1E293B">與 Python 介面形狀一致</text>
+
+  <rect x="367" y="432" width="265" height="50" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="499" y="452" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">適合場景</text>
+  <text x="499" y="470" text-anchor="middle" font-size="11" fill="#1E293B">Next.js、Node 伺服器、網頁應用</text>
+
+  <!-- Column 3: Raw REST (Purple) -->
+  <rect x="664" y="90" width="305" height="410" rx="12" fill="#FAF5FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="664" y="90" width="305" height="46" rx="12" fill="#8B5CF6"/>
+  <rect x="664" y="124" width="305" height="12" fill="#8B5CF6"/>
+  <text x="816" y="120" text-anchor="middle" font-size="16" font-weight="600" fill="white">原始 REST (HTTP)</text>
+
+  <rect x="699" y="150" width="235" height="26" rx="13" fill="#EDE9FE"/>
+  <text x="816" y="168" text-anchor="middle" font-size="11" font-weight="600" fill="#5B21B6">不限程式語言的備案</text>
+
+  <!-- Code snippet -->
+  <rect x="684" y="190" width="265" height="88" rx="6" fill="#0F172A"/>
+  <text x="696" y="212" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">curl / httpx / fetch / Go ...</text>
+  <text x="696" y="234" font-size="9" font-family="Menlo, monospace" fill="#34D399">POST https://api.anthropic.com</text>
+  <text x="696" y="248" font-size="9" font-family="Menlo, monospace" fill="#34D399">     /v1/messages</text>
+  <text x="696" y="266" font-size="9" font-family="Menlo, monospace" fill="#34D399">x-api-key: sk-ant-...</text>
+
+  <!-- Key properties -->
+  <text x="699" y="308" font-size="11" font-weight="700" fill="#5B21B6">主要特色</text>
+  <circle cx="706" cy="326" r="3" fill="#8B5CF6"/>
+  <text x="716" y="330" font-size="11" fill="#1E293B">任何程式語言都能用</text>
+  <circle cx="706" cy="346" r="3" fill="#8B5CF6"/>
+  <text x="716" y="350" font-size="11" fill="#1E293B">不需 SDK 依賴</text>
+  <circle cx="706" cy="366" r="3" fill="#8B5CF6"/>
+  <text x="716" y="370" font-size="11" fill="#1E293B">透過 SSE 進行串流</text>
+  <circle cx="706" cy="386" r="3" fill="#8B5CF6"/>
+  <text x="716" y="390" font-size="11" fill="#1E293B">重試與錯誤需自行處理</text>
+  <circle cx="706" cy="406" r="3" fill="#8B5CF6"/>
+  <text x="716" y="410" font-size="11" fill="#1E293B">完整掌控 HTTP 標頭</text>
+
+  <rect x="684" y="432" width="265" height="50" rx="8" fill="white" stroke="#DDD6FE"/>
+  <text x="816" y="452" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">適合場景</text>
+  <text x="816" y="470" text-anchor="middle" font-size="11" fill="#1E293B">Go、Rust、Shell 腳本、CI/CD</text>
+
+  <!-- Bottom summary -->
+  <rect x="80" y="520" width="840" height="58" rx="8" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="500" y="545" text-anchor="middle" font-size="13" font-weight="500" fill="#1E293B">三條路徑都打到同一個端點：<tspan font-family="Menlo, monospace" fill="#0F172A">POST /v1/messages</tspan></text>
+  <text x="500" y="565" text-anchor="middle" font-size="11" fill="#6B7280">SDK 只是薄包裝 — 依據你的語言挑選，而非功能差異</text>
+</svg>

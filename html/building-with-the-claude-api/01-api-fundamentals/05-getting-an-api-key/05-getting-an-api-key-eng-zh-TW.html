@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting An Api Key Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Getting an API Key — Engineering Deep Dive（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration (20%) 主要；D5 — Enterprise Deployment (20%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（API key lifecycle）、3.2（workspace 與 key 命名）、5.3（生產環境 secret 衛生）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 05</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Anthropic 的 API key 是一張「寫入後只能讀一次」的 bearer credential，透過 Console 在指定的 workspace 底下建立——它只會顯示一次，沒看到當下複製就永遠拿不回來。</p>
+<hr />
+<h2>建立流程五步驟</h2>
+<pre><code>Console 登入 ─▶ Get API Keys ─▶ Create Key ─▶ Workspace + 命名 ─▶ 只能複製一次
+    1              2              3              4                  5
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>步驟</th>
+<th>動作</th>
+<th>備註</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>瀏覽 <code>https://console.anthropic.com/</code> 並登入</td>
+<td>用要負責計費與稽核的帳號</td>
+</tr>
+<tr>
+<td>2</td>
+<td>點 <strong>Get API Keys</strong>（dashboard 右上）</td>
+<td>會進到 key 管理頁</td>
+</tr>
+<tr>
+<td>3</td>
+<td>點 <strong>Create Key</strong>（key 頁右上）</td>
+<td>打開建立對話框</td>
+</tr>
+<tr>
+<td>4</td>
+<td>選 workspace（例如 <code>Default</code>）並取名（例如 <code>Anthropic Course</code>）</td>
+<td>名字只是給人看的識別；workspace 才是計費/稽核邊界</td>
+</tr>
+<tr>
+<td>5</td>
+<td>立刻複製</td>
+<td><strong>這個值只會顯示一次</strong>；對話框關掉就只能刪了重建</td>
+</tr>
+</tbody>
+</table>
+<p>「只能複製一次」這個規則不是 UX 小瑕疵，而是安全設計。Anthropic 建立後就不再儲存明文 key，只保留 hash。<strong>你掉了沒人救得回來，反過來講也沒人能從客服工單把它偷走。</strong></p>
+<hr />
+<h2>Workspace：隔離的單位</h2>
+<p>Workspace 是計費、rate limit、用量報表的邊界。選對 workspace 是生產決策，不是裝飾。</p>
+<table>
+<thead>
+<tr>
+<th>Workspace 策略</th>
+<th>適合誰</th>
+<th>取捨</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一個產品一個 workspace</td>
+<td>乾淨的產品級計費與配額</td>
+<td>工程師要切來切去</td>
+</tr>
+<tr>
+<td>一個環境一個 workspace（dev/staging/prod）</td>
+<td>環境隔離、事故圍堵</td>
+<td>要管的 key 比較多</td>
+</tr>
+<tr>
+<td>共用 <code>Default</code> workspace</td>
+<td>POC / 教學</td>
+<td>不同專案之間無法歸帳</td>
+</tr>
+</tbody>
+</table>
+<p>只要是認真在跑的生產 app，就像管 AWS account 一樣管 workspace：<strong>至少 prod/非 prod 分開。</strong></p>
+<hr />
+<h2>Key 命名：一個小習慣省你一堆時間</h2>
+<p>名字是 free-form 的，只用來給人辨識。<strong>早點立規矩：</strong></p>
+<pre><code>&lt;env&gt;-&lt;service&gt;-&lt;owner&gt;-&lt;date&gt;
+prod-chatbot-backend-2025-04-11
+dev-ingest-worker-2025-04-11
+</code></pre>
+<p>看到可疑帳單或要 rotate key 的時候，名字是你在 console 裡唯一的查詢鍵。取成「My Key 3」會在事故時讓你多花好幾小時。</p>
+<hr />
+<h2>Key 在程式碼中的處理</h2>
+<p>Anthropic 的 SDK 會自動讀取環境變數 <code>ANTHROPIC_API_KEY</code>。這是 Lesson 06 會用到的 pattern，也是唯一可以接受的起手式：</p>
+<pre><code class="language-bash"># .env（絕對不要 commit）
+ANTHROPIC_API_KEY=&quot;sk-ant-api03-...your-key...&quot;
+</code></pre>
+<pre><code class="language-python"># Python — SDK 會自己從環境變數抓
+from dotenv import load_dotenv
+load_dotenv()
+
+from anthropic import Anthropic
+
+client = Anthropic()  # 不用顯式傳 key
+</code></pre>
+<p>Key 在程式碼中的鐵律：</p>
+<table>
+<thead>
+<tr>
+<th>規則</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>絕對不 commit <code>.env</code></td>
+<td>Public repo 會觸發自動 revoke，private repo 也會從 fork 洩漏</td>
+</tr>
+<tr>
+<td><code>.env</code> 一律加進 <code>.gitignore</code></td>
+<td>雙保險防止誤 commit</td>
+</tr>
+<tr>
+<td>生產環境用 secret manager（AWS Secrets Manager、GCP Secret Manager、HashiCorp Vault）</td>
+<td>裸 server 的環境變數 POC 可以，但沒稽核軌跡</td>
+</tr>
+<tr>
+<td>懷疑洩漏就立刻 rotate</td>
+<td>Console 刪舊 → 建新 → redeploy</td>
+</tr>
+<tr>
+<td>不要透過 chat/email/截圖分享</td>
+<td>真的必須分享就用密碼管理器的 secure share</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>「key 遺失」工作流</h2>
+<p>因為值只會顯示一次，恢復路徑很明確：<strong>不能恢復，只能 rotate。</strong></p>
+<pre><code>                ┌──────────────────┐
+                │    key 掉了？     │
+                └────────┬─────────┘
+                         │
+         ┌───────────────┴───────────────┐
+         │                               │
+    Console 找到                  Console 刪掉
+    那把 key                      那把遺失的 key
+         │                               │
+         └───────────────┬───────────────┘
+                         ▼
+                Console: Create Key
+                （新的值，新的「只能複製一次」視窗）
+                         ▼
+                更新 .env / secret manager
+                / redeploy
+</code></pre>
+<p>這也是排程 rotate 的完全相同流程——<strong>沒有「拿回既有 key 的值」這個 API。</strong></p>
+<hr />
+<h2>程式碼範例：顯式傳 key（只能用在測試）</h2>
+<p>SDK 允許直接把 key 當參數傳，但這只能用在丟棄式的腳本：</p>
+<pre><code class="language-python">from anthropic import Anthropic
+
+# 只有 one-off notebook 或測試可接受，生產環境絕對不要
+client = Anthropic(api_key=&quot;sk-ant-api03-...&quot;)
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=256,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;ping&quot;}],
+)
+print(response.content[0].text)
+</code></pre>
+<p>這個 pattern 一旦離開 notebook 就變成地雷——一個手滑的 <code>git add .</code> 就把 key 推到 remote。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>對話框還沒複製就關掉</strong> —— 值救不回來，只能刪了重建。</li>
+<li><strong>Key commit 進 git</strong> —— 即使是 private repo 也會從 fork、備份、之後開源洩漏。一律用環境變數。</li>
+<li><strong>用「My Key」或「Test」當名字</strong> —— 事故發生時你會不知道哪把 key 歸哪個 service。</li>
+<li><strong>Dev 和 prod 共用一個 workspace</strong> —— Dev 失控的 job 會把你的生產配額抽乾。</li>
+<li><strong>從來不 rotate</strong> —— Key 應該排程過期（季度是合理 default），沒用的 key 要刪掉。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>「只能複製一次」的對話框不是不方便——<strong>它就是 API key 安全的根本原因。</strong> 如果 Anthropic 之後還能給你看這個 key，那被盜號的攻擊者也能。把「複製一次、存 secret manager、有懷疑就 rotate」這個迴圈內化，你 D3 secret hygiene 的考題基本上就過了。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3（Claude Code Configuration）</strong>：建立流程、key 放哪、怎麼恢復（不能恢復，只能 rotate）、為什麼。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：把 workspace 當成生產環境的考量——計費、稽核、rate limit 隔離。</li>
+<li>考試觸發：「工程師弄丟了 API key」→ 答案永遠是「在 console 刪掉重建」，不是「聯絡 Anthropic 客服救回」。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anthropic API key 的明文值能看幾次？</td>
+<td>只有一次，建立當下；之後不會再顯示</td>
+</tr>
+<tr>
+<td>弄丟 key 要怎麼救？</td>
+<td>救不回來；要到 console 刪掉再建一把新的</td>
+</tr>
+<tr>
+<td>建立 API key 的五個步驟？</td>
+<td>1) 登入 console.anthropic.com 2) Get API Keys 3) Create Key 4) 選 workspace 並命名 5) 立刻複製那個值</td>
+</tr>
+<tr>
+<td><code>anthropic</code> SDK 會自動讀哪個環境變數？</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td><code>.gitignore</code> 應該加什麼來保護 key？</td>
+<td><code>.env</code>（以及其他可能放到 key 的檔案）</td>
+</tr>
+<tr>
+<td>為什麼 Anthropic 建立後不保存明文 key？</td>
+<td>這樣誰都沒辦法事後拿到它，包括 Anthropic 客服和攻擊者</td>
+</tr>
+<tr>
+<td>Workspace 在 key 管理中的用途？</td>
+<td>計費、配額、用量報表的邊界；按環境或按產品分</td>
+</tr>
+<tr>
+<td>安全的命名慣例？</td>
+<td><code>&lt;env&gt;-&lt;service&gt;-&lt;owner&gt;-&lt;date&gt;</code>，例如 <code>prod-chatbot-backend-2025-04-11</code></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

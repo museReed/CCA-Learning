@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting An Api Key Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Getting an API Key — PM Perspective（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration (20%) 主要；D5 — Enterprise Deployment (20%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1（API key lifecycle）、3.2（workspace 策略）、5.3（生产环境 secret 卫生）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 05</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Anthropic API key 就是你 Claude feature 的信用卡——把创建、workspace 选择、rotation 当成产品问题（不只是 devops 的事），才不会在凌晨三点收到爆表账单或安全事故通知。</p>
+<hr />
+<h2>Mental Model：银行保险箱的钥匙</h2>
+<p>Anthropic API key 就像银行保险箱的钥匙：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>保险箱钥匙</th>
+<th>Anthropic API Key</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>只给一次</td>
+<td>从银行拿回家</td>
+<td>创建时只显示一次</td>
+</tr>
+<tr>
+<td>不能恢复</td>
+<td>丢了就钻开箱子换新的</td>
+<td>丢了就删了重建</td>
+</tr>
+<tr>
+<td>银行能验证但不能复制</td>
+<td>银行只存 hash，不存钥匙</td>
+<td>Anthropic 只存 hash，不存明文</td>
+</tr>
+<tr>
+<td>谁有谁就能用</td>
+<td>进箱子不验身份</td>
+<td>谁有 key 谁就能花你的预算</td>
+</tr>
+</tbody>
+</table>
+<p>PM 的启示：<strong>把 key 当现金处理</strong>。你不会把实体现金放 repo 里——API key 也一样。</p>
+<hr />
+<h2>为什么 PM 该关心 key</h2>
+<table>
+<thead>
+<tr>
+<th>关切点</th>
+<th>PM 影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>成本归属</td>
+<td>没有 workspace 纪律，你无法回答"Feature X 花了多少钱"</td>
+</tr>
+<tr>
+<td>安全事故</td>
+<td>Key 泄漏是真金白银的敞口，会出现在下个月的账单</td>
+</tr>
+<tr>
+<td>Launch 卡关</td>
+<td>合规团队在企业 launch 前会问"key 存哪里"</td>
+</tr>
+<tr>
+<td>团队 onboarding</td>
+<td>新工程师需要 key，流程必须文档化且可审计</td>
+</tr>
+<tr>
+<td>供应商审查</td>
+<td>企业客户在采购阶段会问你的 key 管理</td>
+</tr>
+</tbody>
+</table>
+<p><strong>没有 key 管理计划就推 Claude feature，等于推了一个伪装成 feature 的成本与安全负债。</strong></p>
+<hr />
+<h2>Product Use Cases：Workspace 策略就是产品决策</h2>
+<h3>一个产品一个 workspace</h3>
+<p>多个产品共用一个 Anthropic 账号、需要干净的产品级计费时用。</p>
+<table>
+<thead>
+<tr>
+<th>好处</th>
+<th>代价</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Product A 花了多少 Claude 钱"一目了然</td>
+<td>工程师要在 console 切 workspace</td>
+</tr>
+<tr>
+<td>每产品配额可以防止互相抢资源</td>
+<td>管理负担略增</td>
+</tr>
+</tbody>
+</table>
+<h3>一个环境一个 workspace</h3>
+<p>运营安全很重要时用（生产几乎都要）。</p>
+<table>
+<thead>
+<tr>
+<th>好处</th>
+<th>代价</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dev 失控的 loop 抽不到生产配额</td>
+<td>要 rotate 的 key 变多</td>
+</tr>
+<tr>
+<td>事故时 blast radius 很清楚</td>
+<td>要监控的审计面更多</td>
+</tr>
+</tbody>
+</table>
+<h3>共用 Default workspace</h3>
+<p>只有 prototype 和教学才用。</p>
+<table>
+<thead>
+<tr>
+<th>好处</th>
+<th>代价</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>零设置</td>
+<td>没有成本归属；任何事故影响一切</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Key 生命周期：PM 检查清单</h2>
+<pre><code>     创建
+      │
+      ▼
+     复制一次 → 存 secret manager
+      │
+      ▼
+     文档化：名字、所有者、用途
+      │
+      ▼
+     用在 service → 监控用量/成本
+      │
+      ▼
+     定期 rotate（季度）
+      │
+      ▼
+     Service 退役时删掉
+</code></pre>
+<p>每一步都是产品问题：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>PM 责任</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>创建</td>
+<td>确保命名惯例存在并被遵守</td>
+</tr>
+<tr>
+<td>存储</td>
+<td>PRD 里规定用 secret manager</td>
+</tr>
+<tr>
+<td>文档化</td>
+<td>维护 key 库存（谁拥有什么）</td>
+</tr>
+<tr>
+<td>监控</td>
+<td>不寻常开销的 dashboard</td>
+</tr>
+<tr>
+<td>Rotate</td>
+<td>把每季 rotate 排成工程 ticket</td>
+</tr>
+<tr>
+<td>删除</td>
+<td>Feature 退役时有 decommission checklist</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>新的 Claude feature 提案时跑这份问卷：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>默认答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>这把 key 要放哪个 workspace？</td>
+<td>专属的 per-feature 或 per-env workspace</td>
+</tr>
+<tr>
+<td>谁是这把 key 的人类所有者？</td>
+<td>Feature team 里指名的工程师，不是"整个 team"</td>
+</tr>
+<tr>
+<td>生产环境这把 key 存哪？</td>
+<td>Secret manager（不要放裸机器的环境变量）</td>
+</tr>
+<tr>
+<td>怎么 rotate？</td>
+<td>每季，排定 ticket</td>
+</tr>
+<tr>
+<td>泄漏怎么知道？</td>
+<td>账单异常告警 + GitHub secret scanning</td>
+</tr>
+<tr>
+<td>事故 playbook 是什么？</td>
+<td>Console 删掉 → 建新 → redeploy → post-mortem</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>把 key 管理当成纯 devops 的事</strong> —— 它是产品问题，因为它驱动成本归属、安全姿态、launch 就绪度。</li>
+<li><strong>跳过命名惯例</strong> —— 第一个事故打来时，"My Key 3"会让你花好几个小时当侦探。</li>
+<li><strong>没排 rotation 的工时</strong> —— Rotation 没排进 roadmap 就不会发生，排成每季。</li>
+<li><strong>Dev 跟 prod 共用一个 workspace</strong> —— 今天省十分钟，之后被失控账单打回来。</li>
+<li><strong>没有事故 playbook</strong> —— Key 泄漏时，team 在压力下临时想 rotate 步骤，浪费时间。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Key 管理不是小事——它是伪装成水电的产品设计决策。为 Claude feature 失眠的 PM，通常都是那些把 API key 当成"工程师的事"的人，然后被一个 4 万美金的 dev 失控账单或 public repo 泄漏事件狠狠教训。<strong>把"workspace + key 计划"加进 feature launch checklist，就放在"隐私审查"旁边。</strong></p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3（Claude Code Configuration）</strong>：创建流程、存储模式、恢复路径（不能恢复，只能 rotate）。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：Workspace 作为计费/配额边界；key 卫生作为生产需求。</li>
+<li>情境触发："Key 泄漏到 public repo" → Console 删掉、建新、redeploy、检讨怎么泄漏的。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>为什么 PM 该关心 API key 管理？</td>
+<td>它驱动成本归属、安全事故、企业 launch 就绪度</td>
+</tr>
+<tr>
+<td>Anthropic API key 的心智模型是什么？</td>
+<td>保险箱钥匙——只给一次、不能恢复、银行只存 hash</td>
+</tr>
+<tr>
+<td>"workspace 要选哪个"PM 默认答案是什么？</td>
+<td>专属的 per-feature 或 per-env workspace，不是共用 Default</td>
+</tr>
+<tr>
+<td>Key 库存要记什么？</td>
+<td>名字、所有者（指名的人）、用途、workspace、rotation 日期</td>
+</tr>
+<tr>
+<td>Key 泄漏的正确事故处理是什么？</td>
+<td>Console 删掉 → 建新 → redeploy → post-mortem</td>
+</tr>
+<tr>
+<td>为什么季度 rotate 需要 PM 背书？</td>
+<td>因为 rotation 没排进 roadmap 就不会发生</td>
+</tr>
+<tr>
+<td>Dev 跟 prod 共用一个 workspace 有什么问题？</td>
+<td>Dev 失控 loop 会抽干生产配额，造成客户事故</td>
+</tr>
+<tr>
+<td>PM 该在 feature launch checklist 加什么？</td>
+<td>Workspace + key 计划，和隐私与安全审查放一起</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

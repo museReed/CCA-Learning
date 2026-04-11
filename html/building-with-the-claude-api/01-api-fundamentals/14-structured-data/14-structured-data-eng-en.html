@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Structured Data Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Structured Data — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) — primary; D2 — Tool Design &amp; MCP Integration (18%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.3 (production patterns), 1.3 (prompt engineering), 2.1 (structured output for tools)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 14</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>When you need Claude to return raw JSON, code, or other structured data without the chatty commentary it naturally wraps around output, you combine <strong>assistant message prefilling</strong> with <strong>stop sequences</strong> to force Claude into the exact format you need.</p>
+<hr />
+<h2>The Problem: Claude Wants to Be Helpful</h2>
+<p>Ask Claude for JSON and you will typically get something like:</p>
+<pre><code>```json
+{
+  &quot;source&quot;: [&quot;aws.ec2&quot;],
+  &quot;detail-type&quot;: [&quot;EC2 Instance State-change Notification&quot;],
+  &quot;detail&quot;: {
+    &quot;state&quot;: [&quot;running&quot;]
+  }
+}
+```
+
+This rule captures EC2 instance state changes when instances start running.
+</code></pre>
+<p>The JSON is correct, but it is wrapped in markdown code fences <em>and</em> followed by an English explanation. For an AWS EventBridge rule generator where users expect to click "copy" and paste directly into the AWS console, this is terrible UX. Users have to manually select the JSON, strip the fences, and remember not to include the explanation.</p>
+<p>This is not a bug in Claude — it is Claude's default helpful behavior leaking into a context where you need raw data. You cannot fix it with <code>temperature</code> or a better system prompt alone; Claude will still want to explain itself.</p>
+<hr />
+<h2>The Solution: Prefill + Stop Sequences</h2>
+<p>The trick is to give Claude an <strong>assistant message that is already started</strong> — as if Claude had begun its response with the exact opening you want. Then you use a <strong>stop sequence</strong> to cut generation off before Claude can add any trailing text.</p>
+<pre><code class="language-python">messages = []
+
+add_user_message(messages, &quot;Generate a very short event bridge rule as json&quot;)
+add_assistant_message(messages, &quot;```json&quot;)
+
+text = chat(messages, stop_sequences=[&quot;```&quot;])
+</code></pre>
+<p>The flow:</p>
+<ol>
+<li><strong>User message</strong> — tells Claude what to generate</li>
+<li><strong>Prefilled assistant message</strong> — <code>```json</code> makes Claude think it has already started a markdown code block. The next tokens it generates must continue that block.</li>
+<li><strong>Claude generates JSON content</strong> — constrained by the prefill to emit JSON (not prose).</li>
+<li><strong>Stop sequence</strong> — when Claude tries to close the code block with <code>```</code>, the API immediately stops generation. No trailing explanation ever appears.</li>
+</ol>
+<p>The result is clean JSON with no markdown fences, no commentary, nothing to strip:</p>
+<pre><code class="language-json">{
+  &quot;source&quot;: [&quot;aws.ec2&quot;],
+  &quot;detail-type&quot;: [&quot;EC2 Instance State-change Notification&quot;],
+  &quot;detail&quot;: {
+    &quot;state&quot;: [&quot;running&quot;]
+  }
+}
+</code></pre>
+<hr />
+<h2>Why Prefilling Works</h2>
+<p>Claude is a next-token predictor. When you hand it an assistant message, it treats that message as "what I already said" and continues from there. If the prefill is <code>```json</code> then statistically the next tokens are overwhelmingly likely to be valid JSON — because that is what follows an opening markdown fence in the training distribution.</p>
+<p>Prefilling is a form of prompt engineering that bypasses the "helpful preamble" instinct. Claude cannot apologize or introduce its answer because from its perspective it has already started writing the JSON. There is no "before the code block" to go back to.</p>
+<hr />
+<h2>Why Stop Sequences Matter</h2>
+<p>Without a stop sequence, Claude will happily finish the code block and then continue with its explanation. The prefill solves the start of the output; the stop sequence solves the end.</p>
+<p><code>stop_sequences</code> is a list of strings that, when Claude emits them, cause the API to immediately terminate generation. The emitted stop sequence itself is <strong>not</strong> included in the output. So if you pass <code>stop_sequences=["```"]</code> and Claude tries to close the fence, generation halts before those backticks appear in the returned text.</p>
+<p>You can pass up to (a small number of) stop sequences, and any of them will trigger termination. Common uses:</p>
+<ul>
+<li><code>"```"</code> to stop at a closing markdown fence</li>
+<li><code>"\n\n"</code> to stop at a paragraph break</li>
+<li>Custom delimiters you inject via prefill</li>
+</ul>
+<hr />
+<h2>Wiring It Into the chat() Helper</h2>
+<p>Building on the chat function from Lessons 09 and 11, add <code>stop_sequences</code>:</p>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+def chat(messages, system=None, temperature=1.0, stop_sequences=None):
+    params = {
+        &quot;model&quot;: &quot;claude-sonnet-4-5&quot;,
+        &quot;max_tokens&quot;: 1000,
+        &quot;messages&quot;: messages,
+        &quot;temperature&quot;: temperature,
+    }
+    if system:
+        params[&quot;system&quot;] = system
+    if stop_sequences:
+        params[&quot;stop_sequences&quot;] = stop_sequences
+
+    message = client.messages.create(**params)
+    return message.content[0].text
+
+def add_user_message(messages, text):
+    messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: text})
+
+def add_assistant_message(messages, text):
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: text})
+</code></pre>
+<p>Same conditional pattern as <code>system</code>: only insert <code>stop_sequences</code> when provided.</p>
+<hr />
+<h2>Parsing the Result</h2>
+<p>Because Claude generates JSON content right after the opening fence, the raw returned text usually contains leading whitespace or newlines. Strip it before parsing:</p>
+<pre><code class="language-python">import json
+
+text = chat(messages, stop_sequences=[&quot;```&quot;])
+clean_json = json.loads(text.strip())
+</code></pre>
+<p>Alternatively, you can be more aggressive and use a regex to extract the first <code>{...}</code> or <code>[...]</code> block, but <code>text.strip() + json.loads()</code> covers the common case.</p>
+<hr />
+<h2>Beyond JSON</h2>
+<p>The technique is format-agnostic. Use it anywhere you need clean structured output:</p>
+<table>
+<thead>
+<tr>
+<th>Target format</th>
+<th>Prefill</th>
+<th>Stop sequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JSON</td>
+<td><code>```json</code></td>
+<td><code>```</code></td>
+</tr>
+<tr>
+<td>Python code</td>
+<td><code>```python</code></td>
+<td><code>```</code></td>
+</tr>
+<tr>
+<td>YAML</td>
+<td><code>```yaml</code></td>
+<td><code>```</code></td>
+</tr>
+<tr>
+<td>CSV</td>
+<td><code>```csv</code></td>
+<td><code>```</code></td>
+</tr>
+<tr>
+<td>Bulleted list</td>
+<td><code>-</code></td>
+<td><code>\n\n</code></td>
+</tr>
+<tr>
+<td>Custom XML</td>
+<td><code>&lt;output&gt;</code></td>
+<td><code>&lt;/output&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>The pattern is: identify what Claude naturally wraps around the content, use the opening as the prefill, and use the closing as the stop sequence.</p>
+<hr />
+<h2>Prefill + Stop Sequences vs. Tool Use</h2>
+<p>For JSON specifically, there is a second (often better) approach: use <strong>tool use</strong> to force Claude to return structured data as a tool input. That gives you a schema-validated JSON object without prefill tricks — Claude treats the JSON as a tool call and the SDK parses it for you.</p>
+<p>When should you use which?</p>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prefill + stop sequence</td>
+<td>Quick, schema-less structured output; simple scripts; non-JSON formats like Python or CSV</td>
+</tr>
+<tr>
+<td>Tool use (input schema)</td>
+<td>Production JSON generation where you want schema validation, type guarantees, and agent-style integration</td>
+</tr>
+</tbody>
+</table>
+<p>Lesson 14 covers the prefill technique because it is the foundation — it works for any format and does not require learning the tool use protocol. Tool use is introduced later in the course.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Forgetting the stop sequence</strong> — the prefill solves the start but without <code>stop_sequences</code> Claude will close the fence and add explanatory text.</li>
+<li><strong>Mismatched fence in prefill and stop sequence</strong> — if you prefill with <code>```json</code> but stop on <code>"\n\n"</code>, you will capture the closing fence in the output.</li>
+<li><strong>Not stripping whitespace before parsing</strong> — <code>json.loads(text)</code> will fail on leading newlines; always <code>text.strip()</code> first.</li>
+<li><strong>Expecting 100% valid JSON without a retry loop</strong> — Claude can still emit malformed JSON occasionally; production code should catch <code>json.JSONDecodeError</code> and retry with a lower temperature.</li>
+<li><strong>Using prefill when tool use is available</strong> — for production JSON, tool use with <code>input_schema</code> gives you validation for free.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Prefilling is the oldest and simplest way to constrain Claude's output format. It works because Claude is a sequence predictor — if you put words in its mouth, it will continue from those words rather than restart with its usual preamble. Combined with <code>stop_sequences</code> to cut off trailing explanation, it gives you precise control over output structure without needing tool use or JSON mode. Every CCA candidate should know this pattern cold.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5.3 (production patterns)</strong>: prefill + stop sequences is a canonical pattern for extracting clean structured output from Claude.</li>
+<li><strong>D2 (Tool Design)</strong>: the lesson foreshadows tool use as the next-level approach for JSON generation; the exam may contrast the two.</li>
+<li><strong>D1.3 (prompt engineering for structured output)</strong>: expect questions about how to force a specific output format without adding explanatory text.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What two techniques combine to force Claude into a specific output format?</td>
+<td>Assistant message prefilling and stop sequences.</td>
+</tr>
+<tr>
+<td>What does assistant message prefilling do?</td>
+<td>It adds an assistant message with a partial response (e.g., <code>```json</code>) so Claude continues from that point instead of starting fresh with a preamble.</td>
+</tr>
+<tr>
+<td>What does <code>stop_sequences</code> do?</td>
+<td>It lists strings that, when emitted by Claude, immediately terminate generation — the stop sequence itself is not included in the output.</td>
+</tr>
+<tr>
+<td>What is the typical prefill + stop sequence for extracting pure JSON?</td>
+<td>Prefill with <code>```json</code>, stop on <code>```</code>.</td>
+</tr>
+<tr>
+<td>Why does prefilling work mechanically?</td>
+<td>Claude is a next-token predictor; given a partial assistant message, it continues from there rather than re-introducing itself.</td>
+</tr>
+<tr>
+<td>What do you need to do to the result before calling <code>json.loads()</code>?</td>
+<td>Strip leading/trailing whitespace — <code>text.strip()</code> — to remove the newlines Claude emits after the opening fence.</td>
+</tr>
+<tr>
+<td>When is tool use a better choice than prefill + stop sequences?</td>
+<td>For production JSON generation where schema validation and type guarantees are important.</td>
+</tr>
+<tr>
+<td>Can this technique work for non-JSON formats?</td>
+<td>Yes — Python, YAML, CSV, bulleted lists, custom XML. The pattern is prefill the opener, stop on the closer.</td>
+</tr>
+<tr>
+<td>What is the main risk of relying only on prefill without a stop sequence?</td>
+<td>Claude will close the code block and then add an English explanation, defeating the point of the prefill.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

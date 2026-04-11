@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Making A Request Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Making a Request — Engineering Deep Dive（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（model selection）、5.3（production patterns）、1.2（agentic loop 基礎）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 06</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p><code>client.messages.create()</code> 是 Anthropic API 的原子單位——三個必要參數（<code>model</code>、<code>max_tokens</code>、<code>messages</code>）產生一個 response，文字在 <code>response.content[0].text</code>。這個呼叫就是 agents、tool use、streaming 等所有上層 feature 的基礎。</p>
+<hr />
+<h2>環境設定：最小可行 Stack</h2>
+<p>在呼叫任何 API 前，兩個套件是必要的：</p>
+<pre><code class="language-bash">%pip install anthropic python-dotenv
+</code></pre>
+<ul>
+<li><strong><code>anthropic</code></strong> —— 官方 Python SDK。包住 REST API，處理認證、重試、pagination。</li>
+<li><strong><code>python-dotenv</code></strong> —— 把本地 <code>.env</code> 載進 <code>os.environ</code>，讓 SDK 能自動讀 <code>ANTHROPIC_API_KEY</code>。</li>
+</ul>
+<p><code>.env</code> 放在 notebook 或 entry point 旁邊：</p>
+<pre><code>ANTHROPIC_API_KEY=&quot;sk-ant-api03-...your-key...&quot;
+</code></pre>
+<p>兩條規則救你免於意外洩漏憑證：</p>
+<table>
+<thead>
+<tr>
+<th>規則</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.env</code> 加進 <code>.gitignore</code></td>
+<td>防止 commit</td>
+</tr>
+<tr>
+<td>絕不用字串 literal 把 key 寫進程式碼</td>
+<td>防止它出現在 notebook、log、Slack</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Client 物件</h2>
+<p>一個 process 一個 instance，每次呼叫都重用：</p>
+<pre><code class="language-python">from dotenv import load_dotenv
+load_dotenv()
+
+from anthropic import Anthropic
+
+client = Anthropic()           # 從環境變數自動讀 ANTHROPIC_API_KEY
+model = &quot;claude-sonnet-4-5&quot;    # 把 model 名字釘在一個地方
+</code></pre>
+<p>把 model 名字釘在變數裡（而不是四處撒字串 literal）是一個小習慣，但回報很大：未來要升級 model，只要改一行。</p>
+<hr />
+<h2>三個必要參數</h2>
+<pre><code class="language-python">message = client.messages.create(
+    model=model,
+    max_tokens=1000,
+    messages=[
+        {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is quantum computing? Answer in one sentence&quot;}
+    ],
+)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>參數</th>
+<th>型別</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>model</code></td>
+<td>string</td>
+<td>用哪個 model，例如 <code>"claude-sonnet-4-5"</code></td>
+</tr>
+<tr>
+<td><code>max_tokens</code></td>
+<td>int</td>
+<td>輸出長度上限（不是目標）</td>
+</tr>
+<tr>
+<td><code>messages</code></td>
+<td>list[dict]</td>
+<td>對話歷史（見下一節）</td>
+</tr>
+</tbody>
+</table>
+<h3><code>max_tokens</code> 是上限不是目標</h3>
+<p>這是新手最常見的誤解。<code>max_tokens=1000</code> <strong>不是</strong>告訴 Claude 「寫 1000 個 token 的輸出」，而是告訴 Claude 「你最多可以寫 1000 個 token；遇到自然結束或寫到 1000，看哪個先到」。</p>
+<table>
+<thead>
+<tr>
+<th>行為</th>
+<th>正確理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>設預算？</td>
+<td>是</td>
+</tr>
+<tr>
+<td>設目標？</td>
+<td>不是</td>
+</tr>
+<tr>
+<td>強迫輸出變長？</td>
+<td>不能（要用 prompt 措辭去引導）</td>
+</tr>
+<tr>
+<td>打到上限時 <code>stop_reason == "max_tokens"</code>？</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<p>實務規則：把 <code>max_tokens</code> 設成你預期最長合理回應的 1.5 倍。太低會真的截斷；太高不會浪費（你只為實際生成的 token 付錢），但會掩蓋 prompt bug。</p>
+<hr />
+<h2><code>messages</code> List</h2>
+<p><code>messages</code> 是一個有序的 dict list，每個 dict 有 <code>role</code> 和 <code>content</code>：</p>
+<pre><code class="language-python">messages = [
+    {&quot;role&quot;: &quot;user&quot;,      &quot;content&quot;: &quot;Define quantum computing&quot;},
+    {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: &quot;Quantum computing uses qubits...&quot;},
+    {&quot;role&quot;: &quot;user&quot;,      &quot;content&quot;: &quot;Give me a concrete example&quot;},
+]
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>誰寫的</th>
+<th>何時</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>user</code></td>
+<td>人（或你的後端代寫）</td>
+<td>永遠是第一個和最後一個</td>
+</tr>
+<tr>
+<td><code>assistant</code></td>
+<td>之前 Claude 的回應你重播回來</td>
+<td>在 user turn 之間，提供上下文</td>
+</tr>
+</tbody>
+</table>
+<p>兩個不變式必須成立：</p>
+<ol>
+<li><strong>第一個 message 必須是 <code>user</code></strong>。忘了從 <code>assistant</code> 開始，API 會拒絕。</li>
+<li><strong>Turn 必須交替</strong>。連續兩個 <code>user</code> message 不允許；要合併或塞一個 assistant turn。</li>
+</ol>
+<p>這就是 Lesson 07 用來建立多輪對話的形狀——每次追問都追加兩個 entry（前一次的 assistant 回應 + 新的 user 問題）。</p>
+<hr />
+<h2>取出 response 文字</h2>
+<p>Response 物件是結構化的（帶 usage、stop_reason、metadata），所以拉出文字要一行：</p>
+<pre><code class="language-python">message = client.messages.create(
+    model=model,
+    max_tokens=1000,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is quantum computing? Answer in one sentence&quot;}],
+)
+
+print(message.content[0].text)
+</code></pre>
+<p>為什麼是 <code>content[0].text</code> 而不只是 <code>content</code>？</p>
+<ul>
+<li><code>content</code> 是一個 <strong>content block 的 list</strong>，不是字串。</li>
+<li>單純文字回應時，list 只有一個 <code>TextBlock</code> 在 index 0。</li>
+<li>有 tool use 時（Lesson 32 之後），同一個 list 可能交錯出現 <code>tool_use</code> 和 text block。</li>
+<li>索引 <code>[0]</code> 在最簡單情況可以用，但是壞習慣——生產環境要 iterate 並 pattern-match block type。</li>
+</ul>
+<pre><code class="language-python"># 生產環境更安全的 pattern
+for block in message.content:
+    if block.type == &quot;text&quot;:
+        print(block.text)
+    elif block.type == &quot;tool_use&quot;:
+        handle_tool_use(block)
+</code></pre>
+<hr />
+<h2>完整 End-to-End 範例</h2>
+<pre><code class="language-python">from dotenv import load_dotenv
+load_dotenv()
+
+from anthropic import Anthropic
+
+client = Anthropic()
+model = &quot;claude-sonnet-4-5&quot;
+
+def ask(question: str, max_tokens: int = 1024) -&gt; str:
+    &quot;&quot;&quot;Single-turn 問答 helper。&quot;&quot;&quot;
+    response = client.messages.create(
+        model=model,
+        max_tokens=max_tokens,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}],
+    )
+    # 生產環境 iterate；demo 可以用 index。
+    return response.content[0].text
+
+print(ask(&quot;What is quantum computing? Answer in one sentence.&quot;))
+</code></pre>
+<p>差不多 15 行程式碼，就是完整最小可行 Claude 整合。課程後面所有東西——多輪、streaming、tool use、agents——都是疊在這個骨架上面。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>把 <code>max_tokens</code> 當目標</strong> —— Claude 遇到 <code>end_turn</code> 就停，這個參數是 cap 不是配額。</li>
+<li><strong><code>messages</code> 從 <code>assistant</code> 開始</strong> —— 無效請求；第一個 turn 必須是 <code>user</code>。</li>
+<li><strong>連續兩個 <code>user</code> message</strong> —— 無效；要合併或中間塞 assistant turn。</li>
+<li><strong>把 <code>response.content</code> 當字串用</strong> —— 它是 content block 的 list；用 <code>response.content[0].text</code> 或 iterate。</li>
+<li><strong>Model 名字到處硬編碼</strong> —— 釘在一個變數，升級 model 才會是一行改動。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p><code>client.messages.create()</code> 看起來小得嚇人——三個參數、一個 response——但它是你未來會出的每個 Claude feature 的 <strong>原子</strong>。多輪是這個呼叫跑 loop；tool use 是這個呼叫跑兩次；agents 是這個呼叫跑 loop 加分支；streaming 是這個呼叫加 flag。把三個必要參數和 <code>content[0].text</code> 提取方法深度內化，你就能推理所有上層 pattern。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5（Enterprise Deployment）</strong>：考題會問 <code>max_tokens</code> 語意、必要參數集、怎麼讀 response envelope。</li>
+<li><strong>D1（Agentic Architecture）</strong>：每個 agent loop 都是 <code>messages.create()</code> 的 for-loop；熟悉原子呼叫是所有 D1 內容的前置。</li>
+<li>情境觸發：「<code>max_tokens</code> 是什麼意思？」→ 永遠是「輸出長度的上限，不是目標」。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>client.messages.create()</code> 三個必要參數是什麼？</td>
+<td><code>model</code>、<code>max_tokens</code>、<code>messages</code></td>
+</tr>
+<tr>
+<td><code>max_tokens</code> 設的是目標長度還是上限？</td>
+<td>上限——Claude 自然遇到 <code>end_turn</code> 就停，或打到 <code>max_tokens</code> 被截</td>
+</tr>
+<tr>
+<td><code>messages</code> 第一個訊息 role 必須是什麼？</td>
+<td><code>user</code>——從 <code>assistant</code> 開始是無效的</td>
+</tr>
+<tr>
+<td>怎麼取簡單回應的純文字？</td>
+<td><code>response.content[0].text</code></td>
+</tr>
+<tr>
+<td>為什麼 <code>response.content</code> 是 list 不是字串？</td>
+<td>它是有序的 content block list；tool use 時 <code>text</code> 和 <code>tool_use</code> 類型可以交錯</td>
+</tr>
+<tr>
+<td>Lesson 06 安裝哪兩個套件？</td>
+<td><code>anthropic</code>（SDK）和 <code>python-dotenv</code>（載 <code>.env</code>）</td>
+</tr>
+<tr>
+<td>為什麼 model 名字要釘在單一變數？</td>
+<td>這樣升級 model 只改一行，不用 find-and-replace</td>
+</tr>
+<tr>
+<td>SDK 會自動讀哪個環境變數？</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

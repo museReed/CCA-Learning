@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <linearGradient id="tempGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="33%" stop-color="#8B5CF6"/>
+      <stop offset="66%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#EF4444"/>
+    </linearGradient>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="40" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">temperature 光譜</text>
+  <text x="500" y="62" text-anchor="middle" font-size="13" fill="#6B7280">0.0 到 1.0 — 控制 Claude 從 token 機率分布中的取樣方式</text>
+
+  <!-- Main gradient bar -->
+  <rect x="80" y="120" width="840" height="48" rx="24" fill="url(#tempGradient)" filter="url(#shadow)"/>
+
+  <line x1="100" y1="120" x2="100" y2="180" stroke="#1E293B" stroke-width="2"/>
+  <text x="100" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#1E293B">0.0</text>
+  <line x1="320" y1="120" x2="320" y2="180" stroke="#1E293B" stroke-width="2"/>
+  <text x="320" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#1E293B">0.3</text>
+  <line x1="550" y1="120" x2="550" y2="180" stroke="#1E293B" stroke-width="2"/>
+  <text x="550" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#1E293B">0.7</text>
+  <line x1="900" y1="120" x2="900" y2="180" stroke="#1E293B" stroke-width="2"/>
+  <text x="900" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#1E293B">1.0</text>
+
+  <text x="100" y="108" text-anchor="middle" font-size="11" fill="#3B82F6" font-weight="600">冷 · 決定性</text>
+  <text x="900" y="108" text-anchor="middle" font-size="11" fill="#EF4444" font-weight="600">熱 · 創造性</text>
+
+  <polygon points="900,112 895,98 905,98" fill="#EF4444"/>
+  <text x="770" y="88" font-size="10" fill="#6B7280">Claude 3 後預設為 1.0</text>
+
+  <!-- 0.0 card -->
+  <rect x="30" y="230" width="220" height="240" rx="10" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="30" y="230" width="220" height="38" rx="10" fill="#3B82F6"/>
+  <rect x="30" y="260" width="220" height="8" fill="#3B82F6"/>
+  <text x="140" y="254" text-anchor="middle" font-size="14" font-weight="600" fill="white">0.0 — 完全決定性</text>
+  <text x="140" y="287" text-anchor="middle" font-size="11" fill="#1E40AF" font-weight="600">「每次都給相同答案」</text>
+
+  <text x="50" y="315" font-size="11" font-weight="700" fill="#1E40AF">適合場景</text>
+  <circle cx="57" cy="332" r="3" fill="#3B82F6"/>
+  <text x="67" y="336" font-size="11" fill="#1E293B">資料擷取</text>
+  <circle cx="57" cy="352" r="3" fill="#3B82F6"/>
+  <text x="67" y="356" font-size="11" fill="#1E293B">分類判別</text>
+  <circle cx="57" cy="372" r="3" fill="#3B82F6"/>
+  <text x="67" y="376" font-size="11" fill="#1E293B">程式碼生成</text>
+  <circle cx="57" cy="392" r="3" fill="#3B82F6"/>
+  <text x="67" y="396" font-size="11" fill="#1E293B">嚴格 schema 輸出</text>
+  <circle cx="57" cy="412" r="3" fill="#3B82F6"/>
+  <text x="67" y="416" font-size="11" fill="#1E293B">可單元測試的呼叫</text>
+
+  <rect x="45" y="432" width="190" height="24" rx="4" fill="#0F172A"/>
+  <text x="140" y="448" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#34D399">temperature=0.0</text>
+
+  <!-- 0.3 card -->
+  <rect x="265" y="230" width="220" height="240" rx="10" fill="#FAF5FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="265" y="230" width="220" height="38" rx="10" fill="#8B5CF6"/>
+  <rect x="265" y="260" width="220" height="8" fill="#8B5CF6"/>
+  <text x="375" y="254" text-anchor="middle" font-size="14" font-weight="600" fill="white">0.3 — 低創造性</text>
+  <text x="375" y="287" text-anchor="middle" font-size="11" fill="#5B21B6" font-weight="600">「大致一致，略有變化」</text>
+
+  <text x="285" y="315" font-size="11" font-weight="700" fill="#5B21B6">適合場景</text>
+  <circle cx="292" cy="332" r="3" fill="#8B5CF6"/>
+  <text x="302" y="336" font-size="11" fill="#1E293B">客戶支援機器人</text>
+  <circle cx="292" cy="352" r="3" fill="#8B5CF6"/>
+  <text x="302" y="356" font-size="11" fill="#1E293B">事實型問答</text>
+  <circle cx="292" cy="372" r="3" fill="#8B5CF6"/>
+  <text x="302" y="376" font-size="11" fill="#1E293B">文件摘要</text>
+  <circle cx="292" cy="392" r="3" fill="#8B5CF6"/>
+  <text x="302" y="396" font-size="11" fill="#1E293B">技術說明</text>
+  <circle cx="292" cy="412" r="3" fill="#8B5CF6"/>
+  <text x="302" y="416" font-size="11" fill="#1E293B">法遵／政策文字</text>
+
+  <rect x="280" y="432" width="190" height="24" rx="4" fill="#0F172A"/>
+  <text x="375" y="448" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#34D399">temperature=0.3</text>
+
+  <!-- 0.7 card -->
+  <rect x="500" y="230" width="220" height="240" rx="10" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="500" y="230" width="220" height="38" rx="10" fill="#F59E0B"/>
+  <rect x="500" y="260" width="220" height="8" fill="#F59E0B"/>
+  <text x="610" y="254" text-anchor="middle" font-size="14" font-weight="600" fill="white">0.7 — 平衡</text>
+  <text x="610" y="287" text-anchor="middle" font-size="11" fill="#92400E" font-weight="600">「自然變化、回應豐富」</text>
+
+  <text x="520" y="315" font-size="11" font-weight="700" fill="#92400E">適合場景</text>
+  <circle cx="527" cy="332" r="3" fill="#F59E0B"/>
+  <text x="537" y="336" font-size="11" fill="#1E293B">一般聊天機器人</text>
+  <circle cx="527" cy="352" r="3" fill="#F59E0B"/>
+  <text x="537" y="356" font-size="11" fill="#1E293B">Email 或寫作草稿</text>
+  <circle cx="527" cy="372" r="3" fill="#F59E0B"/>
+  <text x="537" y="376" font-size="11" fill="#1E293B">有風格的說明文</text>
+  <circle cx="527" cy="392" r="3" fill="#F59E0B"/>
+  <text x="537" y="396" font-size="11" fill="#1E293B">家教型代理</text>
+  <circle cx="527" cy="412" r="3" fill="#F59E0B"/>
+  <text x="537" y="416" font-size="11" fill="#1E293B">多數通用情境</text>
+
+  <rect x="515" y="432" width="190" height="24" rx="4" fill="#0F172A"/>
+  <text x="610" y="448" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#34D399">temperature=0.7</text>
+
+  <!-- 1.0 card -->
+  <rect x="735" y="230" width="220" height="240" rx="10" fill="#FEF2F2" stroke="#EF4444" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="735" y="230" width="220" height="38" rx="10" fill="#EF4444"/>
+  <rect x="735" y="260" width="220" height="8" fill="#EF4444"/>
+  <text x="845" y="254" text-anchor="middle" font-size="14" font-weight="600" fill="white">1.0 — 最具創意</text>
+  <text x="845" y="287" text-anchor="middle" font-size="11" fill="#991B1B" font-weight="600">「給我驚喜 — 最大變化」</text>
+
+  <text x="755" y="315" font-size="11" font-weight="700" fill="#991B1B">適合場景</text>
+  <circle cx="762" cy="332" r="3" fill="#EF4444"/>
+  <text x="772" y="336" font-size="11" fill="#1E293B">腦力激盪</text>
+  <circle cx="762" cy="352" r="3" fill="#EF4444"/>
+  <text x="772" y="356" font-size="11" fill="#1E293B">詩詞／小說創作</text>
+  <circle cx="762" cy="372" r="3" fill="#EF4444"/>
+  <text x="772" y="376" font-size="11" fill="#1E293B">行銷標語</text>
+  <circle cx="762" cy="392" r="3" fill="#EF4444"/>
+  <text x="772" y="396" font-size="11" fill="#1E293B">發散性點子列表</text>
+  <circle cx="762" cy="412" r="3" fill="#EF4444"/>
+  <text x="772" y="416" font-size="11" fill="#1E293B">命名與口號生成</text>
+
+  <rect x="750" y="432" width="190" height="24" rx="4" fill="#0F172A"/>
+  <text x="845" y="448" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#34D399">temperature=1.0</text>
+
+  <!-- Bottom myth-buster -->
+  <rect x="60" y="495" width="880" height="90" rx="10" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="500" y="520" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">temperature 不是「亂數旋鈕」 — 它在重塑 token 的機率分布</text>
+  <text x="500" y="542" text-anchor="middle" font-size="11" fill="#475569">低值：最高機率的 token 主宰（分布尖銳）→ 輸出穩定、可能偏重複。</text>
+  <text x="500" y="560" text-anchor="middle" font-size="11" fill="#475569">高值：低機率 token 獲得更多權重（分布扁平）→ 有趣但在事實任務上容易失控。</text>
+  <text x="500" y="578" text-anchor="middle" font-size="10" fill="#6B7280">經驗法則：擷取／程式碼 → 0.0；聊天 → 0.3–0.7；腦力激盪 → 1.0。不確定時先從 1.0 開始，輸出太野再降。</text>
+</svg>

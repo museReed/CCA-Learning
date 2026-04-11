@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi Turn Conversations Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Multi-Turn Conversations — PM Perspective（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Architecture (22%) 主要；D5 — Enterprise Deployment (20%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.2（agentic loop 基礎）、1.1（對話狀態管理）、5.3（生產 pattern）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 07</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude 在呼叫之間沒有記憶——每一輪你的產品都要提供對話歷史——這讓「使用者感覺 AI 記得什麼」變成 PM 沒辦法丟給工程師的產品決策。</p>
+<hr />
+<h2>Mental Model：金魚顧問</h2>
+<p>想像你請了一位非常聰明但是同時是金魚的顧問：每次你走進會議室，他都對上次會議沒有記憶。要持續對話，你每次會議開始都要遞上所有過去會議的列印逐字稿。</p>
+<table>
+<thead>
+<tr>
+<th>金魚顧問</th>
+<th>Claude API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>會議之間會忘記</td>
+<td>API 呼叫之間 stateless</td>
+</tr>
+<tr>
+<td>讀逐字稿追上進度</td>
+<td>每次呼叫讀 <code>messages</code> list</td>
+</tr>
+<tr>
+<td>逐字稿每次變厚</td>
+<td><code>messages</code> list 每輪變長</td>
+</tr>
+<tr>
+<td>厚逐字稿讀起來久</td>
+<td>歷史越長，input token 越貴</td>
+</tr>
+</tbody>
+</table>
+<p>PM 的工作是決定：逐字稿要放什麼、保留多久、每次會議你願意付多少錢。</p>
+<hr />
+<h2>為什麼 PM 該關心 Statelessness</h2>
+<p>這一個技術細節對產品的影響超乎想像：</p>
+<table>
+<thead>
+<tr>
+<th>產品考量</th>
+<th>Statelessness 的影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>聊天感</td>
+<td>記憶必須刻意設計，不會免費出現</td>
+</tr>
+<tr>
+<td>成本曲線</td>
+<td>長聊天很快變貴（線性 token 成長）</td>
+</tr>
+<tr>
+<td>隱私</td>
+<td>你決定留什麼、丟什麼</td>
+</tr>
+<tr>
+<td>Session 逾時</td>
+<td>對話什麼時候「結束」你決定，不是 API</td>
+</tr>
+<tr>
+<td>跨裝置延續</td>
+<td>歷史必須放在持久儲存，不只是 in-memory</td>
+</tr>
+<tr>
+<td>Per-user 隔離</td>
+<td>絕不能把一個使用者的歷史混進另一個</td>
+</tr>
+</tbody>
+</table>
+<p>這每一項都是產品決策。工程師可以實作任何一種，但需要 PM 指引產品該有哪種行為。</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>需要多輪的時候</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>為什麼必須多輪</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>客服聊天</td>
+<td>使用者會指涉對話前面的東西</td>
+</tr>
+<tr>
+<td>教學 / coaching agent</td>
+<td>學習進度依賴前幾輪的 context</td>
+</tr>
+<tr>
+<td>長期寫作助理</td>
+<td>草稿會跨多個 prompt 迭代</td>
+</tr>
+<tr>
+<td>研究 agent</td>
+<td>某一步的發現會餵到下一步</td>
+</tr>
+</tbody>
+</table>
+<h3>單輪就夠的時候</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>為什麼單輪可以</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「摘要這封信」按鈕</td>
+<td>每次點擊獨立</td>
+</tr>
+<tr>
+<td>文件分類</td>
+<td>不需要對話</td>
+</tr>
+<tr>
+<td>翻譯</td>
+<td>無狀態轉換</td>
+</tr>
+<tr>
+<td>自動完成建議</td>
+<td>發射後不管</td>
+</tr>
+</tbody>
+</table>
+<p>PM 經驗法則：如果使用者會期待 AI「記得之前」，那就是多輪情境，你必須明確為它設計。</p>
+<hr />
+<h2>成本曲線：PM 必須看得懂的一張圖</h2>
+<p>因為歷史每輪都重播，input token 線性成長：</p>
+<pre><code>   Input tokens
+        │
+20,000  │                                    ●
+        │                               ●
+        │                          ●
+10,000  │                     ●
+        │                ●
+        │           ●
+ 5,000  │      ●
+        │  ●
+        └──────────────────────────────────────── Turns
+          1    5    10   20   30    40    50
+</code></pre>
+<p>這有三個產品後果：</p>
+<ol>
+<li><strong>單位經濟隨聊天長度變動。</strong> 50 輪的 chat 大約是 10 輪的 25 倍 input token 成本。</li>
+<li><strong>最終會撞 context window。</strong> 每個 model 有歷史長度上限；長 chat 撞牆前需要策略（摘要、截斷、prompt cache）。</li>
+<li><strong>沒有聊天長度分布就沒辦法預估成本。</strong> 需要真實埋點資料，不是憑感覺。</li>
+</ol>
+<hr />
+<h2>PM Decision Framework：記憶策略</h2>
+<p>Launch 前，每個 feature 挑一個記憶策略：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>做法</th>
+<th>什麼時候用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>完整歷史</strong></td>
+<td>messages list 永遠保留每一輪</td>
+<td>短對話（&lt; 20 輪）且 context 重要</td>
+</tr>
+<tr>
+<td><strong>Sliding window</strong></td>
+<td>只留最近 N 輪</td>
+<td>長對話但最近 context 就夠</td>
+</tr>
+<tr>
+<td><strong>摘要</strong></td>
+<td>把舊輪壓成滾動摘要</td>
+<td>長對話但早期 context 還是重要</td>
+</tr>
+<tr>
+<td><strong>Session reset</strong></td>
+<td>閒置或動作時明確結束並清空</td>
+<td>以任務為單位、有明確完成的 chat</td>
+</tr>
+<tr>
+<td><strong>Prompt caching</strong></td>
+<td>沒變的 prefix 便宜重用</td>
+<td>長而穩定的 system prompt + 變動的尾巴</td>
+</tr>
+</tbody>
+</table>
+<p>PRD 應該指定用哪個策略、使用者看起來會是怎樣。「使用者會記住幾輪」是 PM 能回答的問題，不是工程細節。</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>以為 Claude 預設會記得</strong> —— 它不會；跳過這一課，你第一個 chat feature 會讓使用者覺得「笨笨的」。</li>
+<li><strong>沒有聊天長度或預算上限</strong> —— 一個 power user 200 輪的對話會花你真金白銀，要設限。</li>
+<li><strong>混淆跨使用者 session</strong> —— 後端 bug 讓兩個使用者共用 <code>messages</code> list 就是隱私事故；PM 的驗收條件必須要求隔離。</li>
+<li><strong>忘記 reset 流程</strong> —— 使用者需要「新對話」按鈕；沒有它，成本爬升 context 變陳舊。</li>
+<li><strong>沒埋點聊天長度分布</strong> —— 沒真實 chat 長度分布就沒辦法規劃預算或 eval prompt。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Statelessness 是偽裝起來的產品決策。API 給你一張白紙；你的產品定義「記憶」是什麼意思。感覺像魔法的 chat 產品都是刻意這麼做——他們決定哪些輪次重要、session 多久、成本怎麼 scale、chat「重置」時使用者看到什麼。忽略這件事的產品會做出慢、貴、健忘的 chat，然後怪 model。<strong>在 PRD 裡擁有記憶策略，你就會出 feel smart 而且可預測的 feature。</strong></p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1（Agentic Architecture）</strong>：多輪就是 agent loop 的基礎。情境：「Claude 怎麼記住之前訊息？」→ client 每輪都重送。</li>
+<li><strong>D5（Enterprise Deployment）</strong>：線性 token 成長對成本與 scale 的啟示。</li>
+<li>情境觸發：「使用者反映 chatbot 會忘」→ 檢查 app 有沒有追加 assistant 回應並送完整歷史，不是改 prompt。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude 在同一個 chat 裡會自動記得之前交流嗎？</td>
+<td>不會——API 是 stateless；你的 app 每輪都要重播歷史</td>
+</tr>
+<tr>
+<td>「金魚顧問」比喻是什麼？</td>
+<td>Claude 呼叫之間會忘，所以你每次新會議都要遞一份完整的過去會議逐字稿</td>
+</tr>
+<tr>
+<td>為什麼長聊天成本比例失衡？</td>
+<td>Input token 隨歷史重播線性成長；50 輪 chat 大約是 10 輪的 25 倍 input token</td>
+</tr>
+<tr>
+<td>PM 可以挑的記憶策略有哪些？</td>
+<td>完整歷史、sliding window、摘要、session reset、prompt caching</td>
+</tr>
+<tr>
+<td>Statelessness 對多使用者 app 引發什麼產品考量？</td>
+<td>Per-user 隔離——一個使用者的歷史絕不能洩漏到另一個</td>
+</tr>
+<tr>
+<td>什麼時候單輪就夠？</td>
+<td>每次互動獨立（摘要、翻譯、分類）、使用者不期待「記憶」</td>
+</tr>
+<tr>
+<td>Chatbot「會忘」時第一個該檢查什麼？</td>
+<td>App 有沒有追加 assistant 回應並每次呼叫送完整歷史</td>
+</tr>
+<tr>
+<td>PRD 該指定哪些記憶相關事項？</td>
+<td>用哪個記憶策略、輪數/成本上限、「新對話」/session reset 怎麼運作</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

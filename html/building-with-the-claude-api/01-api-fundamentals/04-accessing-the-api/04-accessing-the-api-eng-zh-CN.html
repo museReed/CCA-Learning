@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accessing The Api Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Accessing the API — Engineering Deep Dive（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) 主要；D3 — Claude Code Configuration (20%) 次要；D1 — Agentic Architecture (22%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（model selection）、5.3（production patterns）、3.1（API key 管理）、1.2（agentic loop 基础）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 04</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>一个生产环境的 Claude 请求会经过五个跳点：client → 你的服务器 → Anthropic API → 模型 pipeline → response。搞懂每一跳，才能做好安全架构、调试与成本/延迟调优。</p>
+<hr />
+<h2>五步请求生命周期</h2>
+<pre><code>┌────────┐ 1) HTTPS  ┌────────┐ 2) HTTPS+key ┌──────────┐ 3) 模型
+│ Client │ ────────▶│  你的  │ ────────────▶│ Anthropic│   处理
+│  (app) │          │服务器  │              │   API    │  (tokenize,
+│        │ ◀────────│        │ ◀────────────│          │   embed,
+└────────┘ 5) JSON  └────────┘ 4) Response  └──────────┘   contextualize,
+                                                           generate)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>跳点</th>
+<th>传递内容</th>
+<th>谁持有 secret</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Client → Server</td>
+<td>用户 prompt、session token</td>
+<td>—</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Server → Anthropic</td>
+<td>Prompt + <code>x-api-key</code> header</td>
+<td>服务器</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Anthropic 内部</td>
+<td>Tokens → embeddings → logits → next token</td>
+<td>Anthropic</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Anthropic → Server</td>
+<td><code>message</code> JSON（<code>content</code>、<code>usage</code>、<code>stop_reason</code>）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Server → Client</td>
+<td>渲染后的文本或 streaming SSE</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>每个生产事故都落在这五跳中的某一跳。<strong>第一个要问的问题永远是：哪一跳坏了？</strong> 这个问题能不能问出来，取决于你有没有把这张图背下来。</p>
+<hr />
+<h2>为什么必须有服务器</h2>
+<p>直接从 client 调用 Anthropic 在生产环境是绝对禁止的。原因只有一个：API key 是 <strong>bearer credential</strong>——任何持有它的东西都可以花你的钱、看你的回复。</p>
+<table>
+<thead>
+<tr>
+<th>错误做法</th>
+<th>后果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API key 写进 mobile app binary</td>
+<td>用 <code>strings</code> 或反编译就能挖出来 → 被滥用</td>
+</tr>
+<tr>
+<td>API key 写进浏览器 JS</td>
+<td>DevTools 直接可见 → credits 瞬间被抽干</td>
+</tr>
+<tr>
+<td>API key commit 到 public GitHub repo</td>
+<td>Anthropic 几分钟内会自动 revoke，但账单已经打下去了</td>
+</tr>
+</tbody>
+</table>
+<p>服务器这一层是唯一可以做到以下事情的地方：<br />
+1. 把 key 放在环境变量或 secret manager（绝不写进源代码）。<br />
+2. 做按用户的 rate limit 与 auth。<br />
+3. 在数据离开你的边界前做 logging、审计、PII 脱敏。<br />
+4. 加 retry、circuit breaker、cache 等逻辑。</p>
+<hr />
+<h2>模型内部：四个处理阶段</h2>
+<p>请求进到 Anthropic 之后，Claude 会跑完四个阶段才吐出第一个 output token：</p>
+<ol>
+<li><strong>Tokenization</strong>（分词）——输入文本被切成 tokens。粗略把一个英文单词想成一个 token，但长词会被切成片段。</li>
+<li><strong>Embedding</strong>（嵌入）——每个 token 变成一个高维向量，同时编码该词所有可能的语义（例如 "quantum" 同时带有物理、计算、"非常小"等含义）。</li>
+<li><strong>Contextualization</strong>（上下文化）——周围的 tokens 把每个 embedding 往句子实际需要的那个语义拉。</li>
+<li><strong>Generation</strong>（生成）——最后一层产生词表上的概率分布；下一个 token 是用带随机性的采样抽出来的（不是纯 argmax）。新 token 追加到序列后面，循环继续。</li>
+</ol>
+<pre><code class="language-python"># 生成循环的概念 pseudo-code
+tokens = tokenize(prompt)
+while True:
+    embeddings = embed(tokens)
+    contextual = contextualize(embeddings)
+    logits = output_layer(contextual)
+    next_token = sample(logits)  # 不是纯 argmax
+    tokens.append(next_token)
+    if should_stop(next_token, tokens):
+        break
+</code></pre>
+<p>采样这一步就是为什么两个完全一样的请求会返回不同的文字——temperature 跟随机性是刻意设计，让回复自然。</p>
+<hr />
+<h2>停止条件</h2>
+<p>每生成一个 token，Claude 都会检查三个退出条件：</p>
+<table>
+<thead>
+<tr>
+<th><code>stop_reason</code></th>
+<th>含义</th>
+<th>你该做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>end_turn</code></td>
+<td>模型自己吐出 end-of-sequence token</td>
+<td>把文本返给用户</td>
+</tr>
+<tr>
+<td><code>max_tokens</code></td>
+<td>预算打满，被截断</td>
+<td>调高 <code>max_tokens</code> 或显示截断 UI</td>
+</tr>
+<tr>
+<td><code>stop_sequence</code></td>
+<td>撞到你在 <code>stop_sequences</code> 里给的字符串</td>
+<td>预期行为——拿 sentinel 做切分</td>
+</tr>
+</tbody>
+</table>
+<p>生产环境常见 bug：工程师把 <code>max_tokens</code> 设为 256，然后在 log 里写"Claude 截断了"当成模型 bug。这不是 bug，是你自己的预算。<strong>一定要分支判断 <code>stop_reason</code>。</strong></p>
+<hr />
+<h2>Response 结构</h2>
+<p>Anthropic 返回的 JSON 有一个稳定的形状，你的代码应该做 pattern match：</p>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=1024,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;请解释五步请求流程。&quot;}],
+)
+
+print(response.content[0].text)       # 生成的文本
+print(response.usage.input_tokens)    # 成本指标 1
+print(response.usage.output_tokens)   # 成本指标 2
+print(response.stop_reason)           # &quot;end_turn&quot; | &quot;max_tokens&quot; | &quot;stop_sequence&quot; | &quot;tool_use&quot;
+</code></pre>
+<p>生产环境每个 app 都应该关心三个字段：<br />
+- <code>content</code> —— 模型吐出的文本或 tool_use block。<br />
+- <code>usage</code> —— input + output token 数；乘上价目表就是单次请求的真实成本。<br />
+- <code>stop_reason</code> —— 后端的分支信号，决定是"返给用户"、"继续 loop"还是"处理截断"。</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>从浏览器直接调用 Anthropic</strong> —— key 秒被偷。一定要通过你的服务器代理。</li>
+<li><strong>把 <code>max_tokens</code> 当成目标长度</strong> —— 它是上限。模型遇到 <code>end_turn</code> 就停，不会刻意撑到那个数字。</li>
+<li><strong>忽略 <code>stop_reason</code></strong> —— 代码永远假设 <code>end_turn</code>，结果 <code>max_tokens</code> 截断的时候静悄悄吞掉。</li>
+<li><strong>把带 PII 的完整 prompt 写进 log</strong> —— 服务器这一跳是唯一可以在数据离开边界前脱敏的地方。</li>
+<li><strong>忘记生成是随机的</strong> —— 断言字符串完全相等的测试会 flaky；要么断言结构，要么把 temperature 设低。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>五步流程不是考试冷知识，而是你调试每个生产事故时用的心智地图。请求失败时你第一个问题永远是"哪一跳？" 这个问题有没有答案，取决于你有没有把这张图内化。CCA 的 Enterprise Deployment domain 其他东西全部建在这张图上面。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5（Enterprise Deployment）</strong>：考题会丢情境问你 API key 该放哪、<code>max_tokens</code> 该设多少、生产代码怎么处理 <code>stop_reason</code>。</li>
+<li><strong>D3（Claude Code Configuration）</strong>：API key 存储模式（env vars、secret manager，绝不写 client-side）。</li>
+<li><strong>D1（Agentic Architecture）</strong>：request/response envelope 是每个 agent loop 的原子单位——所有 agent 都是跑这个流程的 for-loop。</li>
+<li>题目里出现"API key 该放在哪"→ 答案永远是服务器，绝不是 client。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude 请求生命周期的五个步骤是什么？</td>
+<td>Client → Server、Server → Anthropic API、模型处理、Anthropic → Server、Server → Client</td>
+</tr>
+<tr>
+<td>为什么 API key 必须放服务器不能放 client？</td>
+<td>Key 是 bearer credential，任何 client 持有都能被取出并滥用，把你的 credits 抽干</td>
+</tr>
+<tr>
+<td>模型内部四个阶段是什么？</td>
+<td>Tokenization、embedding、contextualization、generation</td>
+</tr>
+<tr>
+<td><code>max_tokens</code> 的真正含义？</td>
+<td>输出长度的上限——遇到 <code>end_turn</code> 会提前停，模型不会刻意撑到这个数字</td>
+</tr>
+<tr>
+<td>这一课提到哪三个 <code>stop_reason</code>？</td>
+<td><code>end_turn</code>（自然结束）、<code>max_tokens</code>（打到预算）、<code>stop_sequence</code>（撞到用户给的 sentinel）</td>
+</tr>
+<tr>
+<td>哪个 response 字段告诉你这一次花了多少钱？</td>
+<td><code>response.usage.input_tokens</code> 与 <code>response.usage.output_tokens</code></td>
+</tr>
+<tr>
+<td>为什么两个完全一样的请求会返回不同的文字？</td>
+<td>生成是从概率分布做带随机性的采样，不是纯 argmax</td>
+</tr>
+<tr>
+<td>每个请求必须带的四个字段？</td>
+<td>API key、model 名称、messages list、max_tokens</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Making A Request Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Making a Request — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (model selection), 5.3 (production patterns), 1.2 (agentic loop foundation)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 06</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p><code>client.messages.create()</code> is the atomic unit of the Anthropic API — three required parameters (<code>model</code>, <code>max_tokens</code>, <code>messages</code>) produce one response whose text lives at <code>response.content[0].text</code>, and this one call is what every higher-level feature (agents, tool use, streaming) is built on top of.</p>
+<hr />
+<h2>Environment Setup: The Minimum Viable Stack</h2>
+<p>Before making a single call, two dependencies matter:</p>
+<pre><code class="language-bash">%pip install anthropic python-dotenv
+</code></pre>
+<ul>
+<li><strong><code>anthropic</code></strong> — the official Python SDK. Wraps the REST API, handles auth, retries, and pagination.</li>
+<li><strong><code>python-dotenv</code></strong> — loads a local <code>.env</code> file into <code>os.environ</code> so the SDK can auto-read <code>ANTHROPIC_API_KEY</code>.</li>
+</ul>
+<p>The <code>.env</code> file lives next to your notebook or entry point:</p>
+<pre><code>ANTHROPIC_API_KEY=&quot;sk-ant-api03-...your-key...&quot;
+</code></pre>
+<p>The two rules that save you from accidentally leaking credentials:</p>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Add <code>.env</code> to <code>.gitignore</code></td>
+<td>Prevents commits</td>
+</tr>
+<tr>
+<td>Never pass the key as a string literal in code</td>
+<td>Prevents it showing up in notebooks, logs, Slack</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Client Object</h2>
+<p>One instance per process, reused for every call:</p>
+<pre><code class="language-python">from dotenv import load_dotenv
+load_dotenv()
+
+from anthropic import Anthropic
+
+client = Anthropic()           # auto-reads ANTHROPIC_API_KEY from env
+model = &quot;claude-sonnet-4-5&quot;    # pin the model name in one place
+</code></pre>
+<p>Pinning the model name in a variable (instead of sprinkling string literals) is a tiny habit with big payoff: upgrading to a new model later becomes a one-line change.</p>
+<hr />
+<h2>The Three Required Parameters</h2>
+<pre><code class="language-python">message = client.messages.create(
+    model=model,
+    max_tokens=1000,
+    messages=[
+        {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is quantum computing? Answer in one sentence&quot;}
+    ],
+)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>model</code></td>
+<td>string</td>
+<td>Which model to use, e.g. <code>"claude-sonnet-4-5"</code></td>
+</tr>
+<tr>
+<td><code>max_tokens</code></td>
+<td>int</td>
+<td>Ceiling on output length (NOT a target)</td>
+</tr>
+<tr>
+<td><code>messages</code></td>
+<td>list[dict]</td>
+<td>Conversation history (see next section)</td>
+</tr>
+</tbody>
+</table>
+<h3><code>max_tokens</code> Is a Ceiling, Not a Target</h3>
+<p>This is the single most common beginner confusion. <code>max_tokens=1000</code> does <strong>not</strong> tell Claude "write 1000 tokens of output." It tells Claude "you may write up to 1000 tokens; stop at the natural ending or at 1000, whichever comes first."</p>
+<table>
+<thead>
+<tr>
+<th>Behavior</th>
+<th>Correct framing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sets a budget</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Sets a target</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Forces longer output</td>
+<td>No (use prompt wording instead)</td>
+</tr>
+<tr>
+<td>Causes <code>stop_reason == "max_tokens"</code> on hit</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>Practical rule: set <code>max_tokens</code> to roughly 1.5x what you expect the longest valid response to be. Going too low causes real truncation; going too high wastes nothing (you only pay for tokens actually generated) but masks prompt bugs.</p>
+<hr />
+<h2>The <code>messages</code> List</h2>
+<p><code>messages</code> is an ordered list of dicts, each with <code>role</code> and <code>content</code>:</p>
+<pre><code class="language-python">messages = [
+    {&quot;role&quot;: &quot;user&quot;,      &quot;content&quot;: &quot;Define quantum computing&quot;},
+    {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: &quot;Quantum computing uses qubits...&quot;},
+    {&quot;role&quot;: &quot;user&quot;,      &quot;content&quot;: &quot;Give me a concrete example&quot;},
+]
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Who writes it</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>user</code></td>
+<td>Humans (or your backend on their behalf)</td>
+<td>Always the first and last message</td>
+</tr>
+<tr>
+<td><code>assistant</code></td>
+<td>Previous Claude responses you're replaying back</td>
+<td>Between user turns, to give context</td>
+</tr>
+</tbody>
+</table>
+<p>Two invariants that must hold:</p>
+<ol>
+<li><strong>First message must be <code>user</code></strong>. If you forget and start with <code>assistant</code>, the API will reject.</li>
+<li><strong>Turns must alternate</strong>. Two <code>user</code> messages in a row is not allowed; merge them or inject an assistant turn.</li>
+</ol>
+<p>This is the shape Lesson 07 leverages to build multi-turn conversations — every follow-up appends two more entries (the previous assistant reply + the new user question).</p>
+<hr />
+<h2>Extracting the Response Text</h2>
+<p>The response object is structured (it carries usage, stop_reason, metadata), so pulling out the text requires one line:</p>
+<pre><code class="language-python">message = client.messages.create(
+    model=model,
+    max_tokens=1000,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is quantum computing? Answer in one sentence&quot;}],
+)
+
+print(message.content[0].text)
+</code></pre>
+<p>Why <code>content[0].text</code> and not just <code>content</code>?</p>
+<ul>
+<li><code>content</code> is a <strong>list of content blocks</strong>, not a string.</li>
+<li>For a plain text response, the list has one <code>TextBlock</code> at index 0.</li>
+<li>With tool use (Lesson 32+), the same list may contain <code>tool_use</code> blocks interleaved with text.</li>
+<li>Indexing <code>[0]</code> works for the simplest case but is a bad habit — in production, iterate and pattern-match on block type.</li>
+</ul>
+<pre><code class="language-python"># Safer pattern for production
+for block in message.content:
+    if block.type == &quot;text&quot;:
+        print(block.text)
+    elif block.type == &quot;tool_use&quot;:
+        handle_tool_use(block)
+</code></pre>
+<hr />
+<h2>Full End-to-End Example</h2>
+<pre><code class="language-python">from dotenv import load_dotenv
+load_dotenv()
+
+from anthropic import Anthropic
+
+client = Anthropic()
+model = &quot;claude-sonnet-4-5&quot;
+
+def ask(question: str, max_tokens: int = 1024) -&gt; str:
+    &quot;&quot;&quot;Single-turn helper for quick questions.&quot;&quot;&quot;
+    response = client.messages.create(
+        model=model,
+        max_tokens=max_tokens,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}],
+    )
+    # For production, iterate; for demos, index.
+    return response.content[0].text
+
+print(ask(&quot;What is quantum computing? Answer in one sentence.&quot;))
+</code></pre>
+<p>This is roughly 15 lines of code and it is the complete minimum viable Claude integration. Everything else in the course — multi-turn, streaming, tool use, agents — layers on top of this skeleton.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Treating <code>max_tokens</code> as a target</strong> — Claude stops at <code>end_turn</code> regardless; the parameter is a cap, not a quota.</li>
+<li><strong>Starting <code>messages</code> with an <code>assistant</code> role</strong> — invalid request; the first turn must be <code>user</code>.</li>
+<li><strong>Two <code>user</code> messages in a row</strong> — invalid; merge them or add an assistant turn between.</li>
+<li><strong>Accessing <code>response.content</code> as a string</strong> — it's a list of content blocks; use <code>response.content[0].text</code> or iterate.</li>
+<li><strong>Hardcoding the model name in many places</strong> — pin it to a single variable so upgrades are one line.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p><code>client.messages.create()</code> is deceptively small — three parameters, one response — but it is the <strong>atom</strong> of every Claude feature you will ever ship. Multi-turn is this call in a loop; tool use is this call twice; agents are this call in a loop with branching; streaming is this call with a flag. Understanding the three required parameters and the <code>content[0].text</code> extraction deeply is what lets you reason about every higher-level pattern.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong>: expect questions about <code>max_tokens</code> semantics, the required parameter set, and how to read the response envelope.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: every agent loop is a for-loop over <code>messages.create()</code>; knowing the atomic call cold is a prerequisite for all D1 material.</li>
+<li>Scenario trigger: "What does <code>max_tokens</code> mean?" → always "a ceiling on output length, not a target."</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three required parameters for <code>client.messages.create()</code>?</td>
+<td><code>model</code>, <code>max_tokens</code>, <code>messages</code></td>
+</tr>
+<tr>
+<td>Does <code>max_tokens</code> set a target length or a ceiling?</td>
+<td>A ceiling — Claude stops at <code>end_turn</code> naturally, or at <code>max_tokens</code> if it hits the cap first</td>
+</tr>
+<tr>
+<td>What role must the first message in <code>messages</code> have?</td>
+<td><code>user</code> — starting with <code>assistant</code> is invalid</td>
+</tr>
+<tr>
+<td>How do you extract the plain text of a simple response?</td>
+<td><code>response.content[0].text</code></td>
+</tr>
+<tr>
+<td>Why is <code>response.content</code> a list and not a string?</td>
+<td>It's an ordered list of content blocks; for tool use, blocks of different types (<code>text</code>, <code>tool_use</code>) can be interleaved</td>
+</tr>
+<tr>
+<td>What two packages does Lesson 06 install?</td>
+<td><code>anthropic</code> (the SDK) and <code>python-dotenv</code> (to load <code>.env</code>)</td>
+</tr>
+<tr>
+<td>Why pin the model name to a single variable?</td>
+<td>So upgrading to a new model later is a one-line change instead of a find-and-replace</td>
+</tr>
+<tr>
+<td>What does the SDK auto-read from the environment?</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

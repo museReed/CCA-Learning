@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Temperature Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Temperature — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（模型配置）、5.3（production 模式）、5.4（evaluation 与可靠度）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Temperature 是一个 sampling 参数（0.0–1.0），控制 Claude 下一个 token 概率分布的锐利或平滑程度——低值让输出确定、事实取向，高值让输出多变、具创意。</p>
+<hr />
+<h2>Claude 实际上怎么生成文本</h2>
+<p>理解 temperature 前，先看三步骤生成循环：</p>
+<ol>
+<li><strong>Tokenization</strong>——输入被切成 tokens（subword 单位）</li>
+<li><strong>Prediction</strong>——模型对所有可能的下一个 token 计算概率分布</li>
+<li><strong>Sampling</strong>——从这个分布抽一个 token 加到输出。重复，直到模型输出 stop token 或达到 <code>max_tokens</code></li>
+</ol>
+<p>对于以「What do you think?」结尾的 prompt，分布可能长这样：</p>
+<table>
+<thead>
+<tr>
+<th>候选下一个 token</th>
+<th>概率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>" about"</td>
+<td>30%</td>
+</tr>
+<tr>
+<td>" would"</td>
+<td>20%</td>
+</tr>
+<tr>
+<td>" of"</td>
+<td>10%</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>模型挑一个、接上去，再跑整个循环生成下一个 token。Temperature 就是调整步骤 3 的旋钮。</p>
+<hr />
+<h2>Temperature 在数学上做什么</h2>
+<p>Temperature 在 softmax 前对 logits（pre-softmax 分数）做 rescale。</p>
+<ul>
+<li><strong>Temperature = 0</strong> → 分布坍缩成 argmax。永远挑概率最高的 token。输出几乎确定性（实务上——不计 tie-break）</li>
+<li><strong>Temperature = 1</strong> → 直接用原始分布。Claude 从完整概率质量采样，生成多变输出</li>
+<li><strong>介于 0 和 1 之间</strong> → 中间锐化程度。高概率 token 仍然被偏好，但低概率的也有合理机会</li>
+</ul>
+<p>把它想成「信心旋钮」。0 的时候你只信最好的那个猜测；1 的时候你让多样性进来。</p>
+<hr />
+<h2>三个 Temperature 区段</h2>
+<p>不同的产品行为需要不同区段。课程定义了三个：</p>
+<h3>低（0.0 – 0.3）——确定性任务</h3>
+<p>当答案范围窄、事实很重要时使用。</p>
+<ul>
+<li>事实性 Q&amp;A</li>
+<li>Coding 辅助</li>
+<li>数据抽取 / 分类</li>
+<li>内容审核</li>
+<li>任何要喂给下游 parser 的场景</li>
+</ul>
+<h3>中（0.4 – 0.7）——结构化创意</h3>
+<p>当你要连贯、有用、带点自然变化的输出时使用。</p>
+<ul>
+<li>Summarization</li>
+<li>教育内容</li>
+<li>问题解决</li>
+<li>有约束的创意写作</li>
+</ul>
+<h3>高（0.8 – 1.0）——发散式生成</h3>
+<p>当目标是多样性与新颖时使用。</p>
+<ul>
+<li>Brainstorming</li>
+<li>营销文案</li>
+<li>虚构 / 笑话生成</li>
+<li>发想 session</li>
+</ul>
+<p>把区段和任务对上。内容审核系统开 temperature 1.0 是 bug。Brainstorming 工具开 temperature 0.0 很无趣。</p>
+<hr />
+<h2>把 Temperature 加进 chat 函数</h2>
+<p>接着 Lesson 09 的 <code>chat()</code> helper，把 <code>temperature</code> 加成第一级参数：</p>
+<pre><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+def chat(messages, system=None, temperature=1.0):
+    params = {
+        &quot;model&quot;: &quot;claude-sonnet-4-5&quot;,
+        &quot;max_tokens&quot;: 1000,
+        &quot;messages&quot;: messages,
+        &quot;temperature&quot;: temperature,
+    }
+    if system:
+        params[&quot;system&quot;] = system
+
+    message = client.messages.create(**params)
+    return message.content[0].text
+</code></pre>
+<p>和 Lesson 09 版本的唯一差别是新的 <code>temperature=1.0</code> kwarg 和对应的 <code>params</code> 条目。注意 <code>temperature</code> <strong>永远</strong>被传入——和 <code>system</code> 不同，它不需要条件处理，因为 API 直接接受 float 值。</p>
+<hr />
+<h2>观察效果</h2>
+<p>用两个极端生成电影点子：</p>
+<pre><code class="language-python">messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Give me a one-sentence movie idea.&quot;}]
+
+print(chat(messages, temperature=0.0))
+# &quot;A time-traveling archaeologist must prevent ancient artifacts from being stolen.&quot;
+
+print(chat(messages, temperature=1.0))
+# 每次执行差异很大——不同主题、角色、情节
+</code></pre>
+<p>在 <code>0.0</code> 你常常每次拿到一样的答案。在 <code>1.0</code> 每次调用都会拿到明显不同的答案。这就是为什么非确定性流程的集成测试必须把 <code>temperature=0</code> 钉住，或用 LLM-as-judge evals，不能用 exact-match assertion。</p>
+<hr />
+<h2>Temperature 不是保证</h2>
+<p>两个关键警告：</p>
+<ol>
+<li><strong>Temperature 0 在不同 API 版本或 infra 上不严格确定性</strong>。Tie-break、KV-cache 效应、backend routing 都可能产生罕见变异。如果你需要精确确定性，把低 temperature 搭配确定性 evaluation（对多次抽样做 exact-match，不是单次调用）</li>
+<li><strong>高 temperature 不保证新颖</strong>。就算 1.0，Claude 可能还是会重复常见措辞，因为那些 token 在分布里还是主导。Temperature 改变概率；它不会发明新 token</li>
+</ol>
+<hr />
+<h2>Temperature 和其他 Sampling 参数</h2>
+<p>Temperature 是几个 sampling 控制之一。Anthropic API 也支持 <code>top_p</code>（nucleus sampling），把分布在累积概率阈值处截断。课程聚焦 temperature 因为它最直觉；实务上，production 系统通常把 <code>top_p</code> 留在默认，只调 temperature。</p>
+<p><strong>经验法则</strong>：一次只调一个 sampling 参数。<code>temperature</code> 和 <code>top_p</code> 一起调，会让输出很难推理。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>在抽取 pipeline 用高 temperature</strong>——如果下游 code 预期结构化 JSON，temperature 1.0 是 parse error 温床</li>
+<li><strong>在创意任务用 temperature 0</strong>——输出变得重复无趣，用户立刻察觉</li>
+<li><strong>假设 temperature 0 是 bit-exact 可重现</strong>——不是的；infra 层级的 nondeterminism 可能导致罕见变异</li>
+<li><strong>在调 prompt 之前先调 temperature</strong>——质量最大的杠杆是 prompt + system prompt；temperature 是微调旋钮，不是第一层修复</li>
+<li><strong>完全忘了设 temperature</strong>——全部默认 1.0 会让结构化任务的测试不稳定、production 行为不一致</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Temperature 是政策决策，不是性能决策。它编码的是你产品能接受多少变异。依用户期望选区段：用户要<em>那个</em>答案（低）、<em>一个好</em>答案（中）、还是<em>很多不同</em>答案（高）？然后每个 endpoint 或 feature 锁死——不要让它飘动。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong>：temperature 是核心 production 配置参数。预期会考给定场景该用哪个 temperature 区段（抽取 vs brainstorming）</li>
+<li><strong>D5.3（evaluation 与可靠度）</strong>：确定性 evaluation pipelines 需要钉住 temperature——考试可能问可重现性</li>
+<li>注意「如何让 Claude 输出在数据抽取任务上保持一致？」这种场景——答案是低 temperature（加上结构化 prompting），不是重试</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude <code>temperature</code> 参数的有效范围？</td>
+<td>0.0 到 1.0，含端点</td>
+</tr>
+<tr>
+<td>Temperature 0 在机制上是什么意思？</td>
+<td>Claude 每一步都挑概率最高的下一个 token——实际是 argmax，生成近确定性输出</td>
+</tr>
+<tr>
+<td>Temperature 1 在机制上是什么意思？</td>
+<td>直接从完整概率分布 sampling，生成多变且具创意的输出</td>
+</tr>
+<tr>
+<td>数据抽取该用哪个 temperature 区段？</td>
+<td>低（0.0–0.3）——确定性和事实忠实度很重要</td>
+</tr>
+<tr>
+<td>Brainstorming 该用哪个 temperature 区段？</td>
+<td>高（0.8–1.0）——目标是多样性与新颖</td>
+</tr>
+<tr>
+<td>Summarization 该用哪个 temperature 区段？</td>
+<td>中（0.4–0.7）——结构化但带自然变化</td>
+</tr>
+<tr>
+<td>Temperature 0 是 bit-exact 可重现吗？</td>
+<td>不是——infra 层级 nondeterminism 会造成罕见变异；是近确定性，不是保证</td>
+</tr>
+<tr>
+<td>文本生成的三个步骤是？</td>
+<td>Tokenization → Prediction（概率分布）→ Sampling（挑下一个 token）</td>
+</tr>
+<tr>
+<td>为什么不该在调 prompt 前先调 temperature？</td>
+<td>Prompt 是第一层质量杠杆；temperature 是微调旋钮，修不了坏 prompt</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

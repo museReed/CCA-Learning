@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Temperature Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Temperature — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (model configuration), 5.3 (production patterns), 5.4 (evaluation &amp; reliability)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Temperature is the "creativity dial" on Claude — it controls how much variance the user sees in responses. As a PM, choosing the right temperature per feature is how you align output behavior with user expectations: predictable for factual tasks, varied for creative ones.</p>
+<hr />
+<h2>Mental Model: The Chef Analogy</h2>
+<p>Imagine ordering from a restaurant:</p>
+<table>
+<thead>
+<tr>
+<th>Temperature</th>
+<th>Chef behavior</th>
+<th>Diner expectation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.0</td>
+<td>Makes the exact same dish from the recipe every time</td>
+<td>"I want the signature steak — exactly as it was last time."</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>Follows the recipe but adds small, tasteful variations</td>
+<td>"Do your thing, chef, but keep it on-brand."</td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>Improvises freely — each plate is a new creation</td>
+<td>"Surprise me — chef's choice, never the same twice."</td>
+</tr>
+</tbody>
+</table>
+<p>If a diner orders a medical prescription and gets "chef's choice" behavior, that's a disaster. If a diner orders a tasting menu and gets the same dish every night, that's boring. Temperature is the product decision about which experience this feature delivers.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Temperature is one of the few Claude parameters that <strong>directly shapes the user experience</strong>. It is not a technical detail — it is a product policy.</p>
+<ul>
+<li><strong>Low temperature</strong> = product promise of <em>consistency and reliability</em></li>
+<li><strong>High temperature</strong> = product promise of <em>variety and surprise</em></li>
+<li><strong>Medium</strong> = product promise of <em>quality with a human touch</em></li>
+</ul>
+<p>If your data-extraction feature returns different JSON shapes each time, users lose trust. If your brainstorming tool returns the same three ideas each visit, users stop opening it. Temperature is the simplest lever to fix both.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>Low Temperature (0.0 – 0.3)</h3>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Why low?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Support ticket classifier</td>
+<td>Same input must get same label</td>
+</tr>
+<tr>
+<td>Invoice data extractor</td>
+<td>Downstream systems expect deterministic fields</td>
+</tr>
+<tr>
+<td>Medical / legal explainers</td>
+<td>Variance in wording can be legally dangerous</td>
+</tr>
+<tr>
+<td>Code assistant</td>
+<td>Users expect the same fix for the same bug</td>
+</tr>
+<tr>
+<td>Content moderation</td>
+<td>Consistency is a fairness requirement</td>
+</tr>
+</tbody>
+</table>
+<h3>Medium Temperature (0.4 – 0.7)</h3>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Why medium?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Meeting summarizer</td>
+<td>Coherent structure + natural phrasing</td>
+</tr>
+<tr>
+<td>Tutoring explanations</td>
+<td>Consistent pedagogy with a human voice</td>
+</tr>
+<tr>
+<td>Email draft assistant</td>
+<td>Grounded in facts but not robotic</td>
+</tr>
+<tr>
+<td>Knowledge-base answers</td>
+<td>Reliable facts with readable variation</td>
+</tr>
+</tbody>
+</table>
+<h3>High Temperature (0.8 – 1.0)</h3>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Why high?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Brainstorming / ideation tool</td>
+<td>Users want many different ideas</td>
+</tr>
+<tr>
+<td>Marketing copy generator</td>
+<td>Novelty is the whole point</td>
+</tr>
+<tr>
+<td>Name / slogan generator</td>
+<td>Diversity &gt; precision</td>
+</tr>
+<tr>
+<td>Fiction / game dialog</td>
+<td>Surprise drives engagement</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The PM Decision Framework</h2>
+<p>Ask four questions when you specify an AI feature:</p>
+<ol>
+<li><strong>Does the same input need to produce the same output?</strong> → Low temperature. No exceptions.</li>
+<li><strong>Does a downstream parser or automation consume the output?</strong> → Low temperature. Variance breaks pipelines.</li>
+<li><strong>Will users compare two runs side-by-side?</strong> → Low or medium. Inconsistency reads as a bug.</li>
+<li><strong>Is variety part of the value proposition?</strong> → High. Lock it in.</li>
+</ol>
+<p>Write the answer into the PRD as part of acceptance criteria. "Temperature: 0.2, fixed" is a real product requirement, not a tuning detail.</p>
+<hr />
+<h2>What Temperature Cannot Fix</h2>
+<p>Temperature is a sampling knob, not a quality fix. Do not reach for it when the real problem is:</p>
+<ul>
+<li><strong>Bad prompts</strong> → improve the prompt first; temperature is second-order.</li>
+<li><strong>Missing context</strong> → add retrieved data or tools; temperature cannot invent facts.</li>
+<li><strong>Wrong model size</strong> → upgrade the model tier if outputs are simply not smart enough.</li>
+<li><strong>Inconsistent persona</strong> → that is a system-prompt job, not a temperature job.</li>
+</ul>
+<p>A common failure mode: PM sees "hallucinations" in production, lowers temperature to 0, ships it. The hallucinations were caused by a bad prompt, not temperature. The fix does nothing.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Leaving temperature at the default (1.0) for everything</strong> — great for chat, terrible for extraction. Pick per feature.</li>
+<li><strong>Confusing low temperature with high accuracy</strong> — it only means low variance. A consistent wrong answer is still wrong.</li>
+<li><strong>Not specifying temperature in the PRD</strong> — engineers pick whatever they feel, and you inherit the inconsistency at launch.</li>
+<li><strong>A/B testing high vs. low temperature without changing the prompt</strong> — you may be testing the wrong variable.</li>
+<li><strong>Using high temperature on legally sensitive copy</strong> — the one day it generates something off-brand, you will be in a meeting about it.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Temperature is a product-policy decision, not an engineering tuning knob. It encodes the contract you make with users about how much variance they should expect. Decide it deliberately, write it into the PRD, and lock it per feature. The worst outcome is an inconsistent product because temperature was set by whoever wrote the code first.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong>: temperature is a standard production configuration parameter. Expect scenario questions asking which range fits a given product.</li>
+<li>Watch for phrasing like "How do you ensure consistent classification output?" — the answer is low temperature.</li>
+<li>Watch for phrasing like "How do you generate diverse marketing copy variants?" — the answer is high temperature.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does temperature control in product terms?</td>
+<td>The variance the user sees in responses — low = consistent, high = varied.</td>
+</tr>
+<tr>
+<td>Which temperature band fits a data-extraction tool?</td>
+<td>Low (0.0–0.3) — determinism is a product requirement.</td>
+</tr>
+<tr>
+<td>Which temperature band fits a brainstorming tool?</td>
+<td>High (0.8–1.0) — variety is the value proposition.</td>
+</tr>
+<tr>
+<td>Which temperature band fits a meeting summarizer?</td>
+<td>Medium (0.4–0.7) — coherent but natural.</td>
+</tr>
+<tr>
+<td>Is low temperature the same as high accuracy?</td>
+<td>No — it means low variance. A repeatably wrong answer is still wrong.</td>
+</tr>
+<tr>
+<td>Should temperature be specified in the PRD?</td>
+<td>Yes — it is a product policy, not an engineering tuning detail.</td>
+</tr>
+<tr>
+<td>What is the chef analogy for temperature 0 vs 1?</td>
+<td>0 = signature dish exact every time; 1 = chef's choice, never the same twice.</td>
+</tr>
+<tr>
+<td>What product problem does temperature NOT fix?</td>
+<td>Bad prompts, missing context, wrong model, persona drift. Temperature is second-order.</td>
+</tr>
+<tr>
+<td>Why is temperature 1.0 dangerous for legal / medical copy?</td>
+<td>A rare unusual phrasing can be legally problematic; you need consistency, not creativity.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

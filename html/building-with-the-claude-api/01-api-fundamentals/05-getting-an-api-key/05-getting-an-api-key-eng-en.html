@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting An Api Key Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Getting an API Key — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D3 — Claude Code Configuration (20%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>3.1 (API key lifecycle), 3.2 (workspace &amp; key naming), 5.3 (secret hygiene in production)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 05</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>An Anthropic API key is a write-once, bearer credential created through the Console under a named workspace — you must copy it the moment it appears, because it will never be shown again.</p>
+<hr />
+<h2>The Five-Step Creation Flow</h2>
+<pre><code>Console login  ─▶  Get API Keys  ─▶  Create Key  ─▶  Workspace + Name  ─▶  Copy Once
+     1                  2                3                  4                  5
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Navigate to <code>https://console.anthropic.com/</code> and log in</td>
+<td>Use the account that should own billing &amp; auditing</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Click <strong>Get API Keys</strong> (top right of the dashboard)</td>
+<td>Lands on the keys management page</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Click <strong>Create Key</strong> (top right of the keys page)</td>
+<td>Opens the creation dialog</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Pick a workspace (e.g. <code>Default</code>) and give the key a name (e.g. <code>Anthropic Course</code>)</td>
+<td>Name is identification only; workspace is the billing/audit boundary</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Copy the key immediately</td>
+<td><strong>The value is shown exactly once</strong>; if you close the dialog, you must delete and recreate</td>
+</tr>
+</tbody>
+</table>
+<p>The "copy once" rule is not a UX quirk — it's a security design. Anthropic never stores the plaintext key on its side after creation, only a hash. If you lose it, nobody can recover it, which is also why nobody can steal it from a support ticket.</p>
+<hr />
+<h2>Workspace: The Unit of Isolation</h2>
+<p>A workspace is the boundary where billing, rate limits, and usage reporting live. Choosing the right workspace for a key is a production decision, not cosmetic.</p>
+<table>
+<thead>
+<tr>
+<th>Workspace strategy</th>
+<th>Good for</th>
+<th>Tradeoff</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One workspace per product</td>
+<td>Clean per-product billing and quotas</td>
+<td>Requires workspace switching for devs</td>
+</tr>
+<tr>
+<td>One workspace per environment (dev/staging/prod)</td>
+<td>Env isolation, incident containment</td>
+<td>More keys to manage</td>
+</tr>
+<tr>
+<td>Shared <code>Default</code> workspace</td>
+<td>Prototyping / courses</td>
+<td>No cost attribution between projects</td>
+</tr>
+</tbody>
+</table>
+<p>For any serious production app, treat workspaces the way you treat AWS accounts: at least a prod/non-prod split.</p>
+<hr />
+<h2>Key Naming: A Small Habit With Big Payoff</h2>
+<p>The name field is free-form and exists only to help humans identify which key is which. Adopt a naming convention early:</p>
+<pre><code>&lt;env&gt;-&lt;service&gt;-&lt;owner&gt;-&lt;date&gt;
+prod-chatbot-backend-2025-04-11
+dev-ingest-worker-2025-04-11
+</code></pre>
+<p>When you see a suspicious charge or need to rotate, the name is your only lookup key inside the console. "My Key 3" will cost you hours during an incident.</p>
+<hr />
+<h2>Handling the Key in Code</h2>
+<p>Anthropic's SDK auto-reads from the environment variable <code>ANTHROPIC_API_KEY</code>. This is the pattern Lesson 06 will rely on, and the only acceptable starting pattern:</p>
+<pre><code class="language-bash"># .env (never commit this file)
+ANTHROPIC_API_KEY=&quot;sk-ant-api03-...your-key...&quot;
+</code></pre>
+<pre><code class="language-python"># Python — the SDK picks up the env var automatically
+from dotenv import load_dotenv
+load_dotenv()
+
+from anthropic import Anthropic
+
+client = Anthropic()  # no explicit key argument needed
+</code></pre>
+<p>Rules for the key in code:</p>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Never commit <code>.env</code></td>
+<td>Public repos trigger auto-revocation, private repos still leak via forks</td>
+</tr>
+<tr>
+<td>Always add <code>.env</code> to <code>.gitignore</code></td>
+<td>Belt + suspenders against accidental commits</td>
+</tr>
+<tr>
+<td>Use a secret manager in production (AWS Secrets Manager, GCP Secret Manager, HashiCorp Vault)</td>
+<td>Env vars on bare servers are fine for POCs but not auditable</td>
+</tr>
+<tr>
+<td>Rotate on any suspicion of leak</td>
+<td>Delete in console → create new → redeploy</td>
+</tr>
+<tr>
+<td>Never share via chat/email/screenshot</td>
+<td>If you must share, use a password manager's secure share</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The "Lost Key" Workflow</h2>
+<p>Because the value is shown only once, the recovery path is explicit: you cannot recover, you must rotate.</p>
+<pre><code>                ┌──────────────────┐
+                │  Lost the key?   │
+                └────────┬─────────┘
+                         │
+         ┌───────────────┴───────────────┐
+         │                               │
+    Console: find                 Console: delete
+    the key by name               the lost key
+         │                               │
+         └───────────────┬───────────────┘
+                         ▼
+                 Console: Create Key
+                 (new value, new copy-once window)
+                         ▼
+                 Update .env / secret
+                 manager / deploy
+</code></pre>
+<p>This is also the exact workflow for scheduled rotation — there is no "get existing key value" endpoint.</p>
+<hr />
+<h2>Code Example: SDK With Explicit Key (for testing only)</h2>
+<p>The SDK allows passing the key directly, but you should only do this in throwaway scripts:</p>
+<pre><code class="language-python">from anthropic import Anthropic
+
+# Only acceptable in a one-off notebook or test; never in production
+client = Anthropic(api_key=&quot;sk-ant-api03-...&quot;)
+
+response = client.messages.create(
+    model=&quot;claude-sonnet-4-5&quot;,
+    max_tokens=256,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;ping&quot;}],
+)
+print(response.content[0].text)
+</code></pre>
+<p>The moment this pattern leaves a notebook it becomes a landmine — a stray <code>git add .</code> will ship the key to the remote.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Closing the creation dialog before copying</strong> — the value cannot be recovered; you must delete and recreate.</li>
+<li><strong>Committing the key to git</strong> — even private repos can leak via forks, backups, or future open-sourcing. Always use env vars.</li>
+<li><strong>Using "My Key" or "Test" as the name</strong> — during an incident you won't know which service owns which key.</li>
+<li><strong>Sharing one workspace across dev and prod</strong> — a runaway dev job can then drain your production quota.</li>
+<li><strong>Never rotating</strong> — keys should expire on a schedule (quarterly is a reasonable default); unused keys should be deleted.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The copy-once dialog is not an inconvenience — it's the reason API keys stay secure. If Anthropic could show you the key later, so could an attacker who compromised your account. Internalize the "copy once, store in a secret manager, rotate on any doubt" loop and you've already passed the D3 secret-hygiene questions on the CCA.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D3 (Claude Code Configuration)</strong>: creation flow, where keys live, how to recover (you can't — you rotate), and why.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: workspace strategy as a production concern — billing, auditing, rate-limit isolation.</li>
+<li>Exam trigger: "A developer lost an API key" → the correct answer is always "delete in console and create a new one," never "contact Anthropic support to recover it."</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>How many times can you view the plaintext value of an Anthropic API key?</td>
+<td>Exactly once, at creation time — it is never shown again</td>
+</tr>
+<tr>
+<td>If you lose a key, how do you recover it?</td>
+<td>You cannot recover it; you must delete it in the console and create a new one</td>
+</tr>
+<tr>
+<td>What are the five steps to create an API key?</td>
+<td>1) Log in to console.anthropic.com, 2) Get API Keys, 3) Create Key, 4) Choose workspace + name, 5) Copy the value once</td>
+</tr>
+<tr>
+<td>What environment variable does the <code>anthropic</code> SDK auto-read?</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+</tr>
+<tr>
+<td>What must you add to <code>.gitignore</code> to protect keys?</td>
+<td><code>.env</code> (and any other file where keys might land)</td>
+</tr>
+<tr>
+<td>Why does Anthropic not store the plaintext key server-side after creation?</td>
+<td>So nobody — including Anthropic support or attackers — can retrieve it later</td>
+</tr>
+<tr>
+<td>What is a workspace used for in key management?</td>
+<td>It's the boundary for billing, quotas, and usage reporting; choose per-env or per-product</td>
+</tr>
+<tr>
+<td>What is a safe naming convention for keys?</td>
+<td><code>&lt;env&gt;-&lt;service&gt;-&lt;owner&gt;-&lt;date&gt;</code>, e.g. <code>prod-chatbot-backend-2025-04-11</code></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

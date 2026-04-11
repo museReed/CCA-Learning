@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Temperature Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Temperature — PM 视角</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D5 — Enterprise Deployment (20%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（模型配置）、5.3（production 模式）、5.4（evaluation 与可靠度）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话总结</h2>
+<p>Temperature 是 Claude 的「创意旋钮」——它控制用户看到响应的变异程度。身为 PM，为每个 feature 选对 temperature，就是你把输出行为对齐用户期望的方式：事实任务用可预测的，创意任务用多变的。</p>
+<hr />
+<h2>心智模型：厨师类比</h2>
+<p>想象在餐厅点餐：</p>
+<table>
+<thead>
+<tr>
+<th>Temperature</th>
+<th>厨师行为</th>
+<th>食客期望</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.0</td>
+<td>每次都照菜谱做出完全一样的菜</td>
+<td>「我要招牌牛排——和上次一模一样」</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>照菜谱做但加入小而有品位的变化</td>
+<td>「按你的风格来，但保持招牌味」</td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>自由即兴——每盘都是新创作</td>
+<td>「惊喜我——主厨选择，永远不一样」</td>
+</tr>
+</tbody>
+</table>
+<p>如果食客点的是医疗处方却拿到「主厨选择」，那是灾难。如果食客点的是 tasting menu 却每晚拿到同一道菜，那很无趣。Temperature 是这个 feature 要给用户哪种体验的产品决策。</p>
+<hr />
+<h2>为什么 PM 要在乎</h2>
+<p>Temperature 是少数几个<strong>直接塑造用户体验</strong>的 Claude 参数。它不是技术细节——它是产品政策。</p>
+<ul>
+<li><strong>低 temperature</strong> = 产品承诺<em>一致性与可靠</em></li>
+<li><strong>高 temperature</strong> = 产品承诺<em>多样与惊喜</em></li>
+<li><strong>中 temperature</strong> = 产品承诺<em>质量带点人味</em></li>
+</ul>
+<p>如果你的数据抽取功能每次返回不同 JSON 结构，用户会失去信任。如果你的 brainstorming 工具每次访问都返回同样三个点子，用户会不再打开它。Temperature 是修复这两者最简单的杠杆。</p>
+<hr />
+<h2>产品使用场景</h2>
+<h3>低 Temperature (0.0 – 0.3)</h3>
+<table>
+<thead>
+<tr>
+<th>产品</th>
+<th>为什么低？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>支持工单分类</td>
+<td>同输入必须得到同 label</td>
+</tr>
+<tr>
+<td>发票数据抽取</td>
+<td>下游系统预期确定性字段</td>
+</tr>
+<tr>
+<td>医疗 / 法律说明</td>
+<td>措辞变异可能有法律风险</td>
+</tr>
+<tr>
+<td>Code 助手</td>
+<td>用户预期同 bug 拿到同 fix</td>
+</tr>
+<tr>
+<td>内容审核</td>
+<td>一致性是公平性要求</td>
+</tr>
+</tbody>
+</table>
+<h3>中 Temperature (0.4 – 0.7)</h3>
+<table>
+<thead>
+<tr>
+<th>产品</th>
+<th>为什么中？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>会议摘要</td>
+<td>连贯结构 + 自然措辞</td>
+</tr>
+<tr>
+<td>家教解说</td>
+<td>一致教学法带人声</td>
+</tr>
+<tr>
+<td>Email 草稿助手</td>
+<td>事实为根但不机械</td>
+</tr>
+<tr>
+<td>知识库回答</td>
+<td>可靠事实加可读变化</td>
+</tr>
+</tbody>
+</table>
+<h3>高 Temperature (0.8 – 1.0)</h3>
+<table>
+<thead>
+<tr>
+<th>产品</th>
+<th>为什么高？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Brainstorming / 发想工具</td>
+<td>用户要很多不同点子</td>
+</tr>
+<tr>
+<td>营销文案生成器</td>
+<td>新颖就是全部意义</td>
+</tr>
+<tr>
+<td>命名 / slogan 生成器</td>
+<td>多样性 &gt; 精确</td>
+</tr>
+<tr>
+<td>虚构 / 游戏对白</td>
+<td>惊喜驱动 engagement</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 决策框架</h2>
+<p>规划 AI feature 时问四个问题：</p>
+<ol>
+<li><strong>同样输入需要产生同样输出吗？</strong> → 低 temperature。没有例外</li>
+<li><strong>下游 parser 或 automation 会消费这个输出吗？</strong> → 低 temperature。变异会打破 pipeline</li>
+<li><strong>用户会把两次执行并列比较吗？</strong> → 低或中。不一致会被当成 bug</li>
+<li><strong>多样性是价值主张的一部分吗？</strong> → 高。锁死</li>
+</ol>
+<p>把答案写进 PRD，当作验收标准的一部分。「Temperature: 0.2, fixed」是真实的产品需求，不是调校细节。</p>
+<hr />
+<h2>Temperature 修不了什么</h2>
+<p>Temperature 是 sampling 旋钮，不是质量修复。当真正的问题是下列时，不要伸手抓它：</p>
+<ul>
+<li><strong>坏 prompt</strong> → 先改 prompt；temperature 是第二层</li>
+<li><strong>缺少 context</strong> → 加 retrieved data 或 tools；temperature 无法捏造事实</li>
+<li><strong>模型尺寸不对</strong> → 输出真的不够聪明就升级 model 阶层</li>
+<li><strong>Persona 不一致</strong> → 那是 system prompt 的工作，不是 temperature</li>
+</ul>
+<p>常见失败模式：PM 在 production 看到「hallucination」，把 temperature 降到 0 上线。Hallucination 是坏 prompt 造成的，不是 temperature。这个 fix 毫无作用。</p>
+<hr />
+<h2>常见 PM 错误</h2>
+<ol>
+<li><strong>所有功能都让 temperature 停在默认 1.0</strong>——对 chat 很好，对抽取很糟。每个 feature 要选</li>
+<li><strong>把低 temperature 和高准确度搞混</strong>——它只代表低变异。一致的错答案还是错</li>
+<li><strong>没在 PRD 指定 temperature</strong>——工程师会选一个他们觉得顺手的，你会在上线后继承这个不一致</li>
+<li><strong>没改 prompt 就做 temperature 高 vs 低的 A/B test</strong>——你可能在测错的变量</li>
+<li><strong>在法律敏感文案用高 temperature</strong>——它总有一天会生成 off-brand 的东西，你会在会议室里被约谈</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Temperature 是产品政策决策，不是工程调校旋钮。它编码的是你和用户关于「能预期多少变异」的契约。刻意决定它、写进 PRD、每个 feature 锁死。最糟的结果是因为 temperature 由「第一个写 code 的人」决定而产品不一致。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试重点</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong>：temperature 是标准 production 配置参数。预期会考场景题，问给定产品该用哪个区段</li>
+<li>注意「如何确保分类输出一致？」这种问法——答案是低 temperature</li>
+<li>注意「如何生成多样的营销文案变体？」这种问法——答案是高 temperature</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在产品层面，temperature 控制什么？</td>
+<td>用户看到响应的变异程度——低 = 一致，高 = 多变</td>
+</tr>
+<tr>
+<td>数据抽取工具该用哪个 temperature 区段？</td>
+<td>低（0.0–0.3）——确定性是产品需求</td>
+</tr>
+<tr>
+<td>Brainstorming 工具该用哪个 temperature 区段？</td>
+<td>高（0.8–1.0）——多样性就是价值主张</td>
+</tr>
+<tr>
+<td>会议摘要该用哪个 temperature 区段？</td>
+<td>中（0.4–0.7）——连贯但自然</td>
+</tr>
+<tr>
+<td>低 temperature 等于高准确度吗？</td>
+<td>不等于——它只代表低变异。可重复的错答还是错</td>
+</tr>
+<tr>
+<td>Temperature 该写进 PRD 吗？</td>
+<td>应该——它是产品政策，不是工程调校细节</td>
+</tr>
+<tr>
+<td>Temperature 0 vs 1 的厨师类比是什么？</td>
+<td>0 = 招牌菜每次完全一样；1 = 主厨选择，从不相同</td>
+</tr>
+<tr>
+<td>Temperature 修不了哪些产品问题？</td>
+<td>坏 prompt、缺 context、错 model、persona drift。Temperature 是第二层</td>
+</tr>
+<tr>
+<td>为什么法律 / 医疗文案用 temperature 1.0 危险？</td>
+<td>罕见不寻常措辞可能有法律风险；你要的是一致性，不是创意</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

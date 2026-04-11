@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">非串流 vs 串流回應</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">總延遲相同 — 串流只是讓 token 一產生就顯示，提升感知速度</text>
+
+  <!-- LEFT: Non-streaming -->
+  <rect x="30" y="85" width="460" height="470" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="30" y="85" width="460" height="46" rx="12" fill="#3B82F6"/>
+  <rect x="30" y="119" width="460" height="12" fill="#3B82F6"/>
+  <text x="260" y="115" text-anchor="middle" font-size="16" font-weight="600" fill="white">非串流（預設）</text>
+
+  <rect x="90" y="146" width="340" height="26" rx="13" fill="#DBEAFE"/>
+  <text x="260" y="164" text-anchor="middle" font-size="11" font-weight="600" fill="#1E40AF">結束時一次全部揭露</text>
+
+  <rect x="50" y="188" width="420" height="70" rx="8" fill="#0F172A"/>
+  <text x="62" y="208" font-size="11" font-family="Menlo, monospace" fill="#34D399">response = client.messages.create(...)</text>
+  <text x="62" y="226" font-size="11" font-family="Menlo, monospace" fill="#94A3B8"># blocks the thread...</text>
+  <text x="62" y="244" font-size="11" font-family="Menlo, monospace" fill="#34D399">print(response.content[0].text)</text>
+
+  <text x="50" y="286" font-size="11" font-weight="700" fill="#1E40AF">時間軸（總共 5 秒）</text>
+
+  <rect x="50" y="294" width="340" height="36" rx="4" fill="#DBEAFE" stroke="#93C5FD"/>
+  <text x="220" y="318" text-anchor="middle" font-size="12" font-weight="600" fill="#1E40AF">等候中...（畫面空白）</text>
+
+  <rect x="394" y="294" width="76" height="36" rx="4" fill="#3B82F6"/>
+  <text x="432" y="318" text-anchor="middle" font-size="11" font-weight="700" fill="white">全部揭露</text>
+
+  <line x1="50" y1="335" x2="50" y2="342" stroke="#6B7280"/>
+  <text x="50" y="355" text-anchor="middle" font-size="9" fill="#6B7280">0s</text>
+  <line x1="145" y1="335" x2="145" y2="342" stroke="#6B7280"/>
+  <text x="145" y="355" text-anchor="middle" font-size="9" fill="#6B7280">1s</text>
+  <line x1="240" y1="335" x2="240" y2="342" stroke="#6B7280"/>
+  <text x="240" y="355" text-anchor="middle" font-size="9" fill="#6B7280">2s</text>
+  <line x1="335" y1="335" x2="335" y2="342" stroke="#6B7280"/>
+  <text x="335" y="355" text-anchor="middle" font-size="9" fill="#6B7280">4s</text>
+  <line x1="430" y1="335" x2="430" y2="342" stroke="#6B7280"/>
+  <text x="430" y="355" text-anchor="middle" font-size="9" fill="#6B7280">5s</text>
+
+  <rect x="50" y="375" width="420" height="125" rx="8" fill="white" stroke="#BFDBFE"/>
+  <text x="66" y="396" font-size="11" font-weight="700" fill="#166534">優點</text>
+  <text x="66" y="414" font-size="10" fill="#1E293B">+ 程式最簡單 — 單一返回值</text>
+  <text x="66" y="430" font-size="10" fill="#1E293B">+ 容易 .json() / 儲存 / 記錄</text>
+  <text x="66" y="446" font-size="10" fill="#1E293B">+ 不需處理 event loop</text>
+  <text x="260" y="396" font-size="11" font-weight="700" fill="#991B1B">缺點</text>
+  <text x="260" y="414" font-size="10" fill="#1E293B">− 完成前畫面空白</text>
+  <text x="260" y="430" font-size="10" fill="#1E293B">− 使用者感覺很慢</text>
+  <text x="260" y="446" font-size="10" fill="#1E293B">− 中途不易取消</text>
+  <text x="66" y="470" font-size="11" fill="#6B7280">首個 token 可見：<tspan font-weight="700" fill="#EF4444">~5 秒（結束才顯示）</tspan></text>
+  <text x="66" y="488" font-size="11" fill="#6B7280">總耗時：<tspan font-weight="700" fill="#1E293B">5 秒</tspan></text>
+
+  <rect x="50" y="510" width="420" height="34" rx="6" fill="#F1F5F9"/>
+  <text x="260" y="531" text-anchor="middle" font-size="11" fill="#1E293B">適合批次任務、cron 排程、純後端流水線</text>
+
+  <!-- RIGHT: Streaming -->
+  <rect x="510" y="85" width="460" height="470" rx="12" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="510" y="85" width="460" height="46" rx="12" fill="#22C55E"/>
+  <rect x="510" y="119" width="460" height="12" fill="#22C55E"/>
+  <text x="740" y="115" text-anchor="middle" font-size="16" font-weight="600" fill="white">串流（漸進式）</text>
+
+  <rect x="570" y="146" width="340" height="26" rx="13" fill="#DCFCE7"/>
+  <text x="740" y="164" text-anchor="middle" font-size="11" font-weight="600" fill="#14532D">token 隨 Claude 產生而流入</text>
+
+  <rect x="530" y="188" width="420" height="70" rx="8" fill="#0F172A"/>
+  <text x="542" y="208" font-size="11" font-family="Menlo, monospace" fill="#34D399">with client.messages.stream(...) as stream:</text>
+  <text x="542" y="226" font-size="11" font-family="Menlo, monospace" fill="#34D399">    for text in stream.text_stream:</text>
+  <text x="542" y="244" font-size="11" font-family="Menlo, monospace" fill="#34D399">        print(text, end="", flush=True)</text>
+
+  <text x="530" y="286" font-size="11" font-weight="700" fill="#14532D">時間軸（總共 5 秒 — 一樣！）</text>
+
+  <g transform="translate(530,294)">
+    <rect x="0"   y="0" width="42" height="36" rx="3" fill="#22C55E"/>
+    <text x="21"  y="22" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="44"  y="0" width="42" height="36" rx="3" fill="#22C55E"/>
+    <text x="65"  y="22" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="88"  y="0" width="42" height="36" rx="3" fill="#22C55E"/>
+    <text x="109" y="22" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="132" y="0" width="42" height="36" rx="3" fill="#22C55E"/>
+    <text x="153" y="22" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="176" y="0" width="42" height="36" rx="3" fill="#22C55E"/>
+    <text x="197" y="22" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="220" y="0" width="42" height="36" rx="3" fill="#22C55E"/>
+    <text x="241" y="22" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="264" y="0" width="42" height="36" rx="3" fill="#22C55E"/>
+    <text x="285" y="22" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="308" y="0" width="42" height="36" rx="3" fill="#22C55E"/>
+    <text x="329" y="22" text-anchor="middle" font-size="9" fill="white">chunk</text>
+    <rect x="352" y="0" width="42" height="36" rx="3" fill="#22C55E"/>
+    <text x="373" y="22" text-anchor="middle" font-size="9" fill="white">chunk</text>
+  </g>
+
+  <line x1="530" y1="335" x2="530" y2="342" stroke="#6B7280"/>
+  <text x="530" y="355" text-anchor="middle" font-size="9" fill="#6B7280">0s</text>
+  <line x1="614" y1="335" x2="614" y2="342" stroke="#6B7280"/>
+  <text x="614" y="355" text-anchor="middle" font-size="9" fill="#6B7280">1s</text>
+  <line x1="698" y1="335" x2="698" y2="342" stroke="#6B7280"/>
+  <text x="698" y="355" text-anchor="middle" font-size="9" fill="#6B7280">2s</text>
+  <line x1="822" y1="335" x2="822" y2="342" stroke="#6B7280"/>
+  <text x="822" y="355" text-anchor="middle" font-size="9" fill="#6B7280">4s</text>
+  <line x1="914" y1="335" x2="914" y2="342" stroke="#6B7280"/>
+  <text x="914" y="355" text-anchor="middle" font-size="9" fill="#6B7280">5s</text>
+
+  <rect x="530" y="375" width="420" height="125" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="546" y="396" font-size="11" font-weight="700" fill="#166534">優點</text>
+  <text x="546" y="414" font-size="10" fill="#1E293B">+ 首個 token 約 200ms 內到</text>
+  <text x="546" y="430" font-size="10" fill="#1E293B">+ 反應靈敏、聊天介面首選</text>
+  <text x="546" y="446" font-size="10" fill="#1E293B">+ 可中途中止串流</text>
+  <text x="740" y="396" font-size="11" font-weight="700" fill="#991B1B">缺點</text>
+  <text x="740" y="414" font-size="10" fill="#1E293B">− 需要處理事件程式碼</text>
+  <text x="740" y="430" font-size="10" fill="#1E293B">− 必須自行累積文字</text>
+  <text x="740" y="446" font-size="10" fill="#1E293B">− 乾淨重試較困難</text>
+  <text x="546" y="470" font-size="11" fill="#6B7280">首個 token 可見：<tspan font-weight="700" fill="#22C55E">~0.2 秒</tspan></text>
+  <text x="546" y="488" font-size="11" fill="#6B7280">總耗時：<tspan font-weight="700" fill="#1E293B">5 秒（相同）</tspan></text>
+
+  <rect x="530" y="510" width="420" height="34" rx="6" fill="#F1F5F9"/>
+  <text x="740" y="525" text-anchor="middle" font-size="10" fill="#1E293B" font-weight="600">事件類型</text>
+  <text x="740" y="539" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#475569">message_start · content_block_delta · message_stop</text>
+
+  <!-- Bottom key note -->
+  <rect x="100" y="565" width="800" height="28" rx="6" fill="#FEF3C7" stroke="#F59E0B"/>
+  <text x="500" y="584" text-anchor="middle" font-size="11" fill="#92400E" font-weight="600">串流提升感知延遲 — 總耗時相同，但首個 token 更早出現。聊天 UI 的關鍵功能。</text>
+</svg>

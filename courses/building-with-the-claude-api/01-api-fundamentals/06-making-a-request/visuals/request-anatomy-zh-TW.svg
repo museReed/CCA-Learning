@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#3B82F6"/>
+    </marker>
+    <marker id="arrowGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#94A3B8"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="40" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">messages.create() 呼叫的解剖圖</text>
+  <text x="500" y="62" text-anchor="middle" font-size="13" fill="#6B7280">逐個欄位標註 — 必要欄位藍色、選填灰色、回應綠色</text>
+
+  <!-- Request block (center) -->
+  <rect x="310" y="95" width="380" height="245" rx="10" fill="#0F172A" filter="url(#shadow)"/>
+  <text x="500" y="118" text-anchor="middle" font-size="11" font-family="Menlo, monospace" fill="#94A3B8">REQUEST</text>
+
+  <text x="330" y="142" font-size="12" font-family="Menlo, monospace" fill="#E2E8F0">response = client.messages.create(</text>
+  <text x="350" y="162" font-size="12" font-family="Menlo, monospace" fill="#60A5FA">    model=<tspan fill="#FBBF24">"claude-sonnet-4-5"</tspan>,</text>
+  <text x="350" y="182" font-size="12" font-family="Menlo, monospace" fill="#60A5FA">    max_tokens=<tspan fill="#FBBF24">1024</tspan>,</text>
+  <text x="350" y="202" font-size="12" font-family="Menlo, monospace" fill="#94A3B8">    system=<tspan fill="#FBBF24">"You are helpful"</tspan>,</text>
+  <text x="350" y="222" font-size="12" font-family="Menlo, monospace" fill="#60A5FA">    messages=[</text>
+  <text x="370" y="242" font-size="12" font-family="Menlo, monospace" fill="#E2E8F0">{<tspan fill="#F472B6">"role"</tspan>: <tspan fill="#FBBF24">"user"</tspan>,</text>
+  <text x="380" y="262" font-size="12" font-family="Menlo, monospace" fill="#E2E8F0"><tspan fill="#F472B6">"content"</tspan>: <tspan fill="#FBBF24">"Hi Claude"</tspan>}</text>
+  <text x="350" y="282" font-size="12" font-family="Menlo, monospace" fill="#60A5FA">    ],</text>
+  <text x="350" y="302" font-size="12" font-family="Menlo, monospace" fill="#94A3B8">    temperature=<tspan fill="#FBBF24">1.0</tspan>,</text>
+  <text x="330" y="322" font-size="12" font-family="Menlo, monospace" fill="#E2E8F0">)</text>
+
+  <!-- Annotations LEFT side -->
+  <rect x="30" y="138" width="240" height="36" rx="6" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+  <text x="40" y="154" font-size="11" font-weight="700" fill="#1E40AF">model（必填）</text>
+  <text x="40" y="168" font-size="10" fill="#1E293B">要呼叫哪個 Claude 版本</text>
+  <line x1="270" y1="156" x2="325" y2="158" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <rect x="30" y="182" width="240" height="36" rx="6" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+  <text x="40" y="198" font-size="11" font-weight="700" fill="#1E40AF">max_tokens（必填）</text>
+  <text x="40" y="212" font-size="10" fill="#1E293B">回應長度的硬上限</text>
+  <line x1="270" y1="200" x2="325" y2="178" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <rect x="30" y="226" width="240" height="36" rx="6" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4,2"/>
+  <text x="40" y="242" font-size="11" font-weight="700" fill="#475569">system（選填）</text>
+  <text x="40" y="256" font-size="10" fill="#1E293B">角色設定與規則（字串）</text>
+  <line x1="270" y1="244" x2="325" y2="198" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowGray)"/>
+
+  <rect x="30" y="270" width="240" height="36" rx="6" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+  <text x="40" y="286" font-size="11" font-weight="700" fill="#1E40AF">messages（必填）</text>
+  <text x="40" y="300" font-size="10" fill="#1E293B">由 {role, content} 組成的陣列</text>
+  <line x1="270" y1="288" x2="325" y2="238" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <rect x="30" y="314" width="240" height="36" rx="6" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4,2"/>
+  <text x="40" y="330" font-size="11" font-weight="700" fill="#475569">temperature（選填）</text>
+  <text x="40" y="344" font-size="10" fill="#1E293B">0.0 決定性 → 1.0 最有創意</text>
+  <line x1="270" y1="332" x2="325" y2="298" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowGray)"/>
+
+  <!-- Annotations RIGHT side -->
+  <rect x="720" y="220" width="260" height="36" rx="6" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+  <text x="730" y="236" font-size="11" font-weight="700" fill="#1E40AF">role</text>
+  <text x="730" y="250" font-size="10" fill="#1E293B">"user" 或 "assistant"</text>
+  <line x1="680" y1="238" x2="715" y2="238" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <rect x="720" y="265" width="260" height="36" rx="6" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+  <text x="730" y="281" font-size="11" font-weight="700" fill="#1E40AF">content</text>
+  <text x="730" y="295" font-size="10" fill="#1E293B">文字或內容區塊清單</text>
+  <line x1="680" y1="283" x2="715" y2="283" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <!-- Response block -->
+  <rect x="30" y="370" width="940" height="170" rx="10" fill="#F0FDF4" stroke="#22C55E" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="30" y="370" width="940" height="36" rx="10" fill="#22C55E"/>
+  <rect x="30" y="396" width="940" height="10" fill="#22C55E"/>
+  <text x="500" y="394" text-anchor="middle" font-size="14" font-weight="600" fill="white">Response 物件（Message）</text>
+
+  <rect x="50" y="420" width="215" height="105" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="60" y="440" font-size="11" font-weight="700" fill="#166534">content[0].text</text>
+  <text x="60" y="458" font-size="10" fill="#1E293B">助手的回覆內容</text>
+  <rect x="60" y="468" width="195" height="22" rx="4" fill="#0F172A"/>
+  <text x="157" y="483" text-anchor="middle" font-size="10" font-family="Menlo, monospace" fill="#34D399">"Hello! How can I help?"</text>
+  <text x="60" y="508" font-size="9" fill="#6B7280">型別：TextBlock | ToolUseBlock</text>
+
+  <rect x="275" y="420" width="215" height="105" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="285" y="440" font-size="11" font-weight="700" fill="#166534">usage.input_tokens</text>
+  <text x="285" y="458" font-size="10" fill="#1E293B">你送出的 token 數</text>
+  <text x="285" y="480" font-size="11" font-weight="700" fill="#166534">usage.output_tokens</text>
+  <text x="285" y="498" font-size="10" fill="#1E293B">Claude 產生的 token 數</text>
+  <text x="285" y="518" font-size="9" fill="#6B7280">用於計費與流量限制</text>
+
+  <rect x="500" y="420" width="215" height="105" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="510" y="440" font-size="11" font-weight="700" fill="#166534">stop_reason</text>
+  <text x="510" y="458" font-size="10" fill="#1E293B">生成停止的原因</text>
+  <text x="510" y="478" font-size="10" fill="#1E293B">• end_turn — 自然結束</text>
+  <text x="510" y="494" font-size="10" fill="#1E293B">• max_tokens — 達到上限</text>
+  <text x="510" y="510" font-size="10" fill="#1E293B">• tool_use — 想呼叫工具</text>
+
+  <rect x="725" y="420" width="225" height="105" rx="8" fill="white" stroke="#BBF7D0"/>
+  <text x="735" y="440" font-size="11" font-weight="700" fill="#166534">其他欄位</text>
+  <text x="735" y="458" font-size="10" fill="#1E293B">• id — 請求識別碼</text>
+  <text x="735" y="474" font-size="10" fill="#1E293B">• model — 實際使用的模型</text>
+  <text x="735" y="490" font-size="10" fill="#1E293B">• role — 固定為 "assistant"</text>
+  <text x="735" y="506" font-size="10" fill="#1E293B">• type — 固定為 "message"</text>
+  <text x="735" y="520" font-size="9" fill="#6B7280">用於記錄與稽核</text>
+
+  <!-- Legend -->
+  <rect x="30" y="555" width="940" height="32" rx="6" fill="#F1F5F9" stroke="#E2E8F0"/>
+  <rect x="50" y="565" width="14" height="14" rx="2" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
+  <text x="70" y="576" font-size="11" fill="#1E293B">必填</text>
+  <rect x="120" y="565" width="14" height="14" rx="2" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2" stroke-dasharray="3,2"/>
+  <text x="140" y="576" font-size="11" fill="#1E293B">選填</text>
+  <rect x="190" y="565" width="14" height="14" rx="2" fill="#F0FDF4" stroke="#22C55E" stroke-width="2"/>
+  <text x="210" y="576" font-size="11" fill="#1E293B">回應</text>
+  <text x="500" y="576" text-anchor="middle" font-size="11" fill="#6B7280">只有 model、max_tokens、messages 是嚴格必填 — 其餘都可依需求調整</text>
+</svg>

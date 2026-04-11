@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="PingFang TC, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#8B5CF6"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="600" fill="white"/>
+
+  <!-- Title -->
+  <text x="500" y="36" text-anchor="middle" font-size="20" font-weight="600" fill="#1E293B">system 提示 vs 使用者訊息</text>
+  <text x="500" y="58" text-anchor="middle" font-size="13" fill="#6B7280">system 設定一次角色與規則 — 使用者訊息則逐輪承載對話</text>
+
+  <!-- System Prompt box (left, purple, persistent) -->
+  <rect x="40" y="95" width="340" height="420" rx="12" fill="#FAF5FF" stroke="#8B5CF6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="40" y="95" width="340" height="46" rx="12" fill="#8B5CF6"/>
+  <rect x="40" y="129" width="340" height="12" fill="#8B5CF6"/>
+  <text x="210" y="125" text-anchor="middle" font-size="16" font-weight="600" fill="white">system 提示</text>
+
+  <rect x="85" y="155" width="250" height="26" rx="13" fill="#EDE9FE"/>
+  <text x="210" y="173" text-anchor="middle" font-size="11" font-weight="600" fill="#5B21B6">設定一次 — 每輪都持續生效</text>
+
+  <!-- Example system prompt text -->
+  <rect x="60" y="195" width="300" height="90" rx="8" fill="#0F172A"/>
+  <text x="72" y="215" font-size="10" font-family="Menlo, monospace" fill="#94A3B8">system=</text>
+  <text x="72" y="232" font-size="11" font-family="Menlo, monospace" fill="#C4B5FD">"You are a helpful</text>
+  <text x="72" y="248" font-size="11" font-family="Menlo, monospace" fill="#C4B5FD"> Python tutor.</text>
+  <text x="72" y="264" font-size="11" font-family="Menlo, monospace" fill="#C4B5FD"> Explain with code</text>
+  <text x="72" y="280" font-size="11" font-family="Menlo, monospace" fill="#C4B5FD"> examples."</text>
+
+  <!-- What it contains -->
+  <text x="60" y="312" font-size="11" font-weight="700" fill="#5B21B6">該放什麼</text>
+
+  <rect x="60" y="322" width="300" height="26" rx="4" fill="white" stroke="#DDD6FE"/>
+  <circle cx="75" cy="335" r="4" fill="#8B5CF6"/>
+  <text x="86" y="339" font-size="11" fill="#1E293B">角色與身份（Claude 是誰）</text>
+
+  <rect x="60" y="352" width="300" height="26" rx="4" fill="white" stroke="#DDD6FE"/>
+  <circle cx="75" cy="365" r="4" fill="#8B5CF6"/>
+  <text x="86" y="369" font-size="11" fill="#1E293B">規則與限制（不該做什麼）</text>
+
+  <rect x="60" y="382" width="300" height="26" rx="4" fill="white" stroke="#DDD6FE"/>
+  <circle cx="75" cy="395" r="4" fill="#8B5CF6"/>
+  <text x="86" y="399" font-size="11" fill="#1E293B">輸出格式偏好</text>
+
+  <rect x="60" y="412" width="300" height="26" rx="4" fill="white" stroke="#DDD6FE"/>
+  <circle cx="75" cy="425" r="4" fill="#8B5CF6"/>
+  <text x="86" y="429" font-size="11" fill="#1E293B">背景脈絡與語氣</text>
+
+  <rect x="60" y="442" width="300" height="26" rx="4" fill="white" stroke="#DDD6FE"/>
+  <circle cx="75" cy="455" r="4" fill="#8B5CF6"/>
+  <text x="86" y="459" font-size="11" fill="#1E293B">領域知識與範例</text>
+
+  <text x="210" y="492" text-anchor="middle" font-size="11" fill="#6B7280" font-style="italic">「我是誰 + 我怎麼回應」</text>
+
+  <!-- Arrows influence -->
+  <path d="M 388 215 Q 440 215 440 175 L 610 175" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
+  <path d="M 388 260 Q 460 260 460 270 L 610 270" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
+  <path d="M 388 310 Q 460 310 460 365 L 610 365" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
+
+  <text x="450" y="155" font-size="10" font-weight="600" fill="#5B21B6">影響</text>
+  <text x="450" y="250" font-size="10" font-weight="600" fill="#5B21B6">影響</text>
+  <text x="450" y="345" font-size="10" font-weight="600" fill="#5B21B6">影響</text>
+
+  <!-- User Messages box (right) -->
+  <rect x="610" y="95" width="350" height="420" rx="12" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="610" y="95" width="350" height="46" rx="12" fill="#3B82F6"/>
+  <rect x="610" y="129" width="350" height="12" fill="#3B82F6"/>
+  <text x="785" y="125" text-anchor="middle" font-size="16" font-weight="600" fill="white">messages[]</text>
+
+  <rect x="650" y="155" width="270" height="26" rx="13" fill="#DBEAFE"/>
+  <text x="785" y="173" text-anchor="middle" font-size="11" font-weight="600" fill="#1E40AF">逐輪加入 — 會隨時間成長</text>
+
+  <!-- Turn 1 -->
+  <rect x="630" y="195" width="310" height="48" rx="6" fill="white" stroke="#93C5FD"/>
+  <text x="640" y="212" font-size="9" font-weight="700" fill="#3B82F6">user →</text>
+  <text x="640" y="228" font-size="11" fill="#1E293B">「Python decorator 是什麼？」</text>
+  <text x="935" y="212" text-anchor="end" font-size="8" fill="#6B7280">turn 1</text>
+
+  <rect x="630" y="250" width="310" height="78" rx="6" fill="#F0FDF4" stroke="#86EFAC"/>
+  <text x="640" y="267" font-size="9" font-weight="700" fill="#22C55E">assistant ←</text>
+  <text x="640" y="283" font-size="11" fill="#1E293B">「好問題！decorator 是一個</text>
+  <text x="640" y="297" font-size="11" fill="#1E293B">用來包裝另一個函式的函式...</text>
+  <rect x="640" y="303" width="290" height="18" rx="3" fill="#0F172A"/>
+  <text x="648" y="316" font-size="9" font-family="Menlo, monospace" fill="#34D399">@my_decorator   def hello(): ...</text>
+
+  <!-- Turn 2 -->
+  <rect x="630" y="340" width="310" height="48" rx="6" fill="white" stroke="#93C5FD"/>
+  <text x="640" y="357" font-size="9" font-weight="700" fill="#3B82F6">user →</text>
+  <text x="640" y="373" font-size="11" fill="#1E293B">「給我一個實際使用案例」</text>
+  <text x="935" y="357" text-anchor="end" font-size="8" fill="#6B7280">turn 2</text>
+
+  <rect x="630" y="395" width="310" height="78" rx="6" fill="#F0FDF4" stroke="#86EFAC"/>
+  <text x="640" y="412" font-size="9" font-weight="700" fill="#22C55E">assistant ←</text>
+  <text x="640" y="428" font-size="11" fill="#1E293B">「這是一個計時 decorator，</text>
+  <text x="640" y="442" font-size="11" fill="#1E293B">附上程式碼範例...」</text>
+  <text x="640" y="462" font-size="9" fill="#6B7280" font-style="italic">（依然是家教語氣、依然用程式碼解釋 — 因為 system 這麼說）</text>
+
+  <text x="785" y="495" text-anchor="middle" font-size="11" fill="#6B7280" font-style="italic">「我現在想要什麼」</text>
+
+  <!-- Bottom key insight -->
+  <rect x="60" y="530" width="880" height="56" rx="10" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2"/>
+  <circle cx="90" cy="558" r="14" fill="#F59E0B"/>
+  <text x="90" y="564" text-anchor="middle" font-size="14" font-weight="700" fill="white">i</text>
+  <text x="115" y="552" font-size="13" font-weight="700" fill="#92400E">關鍵觀念：system 提示跨越所有輪次持續生效；使用者訊息只屬於當前這一輪。</text>
+  <text x="115" y="572" font-size="11" fill="#78350F">如果 Claude 在對話中途「跑偏」了，請編輯 system 提示 — 不要改最後一則使用者訊息。</text>
+</svg>

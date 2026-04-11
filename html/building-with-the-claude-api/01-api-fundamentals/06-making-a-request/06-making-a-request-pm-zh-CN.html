@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Making A Request Pm Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Making a Request — PM Perspective（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（model selection）、5.3（production patterns）、1.2（agentic loop 基础）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 06</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>单次 Claude 请求是任何 AI feature 最小的产品价值单位——三个参数决定 feature 的质量、成本、失败模式。所以 PM 要像 review UI 文案那样 review <code>model</code>、<code>max_tokens</code>、<code>messages</code>。</p>
+<hr />
+<h2>Mental Model：自动售货机交易</h2>
+<p>把 <code>client.messages.create()</code> 想成自动售货机：</p>
+<table>
+<thead>
+<tr>
+<th>自动售货机</th>
+<th>Claude 请求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>选机器（咖啡 vs 汽水）</td>
+<td>选 <code>model</code>（Sonnet、Haiku、Opus）</td>
+</tr>
+<tr>
+<td>投正确的钱</td>
+<td>提供 API key</td>
+</tr>
+<tr>
+<td>按按钮（哪个商品）</td>
+<td>发 <code>messages</code>（prompt）</td>
+</tr>
+<tr>
+<td>机器吐出最多一份商品</td>
+<td>Claude 回最多 <code>max_tokens</code> 的内容</td>
+</tr>
+<tr>
+<td>收据含价格</td>
+<td><code>response.usage</code> 含 input/output token 数</td>
+</tr>
+</tbody>
+</table>
+<p>你产品里每个 feature 都是几千次这种交易组成的系统。质量、成本、延迟都是三个参数选择的涌现结果。</p>
+<hr />
+<h2>三个参数就是产品决策</h2>
+<h3>Model</h3>
+<p>选 model 是伪装成技术决策的产品决策。它在速度、能力、成本之间权衡。</p>
+<table>
+<thead>
+<tr>
+<th>Model 档次</th>
+<th>适合</th>
+<th>PM 考量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sonnet（平衡）</td>
+<td>大多数 feature 的 default</td>
+<td>好基准，从这里开始</td>
+</tr>
+<tr>
+<td>Haiku（快、便宜）</td>
+<td>摘要、分类、高量</td>
+<td>每次调用便宜，难题可能错过细节</td>
+</tr>
+<tr>
+<td>Opus（最强）</td>
+<td>推理重的 feature、复杂草稿</td>
+<td>每次调用贵，留给高价值流程</td>
+</tr>
+</tbody>
+</table>
+<p>注：课程里的 model 名称是示例；实际使用时永远跟工程师确认当前 model（例如 <code>claude-sonnet-4-5</code>）。</p>
+<h3><code>max_tokens</code></h3>
+<p>这是你每次调用的成本上限。对 <code>max_tokens</code> 没意见的 PM 等于让工程师默默决定 feature 质量。</p>
+<table>
+<thead>
+<tr>
+<th>Feature 类型</th>
+<th>建议 max_tokens</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>聊天回复</td>
+<td>500–1000</td>
+<td>短回复，留空间给细节</td>
+</tr>
+<tr>
+<td>文档摘要</td>
+<td>1000–2000</td>
+<td>有界但需要喘息空间</td>
+</tr>
+<tr>
+<td>长篇草稿（email、blog）</td>
+<td>2000–4000</td>
+<td>除非要快，否则值得花钱</td>
+</tr>
+<tr>
+<td>分类 / 路由</td>
+<td>50–100</td>
+<td>单 token 答案，浪费 token = 浪费钱</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键澄清</strong>：<code>max_tokens</code> 是上限，不是目标。想要更长的输出，要在 prompt 里要求，不是把上限调高。</p>
+<h3><code>messages</code></h3>
+<p>Messages list 是你的"对话状态"。单轮 feature（问答、摘要）只有一个 entry。多轮 feature（chat、agent）会增长。Lesson 07 会细讲多轮。</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>单次请求就够的时候</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>为什么单轮就够</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"帮我摘要这份文档"</td>
+<td>一问一答</td>
+</tr>
+<tr>
+<td>"翻译这段文字"</td>
+<td>无状态转换</td>
+</tr>
+<tr>
+<td>"分类这张 ticket"</td>
+<td>路由决策，没有后续</td>
+</tr>
+<tr>
+<td>"把这封信改成更友善的语气"</td>
+<td>发射后不管的转换</td>
+</tr>
+</tbody>
+</table>
+<h3>需要不止一次调用的时候</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>为什么单轮不够</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>带历史的聊天</td>
+<td>需要 <code>messages</code> 随时间增长（Lesson 07）</td>
+</tr>
+<tr>
+<td>使用 tool 的 agent</td>
+<td>需要依 <code>stop_reason</code> 分支的 loop（Lesson 32+）</td>
+</tr>
+<tr>
+<td>Streaming 输出</td>
+<td>同一个调用加 <code>stream=True</code> flag</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework：Pre-Launch 问卷</h2>
+<p>Claude feature 出货前，PRD 要回答这些问题：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>要调用哪个 model？</td>
+<td>没特别原因就 Sonnet 起步</td>
+</tr>
+<tr>
+<td><code>max_tokens</code> 设多少？</td>
+<td>合理回复最长长度 × 1.5</td>
+</tr>
+<tr>
+<td>单轮还是多轮？</td>
+<td>默认单轮，除非用户要追问</td>
+</tr>
+<tr>
+<td>典型一次调用多少钱？</td>
+<td>计算：（平均 input + output token）× 价格</td>
+</tr>
+<tr>
+<td>调用中给用户看什么？</td>
+<td>Loading state、streaming、optimistic UI</td>
+</tr>
+<tr>
+<td><code>stop_reason == "max_tokens"</code> 怎么办？</td>
+<td>定义截断 UX</td>
+</tr>
+<tr>
+<td>怎么测 prompt 质量？</td>
+<td>Eval harness 或人工 review loop</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>成本经济学白话版</h2>
+<p>每次调用有两个成本部分：</p>
+<ul>
+<li><strong>Input tokens</strong> —— 你发出去的所有东西长度（system prompt + messages）</li>
+<li><strong>Output tokens</strong> —— Claude 回复的长度</li>
+</ul>
+<p>你按方向按百万 token 付费。PM 的启示：</p>
+<table>
+<thead>
+<tr>
+<th>杠杆</th>
+<th>对成本的影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>较短的 prompt</td>
+<td>线性便宜 input</td>
+</tr>
+<tr>
+<td>较紧的 <code>max_tokens</code></td>
+<td>盖住最坏情况 output 成本</td>
+</tr>
+<tr>
+<td>较小的 model</td>
+<td>显著便宜但可能降质量</td>
+</tr>
+<tr>
+<td>把多个问题 batch 成一次调用</td>
+<td>省每调用 overhead 但失败会绑一起</td>
+</tr>
+<tr>
+<td>用 tool use 取代巨大 context window</td>
+<td>每调用 input token 变少（Lesson 32+）</td>
+</tr>
+</tbody>
+</table>
+<p>经验法则：多数 feature 的账单被 input token 主宰，因为你一直重发 context。Lesson 07（多轮）会让这个效应戏剧化。</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>对 <code>max_tokens</code> 没意见</strong> —— 让工程师默默决定 feature 质量上限，而你不知道被盖住了。</li>
+<li><strong>以为 model 越大越好</strong> —— 分类和路由 Haiku 比 Sonnet 在成本上完胜，而且用户察觉不到差别。</li>
+<li><strong>PRD 跳过 prompt 迭代</strong> —— Prompt 是产品文案，应该跟 UI 文字一样 review。</li>
+<li><strong>没排 prompt eval infra 的预算</strong> —— 没办法量质量就没办法安全做 A/B。</li>
+<li><strong>以为单轮永远比较便宜</strong> —— 长期 chat 如果硬做单轮，重发 context 比多轮更浪费 token。</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p><code>messages.create()</code> 三个参数不是技术冷知识——它们是任何 Claude feature 的三大产品决策：能力（model）、成本上限（max_tokens）、对话设计（messages）。PRD 里三个都明确签核的 PM，feature 会命中成本与质量目标。三个都丢给工程师的 PM，feature 会默默 miss 目标然后被怪"AI 不行"。</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5（Enterprise Deployment）</strong>：情境题问 model selection、<code>max_tokens</code> 大小、成本权衡。</li>
+<li><strong>D1（Agentic Architecture）</strong>：每个 agent 都是在这个单一调用上跑 loop；熟悉原子单位是前置。</li>
+<li>情境触发："AI feature 太慢/太贵/太短"→ 答案通常都住在三个参数其中一个。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>messages.create()</code> 三个跟产品有关的参数是什么？</td>
+<td><code>model</code>（能力）、<code>max_tokens</code>（成本上限）、<code>messages</code>（对话设计）</td>
+</tr>
+<tr>
+<td><code>max_tokens</code> 是设目标还是上限？</td>
+<td>上限——想要更长的输出要在 prompt 里要求，不是调高上限</td>
+</tr>
+<tr>
+<td>为什么 PM 该对 model 选择有意见？</td>
+<td>它在成本、速度、能力之间权衡；没 PM 介入工程师会默认一个</td>
+</tr>
+<tr>
+<td>什么时候该用较小的 model（Haiku）？</td>
+<td>分类、路由、高量摘要——用户察觉不到差别的地方</td>
+</tr>
+<tr>
+<td>每次调用的两个成本部分是什么？</td>
+<td>Input tokens（发出去）与 output tokens（Claude 写的）</td>
+</tr>
+<tr>
+<td>Claude 调用符合什么自动售货机比喻？</td>
+<td>选机器（model）、投币（API key）、按钮（messages）、拿商品上限一份（max_tokens）、收据（usage）</td>
+</tr>
+<tr>
+<td>为什么 prompt 质量是 PM 的事？</td>
+<td>Prompt 是产品文案，决定输出质量，值得 PRD 级别的关注</td>
+</tr>
+<tr>
+<td>A/B 测 prompt 前需要什么？</td>
+<td>Prompt 评估 infra 来量质量变化</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

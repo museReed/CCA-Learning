@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Prompts Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>System Prompts — PM 視角</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D5 — Enterprise Deployment (20%) 主要；D1 — Agentic Architecture (22%) 次要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（模型選擇與設定）、5.3（production 模式）、1.2（agentic loop 基礎）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 09</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話總結</h2>
+<p>System prompt 是你在每段對話開始時交給 Claude 的「職位說明」——它把泛用 AI 變成你產品的專屬 persona，是 PM 對輸出品質與品牌一致性最有槓桿的單一控制點。</p>
+<hr />
+<h2>為什麼 PM 要在乎</h2>
+<p>沒有 system prompt，你產品裡的每個使用者都在跟同一個通用 Claude 對話——任何人在 Claude.ai 都拿得到。這不是產品，這是一層薄薄的 wrapper。System prompt 才是你差異化的所在。</p>
+<table>
+<thead>
+<tr>
+<th>沒有 system prompt</th>
+<th>有精心設計的 system prompt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>泛用、有幫助但不具體的回應</td>
+<td>品牌語氣、一致的 tone</td>
+</tr>
+<tr>
+<td>直接給答案，跳過使用者旅程</td>
+<td>圍繞使用者目標設計的體驗</td>
+</tr>
+<tr>
+<td>跟其他 Claude 整合行為一模一樣</td>
+<td>差異化的產品行為</td>
+</tr>
+<tr>
+<td>沒有 guardrails——無關問題照答</td>
+<td>有範圍限制、優雅拒絕</td>
+</tr>
+<tr>
+<td>格式不可預測</td>
+<td>可靠、可解析的結構</td>
+</tr>
+</tbody>
+</table>
+<p>數學家教的例子很說明問題。沒有引導的話，Claude 對「5x + 2 = 3」會直接給答案。真正的家教產品不要這樣——它要的是<strong>教學體驗</strong>，不是答案。System prompt 就是你編碼「這是家教，不是計算機」的地方。</p>
+<hr />
+<h2>心智模型：新人 Onboarding 簡報</h2>
+<p>想像你聘了一位世界級顧問。他很聰明，但第一天對你公司、客戶、品牌語氣一無所知。你會怎麼做？你會給他一份 onboarding 簡報：</p>
+<ul>
+<li>「你是一家企業 SaaS 公司的 lead customer success manager」</li>
+<li>「我們的 tone 是友善但專業——絕不用 emoji，永遠用客戶名字署名」</li>
+<li>「絕不承諾無法驗證的時程」</li>
+<li>「這是我們最強 CSM 寫的三封範例信——照這個風格」</li>
+</ul>
+<p>那份簡報就是 system prompt。Claude 收到的每個使用者查詢都是一封新的客戶信——簡報形塑每封回覆的樣子。</p>
+<hr />
+<h2>產品使用情境</h2>
+<h3>什麼時候 System Prompt 是關鍵</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>為什麼 system prompt 重要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>客服 chatbot</td>
+<td>品牌語氣、升級規則、知識邊界</td>
+</tr>
+<tr>
+<td>數學 / 語言家教</td>
+<td>教學立場（引導而非直接解答）</td>
+</tr>
+<tr>
+<td>法律 / 醫療助理</td>
+<td>硬 guardrails、免責聲明、範圍限制</td>
+</tr>
+<tr>
+<td>Code review 工具</td>
+<td>技術 persona、嚴重度標準、輸出 schema</td>
+</tr>
+<tr>
+<td>內部 HR bot</td>
+<td>以公司政策為真相來源、隱私規則</td>
+</tr>
+</tbody>
+</table>
+<h3>什麼時候 System Prompt 沒那麼重要</h3>
+<table>
+<thead>
+<tr>
+<th>情境</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通用 ChatGPT 式 playground</td>
+<td>使用者預期看到原味 assistant 行為</td>
+</tr>
+<tr>
+<td>一次性研究查詢</td>
+<td>沒有可重複的 workflow 要編碼</td>
+</tr>
+<tr>
+<td>PMF 前的原型</td>
+<td>迭代速度勝過 persona 打磨</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>每個 Production System Prompt 都需要的五件事</h2>
+<ol>
+<li><strong>身份</strong>——「You are ...」Claude 要扮演誰？</li>
+<li><strong>任務範圍</strong>——什麼在範圍內？什麼在範圍外？</li>
+<li><strong>語氣 &amp; 格式</strong>——Tone、長度、結構、是否用 markdown</li>
+<li><strong>Guardrails</strong>——安全、隱私、法律、品牌的硬規則</li>
+<li><strong>範例</strong>——一兩個黃金標準輸出，錨定風格</li>
+</ol>
+<p>如果你的 system prompt 缺了這五個其中任何一個，就有一個品質 bug 在等著發生。</p>
+<hr />
+<h2>PM 決策框架</h2>
+<p>在規劃新的 AI 功能時，問這些問題：</p>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>如果答 Yes</th>
+<th>意涵</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>這個功能有特定 persona 或 role 嗎？</td>
+<td>Yes</td>
+<td>System prompt——明確定義</td>
+</tr>
+<tr>
+<td>有 Claude 該拒絕的主題嗎？</td>
+<td>Yes</td>
+<td>System prompt——編碼拒絕規則</td>
+</tr>
+<tr>
+<td>有必須的輸出格式（JSON、markdown、條列）嗎？</td>
+<td>Yes</td>
+<td>System prompt——指定結構</td>
+</tr>
+<tr>
+<td>需要品牌語氣一致性嗎？</td>
+<td>Yes</td>
+<td>System prompt——鎖定 tone</td>
+</tr>
+<tr>
+<td>多輪對話中行為要保持穩定嗎？</td>
+<td>Yes</td>
+<td>System prompt——持續性 context</td>
+</tr>
+<tr>
+<td>Context 每個使用者 / 每個查詢都不同嗎？</td>
+<td>Yes</td>
+<td><strong>不是</strong> system prompt——放在 <code>messages</code></td>
+</tr>
+</tbody>
+</table>
+<p>最後一列是大多數 PM 會踩的陷阱：把每位使用者的資料塞進 system prompt，因為「指令應該放那」。動態 context 屬於 <code>messages</code>，不是 <code>system</code>——否則你會破壞 prompt caching 並浪費錢。</p>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>把 system prompt 當作一次性產出</strong>——它是產品。版本化、A/B 測試、量化回歸。品質下降時，第一個要看的就是 system prompt</li>
+<li><strong>寫模糊的指令</strong>——「要有幫助又友善」沒用。「永遠用三個條列回覆、總字數不超過 40 字、絕不用驚嘆號」才可執行</li>
+<li><strong>把動態資料塞進 system prompt</strong>——每位使用者的 context 要放 messages，caching 才能生效</li>
+<li><strong>沒在 PRD 指定 system prompt</strong>——工程師會寫一個預設的，而且一定跟你想像的不一樣。把 system prompt 列為驗收標準</li>
+<li><strong>把使用者請求複製進「system message」</strong>——system prompt 是環境規則，不是當前任務。混了就不可預測</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>System prompt 是你唯一能確保 Claude 表現得像<em>你的</em>產品，而不是通用 assistant 的地方。它是 PM 在 AI 功能上能擁有的最高槓桿製品——槓桿比 model 選擇、temperature、甚至 tool 選擇都還大。如果你把它外包給沒有產品 context 的工程師寫，你的功能就會感覺像 Claude 的 wrapper，而不是產品。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試重點</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong>：system prompt 是在企業部署中強制行為一致性的標準 production 機制</li>
+<li><strong>D1 (Agentic Architecture)</strong>：system prompt 是每個 agent 穩定的身份層，貫穿 tool-use loops</li>
+<li>注意「如何強制品牌語氣 / 拒絕規則 / 輸出格式？」這種情境——考試答案一定是 system prompt，不是逐條 message engineering</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>題目</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>System prompt 的 PM 級定義是什麼？</td>
+<td>你交給 Claude 的「職位說明」或 onboarding 簡報——定義整段對話的 persona、範圍、語氣、guardrails</td>
+</tr>
+<tr>
+<td>Production system prompt 的五個核心元素？</td>
+<td>身份、任務範圍、語氣 &amp; 格式、guardrails、範例</td>
+</tr>
+<tr>
+<td>為什麼每位使用者的資料不該放 system prompt？</td>
+<td>因為 system prompt 應該穩定且可 cache；每位使用者的資料要放 <code>messages</code>，caching 才有效且 context 可隨 turn 演化</td>
+</tr>
+<tr>
+<td>沒寫 system prompt 最大的產品風險是什麼？</td>
+<td>你的功能會變成通用 Claude 的薄 wrapper——沒有差異化、語氣不一致、沒有 guardrails</td>
+</tr>
+<tr>
+<td>在數學家教產品中，system prompt 防止什麼？</td>
+<td>防止 Claude 直接給答案，強制逐步 Socratic 引導</td>
+</tr>
+<tr>
+<td>「要有幫助」該放進 system prompt 嗎？</td>
+<td>不該——它模糊且沒有實際約束。具體、可測試的規則（「永遠最多三個條列」）才是能提升品質的</td>
+</tr>
+<tr>
+<td>團隊裡誰該擁有 system prompt？</td>
+<td>PM——它編碼的是產品意圖。工程師實作；PM 定義契約、版本化、A/B 測試</td>
+</tr>
+<tr>
+<td>System prompt 設計最直接對應 CCA 哪個 domain？</td>
+<td>D5 Enterprise Deployment——它是在規模下強制 production 級一致性的方式</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

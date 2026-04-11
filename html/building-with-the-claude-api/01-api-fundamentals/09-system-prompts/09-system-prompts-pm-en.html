@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Prompts Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>System Prompts — PM Perspective</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) — primary; D1 — Agentic Architecture (22%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (model selection &amp; configuration), 5.3 (production patterns), 1.2 (agentic loop foundation)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 09</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>A system prompt is the "job description" you hand Claude at the start of every conversation — it turns a generic AI into your product's specific persona, and it is the single biggest lever PMs have over output quality and on-brand behavior.</p>
+<hr />
+<h2>Why PMs Should Care</h2>
+<p>Without a system prompt, every user of your product talks to the same generic, vanilla Claude that anyone else can get from the consumer Claude.ai app. That is not a product — that is a thin wrapper. The system prompt is where your differentiation lives.</p>
+<table>
+<thead>
+<tr>
+<th>Without system prompt</th>
+<th>With a well-crafted system prompt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generic, helpful-but-unspecific replies</td>
+<td>On-brand voice, consistent tone</td>
+</tr>
+<tr>
+<td>Direct answers that skip the user journey</td>
+<td>Experience designed around your user's goal</td>
+</tr>
+<tr>
+<td>Same behavior as every other Claude integration</td>
+<td>Differentiated product behavior</td>
+</tr>
+<tr>
+<td>No guardrails — off-topic questions answered</td>
+<td>Bounded scope, graceful refusals</td>
+</tr>
+<tr>
+<td>Unpredictable formatting</td>
+<td>Reliable, parseable structure</td>
+</tr>
+</tbody>
+</table>
+<p>The math tutor example is instructive. Without guidance, Claude answers "5x + 2 = 3" by giving the solution. A real tutoring product doesn't want that — it wants the <strong>pedagogical experience</strong>, not the answer. The system prompt is how you encode "this is a tutor, not a calculator."</p>
+<hr />
+<h2>Mental Model: The Onboarding Briefing</h2>
+<p>Imagine you hire a world-class consultant. They are brilliant, but on day one they know nothing about your company, your customers, or your brand voice. What do you do? You give them an onboarding briefing:</p>
+<ul>
+<li>"You are the lead customer success manager for an enterprise SaaS company."</li>
+<li>"Our tone is friendly but professional — never use emojis, always sign off with the customer's name."</li>
+<li>"Never promise timelines you cannot verify."</li>
+<li>"Here are three example emails from our best CSM — match this style."</li>
+</ul>
+<p>That briefing is the system prompt. Every user query Claude receives is a new customer email — the briefing shapes how every reply lands.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<h3>When System Prompts Are Critical</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why the system prompt matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Customer support chatbot</td>
+<td>Brand voice, escalation rules, knowledge boundaries</td>
+</tr>
+<tr>
+<td>Math / language tutor</td>
+<td>Pedagogical stance (guide, don't solve)</td>
+</tr>
+<tr>
+<td>Legal / medical assistant</td>
+<td>Hard guardrails, disclaimers, scope limits</td>
+</tr>
+<tr>
+<td>Code review tool</td>
+<td>Technical persona, severity rubric, output schema</td>
+</tr>
+<tr>
+<td>Internal HR bot</td>
+<td>Company policy as source of truth, privacy rules</td>
+</tr>
+</tbody>
+</table>
+<h3>When System Prompts Are Less Important</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generic ChatGPT-style playground</td>
+<td>Users expect vanilla assistant behavior</td>
+</tr>
+<tr>
+<td>One-off research query</td>
+<td>No repeatable workflow to encode</td>
+</tr>
+<tr>
+<td>Prototype before product-market fit</td>
+<td>Iteration speed beats persona polish</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Five Things Every Production System Prompt Needs</h2>
+<ol>
+<li><strong>Identity</strong> — "You are ..." Who is Claude pretending to be?</li>
+<li><strong>Task scope</strong> — What is in scope? What is out of scope?</li>
+<li><strong>Voice &amp; format</strong> — Tone, length, structure, whether to use markdown.</li>
+<li><strong>Guardrails</strong> — Hard rules for safety, privacy, legal, brand.</li>
+<li><strong>Examples</strong> — One or two gold-standard outputs to anchor style.</li>
+</ol>
+<p>If your system prompt is missing any of these five, you have a quality bug waiting to happen.</p>
+<hr />
+<h2>PM Decision Framework</h2>
+<p>When specifying a new AI feature, ask these questions:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>If "Yes"</th>
+<th>Implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Does the feature have a specific persona or role?</td>
+<td>Yes</td>
+<td>System prompt — define it explicitly</td>
+</tr>
+<tr>
+<td>Are there topics Claude should refuse?</td>
+<td>Yes</td>
+<td>System prompt — encode refusal rules</td>
+</tr>
+<tr>
+<td>Is there a required output format (JSON, markdown, bullets)?</td>
+<td>Yes</td>
+<td>System prompt — specify the structure</td>
+</tr>
+<tr>
+<td>Do we need brand voice consistency?</td>
+<td>Yes</td>
+<td>System prompt — lock the tone</td>
+</tr>
+<tr>
+<td>Should behavior stay stable across multi-turn conversations?</td>
+<td>Yes</td>
+<td>System prompt — persistent context</td>
+</tr>
+<tr>
+<td>Is context unique per user / per query?</td>
+<td>Yes</td>
+<td><strong>Not</strong> system prompt — put in <code>messages</code></td>
+</tr>
+</tbody>
+</table>
+<p>The last row is the trap most PMs fall into: shoving per-user data into the system prompt because "that's where instructions go." Dynamic context belongs in <code>messages</code>, not <code>system</code> — otherwise you break prompt caching and waste money.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Treating system prompts as one-and-done</strong> — they are products. Version them, A/B test them, measure regressions. When quality degrades, the system prompt is where you look first.</li>
+<li><strong>Writing vague instructions</strong> — "Be helpful and friendly" is useless. "Always respond in three bullets, never more than 40 words total, never use exclamation marks" is actionable.</li>
+<li><strong>Stuffing dynamic data into the system prompt</strong> — per-user context belongs in messages so caching works.</li>
+<li><strong>Not specifying the system prompt in the PRD</strong> — engineers will write a default one, and it will not match your vision. Include the system prompt as an acceptance criterion.</li>
+<li><strong>Copying the user's request into a "system message"</strong> — system prompts are ambient rules, not the current task. If you mix them up, behavior becomes unpredictable.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>The system prompt is the only place where you can guarantee Claude behaves like <em>your</em> product instead of a generic assistant. It is the highest-leverage artifact a PM can own in an AI feature — more leverage than model choice, temperature, or even tool selection. If you outsource writing it to an engineer with no product context, your feature will feel like a wrapper around Claude, not a product.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong>: system prompts are the canonical production mechanism for enforcing consistent behavior across an enterprise deployment.</li>
+<li><strong>D1 (Agentic Architecture)</strong>: the system prompt is the stable identity layer of every agent, persisting across tool-use loops.</li>
+<li>Watch for scenarios phrased as "How do you enforce brand voice / refusal rules / output format?" — the answer on the exam is always system prompt, not per-message engineering.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is the PM-level definition of a system prompt?</td>
+<td>The "job description" or onboarding briefing you give Claude — it defines persona, scope, voice, and guardrails for an entire conversation.</td>
+</tr>
+<tr>
+<td>What are the five essential elements of a production system prompt?</td>
+<td>Identity, task scope, voice &amp; format, guardrails, examples.</td>
+</tr>
+<tr>
+<td>Why shouldn't per-user data go in the system prompt?</td>
+<td>Because the system prompt should be stable and cacheable; per-user data belongs in <code>messages</code> so prompt caching works and context can evolve per turn.</td>
+</tr>
+<tr>
+<td>What is the biggest product risk of not writing a system prompt?</td>
+<td>Your feature becomes a thin wrapper around generic Claude — no differentiation, inconsistent voice, no guardrails.</td>
+</tr>
+<tr>
+<td>In a math tutor product, what does the system prompt prevent?</td>
+<td>It prevents Claude from giving direct answers and enforces step-by-step Socratic guidance.</td>
+</tr>
+<tr>
+<td>Should "Be helpful" be part of a system prompt?</td>
+<td>No — it is vague and provides no real constraint. Specific, testable rules ("Always respond in 3 bullets max") are what move quality.</td>
+</tr>
+<tr>
+<td>Who in the team should own the system prompt?</td>
+<td>PM — it encodes product intent. Engineers implement; PM defines the contract, versions it, and A/B tests it.</td>
+</tr>
+<tr>
+<td>What CCA domain does system-prompt design map to most directly?</td>
+<td>D5 Enterprise Deployment — it is how you enforce production-grade consistency at scale.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
