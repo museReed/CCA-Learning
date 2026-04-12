@@ -144,7 +144,7 @@ CCA 考試涵蓋五大領域：
 | Ch08 Agents & Workflows | Agent 架構模式 |
 | Ch09 Assessment | 綜合評量 |
 
-⚠️ 此課程尚未產出學習筆記，目前僅有原始文字稿與截圖。
+✅ 學習筆記已完成（68 課 × 6 版本 = 408 筆記 + 84 SVG 圖表）
 
 ---
 
@@ -219,11 +219,8 @@ open html/index.html
 # 1. 安裝 markdown 套件
 pip3 install markdown
 
-# 2. 建置 HTML
-python3 scripts/build_html_multi.py
-
-# 3. 重建首頁
-python3 scripts/rebuild_index_multi.py
+# 2. 建置 HTML（含所有 4 門課程）
+python3 scripts/build_html.py
 ```
 
 ---
@@ -244,15 +241,16 @@ CCA-Learning/
 │   │   └── ...
 │   ├── introduction-to-model-context-protocol/  ✅ 4 章 10 課（60 筆記 + 10 SVG）
 │   ├── model-context-protocol-advanced-topics/  ✅ 3 章 8 課（48 筆記 + 12 SVG）
-│   ├── building-with-the-claude-api/            📝 9 章 87 課（原始教材，待產筆記）
+│   ├── building-with-the-claude-api/            ✅ 9 章 68 課（408 筆記 + 84 SVG）
 │   ├── claude-101/                              ⏭️ 單堂入門（可跳過）
 │   ├── introduction-to-agent-skills/            ⏭️ 單堂簡介（可跳過）
 │   └── introduction-to-subagents/               ⏭️ 單堂簡介（可跳過）
-└── html/                                        🌐 預建 HTML（222 頁）
+└── html/                                        🌐 預建 HTML（636 頁）
     ├── index.html                               ← 學習入口首頁
     ├── claude-code-in-action/
     ├── introduction-to-model-context-protocol/
-    └── model-context-protocol-advanced-topics/
+    ├── model-context-protocol-advanced-topics/
+    └── building-with-the-claude-api/
 ```
 
 ---
@@ -261,10 +259,11 @@ CCA-Learning/
 
 | 項目 | 數量 |
 |------|------|
-| 課程 | 7 門（4 門已產筆記） |
-| 學習筆記 | 222 份 |
-| SVG 圖表 | 112 個（56 EN + 56 zh-TW） |
-| HTML 頁面 | 222 頁 |
+| 課程 | 7 門（4 門已產筆記，3 門可跳過） |
+| 已完成課堂 | 106 堂（19 + 10 + 8 + 68 + 1 supplementary） |
+| 學習筆記 | 636 份（106 課 × 6 版本） |
+| SVG 圖表 | 196 個（98 EN + 98 zh-TW） |
+| HTML 頁面 | 636 頁 |
 | 原始課堂文字稿 | 240 份 |
 | 英文字幕 | 134 個 .srt |
 | 影片截圖 | 393 張 |
@@ -279,4 +278,4 @@ CCA-Learning/
 
 ---
 
-*Last updated: 2026-04-08*
+*Last updated: 2026-04-12*
