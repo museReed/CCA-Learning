@@ -397,8 +397,60 @@ def build_index():
     return total_notes, total_lessons, total_chapters
 
 
+def sync_delete():
+    """Remove stale HTML files whose source .md no longer exists."""
+    # Build set of expected html paths (relative to HTML dir)
+    expected = set()
+    for course in COURSE_ORDER:
+        for md_path in scan_course(course):
+            rel = md_path.relative_to(COURSES)
+            parts = list(rel.parts)
+            try:
+                idx = parts.index("study-notes")
+                parts = parts[:idx] + parts[idx + 2:]
+            except ValueError:
+                pass
+            expected.add(Path(*parts).with_suffix(".html"))
+
+    # Walk html/ and find .html files (skip index.html)
+    removed = 0
+    for html_path in sorted(HTML.rglob("*.html")):
+        if html_path.name == "index.html":
+            continue
+        rel = html_path.relative_to(HTML)
+        if rel not in expected:
+            html_path.unlink()
+            removed += 1
+
+    # Remove empty visuals dirs that have no matching lesson source
+    for vis_dir in sorted(HTML.rglob("visuals"), reverse=True):
+        if vis_dir.is_dir():
+            # Check if the corresponding source visuals dir still exists
+            rel = vis_dir.relative_to(HTML)
+            src_vis = COURSES / rel
+            if not src_vis.is_dir():
+                shutil.rmtree(vis_dir)
+                removed += 1
+            else:
+                # Remove individual stale visual files
+                for f in vis_dir.iterdir():
+                    if f.is_file() and not (src_vis / f.name).exists():
+                        f.unlink()
+                        removed += 1
+
+    # Remove empty directories left behind
+    for dirpath in sorted(HTML.rglob("*"), reverse=True):
+        if dirpath.is_dir() and not any(dirpath.iterdir()):
+            dirpath.rmdir()
+
+    return removed
+
+
 if __name__ == "__main__":
     n = build_all_pages()
     print(f"Built {n} HTML pages")
+    removed = sync_delete()
+    if removed:
+        print(f"Removed {removed} stale files/dirs")
     notes, lessons, chapters = build_index()
     print(f"Index: {chapters} chapters, {lessons} lessons, {notes} notes")
