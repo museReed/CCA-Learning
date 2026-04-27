@@ -1,0 +1,297 @@
+{
+  "srt_file": "Introducing_hooks_3uGhMBFx.srt",
+  "video_file": "Introducing_hooks_3uGhMBFx.mp4",
+  "max_valid_entry": 58,
+  "entries": {
+    "1": {
+      "en": "In this video, we're going to take a look at hooks.",
+      "zh_tw": "在這個影片中，我們來看看 hooks。",
+      "zh_cn": "在这个视频中，我们来看看 hooks。"
+    },
+    "2": {
+      "en": "These allow you to run commands before or after Claude attempts to run a tool.",
+      "zh_tw": "它們讓你可以在 Claude 嘗試執行工具之前或之後執行命令。",
+      "zh_cn": "它们让你可以在 Claude 尝试执行工具之前或之后执行命令。"
+    },
+    "3": {
+      "en": "Hooks can be used to implement really interesting and very useful functionality.",
+      "zh_tw": "Hooks 可以用來實現非常有趣且實用的功能。",
+      "zh_cn": "Hooks 可以用来实现非常有趣且实用的功能。"
+    },
+    "4": {
+      "en": "For example, after Claude decides to write a file, you can automatically run a code formatter",
+      "zh_tw": "例如，在 Claude 決定寫入檔案後，你可以自動執行程式碼格式化工具",
+      "zh_cn": "例如，在 Claude 决定写入文件后，你可以自动执行代码格式化工具"
+    },
+    "5": {
+      "en": "on the created file.",
+      "zh_tw": "對剛建立的檔案進行格式化。",
+      "zh_cn": "对刚创建的文件进行格式化。"
+    },
+    "6": {
+      "en": "Or you can run tests after a file is edited.",
+      "zh_tw": "或者你可以在檔案被編輯後執行測試。",
+      "zh_cn": "或者你可以在文件被编辑后执行测试。"
+    },
+    "7": {
+      "en": "Or you can block Claude from reading particular files.",
+      "zh_tw": "或者你可以阻止 Claude 讀取特定檔案。",
+      "zh_cn": "或者你可以阻止 Claude 读取特定文件。"
+    },
+    "8": {
+      "en": "The possibilities are really endless, and I've got a couple of good examples lined up",
+      "zh_tw": "可能性真的是無窮的，我準備了幾個好例子",
+      "zh_cn": "可能性真的是无穷的，我准备了几个好例子"
+    },
+    "9": {
+      "en": "to show you to give you some ideas of how you might use hooks on your particular project.",
+      "zh_tw": "來展示如何在你的專案中使用 hooks。",
+      "zh_cn": "来展示如何在你的项目中使用 hooks。"
+    },
+    "10": {
+      "en": "First however, let me help you understand exactly how hooks work.",
+      "zh_tw": "不過首先，讓我幫你理解 hooks 到底怎麼運作。",
+      "zh_cn": "不过首先，让我帮你理解 hooks 到底怎么运作。"
+    },
+    "11": {
+      "en": "As a reminder, when you ask Claude code something, your query is sent off to the Claude model along",
+      "zh_tw": "提醒一下，當你向 Claude Code 提問時，你的查詢會連同一些工具定義",
+      "zh_cn": "提醒一下，当你向 Claude Code 提问时，你的查询会连同一些工具定义"
+    },
+    "12": {
+      "en": "with some tool definitions.",
+      "zh_tw": "一起送到 Claude 模型。",
+      "zh_cn": "一起送到 Claude 模型。"
+    },
+    "13": {
+      "en": "The Claude model might then decide to run a tool by providing a carefully formatted response.",
+      "zh_tw": "Claude 模型可能會透過提供一個格式化的回應來決定執行某個工具。",
+      "zh_cn": "Claude 模型可能会通过提供一个格式化的响应来决定执行某个工具。"
+    },
+    "14": {
+      "en": "And at that point, it is up to Claude code to run the requested tool, maybe in this case",
+      "zh_tw": "到這個時候，就由 Claude Code 來執行被請求的工具，比如在這個案例中",
+      "zh_cn": "到这个时候，就由 Claude Code 来执行被请求的工具，比如在这个案例中"
+    },
+    "15": {
+      "en": "to read a file, and then respond with the result of that tool call.",
+      "zh_tw": "讀取一個檔案，然後回傳工具呼叫的結果。",
+      "zh_cn": "读取一个文件，然后返回工具调用的结果。"
+    },
+    "16": {
+      "en": "Now hooks give us the ability to execute code just before or just after the tool execution.",
+      "zh_tw": "現在 hooks 讓我們有能力在工具執行之前或之後執行程式碼。",
+      "zh_cn": "现在 hooks 让我们有能力在工具执行之前或之后执行代码。"
+    },
+    "17": {
+      "en": "Hooks that run before a tool are referred to as pre-tool use hooks because they run before",
+      "zh_tw": "在工具之前執行的 hooks 被稱為 PreToolUse hooks，因為它們在",
+      "zh_cn": "在工具之前执行的 hooks 被称为 PreToolUse hooks，因为它们在"
+    },
+    "18": {
+      "en": "the tool.",
+      "zh_tw": "工具之前執行。",
+      "zh_cn": "工具之前执行。"
+    },
+    "19": {
+      "en": "And hooks that run after the tool are referred to as post-tool use for the same reason.",
+      "zh_tw": "在工具之後執行的 hooks 被稱為 PostToolUse，原因相同。",
+      "zh_cn": "在工具之后执行的 hooks 被称为 PostToolUse，原因相同。"
+    },
+    "20": {
+      "en": "To define hooks, we add configuration to the Claude settings file.",
+      "zh_tw": "要定義 hooks，我們在 Claude 設定檔中加入設定。",
+      "zh_cn": "要定义 hooks，我们在 Claude 配置文件中加入设置。"
+    },
+    "21": {
+      "en": "Remember that there are several different settings files.",
+      "zh_tw": "記住有幾個不同的設定檔。",
+      "zh_cn": "记住有几个不同的配置文件。"
+    },
+    "22": {
+      "en": "One for global use across all projects on your machine.",
+      "zh_tw": "一個是你機器上所有專案的全域設定。",
+      "zh_cn": "一个是你机器上所有项目的全局设置。"
+    },
+    "23": {
+      "en": "One for your particular project that gets shared with other engineers and one for just you on",
+      "zh_tw": "一個是你特定專案的設定，會與其他工程師共用；另一個是只屬於你的",
+      "zh_cn": "一个是你特定项目的设置，会与其他工程师共用；另一个是只属于你的"
+    },
+    "24": {
+      "en": "a particular project.",
+      "zh_tw": "特定專案設定。",
+      "zh_cn": "特定项目设置。"
+    },
+    "25": {
+      "en": "You can add hooks either by writing them out by hand inside this file or by using the built",
+      "zh_tw": "你可以手動在設定檔中寫出 hooks，或是使用內建的",
+      "zh_cn": "你可以手动在配置文件中写出 hooks，或是使用内置的"
+    },
+    "26": {
+      "en": "in slash hooks command inside of Claude code itself.",
+      "zh_tw": "Claude Code 的 /hooks 指令。",
+      "zh_cn": "Claude Code 的 /hooks 命令。"
+    },
+    "27": {
+      "en": "The configuration itself looks like what you see on the right hand side of the screen.",
+      "zh_tw": "設定本身看起來就像你在螢幕右側看到的樣子。",
+      "zh_cn": "设置本身看起来就像你在屏幕右侧看到的样子。"
+    },
+    "28": {
+      "en": "Let me walk you through this example file just to give you a better idea of what's going on.",
+      "zh_tw": "讓我帶你看看這個範例檔案，讓你更了解是怎麼回事。",
+      "zh_cn": "让我带你看看这个示例文件，让你更了解是怎么回事。"
+    },
+    "29": {
+      "en": "So first notice that there are two distinct sections inside of this file.",
+      "zh_tw": "首先注意這個檔案裡有兩個不同的區塊。",
+      "zh_cn": "首先注意这个文件里有两个不同的区块。"
+    },
+    "30": {
+      "en": "One section lists out all the commands that should be executed before a tool use.",
+      "zh_tw": "一個區塊列出了所有在工具使用之前應該執行的命令。",
+      "zh_cn": "一个区块列出了所有在工具使用之前应该执行的命令。"
+    },
+    "31": {
+      "en": "Remember those are referred to as pre-tool use hooks.",
+      "zh_tw": "記住那些被稱為 PreToolUse hooks。",
+      "zh_cn": "记住那些被称为 PreToolUse hooks。"
+    },
+    "32": {
+      "en": "The other section lists out all the different commands that should be executed after a tool",
+      "zh_tw": "另一個區塊列出了所有在工具使用之後應該執行的",
+      "zh_cn": "另一个区块列出了所有在工具使用之后应该执行的"
+    },
+    "33": {
+      "en": "use.",
+      "zh_tw": "不同命令。",
+      "zh_cn": "不同命令。"
+    },
+    "34": {
+      "en": "And again, those are post-tool use hooks.",
+      "zh_tw": "同樣的，那些是 PostToolUse hooks。",
+      "zh_cn": "同样的，那些是 PostToolUse hooks。"
+    },
+    "35": {
+      "en": "In each of these sections, we provide a matcher.",
+      "zh_tw": "在每個區塊中，我們提供一個 matcher。",
+      "zh_cn": "在每个区块中，我们提供一个 matcher。"
+    },
+    "36": {
+      "en": "This indicates which tool use types we are looking for.",
+      "zh_tw": "這表示我們要匹配哪些工具使用類型。",
+      "zh_cn": "这表示我们要匹配哪些工具使用类型。"
+    },
+    "37": {
+      "en": "So in this case, I want to find uses of the read tool.",
+      "zh_tw": "所以在這個案例中，我想匹配 Read 工具的使用。",
+      "zh_cn": "所以在这个案例中，我想匹配 Read 工具的使用。"
+    },
+    "38": {
+      "en": "Whenever Claude code attempts to read a file, I want to run the command you see listed there.",
+      "zh_tw": "每當 Claude Code 嘗試讀取檔案時，我想執行你看到列出的那個命令。",
+      "zh_cn": "每当 Claude Code 尝试读取文件时，我想执行你看到列出的那个命令。"
+    },
+    "39": {
+      "en": "Likewise inside the post-tool use section after a use of the write, edit, or multi-edit tools,",
+      "zh_tw": "同樣在 PostToolUse 區塊中，在使用 Write、Edit 或 MultiEdit 工具之後，",
+      "zh_cn": "同样在 PostToolUse 区块中，在使用 Write、Edit 或 MultiEdit 工具之后，"
+    },
+    "40": {
+      "en": "there's a different command that I want to run.",
+      "zh_tw": "有一個不同的命令我想要執行。",
+      "zh_cn": "有一个不同的命令我想要执行。"
+    },
+    "41": {
+      "en": "Now here's the important part.",
+      "zh_tw": "現在重點來了。",
+      "zh_cn": "现在重点来了。"
+    },
+    "42": {
+      "en": "Here's what hooks are really intended to do.",
+      "zh_tw": "這就是 hooks 真正的用途。",
+      "zh_cn": "这就是 hooks 真正的用途。"
+    },
+    "43": {
+      "en": "Those commands you saw will be given details about the tool call that Claude wants to run.",
+      "zh_tw": "你看到的那些命令會收到 Claude 想要執行的工具呼叫的詳細資訊。",
+      "zh_cn": "你看到的那些命令会收到 Claude 想要执行的工具调用的详细信息。"
+    },
+    "44": {
+      "en": "In the case of a pre-tool use hook, you can inspect what Claude wants to do.",
+      "zh_tw": "在 PreToolUse hook 的情況下，你可以檢查 Claude 想做什麼。",
+      "zh_cn": "在 PreToolUse hook 的情况下，你可以检查 Claude 想做什么。"
+    },
+    "45": {
+      "en": "And if for any reason you don't want to allow it, you can block the tool use operation and",
+      "zh_tw": "如果出於任何原因你不想允許它，你可以阻擋工具使用操作並",
+      "zh_cn": "如果出于任何原因你不想允许它，你可以阻挡工具使用操作并"
+    },
+    "46": {
+      "en": "send an error message back to Claude.",
+      "zh_tw": "把錯誤訊息送回給 Claude。",
+      "zh_cn": "把错误信息送回给 Claude。"
+    },
+    "47": {
+      "en": "In the case of a post-tool use hook, the tool call has already occurred, so it's too late",
+      "zh_tw": "在 PostToolUse hook 的情況下，工具呼叫已經發生了，所以阻擋",
+      "zh_cn": "在 PostToolUse hook 的情况下，工具调用已经发生了，所以阻挡"
+    },
+    "48": {
+      "en": "to block it.",
+      "zh_tw": "已經太遲了。",
+      "zh_cn": "已经太迟了。"
+    },
+    "49": {
+      "en": "So you can do some follow-up operation based upon the tool call, like maybe format a file",
+      "zh_tw": "所以你可以基於工具呼叫做一些後續操作，比如格式化一個",
+      "zh_cn": "所以你可以基于工具调用做一些后续操作，比如格式化一个"
+    },
+    "50": {
+      "en": "that was just edited.",
+      "zh_tw": "剛被編輯的檔案。",
+      "zh_cn": "刚被编辑的文件。"
+    },
+    "51": {
+      "en": "You can also provide some message back to Claude about that tool use.",
+      "zh_tw": "你也可以向 Claude 回傳一些關於該工具使用的訊息。",
+      "zh_cn": "你也可以向 Claude 返回一些关于该工具使用的信息。"
+    },
+    "52": {
+      "en": "For example, you might decide to run a separate program to check the code quality of the edit,",
+      "zh_tw": "例如，你可能決定執行一個獨立的程式來檢查編輯的程式碼品質，",
+      "zh_cn": "例如，你可能决定执行一个独立的程序来检查编辑的代码质量，"
+    },
+    "53": {
+      "en": "or maybe do a type check and then provide that feedback back to Claude.",
+      "zh_tw": "或者做型別檢查，然後把回饋提供給 Claude。",
+      "zh_cn": "或者做类型检查，然后把反馈提供给 Claude。"
+    },
+    "54": {
+      "en": "Claude might then take that feedback and make an update to the file that it just wrote to.",
+      "zh_tw": "Claude 可能會根據回饋去更新它剛寫入的檔案。",
+      "zh_cn": "Claude 可能会根据反馈去更新它刚写入的文件。"
+    },
+    "55": {
+      "en": "If you're still confused about hooks or what they are intended to do, that is absolutely",
+      "zh_tw": "如果你仍然對 hooks 或它們的用途感到困惑，那完全",
+      "zh_cn": "如果你仍然对 hooks 或它们的用途感到困惑，那完全"
+    },
+    "56": {
+      "en": "okay.",
+      "zh_tw": "沒問題。",
+      "zh_cn": "没问题。"
+    },
+    "57": {
+      "en": "Wrapping your head around hooks can be really challenging.",
+      "zh_tw": "理解 hooks 確實可能很有挑戰性。",
+      "zh_cn": "理解 hooks 确实可能很有挑战性。"
+    },
+    "58": {
+      "en": "So let's come back in a moment and work on a sample project with hooks.",
+      "zh_tw": "所以讓我們等一下回來，用一個範例專案來練習 hooks。",
+      "zh_cn": "所以让我们等一下回来，用一个示例项目来练习 hooks。"
+    }
+  }
+}

@@ -1,0 +1,822 @@
+{
+  "srt_file": "Useful_hooks_fXIRG62r.srt",
+  "video_file": "Useful_hooks_fXIRG62r.mp4",
+  "max_valid_entry": 163,
+  "entries": {
+    "1": {
+      "en": "In this video, I'd like to show you some really useful hooks that you might want to use on",
+      "zh_tw": "在這支影片中，我想展示一些非常實用的 hooks，你可能會想在自己的專案裡使用",
+      "zh_cn": "在这个视频中，我想展示一些非常实用的 hooks，你可能会想在自己的项目里使用"
+    },
+    "2": {
+      "en": "your own projects.",
+      "zh_tw": "這些 hooks。",
+      "zh_cn": "这些 hooks。"
+    },
+    "3": {
+      "en": "These hooks are intended to address some common weak points in CloudCode.",
+      "zh_tw": "這些 hooks 的目的是解決 Claude Code 的一些常見弱點。",
+      "zh_cn": "这些 hooks 的目的是解决 Claude Code 的一些常见弱点。"
+    },
+    "4": {
+      "en": "To help you understand how the first one works, let me give you a quick demonstration of a",
+      "zh_tw": "為了讓你理解第一個 hook 的運作方式，讓我先快速示範一個",
+      "zh_cn": "为了让你理解第一个 hook 的运作方式，让我先快速示范一个"
+    },
+    "5": {
+      "en": "problem that CloudCode sometimes runs into, especially on larger projects.",
+      "zh_tw": "Claude Code 有時候會遇到的問題，尤其是在比較大的專案裡。",
+      "zh_cn": "Claude Code 有时候会遇到的问题，尤其是在比较大的项目里。"
+    },
+    "6": {
+      "en": "So inside the SRC directory, I'm going to find schema.ts.",
+      "zh_tw": "在 SRC 目錄裡面，我要找到 schema.ts。",
+      "zh_cn": "在 SRC 目录里面，我要找到 schema.ts。"
+    },
+    "7": {
+      "en": "Inside of here, there's just one single function called create schema.",
+      "zh_tw": "裡面只有一個函式叫做 create schema。",
+      "zh_cn": "里面只有一个函数叫做 create schema。"
+    },
+    "8": {
+      "en": "This function is called from the main.ts file specifically right here.",
+      "zh_tw": "這個函式是從 main.ts 檔案呼叫的，就在這裡。",
+      "zh_cn": "这个函数是从 main.ts 文件调用的，就在这里。"
+    },
+    "9": {
+      "en": "Now I'm going to go back to the schema.ts file and I'm going to update the function definition.",
+      "zh_tw": "現在我要回到 schema.ts 檔案，然後更新這個函式定義。",
+      "zh_cn": "现在我要回到 schema.ts 文件，然后更新这个函数定义。"
+    },
+    "10": {
+      "en": "I'm going to say that if you ever want to call this function, you must also pass in a verbose",
+      "zh_tw": "我要加一個條件：如果你要呼叫這個函式，你必須同時傳入一個 verbose",
+      "zh_cn": "我要加一个条件：如果你要调用这个函数，你必须同时传入一个 verbose"
+    },
+    "11": {
+      "en": "argument that must be of type Boolean.",
+      "zh_tw": "參數，型別必須是 Boolean。",
+      "zh_cn": "参数，类型必须是 Boolean。"
+    },
+    "12": {
+      "en": "Now as soon as I add in this change, if I go back over to the main.ts file, I'm going to",
+      "zh_tw": "一旦我加了這個改動，如果我回到 main.ts 檔案，就會",
+      "zh_cn": "一旦我加了这个改动，如果我回到 main.ts 文件，就会"
+    },
+    "13": {
+      "en": "get a type error because I just updated the definition of this function, but I have not",
+      "zh_tw": "出現一個 type error，因為我更新了這個函式的定義，但我還沒有",
+      "zh_cn": "出现一个 type error，因为我更新了这个函数的定义，但我还没有"
+    },
+    "14": {
+      "en": "actually added in a value for verbose.",
+      "zh_tw": "實際傳入 verbose 的值。",
+      "zh_cn": "实际传入 verbose 的值。"
+    },
+    "15": {
+      "en": "So the error right here says specifically argument for verbose was not provided.",
+      "zh_tw": "這個錯誤明確指出：verbose 的參數沒有被提供。",
+      "zh_cn": "这个错误明确指出：verbose 的参数没有被提供。"
+    },
+    "16": {
+      "en": "Now I'm going to undo that change very quickly.",
+      "zh_tw": "現在我快速把這個改動復原。",
+      "zh_cn": "现在我快速把这个改动还原。"
+    },
+    "17": {
+      "en": "I'm going to close the main.ts file.",
+      "zh_tw": "我要關掉 main.ts 檔案。",
+      "zh_cn": "我要关掉 main.ts 文件。"
+    },
+    "18": {
+      "en": "I'm then going to open up CloudCode and ask it to make the exact same change.",
+      "zh_tw": "然後打開 Claude Code，請它做完全一樣的改動。",
+      "zh_cn": "然后打开 Claude Code，请它做完全一样的改动。"
+    },
+    "19": {
+      "en": "Now if I run this, CloudCode is going to have absolutely no issue making this edit whatsoever,",
+      "zh_tw": "如果我執行這個，Claude Code 做這個編輯完全沒問題，",
+      "zh_cn": "如果我执行这个，Claude Code 做这个编辑完全没问题，"
+    },
+    "20": {
+      "en": "but it's going to update this file.",
+      "zh_tw": "但它只會更新這個檔案。",
+      "zh_cn": "但它只会更新这个文件。"
+    },
+    "21": {
+      "en": "And then unfortunately, after making that change, so there's the new verbose true right there.",
+      "zh_tw": "然後很不幸地，做完改動之後——verbose true 就在那裡。",
+      "zh_cn": "然后很不幸地，做完改动之后——verbose true 就在那里。"
+    },
+    "22": {
+      "en": "Unfortunately, Cloud won't go around the project and try to find where that function is actually",
+      "zh_tw": "不幸的是，Claude 不會主動去整個專案裡找這個函式實際被呼叫的地方，",
+      "zh_cn": "不幸的是，Claude 不会主动去整个项目里找这个函数实际被调用的地方，"
+    },
+    "23": {
+      "en": "called and try to update any of the different call sites.",
+      "zh_tw": "然後更新那些呼叫點。",
+      "zh_cn": "然后更新那些调用点。"
+    },
+    "24": {
+      "en": "So if I now open up main.ts, we'll see that we do in fact have an error over here and Cloud",
+      "zh_tw": "所以如果我現在打開 main.ts，會看到這裡確實有個錯誤，而 Claude",
+      "zh_cn": "所以如果我现在打开 main.ts，会看到这里确实有个错误，而 Claude"
+    },
+    "25": {
+      "en": "didn't really catch this unfortunately.",
+      "zh_tw": "很遺憾地沒有抓到這個問題。",
+      "zh_cn": "很遗憾地没有抓到这个问题。"
+    },
+    "26": {
+      "en": "So the first hook that I want to show you will fix this solution super easily.",
+      "zh_tw": "所以我要展示的第一個 hook 可以超輕鬆地解決這個問題。",
+      "zh_cn": "所以我要展示的第一个 hook 可以超轻松地解决这个问题。"
+    },
+    "27": {
+      "en": "In case you're not familiar with TypeScript, if you're not, that's totally fine.",
+      "zh_tw": "如果你不熟悉 TypeScript，沒關係，完全沒問題。",
+      "zh_cn": "如果你不熟悉 TypeScript，没关系，完全没问题。"
+    },
+    "28": {
+      "en": "If I close out a CloudCode and run the command tsc-noemit, that's going to run a type check",
+      "zh_tw": "如果我關掉 Claude Code 然後執行 tsc --noEmit 這個指令，它會對我整個專案",
+      "zh_cn": "如果我关掉 Claude Code 然后执行 tsc --noEmit 这个命令，它会对我整个项目"
+    },
+    "29": {
+      "en": "on my entire project.",
+      "zh_tw": "跑一次 type check。",
+      "zh_cn": "跑一次 type check。"
+    },
+    "30": {
+      "en": "And in this type check, we can see that the error is very evident right here.",
+      "zh_tw": "在這個 type check 的結果裡，我們可以看到錯誤非常明顯地出現在這裡。",
+      "zh_cn": "在这个 type check 的结果里，我们可以看到错误非常明显地出现在这里。"
+    },
+    "31": {
+      "en": "So it's complaining about our call to create schema from that main.ts file.",
+      "zh_tw": "它在抱怨我們從 main.ts 檔案裡呼叫 create schema 的那段程式碼。",
+      "zh_cn": "它在抱怨我们从 main.ts 文件里调用 create schema 的那段代码。"
+    },
+    "32": {
+      "en": "So my idea for a hook is really simple.",
+      "zh_tw": "所以我的 hook 想法其實很簡單。",
+      "zh_cn": "所以我的 hook 想法其实很简单。"
+    },
+    "33": {
+      "en": "I think that any time that we edit a TypeScript file, we should run the TypeScript type checker",
+      "zh_tw": "我認為每次我們編輯一個 TypeScript 檔案的時候，都應該跑 TypeScript type checker",
+      "zh_cn": "我认为每次我们编辑一个 TypeScript 文件的时候，都应该跑 TypeScript type checker"
+    },
+    "34": {
+      "en": "and see if there are any distinct errors.",
+      "zh_tw": "然後看看有沒有任何新的錯誤。",
+      "zh_cn": "然后看看有没有任何新的错误。"
+    },
+    "35": {
+      "en": "If there are, we should attempt to feed these errors back into Cloud immediately inside of",
+      "zh_tw": "如果有的話，我們應該在 post tool use hook 裡面",
+      "zh_cn": "如果有的话，我们应该在 post tool use hook 里面"
+    },
+    "36": {
+      "en": "a post tool use hook.",
+      "zh_tw": "立即把這些錯誤回饋給 Claude。",
+      "zh_cn": "立即把这些错误反馈给 Claude。"
+    },
+    "37": {
+      "en": "And hopefully this will give Cloud a signal and tell it that there is a type error that",
+      "zh_tw": "希望這能給 Claude 一個訊號，告訴它剛剛引入了一個 type error，",
+      "zh_cn": "希望这能给 Claude 一个信号，告诉它刚刚引入了一个 type error，"
+    },
+    "38": {
+      "en": "it just introduced that it probably needs to go and fix somewhere else inside of our project.",
+      "zh_tw": "它可能需要去專案的其他地方修復。",
+      "zh_cn": "它可能需要去项目的其他地方修复。"
+    },
+    "39": {
+      "en": "Now I already put this hook together for us, fortunately, just to save us a little bit",
+      "zh_tw": "我已經幫我們把這個 hook 寫好了，省點時間，",
+      "zh_cn": "我已经帮我们把这个 hook 写好了，省点时间，"
+    },
+    "40": {
+      "en": "of time inside the hooks tsc.js file.",
+      "zh_tw": "就在 hooks 的 tsc.js 檔案裡。",
+      "zh_cn": "就在 hooks 的 tsc.js 文件里。"
+    },
+    "41": {
+      "en": "So inside this file, I've got a bunch of logic put together to run the TypeScript type checker,",
+      "zh_tw": "在這個檔案裡，我寫了一堆邏輯來執行 TypeScript type checker，",
+      "zh_cn": "在这个文件里，我写了一堆逻辑来执行 TypeScript type checker，"
+    },
+    "42": {
+      "en": "take any errors that it found and pass them back into Cloud.",
+      "zh_tw": "把它找到的任何錯誤回傳給 Claude。",
+      "zh_cn": "把它找到的任何错误返回给 Claude。"
+    },
+    "43": {
+      "en": "At present, I disabled this hook just so I can give you that demonstration you just saw.",
+      "zh_tw": "目前我先停用了這個 hook，這樣才能做剛才那個示範給你看。",
+      "zh_cn": "目前我先停用了这个 hook，这样才能做刚才那个示范给你看。"
+    },
+    "44": {
+      "en": "So I disabled it by adding the process exit zero right there.",
+      "zh_tw": "我是透過加上 process.exit(0) 來停用的，就在那裡。",
+      "zh_cn": "我是通过加上 process.exit(0) 来停用的，就在那里。"
+    },
+    "45": {
+      "en": "I'm going to delete that.",
+      "zh_tw": "我現在要把它刪掉。",
+      "zh_cn": "我现在要把它删掉。"
+    },
+    "46": {
+      "en": "And now this hook should be working a-okay.",
+      "zh_tw": "這樣這個 hook 就能正常運作了。",
+      "zh_cn": "这样这个 hook 就能正常运作了。"
+    },
+    "47": {
+      "en": "So if I now go back to the schema.ts file, remove that verbose flag, restart Cloud code,",
+      "zh_tw": "所以如果我現在回到 schema.ts 檔案，移除 verbose 旗標，重啟 Claude Code，",
+      "zh_cn": "所以如果我现在回到 schema.ts 文件，移除 verbose 标志，重启 Claude Code，"
+    },
+    "48": {
+      "en": "and ask it to make the same change once again, it will make the change.",
+      "zh_tw": "然後再請它做一次同樣的改動，它會完成改動。",
+      "zh_cn": "然后再请它做一次同样的改动，它会完成改动。"
+    },
+    "49": {
+      "en": "And then hopefully this time it will immediately get that feedback from the TypeScript type checker",
+      "zh_tw": "然後希望這次它會立刻從 TypeScript type checker 得到回饋，",
+      "zh_cn": "然后希望这次它会立刻从 TypeScript type checker 得到反馈，"
+    },
+    "50": {
+      "en": "saying, Hey, you've got an error somewhere else in the project that you've just introduced.",
+      "zh_tw": "說：「嘿，你剛在專案其他地方引入了一個錯誤。」",
+      "zh_cn": "说：「嘿，你刚在项目其他地方引入了一个错误。」"
+    },
+    "51": {
+      "en": "And hopefully Cloud will go and fix it.",
+      "zh_tw": "希望 Claude 就會去修復它。",
+      "zh_cn": "希望 Claude 就会去修复它。"
+    },
+    "52": {
+      "en": "So we can see right here, there's the edit that was made.",
+      "zh_tw": "我們可以看到這裡，編輯已經完成了。",
+      "zh_cn": "我们可以看到这里，编辑已经完成了。"
+    },
+    "53": {
+      "en": "We got some edit operation feedback from the hook that we put together.",
+      "zh_tw": "我們從我們建的 hook 得到了一些 edit operation 的回饋。",
+      "zh_cn": "我们从我们建的 hook 得到了一些 edit operation 的反馈。"
+    },
+    "54": {
+      "en": "So it found an issue inside of one of our different files.",
+      "zh_tw": "它在我們其中一個檔案裡發現了問題。",
+      "zh_cn": "它在我们其中一个文件里发现了问题。"
+    },
+    "55": {
+      "en": "And Cloud is now saying, okay, I understand I introduced an error.",
+      "zh_tw": "然後 Claude 現在說：好，我知道我引入了一個錯誤。",
+      "zh_cn": "然后 Claude 现在说：好，我知道我引入了一个错误。"
+    },
+    "56": {
+      "en": "I need to fix the call to create schema inside of main.ts.",
+      "zh_tw": "我需要修復 main.ts 裡面呼叫 create schema 的地方。",
+      "zh_cn": "我需要修复 main.ts 里面调用 create schema 的地方。"
+    },
+    "57": {
+      "en": "And then the next update it makes is going to attempt to go into that file and update that",
+      "zh_tw": "接下來它做的更新就是去那個檔案裡面",
+      "zh_cn": "接下来它做的更新就是去那个文件里面"
+    },
+    "58": {
+      "en": "function call to add in that missing argument.",
+      "zh_tw": "把函式呼叫更新，加上缺少的參數。",
+      "zh_cn": "把函数调用更新，加上缺少的参数。"
+    },
+    "59": {
+      "en": "So this is a hook that you might want to try implementing on your own personal projects.",
+      "zh_tw": "所以這是一個你可能會想在自己的專案裡實作的 hook。",
+      "zh_cn": "所以这是一个你可能会想在自己的项目里实现的 hook。"
+    },
+    "60": {
+      "en": "Now, even though this hook was implemented specifically for TypeScript, it still works for any other kind of",
+      "zh_tw": "雖然這個 hook 是專門為 TypeScript 寫的，但它其實適用於任何",
+      "zh_cn": "虽然这个 hook 是专门为 TypeScript 写的，但它其实适用于任何"
+    },
+    "61": {
+      "en": "type language where you can run a type checker very easily.",
+      "zh_tw": "可以輕鬆跑 type checker 的型別語言。",
+      "zh_cn": "可以轻松跑 type checker 的类型语言。"
+    },
+    "62": {
+      "en": "Even if you're using an untyped language, you might even implement the same idea of functionality using",
+      "zh_tw": "即使你用的是無型別的語言，你也可以用測試來實現同樣的功能，",
+      "zh_cn": "即使你用的是无类型的语言，你也可以用测试来实现同样的功能，"
+    },
+    "63": {
+      "en": "tests instead of running a type checker.",
+      "zh_tw": "而不是跑 type checker。",
+      "zh_cn": "而不是跑 type checker。"
+    },
+    "64": {
+      "en": "So every time an edit is made, you could run your tests to make sure that the edit is okay.",
+      "zh_tw": "所以每次做完編輯，你都可以跑測試來確保改動沒問題。",
+      "zh_cn": "所以每次做完编辑，你都可以跑测试来确保改动没问题。"
+    },
+    "65": {
+      "en": "Now, the next hook that I would like to show you is a little bit more challenging to explain,",
+      "zh_tw": "接下來我要展示的 hook 稍微難解釋一點，",
+      "zh_cn": "接下来我要展示的 hook 稍微难解释一点，"
+    },
+    "66": {
+      "en": "but once you get the idea behind it, I think that you will definitely find this next one really helpful,",
+      "zh_tw": "但一旦你理解了背後的概念，我覺得你一定會覺得這個 hook 非常有用，",
+      "zh_cn": "但一旦你理解了背后的概念，我觉得你一定会觉得这个 hook 非常有用，"
+    },
+    "67": {
+      "en": "particularly in larger projects.",
+      "zh_tw": "尤其是在比較大的專案裡。",
+      "zh_cn": "尤其是在比较大的项目里。"
+    },
+    "68": {
+      "en": "To help you understand this other hook, I want to give you a little bit of background on this project.",
+      "zh_tw": "為了幫你理解這個 hook，我想先介紹一下這個專案的背景。",
+      "zh_cn": "为了帮你理解这个 hook，我想先介绍一下这个项目的背景。"
+    },
+    "69": {
+      "en": "Inside of the SRC queries directory, there are many different files.",
+      "zh_tw": "在 SRC queries 目錄裡面，有很多不同的檔案。",
+      "zh_cn": "在 SRC queries 目录里面，有很多不同的文件。"
+    },
+    "70": {
+      "en": "Each of these different files contains many different SQL queries written inside of different functions.",
+      "zh_tw": "每個檔案裡都包含了很多用函式寫的 SQL queries。",
+      "zh_cn": "每个文件里都包含了很多用函数写的 SQL queries。"
+    },
+    "71": {
+      "en": "Inside of the orderqueries.ts file in particular, I want to point out that there is a function inside",
+      "zh_tw": "特別是在 orderqueries.ts 檔案裡面，我想指出有一個函式叫做",
+      "zh_cn": "特别是在 orderqueries.ts 文件里面，我想指出有一个函数叫做"
+    },
+    "72": {
+      "en": "of here called get pending orders.",
+      "zh_tw": "get pending orders。",
+      "zh_cn": "get pending orders。"
+    },
+    "73": {
+      "en": "This query goes through a database that contains some e-commerce related data.",
+      "zh_tw": "這個 query 會查詢一個包含電商資料的資料庫。",
+      "zh_cn": "这个 query 会查询一个包含电商数据的数据库。"
+    },
+    "74": {
+      "en": "And in theory, it's going to find all the different orders that have been created that are in a pending state.",
+      "zh_tw": "理論上，它會找出所有已建立且處於 pending 狀態的訂單。",
+      "zh_cn": "理论上，它会找出所有已创建且处于 pending 状态的订单。"
+    },
+    "75": {
+      "en": "So just keep that function in mind for a moment.",
+      "zh_tw": "先記住這個函式，等一下會用到。",
+      "zh_cn": "先记住这个函数，等一下会用到。"
+    },
+    "76": {
+      "en": "Okay, so I'm going to show you a couple of diagrams really quickly to help you understand a common problem",
+      "zh_tw": "好，我要快速展示幾張圖，幫你理解在大型專案中",
+      "zh_cn": "好，我要快速展示几张图，帮你理解在大型项目中"
+    },
+    "77": {
+      "en": "that starts to arise inside of larger projects.",
+      "zh_tw": "常會出現的一個問題。",
+      "zh_cn": "常会出现的一个问题。"
+    },
+    "78": {
+      "en": "So in this diagram, I've got my list of different query files on the left-hand side.",
+      "zh_tw": "在這張圖裡，左邊是我的不同 query 檔案列表。",
+      "zh_cn": "在这张图里，左边是我的不同 query 文件列表。"
+    },
+    "79": {
+      "en": "And as we saw, each of those different query files contains many different queries.",
+      "zh_tw": "正如我們看到的，每個 query 檔案裡都包含很多不同的 queries。",
+      "zh_cn": "正如我们看到的，每个 query 文件里都包含很多不同的 queries。"
+    },
+    "80": {
+      "en": "Inside of that orderqueries.ts file in particular is the get pending orders function.",
+      "zh_tw": "特別是在那個 orderqueries.ts 檔案裡面就有 get pending orders 函式。",
+      "zh_cn": "特别是在那个 orderqueries.ts 文件里面就有 get pending orders 函数。"
+    },
+    "81": {
+      "en": "So we've already got a query put together that will attempt to find some different pending orders.",
+      "zh_tw": "所以我們已經有一個現成的 query 可以用來找 pending 的訂單了。",
+      "zh_cn": "所以我们已经有一个现成的 query 可以用来找 pending 的订单了。"
+    },
+    "82": {
+      "en": "Now, if I go to Claude and ask it to update the main.ts file to print out all the different orders",
+      "zh_tw": "現在如果我去問 Claude，請它更新 main.ts 檔案來印出所有",
+      "zh_cn": "现在如果我去问 Claude，请它更新 main.ts 文件来打印出所有"
+    },
+    "83": {
+      "en": "that have been in a pending state for longer than three days,",
+      "zh_tw": "pending 超過三天的訂單，",
+      "zh_cn": "pending 超过三天的订单，"
+    },
+    "84": {
+      "en": "in a perfect world, Claude would find the orderqueries.ts file.",
+      "zh_tw": "在理想情況下，Claude 會找到 orderqueries.ts 檔案。",
+      "zh_cn": "在理想情况下，Claude 会找到 orderqueries.ts 文件。"
+    },
+    "85": {
+      "en": "It would find that existing query and it would make use of it,",
+      "zh_tw": "它會找到那個現有的 query 然後直接用它，",
+      "zh_cn": "它会找到那个现有的 query 然后直接用它，"
+    },
+    "86": {
+      "en": "as opposed to writing out a brand new query.",
+      "zh_tw": "而不是寫一個全新的 query。",
+      "zh_cn": "而不是写一个全新的 query。"
+    },
+    "87": {
+      "en": "So that's what we want.",
+      "zh_tw": "這才是我們想要的結果。",
+      "zh_cn": "这才是我们想要的结果。"
+    },
+    "88": {
+      "en": "And we'll see that if we make use of Claude right now and ask it to do exactly that,",
+      "zh_tw": "而且如果我們現在就讓 Claude 去做這件事，",
+      "zh_cn": "而且如果我们现在就让 Claude 去做这件事，"
+    },
+    "89": {
+      "en": "we're going to get exactly the result we want.",
+      "zh_tw": "我們會得到我們想要的結果。",
+      "zh_cn": "我们会得到我们想要的结果。"
+    },
+    "90": {
+      "en": "So I'm going to ask Claude in the main.ts file, print out orders that have been pending.",
+      "zh_tw": "所以我要請 Claude：在 main.ts 檔案裡，印出 pending 狀態的訂單。",
+      "zh_cn": "所以我要请 Claude：在 main.ts 文件里，打印出 pending 状态的订单。"
+    },
+    "91": {
+      "en": "Now, to Claude's credit, it is going to take a look at the different query files that exist.",
+      "zh_tw": "說句公道話，Claude 確實會去看現有的 query 檔案。",
+      "zh_cn": "说句公道话，Claude 确实会去看现有的 query 文件。"
+    },
+    "92": {
+      "en": "It's going to find the orderqueries file.",
+      "zh_tw": "它會找到 orderqueries 檔案。",
+      "zh_cn": "它会找到 orderqueries 文件。"
+    },
+    "93": {
+      "en": "And then inside there, it's going to recognize that there is already a query called get pending orders.",
+      "zh_tw": "然後在裡面，它會發現已經有一個叫做 get pending orders 的 query。",
+      "zh_cn": "然后在里面，它会发现已经有一个叫做 get pending orders 的 query。"
+    },
+    "94": {
+      "en": "And it's going to attempt to use that function as opposed to creating a new query.",
+      "zh_tw": "然後它會嘗試使用那個函式，而不是建立一個新的 query。",
+      "zh_cn": "然后它会尝试使用那个函数，而不是创建一个新的 query。"
+    },
+    "95": {
+      "en": "We didn't want a new query.",
+      "zh_tw": "我們不想要新的 query。",
+      "zh_cn": "我们不想要新的 query。"
+    },
+    "96": {
+      "en": "We wanted Claude to use the existing function.",
+      "zh_tw": "我們希望 Claude 使用現有的函式。",
+      "zh_cn": "我们希望 Claude 使用现有的函数。"
+    },
+    "97": {
+      "en": "So when we gave Claude a very focused and directed task,",
+      "zh_tw": "所以當我們給 Claude 一個很聚焦、很明確的任務時，",
+      "zh_cn": "所以当我们给 Claude 一个很聚焦、很明确的任务时，"
+    },
+    "98": {
+      "en": "it was able to understand that, yeah, it probably shouldn't write a new query.",
+      "zh_tw": "它能理解，對，它可能不應該寫新的 query。",
+      "zh_cn": "它能理解，对，它可能不应该写新的 query。"
+    },
+    "99": {
+      "en": "It should at least take a look at some of the ones that already exist.",
+      "zh_tw": "它至少應該先看看已經存在的那些。",
+      "zh_cn": "它至少应该先看看已经存在的那些。"
+    },
+    "100": {
+      "en": "And that was definitely good.",
+      "zh_tw": "這確實很好。",
+      "zh_cn": "这确实很好。"
+    },
+    "101": {
+      "en": "Now I'm going to give Claude a little bit of a curveball.",
+      "zh_tw": "現在我要給 Claude 出個難題。",
+      "zh_cn": "现在我要给 Claude 出个难题。"
+    },
+    "102": {
+      "en": "I'm going to purposefully make this task a little bit more difficult.",
+      "zh_tw": "我要故意把這個任務變得更困難一點。",
+      "zh_cn": "我要故意把这个任务变得更困难一点。"
+    },
+    "103": {
+      "en": "First, I'm going to run slash clear to clear out all the context that we've gained.",
+      "zh_tw": "首先，我要執行 /clear 來清除我們累積的所有 context。",
+      "zh_cn": "首先，我要执行 /clear 来清除我们累积的所有 context。"
+    },
+    "104": {
+      "en": "Then I'd like you to take a look at the task.md file.",
+      "zh_tw": "然後我希望你看一下 task.md 檔案。",
+      "zh_cn": "然后我希望你看一下 task.md 文件。"
+    },
+    "105": {
+      "en": "Inside this file, I put together a prompt that is still going to ask Claude to find orders that have been pending for a while.",
+      "zh_tw": "在這個檔案裡，我寫了一個 prompt，還是會請 Claude 找 pending 一段時間的訂單。",
+      "zh_cn": "在这个文件里，我写了一个 prompt，还是会请 Claude 找 pending 一段时间的订单。"
+    },
+    "106": {
+      "en": "But I've also wrapped it up in some larger project.",
+      "zh_tw": "但我把它包在一個更大的專案裡面。",
+      "zh_cn": "但我把它包在一个更大的项目里面。"
+    },
+    "107": {
+      "en": "I'm asking Claude to write out a Slack integration that's going to message a specific channel once a day",
+      "zh_tw": "我請 Claude 寫一個 Slack 整合，每天對特定頻道發一次訊息，",
+      "zh_cn": "我请 Claude 写一个 Slack 整合，每天对特定频道发一次消息，"
+    },
+    "108": {
+      "en": "with all the different orders that have been pending for too long.",
+      "zh_tw": "列出所有 pending 太久的訂單。",
+      "zh_cn": "列出所有 pending 太久的订单。"
+    },
+    "109": {
+      "en": "So in this scenario, we still want to find orders that have been pending for too long.",
+      "zh_tw": "所以在這個情境裡，我們還是要找 pending 太久的訂單。",
+      "zh_cn": "所以在这个情境里，我们还是要找 pending 太久的订单。"
+    },
+    "110": {
+      "en": "But now I've wrapped it inside this larger task.",
+      "zh_tw": "但現在我把它包在一個更大的任務裡面了。",
+      "zh_cn": "但现在我把它包在一个更大的任务里面了。"
+    },
+    "111": {
+      "en": "And if I take this task and then feed it into Claude, again, after doing that slash clear operation,",
+      "zh_tw": "如果我把這個任務丟給 Claude，在做完 /clear 之後，",
+      "zh_cn": "如果我把这个任务丢给 Claude，在做完 /clear 之后，"
+    },
+    "112": {
+      "en": "we're going to see that this time around, unfortunately, it's not going to stay quite as focused.",
+      "zh_tw": "我們會看到這一次它不會那麼聚焦了。",
+      "zh_cn": "我们会看到这一次它不会那么聚焦了。"
+    },
+    "113": {
+      "en": "And it's going to end up trying to write out a brand new get pending orders query,",
+      "zh_tw": "它最終會試著寫一個全新的 get pending orders query，",
+      "zh_cn": "它最终会试着写一个全新的 get pending orders query，"
+    },
+    "114": {
+      "en": "which is, again, not what we want, because that would be duplicating code throughout our project.",
+      "zh_tw": "這又不是我們想要的，因為這會在專案裡產生重複的程式碼。",
+      "zh_cn": "这又不是我们想要的，因为这会在项目里产生重复的代码。"
+    },
+    "115": {
+      "en": "If I let this run for a bit, I will eventually see that, yes, it does in fact make a brand new query called get orders pending too long.",
+      "zh_tw": "如果我讓它跑一陣子，最終會看到它確實建了一個新的 query 叫 get orders pending too long。",
+      "zh_cn": "如果我让它跑一阵子，最终会看到它确实建了一个新的 query 叫 get orders pending too long。"
+    },
+    "116": {
+      "en": "So this is an example of where Claude kind of lost focus and decided to write a brand new query as opposed to reusing an existing one.",
+      "zh_tw": "所以這就是一個 Claude 失焦的例子，它決定寫一個全新的 query 而不是重用現有的。",
+      "zh_cn": "所以这就是一个 Claude 失焦的例子，它决定写一个全新的 query 而不是重用现有的。"
+    },
+    "117": {
+      "en": "Again, we've got some duplicate code here, which is probably not what we want.",
+      "zh_tw": "又出現重複程式碼了，這可能不是我們想要的。",
+      "zh_cn": "又出现重复代码了，这可能不是我们想要的。"
+    },
+    "118": {
+      "en": "In addition, it didn't only create the new query.",
+      "zh_tw": "不僅如此，它不只建了新的 query。",
+      "zh_cn": "不仅如此，它不只建了新的 query。"
+    },
+    "119": {
+      "en": "It also created a brand new file, which is also probably something we don't want.",
+      "zh_tw": "它還建了一個全新的檔案，這大概也不是我們想要的。",
+      "zh_cn": "它还建了一个全新的文件，这大概也不是我们想要的。"
+    },
+    "120": {
+      "en": "We'd probably want this order related query to be added to the order queries file.",
+      "zh_tw": "我們可能會希望把這個訂單相關的 query 加到 order queries 檔案裡。",
+      "zh_cn": "我们可能会希望把这个订单相关的 query 加到 order queries 文件里。"
+    },
+    "121": {
+      "en": "So now that we understand the issue here, let me show you how we could fix this potentially by making use of a hook.",
+      "zh_tw": "現在我們理解了這個問題，讓我展示如何用 hook 來修復它。",
+      "zh_cn": "现在我们理解了这个问题，让我展示如何用 hook 来修复它。"
+    },
+    "122": {
+      "en": "All right.",
+      "zh_tw": "好。",
+      "zh_cn": "好。"
+    },
+    "123": {
+      "en": "So whenever Claude attempts to write, edit, or use the multi-edit tool to modify something inside the queries directory specifically,",
+      "zh_tw": "每當 Claude 嘗試用 write、edit 或 multi-edit 工具去修改 queries 目錄裡的東西時，",
+      "zh_cn": "每当 Claude 尝试用 write、edit 或 multi-edit 工具去修改 queries 目录里的东西时，"
+    },
+    "124": {
+      "en": "I'm going to run the following hook.",
+      "zh_tw": "我就會執行以下這個 hook。",
+      "zh_cn": "我就会执行以下这个 hook。"
+    },
+    "125": {
+      "en": "First, inside this hook, I'm going to launch a brand new separate copy of Claude code.",
+      "zh_tw": "首先，在這個 hook 裡，我會啟動一個全新的、獨立的 Claude Code 副本。",
+      "zh_cn": "首先，在这个 hook 里，我会启动一个全新的、独立的 Claude Code 副本。"
+    },
+    "126": {
+      "en": "I'm going to ask this new copy to take a look at the change that was just made and take a look at some of the existing code inside the queries directory and see if a similar query is already inside there.",
+      "zh_tw": "我會請這個新的副本去看剛才做的改動，同時看看 queries 目錄裡的現有程式碼，檢查是否已經有類似的 query 存在。",
+      "zh_cn": "我会请这个新的副本去看刚才做的改动，同时看看 queries 目录里的现有代码，检查是否已经有类似的 query 存在。"
+    },
+    "127": {
+      "en": "Then if there is an existing query, then I'm going to take that feedback and send it back to the original copy of Claude.",
+      "zh_tw": "然後如果有現成的 query，我就會把這個回饋傳回給原本的 Claude 副本。",
+      "zh_cn": "然后如果有现成的 query，我就会把这个反馈传回给原本的 Claude 副本。"
+    },
+    "128": {
+      "en": "And I'm going to ask Claude to maybe decide to fix the situation.",
+      "zh_tw": "然後請 Claude 決定要不要修正這個情況。",
+      "zh_cn": "然后请 Claude 决定要不要修正这个情况。"
+    },
+    "129": {
+      "en": "So remove the added query and make use of the one that already exists.",
+      "zh_tw": "也就是移除新加的 query，改用已經存在的那個。",
+      "zh_cn": "也就是移除新加的 query，改用已经存在的那个。"
+    },
+    "130": {
+      "en": "So this is going to allow us to make sure that the queries folder generally stays clean and doesn't have a bunch of duplicate code inside of it.",
+      "zh_tw": "這樣就能確保 queries 資料夾保持乾淨，不會有一堆重複的程式碼。",
+      "zh_cn": "这样就能确保 queries 文件夹保持干净，不会有一堆重复的代码。"
+    },
+    "131": {
+      "en": "So let me show you how this would work in action.",
+      "zh_tw": "讓我展示一下實際運作的效果。",
+      "zh_cn": "让我展示一下实际运作的效果。"
+    },
+    "132": {
+      "en": "First, I'm going to flip back over here.",
+      "zh_tw": "首先，我切回這邊。",
+      "zh_cn": "首先，我切回这边。"
+    },
+    "133": {
+      "en": "I'm going to delete the brand new order alerts queries.ts file that was made and the slack.ts file that was made as well.",
+      "zh_tw": "我要刪掉剛建的 order alerts queries.ts 檔案和 slack.ts 檔案。",
+      "zh_cn": "我要删掉刚建的 order alerts queries.ts 文件和 slack.ts 文件。"
+    },
+    "134": {
+      "en": "Then I'm going to find inside the hooks directory, the query hook file.",
+      "zh_tw": "然後我要在 hooks 目錄裡找到 query hook 檔案。",
+      "zh_cn": "然后我要在 hooks 目录里找到 query hook 文件。"
+    },
+    "135": {
+      "en": "So I already put this hook together for us.",
+      "zh_tw": "我已經幫我們把這個 hook 寫好了。",
+      "zh_cn": "我已经帮我们把这个 hook 写好了。"
+    },
+    "136": {
+      "en": "Right now it is currently disabled because I got a process.exit at the very top.",
+      "zh_tw": "現在它目前是停用的，因為我在最上面放了 process.exit。",
+      "zh_cn": "现在它目前是停用的，因为我在最上面放了 process.exit。"
+    },
+    "137": {
+      "en": "So let's walk through this hook really quickly.",
+      "zh_tw": "讓我們快速走過這個 hook。",
+      "zh_cn": "让我们快速走过这个 hook。"
+    },
+    "138": {
+      "en": "First, I'm going to tell this thing that it's only going to review changes to the SRC queries directory.",
+      "zh_tw": "首先，我告訴它只要檢查對 SRC queries 目錄的改動。",
+      "zh_cn": "首先，我告诉它只要检查对 SRC queries 目录的改动。"
+    },
+    "139": {
+      "en": "Then a little bit lower, I'm going to check and see if the change that was just made was made to the queries directory.",
+      "zh_tw": "再往下一點，我會檢查剛才的改動是不是在 queries 目錄裡做的。",
+      "zh_cn": "再往下一点，我会检查刚才的改动是不是在 queries 目录里做的。"
+    },
+    "140": {
+      "en": "After that, I've then got a long prompt here that is asking Claude to do a review on the change that was just made.",
+      "zh_tw": "接著這裡有一段長長的 prompt，請 Claude 對剛才的改動做 review。",
+      "zh_cn": "接着这里有一段长长的 prompt，请 Claude 对刚才的改动做 review。"
+    },
+    "141": {
+      "en": "And then after that is where I'm launching Claude code programmatically.",
+      "zh_tw": "然後在那之後就是我用程式化方式啟動 Claude Code 的地方。",
+      "zh_cn": "然后在那之后就是我用程序化方式启动 Claude Code 的地方。"
+    },
+    "142": {
+      "en": "Specifically these lines right here.",
+      "zh_tw": "具體來說就是這幾行。",
+      "zh_cn": "具体来说就是这几行。"
+    },
+    "143": {
+      "en": "This is making use of the Claude code TypeScript SDK.",
+      "zh_tw": "這裡用的是 Claude Code 的 TypeScript SDK。",
+      "zh_cn": "这里用的是 Claude Code 的 TypeScript SDK。"
+    },
+    "144": {
+      "en": "I can give you a lot more information on it in just a little bit.",
+      "zh_tw": "等一下我可以給你更多相關資訊。",
+      "zh_cn": "等一下我可以给你更多相关信息。"
+    },
+    "145": {
+      "en": "For right now, just understand that this right here is essentially the same as us making use of Claude code at the terminal.",
+      "zh_tw": "現在你只要理解這裡基本上等同於我們在終端機使用 Claude Code。",
+      "zh_cn": "现在你只要理解这里基本上等同于我们在终端使用 Claude Code。"
+    },
+    "146": {
+      "en": "Once Claude code runs and I get a response back out of it, I check and see if Claude decides that, yeah, the changes look okay.",
+      "zh_tw": "Claude Code 跑完之後我拿到回應，我會檢查 Claude 是判斷改動沒問題，",
+      "zh_cn": "Claude Code 跑完之后我拿到响应，我会检查 Claude 是判断改动没问题，"
+    },
+    "147": {
+      "en": "Or maybe we've got a duplicate query.",
+      "zh_tw": "還是有重複的 query。",
+      "zh_cn": "还是有重复的 query。"
+    },
+    "148": {
+      "en": "And if we do, then we're going to exit early with an exit code of two, which is going to give this feedback back to Claude and hopefully tell it that it needs to make a change.",
+      "zh_tw": "如果有的話，我們就會用 exit code 2 提前結束，這會把回饋傳回 Claude，希望能告訴它需要做修改。",
+      "zh_cn": "如果有的话，我们就会用 exit code 2 提前结束，这会把反馈传回 Claude，希望能告诉它需要做修改。"
+    },
+    "149": {
+      "en": "So now that I've got this additional hook put together and enabled by removing that process exit zero at the top, I'm going to again restart Claude code.",
+      "zh_tw": "現在這個額外的 hook 已經啟用了——我移除了頂部的 process.exit(0)——我要再次重啟 Claude Code。",
+      "zh_cn": "现在这个额外的 hook 已经启用了——我移除了顶部的 process.exit(0)——我要再次重启 Claude Code。"
+    },
+    "150": {
+      "en": "And then run the same query again.",
+      "zh_tw": "然後再跑一次同樣的指令。",
+      "zh_cn": "然后再跑一次同样的命令。"
+    },
+    "151": {
+      "en": "And hopefully this time it might initially put in that duplicate query, but then our hook right here is going to run and hopefully tell it, hey, we don't want that duplicate code.",
+      "zh_tw": "希望這次它可能一開始還是會放入重複的 query，但我們的 hook 會執行並告訴它：嘿，我們不要重複的程式碼。",
+      "zh_cn": "希望这次它可能一开始还是会放入重复的 query，但我们的 hook 会执行并告诉它：嘿，我们不要重复的代码。"
+    },
+    "152": {
+      "en": "You should make use of some already existing query to implement this functionality.",
+      "zh_tw": "你應該用已經存在的 query 來實現這個功能。",
+      "zh_cn": "你应该用已经存在的 query 来实现这个功能。"
+    },
+    "153": {
+      "en": "Now Claude code is once again going to attempt to create a brand new, completely separate query file, not making use of the old query that already existed.",
+      "zh_tw": "Claude Code 又會試著建立一個全新的、完全獨立的 query 檔案，沒有使用已經存在的 query。",
+      "zh_cn": "Claude Code 又会试着建立一个全新的、完全独立的 query 文件，没有使用已经存在的 query。"
+    },
+    "154": {
+      "en": "When it tries to create that file, however, our hook is going to run.",
+      "zh_tw": "但當它試著建立那個檔案時，我們的 hook 就會執行。",
+      "zh_cn": "但当它试着建立那个文件时，我们的 hook 就会执行。"
+    },
+    "155": {
+      "en": "This is going to launch that separate copy of Claude code, which is going to do some research and find that there is in fact an existing query that can be reused.",
+      "zh_tw": "它會啟動那個獨立的 Claude Code 副本，去做一些研究，然後發現確實有一個現成的 query 可以重用。",
+      "zh_cn": "它会启动那个独立的 Claude Code 副本，去做一些研究，然后发现确实有一个现成的 query 可以重用。"
+    },
+    "156": {
+      "en": "It's going to provide some advice and say, hey, you could probably go and update this other existing query to suit your purposes perfectly.",
+      "zh_tw": "它會提供建議說：嘿，你可以去修改這個現有的 query 來完美符合你的需求。",
+      "zh_cn": "它会提供建议说：嘿，你可以去修改这个现有的 query 来完美符合你的需求。"
+    },
+    "157": {
+      "en": "And we'll see some feedback from Claude, our primary instance that we are interacting with saying, ah, yes, there is this existing query.",
+      "zh_tw": "然後我們會看到我們正在互動的主要 Claude 實例的回饋說：啊對，有這個現成的 query。",
+      "zh_cn": "然后我们会看到我们正在互动的主要 Claude 实例的反馈说：啊对，有这个现成的 query。"
+    },
+    "158": {
+      "en": "Let's just modify that existing query rather than attempting to write out a brand new one.",
+      "zh_tw": "我們就修改這個現有的 query，而不是寫一個全新的。",
+      "zh_cn": "我们就修改这个现有的 query，而不是写一个全新的。"
+    },
+    "159": {
+      "en": "Now, the downside to this hook is that it's going to take some additional time and expense to run every single time that I want to edit something inside the queries directory.",
+      "zh_tw": "這個 hook 的缺點是，每次我要編輯 queries 目錄裡的東西時，都會額外花一些時間和費用。",
+      "zh_cn": "这个 hook 的缺点是，每次我要编辑 queries 目录里的东西时，都会额外花一些时间和费用。"
+    },
+    "160": {
+      "en": "But the upside is that I'm going to end up with a lot less duplicate code inside my queries directory.",
+      "zh_tw": "但好處是，我的 queries 目錄裡會少很多重複的程式碼。",
+      "zh_cn": "但好处是，我的 queries 目录里会少很多重复的代码。"
+    },
+    "161": {
+      "en": "So it really comes down to a set of trade-offs for you deciding whether or not you want to implement something like this in your own project.",
+      "zh_tw": "所以這真的取決於你自己的取捨，決定要不要在自己的專案裡實作這樣的東西。",
+      "zh_cn": "所以这真的取决于你自己的取舍，决定要不要在自己的项目里实现这样的东西。"
+    },
+    "162": {
+      "en": "If you do, I would at least recommend doing what I showed you inside of the query hook.",
+      "zh_tw": "如果你要做的話，我至少建議像 query hook 裡展示的那樣做。",
+      "zh_cn": "如果你要做的话，我至少建议像 query hook 里展示的那样做。"
+    },
+    "163": {
+      "en": "So this one right here and only watching maybe a handful of directories, like really important folders inside of your project, just to minimize the amount of extra work that is being done.",
+      "zh_tw": "就是這個，只監控少數幾個目錄，像是專案裡真正重要的資料夾，盡量減少額外的工作量。",
+      "zh_cn": "就是这个，只监控少数几个目录，像是项目里真正重要的文件夹，尽量减少额外的工作量。"
+    }
+  }
+}

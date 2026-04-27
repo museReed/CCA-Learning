@@ -1,129 +1,94 @@
 # CCA-Learning Session Handoff
 
-**Date**: 2026-04-27
-**Last commit**: `0f80c22` — chore: add sync/delete to build_html.py, remove 49 stale files
+**Date**: 2026-04-28
+**Last commit**: `09cfed3` — fix(pipeline): improve bilingual subtitle overlay layout
 
 ---
 
 ## Project Overview
 
-Skilljar 線上課程學習筆記庫，涵蓋 Anthropic 官方 7 門課程。包含學習筆記 (Markdown)、視覺指南 (SVG)、翻譯字幕 (JSON) 和建構腳本。
-
-## Repository Structure
-
-```
-courses/
-├── building-with-the-claude-api/       86 SVGs, 74 translations, 575 notes
-├── claude-code-in-action/              91 SVGs,  0 translations, 338 notes
-├── introduction-to-model-context-protocol/  10 SVGs, 11 translations,  87 notes
-├── model-context-protocol-advanced-topics/  12 SVGs,  8 translations,  73 notes
-├── claude-101/                         (outline only)
-├── introduction-to-agent-skills/       (outline only)
-├── introduction-to-subagents/          (outline only)
-scripts/                                Translation & build utilities
-```
+Skilljar 線上課程學習筆記庫，涵蓋 Anthropic 官方 7 門課程。包含學習筆記 (Markdown)、視覺指南 (SVG)、逐幀截圖、翻譯字幕 (JSON)、雙語 SRT 和建構腳本。
 
 ---
 
-## Completed Work (This Session + Prior Sessions)
+## Current Status — All Major Work Complete
 
-### 1. Translation: zh_tw + zh_cn for 93 Files — DONE
+### Content Inventory
 
-All subtitle translation templates filled with Traditional Chinese (zh_tw), Simplified Chinese (zh_cn) auto-converted via `tw_to_cn()`.
+| 項目 | 數量 |
+|------|------|
+| 課程 | 7 門（4 門完整，3 門大綱） |
+| 已完成課堂 | 106 堂 |
+| 學習筆記 | 636 份（106 課 × 6 版本） |
+| SVG 圖表 | 187 個 |
+| 翻譯 JSON | 108 個（4 課程全覆蓋） |
+| 雙語 SRT | 216 個（108 × zh-TW/zh-CN） |
+| 逐幀學習指南 | 7,658 幀 + 108 Markdown |
+| HTML 頁面 | 637 頁 |
+| 教學影片 | 108 支 |
+
+### Translation Coverage
 
 | Course | Files | Entries | Status |
 |--------|------:|--------:|--------|
 | Introduction to MCP | 11 | 679 | 100% |
 | MCP Advanced Topics | 8 | 774 | 100% |
 | Building with Claude API | 74 | 5,257 | 100% |
-| **Total** | **93** | **6,710** | **100%** |
-
-Note: 6 entries in `The_web_search_tool` (96-101) have empty English source — nothing to translate.
-
-**Translation scripts** (all in `scripts/`):
-- `fill_translations.py` — Core utility: `fill_template_from_dict()` + `tw_to_cn()`
-- `translate_intro_mcp.py` — 11 files, 679 entries
-- `translate_mcp_advanced.py` — 8 files, 764 entries
-- `translate_api_ch01.py` through `translate_api_ch09.py` — 74 files, 5,257 entries
-
-### 2. Study Notes — Previously Complete
-
-- **building-with-the-claude-api**: 575 .md files across 9 chapters (ch01-ch09)
-- **claude-code-in-action**: 338 .md files across 6 chapters
-- **introduction-to-model-context-protocol**: 87 .md files across 4 chapters
-- **model-context-protocol-advanced-topics**: 73 .md files across 4 chapters
-
-### 3. Visual Guides (SVG) — Previously Complete
-
-- 199 total SVGs across 4 courses
-- Includes zh-TW bilingual variants for some diagrams
+| Claude Code in Action | 15 | 949 | 100% |
+| **Total** | **108** | **7,659** | **100%** |
 
 ---
 
-## Uncommitted Changes
+## Completed Work (This Session)
 
-Large batch of uncommitted work (all untracked):
-
-### Must commit:
-- `courses/*/translations/` — All 93 translation JSON files (the work from recent sessions)
-- `scripts/translate_*.py` — 11 translation scripts
-- `scripts/fill_translations.py` — Core translation utility
-- `scripts/bilingual_pipeline.py` — Bilingual subtitle/visual pipeline (not yet executed)
-
-### Visual guides (untracked `visual-guides/` dirs):
-- 17 `visual-guides/` directories across 4 courses — appear to be empty placeholder dirs
-
-### Other untracked:
-- `courses/*/00-outline.json` — Modified outlines (4 files)
-- `scripts/check_upstream.py`, `scripts/probe_skilljar.py`, `scripts/save_session.py`, `scripts/verify_session.py` — Utility scripts
-- `logs/`, `reports/` — Generated output directories
-- `.obsidian/workspace.json` — Obsidian editor state
+1. **Bilingual SRT generation** — 216 雙語字幕檔（from translation JSONs via `bilingual_pipeline.py`）
+2. **Visual guide generation** — 6,710 逐幀截圖（3 courses with chapter-level visual-guides）
+3. **Subtitle overlay fix** — 修正中文字幕佈局（overlay 120→140px，中/英雙行正確顯示）
+4. **Claude-code-in-action translation JSONs** — 從已有雙語 SRT 反向生成 15 個 JSON
+5. **Cleanup (88 items):**
+   - 7 個 study-notes-v2 重複目錄
+   - 3 個重複 lesson 目錄（05-hooks 新舊版衝突）
+   - 2 個重複 SRT 檔
+   - 6 個 chapter-level scripts 目錄
+   - 15 個 raw frame 目錄（948 原始幀）
+   - 10 個空 source/images 目錄
+   - 45 個空目錄
+6. **README.md update** — 反映最新統計和資源
+7. **INDEX.md** — 4 門主力課程各自的課堂導覽目錄
 
 ---
 
-## Pending / Next Steps
+## Remaining Work (Low Priority)
 
-### High Priority
-1. **Commit translations** — Stage and commit all 93 translation JSONs + scripts
-2. **Run bilingual pipeline** — `scripts/bilingual_pipeline.py` exists but has NOT been executed yet; it should generate bilingual subtitle files and/or visual guides from the translations
-
-### Medium Priority
-3. **claude-code-in-action translations** — 0/? translation files exist; this course has no translation templates yet
-4. **Clean up empty visual-guides dirs** — 17 empty placeholder directories
-
-### Low Priority
-5. **Remaining 3 courses** (claude-101, introduction-to-agent-skills, introduction-to-subagents) — Only outlines exist, no content yet
+1. **3 門輕量課程** — claude-101, introduction-to-agent-skills, introduction-to-subagents 只有大綱和 placeholder，無官方內容可供充實
+2. **HTML rebuild** — `python3 scripts/build_html.py` 可能需要重跑以反映最新筆記
+3. **Visual guides for claude-code-in-action** — 此課程的 visual-guide 已在之前 session 完成（lesson-level），格式與其他 3 門課不同（chapter-level visual-guides）
 
 ---
 
 ## Key Technical Details
 
-### Translation JSON Format
-```json
-{
-  "srt_file": "...",
-  "video_file": "...",
-  "max_valid_entry": 56,
-  "entries": {
-    "1": { "en": "English text...", "zh_tw": "繁體中文...", "zh_cn": "简体中文..." }
-  }
-}
-```
+### File Structure Patterns
 
-### tw_to_cn() Conversion
-`fill_translations.py` contains character-level mapping + word-level tech term replacements:
-- 程式碼→代码, 伺服器→服务器, 資料庫→数据库, 模組→模块, etc.
+| 課程 | 原始文字稿 | SRT 位置 | 雙語 SRT | 逐幀截圖 |
+|------|-----------|---------|---------|---------|
+| building-with-the-claude-api | `<chapter>/NN-slug.md` | `<chapter>/` (loose) | `<chapter>/srt/bilingual/` | `<chapter>/visual-guides/` |
+| claude-code-in-action | `<chapter>/<lesson>/source/` | `<chapter>/<lesson>/srt/` | `<chapter>/<lesson>/srt/bilingual/` | `<chapter>/<lesson>/visual-guide/` |
+| intro-mcp / mcp-advanced | `<chapter>/NN-slug/` | `<chapter>/` (loose) | `<chapter>/srt/bilingual/` | `<chapter>/visual-guides/` |
 
-### Translation Script Pattern
-Each `translate_api_chXX.py`:
-1. Imports `fill_template_from_dict` from `fill_translations.py`
-2. Defines dict `T` mapping `"chapter/filename"` → `{entry_num: "zh_tw_text"}`
-3. Iterates and fills templates; zh_cn auto-generated
+### Key Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `bilingual_pipeline.py` | scan/templates/bilingual/visual 管線 |
+| `fill_translations.py` | 翻譯核心：`fill_template_from_dict()` + `tw_to_cn()` |
+| `build_html.py` | Markdown → HTML 建置 |
+| `translate_*.py` | 各課程翻譯腳本（13 支） |
 
 ---
 
-## Environment Notes
+## Environment
+
 - Working directory: `/Volumes/Muse_AI_Core/CCA-Learning`
 - Git branch: `main`
-- Python 3 required for scripts
-- Obsidian vault for viewing .md notes
+- Python 3 + Pillow + ffmpeg required for visual pipeline

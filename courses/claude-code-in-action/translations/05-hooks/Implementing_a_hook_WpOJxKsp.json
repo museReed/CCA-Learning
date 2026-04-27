@@ -1,0 +1,357 @@
+{
+  "srt_file": "Implementing_a_hook_WpOJxKsp.srt",
+  "video_file": "Implementing_a_hook_WpOJxKsp.mp4",
+  "max_valid_entry": 70,
+  "entries": {
+    "1": {
+      "en": "Let's put together our custom hook.",
+      "zh_tw": "我們來組合自己的自訂 hook。",
+      "zh_cn": "我们来组合自己的自定义 hook。"
+    },
+    "2": {
+      "en": "Remember, the entire goal here is to prevent Claude from ever reading the contents of the .env file.",
+      "zh_tw": "記住，這裡的整個目標是防止 Claude 讀取 .env 檔案的內容。",
+      "zh_cn": "记住，这里的整个目标是防止 Claude 读取 .env 文件的内容。"
+    },
+    "3": {
+      "en": "In the last video, we discussed many of the different configuration options we'll need to set.",
+      "zh_tw": "在上一支影片中，我們討論了許多需要設定的不同配置選項。",
+      "zh_cn": "在上一个视频中，我们讨论了许多需要设置的不同配置选项。"
+    },
+    "4": {
+      "en": "So in this video, we're going to be mostly focused on the implementation.",
+      "zh_tw": "所以在這支影片中，我們主要會專注在實作上。",
+      "zh_cn": "所以在这个视频中，我们主要会专注在实现上。"
+    },
+    "5": {
+      "en": "To get started, inside the .claud directory, I'm going to open up the settings.local.json file.",
+      "zh_tw": "首先，在 .claude 目錄裡面，我要打開 settings.local.json 這個檔案。",
+      "zh_cn": "首先，在 .claude 目录里面，我要打开 settings.local.json 这个文件。"
+    },
+    "6": {
+      "en": "Remember, inside of here, we have a list of pre-tool use hooks and post-tool use hooks.",
+      "zh_tw": "記住，在這裡面我們有一個 pre-tool use hooks 和 post-tool use hooks 的列表。",
+      "zh_cn": "记住，在这里面我们有一个 pre-tool use hooks 和 post-tool use hooks 的列表。"
+    },
+    "7": {
+      "en": "As we discussed a moment ago, we want to make a pre-tool use hook so that we can prevent Claude from ever reading the contents of that particular file.",
+      "zh_tw": "如同我們剛才討論的，我們要做一個 pre-tool use hook，這樣就能防止 Claude 讀取那個特定檔案的內容。",
+      "zh_cn": "如同我们刚才讨论的，我们要做一个 pre-tool use hook，这样就能防止 Claude 读取那个特定文件的内容。"
+    },
+    "8": {
+      "en": "I already added in a little configuration section right here for us, just to save us a little bit of typing.",
+      "zh_tw": "我已經在這裡預先加了一小段配置區塊，幫我們省一點打字的時間。",
+      "zh_cn": "我已经在这里预先加了一小段配置区块，帮我们省一点打字的时间。"
+    },
+    "9": {
+      "en": "All we need to do is fill in the matcher and the command.",
+      "zh_tw": "我們只需要填入 matcher 和 command 就好。",
+      "zh_cn": "我们只需要填入 matcher 和 command 就好。"
+    },
+    "10": {
+      "en": "First is the matcher.",
+      "zh_tw": "首先是 matcher。",
+      "zh_cn": "首先是 matcher。"
+    },
+    "11": {
+      "en": "So the matcher is going to be the tools that we want to watch for.",
+      "zh_tw": "matcher 就是我們想要監控的工具。",
+      "zh_cn": "matcher 就是我们想要监控的工具。"
+    },
+    "12": {
+      "en": "In our case, as we discussed, we want to watch for calls to the read and the grep tools.",
+      "zh_tw": "在我們的案例中，如同討論過的，我們要監控對 read 和 grep 工具的呼叫。",
+      "zh_cn": "在我们的案例中，如同讨论过的，我们要监控对 read 和 grep 工具的调用。"
+    },
+    "13": {
+      "en": "I'm going to separate those two tool names with a pipe symbol.",
+      "zh_tw": "我要用一個 pipe 符號來分隔這兩個工具名稱。",
+      "zh_cn": "我要用一个 pipe 符号来分隔这两个工具名称。"
+    },
+    "14": {
+      "en": "So that's not an L or a capital I.",
+      "zh_tw": "那不是字母 L 也不是大寫的 I。",
+      "zh_cn": "那不是字母 L 也不是大写的 I。"
+    },
+    "15": {
+      "en": "It is the symbol right above the return key on your keyboard.",
+      "zh_tw": "它是你鍵盤上 return 鍵正上方的那個符號。",
+      "zh_cn": "它是你键盘上 return 键正上方的那个符号。"
+    },
+    "16": {
+      "en": "Then next up, we need to provide a command to run whenever Claude attempts to call those two tools.",
+      "zh_tw": "接下來，我們需要提供一個 command，在 Claude 嘗試呼叫這兩個工具時執行。",
+      "zh_cn": "接下来，我们需要提供一个 command，在 Claude 尝试调用这两个工具时执行。"
+    },
+    "17": {
+      "en": "We could put in here any command you want.",
+      "zh_tw": "你可以在這裡放任何你想要的命令。",
+      "zh_cn": "你可以在这里放任何你想要的命令。"
+    },
+    "18": {
+      "en": "So it can be a CLI.",
+      "zh_tw": "可以是一個 CLI。",
+      "zh_cn": "可以是一个 CLI。"
+    },
+    "19": {
+      "en": "It can be a call to a shell script.",
+      "zh_tw": "可以是呼叫一個 shell script。",
+      "zh_cn": "可以是调用一个 shell script。"
+    },
+    "20": {
+      "en": "Absolutely anything.",
+      "zh_tw": "什麼都可以。",
+      "zh_cn": "什么都可以。"
+    },
+    "21": {
+      "en": "To follow the pattern that I've already established inside the rest of this file,",
+      "zh_tw": "為了延續我在這個檔案其他地方已經建立的模式，",
+      "zh_cn": "为了延续我在这个文件其他地方已经建立的模式，"
+    },
+    "22": {
+      "en": "I'm going to call a node.js script that I placed ahead of time inside the hooks directory of this project.",
+      "zh_tw": "我要呼叫一個 node.js 腳本，我事先放在這個專案的 hooks 目錄裡面。",
+      "zh_cn": "我要调用一个 node.js 脚本，我事先放在这个项目的 hooks 目录里面。"
+    },
+    "23": {
+      "en": "So inside the hooks directory, I put together for us a read underscore hook dot js file.",
+      "zh_tw": "在 hooks 目錄裡面，我幫我們準備了一個 read_hook.js 檔案。",
+      "zh_cn": "在 hooks 目录里面，我帮我们准备了一个 read_hook.js 文件。"
+    },
+    "24": {
+      "en": "This is the file that I want to run whenever Claude attempts to call one of those two tools.",
+      "zh_tw": "這就是我想在 Claude 嘗試呼叫那兩個工具時執行的檔案。",
+      "zh_cn": "这就是我想在 Claude 尝试调用那两个工具时执行的文件。"
+    },
+    "25": {
+      "en": "So to call that, I'm going to replace the true right here, which is just a placeholder for right now,",
+      "zh_tw": "所以要呼叫它的話，我要把這裡的 true（目前只是一個佔位符）",
+      "zh_cn": "所以要调用它的话，我要把这里的 true（目前只是一个占位符）"
+    },
+    "26": {
+      "en": "with node dot slash hooks, read underscore hook dot js.",
+      "zh_tw": "替換成 node ./hooks/read_hook.js。",
+      "zh_cn": "替换成 node ./hooks/read_hook.js。"
+    },
+    "27": {
+      "en": "I'm then going to save this file and that's all we have to do inside of here.",
+      "zh_tw": "然後我要存檔，在這個檔案裡我們要做的就這些。",
+      "zh_cn": "然后我要保存，在这个文件里我们要做的就这些。"
+    },
+    "28": {
+      "en": "Next up, we need to actually implement the command that's going to run anytime Claude tries to call",
+      "zh_tw": "接下來，我們需要實際實作那個在 Claude 嘗試呼叫",
+      "zh_cn": "接下来，我们需要实际实现那个在 Claude 尝试调用"
+    },
+    "29": {
+      "en": "the read or the grep tools.",
+      "zh_tw": "read 或 grep 工具時會執行的 command。",
+      "zh_cn": "read 或 grep 工具时会执行的 command。"
+    },
+    "30": {
+      "en": "So that's going to be the read hook dot js file.",
+      "zh_tw": "也就是 read_hook.js 這個檔案。",
+      "zh_cn": "也就是 read_hook.js 这个文件。"
+    },
+    "31": {
+      "en": "At the top of this file, I've got some code that's going to read from standard in and parse that data as JSON.",
+      "zh_tw": "在這個檔案的最上面，我有一些程式碼會從 standard in 讀取資料並解析成 JSON。",
+      "zh_cn": "在这个文件的最上面，我有一些代码会从 standard in 读取数据并解析成 JSON。"
+    },
+    "32": {
+      "en": "So this tool args object right here, that's going to be the big JSON object I showed you in this diagram",
+      "zh_tw": "這裡的 toolArgs 物件，就是我在這張圖表中展示給你看的那個大 JSON 物件，",
+      "zh_cn": "这里的 toolArgs 对象，就是我在这张图表中展示给你看的那个大 JSON 对象，"
+    },
+    "33": {
+      "en": "back over here.",
+      "zh_tw": "就在這邊。",
+      "zh_cn": "就在这边。"
+    },
+    "34": {
+      "en": "So it's going to have properties like session ID, the tool name, the tool input, and so on.",
+      "zh_tw": "它會有像 session ID、tool name、tool input 等等這些屬性。",
+      "zh_cn": "它会有像 session ID、tool name、tool input 等等这些属性。"
+    },
+    "35": {
+      "en": "So all we really need to do is take a look at that file path right there and decide whether or not",
+      "zh_tw": "所以我們真正需要做的就是看一下那個 file path，然後判斷它",
+      "zh_cn": "所以我们真正需要做的就是看一下那个 file path，然后判断它"
+    },
+    "36": {
+      "en": "it is trying to read the dot EMV file.",
+      "zh_tw": "是不是在嘗試讀取 .env 檔案。",
+      "zh_cn": "是不是在尝试读取 .env 文件。"
+    },
+    "37": {
+      "en": "If it is, then we want to make sure that we exit from our program or our command here with an exit",
+      "zh_tw": "然後在我們的程式或 command 裡面，我們需要透過 standard in 接收這些資訊，解析那個 JSON，然後讀取 tool name、tool input 的參數等等，決定我們要怎麼處理這個工具呼叫。",
+      "zh_cn": "然后在我们的程序或 command 里面，我们需要通过 standard in 接收这些信息，解析那个 JSON，然后读取 tool name、tool input 的参数等等，决定我们要怎么处理这个工具调用。"
+    },
+    "38": {
+      "en": "code of two, and hopefully also log some information out to Claude that says, sorry, but you can't read",
+      "zh_tw": "然後到第四步。",
+      "zh_cn": "然后到第四步。"
+    },
+    "39": {
+      "en": "that file.",
+      "zh_tw": "在第四步，當我們的 command 收到那個提議的工具呼叫資料後，我們接著要 exit。",
+      "zh_cn": "在第四步，当我们的 command 收到那个提议的工具调用数据后，我们接着要 exit。"
+    },
+    "40": {
+      "en": "So you'll notice that back over here, I've already got some code that's going to read that file path.",
+      "zh_tw": "你會注意到回到這邊，我已經有一些程式碼會讀取那個 file path。",
+      "zh_cn": "你会注意到回到这边，我已经有一些代码会读取那个 file path。"
+    },
+    "41": {
+      "en": "You'll also notice that there's a fallback of looking at tool input dot path right here.",
+      "zh_tw": "你也會注意到這裡有一個 fallback 去看 toolInput.path。",
+      "zh_cn": "你也会注意到这里有一个 fallback 去看 toolInput.path。"
+    },
+    "42": {
+      "en": "I'll tell you why that's added in, in just a moment.",
+      "zh_tw": "我等一下會告訴你為什麼要加這個。",
+      "zh_cn": "我等一下会告诉你为什么要加这个。"
+    },
+    "43": {
+      "en": "So now let's implement the to do statement.",
+      "zh_tw": "現在我們來實作這個 TODO 的部分。",
+      "zh_cn": "现在我们来实现这个 TODO 的部分。"
+    },
+    "44": {
+      "en": "We'll say if read path includes dot EMV.",
+      "zh_tw": "我們寫：如果 readPath 包含 .env。",
+      "zh_cn": "我们写：如果 readPath 包含 .env。"
+    },
+    "45": {
+      "en": "That means that Claude must be trying to read the dot EMV file.",
+      "zh_tw": "那就代表 Claude 一定是在嘗試讀取 .env 檔案。",
+      "zh_cn": "那就代表 Claude 一定是在尝试读取 .env 文件。"
+    },
+    "46": {
+      "en": "And if that's the case, then I want to make sure that we block that operation and provide some",
+      "zh_tw": "如果是這種情況，我要確保我們阻擋這個操作，並提供一些",
+      "zh_cn": "如果是这种情况，我要确保我们阻挡这个操作，并提供一些"
+    },
+    "47": {
+      "en": "logging feedback to Claude.",
+      "zh_tw": "日誌回饋給 Claude。",
+      "zh_cn": "日志反馈给 Claude。"
+    },
+    "48": {
+      "en": "Claude.",
+      "zh_tw": "Claude。",
+      "zh_cn": "Claude。"
+    },
+    "49": {
+      "en": "So I'm going to first add in a console dot air specifically a console dot air, because",
+      "zh_tw": "所以我要先加一個 console.error，特別是 console.error，因為",
+      "zh_cn": "所以我要先加一个 console.error，特别是 console.error，因为"
+    },
+    "50": {
+      "en": "we want to log to standard air.",
+      "zh_tw": "我們要輸出到 standard error。",
+      "zh_cn": "我们要输出到 standard error。"
+    },
+    "51": {
+      "en": "Remember, that's how we provide some feedback to Claude.",
+      "zh_tw": "記住，這就是我們提供回饋給 Claude 的方式。",
+      "zh_cn": "记住，这就是我们提供反馈给 Claude 的方式。"
+    },
+    "52": {
+      "en": "And I'll say something like you cannot read the dot EMV file.",
+      "zh_tw": "我會寫類似「你不能讀取 .env 檔案」這樣的訊息。",
+      "zh_cn": "我会写类似「你不能读取 .env 文件」这样的信息。"
+    },
+    "53": {
+      "en": "And then I'll do a process dot exit two.",
+      "zh_tw": "然後我會做 process.exit(2)。",
+      "zh_cn": "然后我会做 process.exit(2)。"
+    },
+    "54": {
+      "en": "So now to test this out, I'm going to save the file.",
+      "zh_tw": "現在來測試一下，我要存檔。",
+      "zh_cn": "现在来测试一下，我要保存。"
+    },
+    "55": {
+      "en": "I'm going to open up Claude code.",
+      "zh_tw": "我要打開 Claude Code。",
+      "zh_cn": "我要打开 Claude Code。"
+    },
+    "56": {
+      "en": "If you already have it open, make sure you restart Claude code.",
+      "zh_tw": "如果你已經打開了，請確保你重新啟動 Claude Code。",
+      "zh_cn": "如果你已经打开了，请确保你重新启动 Claude Code。"
+    },
+    "57": {
+      "en": "You have to restart it to have any changes to your hooks take effect.",
+      "zh_tw": "你必須重新啟動它，hooks 的任何變更才會生效。",
+      "zh_cn": "你必须重新启动它，hooks 的任何变更才会生效。"
+    },
+    "58": {
+      "en": "I'm going to ask Claude to read the dot EMV file.",
+      "zh_tw": "我要請 Claude 讀取 .env 檔案。",
+      "zh_cn": "我要请 Claude 读取 .env 文件。"
+    },
+    "59": {
+      "en": "And it's probably going to attempt to, but as it attempts to read it, we're going to send",
+      "zh_tw": "它大概會嘗試去讀，但當它嘗試讀取時，我們會回傳",
+      "zh_cn": "它大概会尝试去读，但当它尝试读取时，我们会返回"
+    },
+    "60": {
+      "en": "back an error that says you cannot read the dot EMV file.",
+      "zh_tw": "一個錯誤說「你不能讀取 .env 檔案」。",
+      "zh_cn": "一个错误说「你不能读取 .env 文件」。"
+    },
+    "61": {
+      "en": "And then Claude is hopefully going to realize that, sorry, you can't actually read this.",
+      "zh_tw": "然後 Claude 應該就會意識到，抱歉，你其實不能讀這個檔案。",
+      "zh_cn": "然后 Claude 应该就会意识到，抱歉，你其实不能读这个文件。"
+    },
+    "62": {
+      "en": "As a matter of fact, it's even able to recognize that it was prevented by a read hook.",
+      "zh_tw": "事實上，它甚至能辨識出是被一個 read hook 擋下來的。",
+      "zh_cn": "事实上，它甚至能辨识出是被一个 read hook 挡下来的。"
+    },
+    "63": {
+      "en": "Now, our hook should also be working on grep operations as well.",
+      "zh_tw": "現在，我們的 hook 應該對 grep 操作也同樣有效。",
+      "zh_cn": "现在，我们的 hook 应该对 grep 操作也同样有效。"
+    },
+    "64": {
+      "en": "So if I ask Claude to try the grep tool, this should also hopefully be forbidden as well.",
+      "zh_tw": "所以如果我請 Claude 試試 grep 工具，這應該也會被禁止。",
+      "zh_cn": "所以如果我请 Claude 试试 grep 工具，这应该也会被禁止。"
+    },
+    "65": {
+      "en": "So let's see how it does.",
+      "zh_tw": "我們來看看效果如何。",
+      "zh_cn": "我们来看看效果如何。"
+    },
+    "66": {
+      "en": "And yep, same thing.",
+      "zh_tw": "沒錯，一樣的結果。",
+      "zh_cn": "没错，一样的结果。"
+    },
+    "67": {
+      "en": "It is now forbidden.",
+      "zh_tw": "現在也被禁止了。",
+      "zh_cn": "现在也被禁止了。"
+    },
+    "68": {
+      "en": "So that is a working hook that we have put together.",
+      "zh_tw": "這就是我們組合出來的一個可運作的 hook。",
+      "zh_cn": "这就是我们组合出来的一个可运作的 hook。"
+    },
+    "69": {
+      "en": "Now, this hook is not terribly useful, and I'm going to show you a much more useful hook",
+      "zh_tw": "這個 hook 不是特別實用，我等一下會展示一個",
+      "zh_cn": "这个 hook 不是特别实用，我等一下会展示一个"
+    },
+    "70": {
+      "en": "in just a moment.",
+      "zh_tw": "更實用的 hook 給你看。",
+      "zh_cn": "更实用的 hook 给你看。"
+    }
+  }
+}
