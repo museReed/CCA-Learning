@@ -322,14 +322,16 @@ def burn_subtitles(frame_path: Path, text_en: str, text_zh: str, output_path: Pa
     img = Image.open(frame_path)
     w, h = img.size
 
-    overlay = Image.new("RGBA", (w, 120), (0, 0, 0, 180))
+    # Taller overlay for two lines of subtitles
+    overlay_h = 140 if text_zh else 80
+    overlay = Image.new("RGBA", (w, overlay_h), (0, 0, 0, 180))
     img = img.convert("RGBA")
-    img.paste(overlay, (0, h - 120), overlay)
+    img.paste(overlay, (0, h - overlay_h), overlay)
 
     draw = ImageDraw.Draw(img)
 
     try:
-        font_zh = ImageFont.truetype("/System/Library/Fonts/STHeiti Light.ttc", 28)
+        font_zh = ImageFont.truetype("/System/Library/Fonts/STHeiti Light.ttc", 30)
     except Exception:
         font_zh = ImageFont.load_default()
     try:
@@ -338,21 +340,30 @@ def burn_subtitles(frame_path: Path, text_en: str, text_zh: str, output_path: Pa
         font_en = ImageFont.load_default()
 
     if text_zh:
+        # Chinese on top line, English below
         bbox_zh = draw.textbbox((0, 0), text_zh, font=font_zh)
         tw_zh = bbox_zh[2] - bbox_zh[0]
         x_zh = (w - tw_zh) // 2
-        y_zh = h - 110
+        y_zh = h - overlay_h + 15
         for dx, dy in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
             draw.text((x_zh + dx, y_zh + dy), text_zh, font=font_zh, fill=(0, 0, 0, 255))
         draw.text((x_zh, y_zh), text_zh, font=font_zh, fill=(255, 255, 255, 255))
 
-    bbox_en = draw.textbbox((0, 0), text_en, font=font_en)
-    tw_en = bbox_en[2] - bbox_en[0]
-    x_en = (w - tw_en) // 2
-    y_en = h - 55
-    for dx, dy in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
-        draw.text((x_en + dx, y_en + dy), text_en, font=font_en, fill=(0, 0, 0, 255))
-    draw.text((x_en, y_en), text_en, font=font_en, fill=(204, 204, 204, 255))
+        bbox_en = draw.textbbox((0, 0), text_en, font=font_en)
+        tw_en = bbox_en[2] - bbox_en[0]
+        x_en = (w - tw_en) // 2
+        y_en = h - overlay_h + 80
+        for dx, dy in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+            draw.text((x_en + dx, y_en + dy), text_en, font=font_en, fill=(0, 0, 0, 255))
+        draw.text((x_en, y_en), text_en, font=font_en, fill=(204, 204, 204, 255))
+    else:
+        bbox_en = draw.textbbox((0, 0), text_en, font=font_en)
+        tw_en = bbox_en[2] - bbox_en[0]
+        x_en = (w - tw_en) // 2
+        y_en = h - overlay_h + 25
+        for dx, dy in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+            draw.text((x_en + dx, y_en + dy), text_en, font=font_en, fill=(0, 0, 0, 255))
+        draw.text((x_en, y_en), text_en, font=font_en, fill=(204, 204, 204, 255))
 
     img.convert("RGB").save(output_path, "JPEG", quality=92)
 
