@@ -110,11 +110,15 @@ def discover_pairs(course_dir: Path) -> list[dict]:
         # Skip bilingual SRTs
         if "bilingual" in srt_path.name:
             continue
-        # Look for matching video
+
+        # Determine chapter dir: SRTs may be in chapter root, srt/ subdir, or lesson/srt/
         chapter_dir = srt_path.parent
+        if chapter_dir.name == "srt":
+            chapter_dir = chapter_dir.parent
+
+        # Look for matching video
         video_path = chapter_dir / "videos" / (srt_path.stem + ".mp4")
         if not video_path.exists():
-            # Also check if video is in same dir
             video_path = chapter_dir / (srt_path.stem + ".mp4")
 
         pairs.append({

@@ -211,39 +211,45 @@ CCA-Learning/
 ├── README.md                              ← 你在這裡
 ├── courses/
 │   ├── building-with-the-claude-api/      ✅ 9 章 68 課
-│   │   ├── INDEX.md                       ← 課程目錄
+│   │   ├── INDEX.md                       ← 課程目錄（每門課都有）
 │   │   ├── translations/                  ← 74 翻譯 JSON
-│   │   ├── 01-api-fundamentals/
-│   │   │   ├── 04-accessing-the-api.md    ← 原始課程文字稿
-│   │   │   ├── 04-accessing-the-api/
-│   │   │   │   ├── study-notes/universal/ ← 6 個學習筆記
-│   │   │   │   └── visuals/               ← SVG 圖表
-│   │   │   ├── visual-guides/             ← 逐幀影片截圖+雙語字幕
-│   │   │   └── srt/bilingual/             ← 雙語 SRT
-│   │   └── ...
+│   │   └── 01-api-fundamentals/           ← 章節目錄
+│   │       ├── 04-accessing-the-api.md    ← 原始課程文字稿
+│   │       ├── 04-accessing-the-api/      ← 課堂目錄
+│   │       │   ├── study-notes/universal/ ← 6 個學習筆記
+│   │       │   └── visuals/               ← SVG 圖表
+│   │       ├── images/                    ← 講師截圖（文字稿引用）
+│   │       ├── screenshots/               ← Skilljar 頁面截圖
+│   │       ├── srt/                       ← 英文 + 雙語字幕
+│   │       │   └── bilingual/             ← EN+ZH 雙語 SRT
+│   │       ├── videos/                    ← MP4 教學影片
+│   │       └── visual-guides/             ← 逐幀截圖+雙語字幕疊加
+│   │
 │   ├── claude-code-in-action/             ✅ 6 章 15 課
 │   │   ├── INDEX.md
 │   │   ├── translations/                  ← 15 翻譯 JSON
-│   │   ├── 01-intro/
-│   │   │   └── 02-introduction/
-│   │   │       ├── source/                ← 課程文字稿+截圖
-│   │   │       ├── study-notes/universal/ ← 6 個學習筆記
-│   │   │       ├── srt/bilingual/         ← 雙語 SRT
-│   │   │       ├── visual-guide/          ← 逐幀截圖
-│   │   │       └── visuals/               ← SVG
-│   │   └── ...
+│   │   └── 01-intro/
+│   │       └── 02-introduction/           ← 每堂課獨立目錄
+│   │           ├── source/                ← 課程文字稿+截圖
+│   │           ├── study-notes/universal/ ← 6 個學習筆記
+│   │           ├── srt/bilingual/         ← 雙語 SRT
+│   │           ├── visual-guide/          ← 逐幀截圖
+│   │           └── visuals/               ← SVG 圖表
+│   │
 │   ├── introduction-to-model-context-protocol/  ✅ 4 章 11 課
 │   ├── model-context-protocol-advanced-topics/  ✅ 4 章 8 課
 │   ├── claude-101/                        ⏭️ 單堂入門
 │   ├── introduction-to-agent-skills/      ⏭️ 單堂簡介
 │   └── introduction-to-subagents/         ⏭️ 單堂簡介
+│
 ├── html/                                  🌐 預建 HTML（637 頁）
 ├── scripts/                               🔧 翻譯、建置、管線腳本
 │   ├── bilingual_pipeline.py              ← 雙語字幕+逐幀指南管線
 │   ├── fill_translations.py              ← 翻譯核心工具
 │   ├── build_html.py                     ← HTML 建置腳本
-│   └── translate_*.py                    ← 各課程翻譯腳本
-└── references/                            📚 參考資料
+│   ├── translate_*.py                    ← 各課程翻譯腳本
+│   └── internal/                         ← 內部工具（非讀者用）
+└── references/                            📚 CCA 考試參考資料
 ```
 
 ---
