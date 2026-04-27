@@ -1,0 +1,297 @@
+{
+  "srt_file": "Introducing_MCP_uDieeg3M.srt",
+  "video_file": "Introducing_MCP_uDieeg3M.mp4",
+  "max_valid_entry": 58,
+  "entries": {
+    "1": {
+      "en": "In this module, we are going to focus on model context protocol.",
+      "zh_tw": "在這個模組中，我們要專注於模型上下文協議。",
+      "zh_cn": "在这个模组中，我们要專注於模型上下文协议。"
+    },
+    "2": {
+      "en": "MCP is a communication layer designed to provide Claude with context and tools",
+      "zh_tw": "MCP 是一個通訊層，設計用來為 Claude 提供上下文和工具，",
+      "zh_cn": "MCP 是一个通讯层，设计用來为 Claude 提供上下文和工具，"
+    },
+    "3": {
+      "en": "without requiring you, the developer, to write a bunch of tedious code.",
+      "zh_tw": "而不需要你這個開發者寫一堆繁瑣的程式碼。",
+      "zh_cn": "而不需要你这个开发者写一堆繁琐的代码。"
+    },
+    "4": {
+      "en": "When you first get started with MCP, you will see diagrams that look like this very often.",
+      "zh_tw": "當你第一次開始接觸 MCP 時，你會很常看到像這樣的圖表。",
+      "zh_cn": "当你第一次开始接触 MCP 时，你会很常看到像这样的圖表。"
+    },
+    "5": {
+      "en": "It shows two major elements of MCP, namely the client and the server.",
+      "zh_tw": "它展示了 MCP 的兩個主要元素，即客戶端和伺服器。",
+      "zh_cn": "它展示了 MCP 的兩个主要元素，即客户端和服务器。"
+    },
+    "6": {
+      "en": "The server often contains a number of internal components, named tools, resources, and prompts.",
+      "zh_tw": "伺服器通常包含一些內部元件，稱為工具、資源和提示詞。",
+      "zh_cn": "服务器通常包含一些內部元件，称为工具、资源和提示词。"
+    },
+    "7": {
+      "en": "Now there's a lot of terminology here.",
+      "zh_tw": "這裡有很多術語。",
+      "zh_cn": "这里有很多术语。"
+    },
+    "8": {
+      "en": "So to help you understand all of this, we're going to imagine that we are building a small app",
+      "zh_tw": "所以為了幫助你理解這些，我們要想像我們在建構一個小應用程式，",
+      "zh_cn": "所以为了幫助你理解这些，我们要想像我们在建构一个小应用程序，"
+    },
+    "9": {
+      "en": "and see how MCP fits into it.",
+      "zh_tw": "然後看看 MCP 如何融入其中。",
+      "zh_cn": "然后看看 MCP 如何融入其中。"
+    },
+    "10": {
+      "en": "Our sample app is going to be another chat interface.",
+      "zh_tw": "我們的範例應用程式會是另一個聊天介面。",
+      "zh_cn": "我们的范例应用程序会是另一个聊天接口。"
+    },
+    "11": {
+      "en": "It's going to allow a user to chat with Claude about their GitHub data.",
+      "zh_tw": "它會讓使用者能跟 Claude 聊他們的 GitHub 資料。",
+      "zh_cn": "它会让使用者能跟 Claude 聊他们的 GitHub 数据。"
+    },
+    "12": {
+      "en": "So if a user asks a question like,",
+      "zh_tw": "所以如果使用者問一個問題，像是",
+      "zh_cn": "所以如果使用者问一个问题，像是"
+    },
+    "13": {
+      "en": "what open pull request do I have across all my different repositories?",
+      "zh_tw": "「我在所有不同的倉庫中有哪些未合併的拉取請求？」",
+      "zh_cn": "「我在所有不同的倉庫中有哪些未合併的拉取请求？」"
+    },
+    "14": {
+      "en": "The expectation is that Claude is probably going to make use of a tool to reach out to GitHub,",
+      "zh_tw": "預期是 Claude 大概會使用工具來存取 GitHub，",
+      "zh_cn": "预期是 Claude 大概会使用工具來访问 GitHub，"
+    },
+    "15": {
+      "en": "access the user's account, and see what open pull requests they have,",
+      "zh_tw": "存取使用者的帳號，看看他們有哪些未合併的拉取請求，",
+      "zh_cn": "访问使用者的帳号，看看他们有哪些未合併的拉取请求，"
+    },
+    "16": {
+      "en": "maybe open repositories or whatever else.",
+      "zh_tw": "也許是開放的倉庫或其他什麼。",
+      "zh_cn": "也许是开放的倉庫或其他什麼。"
+    },
+    "17": {
+      "en": "The point here is that we would implement this probably by using a set of tools.",
+      "zh_tw": "重點是我們大概會用一組工具來實作這個。",
+      "zh_cn": "重点是我们大概会用一组工具來实作这个。"
+    },
+    "18": {
+      "en": "Now one thing I want to mention really quickly is that GitHub has a tremendous amount of functionality.",
+      "zh_tw": "我想快速提一下，GitHub 有大量的功能。",
+      "zh_cn": "我想快速提一下，GitHub 有大量的功能。"
+    },
+    "19": {
+      "en": "There are repositories, pull requests, issues, projects, and tons of other things.",
+      "zh_tw": "有倉庫、拉取請求、問題、專案和很多其他東西。",
+      "zh_cn": "有倉庫、拉取请求、问题、项目和很多其他東西。"
+    },
+    "20": {
+      "en": "So to have a complete GitHub chatbot, we would really have to author a tremendous number of tools.",
+      "zh_tw": "所以要有一個完整的 GitHub 聊天機器人，我們真的得撰寫大量的工具。",
+      "zh_cn": "所以要有一个完整的 GitHub 聊天机器人，我们真的得撰写大量的工具。"
+    },
+    "21": {
+      "en": "If we wanted to build that sample app, we would be on the hook for authoring all these schemas and all these functions.",
+      "zh_tw": "如果我們想建構那個範例應用程式，我們就得負責撰寫所有這些 schema 和函式。",
+      "zh_cn": "如果我们想建构那个范例应用程序，我们就得负責撰写所有这些 schema 和函数。"
+    },
+    "22": {
+      "en": "And this is all code that you and I as developers would have to write, test, and maintain.",
+      "zh_tw": "這些都是我們開發者必須寫、測試和維護的程式碼。",
+      "zh_cn": "这些都是我们开发者必须写、测试和维护的代码。"
+    },
+    "23": {
+      "en": "That's a lot of effort, a lot of burden being placed on us.",
+      "zh_tw": "那是很多的努力，很多的負擔加在我們身上。",
+      "zh_cn": "那是很多的努力，很多的负担加在我们身上。"
+    },
+    "24": {
+      "en": "This challenge of making developers maintain a big set of integrations is one of the primary difficulties that model context aims to solve.",
+      "zh_tw": "讓開發者維護一大堆整合的這個挑戰，是模型上下文協議旨在解決的主要困難之一。",
+      "zh_cn": "让开发者维护一大堆整合的这个挑战，是模型上下文协议旨在解决的主要困难之一。"
+    },
+    "25": {
+      "en": "MCP shifts the burden of defining and running tools from your server to something else called an MCP server.",
+      "zh_tw": "MCP 把定義和執行工具的負擔從你的伺服器轉移到另一個叫做 MCP 伺服器的東西。",
+      "zh_cn": "MCP 把定义和执行工具的负担从你的服务器转移到另一个叫做 MCP 服务器的東西。"
+    },
+    "26": {
+      "en": "So no longer would you and I have to author this tool right here.",
+      "zh_tw": "所以你和我不再需要撰寫這裡的這個工具。",
+      "zh_cn": "所以你和我不再需要撰写这里的这个工具。"
+    },
+    "27": {
+      "en": "Instead, it would be authored and executed somewhere else inside of this MCP server.",
+      "zh_tw": "它會在其他地方，在 MCP 伺服器中被撰寫和執行。",
+      "zh_cn": "它会在其他地方，在 MCP 服务器中被撰写和执行。"
+    },
+    "28": {
+      "en": "These MCP servers can really be thought of as like an interface to some outside service.",
+      "zh_tw": "這些 MCP 伺服器可以被想成是某個外部服務的介面。",
+      "zh_cn": "这些 MCP 服务器可以被想成是某个外部服务的接口。"
+    },
+    "29": {
+      "en": "So I might have a GitHub MCP server that provides access to data and functionality provided by specifically GitHub.",
+      "zh_tw": "所以我可能有一個 GitHub MCP 伺服器，提供對 GitHub 特定的資料和功能的存取。",
+      "zh_cn": "所以我可能有一个 GitHub MCP 服务器，提供对 GitHub 特定的数据和功能的访问。"
+    },
+    "30": {
+      "en": "We're essentially wrapping up a ton of functionality around GitHub and placing it into this MCP server in the form of a set of tools.",
+      "zh_tw": "我們基本上把大量圍繞 GitHub 的功能包裝起來，以一組工具的形式放入這個 MCP 伺服器中。",
+      "zh_cn": "我们基本上把大量圍繞 GitHub 的功能包装起來，以一组工具的形式放入这个 MCP 服务器中。"
+    },
+    "31": {
+      "en": "So at this point, we have a very basic understanding of what a MCP server is.",
+      "zh_tw": "所以此時，我們對 MCP 伺服器有了非常基本的理解。",
+      "zh_cn": "所以此时，我们对 MCP 服务器有了非常基本的理解。"
+    },
+    "32": {
+      "en": "It gives us access to a set of tools that exposes functionality related to some outside service.",
+      "zh_tw": "它讓我們存取一組工具，公開與某個外部服務相關的功能。",
+      "zh_cn": "它让我们访问一组工具，公开与某个外部服务相关的功能。"
+    },
+    "33": {
+      "en": "And the benefit here is that you and I do not have to author all these different tool schemas and functions and so on.",
+      "zh_tw": "好處是你和我不需要撰寫所有這些不同的工具 schema 和函式等等。",
+      "zh_cn": "好处是你和我不需要撰写所有这些不同的工具 schema 和函数等等。"
+    },
+    "34": {
+      "en": "Now that we have this basic understanding, I want to address some very common questions that a lot of people have when they first learn about MCP servers.",
+      "zh_tw": "現在我們有了基本理解，我想回答很多人第一次學 MCP 伺服器時都會有的一些常見問題。",
+      "zh_cn": "现在我们有了基本理解，我想回答很多人第一次学 MCP 服务器时都会有的一些常見问题。"
+    },
+    "35": {
+      "en": "So three common questions that seem to always come up.",
+      "zh_tw": "三個似乎總是會出現的常見問題。",
+      "zh_cn": "三个似乎总是会出现的常見问题。"
+    },
+    "36": {
+      "en": "The first common question is who authors these MCP servers?",
+      "zh_tw": "第一個常見問題是誰撰寫這些 MCP 伺服器？",
+      "zh_cn": "第一个常見问题是誰撰写这些 MCP 服务器？"
+    },
+    "37": {
+      "en": "And the answer is anyone.",
+      "zh_tw": "答案是任何人。",
+      "zh_cn": "答案是任何人。"
+    },
+    "38": {
+      "en": "Anyone can make an MCP server implementation.",
+      "zh_tw": "任何人都可以做 MCP 伺服器實作。",
+      "zh_cn": "任何人都可以做 MCP 服务器实作。"
+    },
+    "39": {
+      "en": "But very often, you will find that service providers make their own official implementation.",
+      "zh_tw": "但你會很常發現服務提供者會做他們自己的官方實作。",
+      "zh_cn": "但你会很常发现服务提供者会做他们自己的官方实作。"
+    },
+    "40": {
+      "en": "So for example, AWS might decide to release their own official MCP server implementation.",
+      "zh_tw": "例如，AWS 可能決定發布他們自己的官方 MCP 伺服器實作。",
+      "zh_cn": "例如，AWS 可能决定发布他们自己的官方 MCP 服务器实作。"
+    },
+    "41": {
+      "en": "And inside of it, it might have a wide variety of different tools available for you to use.",
+      "zh_tw": "裡面可能有各種不同的工具可供你使用。",
+      "zh_cn": "里面可能有各种不同的工具可供你使用。"
+    },
+    "42": {
+      "en": "The second common question is how is using a MCP server different than just calling a services API directly?",
+      "zh_tw": "第二個常見問題是使用 MCP 伺服器跟直接呼叫服務的 API 有什麼不同？",
+      "zh_cn": "第二个常見问题是使用 MCP 服务器跟直接调用服务的 API 有什麼不同？"
+    },
+    "43": {
+      "en": "Well, as we just saw, if we wanted to call a API directly, such as GitHub, then we would have to author this tool ourselves.",
+      "zh_tw": "嗯，正如我們剛看到的，如果我們想直接呼叫 API，比如 GitHub，我們就得自己撰寫工具。",
+      "zh_cn": "嗯，正如我们剛看到的，如果我们想直接调用 API，比如 GitHub，我们就得自己撰写工具。"
+    },
+    "44": {
+      "en": "And now we can call GitHub directly.",
+      "zh_tw": "而現在我們可以直接呼叫 GitHub。",
+      "zh_cn": "而现在我们可以直接调用 GitHub。"
+    },
+    "45": {
+      "en": "So what did we gain here?",
+      "zh_tw": "所以我們在這裡得到了什麼？",
+      "zh_cn": "所以我们在这里得到了什麼？"
+    },
+    "46": {
+      "en": "Well, all that really changed was we are now having to author the schema ourselves and the function implementation ourselves.",
+      "zh_tw": "真正改變的只是我們現在由 MCP 伺服器來撰寫 schema 和函式實作。",
+      "zh_cn": "真正改变的只是我们现在由 MCP 服务器來撰写 schema 和函数实作。"
+    },
+    "47": {
+      "en": "So simply by adding in the MCP server, we are saving ourselves a little bit of time.",
+      "zh_tw": "所以簡單地加入 MCP 伺服器，我們就省了一些時間。",
+      "zh_cn": "所以简单地加入 MCP 服务器，我们就省了一些时间。"
+    },
+    "48": {
+      "en": "The final common question is more of a common criticism that you're going to see people have around MCP.",
+      "zh_tw": "最後一個常見問題更像是你會看到人們對 MCP 的常見批評。",
+      "zh_cn": "最后一个常見问题更像是你会看到人们对 MCP 的常見批评。"
+    },
+    "49": {
+      "en": "And this criticism is most often coming from people who don't quite understand what MCP is all about.",
+      "zh_tw": "這個批評最常來自不太理解 MCP 是什麼的人。",
+      "zh_cn": "这个批评最常來自不太理解 MCP 是什麼的人。"
+    },
+    "50": {
+      "en": "So very often, you will see people saying MCP and tool use are the same thing.",
+      "zh_tw": "你會很常看到人們說 MCP 和工具使用是同樣的東西。",
+      "zh_cn": "你会很常看到人们说 MCP 和工具使用是同样的東西。"
+    },
+    "51": {
+      "en": "Well, as I have just laid out to you, MCP servers and tool use, they are complementary.",
+      "zh_tw": "嗯，正如我剛才向你說明的，MCP 伺服器和工具使用是互補的。",
+      "zh_cn": "嗯，正如我剛才向你说明的，MCP 服务器和工具使用是互补的。"
+    },
+    "52": {
+      "en": "They are different things, but they are complementary.",
+      "zh_tw": "它們是不同的東西，但它們是互補的。",
+      "zh_cn": "它们是不同的東西，但它们是互补的。"
+    },
+    "53": {
+      "en": "The idea behind MCP is that you do not have to author the tool function and the tool schema.",
+      "zh_tw": "MCP 背後的概念是你不需要撰寫工具函式和工具 schema。",
+      "zh_cn": "MCP 背后的概念是你不需要撰写工具函数和工具 schema。"
+    },
+    "54": {
+      "en": "That is something that is done for you by someone else and is being wrapped up inside of this MCP server.",
+      "zh_tw": "那是由別人為你做的，被包裝在 MCP 伺服器裡。",
+      "zh_cn": "那是由別人为你做的，被包装在 MCP 服务器里。"
+    },
+    "55": {
+      "en": "So at some level, yeah, they're kind of similar because we are talking about tool use in both cases.",
+      "zh_tw": "所以在某種層面上，是的，它們有點相似，因為兩種情況下我們都在討論工具使用。",
+      "zh_cn": "所以在某种层面上，是的，它们有点相似，因为兩种情況下我们都在討论工具使用。"
+    },
+    "56": {
+      "en": "But MCP servers are really talking about who is doing the actual work.",
+      "zh_tw": "但 MCP 伺服器真正在討論的是誰在做實際的工作。",
+      "zh_cn": "但 MCP 服务器真正在討论的是誰在做实际的工作。"
+    },
+    "57": {
+      "en": "So if you ever see this criticism, again, it's usually because people don't quite understand what MCP is all about.",
+      "zh_tw": "所以如果你看到這個批評，通常是因為人們不太理解 MCP 是什麼。",
+      "zh_cn": "所以如果你看到这个批评，通常是因为人们不太理解 MCP 是什麼。"
+    },
+    "58": {
+      "en": "So if you ever see this, you can see it.",
+      "zh_tw": "所以如果你看到這個，你就知道了。",
+      "zh_cn": "所以如果你看到这个，你就知道了。"
+    }
+  }
+}

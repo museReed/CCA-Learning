@@ -1,0 +1,332 @@
+{
+  "srt_file": "Handling_message_blocks_pZ50oXe4.srt",
+  "video_file": "Handling_message_blocks_pZ50oXe4.mp4",
+  "max_valid_entry": 65,
+  "entries": {
+    "1": {
+      "en": "On to step three, we're going to call Claude with this JSON schema and some user message.",
+      "zh_tw": "進入第三步，我們要用這個 JSON Schema 和一些使用者訊息呼叫 Claude。",
+      "zh_cn": "进入第三步，我们要用这个 JSON Schema 和一些使用者信息调用 Claude。"
+    },
+    "2": {
+      "en": "So from our server, we're going to make a request off to Claude just as we've been doing before,",
+      "zh_tw": "從伺服器送出請求給 Claude，就像之前一樣，",
+      "zh_cn": "从服务器送出请求给 Claude，就像之前一样，"
+    },
+    "3": {
+      "en": "but now we're going to also include this tool schema. This helps Claude understand that there",
+      "zh_tw": "但現在我們還要包含工具 schema。這幫助 Claude 理解它有",
+      "zh_cn": "但现在我们还要包含工具 schema。这幫助 Claude 理解它有"
+    },
+    "4": {
+      "en": "is a tool available to it. Let's go back over to our notebook and we're going to try to make",
+      "zh_tw": "工具可以使用。回到筆記本，我們要手動發出",
+      "zh_cn": "工具可以使用。回到笔记本，我们要手动发出"
+    },
+    "5": {
+      "en": "this request by hand without using any of those helper functions we previously put together,",
+      "zh_tw": "這個請求，不使用之前的輔助函式，",
+      "zh_cn": "这个请求，不使用之前的辅助函数，"
+    },
+    "6": {
+      "en": "like the chat function. Okay, so back over here, I'm going to go down and create a new cell.",
+      "zh_tw": "像是 chat 函式。回到這裡，往下建一個新儲存格。",
+      "zh_cn": "像是 chat 函数。回到这里，往下建一个新存储格。"
+    },
+    "7": {
+      "en": "I'm going to make an empty list of messages. I'm going to append in there manually a new message",
+      "zh_tw": "建一個空的訊息列表。手動加入一個訊息，",
+      "zh_cn": "建一个空的信息列表。手动加入一个信息，"
+    },
+    "8": {
+      "en": "with a role of user and a content of what is the exact time formatted as hour, minute, seconds.",
+      "zh_tw": "role 是 user，content 是「目前確切時間是什麼，格式為時分秒」。",
+      "zh_cn": "role 是 user，content 是「目前确切时间是什麼，格式为时分秒」。"
+    },
+    "9": {
+      "en": "Then underneath that, I'm going to do a call off to the client messages.create function.",
+      "zh_tw": "然後下面呼叫 client.messages.create 函式。",
+      "zh_cn": "然后下面调用 client.messages.create 函数。"
+    },
+    "10": {
+      "en": "So I'll get a response from client messages create. I'll designate my model, my max tokens,",
+      "zh_tw": "從 client.messages.create 取得 response。指定模型、max tokens、",
+      "zh_cn": "从 client.messages.create 取得 response。指定模型、max tokens、"
+    },
+    "11": {
+      "en": "my list of messages. And now we want to also include this JSON schema that tells Claude that",
+      "zh_tw": "訊息列表。現在還要包含 JSON Schema 來告訴 Claude",
+      "zh_cn": "信息列表。现在还要包含 JSON Schema 來告訴 Claude"
+    },
+    "12": {
+      "en": "it has a tool available to it. To do so, we'll include a tools keyword argument. This is going",
+      "zh_tw": "它有工具可用。加入 tools 關鍵字參數。是",
+      "zh_cn": "它有工具可用。加入 tools 关键字参数。是"
+    },
+    "13": {
+      "en": "to be a list and inside of it is going to be all the different JSON schema specs that we have created.",
+      "zh_tw": "一個列表，裡面放所有我們建立的 JSON Schema 規格。",
+      "zh_cn": "一个列表，里面放所有我们建立的 JSON Schema 规格。"
+    },
+    "14": {
+      "en": "At this point in time, you and I have only created one and it's called get current date time schema.",
+      "zh_tw": "目前只有一個，叫做 get current date time schema。",
+      "zh_cn": "目前只有一个，叫做 get current date time schema。"
+    },
+    "15": {
+      "en": "So we're going to take that and put it in right here. Then I'm going to print out response at the",
+      "zh_tw": "把它放進去。然後在最下面印出 response，執行看看結果。會得到一個之前",
+      "zh_cn": "把它放进去。然后在最下面印出 response，执行看看结果。会得到一个之前"
+    },
+    "16": {
+      "en": "very bottom and let's run this and see what happens. We're going to get a response message back here",
+      "zh_tw": "沒見過的回應結構。之前收到的訊息",
+      "zh_cn": "没見过的回应结构。之前收到的信息"
+    },
+    "17": {
+      "en": "that has a structure that we have not quite seen before. All the messages that we have ever received",
+      "zh_tw": "content 欄位裡都有一個列表，裡面是 text block。而如之前多次",
+      "zh_cn": "content 字段里都有一个列表，里面是 text block。而如之前多次"
+    },
+    "18": {
+      "en": "before would have a content field that has a list and inside there would be a text block. And as I've",
+      "zh_tw": "提到的，text block 裡就是我們真正想顯示給",
+      "zh_cn": "提到的，text block 里就是我们真正想显示给"
+    },
+    "19": {
+      "en": "mentioned many times before inside the text block is the text that we actually want to display to the",
+      "zh_tw": "使用者的文字。但現在使用工具後，content 列表",
+      "zh_cn": "使用者的文字。但现在使用工具后，content 列表"
+    },
+    "20": {
+      "en": "user. But now that we are making use of tools, this content list is going to be a little bit",
+      "zh_tw": "會不太一樣。你會注意到列表中有第二個 block 叫做 tool",
+      "zh_cn": "会不太一样。你会注意到列表中有第二个 block 叫做 tool"
+    },
+    "21": {
+      "en": "different. So you might notice that inside the content list, there's a second block called a tool",
+      "zh_tw": "use block。整個結構在這裡。讓我展示一張圖確保",
+      "zh_cn": "use block。整个结构在这里。让我展示一張圖确保"
+    },
+    "22": {
+      "en": "use block. So here's that entire structure right here. Let me show you a diagram just to make sure",
+      "zh_tw": "清楚。好的。這是我們第一次遇到多 block 的訊息。",
+      "zh_cn": "清楚。好的。这是我们第一次遇到多 block 的信息。"
+    },
+    "23": {
+      "en": "this thing is really clear. Okay. So this is our first experience with a multi block message.",
+      "zh_tw": "記住訊息不是助手訊息就是使用者訊息。我們經常會有一些",
+      "zh_cn": "记住信息不是助手信息就是使用者信息。我们经常会有一些"
+    },
+    "24": {
+      "en": "Remember a message is either an assistant message or a user message. We are often going to have some",
+      "zh_tw": "文字儲存在訊息中。之前一直都是看到這個，",
+      "zh_cn": "文字存储在信息中。之前一直都是看到这个，"
+    },
+    "25": {
+      "en": "amount of text stored inside of a message. And that's what we've always seen previously,",
+      "zh_tw": "但除了文字以外，訊息中還可以儲存其他類型的資料。",
+      "zh_cn": "但除了文字以外，信息中还可以存储其他类型的数据。"
+    },
+    "26": {
+      "en": "but in addition to just text, there are other types of data that can be stored inside of a message.",
+      "zh_tw": "當 Claude 決定使用工具時，經常會送回一個助手",
+      "zh_cn": "当 Claude 决定使用工具时，经常会送回一个助手"
+    },
+    "27": {
+      "en": "When Claude decides to make use of a tool, it's very often going to send us back an assistant",
+      "zh_tw": "訊息，包含 text block 和 tool use block。text block 是要顯示給使用者的",
+      "zh_cn": "信息，包含 text block 和 tool use block。text block 是要显示给使用者的"
+    },
+    "28": {
+      "en": "message that contains both a text block and a tool use block. The text block is intended to be some",
+      "zh_tw": "文字，幫助他們理解正在發生什麼。所以這裡",
+      "zh_cn": "文字，幫助他们理解正在发生什麼。所以这里"
+    },
+    "29": {
+      "en": "text that is displayed to the user to help them understand what is going on. So in this case,",
+      "zh_tw": "text block 可能包含像「我可以幫你找到目前時間。讓我幫你查一下」",
+      "zh_cn": "text block 可能包含像「我可以幫你找到目前时间。让我幫你查一下」"
+    },
+    "30": {
+      "en": "the text block might contain something like, I can help you find the current time. Let me find that",
+      "zh_tw": "這樣的內容。",
+      "zh_cn": "这样的內容。"
+    },
+    "31": {
+      "en": "information for you. Then in addition to this text block is the tool use block. This tool use block",
+      "zh_tw": "除了 text block 外還有 tool use block。tool use block",
+      "zh_cn": "除了 text block 外还有 tool use block。tool use block"
+    },
+    "32": {
+      "en": "is assigned to you and I as developers that Claude wants to make use of a tool. The tool use block is",
+      "zh_tw": "是告訴我們開發者 Claude 想要使用工具。tool use block",
+      "zh_cn": "是告訴我们开发者 Claude 想要使用工具。tool use block"
+    },
+    "33": {
+      "en": "going to list out the name of the tool function that it wants to call. So in this case, Claude wants to",
+      "zh_tw": "會列出它想呼叫的工具函式名稱。在這裡 Claude 想",
+      "zh_cn": "会列出它想调用的工具函数名称。在这里 Claude 想"
+    },
+    "34": {
+      "en": "call the get current date time function we put together. And then it also provides some inputs or",
+      "zh_tw": "呼叫我們建的 get current date time 函式。然後還提供一些 inputs 或",
+      "zh_cn": "调用我们建的 get current date time 函数。然后还提供一些 inputs 或"
+    },
+    "35": {
+      "en": "essentially arguments that we need to pass into that function. So the next thing we're going to do as a",
+      "zh_tw": "基本上就是我們需要傳入函式的參數。接下來要做的是",
+      "zh_cn": "基本上就是我们需要传入函数的参数。接下來要做的是"
+    },
+    "36": {
+      "en": "part of this entire process is to find the appropriate tool and actually run it. But before",
+      "zh_tw": "找到對應的工具並實際執行。但在那之前，",
+      "zh_cn": "找到对应的工具並实际执行。但在那之前，"
+    },
+    "37": {
+      "en": "that, there's something really critical that we need to take care of around this idea of having a",
+      "zh_tw": "有個非常關鍵的事情需要處理，關於 content",
+      "zh_cn": "有个非常关键的事情需要处理，关於 content"
+    },
+    "38": {
+      "en": "content list with multiple blocks inside of it. Okay, so here's just a quick reminder for you.",
+      "zh_tw": "列表中有多個 block 的情況。好的，快速提醒一下。",
+      "zh_cn": "列表中有多个 block 的情況。好的，快速提醒一下。"
+    },
+    "39": {
+      "en": "At this point in time, we have made a request from our server off to Claude. And in that request,",
+      "zh_tw": "目前我們已經從伺服器送請求給 Claude。請求中",
+      "zh_cn": "目前我们已经从服务器送请求给 Claude。请求中"
+    },
+    "40": {
+      "en": "we had a single user message that also included a tool schema. We have now gotten a response back.",
+      "zh_tw": "有一個使用者訊息，也包含了工具 schema。我們得到了回應。",
+      "zh_cn": "有一个使用者信息，也包含了工具 schema。我们得到了回应。"
+    },
+    "41": {
+      "en": "And inside this response, there's the assistant message and it has two separate blocks inside the",
+      "zh_tw": "回應中有助手訊息，content 列表裡有兩個獨立的 block，",
+      "zh_cn": "回应中有助手信息，content 列表里有兩个独立的 block，"
+    },
+    "42": {
+      "en": "content list, a text block and a tool use block. Now there's something I want to remind you about",
+      "zh_tw": "text block 和 tool use block。我想提醒你關於",
+      "zh_cn": "text block 和 tool use block。我想提醒你关於"
+    },
+    "43": {
+      "en": "Claude. Remember that Claude does not store any message history or anything about the conversation",
+      "zh_tw": "Claude 的一件事。記住 Claude 不會儲存任何訊息歷史或對話的任何資訊。",
+      "zh_cn": "Claude 的一件事。记住 Claude 不会存储任何信息历史或对话的任何资讯。"
+    },
+    "44": {
+      "en": "you are having. If you ever want to maintain a conversation or a history with Claude,",
+      "zh_tw": "如果你想維持和 Claude 的對話或歷史，",
+      "zh_cn": "如果你想维持和 Claude 的对话或历史，"
+    },
+    "45": {
+      "en": "you have to manage it manually. And what this means is that when we eventually take this tool use block",
+      "zh_tw": "必須手動管理。這意味著當我們最終處理 tool use block",
+      "zh_cn": "必须手动管理。这意味著当我们最终处理 tool use block"
+    },
+    "46": {
+      "en": "and eventually call some actual function, we need to eventually respond back to Claude. And when we do so,",
+      "zh_tw": "並呼叫某個實際函式後，我們需要再回應 Claude。重要的是，",
+      "zh_cn": "並调用某个实际函数后，我们需要再回应 Claude。重要的是，"
+    },
+    "47": {
+      "en": "here's the critical part, we need to make sure we include the entire conversation history,",
+      "zh_tw": "需要確保包含完整的對話歷史，",
+      "zh_cn": "需要确保包含完整的对话历史，"
+    },
+    "48": {
+      "en": "just as we've been doing throughout the course. So we already have an idea of how to do this.",
+      "zh_tw": "就像整個課程中一直在做的。我們已經知道怎麼做了。",
+      "zh_cn": "就像整个课程中一直在做的。我们已经知道怎麼做了。"
+    },
+    "49": {
+      "en": "The only difference this time around is that we need to make sure that we deal with messages",
+      "zh_tw": "唯一的不同是這次需要處理",
+      "zh_cn": "唯一的不同是这次需要处理"
+    },
+    "50": {
+      "en": "that might have multiple blocks inside them. So let me show you how we would do this by hand.",
+      "zh_tw": "可能有多個 block 的訊息。讓我示範如何手動做。",
+      "zh_cn": "可能有多个 block 的信息。让我示范如何手动做。"
+    },
+    "51": {
+      "en": "And then eventually a little bit later on inside this section, we're going to go back to our helper",
+      "zh_tw": "之後我們會回到輔助",
+      "zh_cn": "之后我们会回到辅助"
+    },
+    "52": {
+      "en": "functions, specifically add user message and add assistant message, and make sure that these can",
+      "zh_tw": "函式，特別是 add user message 和 add assistant message，確保能",
+      "zh_cn": "函数，特別是 add user message 和 add assistant message，确保能"
+    },
+    "53": {
+      "en": "support messages that have multiple blocks inside them. Because right now they only support single text",
+      "zh_tw": "支援有多個 block 的訊息。因為目前只支援單一 text",
+      "zh_cn": "支持有多个 block 的信息。因为目前只支持单一 text"
+    },
+    "54": {
+      "en": "blocks. Okay, so to manage these messages, I'm going to go back down to our bottom code cell where",
+      "zh_tw": "block。好的，為了管理這些訊息，回到下面我們",
+      "zh_cn": "block。好的，为了管理这些信息，回到下面我们"
+    },
+    "55": {
+      "en": "we are currently getting our response. I'm going to take our response and make sure I append in a new",
+      "zh_tw": "取得回應的儲存格。取出 response，確保加入一個新的",
+      "zh_cn": "取得回应的存储格。取出 response，确保加入一个新的"
+    },
+    "56": {
+      "en": "assistant message to our list of messages. So I'm going to delete response right there. We'll say",
+      "zh_tw": "助手訊息到訊息列表。刪掉那裡的 response。改成",
+      "zh_cn": "助手信息到信息列表。刪掉那里的 response。改成"
+    },
+    "57": {
+      "en": "messages.append. I'm going to put in a new role of assistant. And then our content is going to be the",
+      "zh_tw": "messages.append。放入 role 為 assistant。content 就是",
+      "zh_cn": "messages.append。放入 role 为 assistant。content 就是"
+    },
+    "58": {
+      "en": "exact list of content blocks out of the response we just got back. So all we have to do is add in",
+      "zh_tw": "回應中的完整 content block 列表。只需要加入",
+      "zh_cn": "回应中的完整 content block 列表。只需要加入"
+    },
+    "59": {
+      "en": "response.oop, not blocks, but content. There we go. So now if I print out messages and run the cell again,",
+      "zh_tw": "response.content。好的。印出 messages 重新執行，",
+      "zh_cn": "response.content。好的。印出 messages 重新执行，"
+    },
+    "60": {
+      "en": "we should see that we end up with our user. So that's our original message right there. We now",
+      "zh_tw": "應該看到 user 訊息，就是原始訊息。現在",
+      "zh_cn": "应该看到 user 信息，就是原始信息。现在"
+    },
+    "61": {
+      "en": "have our assistant message. And inside there is a text block and the tool use block. So now we are",
+      "zh_tw": "有了 assistant 訊息。裡面有 text block 和 tool use block。所以現在",
+      "zh_cn": "有了 assistant 信息。里面有 text block 和 tool use block。所以现在"
+    },
+    "62": {
+      "en": "correctly building up our conversation history over time by including all the different blocks from all",
+      "zh_tw": "正確地建構對話歷史，包含所有不同訊息中",
+      "zh_cn": "正确地建构对话历史，包含所有不同信息中"
+    },
+    "63": {
+      "en": "these different messages that we are collecting. So once again, I just want to remind you that we are",
+      "zh_tw": "的不同 block。再次提醒，我們",
+      "zh_cn": "的不同 block。再次提醒，我们"
+    },
+    "64": {
+      "en": "going to eventually have to go back to the add user message and add assistant message, those two helper",
+      "zh_tw": "最終必須回去更新 add user message 和 add assistant message 這兩個輔助",
+      "zh_cn": "最终必须回去更新 add user message 和 add assistant message 这兩个辅助"
+    },
+    "65": {
+      "en": "functions and update them to account for dealing with multiple blocks like this.",
+      "zh_tw": "函式，來處理像這樣的多 block 情況。",
+      "zh_cn": "函数，來处理像这样的多 block 情況。"
+    }
+  }
+}

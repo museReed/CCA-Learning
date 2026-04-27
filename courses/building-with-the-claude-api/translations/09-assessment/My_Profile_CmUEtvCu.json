@@ -1,0 +1,312 @@
+{
+  "srt_file": "My_Profile_CmUEtvCu.srt",
+  "video_file": "My_Profile_CmUEtvCu.mp4",
+  "max_valid_entry": 61,
+  "entries": {
+    "1": {
+      "en": "Let's get started working on our first tool, which is going to allow Claude to retrieve the current date time.",
+      "zh_tw": "讓我們開始製作我們的第一個工具，它將允許 Claude 擷取當前的日期時間。",
+      "zh_cn": "让我们开始製作我们的第一个工具，它将允许 Claude 提取当前的日期时间。"
+    },
+    "2": {
+      "en": "Before we go any further, I want you to know that I've created a new notebook for you to use.",
+      "zh_tw": "在我們繼續之前，我想讓你知道我已經為你建立了一個新的筆記本。",
+      "zh_cn": "在我们继续之前，我想让你知道我已经为你建立了一个新的笔记本。"
+    },
+    "3": {
+      "en": "This notebook is titled 001Tools, and it is attached to this lecture.",
+      "zh_tw": "這個筆記本標題為 001Tools，它附在這堂課中。",
+      "zh_cn": "这个笔记本标题为 001Tools，它附在这堂课中。"
+    },
+    "4": {
+      "en": "Inside this notebook, you're going to find a lot of the same code we've already written out inside the course.",
+      "zh_tw": "在這個筆記本裡面，你會找到我們在課程中已經寫過的很多相同程式碼。",
+      "zh_cn": "在这个笔记本里面，你会找到我们在课程中已经写过的很多相同代码。"
+    },
+    "5": {
+      "en": "However, I've also added in a new cell down here, titled Tools and Schemas.",
+      "zh_tw": "不過，我在下方還新增了一個名為「工具與結構描述」的儲存格。",
+      "zh_cn": "不过，我在下方还新增了一个名为「工具与结构描述」的存储格。"
+    },
+    "6": {
+      "en": "Inside this cell, I've placed a tremendous amount of boilerplate code, just to save us a little bit of time later on.",
+      "zh_tw": "在這個儲存格中，我放了大量的樣板程式碼，只是為了稍後幫我們節省一些時間。",
+      "zh_cn": "在这个存储格中，我放了大量的样板代码，只是为了稍后幫我们节省一些时间。"
+    },
+    "7": {
+      "en": "In particular, you're going to find the add duration to date time function, which we're going to use a little bit later on.",
+      "zh_tw": "特別是，你會找到 add duration to date time 函式，我們稍後會用到它。",
+      "zh_cn": "特別是，你会找到 add duration to date time 函数，我们稍后会用到它。"
+    },
+    "8": {
+      "en": "So again, I would encourage you to download this notebook that is attached to this lecture and use it as the starting point.",
+      "zh_tw": "所以再次提醒，我鼓勵你下載附在這堂課的筆記本，並將其作為起點使用。",
+      "zh_cn": "所以再次提醒，我鼓勵你下載附在这堂课的笔记本，並将其作为起点使用。"
+    },
+    "9": {
+      "en": "All right.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "10": {
+      "en": "So now, once again, we're going to be focused on implementing this first tool of get the current date time.",
+      "zh_tw": "現在，我們再次把重點放在實作這個第一個工具——取得當前日期時間。",
+      "zh_cn": "现在，我们再次把重点放在实作这个第一个工具——取得当前日期时间。"
+    },
+    "11": {
+      "en": "I'm going to walk you through this entire process step by step.",
+      "zh_tw": "我將一步一步帶你完成整個過程。",
+      "zh_cn": "我将一步一步帶你完成整个过程。"
+    },
+    "12": {
+      "en": "We're going to write out a lot of code inside of our notebook, and we're not going to use any of those helper functions that we've set up inside there.",
+      "zh_tw": "我們將在筆記本中撰寫大量程式碼，而且我們不會使用我們在裡面設定的那些輔助函式。",
+      "zh_cn": "我们将在笔记本中撰写大量代码，而且我们不会使用我们在里面设定的那些辅助函数。"
+    },
+    "13": {
+      "en": "The ones like add user message and add assistant message and so on.",
+      "zh_tw": "像是 add user message、add assistant message 等等。",
+      "zh_cn": "像是 add user message、add assistant message 等等。"
+    },
+    "14": {
+      "en": "The reason for this is that you're going to see that we need to refactor those functions just a little bit to suit tools.",
+      "zh_tw": "原因是你會看到我們需要稍微重構這些函式以適應工具。",
+      "zh_cn": "原因是你会看到我们需要稍微重构这些函数以适应工具。"
+    },
+    "15": {
+      "en": "So rather than trying to mix updating those helper functions and learn about tools at the same time, that would be really confusing.",
+      "zh_tw": "所以與其同時嘗試更新那些輔助函式又學習工具，那會非常令人困惑。",
+      "zh_cn": "所以与其同时嘗试更新那些辅助函数又学習工具，那会非常令人困惑。"
+    },
+    "16": {
+      "en": "So we're going to instead just focus on making a tool call without using any helper functions as much as possible.",
+      "zh_tw": "因此，我們將盡可能專注於不使用任何輔助函式來進行工具呼叫。",
+      "zh_cn": "因此，我们将尽可能專注於不使用任何辅助函数來进行工具调用。"
+    },
+    "17": {
+      "en": "Okay, so let's get to it.",
+      "zh_tw": "好的，讓我們開始吧。",
+      "zh_cn": "好的，让我们开始吧。"
+    },
+    "18": {
+      "en": "I've broken down this entire process into several different steps.",
+      "zh_tw": "我已經將整個過程分解為幾個不同的步驟。",
+      "zh_cn": "我已经将整个过程分解为幾个不同的步驟。"
+    },
+    "19": {
+      "en": "Step one, whenever we are adding in a tool to our implementation is to write out a tool function.",
+      "zh_tw": "第一步，每當我們在實作中加入工具時，就是編寫一個工具函式。",
+      "zh_cn": "第一步，每当我们在实作中加入工具时，就是编写一个工具函数。"
+    },
+    "20": {
+      "en": "A tool function is a plain Python function that is going to be executed automatically at some point in time when Claude decides that it needs to retrieve some extra information in order to help the user in some way.",
+      "zh_tw": "工具函式是一個普通的 Python 函式，當 Claude 決定它需要擷取一些額外資訊以某種方式幫助使用者時，它將在某個時間點被自動執行。",
+      "zh_cn": "工具函数是一个普通的 Python 函数，当 Claude 决定它需要提取一些额外资讯以某种方式幫助使用者时，它将在某个时间点被自动执行。"
+    },
+    "21": {
+      "en": "I've got an example of a possible tool function on the right hand side called get weather.",
+      "zh_tw": "我在右邊有一個可能的工具函式範例，叫做 get weather。",
+      "zh_cn": "我在右边有一个可能的工具函数范例，叫做 get weather。"
+    },
+    "22": {
+      "en": "Claude might be able to make use of this tool function in order to retrieve the current weather at some particular location in the world.",
+      "zh_tw": "Claude 可能能夠利用這個工具函式來擷取世界上某個特定地點的當前天氣。",
+      "zh_cn": "Claude 可能能够利用这个工具函数來提取世界上某个特定地点的当前天气。"
+    },
+    "23": {
+      "en": "Now there's a couple of best practices around tool functions.",
+      "zh_tw": "現在，關於工具函式有幾個最佳實踐。",
+      "zh_cn": "现在，关於工具函数有幾个最佳实踐。"
+    },
+    "24": {
+      "en": "First, we always want to use well-named and descriptive arguments.",
+      "zh_tw": "首先，我們總是希望使用命名良好且具描述性的參數。",
+      "zh_cn": "首先，我们总是希望使用命名良好且具描述性的参数。"
+    },
+    "25": {
+      "en": "So the actual function itself and the arguments to receive should be reasonably well-named and at least give us a hint of what they are about.",
+      "zh_tw": "所以函式本身以及接收的參數應該有合理的命名，至少讓我們對它們有所了解。",
+      "zh_cn": "所以函数本身以及接收的参数应该有合理的命名，至少让我们对它们有所了解。"
+    },
+    "26": {
+      "en": "Second, we want to validate these inputs and raise an error if anything is wrong with the input itself.",
+      "zh_tw": "其次，我們要驗證這些輸入，如果輸入本身有任何問題就拋出錯誤。",
+      "zh_cn": "其次，我们要验证这些输入，如果输入本身有任何问题就拋出错误。"
+    },
+    "27": {
+      "en": "So for example, if we fail to receive a location or if the location is an empty string, we would want to raise an error immediately.",
+      "zh_tw": "例如，如果我們沒有收到 location 或 location 是空字串，我們會希望立即拋出錯誤。",
+      "zh_cn": "例如，如果我们没有收到 location 或 location 是空字符串，我们会希望立即拋出错误。"
+    },
+    "28": {
+      "en": "And then finally, whenever we do raise an error, we want to make sure that it contains some kind of meaningful error message.",
+      "zh_tw": "最後，每當我們拋出錯誤時，我們要確保它包含某種有意義的錯誤訊息。",
+      "zh_cn": "最后，每当我们拋出错误时，我们要确保它包含某种有意义的错误信息。"
+    },
+    "29": {
+      "en": "In some cases, if Claude tries to call a tool function and it results in an error, Claude is going to see the exact error message.",
+      "zh_tw": "在某些情況下，如果 Claude 嘗試呼叫工具函式並產生錯誤，Claude 會看到確切的錯誤訊息。",
+      "zh_cn": "在某些情況下，如果 Claude 嘗试调用工具函数並产生错误，Claude 会看到确切的错误信息。"
+    },
+    "30": {
+      "en": "And Claude might decide to try to call your tool function again and call it in a slightly different way that attempts to correct for that error.",
+      "zh_tw": "然後 Claude 可能會決定再次嘗試呼叫你的工具函式，並以稍微不同的方式呼叫以嘗試修正該錯誤。",
+      "zh_cn": "然后 Claude 可能会决定再次嘗试调用你的工具函数，並以稍微不同的方式调用以嘗试修正该错误。"
+    },
+    "31": {
+      "en": "So for example, you can imagine if that if Claude tries to call this get weather function and it passes in an empty string, the validation check at the very top would fail and we would raise an error.",
+      "zh_tw": "例如，你可以想像如果 Claude 嘗試呼叫這個 get weather 函式並傳入空字串，最上方的驗證檢查會失敗，我們會拋出錯誤。",
+      "zh_cn": "例如，你可以想像如果 Claude 嘗试调用这个 get weather 函数並传入空字符串，最上方的验证检查会失敗，我们会拋出错误。"
+    },
+    "32": {
+      "en": "Claude would see the error message of location cannot be empty.",
+      "zh_tw": "Claude 會看到「location 不能為空」的錯誤訊息。",
+      "zh_cn": "Claude 会看到「location 不能为空」的错误信息。"
+    },
+    "33": {
+      "en": "And Claude might then decide to try to call this tool function again, making sure that it passes in not an empty string anymore.",
+      "zh_tw": "然後 Claude 可能會決定再次嘗試呼叫這個工具函式，確保傳入的不再是空字串。",
+      "zh_cn": "然后 Claude 可能会决定再次嘗试调用这个工具函数，确保传入的不再是空字符串。"
+    },
+    "34": {
+      "en": "All right, so let's go back over to our notebook and we're going to put together our first tool function.",
+      "zh_tw": "好的，讓我們回到筆記本，我們來組裝第一個工具函式。",
+      "zh_cn": "好的，让我们回到笔记本，我们來组装第一个工具函数。"
+    },
+    "35": {
+      "en": "Remember, the goal of the tool we are putting together is to get the current date time.",
+      "zh_tw": "記住，我們正在組裝的工具目標是取得當前日期時間。",
+      "zh_cn": "记住，我们正在组装的工具目标是取得当前日期时间。"
+    },
+    "36": {
+      "en": "So back over here, I'm going to add a new cell at the very bottom and I will define a new function called get current date time.",
+      "zh_tw": "回到這裡，我要在最底部新增一個儲存格，然後定義一個新函式叫做 get current date time。",
+      "zh_cn": "回到这里，我要在最底部新增一个存储格，然后定义一个新函数叫做 get current date time。"
+    },
+    "37": {
+      "en": "This is going to take in an argument that I will call date format.",
+      "zh_tw": "這將接受一個我稱為 date format 的參數。",
+      "zh_cn": "这将接受一个我称为 date format 的参数。"
+    },
+    "38": {
+      "en": "I will give it a default value.",
+      "zh_tw": "我會給它一個預設值。",
+      "zh_cn": "我会给它一个默认值。"
+    },
+    "39": {
+      "en": "It's going to be a little bit of a complicated string here.",
+      "zh_tw": "這會是一個有點複雜的字串。",
+      "zh_cn": "这会是一个有点复杂的字符串。"
+    },
+    "40": {
+      "en": "I'm going to put in percent capital Y percent lowercase M percent lowercase D and then a space a percent H colon percent M colon percent S.",
+      "zh_tw": "我要輸入 percent 大寫 Y percent 小寫 m percent 小寫 d 然後空格 percent H 冒號 percent M 冒號 percent S。",
+      "zh_cn": "我要输入 percent 大写 Y percent 小写 m percent 小写 d 然后空格 percent H 冒号 percent M 冒号 percent S。"
+    },
+    "41": {
+      "en": "Now that string is a little bit complicated.",
+      "zh_tw": "那個字串有點複雜。",
+      "zh_cn": "那个字符串有点复杂。"
+    },
+    "42": {
+      "en": "So I would encourage you to pause the video right here and double check the string you've put in.",
+      "zh_tw": "所以我鼓勵你在這裡暫停影片，仔細檢查你輸入的字串。",
+      "zh_cn": "所以我鼓勵你在这里暫停视频，仔细检查你输入的字符串。"
+    },
+    "43": {
+      "en": "Make sure it exactly matches what I have.",
+      "zh_tw": "確保它和我的完全一致。",
+      "zh_cn": "确保它和我的完全一致。"
+    },
+    "44": {
+      "en": "Then inside this function, I'm going to use that date format to get the current date time and format it in a way that matches this date format string.",
+      "zh_tw": "然後在這個函式裡面，我要使用那個 date format 來取得當前日期時間，並以符合這個日期格式字串的方式進行格式化。",
+      "zh_cn": "然后在这个函数里面，我要使用那个 date format 來取得当前日期时间，並以符合这个日期格式字符串的方式进行格式化。"
+    },
+    "45": {
+      "en": "So I will return.",
+      "zh_tw": "所以我會 return。",
+      "zh_cn": "所以我会 return。"
+    },
+    "46": {
+      "en": "Date time dot now.",
+      "zh_tw": "datetime dot now。",
+      "zh_cn": "datetime dot now。"
+    },
+    "47": {
+      "en": "String format time.",
+      "zh_tw": "strftime。",
+      "zh_cn": "strftime。"
+    },
+    "48": {
+      "en": "I'll pass in that date format.",
+      "zh_tw": "傳入那個 date format。",
+      "zh_cn": "传入那个 date format。"
+    },
+    "49": {
+      "en": "So now as a quick example of how we would actually use this function, we could call get current date time.",
+      "zh_tw": "現在作為一個快速的使用範例，我們可以呼叫 get current date time。",
+      "zh_cn": "现在作为一个快速的使用范例，我们可以调用 get current date time。"
+    },
+    "50": {
+      "en": "And if we ran it just like this, we would get back a date time in the format of year month day hour minute second.",
+      "zh_tw": "如果我們就這樣執行它，我們會得到一個年月日時分秒格式的日期時間。",
+      "zh_cn": "如果我们就这样执行它，我们会得到一个年月日时分秒格式的日期时间。"
+    },
+    "51": {
+      "en": "Or alternatively, I could put in a custom date format string of something like percent H colon percent capital M.",
+      "zh_tw": "或者，我也可以傳入一個自訂的日期格式字串，像是 percent H 冒號 percent 大寫 M。",
+      "zh_cn": "或者，我也可以传入一个自定义的日期格式字符串，像是 percent H 冒号 percent 大写 M。"
+    },
+    "52": {
+      "en": "And that will print out just the hour and minute of my current time.",
+      "zh_tw": "這只會印出我當前時間的小時和分鐘。",
+      "zh_cn": "这只会印出我当前时间的小时和分鐘。"
+    },
+    "53": {
+      "en": "A good improvement to this function would be to add in some validation of the date format argument.",
+      "zh_tw": "對這個函式的一個好改進是為 date format 參數加入一些驗證。",
+      "zh_cn": "对这个函数的一个好改进是为 date format 参数加入一些验证。"
+    },
+    "54": {
+      "en": "Unfortunately, we can't very easily validate the exact structure and make sure that this thing is a valid string format time formatter.",
+      "zh_tw": "不幸的是，我們不能很容易地驗證確切的結構，確保這個東西是有效的 strftime 格式器。",
+      "zh_cn": "不幸的是，我们不能很容易地验证确切的结构，确保这个東西是有效的 strftime 格式器。"
+    },
+    "55": {
+      "en": "But we can at least check and make sure that we are not passing in an empty string.",
+      "zh_tw": "但我們至少可以檢查確保我們沒有傳入空字串。",
+      "zh_cn": "但我们至少可以检查确保我们没有传入空字符串。"
+    },
+    "56": {
+      "en": "So I might decide to add in a little bit of validation here with a if not date format.",
+      "zh_tw": "所以我可能會決定在這裡加入一點驗證，用 if not date format。",
+      "zh_cn": "所以我可能会决定在这里加入一点验证，用 if not date format。"
+    },
+    "57": {
+      "en": "And then if we fail that validation check, I might raise a value error and say something like date format cannot be empty.",
+      "zh_tw": "然後如果驗證檢查失敗，我可能會 raise 一個 ValueError 並說類似「date format 不能為空」。",
+      "zh_cn": "然后如果验证检查失敗，我可能会 raise 一个 ValueError 並说类似「date format 不能为空」。"
+    },
+    "58": {
+      "en": "So now if I try to call get current date time with an empty string, I would end up getting an error message and it's going to tell me date format cannot be empty.",
+      "zh_tw": "所以現在如果我嘗試用空字串呼叫 get current date time，我會得到一個錯誤訊息，告訴我 date format 不能為空。",
+      "zh_cn": "所以现在如果我嘗试用空字符串调用 get current date time，我会得到一个错误信息，告訴我 date format 不能为空。"
+    },
+    "59": {
+      "en": "Now, to be honest with you, it's kind of unlikely that Claude is going to make this mistake of passing in an empty string here.",
+      "zh_tw": "老實說，Claude 犯這個傳入空字串的錯誤的機率不太高。",
+      "zh_cn": "老实说，Claude 犯这个传入空字符串的错误的机率不太高。"
+    },
+    "60": {
+      "en": "But at least in the off chance that it does, we are providing some signal back to Claude and we are kind of telling it how it can fix up the error.",
+      "zh_tw": "但至少在萬一發生的情況下，我們提供了一些回饋訊號給 Claude，我們算是告訴它如何修正這個錯誤。",
+      "zh_cn": "但至少在万一发生的情況下，我们提供了一些反馈讯号给 Claude，我们算是告訴它如何修正这个错误。"
+    },
+    "61": {
+      "en": "It can try to call get current date time again and make sure that it passes in a date format that is not empty.",
+      "zh_tw": "它可以嘗試再次呼叫 get current date time，確保傳入的 date format 不是空的。",
+      "zh_cn": "它可以嘗试再次调用 get current date time，确保传入的 date format 不是空的。"
+    }
+  }
+}

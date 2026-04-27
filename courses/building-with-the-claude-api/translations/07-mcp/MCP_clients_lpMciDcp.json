@@ -1,0 +1,272 @@
+{
+  "srt_file": "MCP_clients_lpMciDcp.srt",
+  "video_file": "MCP_clients_lpMciDcp.mp4",
+  "max_valid_entry": 53,
+  "entries": {
+    "1": {
+      "en": "The next portion of model context protocol that we're going to investigate is the client.",
+      "zh_tw": "模型上下文協議的下一個部分是客戶端。",
+      "zh_cn": "模型上下文协议的下一个部分是客户端。"
+    },
+    "2": {
+      "en": "The purpose of the client is to provide a means of communication between your server and a MCP",
+      "zh_tw": "客戶端的目的是提供你的伺服器和 MCP 伺服器之間的通訊手段。",
+      "zh_cn": "客户端的目的是提供你的服务器和 MCP 服务器之间的通讯手段。"
+    },
+    "3": {
+      "en": "server. This client is going to be your access point to all the tools implemented by that server.",
+      "zh_tw": "這個客戶端將是你存取該伺服器實作的所有工具的入口點。",
+      "zh_cn": "这个客户端将是你访问该服务器实作的所有工具的入口点。"
+    },
+    "4": {
+      "en": "Now MCP is transport agnostic. This is a fancy term that just says that the client and the server",
+      "zh_tw": "MCP 是傳輸無關的。這個花俏的術語只是說客戶端和伺服器",
+      "zh_cn": "MCP 是传输无关的。这个花俏的术语只是说客户端和服务器"
+    },
+    "5": {
+      "en": "can communicate over a variety of different protocols. A very common way to run a MCP",
+      "zh_tw": "可以通過各種不同的協議進行通訊。目前執行 MCP",
+      "zh_cn": "可以通过各种不同的协议进行通讯。目前执行 MCP"
+    },
+    "6": {
+      "en": "server right now is on the same physical machine as the MCP client. And if these two things are",
+      "zh_tw": "伺服器的一種非常常見的方式是在與 MCP 客戶端相同的實體機器上。如果這兩個東西在",
+      "zh_cn": "服务器的一种非常常見的方式是在与 MCP 客户端相同的实体机器上。如果这兩个東西在"
+    },
+    "7": {
+      "en": "running on the same machine, then they can communicate over standard input output. And",
+      "zh_tw": "同一台機器上執行，它們可以通過標準輸入輸出進行通訊。",
+      "zh_cn": "同一台机器上执行，它们可以通过标准输入输出进行通讯。"
+    },
+    "8": {
+      "en": "that's what we are going to be setting up later on inside this section. There are however, other ways",
+      "zh_tw": "這就是我們稍後在這個章節中要設定的。然而還有其他方式",
+      "zh_cn": "这就是我们稍后在这个章节中要设定的。然而还有其他方式"
+    },
+    "9": {
+      "en": "we can connect the MCP client with the MCP server. So they can also connect over HTTP or web sockets",
+      "zh_tw": "可以連接 MCP 客戶端和 MCP 伺服器。它們也可以通過 HTTP 或 WebSocket",
+      "zh_cn": "可以连接 MCP 客户端和 MCP 服务器。它们也可以通过 HTTP 或 WebSocket"
+    },
+    "10": {
+      "en": "or any of a number of other varieties or techniques. Once a connection has been formed between the",
+      "zh_tw": "或其他各種方式連接。一旦客戶端和伺服器之間建立了連接，",
+      "zh_cn": "或其他各种方式连接。一旦客户端和服务器之间建立了连接，"
+    },
+    "11": {
+      "en": "client and the server, they communicate by exchanging messages. The exact messages that are allowed are",
+      "zh_tw": "它們通過交換訊息進行通訊。允許的確切訊息都",
+      "zh_cn": "它们通过交换信息进行通讯。允许的确切信息都"
+    },
+    "12": {
+      "en": "all defined inside of the MCP spec. Some of the message types that you and I are going to be",
+      "zh_tw": "定義在 MCP 規範中。你和我將要專注的一些訊息類型",
+      "zh_cn": "定义在 MCP 规范中。你和我将要專注的一些信息类型"
+    },
+    "13": {
+      "en": "focusing are the list tools request and the list tools result. As you guessed, list tools request",
+      "zh_tw": "是 list tools request 和 list tools result。如你所猜，list tools request",
+      "zh_cn": "是 list tools request 和 list tools result。如你所猜，list tools request"
+    },
+    "14": {
+      "en": "is sent from the client to the server and it asks the server to list out all the different tools that",
+      "zh_tw": "從客戶端發送到伺服器，要求伺服器列出它提供的所有不同工具。",
+      "zh_cn": "从客户端发送到服务器，要求服务器列出它提供的所有不同工具。"
+    },
+    "15": {
+      "en": "it provides. The server would then respond with a list tools result message, which contains a list of",
+      "zh_tw": "伺服器然後會用 list tools result 訊息回應，其中包含",
+      "zh_cn": "服务器然后会用 list tools result 信息回应，其中包含"
+    },
+    "16": {
+      "en": "all the different tools that it can provide. Two other common message types that you and I are going",
+      "zh_tw": "它能提供的所有不同工具的列表。你和我會看到的另外兩個常見訊息類型",
+      "zh_cn": "它能提供的所有不同工具的列表。你和我会看到的另外兩个常見信息类型"
+    },
+    "17": {
+      "en": "to see are the call tool request and call tool result. The first will ask the server to run a tool",
+      "zh_tw": "是 call tool request 和 call tool result。第一個會要求伺服器用特定參數執行工具。",
+      "zh_cn": "是 call tool request 和 call tool result。第一个会要求服务器用特定参数执行工具。"
+    },
+    "18": {
+      "en": "with some particular arguments. And the second will contain the result of the tool run. Now at this",
+      "zh_tw": "第二個會包含工具執行的結果。此時，",
+      "zh_cn": "第二个会包含工具执行的结果。此时，"
+    },
+    "19": {
+      "en": "point in time, we've got this idea of a server and a client, but I suspect it's probably not really",
+      "zh_tw": "我們有了伺服器和客戶端的概念，但我猜可能還不太",
+      "zh_cn": "我们有了服务器和客户端的概念，但我猜可能还不太"
+    },
+    "20": {
+      "en": "clear how all this stuff really works together. So here's what we're going to do in the remainder of",
+      "zh_tw": "清楚這些東西實際上如何一起運作。所以這是我們在這個影片剩餘部分要做的。",
+      "zh_cn": "清楚这些東西实际上如何一起运作。所以这是我们在这个视频剩余部分要做的。"
+    },
+    "21": {
+      "en": "this video. We are going to walk through a example call between a lot of different things. So this",
+      "zh_tw": "我們要走過很多不同元件之間的範例呼叫。",
+      "zh_cn": "我们要走过很多不同元件之间的范例调用。"
+    },
+    "22": {
+      "en": "will be kind of an involved process, but we're going to imagine the communication that goes on between",
+      "zh_tw": "這會是一個比較複雜的過程，但我們要想像",
+      "zh_cn": "这会是一个比較复杂的过程，但我们要想像"
+    },
+    "23": {
+      "en": "a user, our server that we're putting together, a MCP client, the MCP server, GitHub as some provider",
+      "zh_tw": "使用者、我們的伺服器、MCP 客戶端、MCP 伺服器、GitHub 作為我們嘗試存取資料的提供者，和 Claude 之間的通訊。",
+      "zh_cn": "使用者、我们的服务器、MCP 客户端、MCP 服务器、GitHub 作为我们嘗试访问数据的提供者，和 Claude 之间的通讯。"
+    },
+    "24": {
+      "en": "that we're trying to access some data from, and Claude. So let's get to it. Again, step by step.",
+      "zh_tw": "好，一步一步來。",
+      "zh_cn": "好，一步一步來。"
+    },
+    "25": {
+      "en": "First thing we would expect to happen is a user to submit some kind of query or question to our server,",
+      "zh_tw": "首先我們預期的是使用者向我們的伺服器提交某種查詢或問題，",
+      "zh_cn": "首先我们预期的是使用者向我们的服务器提交某种查询或问题，"
+    },
+    "26": {
+      "en": "like what repositories do I have? At this point, it would be up to our server to make a request off to Claude.",
+      "zh_tw": "像是「我有哪些倉庫？」此時，我們的伺服器需要向 Claude 發送請求。",
+      "zh_cn": "像是「我有哪些倉庫？」此时，我们的服务器需要向 Claude 发送请求。"
+    },
+    "27": {
+      "en": "But in that request, we want to list out all the different tools that Claude has access to. So before our",
+      "zh_tw": "但在那個請求中，我們想列出 Claude 可以存取的所有工具。所以在我們的",
+      "zh_cn": "但在那个请求中，我们想列出 Claude 可以访问的所有工具。所以在我们的"
+    },
+    "28": {
+      "en": "server can make the request off to Claude, it's first going to go through a little side detour through the",
+      "zh_tw": "伺服器向 Claude 發送請求之前，它首先要通過 MCP",
+      "zh_cn": "服务器向 Claude 发送请求之前，它首先要通过 MCP"
+    },
+    "29": {
+      "en": "MCP client and the server. So here's what happens. The server is going to realize that it needs to see a list of",
+      "zh_tw": "客戶端和伺服器做一個小小的繞道。伺服器會意識到它需要看到",
+      "zh_cn": "客户端和服务器做一个小小的繞道。服务器会意识到它需要看到"
+    },
+    "30": {
+      "en": "tools to send off to Claude along with the user's query. So it's going to ask the MCP client to get a list of tools.",
+      "zh_tw": "要連同使用者的查詢一起送給 Claude 的工具列表。所以它要求 MCP 客戶端取得工具列表。",
+      "zh_cn": "要连同使用者的查询一起送给 Claude 的工具列表。所以它要求 MCP 客户端取得工具列表。"
+    },
+    "31": {
+      "en": "The MCP client in turn is going to send a list tools request off to the server, and the server will",
+      "zh_tw": "MCP 客戶端接著會向伺服器發送 list tools request，伺服器會",
+      "zh_cn": "MCP 客户端接著会向服务器发送 list tools request，服务器会"
+    },
+    "32": {
+      "en": "respond with a list tools result. Now that our MCP client has a list of the tools, it will give that",
+      "zh_tw": "用 list tools result 回應。現在 MCP 客戶端有了工具列表，它會把",
+      "zh_cn": "用 list tools result 回应。现在 MCP 客户端有了工具列表，它会把"
+    },
+    "33": {
+      "en": "list of tools back to the server. And now our server has everything it needs to make an initial request",
+      "zh_tw": "工具列表回傳給伺服器。現在我們的伺服器有了向 Claude 發送初始請求所需的一切。",
+      "zh_cn": "工具列表返回给服务器。现在我们的服务器有了向 Claude 发送初始请求所需的一切。"
+    },
+    "34": {
+      "en": "off to Claude. It has both the original message from the user and a list of tools to include. So our",
+      "zh_tw": "它有使用者的原始訊息和要包含的工具列表。所以我們的",
+      "zh_cn": "它有使用者的原始信息和要包含的工具列表。所以我们的"
+    },
+    "35": {
+      "en": "server can make a request off to Claude with that query and the set of tools. Claude is going to take a",
+      "zh_tw": "伺服器可以帶著查詢和工具集向 Claude 發送請求。Claude 會看看",
+      "zh_cn": "服务器可以帶著查询和工具集向 Claude 发送请求。Claude 会看看"
+    },
+    "36": {
+      "en": "look at the tools and realize, you know what, in order to answer the user's original question right",
+      "zh_tw": "工具然後意識到，為了回答使用者的原始問題，",
+      "zh_cn": "工具然后意识到，为了回答使用者的原始问题，"
+    },
+    "37": {
+      "en": "here, I really want to call a tool. So Claude would respond with some tool use message part. At this",
+      "zh_tw": "我真的想呼叫一個工具。所以 Claude 會用某個 tool use 訊息部分回應。此時，",
+      "zh_cn": "我真的想调用一个工具。所以 Claude 会用某个 tool use 信息部分回应。此时，"
+    },
+    "38": {
+      "en": "point, our server is going to realize that Claude wants to run a tool, but our server is no longer",
+      "zh_tw": "我們的伺服器會意識到 Claude 想執行工具，但我們的伺服器不再",
+      "zh_cn": "我们的服务器会意识到 Claude 想执行工具，但我们的服务器不再"
+    },
+    "39": {
+      "en": "really in charge of executing any tools. Instead, our tools are going to be executed by the MCP server.",
+      "zh_tw": "真正負責執行任何工具。我們的工具會由 MCP 伺服器執行。",
+      "zh_cn": "真正负責执行任何工具。我们的工具会由 MCP 服务器执行。"
+    },
+    "40": {
+      "en": "So in order to run the tool that Claude is asking for, our server is going to ask the MCP client to",
+      "zh_tw": "為了執行 Claude 要求的工具，我們的伺服器會要求 MCP 客戶端",
+      "zh_cn": "为了执行 Claude 要求的工具，我们的服务器会要求 MCP 客户端"
+    },
+    "41": {
+      "en": "run a tool with some particular arguments that were provided by Claude. The MCP client, however,",
+      "zh_tw": "用 Claude 提供的特定參數執行工具。然而 MCP 客戶端",
+      "zh_cn": "用 Claude 提供的特定参数执行工具。然而 MCP 客户端"
+    },
+    "42": {
+      "en": "doesn't actually run the tool, it's going to send a call tool request off to the MCP server. The MCP",
+      "zh_tw": "實際上不會執行工具，它會向 MCP 伺服器發送 call tool request。MCP",
+      "zh_cn": "实际上不会执行工具，它会向 MCP 服务器发送 call tool request。MCP"
+    },
+    "43": {
+      "en": "server will receive that request and make a follow up request off to GitHub. So this is where we would",
+      "zh_tw": "伺服器會收到請求並向 GitHub 發送後續請求。這就是我們",
+      "zh_cn": "服务器会收到请求並向 GitHub 发送后续请求。这就是我们"
+    },
+    "44": {
+      "en": "actually be getting a list of repositories that belong to this particular user. GitHub would respond with",
+      "zh_tw": "實際取得屬於這個使用者的倉庫列表的地方。GitHub 會回應",
+      "zh_cn": "实际取得属於这个使用者的倉庫列表的地方。GitHub 会回应"
+    },
+    "45": {
+      "en": "that list of repositories, then the MCP server would wrap up that data inside of a call tool result, and send",
+      "zh_tw": "倉庫列表，然後 MCP 伺服器會把資料包裝在 call tool result 中，送",
+      "zh_cn": "倉庫列表，然后 MCP 服务器会把数据包装在 call tool result 中，送"
+    },
+    "46": {
+      "en": "that back to the MCP client, then the MCP client in turn would hand the result off to our server. Now our server",
+      "zh_tw": "回 MCP 客戶端，然後 MCP 客戶端會把結果交給我們的伺服器。現在我們的伺服器",
+      "zh_cn": "回 MCP 客户端，然后 MCP 客户端会把结果交给我们的服务器。现在我们的服务器"
+    },
+    "47": {
+      "en": "has the list of repositories. And it can make a follow up request to Claude with the tool results parked inside of a",
+      "zh_tw": "有了倉庫列表。它可以帶著工具結果向 Claude 發送後續請求。",
+      "zh_cn": "有了倉庫列表。它可以帶著工具结果向 Claude 发送后续请求。"
+    },
+    "48": {
+      "en": "user message. So this tool result would include the list of repositories that Claude was asking for. And now Claude has all the",
+      "zh_tw": "這個工具結果會包含 Claude 要求的倉庫列表。現在 Claude 有了",
+      "zh_cn": "这个工具结果会包含 Claude 要求的倉庫列表。现在 Claude 有了"
+    },
+    "49": {
+      "en": "information it needs to formulate a final response. So it'll write out some text of something like your",
+      "zh_tw": "制定最終回應所需的所有資訊。所以它會寫出一些文字，像是「你的",
+      "zh_cn": "制定最终回应所需的所有资讯。所以它会写出一些文字，像是「你的"
+    },
+    "50": {
+      "en": "repositories are and then send that back to our server. And our server would send it on back to our user.",
+      "zh_tw": "倉庫有」然後送回我們的伺服器。我們的伺服器會把它送回使用者。",
+      "zh_cn": "倉庫有」然后送回我们的服务器。我们的服务器会把它送回使用者。"
+    },
+    "51": {
+      "en": "Alright, so this flow, yes, it is rather complicated. The reason I want to show you this is that we are",
+      "zh_tw": "好的，這個流程，是的，它相當複雜。我想展示給你看的原因是我們會",
+      "zh_cn": "好的，这个流程，是的，它相当复杂。我想展示给你看的原因是我们会"
+    },
+    "52": {
+      "en": "going to see all these different pieces as you and I start to implement our own custom MCP client and",
+      "zh_tw": "在稍後你和我開始實作自己的自訂 MCP 客戶端和",
+      "zh_cn": "在稍后你和我开始实作自己的自定义 MCP 客户端和"
+    },
+    "53": {
+      "en": "MCP server a little bit later on.",
+      "zh_tw": "MCP 伺服器時看到所有這些不同的部分。",
+      "zh_cn": "MCP 服务器时看到所有这些不同的部分。"
+    }
+  }
+}

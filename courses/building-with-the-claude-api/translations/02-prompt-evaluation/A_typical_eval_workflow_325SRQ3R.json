@@ -1,0 +1,267 @@
+{
+  "srt_file": "A_typical_eval_workflow_325SRQ3R.srt",
+  "video_file": "A_typical_eval_workflow_325SRQ3R.mp4",
+  "max_valid_entry": 52,
+  "entries": {
+    "1": {
+      "en": "In this video, we're going to walk through all these steps implemented by a typical",
+      "zh_tw": "在這個影片中，我們將逐步介紹一個典型的",
+      "zh_cn": "在这个视频中，我们将逐步介绍一个典型的"
+    },
+    "2": {
+      "en": "prompt evaluation workflow. Before we go through any of these steps, however, I just want you to",
+      "zh_tw": "提示評估工作流程所實作的所有步驟。在我們開始介紹這些步驟之前，我想先讓你",
+      "zh_cn": "提示评估工作流程所实作的所有步驟。在我们开始介绍这些步驟之前，我想先让你"
+    },
+    "3": {
+      "en": "understand two important things. First is there are many different ways you can assemble a workflow.",
+      "zh_tw": "了解兩件重要的事情。首先，組裝工作流程的方式有很多種。",
+      "zh_cn": "了解兩件重要的事情。首先，组装工作流程的方式有很多种。"
+    },
+    "4": {
+      "en": "There's no one set methodology set in stone that is standard across the industry. The second thing",
+      "zh_tw": "業界並沒有一套固定不變的標準方法。第二件要了解的事情",
+      "zh_cn": "業界並没有一套固定不变的标准方法。第二件要了解的事情"
+    },
+    "5": {
+      "en": "to understand is that there are many different open source packages and even paid options online",
+      "zh_tw": "是有很多不同的開源套件甚至線上的付費方案",
+      "zh_cn": "是有很多不同的开源套件甚至线上的付费方案"
+    },
+    "6": {
+      "en": "that will help you implement your own workflows. Now in this video and this module, we're going to",
+      "zh_tw": "可以幫助你實作自己的工作流程。在這個影片和這個模組中，我們將",
+      "zh_cn": "可以幫助你实作自己的工作流程。在这个视频和这个模组中，我们将"
+    },
+    "7": {
+      "en": "start to implement our own custom workflow from scratch inside of a Jupyter notebook. The reason",
+      "zh_tw": "在 Jupyter 筆記本中從頭開始實作我們自己的自訂工作流程。我們",
+      "zh_cn": "在 Jupyter 笔记本中从头开始实作我们自己的自定义工作流程。我们"
+    },
+    "8": {
+      "en": "we're doing this is to, of course, just help you understand how these workflows behave, but also to",
+      "zh_tw": "這麼做的原因當然是為了幫助你了解這些工作流程是如何運作的，但同時也是",
+      "zh_cn": "这麼做的原因当然是为了幫助你了解这些工作流程是如何运作的，但同时也是"
+    },
+    "9": {
+      "en": "help you understand that you don't have to get a really heavyweight solution to do prompt evals.",
+      "zh_tw": "幫助你了解你不需要一個非常重量級的解決方案來做提示評估。",
+      "zh_cn": "幫助你了解你不需要一个非常重量级的解决方案來做提示评估。"
+    },
+    "10": {
+      "en": "You can start small just to get started and get a sense of how everything works and then scale up",
+      "zh_tw": "你可以從小處著手，先了解一切是如何運作的，然後再從那裡",
+      "zh_cn": "你可以从小处著手，先了解一切是如何运作的，然后再从那里"
+    },
+    "11": {
+      "en": "from there. All right, so let's get to it. Step one of a typical prompt eval. Step one, we're going to",
+      "zh_tw": "擴展規模。好的，那我們開始吧。典型提示評估的第一步。在第一步中，我們要",
+      "zh_cn": "扩展规模。好的，那我们开始吧。典型提示评估的第一步。在第一步中，我们要"
+    },
+    "12": {
+      "en": "write out a initial prompt draft. So you and I will sit down and just write out some kind of prompt that",
+      "zh_tw": "寫出一個初始的提示草稿。所以你和我會坐下來寫出某種我們",
+      "zh_cn": "写出一个初始的提示草稿。所以你和我会坐下來写出某种我们"
+    },
+    "13": {
+      "en": "we want to improve in some way. For this example, we're going to have a very simple prompt that just",
+      "zh_tw": "想要以某種方式改進的提示。在這個範例中，我們將有一個非常簡單的提示，只是",
+      "zh_cn": "想要以某种方式改进的提示。在这个范例中，我们将有一个非常简单的提示，只是"
+    },
+    "14": {
+      "en": "says, please answer the user's question. And then we're going to interpolate in some user input. So",
+      "zh_tw": "說「請回答使用者的問題」。然後我們會插入一些使用者輸入。也就是",
+      "zh_cn": "说「请回答使用者的问题」。然后我们会插入一些使用者输入。也就是"
+    },
+    "15": {
+      "en": "some question provided by a user. In step two, we're going to create an evaluation data set. This data set is",
+      "zh_tw": "使用者提供的某個問題。在第二步中，我們要建立一個評估資料集。這個資料集",
+      "zh_cn": "使用者提供的某个问题。在第二步中，我们要建立一个评估数据集。这个数据集"
+    },
+    "16": {
+      "en": "going to contain some number of possible inputs that we might want to put into our prompt. So for us,",
+      "zh_tw": "將包含一定數量的可能輸入，我們要把它們放入我們的提示中。所以對我們來說，",
+      "zh_cn": "将包含一定数量的可能输入，我们要把它们放入我们的提示中。所以对我们來说，"
+    },
+    "17": {
+      "en": "our prompt only has one input, a question provided by a user. So for our eval data set, we'll have a list",
+      "zh_tw": "我們的提示只有一個輸入，就是使用者提供的問題。所以我們的評估資料集會有一份",
+      "zh_cn": "我们的提示只有一个输入，就是使用者提供的问题。所以我们的评估数据集会有一份"
+    },
+    "18": {
+      "en": "of different possible questions that we might want to put into our prompt. My data set is only going to",
+      "zh_tw": "不同的可能問題清單，我們可能會想把它們放入提示中。我的資料集只會",
+      "zh_cn": "不同的可能问题清单，我们可能会想把它们放入提示中。我的数据集只会"
+    },
+    "19": {
+      "en": "have three different questions inside of it. But in real world evals, you might have tens, hundreds,",
+      "zh_tw": "有三個不同的問題。但在真實世界的評估中，你可能有數十、數百、",
+      "zh_cn": "有三个不同的问题。但在真实世界的评估中，你可能有数十、数百、"
+    },
+    "20": {
+      "en": "even thousands of different records in your data set. Now you can assemble these data sets by hand,",
+      "zh_tw": "甚至數千筆不同的記錄在你的資料集中。你可以手動組裝這些資料集，",
+      "zh_cn": "甚至数千笔不同的记录在你的数据集中。你可以手动组装这些数据集，"
+    },
+    "21": {
+      "en": "or you can of course also use Claude to generate them for you. Once we have our eval data set,",
+      "zh_tw": "當然也可以使用 Claude 來為你生成。一旦我們有了評估資料集，",
+      "zh_cn": "当然也可以使用 Claude 來为你生成。一旦我们有了评估数据集，"
+    },
+    "22": {
+      "en": "we're then going to feed each of these different questions into our prompt. So we get a fully fleshed",
+      "zh_tw": "接著我們會將每一個不同的問題餵入我們的提示。這樣我們就得到一個完整的",
+      "zh_cn": "接著我们会将每一个不同的问题餵入我们的提示。这样我们就得到一个完整的"
+    },
+    "23": {
+      "en": "out prompt that we can then feed into Claude. So we might have prompt one right here where we have,",
+      "zh_tw": "提示，可以餵給 Claude。所以我們可能有第一個提示，內容是",
+      "zh_cn": "提示，可以餵给 Claude。所以我们可能有第一个提示，內容是"
+    },
+    "24": {
+      "en": "please answer the user's question, and then a sample question out of our data set, like what's two plus",
+      "zh_tw": "「請回答使用者的問題」，然後是我們資料集中的一個範例問題，比如二加二等於",
+      "zh_cn": "「请回答使用者的问题」，然后是我们数据集中的一个范例问题，比如二加二等於"
+    },
+    "25": {
+      "en": "two. And then we will repeat for all the other records inside of our data set. So here's two and three.",
+      "zh_tw": "多少。然後對資料集中的所有其他記錄重複這個過程。這是第二和第三個。",
+      "zh_cn": "多少。然后对数据集中的所有其他记录重复这个过程。这是第二和第三个。"
+    },
+    "26": {
+      "en": "We'll then feed each of these into Claude and get an actual response out of Claude. So for the first one,",
+      "zh_tw": "接著我們會把每一個都餵給 Claude，從 Claude 得到實際的回應。所以對第一個，",
+      "zh_cn": "接著我们会把每一个都餵给 Claude，从 Claude 得到实际的回应。所以对第一个，"
+    },
+    "27": {
+      "en": "we might get back a response of something like two plus two is four, and then something about how to make",
+      "zh_tw": "我們可能得到的回應是二加二等於四，然後是關於如何做",
+      "zh_cn": "我们可能得到的回应是二加二等於四，然后是关於如何做"
+    },
+    "28": {
+      "en": "oatmeal, and then something about the distance to the moon. Once we have these actual answers coming out of Claude,",
+      "zh_tw": "燕麥粥的內容，然後是關於到月球距離的內容。一旦我們有了這些來自 Claude 的實際答案，",
+      "zh_cn": "燕麥粥的內容，然后是关於到月球距离的內容。一旦我们有了这些來自 Claude 的实际答案，"
+    },
+    "29": {
+      "en": "we're then going to grade them in some way. During this grading step, we're going to take each of the",
+      "zh_tw": "接下來我們要以某種方式對它們進行評分。在這個評分步驟中，我們要取出",
+      "zh_cn": "接下來我们要以某种方式对它们进行评分。在这个评分步驟中，我们要取出"
+    },
+    "30": {
+      "en": "questions out of our data set, and the answers we got out of Claude. We'll pair them all off together,",
+      "zh_tw": "資料集中的每一個問題，以及我們從 Claude 得到的答案。我們會把它們一一配對，",
+      "zh_cn": "数据集中的每一个问题，以及我们从 Claude 得到的答案。我们会把它们一一配对，"
+    },
+    "31": {
+      "en": "and we'll feed them into a grader one by one. There are many different ways we can implement",
+      "zh_tw": "然後逐一餵入評分器。我們可以用很多不同的方式來實作",
+      "zh_cn": "然后逐一餵入评分器。我们可以用很多不同的方式來实作"
+    },
+    "32": {
+      "en": "this grader. We'll take a look at some of the different methodologies a little bit later.",
+      "zh_tw": "這個評分器。我們稍後會看一些不同的方法。",
+      "zh_cn": "这个评分器。我们稍后会看一些不同的方法。"
+    },
+    "33": {
+      "en": "The grader will then give us a score, maybe from one up to 10, based upon the quality of the answer",
+      "zh_tw": "評分器會根據 Claude 產出的答案品質給我們一個分數，可能從一分到十分。",
+      "zh_cn": "评分器会根据 Claude 产出的答案品质给我们一个分数，可能从一分到十分。"
+    },
+    "34": {
+      "en": "that was produced by Claude. So a 10 would mean we got a perfect answer, and there's really no possible",
+      "zh_tw": "所以十分表示我們得到了完美的答案，而且真的沒有任何可能的",
+      "zh_cn": "所以十分表示我们得到了完美的答案，而且真的没有任何可能的"
+    },
+    "35": {
+      "en": "way we could improve it. And maybe something like a four indicates that there's definitely room for",
+      "zh_tw": "改進方式。而四分左右則表示那裡絕對還有",
+      "zh_cn": "改进方式。而四分左右则表示那里绝对还有"
+    },
+    "36": {
+      "en": "improvement there. Now, as you can guess, there's kind of a lot of hidden complexity here with the grader,",
+      "zh_tw": "改進空間。現在如你所猜測的，評分器中有很多隱藏的複雜性，",
+      "zh_cn": "改进空间。现在如你所猜测的，评分器中有很多隐藏的复杂性，"
+    },
+    "37": {
+      "en": "because you're probably curious or wondering, well, how do we actually get these scores at all? And again,",
+      "zh_tw": "因為你可能很好奇或想知道，我們到底是怎麼得到這些分數的？同樣，",
+      "zh_cn": "因为你可能很好奇或想知道，我们到底是怎麼得到这些分数的？同样，"
+    },
+    "38": {
+      "en": "don't worry, we're going to cover these grader things in much greater detail in a little bit.",
+      "zh_tw": "別擔心，我們很快會更詳細地介紹這些評分器的內容。",
+      "zh_cn": "別担心，我们很快会更详细地介绍这些评分器的內容。"
+    },
+    "39": {
+      "en": "After we get these scores, we're then going to average them all together. So in this case, I would",
+      "zh_tw": "在我們得到這些分數之後，我們要把它們全部加總求平均。所以在這個例子中，我會",
+      "zh_cn": "在我们得到这些分数之后，我们要把它们全部加总求平均。所以在这个例子中，我会"
+    },
+    "40": {
+      "en": "add the scores together, divide by three, and get an average score of 7.66.",
+      "zh_tw": "把分數加在一起，除以三，得到平均分數 7.66。",
+      "zh_cn": "把分数加在一起，除以三，得到平均分数 7.66。"
+    },
+    "41": {
+      "en": "So I now have some kind of objective way of describing how well our original prompt performed.",
+      "zh_tw": "所以我現在有了某種客觀的方式來描述我們原始提示的表現如何。",
+      "zh_cn": "所以我现在有了某种客观的方式來描述我们原始提示的表现如何。"
+    },
+    "42": {
+      "en": "Now that we have this score, we can then change our prompt in some way and iterate or repeat this",
+      "zh_tw": "現在我們有了這個分數，接著可以以某種方式修改我們的提示並迭代或重複這個",
+      "zh_cn": "现在我们有了这个分数，接著可以以某种方式修改我们的提示並迭代或重复这个"
+    },
+    "43": {
+      "en": "entire process. So if I want to improve my score, I might try adding in a little bit more detail to",
+      "zh_tw": "整個過程。所以如果我想提高分數，我可能會嘗試在",
+      "zh_cn": "整个过程。所以如果我想提高分数，我可能会嘗试在"
+    },
+    "44": {
+      "en": "the prompt to hopefully guide Claude a little bit more and help it understand what kind of output we",
+      "zh_tw": "提示中加入更多細節，希望能更好地引導 Claude，幫助它理解我們想要什麼樣的輸出。",
+      "zh_cn": "提示中加入更多细节，希望能更好地引导 Claude，幫助它理解我们想要什麼样的输出。"
+    },
+    "45": {
+      "en": "want. So maybe I would add on to the end of the prompt, something like answer the question with",
+      "zh_tw": "所以我可能會在提示的末尾加上類似「用充足的",
+      "zh_cn": "所以我可能会在提示的末尾加上类似「用充足的"
+    },
+    "46": {
+      "en": "ample detail. Once I have the second version of my prompt, I would then run it through this entire",
+      "zh_tw": "細節回答問題」這樣的內容。一旦我有了第二版提示，我就會再次通過整個",
+      "zh_cn": "细节回答问题」这样的內容。一旦我有了第二版提示，我就会再次通过整个"
+    },
+    "47": {
+      "en": "pipeline again. I would then have a score for prompt version one in prompt version two, I could then",
+      "zh_tw": "管線執行它。然後我會有第一版提示和第二版提示的分數，接著可以",
+      "zh_cn": "管线执行它。然后我会有第一版提示和第二版提示的分数，接著可以"
+    },
+    "48": {
+      "en": "compare these two scores and whichever score is greater or higher. It's kind of a objective sign",
+      "zh_tw": "比較這兩個分數，哪個分數更大或更高。這是一種客觀的信號",
+      "zh_cn": "比較这兩个分数，哪个分数更大或更高。这是一种客观的信号"
+    },
+    "49": {
+      "en": "better than nothing that tells me that prompt v2 in this case is perhaps the better version of our",
+      "zh_tw": "總比沒有好，它告訴我第二版提示在這個例子中可能是我們",
+      "zh_cn": "总比没有好，它告訴我第二版提示在这个例子中可能是我们"
+    },
+    "50": {
+      "en": "prompt. So now that we have a high level overview of this entire process, as I mentioned, we're going to",
+      "zh_tw": "提示的更好版本。所以現在我們對整個過程有了高層次的概覽，正如我所提到的，我們將",
+      "zh_cn": "提示的更好版本。所以现在我们对整个过程有了高层次的概览，正如我所提到的，我们将"
+    },
+    "51": {
+      "en": "start to implement our own custom eval framework inside of a Jupyter notebook. So let's get started",
+      "zh_tw": "開始在 Jupyter 筆記本中實作我們自己的自訂評估框架。讓我們在",
+      "zh_cn": "开始在 Jupyter 笔记本中实作我们自己的自定义评估框架。让我们在"
+    },
+    "52": {
+      "en": "on an implementation in the next video.",
+      "zh_tw": "下一個影片中開始實作。",
+      "zh_cn": "下一个视频中开始实作。"
+    }
+  }
+}

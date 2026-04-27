@@ -1,0 +1,537 @@
+{
+  "srt_file": "Defining_resources_IhbXDBxu.srt",
+  "video_file": "Defining_resources_IhbXDBxu.mp4",
+  "max_valid_entry": 106,
+  "entries": {
+    "1": {
+      "en": "In this video, we're going to move on to the next major feature inside of MCP servers,",
+      "zh_tw": "在這支影片中，我們要接著介紹 MCP 伺服器中的下一個主要功能，",
+      "zh_cn": "在这支视频中，我们要接著介绍 MCP 服务器中的下一个主要功能，"
+    },
+    "2": {
+      "en": "which is resources. To help you understand resources, we're going to be implementing",
+      "zh_tw": "也就是資源。為了幫助你理解資源，我們要在專案中實作",
+      "zh_cn": "也就是资源。为了幫助你理解资源，我们要在项目中实作"
+    },
+    "3": {
+      "en": "another feature inside of our project. Here's what we're going to add in. I want to allow a",
+      "zh_tw": "另一個功能。這是我們要加入的。我想讓",
+      "zh_cn": "另一个功能。这是我们要加入的。我想让"
+    },
+    "4": {
+      "en": "user to mention a document by putting in an at symbol and then the name of a document.",
+      "zh_tw": "使用者可以用 @ 符號加上文件名稱來提及一個文件。",
+      "zh_cn": "使用者可以用 @ 符号加上文件名称來提及一个文件。"
+    },
+    "5": {
+      "en": "Whenever they do so, I want to automatically fetch the contents of that document and insert",
+      "zh_tw": "每當他們這樣做時，我想自動取得那個文件的內容並把它",
+      "zh_cn": "每当他们这样做时，我想自动取得那个文件的內容並把它"
+    },
+    "6": {
+      "en": "it into the prompt that we send off to Claude. So in total, there's going to be kind of two",
+      "zh_tw": "插入到我們發送給 Claude 的提示中。所以整體來說，這個功能大概有",
+      "zh_cn": "插入到我们发送给 Claude 的提示中。所以整体來说，这个功能大概有"
+    },
+    "7": {
+      "en": "aspects to this feature. Whenever a user types out the at symbol inside of a message,",
+      "zh_tw": "兩個方面。每當使用者在訊息中輸入 @ 符號時，",
+      "zh_cn": "兩个方面。每当使用者在信息中输入 @ 符号时，"
+    },
+    "8": {
+      "en": "we're going to automatically show a list of all the different documents that they can mention",
+      "zh_tw": "我們要在一個小小的自動完成視窗中自動顯示所有不同文件的列表，",
+      "zh_cn": "我们要在一个小小的自动完成視窗中自动显示所有不同文件的列表，"
+    },
+    "9": {
+      "en": "inside of a little autocomplete window. Then whenever a user submits a message with a mention",
+      "zh_tw": "讓他們可以提及。然後每當使用者送出一個包含提及的訊息時，",
+      "zh_cn": "让他们可以提及。然后每当使用者送出一个包含提及的信息时，"
+    },
+    "10": {
+      "en": "inside of it, we're going to automatically get the contents of that document and insert it into the",
+      "zh_tw": "我們要自動取得那個文件的內容並把它插入到",
+      "zh_cn": "我们要自动取得那个文件的內容並把它插入到"
+    },
+    "11": {
+      "en": "prompt that we send off to Claude. So for example, if a user says something like what's in the",
+      "zh_tw": "我們發送給 Claude 的提示中。例如，如果使用者說「@report.pdf 裡面有什麼」，",
+      "zh_cn": "我们发送给 Claude 的提示中。例如，如果使用者说「@report.pdf 里面有什麼」，"
+    },
+    "12": {
+      "en": "at report.pdf file, I would want to assemble a prompt like this and send it to Claude. So we're",
+      "zh_tw": "我會想組裝一個像這樣的提示發送給 Claude。所以我們",
+      "zh_cn": "我会想组装一个像这样的提示发送给 Claude。所以我们"
+    },
+    "13": {
+      "en": "going to have the query inside there from the user. And then we're also going to tell Claude that the",
+      "zh_tw": "會在裡面放入使用者的查詢。然後我們也會告訴 Claude",
+      "zh_cn": "会在里面放入使用者的查询。然后我们也会告訴 Claude"
+    },
+    "14": {
+      "en": "user might have referenced some document and here is the contents of the document.",
+      "zh_tw": "使用者可能引用了某個文件，這是文件的內容。",
+      "zh_cn": "使用者可能引用了某个文件，这是文件的內容。"
+    },
+    "15": {
+      "en": "So the approach here or the idea here is that we will not have to rely upon Claude to go and make",
+      "zh_tw": "這裡的方法或想法是，我們不必依賴 Claude 去使用",
+      "zh_cn": "这里的方法或想法是，我们不必依賴 Claude 去使用"
+    },
+    "16": {
+      "en": "use of some tool to figure out what is inside of the report.pdf file. Instead, the user can just",
+      "zh_tw": "某個工具來弄清楚 report.pdf 裡面有什麼。相反，使用者可以",
+      "zh_cn": "某个工具來弄清楚 report.pdf 里面有什麼。相反，使用者可以"
+    },
+    "17": {
+      "en": "preemptively mention the file and we're going to automatically insert some context ahead of time.",
+      "zh_tw": "先主動提及檔案，然後我們會提前自動插入一些上下文。",
+      "zh_cn": "先主动提及文件，然后我们会提前自动插入一些上下文。"
+    },
+    "18": {
+      "en": "Now, one thing I want to clarify here is that we're kind of talking about two separate features.",
+      "zh_tw": "有一件事我想澄清，我們其實在討論兩個不同的功能。",
+      "zh_cn": "有一件事我想澄清，我们其实在討论兩个不同的功能。"
+    },
+    "19": {
+      "en": "The first feature is that whenever a user types in the at symbol, we really need the MCP server to give",
+      "zh_tw": "第一個功能是，每當使用者輸入 @ 符號時，我們真的需要 MCP 伺服器",
+      "zh_cn": "第一个功能是，每当使用者输入 @ 符号时，我们真的需要 MCP 服务器"
+    },
+    "20": {
+      "en": "us a list of all the different documents that the user can possibly mention. And then the second",
+      "zh_tw": "給我們一個列表，列出使用者可以提及的所有不同文件。然後第二個",
+      "zh_cn": "给我们一个列表，列出使用者可以提及的所有不同文件。然后第二个"
+    },
+    "21": {
+      "en": "aspect here is that whenever a user submits a message that contains a mention, then we need the MCP server",
+      "zh_tw": "方面是，每當使用者送出的訊息包含提及時，我們需要 MCP 伺服器",
+      "zh_cn": "方面是，每当使用者送出的信息包含提及时，我们需要 MCP 服务器"
+    },
+    "22": {
+      "en": "to give us the contents of a single document. To get this information out of our MCP server, we are going",
+      "zh_tw": "給我們一個文件的內容。要從 MCP 伺服器取得這些資訊，我們要",
+      "zh_cn": "给我们一个文件的內容。要从 MCP 服务器取得这些资讯，我们要"
+    },
+    "23": {
+      "en": "to be making use of resources. Resources allow our MCP server to expose some amount of data to the client.",
+      "zh_tw": "使用資源。資源允許我們的 MCP 伺服器向客戶端暴露一些資料。",
+      "zh_cn": "使用资源。资源允许我们的 MCP 服务器向客户端暴露一些数据。"
+    },
+    "24": {
+      "en": "We usually define one resource for each distinct read operation. So in our example, we need to get",
+      "zh_tw": "我們通常為每個不同的讀取操作定義一個資源。在我們的例子中，需要",
+      "zh_cn": "我们通常为每个不同的读取操作定义一个资源。在我们的例子中，需要"
+    },
+    "25": {
+      "en": "a list of documents and read the contents of a single document. So we would probably end up making",
+      "zh_tw": "取得文件列表和讀取單一文件的內容。所以我們大概會",
+      "zh_cn": "取得文件列表和读取单一文件的內容。所以我们大概会"
+    },
+    "26": {
+      "en": "two separate resources. One resource would be responsible for returning just a list of document",
+      "zh_tw": "做兩個不同的資源。一個資源負責回傳文件",
+      "zh_cn": "做兩个不同的资源。一个资源负責返回文件"
+    },
+    "27": {
+      "en": "names so we can put them inside the autocomplete. And then we would probably make another resource",
+      "zh_tw": "名稱列表，這樣我們可以放到自動完成裡面。然後我們可能會做另一個資源",
+      "zh_cn": "名称列表，这样我们可以放到自动完成里面。然后我们可能会做另一个资源"
+    },
+    "28": {
+      "en": "that will expose the contents of a single document based upon its document ID. When we define these",
+      "zh_tw": "來根據文件 ID 暴露單一文件的內容。當我們定義",
+      "zh_cn": "來根据文件 ID 暴露单一文件的內容。当我们定义"
+    },
+    "29": {
+      "en": "resources, they're going to be accessed through our MCP client. So the entire flow that we're going to",
+      "zh_tw": "這些資源時，它們會透過 MCP 客戶端來存取。所以我們最終要",
+      "zh_cn": "这些资源时，它们会透过 MCP 客户端來访问。所以我们最终要"
+    },
+    "30": {
+      "en": "eventually put together here, whenever user types in something like what's in the at, and then",
+      "zh_tw": "組裝的整個流程，當使用者輸入像是「what's in the @」，然後",
+      "zh_cn": "组装的整个流程，当使用者输入像是「what's in the @」，然后"
+    },
+    "31": {
+      "en": "presumably they're going to put in something right there. As soon as they type in that at character,",
+      "zh_tw": "他們大概會在那裡放入某些東西。一旦他們輸入 @ 字元，",
+      "zh_cn": "他们大概会在那里放入某些東西。一旦他们输入 @ 字元，"
+    },
+    "32": {
+      "en": "we need to display a list of document names to put in the autocomplete. So our code is going to reach",
+      "zh_tw": "我們需要顯示文件名稱列表放到自動完成裡。所以我們的程式碼會去",
+      "zh_cn": "我们需要显示文件名称列表放到自动完成里。所以我们的代码会去"
+    },
+    "33": {
+      "en": "out to the MCP client, which in turn is going to send a read resource request off to the MCP server.",
+      "zh_tw": "找 MCP 客戶端，MCP 客戶端會向 MCP 伺服器發送一個 read resource 請求。",
+      "zh_cn": "找 MCP 客户端，MCP 客户端会向 MCP 服务器发送一个 read resource 请求。"
+    },
+    "34": {
+      "en": "Inside of that read resource request, we're going to include something called the URI. That is",
+      "zh_tw": "在那個 read resource 請求裡面，我們會包含一個叫做 URI 的東西。那基本上",
+      "zh_cn": "在那个 read resource 请求里面，我们会包含一个叫做 URI 的東西。那基本上"
+    },
+    "35": {
+      "en": "essentially the address of the resource we want to read. This URI gets defined whenever we put",
+      "zh_tw": "就是我們想要讀取的資源的位址。這個 URI 在我們最初建立",
+      "zh_cn": "就是我们想要读取的资源的位址。这个 URI 在我们最初建立"
+    },
+    "36": {
+      "en": "together our resource initially. So the URI is that right there. When we send off this read resource",
+      "zh_tw": "資源的時候就被定義了。所以 URI 就是那裡的那個。當我們發送這個 read resource",
+      "zh_cn": "资源的时候就被定义了。所以 URI 就是那里的那个。当我们发送这个 read resource"
+    },
+    "37": {
+      "en": "request, the MCP server is going to look at the exact URI that we put inside of here, and then run the",
+      "zh_tw": "請求時，MCP 伺服器會查看我們放在裡面的確切 URI，然後執行",
+      "zh_cn": "请求时，MCP 服务器会查看我们放在里面的确切 URI，然后执行"
+    },
+    "38": {
+      "en": "function we put together right there, take the result and send it back to us inside of a read",
+      "zh_tw": "我們在那裡組裝的函式，取得結果並透過 read",
+      "zh_cn": "我们在那里组装的函数，取得结果並透过 read"
+    },
+    "39": {
+      "en": "resource result message. We can then take the data inside there and display it inside of our autocomplete",
+      "zh_tw": "resource result 訊息發送回來。然後我們可以拿到裡面的資料，把它顯示在自動完成裡",
+      "zh_cn": "resource result 信息发送回來。然后我们可以拿到里面的数据，把它显示在自动完成里"
+    },
+    "40": {
+      "en": "or do whatever else we need to do with it. There are two different types of resources, direct and",
+      "zh_tw": "或做任何其他我們需要做的事。資源有兩種不同的類型：直接和",
+      "zh_cn": "或做任何其他我们需要做的事。资源有兩种不同的类型：直接和"
+    },
+    "41": {
+      "en": "templated. You'll also sometimes see direct resources referred to as static resources. A direct resource",
+      "zh_tw": "模板化的。你有時也會看到直接資源被稱為靜態資源。直接資源",
+      "zh_cn": "模板化的。你有时也会看到直接资源被称为静态资源。直接资源"
+    },
+    "42": {
+      "en": "just has a static URI. So it's always going to be the exact same thing, such as docs colon slash slash",
+      "zh_tw": "就是有一個靜態的 URI。它永遠都是一樣的東西，比如 docs://",
+      "zh_cn": "就是有一个静态的 URI。它永远都是一样的東西，比如 docs://"
+    },
+    "43": {
+      "en": "documents. A templated resource will have one or more parameters inside of its URI. So for example,",
+      "zh_tw": "documents。模板化資源會在 URI 裡有一個或多個參數。例如，",
+      "zh_cn": "documents。模板化资源会在 URI 里有一个或多个参数。例如，"
+    },
+    "44": {
+      "en": "we might have document slash and then kind of a wild card right here. So we can put in any document ID",
+      "zh_tw": "我們可能有 document/ 然後這裡有一個萬用字元。所以我們可以放入任何文件 ID",
+      "zh_cn": "我们可能有 document/ 然后这里有一个万用字元。所以我们可以放入任何文件 ID"
+    },
+    "45": {
+      "en": "we want to. And whenever we ask for this resource, that document ID right there inside the URI will be",
+      "zh_tw": "都行。每當我們請求這個資源時，URI 裡面的文件 ID 會被",
+      "zh_cn": "都行。每当我们请求这个资源时，URI 里面的文件 ID 会被"
+    },
+    "46": {
+      "en": "automatically parsed by the Python MCP SDK and provided as a keyword argument to our function.",
+      "zh_tw": "Python MCP SDK 自動解析，並作為關鍵字引數提供給我們的函式。",
+      "zh_cn": "Python MCP SDK 自动解析，並作为关键字引数提供给我们的函数。"
+    },
+    "47": {
+      "en": "The keyword argument will have the exact same name of whatever string you put in right there.",
+      "zh_tw": "關鍵字引數的名稱會和你放在那裡的字串完全相同。",
+      "zh_cn": "关键字引数的名称会和你放在那里的字符串完全相同。"
+    },
+    "48": {
+      "en": "So doc ID right there will be doc ID right there. As you can probably guess, we'll make use of",
+      "zh_tw": "所以那裡的 doc ID 就會是那裡的 doc ID。你大概可以猜到，我們會使用",
+      "zh_cn": "所以那里的 doc ID 就会是那里的 doc ID。你大概可以猜到，我们会使用"
+    },
+    "49": {
+      "en": "templated resources anytime that we want to allow a little bit more selection or variety or customization",
+      "zh_tw": "模板化資源，每當我們想在使用者向 MCP 伺服器請求的內容中允許更多選擇、多樣性或客製化",
+      "zh_cn": "模板化资源，每当我们想在使用者向 MCP 服务器请求的內容中允许更多选择、多样性或自定义"
+    },
+    "50": {
+      "en": "in what someone is asking for out of our MCP server. Implementing resources is pretty straightforward.",
+      "zh_tw": "的時候。實作資源相當直接。",
+      "zh_cn": "的时候。实作资源相当直接。"
+    },
+    "51": {
+      "en": "So let's go back over to our editor and we're going to add in some resources to our server right away.",
+      "zh_tw": "那我們回到編輯器，馬上在伺服器裡加入一些資源。",
+      "zh_cn": "那我们回到编輯器，马上在服务器里加入一些资源。"
+    },
+    "52": {
+      "en": "All right. So back over inside my editor, I will find the MCP server.py file. I'm then going to",
+      "zh_tw": "好的。回到編輯器裡，我會找到 MCP server.py 檔案。然後我要",
+      "zh_cn": "好的。回到编輯器里，我会找到 MCP server.py 文件。然后我要"
+    },
+    "53": {
+      "en": "scroll down a little bit and I'm going to find some comments for writing resource to return all document",
+      "zh_tw": "往下捲動一點，找到一些關於撰寫回傳所有文件 ID 的資源",
+      "zh_cn": "往下捲动一点，找到一些关於撰写返回所有文件 ID 的资源"
+    },
+    "54": {
+      "en": "IDs and writing resource to return the contents of a particular document. Now for this first one right",
+      "zh_tw": "和撰寫回傳特定文件內容的資源的註解。對於這裡第一個",
+      "zh_cn": "和撰写返回特定文件內容的资源的註解。对於这里第一个"
+    },
+    "55": {
+      "en": "here, I put in the comment document IDs. Remember for us, our document IDs are essentially the name of",
+      "zh_tw": "資源，我放了 document IDs 的註解。記住對我們來說，文件 ID 基本上就是",
+      "zh_cn": "资源，我放了 document IDs 的註解。记住对我们來说，文件 ID 基本上就是"
+    },
+    "56": {
+      "en": "the document. So for us, we're really just returning these IDs. They're going to serve the purpose of",
+      "zh_tw": "文件的名稱。所以我們真的就是回傳這些 ID。它們會作為",
+      "zh_cn": "文件的名称。所以我们真的就是返回这些 ID。它们会作为"
+    },
+    "57": {
+      "en": "the name. That means we can put them directly into that autocomplete element. All right. So to make",
+      "zh_tw": "名稱的用途。這意味著我們可以直接把它們放進自動完成元素裡。好的。所以要建立",
+      "zh_cn": "名称的用途。这意味著我们可以直接把它们放进自动完成元素里。好的。所以要建立"
+    },
+    "58": {
+      "en": "our resource, I'm going to delete that to do, and then I'll add in a MCP dot resource. The first argument",
+      "zh_tw": "我們的資源，我要刪除待辦事項，然後加入 mcp.resource。第一個引數",
+      "zh_cn": "我们的资源，我要刪除待办事项，然后加入 mcp.resource。第一个引数"
+    },
+    "59": {
+      "en": "is going to be the URI for accessing this thing. Again, it's kind of equivalent to a route handler.",
+      "zh_tw": "是存取這個東西的 URI。同樣，它有點像路由處理器。",
+      "zh_cn": "是访问这个東西的 URI。同样，它有点像路由处理器。"
+    },
+    "60": {
+      "en": "So I will use docs colon slash slash documents, and I'm also going to add in a MIME type of",
+      "zh_tw": "我會用 docs://documents，然後加入一個 MIME 類型",
+      "zh_cn": "我会用 docs://documents，然后加入一个 MIME 类型"
+    },
+    "61": {
+      "en": "application slash JSON. A resource can return any type of data. So it can be plain text. It can be",
+      "zh_tw": "application/json。資源可以回傳任何類型的資料。可以是純文字、",
+      "zh_cn": "application/json。资源可以返回任何类型的数据。可以是纯文字、"
+    },
+    "62": {
+      "en": "JSON. It can be binary data, anything. It's up to us to kind of give our client a hint as to what kind",
+      "zh_tw": "JSON、二進制資料，什麼都行。由我們來給客戶端一個提示，讓它知道我們在",
+      "zh_cn": "JSON、二进制数据，什麼都行。由我们來给客户端一个提示，让它知道我们在"
+    },
+    "63": {
+      "en": "of data we are returning. To do so, we're going to define this MIME type. A MIME type of application",
+      "zh_tw": "回傳什麼類型的資料。為此，我們要定義這個 MIME 類型。MIME 類型",
+      "zh_cn": "返回什麼类型的数据。为此，我们要定义这个 MIME 类型。MIME 类型"
+    },
+    "64": {
+      "en": "slash JSON is a hint to our client, who's eventually going to ask for this resource right here,",
+      "zh_tw": "application/json 是一個提示，告訴最終會請求這個資源的客戶端，",
+      "zh_cn": "application/json 是一个提示，告訴最终会请求这个资源的客户端，"
+    },
+    "65": {
+      "en": "that we're going to be sending back a string that contains some structured JSON data. And so it would",
+      "zh_tw": "我們將回傳一個包含結構化 JSON 資料的字串。所以",
+      "zh_cn": "我们将返回一个包含结构化 JSON 数据的字符串。所以"
+    },
+    "66": {
+      "en": "be up to our client to deserialize that data. We're essentially turning into some usable data structure.",
+      "zh_tw": "客戶端需要把這個資料反序列化。我們基本上是把它轉換成某種可用的資料結構。",
+      "zh_cn": "客户端需要把这个数据反序列化。我们基本上是把它转换成某种可用的数据结构。"
+    },
+    "67": {
+      "en": "Underneath that decorator, I'll write out my function of list docs, and I'm going to return a",
+      "zh_tw": "在那個裝飾器下面，我會寫出函式 list docs，我要回傳",
+      "zh_cn": "在那个装饰器下面，我会写出函数 list docs，我要返回"
+    },
+    "68": {
+      "en": "list of strings. And then inside there, I will return list docs keys. So just take all the keys out",
+      "zh_tw": "一個字串列表。然後在裡面，我會 return list(docs.keys())。所以把那個",
+      "zh_cn": "一个字符串列表。然后在里面，我会 return list(docs.keys())。所以把那个"
+    },
+    "69": {
+      "en": "of that dictionary and turn it into a list, and I'm going to return it. Now, you'll notice that we",
+      "zh_tw": "字典的所有鍵取出來轉成列表，然後回傳。你會注意到我們",
+      "zh_cn": "字典的所有键取出來转成列表，然后返回。你会注意到我们"
+    },
+    "70": {
+      "en": "are not returning distinct JSON here. In other words, we're not actually returning a string.",
+      "zh_tw": "並沒有回傳明確的 JSON。換句話說，我們實際上沒有回傳一個字串。",
+      "zh_cn": "並没有返回明确的 JSON。换句话说，我们实际上没有返回一个字符串。"
+    },
+    "71": {
+      "en": "The MCP Python SDK is going to automatically take whatever we return and turn it into a string for us.",
+      "zh_tw": "MCP Python SDK 會自動把我們回傳的東西轉成字串。",
+      "zh_cn": "MCP Python SDK 会自动把我们返回的東西转成字符串。"
+    },
+    "72": {
+      "en": "All right, let's take care of our second resource. So I'm going to delete that comment,",
+      "zh_tw": "好的，讓我們處理第二個資源。我要刪除那個註解，",
+      "zh_cn": "好的，让我们处理第二个资源。我要刪除那个註解，"
+    },
+    "73": {
+      "en": "and then replace it with MCP resource, docs, colon, slash, slash documents. And then this time,",
+      "zh_tw": "然後替換成 mcp.resource，docs://documents。然後這次，",
+      "zh_cn": "然后替换成 mcp.resource，docs://documents。然后这次，"
+    },
+    "74": {
+      "en": "I want a templated resource, because I'm putting in this wildcard right here. And then my MIME type",
+      "zh_tw": "我要用模板化資源，因為我在這裡放了一個萬用字元。然後我的 MIME 類型",
+      "zh_cn": "我要用模板化资源，因为我在这里放了一个万用字元。然后我的 MIME 类型"
+    },
+    "75": {
+      "en": "this time around, just for a little bit of variety, I'm going to be returning plain text,",
+      "zh_tw": "這次為了有一點變化，我要回傳純文字，",
+      "zh_cn": "这次为了有一点变化，我要返回纯文字，"
+    },
+    "76": {
+      "en": "because it's going to be just the contents of the document. And I'm not going to wrap it up in any",
+      "zh_tw": "因為就是文件的內容。我不會把它包裝在任何",
+      "zh_cn": "因为就是文件的內容。我不会把它包装在任何"
+    },
+    "77": {
+      "en": "kind of structure. Now, just so you know, in a real application, something like read a document,",
+      "zh_tw": "結構裡面。提醒一下，在真正的應用程式中，像讀取一個文件這樣的操作，",
+      "zh_cn": "结构里面。提醒一下，在真正的应用程序中，像读取一个文件这样的操作，"
+    },
+    "78": {
+      "en": "I would probably return an entire document record. So some kind of dictionary that contains maybe the",
+      "zh_tw": "我大概會回傳整個文件記錄。也就是某種字典，可能包含",
+      "zh_cn": "我大概会返回整个文件记录。也就是某种字典，可能包含"
+    },
+    "79": {
+      "en": "ID, the content, the author name, the author ID, and stuff like that. But just for the sake of an",
+      "zh_tw": "ID、內容、作者名稱、作者 ID 之類的東西。但為了示範，",
+      "zh_cn": "ID、內容、作者名称、作者 ID 之类的東西。但为了示范，"
+    },
+    "80": {
+      "en": "example, I'm going to return just the text of the document to show you how we would normally return",
+      "zh_tw": "我只回傳文件的文字，來展示我們通常怎麼回傳",
+      "zh_cn": "我只返回文件的文字，來展示我们通常怎麼返回"
+    },
+    "81": {
+      "en": "plain text. So in this scenario, my MIME type would be text plain. And then I will make fetch",
+      "zh_tw": "純文字。所以在這種情況下，我的 MIME 類型會是 text/plain。然後我會做 fetch",
+      "zh_cn": "纯文字。所以在这种情況下，我的 MIME 类型会是 text/plain。然后我会做 fetch"
+    },
+    "82": {
+      "en": "doc, I'm going to take doc ID, which is going to be a string, and I'm going to return a string.",
+      "zh_tw": "doc 函式，接收 doc_ID 字串，回傳字串。",
+      "zh_cn": "doc 函数，接收 doc_ID 字符串，返回字符串。"
+    },
+    "83": {
+      "en": "Once again, whatever word you put right there, it's going to show up as a keyword argument inside",
+      "zh_tw": "再一次，你放在那裡的任何字詞，都會作為關鍵字引數出現在",
+      "zh_cn": "再一次，你放在那里的任何字词，都会作为关键字引数出现在"
+    },
+    "84": {
+      "en": "of your function. If we added in some additional parameters inside of here, such as maybe doc type",
+      "zh_tw": "你的函式裡面。如果我們在這裡加入一些額外的參數，比如 doc_type",
+      "zh_cn": "你的函数里面。如果我们在这里加入一些额外的参数，比如 doc_type"
+    },
+    "85": {
+      "en": "or something like that, it would just show up as an additional keyword argument like so.",
+      "zh_tw": "或類似的東西，它就會作為額外的關鍵字引數出現。",
+      "zh_cn": "或类似的東西，它就会作为额外的关键字引数出现。"
+    },
+    "86": {
+      "en": "Then inside of here, I'm going to first make sure that the ID that this person is asking for",
+      "zh_tw": "然後在裡面，我要先確保這個人請求的 ID",
+      "zh_cn": "然后在里面，我要先确保这个人请求的 ID"
+    },
+    "87": {
+      "en": "actually exists. So if doc ID not in docs, I'm going to raise a value error with a F string that",
+      "zh_tw": "確實存在。所以 if doc_ID not in docs，我要 raise ValueError，帶一個 f 字串說",
+      "zh_cn": "确实存在。所以 if doc_ID not in docs，我要 raise ValueError，帶一个 f 字符串说"
+    },
+    "88": {
+      "en": "says doc with ID not found. And then if we get past that check, I will return docs doc ID.",
+      "zh_tw": "doc with ID not found。然後如果通過了那個檢查，我就 return docs[doc_ID]。",
+      "zh_cn": "doc with ID not found。然后如果通过了那个检查，我就 return docs[doc_ID]。"
+    },
+    "89": {
+      "en": "And that's it. Now let's try testing this stuff out inside of our MCP inspector once again.",
+      "zh_tw": "就這樣。現在讓我們在 MCP inspector 裡面再次測試這些東西。",
+      "zh_cn": "就这样。现在让我们在 MCP inspector 里面再次测试这些東西。"
+    },
+    "90": {
+      "en": "So remember at our terminal, we can run the command UV run MCP dev MCP server dot PI.",
+      "zh_tw": "記得在終端機中，我們可以執行命令 uv run mcp dev mcpserver.py。",
+      "zh_cn": "记得在终端中，我们可以执行命令 uv run mcp dev mcpserver.py。"
+    },
+    "91": {
+      "en": "That's going to start up a web server at port 6277 or excuse me, 6274 is the default.",
+      "zh_tw": "那會在 port 6277 啟動一個網頁伺服器，或者抱歉，6274 是預設值。",
+      "zh_cn": "那会在 port 6277 啟动一个网页服务器，或者抱歉，6274 是默认值。"
+    },
+    "92": {
+      "en": "So I'm going to make sure I open that up inside my browser. Here we go. I'll click connect.",
+      "zh_tw": "我要確保在瀏覽器中打開它。好了。我點擊連接。",
+      "zh_cn": "我要确保在浏览器中打开它。好了。我点击连接。"
+    },
+    "93": {
+      "en": "I'll then find resources. And then I should be able to list out all the different resources that are",
+      "zh_tw": "然後找到 resources。我應該可以列出所有不同的可用資源。",
+      "zh_cn": "然后找到 resources。我应该可以列出所有不同的可用资源。"
+    },
+    "94": {
+      "en": "available. Now, when I list out resources, this is going to be specifically static or direct resources.",
+      "zh_tw": "當我列出資源時，這裡特指靜態或直接資源。",
+      "zh_cn": "当我列出资源时，这里特指静态或直接资源。"
+    },
+    "95": {
+      "en": "So I'll see only doc slash documents, and then I can separately list out all my different resource",
+      "zh_tw": "所以我只會看到 docs://documents，然後我可以另外列出所有不同的資源",
+      "zh_cn": "所以我只会看到 docs://documents，然后我可以另外列出所有不同的资源"
+    },
+    "96": {
+      "en": "templates. And so I'll see that I have one resource template of fetch doc. I'm going to",
+      "zh_tw": "模板。所以我會看到有一個 fetch doc 的資源模板。我要",
+      "zh_cn": "模板。所以我会看到有一个 fetch doc 的资源模板。我要"
+    },
+    "97": {
+      "en": "first try to run the slash documents right here. We'll see what we get back. So this is the actual",
+      "zh_tw": "先試試執行 /documents。看看我們拿到什麼。這是實際的",
+      "zh_cn": "先试试执行 /documents。看看我们拿到什麼。这是实际的"
+    },
+    "98": {
+      "en": "message, the exact structure that gets returned from our MCP server. You'll notice that it has a",
+      "zh_tw": "訊息，也就是從 MCP 伺服器回傳的確切結構。你會注意到它有一個",
+      "zh_cn": "信息，也就是从 MCP 服务器返回的确切结构。你会注意到它有一个"
+    },
+    "99": {
+      "en": "text property and inside there is all the data that we are returning serialized as a JSON string.",
+      "zh_tw": "text 屬性，裡面是所有我們回傳的資料，序列化為 JSON 字串。",
+      "zh_cn": "text 属性，里面是所有我们返回的数据，序列化为 JSON 字符串。"
+    },
+    "100": {
+      "en": "So again, it would be up to us inside of our CLI application to take this text right here and",
+      "zh_tw": "再次說明，在我們的 CLI 應用程式裡，由我們負責把這裡的文字",
+      "zh_cn": "再次说明，在我们的 CLI 应用程序里，由我们负責把这里的文字"
+    },
+    "101": {
+      "en": "deserialize it from this JSON string into a usable list of strings. Then we can also test out fetch doc.",
+      "zh_tw": "從 JSON 字串反序列化為可用的字串列表。然後我們也可以測試 fetch doc。",
+      "zh_cn": "从 JSON 字符串反序列化为可用的字符串列表。然后我们也可以测试 fetch doc。"
+    },
+    "102": {
+      "en": "So I'll click on that. I have to enter a doc ID. So I'm going to put it in. I want to read the",
+      "zh_tw": "我點擊那個。我要輸入一個 doc ID。所以我要放入——我想讀取",
+      "zh_cn": "我点击那个。我要输入一个 doc ID。所以我要放入——我想读取"
+    },
+    "103": {
+      "en": "report.pdf file. And I'll read the resource. And now I should see the contents of that particular",
+      "zh_tw": "report.pdf 檔案。我讀取資源。現在我應該看到那個特定",
+      "zh_cn": "report.pdf 文件。我读取资源。现在我应该看到那个特定"
+    },
+    "104": {
+      "en": "document. And you'll notice this time around, once again, I get a text plain. So that's a hint to me",
+      "zh_tw": "文件的內容。你會注意到這次我得到的是 text/plain。所以那是給我的一個提示，",
+      "zh_cn": "文件的內容。你会注意到这次我得到的是 text/plain。所以那是给我的一个提示，"
+    },
+    "105": {
+      "en": "that this is plain text and I should not attempt to deserialize it from JSON in any way.",
+      "zh_tw": "說明這是純文字，我不應該嘗試用任何方式從 JSON 反序列化它。",
+      "zh_cn": "说明这是纯文字，我不应该嘗试用任何方式从 JSON 反序列化它。"
+    },
+    "106": {
+      "en": "So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint. So that's a hint",
+      "zh_tw": "這就是提示。就是這個提示。就是這樣。",
+      "zh_cn": "这就是提示。就是这个提示。就是这样。"
+    }
+  }
+}

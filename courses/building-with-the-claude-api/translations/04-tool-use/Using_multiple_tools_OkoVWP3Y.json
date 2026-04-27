@@ -1,0 +1,207 @@
+{
+  "srt_file": "Using_multiple_tools_OkoVWP3Y.srt",
+  "video_file": "Using_multiple_tools_OkoVWP3Y.mp4",
+  "max_valid_entry": 40,
+  "entries": {
+    "1": {
+      "en": "The last thing we need to do is add in the add duration to date time tool and the set and reminder",
+      "zh_tw": "最後要做的是加入 add duration to date time 工具和 set reminder",
+      "zh_cn": "最后要做的是加入 add duration to date time 工具和 set reminder"
+    },
+    "2": {
+      "en": "tool. And this is going to be a little bit anticlimactic because last video was rather",
+      "zh_tw": "工具。這可能有點虎頭蛇尾，因為上個影片相當",
+      "zh_cn": "工具。这可能有点虎头蛇尾，因为上个视频相当"
+    },
+    "3": {
+      "en": "challenging. This one is going to be really easy, short, and straightforward. It turns out I've",
+      "zh_tw": "有挑戰性。這個會很簡單、很短、很直觀。其實我已經在 tools and schemas",
+      "zh_cn": "有挑战性。这个会很简单、很短、很直观。其实我已经在 tools and schemas"
+    },
+    "4": {
+      "en": "already put together a lot of the code that we need for this inside of the tools and schemas",
+      "zh_tw": "儲存格中準備好了很多需要的程式碼。你會發現裡面已經有",
+      "zh_cn": "存储格中准备好了很多需要的代码。你会发现里面已经有"
+    },
+    "5": {
+      "en": "cell. You'll find that I've already got an implementation of add duration to date time",
+      "zh_tw": "add duration to date time 的實作。往下捲還會看到 set reminder",
+      "zh_cn": "add duration to date time 的实作。往下捲还会看到 set reminder"
+    },
+    "6": {
+      "en": "put together inside of here. And if you scroll down, you'll see I've also got our set reminder",
+      "zh_tw": "函式。set reminder 不會真的設定提醒或做類似的事。",
+      "zh_cn": "函数。set reminder 不会真的设定提醒或做类似的事。"
+    },
+    "7": {
+      "en": "function put together. Now the set reminder doesn't actually set a reminder or anything",
+      "zh_tw": "它只是印出一個聲明說「我們在某個時間設了提醒，",
+      "zh_cn": "它只是印出一个声明说「我们在某个时间设了提醒，"
+    },
+    "8": {
+      "en": "like that. It's just going to print out a statement that says, Hey, we set a reminder at this time",
+      "zh_tw": "內容是某某」。我也提供了 add duration to date time schema 和 set reminder",
+      "zh_cn": "內容是某某」。我也提供了 add duration to date time schema 和 set reminder"
+    },
+    "9": {
+      "en": "with some given content. I've also provided us a add duration to date time schema and a set reminder",
+      "zh_tw": "schema。所以真正要做的就是把這兩個 schema 傳給 Claude。還要確保",
+      "zh_cn": "schema。所以真正要做的就是把这兩个 schema 传给 Claude。还要确保"
+    },
+    "10": {
+      "en": "schema. So all we really need to do is pass these two schemas into Claude. And we also need to make",
+      "zh_tw": "如果 Claude 要求使用任一工具，我們呼叫對應的工具函式。",
+      "zh_cn": "如果 Claude 要求使用任一工具，我们调用对应的工具函数。"
+    },
+    "11": {
+      "en": "sure that if Claude ever asked to use either tool, we call the appropriate tool function.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "12": {
+      "en": "So let's get to it should be pretty straightforward. First off, I'm going to find the run conversation",
+      "zh_tw": "開始吧，應該很直觀。首先找到",
+      "zh_cn": "开始吧，应该很直观。首先找到"
+    },
+    "13": {
+      "en": "function inside of here. I'm going to find the list of tools and I'm going to add into it,",
+      "zh_tw": "run conversation 函式。找到工具列表，加入",
+      "zh_cn": "run conversation 函数。找到工具列表，加入"
+    },
+    "14": {
+      "en": "add duration to date time schema and the set reminder schema as well. So now Claude is aware",
+      "zh_tw": "add duration to date time schema 和 set reminder schema。現在 Claude 知道了",
+      "zh_cn": "add duration to date time schema 和 set reminder schema。现在 Claude 知道了"
+    },
+    "15": {
+      "en": "of the existence of these two other tools. Next, all I have to do is go up a little bit here",
+      "zh_tw": "這兩個其他工具的存在。接下來只需要往上一點到",
+      "zh_cn": "这兩个其他工具的存在。接下來只需要往上一点到"
+    },
+    "16": {
+      "en": "to the run tool function. So this is the function where we're going to get a tool name and some",
+      "zh_tw": "run tool 函式。這是取得工具名稱和",
+      "zh_cn": "run tool 函数。这是取得工具名称和"
+    },
+    "17": {
+      "en": "arguments. All we have to do is find the appropriate tool function to call, call it and return the results.",
+      "zh_tw": "參數的函式。找到對應的工具函式呼叫，呼叫它並回傳結果。",
+      "zh_cn": "参数的函数。找到对应的工具函数调用，调用它並返回结果。"
+    },
+    "18": {
+      "en": "So adding into the thing is really easy. We'll just add in an LF case. So we'll check and see if the tool",
+      "zh_tw": "加入新的很簡單。加個 elif 判斷。檢查 tool",
+      "zh_cn": "加入新的很简单。加个 elif 判断。检查 tool"
+    },
+    "19": {
+      "en": "name is add duration to date time. And if it is, we'll return a call to add duration to date time",
+      "zh_tw": "name 是否為 add duration to date time。如果是，回傳 add duration to date time",
+      "zh_cn": "name 是否为 add duration to date time。如果是，返回 add duration to date time"
+    },
+    "20": {
+      "en": "and star star tool input. I'll then repeat that for the other tool. So the tool name is set reminder,",
+      "zh_tw": "加兩個星號 tool_input。然後對另一個工具重複。如果 tool name 是 set reminder，",
+      "zh_cn": "加兩个星号 tool_input。然后对另一个工具重复。如果 tool name 是 set reminder，"
+    },
+    "21": {
+      "en": "return set reminder with tool input. And that's it. So as soon as you put together this run tools function",
+      "zh_tw": "回傳 set reminder 加 tool_input。就這樣。一旦建好 run tools 函式",
+      "zh_cn": "返回 set reminder 加 tool_input。就这样。一旦建好 run tools 函数"
+    },
+    "22": {
+      "en": "and the run conversation function, after that initial difficulty, everything around tool use starts to become",
+      "zh_tw": "和 run conversation 函式，在最初的困難之後，工具使用的一切開始變得",
+      "zh_cn": "和 run conversation 函数，在最初的困难之后，工具使用的一切开始变得"
+    },
+    "23": {
+      "en": "really easy and straightforward because adding in additional tools is super simple. Just update run tool,",
+      "zh_tw": "很簡單直觀，因為加入額外工具超級簡單。更新 run tool，",
+      "zh_cn": "很简单直观，因为加入额外工具超级简单。更新 run tool，"
+    },
+    "24": {
+      "en": "add in a tool schema, add in an implementation for the actual tool function itself. And that's it.",
+      "zh_tw": "加個工具 schema，加個工具函式的實作。就完成了。",
+      "zh_cn": "加个工具 schema，加个工具函数的实作。就完成了。"
+    },
+    "25": {
+      "en": "You're all done. So now let's test this out. I'm going to make sure I rerun that cell.",
+      "zh_tw": "現在測試一下。確保重新執行儲存格。",
+      "zh_cn": "现在测试一下。确保重新执行存储格。"
+    },
+    "26": {
+      "en": "I'm going to rerun run conversation. And then down here at the very bottom, let's update our query.",
+      "zh_tw": "重新執行 run conversation。然後在最下面更新查詢。",
+      "zh_cn": "重新执行 run conversation。然后在最下面更新查询。"
+    },
+    "27": {
+      "en": "I'm going to ask Claude to set a reminder. And I'm going to say that the reminder needs to be set",
+      "zh_tw": "要求 Claude 設定提醒。提醒需要設在",
+      "zh_cn": "要求 Claude 设定提醒。提醒需要设在"
+    },
+    "28": {
+      "en": "177 days after January 1st, 2050. This is definitely going to result in more than one tool call.",
+      "zh_tw": "2050 年 1 月 1 日後 177 天。這一定會產生多次工具呼叫。",
+      "zh_cn": "2050 年 1 月 1 日后 177 天。这一定会产生多次工具调用。"
+    },
+    "29": {
+      "en": "Claude is going to first have to add a duration to date time and then set a reminder after that.",
+      "zh_tw": "Claude 首先要做日期加法，然後再設定提醒。",
+      "zh_cn": "Claude 首先要做日期加法，然后再设定提醒。"
+    },
+    "30": {
+      "en": "Let's then run this and see how it does. Claude initially tells us that it needs to figure out 177 days",
+      "zh_tw": "執行它看看。Claude 先告訴我們要算出 1 月 1 日後 177 天是幾號。",
+      "zh_cn": "执行它看看。Claude 先告訴我们要算出 1 月 1 日后 177 天是幾号。"
+    },
+    "31": {
+      "en": "after January 1st. Once it figures that out, it's then going to attempt to set the reminder.",
+      "zh_tw": "算出後就嘗試設定提醒。",
+      "zh_cn": "算出后就嘗试设定提醒。"
+    },
+    "32": {
+      "en": "Then we see a log statement right here. This log statement is coming from the set reminder function.",
+      "zh_tw": "然後看到一個 log 聲明。這是從 set reminder 函式來的。",
+      "zh_cn": "然后看到一个 log 声明。这是从 set reminder 函数來的。"
+    },
+    "33": {
+      "en": "Remember set reminder doesn't actually do anything. It just prints out the arguments that it's given.",
+      "zh_tw": "記得 set reminder 不會真的做什麼。它只是印出收到的參數。",
+      "zh_cn": "记得 set reminder 不会真的做什麼。它只是印出收到的参数。"
+    },
+    "34": {
+      "en": "And then finally, we get a response from Claude telling us that our appointment has been set",
+      "zh_tw": "最後 Claude 回應告訴我們預約已設定在",
+      "zh_cn": "最后 Claude 回应告訴我们预约已设定在"
+    },
+    "35": {
+      "en": "on the correct date of Monday, June 27th of 2050. We can also go down to the message conversation",
+      "zh_tw": "正確的日期，2050 年 6 月 27 日星期一。也可以往下看訊息對話",
+      "zh_cn": "正确的日期，2050 年 6 月 27 日星期一。也可以往下看信息对话"
+    },
+    "36": {
+      "en": "history. So once again, we've got the user message, the assistant right here that has a text block.",
+      "zh_tw": "歷史。又是使用者訊息，然後是有 text block 的助手訊息。",
+      "zh_cn": "历史。又是使用者信息，然后是有 text block 的助手信息。"
+    },
+    "37": {
+      "en": "And in addition to the text block, once again, a tool use block. So yet again, we're seeing an",
+      "zh_tw": "除了 text block 外還有 tool use block。又是一個",
+      "zh_cn": "除了 text block 外还有 tool use block。又是一个"
+    },
+    "38": {
+      "en": "example here of a message with multiple different blocks inside of it. We then respond with the tool",
+      "zh_tw": "有多個不同 block 的訊息範例。然後回應 tool",
+      "zh_cn": "有多个不同 block 的信息范例。然后回应 tool"
+    },
+    "39": {
+      "en": "results. We then get some followup. And from there, I think you understand the process.",
+      "zh_tw": "result。再來是後續。從這裡開始你已經了解流程了。",
+      "zh_cn": "result。再來是后续。从这里开始你已经了解流程了。"
+    },
+    "40": {
+      "en": "All right. So that's it. We have wired in multiple different tools to our notebook. Excellent progress.",
+      "zh_tw": "好的。就是這樣。我們已經在筆記本中接入了多個不同的工具。很棒的進展。",
+      "zh_cn": "好的。就是这样。我们已经在笔记本中接入了多个不同的工具。很棒的进展。"
+    }
+  }
+}

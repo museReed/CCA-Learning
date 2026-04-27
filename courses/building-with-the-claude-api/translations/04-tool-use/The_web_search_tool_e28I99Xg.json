@@ -1,0 +1,487 @@
+{
+  "srt_file": "The_web_search_tool_e28I99Xg.srt",
+  "video_file": "The_web_search_tool_e28I99Xg.mp4",
+  "max_valid_entry": 102,
+  "entries": {
+    "1": {
+      "en": "There's another tool built directly into Claude named the web search tool.",
+      "zh_tw": "Claude 還有另一個內建工具叫做網路搜尋工具。",
+      "zh_cn": "Claude 还有另一个內建工具叫做网络搜尋工具。"
+    },
+    "2": {
+      "en": "As the name implies, this tool allows Claude to search the web for up-to-date or specialized",
+      "zh_tw": "顧名思義，這個工具讓 Claude 能搜尋網路，找到最新或專業的",
+      "zh_cn": "顧名思义，这个工具让 Claude 能搜尋网络，找到最新或專業的"
+    },
+    "3": {
+      "en": "information to answer a user's question.",
+      "zh_tw": "資訊來回答使用者的問題。",
+      "zh_cn": "资讯來回答使用者的问题。"
+    },
+    "4": {
+      "en": "For example, if we ask about current events in quantum computing, Claude might decide",
+      "zh_tw": "例如，如果我們問量子計算的時事，Claude 可能會決定",
+      "zh_cn": "例如，如果我们问量子计算的时事，Claude 可能会决定"
+    },
+    "5": {
+      "en": "to use this tool to find some up-to-date articles related to quantum computing and then use",
+      "zh_tw": "用這個工具找一些量子計算的最新文章，然後用",
+      "zh_cn": "用这个工具找一些量子计算的最新文章，然后用"
+    },
+    "6": {
+      "en": "that content to formulate an answer.",
+      "zh_tw": "那些內容來撰寫答案。",
+      "zh_cn": "那些內容來撰写答案。"
+    },
+    "7": {
+      "en": "Unlike the text editor tool, we do not have to provide an implementation to actually run",
+      "zh_tw": "和 text editor 工具不同，我們不需要提供實際執行搜尋的",
+      "zh_cn": "和 text editor 工具不同，我们不需要提供实际执行搜尋的"
+    },
+    "8": {
+      "en": "the search.",
+      "zh_tw": "實作。",
+      "zh_cn": "实作。"
+    },
+    "9": {
+      "en": "The search is done entirely by Claude, and this makes this tool really easy to run and",
+      "zh_tw": "搜尋完全由 Claude 完成，這讓這個工具非常容易執行和",
+      "zh_cn": "搜尋完全由 Claude 完成，这让这个工具非常容易执行和"
+    },
+    "10": {
+      "en": "use.",
+      "zh_tw": "使用。",
+      "zh_cn": "使用。"
+    },
+    "11": {
+      "en": "Let's write out some code to understand how this tool works.",
+      "zh_tw": "讓我們寫些程式碼來理解這個工具如何運作。",
+      "zh_cn": "让我们写些代码來理解这个工具如何运作。"
+    },
+    "12": {
+      "en": "I'm back inside of a notebook.",
+      "zh_tw": "回到筆記本。",
+      "zh_cn": "回到笔记本。"
+    },
+    "13": {
+      "en": "I've created a new one called 006 web search, and I've got a cell down here at the bottom",
+      "zh_tw": "建了一個叫 006 web search 的新筆記本，下面有一個儲存格",
+      "zh_cn": "建了一个叫 006 web search 的新笔记本，下面有一个存储格"
+    },
+    "14": {
+      "en": "with some typical code for running a request off to Claude.",
+      "zh_tw": "包含向 Claude 發送請求的典型程式碼。",
+      "zh_cn": "包含向 Claude 发送请求的典型代码。"
+    },
+    "15": {
+      "en": "In the cell right above, I'm going to create a new variable called web search schema.",
+      "zh_tw": "在上面的儲存格中建一個新變數 web search schema。",
+      "zh_cn": "在上面的存储格中建一个新变量 web search schema。"
+    },
+    "16": {
+      "en": "This is going to be a schema that we author that we are going to include in our request",
+      "zh_tw": "這是一個我們撰寫的 schema，會包含在發給",
+      "zh_cn": "这是一个我们撰写的 schema，会包含在发给"
+    },
+    "17": {
+      "en": "off to Claude, and we're going to list it as a tool.",
+      "zh_tw": "Claude 的請求中，作為工具列出。",
+      "zh_cn": "Claude 的请求中，作为工具列出。"
+    },
+    "18": {
+      "en": "This schema is going to enable the web search functionality.",
+      "zh_tw": "這個 schema 會啟用網路搜尋功能。",
+      "zh_cn": "这个 schema 会啟用网络搜尋功能。"
+    },
+    "19": {
+      "en": "So just like the text editor tool, we have to provide this very small schema that behind",
+      "zh_tw": "就像 text editor 工具一樣，要提供一個小 schema，在",
+      "zh_cn": "就像 text editor 工具一样，要提供一个小 schema，在"
+    },
+    "20": {
+      "en": "the scenes is going to get expanded into a much larger schema.",
+      "zh_tw": "幕後會被擴展成更大的 schema。",
+      "zh_cn": "幕后会被扩展成更大的 schema。"
+    },
+    "21": {
+      "en": "We're going to add in a couple of fields here, in particular a type with web search underscore",
+      "zh_tw": "加入幾個欄位，特別是 type 設為 web_search_",
+      "zh_cn": "加入幾个字段，特別是 type 设为 web_search_"
+    },
+    "22": {
+      "en": "2025 0305, then a name of web underscore search, a max uses of five, and that's it for right",
+      "zh_tw": "20250305，name 設為 web_search，max_uses 設為五，暫時就這樣。",
+      "zh_cn": "20250305，name 设为 web_search，max_uses 设为五，暫时就这样。"
+    },
+    "23": {
+      "en": "now.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "24": {
+      "en": "Now the max uses is the number of times that Claude can run a search.",
+      "zh_tw": "max uses 是 Claude 可以執行搜尋的次數。",
+      "zh_cn": "max uses 是 Claude 可以执行搜尋的次数。"
+    },
+    "25": {
+      "en": "A single search can return multiple different search results, but depending upon the content",
+      "zh_tw": "單次搜尋可以回傳多個搜尋結果，但根據",
+      "zh_cn": "单次搜尋可以返回多个搜尋结果，但根据"
+    },
+    "26": {
+      "en": "in those search results, Claude might decide to do a follow-per search.",
+      "zh_tw": "搜尋結果的內容，Claude 可能會決定做後續搜尋。",
+      "zh_cn": "搜尋结果的內容，Claude 可能会决定做后续搜尋。"
+    },
+    "27": {
+      "en": "This process can repeat several times.",
+      "zh_tw": "這個過程可以重複多次。",
+      "zh_cn": "这个过程可以重复多次。"
+    },
+    "28": {
+      "en": "So we are capping the number of times that Claude can search in total to just five.",
+      "zh_tw": "所以我們把 Claude 總共可以搜尋的次數上限設為五次。",
+      "zh_cn": "所以我们把 Claude 总共可以搜尋的次数上限设为五次。"
+    },
+    "29": {
+      "en": "I'm then going to go down here after running that cell, and I'm going to ask Claude, what's",
+      "zh_tw": "往下執行儲存格後，問 Claude「增長腿部肌肉最好的運動是什麼？」",
+      "zh_cn": "往下执行存储格后，问 Claude「增长腿部肌肉最好的运动是什麼？」"
+    },
+    "30": {
+      "en": "the best exercise for gaining leg muscle?",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "31": {
+      "en": "And then I'm going to add in that schema that we just put together.",
+      "zh_tw": "然後加入剛建的 schema。",
+      "zh_cn": "然后加入剛建的 schema。"
+    },
+    "32": {
+      "en": "So web search schema, like so.",
+      "zh_tw": "web search schema，就這樣。",
+      "zh_cn": "web search schema，就这样。"
+    },
+    "33": {
+      "en": "Now I'm going to run this, and it's going to take a little bit of time to get a response",
+      "zh_tw": "執行它，取得回應需要一些時間。",
+      "zh_cn": "执行它，取得回应需要一些时间。"
+    },
+    "34": {
+      "en": "back.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "35": {
+      "en": "The response we get back is going to be quite large, so I can scroll through it here, and",
+      "zh_tw": "回應會很大，捲過去看會發現有大量資訊。",
+      "zh_cn": "回应会很大，捲过去看会发现有大量资讯。"
+    },
+    "36": {
+      "en": "we're going to see that there is just a tremendous amount of information here.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "37": {
+      "en": "So to help you understand the response we got back, I want to show you a little part",
+      "zh_tw": "為了幫你理解回應，展示一個精簡版，",
+      "zh_cn": "为了幫你理解回应，展示一个精简版，"
+    },
+    "38": {
+      "en": "down version of this response, where I took this messages, content list, and I removed",
+      "zh_tw": "從 messages content 列表中移除了很多內容以便更好理解。",
+      "zh_cn": "从 messages content 列表中移除了很多內容以便更好理解。"
+    },
+    "39": {
+      "en": "a ton of content out of it just so we can better understand what is going on.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "40": {
+      "en": "So here is a slightly redacted form.",
+      "zh_tw": "這是稍微刪減過的版本。",
+      "zh_cn": "这是稍微刪減过的版本。"
+    },
+    "41": {
+      "en": "Again, this is the content list inside the response message.",
+      "zh_tw": "還是 response message 中的 content 列表。",
+      "zh_cn": "还是 response message 中的 content 列表。"
+    },
+    "42": {
+      "en": "The content list is going to contain several different blocks, several blocks that we have",
+      "zh_tw": "content 列表包含幾個不同的 block，幾個之前",
+      "zh_cn": "content 列表包含幾个不同的 block，幾个之前"
+    },
+    "43": {
+      "en": "not seen before.",
+      "zh_tw": "沒見過的 block。",
+      "zh_cn": "没見过的 block。"
+    },
+    "44": {
+      "en": "Initially, we get back a text block, which is kind of framing the entire response that",
+      "zh_tw": "首先得到一個 text block，為 Claude 的整個回應做鋪陳。",
+      "zh_cn": "首先得到一个 text block，为 Claude 的整个回应做鋪陈。"
+    },
+    "45": {
+      "en": "Claude is giving us.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "46": {
+      "en": "Claude is saying that it's going to do a web search to better understand how to answer",
+      "zh_tw": "Claude 說要做網路搜尋來更好地了解如何回答",
+      "zh_cn": "Claude 说要做网络搜尋來更好地了解如何回答"
+    },
+    "47": {
+      "en": "the question.",
+      "zh_tw": "問題。",
+      "zh_cn": "问题。"
+    },
+    "48": {
+      "en": "Then we're going to see a server tool use block.",
+      "zh_tw": "然後看到 server tool use block。",
+      "zh_cn": "然后看到 server tool use block。"
+    },
+    "49": {
+      "en": "And inside there is the input to the search tool.",
+      "zh_tw": "裡面是搜尋工具的輸入。",
+      "zh_cn": "里面是搜尋工具的输入。"
+    },
+    "50": {
+      "en": "We can see that's the exact query that Claude is going to use to search the web.",
+      "zh_tw": "可以看到 Claude 要用來搜尋網路的確切查詢。",
+      "zh_cn": "可以看到 Claude 要用來搜尋网络的确切查询。"
+    },
+    "51": {
+      "en": "After that, we're going to see a listing of web search tool result block.",
+      "zh_tw": "之後看到 web search tool result block 的列表。",
+      "zh_cn": "之后看到 web search tool result block 的列表。"
+    },
+    "52": {
+      "en": "And inside there are going to be many different web search result block.",
+      "zh_tw": "裡面有很多 web search result block。",
+      "zh_cn": "里面有很多 web search result block。"
+    },
+    "53": {
+      "en": "These are the different search results that Claude has received from that initial query.",
+      "zh_tw": "這是 Claude 從初始查詢收到的不同搜尋結果。",
+      "zh_cn": "这是 Claude 从初始查询收到的不同搜尋结果。"
+    },
+    "54": {
+      "en": "Now, an actual query response will probably have many different search results.",
+      "zh_tw": "實際查詢回應可能有很多不同的搜尋結果。",
+      "zh_cn": "实际查询回应可能有很多不同的搜尋结果。"
+    },
+    "55": {
+      "en": "In this case, I removed all of them but one just to better understand what's going on here.",
+      "zh_tw": "這裡我只保留了一個以便更好理解。",
+      "zh_cn": "这里我只保留了一个以便更好理解。"
+    },
+    "56": {
+      "en": "So this is an actual web search result.",
+      "zh_tw": "這是實際的網路搜尋結果。",
+      "zh_cn": "这是实际的网络搜尋结果。"
+    },
+    "57": {
+      "en": "We can see the title of the page that Claude fetched and the actual URL.",
+      "zh_tw": "可以看到 Claude 取得的頁面標題和實際 URL。",
+      "zh_cn": "可以看到 Claude 取得的页面标题和实际 URL。"
+    },
+    "58": {
+      "en": "There's no content inside of here just yet.",
+      "zh_tw": "裡面還沒有內容。",
+      "zh_cn": "里面还没有內容。"
+    },
+    "59": {
+      "en": "This is just telling us exactly what Claude found when it did the search.",
+      "zh_tw": "只是告訴我們 Claude 搜尋到了什麼。",
+      "zh_cn": "只是告訴我们 Claude 搜尋到了什麼。"
+    },
+    "60": {
+      "en": "Then Claude is going to begin by answering the user's question.",
+      "zh_tw": "然後 Claude 會開始回答使用者的問題。",
+      "zh_cn": "然后 Claude 会开始回答使用者的问题。"
+    },
+    "61": {
+      "en": "And it's going to answer the user's question with a variety of different text blocks that might include a citations list.",
+      "zh_tw": "用多個 text block 回答，可能包含引用列表。",
+      "zh_cn": "用多个 text block 回答，可能包含引用列表。"
+    },
+    "62": {
+      "en": "The citations list is text that is supposed to support the statements that Claude is making in some way.",
+      "zh_tw": "引用列表是應該以某種方式支持 Claude 陳述的文字。",
+      "zh_cn": "引用列表是应该以某种方式支持 Claude 陈述的文字。"
+    },
+    "63": {
+      "en": "So in this case, Claude has cited some particular web page right here.",
+      "zh_tw": "這裡 Claude 引用了某個特定網頁。",
+      "zh_cn": "这里 Claude 引用了某个特定网页。"
+    },
+    "64": {
+      "en": "And it is using this specific text to support the point or the argument that it's trying to make.",
+      "zh_tw": "用這段特定文字來支持它要表達的觀點或論述。",
+      "zh_cn": "用这段特定文字來支持它要表达的观点或论述。"
+    },
+    "65": {
+      "en": "When we define the web search schema, there are a variety of different fields that we can add in.",
+      "zh_tw": "定義 web search schema 時，有多種不同的欄位可以加入。",
+      "zh_cn": "定义 web search schema 时，有多种不同的字段可以加入。"
+    },
+    "66": {
+      "en": "There's one field in particular that I really recommend you consider using if you ever have a good understanding of exactly what your users are going to be asking about.",
+      "zh_tw": "有一個欄位我真的建議你考慮使用，如果你對使用者會問什麼有很好的了解。",
+      "zh_cn": "有一个字段我真的建议你考慮使用，如果你对使用者会问什麼有很好的了解。"
+    },
+    "67": {
+      "en": "So in our case, we asked about the best leg exercises for gaining leg muscle.",
+      "zh_tw": "我們的例子中問的是最好的腿部運動。",
+      "zh_cn": "我们的例子中问的是最好的腿部运动。"
+    },
+    "68": {
+      "en": "I don't know if you've ever searched online for exercise advice, but there are a tremendous number of blogs out there with probably just AI generated content.",
+      "zh_tw": "如果你在網上搜尋過運動建議，有大量的部落格可能都是 AI 生成的內容。",
+      "zh_cn": "如果你在网上搜尋过运动建议，有大量的部落格可能都是 AI 生成的內容。"
+    },
+    "69": {
+      "en": "And the advice that you get out of those blogs might not actually be the most accurate or give you the best idea of how to actually gain leg muscle.",
+      "zh_tw": "那些部落格的建議可能不是最準確的。",
+      "zh_cn": "那些部落格的建议可能不是最准确的。"
+    },
+    "70": {
+      "en": "On the other hand, there are some websites that collect different publications such as PubMed.",
+      "zh_tw": "另一方面，有些網站收集各種出版物，如 PubMed。",
+      "zh_cn": "另一方面，有些网站收集各种出版物，如 PubMed。"
+    },
+    "71": {
+      "en": "So this is a website maintained by the U.S. government.",
+      "zh_tw": "這是美國政府維護的網站。",
+      "zh_cn": "这是美國政府维护的网站。"
+    },
+    "72": {
+      "en": "It contains a ton of different scholarly articles around medicine.",
+      "zh_tw": "包含大量醫學相關的學術文章。",
+      "zh_cn": "包含大量醫学相关的学术文章。"
+    },
+    "73": {
+      "en": "So we could search through here and find a tremendous amount of evidence-supported exercise advice.",
+      "zh_tw": "所以可以在這裡搜尋大量有證據支持的運動建議。",
+      "zh_cn": "所以可以在这里搜尋大量有证据支持的运动建议。"
+    },
+    "74": {
+      "en": "So it would be really fantastic if we could somehow tell Claude to only search this web page and content inside of it.",
+      "zh_tw": "如果能告訴 Claude 只搜尋這個網頁就太好了。",
+      "zh_cn": "如果能告訴 Claude 只搜尋这个网页就太好了。"
+    },
+    "75": {
+      "en": "That would allow us to make sure that we are giving the best possible advice to our users and not just some randomly generated stuff that we found online.",
+      "zh_tw": "這讓我們能確保給使用者最好的建議，而不是隨便在網上找到的東西。",
+      "zh_cn": "这让我们能确保给使用者最好的建议，而不是随便在网上找到的東西。"
+    },
+    "76": {
+      "en": "In order to get Claude to only search this page, we're going to find the domain, which is nih.gov.",
+      "zh_tw": "要讓 Claude 只搜尋這個頁面，找到網域 nih.gov。",
+      "zh_cn": "要让 Claude 只搜尋这个页面，找到网域 nih.gov。"
+    },
+    "77": {
+      "en": "I'm then going to go back over to my notebook.",
+      "zh_tw": "回到筆記本。",
+      "zh_cn": "回到笔记本。"
+    },
+    "78": {
+      "en": "I'm going to find my web search schema, and I'm going to add in an additional field here of allowed domains.",
+      "zh_tw": "找到 web search schema，加入一個 allowed_domains 欄位。",
+      "zh_cn": "找到 web search schema，加入一个 allowed_domains 字段。"
+    },
+    "79": {
+      "en": "I'm going to put in a list with nih.gov.",
+      "zh_tw": "放入一個包含 nih.gov 的列表。",
+      "zh_cn": "放入一个包含 nih.gov 的列表。"
+    },
+    "80": {
+      "en": "This is going to constrain Claude's search to only that domain right there, and it won't try to find anything else.",
+      "zh_tw": "這會限制 Claude 只搜尋那個網域，不會搜尋其他地方。",
+      "zh_cn": "这会限制 Claude 只搜尋那个网域，不会搜尋其他地方。"
+    },
+    "81": {
+      "en": "So now if I run this cell again and then make my request off to Claude again, we're going to have to wait for the response to come back.",
+      "zh_tw": "重新執行儲存格，再次對 Claude 發請求，等待回應。",
+      "zh_cn": "重新执行存储格，再次对 Claude 发请求，等待回应。"
+    },
+    "82": {
+      "en": "But when we do get a response, we should be able to scroll through it a little bit and eventually see that we have a URL right here, and we should only have URLs belonging to the nih.gov domain.",
+      "zh_tw": "得到回應後，捲過去看應該會看到 URL，而且只有 nih.gov 網域的 URL。",
+      "zh_cn": "得到回应后，捲过去看应该会看到 URL，而且只有 nih.gov 网域的 URL。"
+    },
+    "83": {
+      "en": "We shouldn't see anything else.",
+      "zh_tw": "不應該看到其他的。",
+      "zh_cn": "不应该看到其他的。"
+    },
+    "84": {
+      "en": "So again, this will allow us to make sure that we are giving at least some scientifically supported advice to our users.",
+      "zh_tw": "這讓我們能確保給使用者至少有科學支持的建議。",
+      "zh_cn": "这让我们能确保给使用者至少有科学支持的建议。"
+    },
+    "85": {
+      "en": "Now, last thing I'm going to do is show you exactly how we are really intended to use this giant list of different types of blocks that we get back when we make use of this tool.",
+      "zh_tw": "最後展示我們如何使用 web search 工具回傳的這些不同類型 block。",
+      "zh_cn": "最后展示我们如何使用 web search 工具返回的这些不同类型 block。"
+    },
+    "86": {
+      "en": "The thought process here is that you're going to render all the text blocks as plain text, and then whenever you get a web search result block or a citation web search result location, you might render those out inside the UI in such a way that makes it obvious to a user that you are trying to support your information in some way.",
+      "zh_tw": "思路是把所有 text block 渲染為純文字，遇到 web search result block 或 citation 時在 UI 中渲染出來，讓使用者明顯看到你在用某種方式支持資訊。",
+      "zh_cn": "思路是把所有 text block 渲染为纯文字，遇到 web search result block 或 citation 时在 UI 中渲染出來，让使用者明显看到你在用某种方式支持资讯。"
+    },
+    "87": {
+      "en": "Here's an example of how you might do that.",
+      "zh_tw": "這是一個範例。",
+      "zh_cn": "这是一个范例。"
+    },
+    "88": {
+      "en": "I wrote out a small page that is going to take all those different blocks we saw inside the response message and render them out.",
+      "zh_tw": "我寫了一個小頁面，會把回應訊息中所有不同的 block 渲染出來。",
+      "zh_cn": "我写了一个小页面，会把回应信息中所有不同的 block 渲染出來。"
+    },
+    "89": {
+      "en": "At the very top right here, I've got a list of all my web search tool result blocks.",
+      "zh_tw": "最上面列出所有 web search tool result block。",
+      "zh_cn": "最上面列出所有 web search tool result block。"
+    },
+    "90": {
+      "en": "So these are the different pages that Claude found when it did the web search.",
+      "zh_tw": "這是 Claude 搜尋時找到的不同頁面。",
+      "zh_cn": "这是 Claude 搜尋时找到的不同页面。"
+    },
+    "91": {
+      "en": "I'm then going to iterate through the entire list of blocks and show the text out of every single text block.",
+      "zh_tw": "然後遍歷整個 block 列表，顯示每個 text block 的文字。",
+      "zh_cn": "然后遍历整个 block 列表，显示每个 text block 的文字。"
+    },
+    "92": {
+      "en": "Whenever I found a text block that has a citation web search result location, I know that's a long term, so it's one of these right here.",
+      "zh_tw": "每當找到帶有 citation web search result location 的 text block，就是這些。",
+      "zh_cn": "每当找到帶有 citation web search result location 的 text block，就是这些。"
+    },
+    "93": {
+      "en": "Whenever I find one of those, I might render it with a little citation like so, where I'll show the domain, show the title of the page that I found, show the exact address of it, and then the exact cited text as well.",
+      "zh_tw": "找到時可能會渲染一個小引用，顯示網域、頁面標題、確切地址和引用文字。",
+      "zh_cn": "找到时可能会渲染一个小引用，显示网域、页面标题、确切地址和引用文字。"
+    },
+    "94": {
+      "en": "Again, this just allows our users to better understand how Claude is actually getting its information.",
+      "zh_tw": "這讓使用者更好地了解 Claude 實際上如何取得資訊。",
+      "zh_cn": "这让使用者更好地了解 Claude 实际上如何取得资讯。"
+    },
+    "95": {
+      "en": "So let's go.",
+      "zh_tw": "讓我們開始。",
+      "zh_cn": "让我们开始。"
+    },
+    "102": {
+      "en": "Let's go.",
+      "zh_tw": "讓我們開始。",
+      "zh_cn": "让我们开始。"
+    }
+  }
+}

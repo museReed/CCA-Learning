@@ -1,0 +1,382 @@
+{
+  "srt_file": "Multi-Turn_conversations_6owq0WNb.srt",
+  "video_file": "Multi-Turn_conversations_6owq0WNb.mp4",
+  "max_valid_entry": 75,
+  "entries": {
+    "1": {
+      "en": "The code that we've written out so far simulates a very simple exchange with our model, and",
+      "zh_tw": "到目前為止我們寫的程式碼模擬了一個非常簡單的與模型的交流，",
+      "zh_cn": "到目前为止我们写的代码模擬了一个非常简单的与模型的交流，"
+    },
+    "2": {
+      "en": "we can kind of visualize this conversation inside of a chat box like this.",
+      "zh_tw": "我們可以把這個對話在這樣的聊天框裡視覺化。",
+      "zh_cn": "我们可以把这个对话在这样的聊天框里視覺化。"
+    },
+    "3": {
+      "en": "We sent in a request asking something like, what's quantum computing?",
+      "zh_tw": "我們發送了一個請求，問了像是「什麼是量子運算」這樣的問題。",
+      "zh_cn": "我们发送了一个请求，问了像是「什麼是量子运算」这样的问题。"
+    },
+    "4": {
+      "en": "Answer in one sentence.",
+      "zh_tw": "然後 Claude 給了我們一個回覆，解釋了它的定義。",
+      "zh_cn": "然后 Claude 给了我们一个回覆，解釋了它的定义。"
+    },
+    "5": {
+      "en": "And we got a very simple single sentence reply.",
+      "zh_tw": "現在，在真正的應用程式中，使用者不只是想問一個問題。",
+      "zh_cn": "现在，在真正的应用程序中，使用者不只是想问一个问题。"
+    },
+    "6": {
+      "en": "Naturally, we might want to continue this conversation at some point in time.",
+      "zh_tw": "他們想要進行一個多輪的來回對話。",
+      "zh_cn": "他们想要进行一个多轮的來回对话。"
+    },
+    "7": {
+      "en": "So we might want to be able to send in a follow-up asking something like, write another sentence.",
+      "zh_tw": "例如，使用者可能會跟進問「能多說一點嗎」。",
+      "zh_cn": "例如，使用者可能会跟进问「能多说一点嗎」。"
+    },
+    "8": {
+      "en": "And we would then expect to get back a response that expands on quantum computing in some way.",
+      "zh_tw": "有一件非常重要的事你需要理解，",
+      "zh_cn": "有一件非常重要的事你需要理解，"
+    },
+    "9": {
+      "en": "To have a multi-message conversation like this, there's something really critical that you need to understand around the Anthropik API and Claude itself.",
+      "zh_tw": "那就是 Claude 或 API 不會為你儲存任何訊息。",
+      "zh_cn": "那就是 Claude 或 API 不会为你存储任何信息。"
+    },
+    "10": {
+      "en": "And that is that the Anthropik API and Claude do not store any messages that you send to it.",
+      "zh_tw": "所以 Claude 不會記住你在先前的請求中發送了什麼。",
+      "zh_cn": "所以 Claude 不会记住你在先前的请求中发送了什麼。"
+    },
+    "11": {
+      "en": "None of the messages you send get stored in any way.",
+      "zh_tw": "為了進行多輪的來回對話，你需要自己維護和管理對話歷史。",
+      "zh_cn": "为了进行多轮的來回对话，你需要自己维护和管理对话历史。"
+    },
+    "12": {
+      "en": "And none of the responses that you get back are stored in any way.",
+      "zh_tw": "讓我展示一下如果我們只是嘗試在沒有任何歷史的情況下問跟進問題會發生什麼。",
+      "zh_cn": "让我展示一下如果我们只是嘗试在没有任何历史的情況下问跟进问题会发生什麼。"
+    },
+    "13": {
+      "en": "So if you ever want to have some kind of conversation going on where you have multiple messages that kind of maintain a context or a flow,",
+      "zh_tw": "我回到筆記本裡，做另一個請求。",
+      "zh_cn": "我回到笔记本里，做另一个请求。"
+    },
+    "14": {
+      "en": "then there are two things that you need to do.",
+      "zh_tw": "這次我問「能多說一些嗎」。",
+      "zh_cn": "这次我问「能多说一些嗎」。"
+    },
+    "15": {
+      "en": "You need to manually, inside of your code, maintain a list of all the messages that you are exchanging.",
+      "zh_tw": "如果我發送這個，Claude 的回應會類似「我很樂意多分享一些，但能告訴我你感興趣的主題是什麼嗎」。",
+      "zh_cn": "如果我发送这个，Claude 的回应会类似「我很樂意多分享一些，但能告訴我你感興趣的主题是什麼嗎」。"
+    },
+    "16": {
+      "en": "And second, you need to make sure that you provide that entire list of messages with every follow-up request that you make.",
+      "zh_tw": "很明顯，Claude 不知道我在之前的請求中問了什麼。",
+      "zh_cn": "很明显，Claude 不知道我在之前的请求中问了什麼。"
+    },
+    "17": {
+      "en": "So let's go into some detail on this entire idea just to make sure it's really clear and you understand what's going on here.",
+      "zh_tw": "它不知道我在問量子運算的事。",
+      "zh_cn": "它不知道我在问量子运算的事。"
+    },
+    "18": {
+      "en": "The first thing I want to do is write out a little bit of sample code just to prove to you that Claude doesn't store any messages or anything like that.",
+      "zh_tw": "所以為了進行正確的多輪對話，我們需要手動維護一個完整的對話歷史。",
+      "zh_cn": "所以为了进行正确的多轮对话，我们需要手动维护一个完整的对话历史。"
+    },
+    "19": {
+      "en": "And I'm going to prove this by trying to simulate this kind of conversation, where I first ask what quantum computing is and then ask write another sentence.",
+      "zh_tw": "讓我展示我們怎麼做。我要建立一些輔助函式。",
+      "zh_cn": "让我展示我们怎麼做。我要建立一些辅助函数。"
+    },
+    "20": {
+      "en": "So back inside of my notebook, I'm going to go to the cell where I initially asked what is quantum computing.",
+      "zh_tw": "第一個輔助函式叫 add_user_message。",
+      "zh_cn": "第一个辅助函数叫 add_user_message。"
+    },
+    "21": {
+      "en": "And I'm going to paste in a second request to Claude that I wrote out ahead of time.",
+      "zh_tw": "這會接收對話歷史和一個新的文字字串，然後把使用者訊息附加到歷史中。",
+      "zh_cn": "这会接收对话历史和一个新的文字字符串，然后把使用者信息附加到历史中。"
+    },
+    "22": {
+      "en": "So in this second request, I'm asking Claude to write another sentence and I'm going to print out the text inside of that follow-up request.",
+      "zh_tw": "第二個輔助函式叫 add_assistant_message。它做同樣的事但用 assistant 角色。",
+      "zh_cn": "第二个辅助函数叫 add_assistant_message。它做同样的事但用 assistant 角色。"
+    },
+    "23": {
+      "en": "So now we've kind of got a simulation of what's going on right here, where we ask that first question and then send in a follow-up.",
+      "zh_tw": "然後我要建立一個 chat 函式，它接收對話歷史，",
+      "zh_cn": "然后我要建立一个 chat 函数，它接收对话历史，"
+    },
+    "24": {
+      "en": "And we're going to see that we don't get back any kind of legible or any usable text here.",
+      "zh_tw": "向 Claude 發送請求，取得回應，",
+      "zh_cn": "向 Claude 发送请求，取得回应，"
+    },
+    "25": {
+      "en": "So I'm going to run this and we'll see what happens.",
+      "zh_tw": "然後自動把助手的回應附加到歷史中。",
+      "zh_cn": "然后自动把助手的回应附加到历史中。"
+    },
+    "26": {
+      "en": "So back over here, I'm going to run that cell now.",
+      "zh_tw": "重要的是它回傳的是生成的文字。",
+      "zh_cn": "重要的是它返回的是生成的文字。"
+    },
+    "27": {
+      "en": "And we're going to see that we get back something that has absolutely nothing to do with quantum computing at all.",
+      "zh_tw": "現在讓我們實際使用這些輔助函式。",
+      "zh_cn": "现在让我们实际使用这些辅助函数。"
+    },
+    "28": {
+      "en": "So again, to make sure that it's really clear why we are seeing this result and not seeing something about quantum computing, let's go over a couple of diagrams.",
+      "zh_tw": "首先，我建立一個空的歷史列表。",
+      "zh_cn": "首先，我建立一个空的历史列表。"
+    },
+    "29": {
+      "en": "All right.",
+      "zh_tw": "然後我加入一個使用者訊息「什麼是量子運算」。",
+      "zh_cn": "然后我加入一个使用者信息「什麼是量子运算」。"
+    },
+    "30": {
+      "en": "So in this diagram, I'm going to first show you exactly what's going on with the current code that I've written out, where we are getting back a response that has nothing to do with quantum computing.",
+      "zh_tw": "然後我呼叫 chat 函式。",
+      "zh_cn": "然后我调用 chat 函数。"
+    },
+    "31": {
+      "en": "So initially I make a single request to Claude where I have one user message and I'm asking Claude to define quantum computing in one sentence.",
+      "zh_tw": "我會看到 Claude 的回應。",
+      "zh_cn": "我会看到 Claude 的回应。"
+    },
+    "32": {
+      "en": "I then get back a response that is exactly what I would expect.",
+      "zh_tw": "到目前為止，看起來和之前一模一樣。",
+      "zh_cn": "到目前为止，看起來和之前一模一样。"
+    },
+    "33": {
+      "en": "Claude gives me back a one sentence definition of quantum computing.",
+      "zh_tw": "但關鍵在於，現在如果我問跟進問題，",
+      "zh_cn": "但关键在於，现在如果我问跟进问题，"
+    },
+    "34": {
+      "en": "Then I make a second request where I have only one message inside the body.",
+      "zh_tw": "歷史裡已經包含了之前的使用者訊息和助手的回應。",
+      "zh_cn": "历史里已经包含了之前的使用者信息和助手的回应。"
+    },
+    "35": {
+      "en": "And the only message is asking Claude to write another sentence.",
+      "zh_tw": "所以 Claude 會有完整的上下文。",
+      "zh_cn": "所以 Claude 会有完整的上下文。"
+    },
+    "36": {
+      "en": "When I send this in, Claude has no memory of any past conversation or any previous messages that I exchanged with it.",
+      "zh_tw": "讓我加入另一個使用者訊息「能多說一些嗎」。",
+      "zh_cn": "让我加入另一个使用者信息「能多说一些嗎」。"
+    },
+    "37": {
+      "en": "So Claude is just going to do the best it can to fulfill my request.",
+      "zh_tw": "然後再次呼叫 chat。",
+      "zh_cn": "然后再次调用 chat。"
+    },
+    "38": {
+      "en": "It's going to write out some sentence, but it definitely is probably not going to be about quantum computing.",
+      "zh_tw": "這次，Claude 應該知道我在問量子運算的事。",
+      "zh_cn": "这次，Claude 应该知道我在问量子运算的事。"
+    },
+    "39": {
+      "en": "So now let me show you what we need to do to fix this problem.",
+      "zh_tw": "我們來看看。",
+      "zh_cn": "我们來看看。"
+    },
+    "40": {
+      "en": "Here's how we're going to solve the issue.",
+      "zh_tw": "果然，Claude 繼續解釋了更多關於量子運算的內容。",
+      "zh_cn": "果然，Claude 继续解釋了更多关於量子运算的內容。"
+    },
+    "41": {
+      "en": "First, we're going to once again, make that initial request with just one user message.",
+      "zh_tw": "太好了。所以這就是多輪對話運作的方式。",
+      "zh_cn": "太好了。所以这就是多轮对话运作的方式。"
+    },
+    "42": {
+      "en": "Then we're going to take that assistant message that we get back and append it into a list of messages.",
+      "zh_tw": "而且我想讓你注意的是，每次我們發送請求時，",
+      "zh_cn": "而且我想让你注意的是，每次我们发送请求时，"
+    },
+    "43": {
+      "en": "So we're going to take the assistant right there and we can imagine we're going to add it into our list on the left-hand side.",
+      "zh_tw": "我們把整個對話歷史都發送出去。",
+      "zh_cn": "我们把整个对话历史都发送出去。"
+    },
+    "44": {
+      "en": "Then when we want to follow up on this conversation or continue it in some way, we're going to append on a user message at the bottom.",
+      "zh_tw": "我知道這看起來有點浪費。",
+      "zh_cn": "我知道这看起來有点浪费。"
+    },
+    "45": {
+      "en": "So now we can read this as like a real conversation.",
+      "zh_tw": "但再次強調，API 不會為你儲存任何東西。",
+      "zh_cn": "但再次強调，API 不会为你存储任何東西。"
+    },
+    "46": {
+      "en": "I asked to find quantum computing.",
+      "zh_tw": "你必須每次都發送完整的歷史。",
+      "zh_cn": "你必须每次都发送完整的历史。"
+    },
+    "47": {
+      "en": "I got back a response.",
+      "zh_tw": "如果我印出歷史列表，你可以看到現在裡面有四個訊息。",
+      "zh_cn": "如果我印出历史列表，你可以看到现在里面有四个信息。"
+    },
+    "48": {
+      "en": "And now I'm adding in another question or another query that I want to ask Claude.",
+      "zh_tw": "第一個使用者訊息、第一個助手回應、",
+      "zh_cn": "第一个使用者信息、第一个助手回应、"
+    },
+    "49": {
+      "en": "In this case, write another sentence.",
+      "zh_tw": "第二個使用者訊息、第二個助手回應。",
+      "zh_cn": "第二个使用者信息、第二个助手回应。"
+    },
+    "50": {
+      "en": "Now when I send in this list of messages to Claude, it will have the entire context and history of the whole conversation.",
+      "zh_tw": "讓我快速帶你看看對話歷史的訊息結構。",
+      "zh_cn": "让我快速帶你看看对话历史的信息结构。"
+    },
+    "51": {
+      "en": "It's seen all the previous messages that we've exchanged around this line of questioning.",
+      "zh_tw": "每條訊息都是一個字典，有 role 和 content。",
+      "zh_cn": "每条信息都是一个字典，有 role 和 content。"
+    },
+    "52": {
+      "en": "And hopefully Claude will be able to give us back a more reasonable answer.",
+      "zh_tw": "使用者訊息的 role 是 user。",
+      "zh_cn": "使用者信息的 role 是 user。"
+    },
+    "53": {
+      "en": "Hopefully a one sentence follow-up that's going to extend its previous answer a little bit more.",
+      "zh_tw": "助手訊息的 role 是 assistant。",
+      "zh_cn": "助手信息的 role 是 assistant。"
+    },
+    "54": {
+      "en": "To see this entire flow in action, I'm going to go back over to my notebook and we're going to try to write out some code that will allow us to maintain the full context for a conversation.",
+      "zh_tw": "content 只是一個包含文字的字串。",
+      "zh_cn": "content 只是一个包含文字的字符串。"
+    },
+    "55": {
+      "en": "Back inside of my notebook, I'm going to get started by making three different helper functions that are going to aid us in maintaining the history or context of a conversation.",
+      "zh_tw": "還有一件事我想提的是，Claude 的 API 要求訊息必須交替出現。",
+      "zh_cn": "还有一件事我想提的是，Claude 的 API 要求信息必须交替出现。"
+    },
+    "56": {
+      "en": "We're going to end up using these helper functions quite a bit throughout the remainder of this course.",
+      "zh_tw": "換句話說，你必須先有使用者訊息，然後助手訊息，然後使用者訊息，以此類推。",
+      "zh_cn": "换句话说，你必须先有使用者信息，然后助手信息，然后使用者信息，以此类推。"
+    },
+    "57": {
+      "en": "So in this cell right here, I'm going to give myself a little bit of space at the top and then define our first helper function that will aid us in maintaining this history.",
+      "zh_tw": "你不能連續放兩個使用者訊息或兩個助手訊息。",
+      "zh_cn": "你不能连续放兩个使用者信息或兩个助手信息。"
+    },
+    "58": {
+      "en": "I'm going to name this function, add user message.",
+      "zh_tw": "它們必須交替出現。",
+      "zh_cn": "它们必须交替出现。"
+    },
+    "59": {
+      "en": "It's going to take in a list of messages and some text.",
+      "zh_tw": "而且你必須以使用者訊息開始。",
+      "zh_cn": "而且你必须以使用者信息开始。"
+    },
+    "60": {
+      "en": "I'm then going to make a variable of user message.",
+      "zh_tw": "所以第一條訊息必須總是使用者訊息。",
+      "zh_cn": "所以第一条信息必须总是使用者信息。"
+    },
+    "61": {
+      "en": "That's going to have a role of user.",
+      "zh_tw": "最後一條訊息也必須是使用者訊息。",
+      "zh_cn": "最后一条信息也必须是使用者信息。"
+    },
+    "62": {
+      "en": "And some content of whatever text we pass in.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "63": {
+      "en": "And then I'm going to append this new user message into the list of messages.",
+      "zh_tw": "這就是你需要知道的關於多輪對話的一切。",
+      "zh_cn": "这就是你需要知道的关於多轮对话的一切。"
+    },
+    "64": {
+      "en": "Next, I'm going to add in a second helper function that's going to specialize in adding in assistant messages to a history.",
+      "zh_tw": "只要記住，你需要自己維護和管理對話歷史，",
+      "zh_cn": "只要记住，你需要自己维护和管理对话历史，"
+    },
+    "65": {
+      "en": "So I'm going to copy this function right here just to save a little bit of time.",
+      "zh_tw": "然後每次呼叫 API 時都把完整的歷史傳入。",
+      "zh_cn": "然后每次调用 API 时都把完整的历史传入。"
+    },
+    "66": {
+      "en": "I'll rename it to add assistant message and I'll go through and wherever I see the word user, I'm going to change it out to assistant.",
+      "zh_tw": "API 不會幫你記住任何東西。",
+      "zh_cn": "API 不会幫你记住任何東西。"
+    },
+    "67": {
+      "en": "So right there, right there, and right there.",
+      "zh_tw": "到目前為止，我們已經有了一個相當不錯的設定。",
+      "zh_cn": "到目前为止，我们已经有了一个相当不错的设定。"
+    },
+    "68": {
+      "en": "Okay.",
+      "zh_tw": "我們有輔助函式可以加入訊息，",
+      "zh_cn": "我们有辅助函数可以加入信息，"
+    },
+    "69": {
+      "en": "Now onto our third helper function.",
+      "zh_tw": "我們有 chat 函式可以處理整個來回的流程。",
+      "zh_cn": "我们有 chat 函数可以处理整个來回的流程。"
+    },
+    "70": {
+      "en": "I'm going to take our messages.create function call down here and I'm going to rename it to chat.",
+      "zh_tw": "這會是我們在之後很多影片中使用的基礎。",
+      "zh_cn": "这会是我们在之后很多视频中使用的基础。"
+    },
+    "71": {
+      "en": "Whenever I call chat, I'm going to pass in a list of messages.",
+      "zh_tw": "讓我總結一下我們到目前為止學到的東西。",
+      "zh_cn": "让我总结一下我们到目前为止学到的東西。"
+    },
+    "72": {
+      "en": "So this is going to be like my message history.",
+      "zh_tw": "我們了解了如何建立 API 客戶端。",
+      "zh_cn": "我们了解了如何建立 API 客户端。"
+    },
+    "73": {
+      "en": "Then I'm going to indent our call right here.",
+      "zh_tw": "我們了解了如何使用 create 函式發送請求。",
+      "zh_cn": "我们了解了如何使用 create 函数发送请求。"
+    },
+    "74": {
+      "en": "I'm going to replace messages with the messages argument.",
+      "zh_tw": "我們了解了訊息必須交替出現。",
+      "zh_cn": "我们了解了信息必须交替出现。"
+    },
+    "75": {
+      "en": "And then return from this function is going to be message content at zero dot text.",
+      "zh_tw": "我們建立了一些很好的輔助函式來管理對話歷史。",
+      "zh_cn": "我们建立了一些很好的辅助函数來管理对话历史。"
+    }
+  }
+}

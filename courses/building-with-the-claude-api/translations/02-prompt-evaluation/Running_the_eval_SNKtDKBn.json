@@ -1,0 +1,517 @@
+{
+  "srt_file": "Running_the_eval_SNKtDKBn.srt",
+  "video_file": "Running_the_eval_SNKtDKBn.mp4",
+  "max_valid_entry": 102,
+  "entries": {
+    "1": {
+      "en": "With our dataset generation complete, we now need to take every record in that dataset, which we're going to refer to as a test case.",
+      "zh_tw": "資料集生成完成後，我們現在需要取出資料集中的每一筆記錄，我們將其稱為測試案例。",
+      "zh_cn": "数据集生成完成后，我们现在需要取出数据集中的每一笔记录，我们将其称为测试案例。"
+    },
+    "2": {
+      "en": "So we're going to take each test case and merge it with a prompt.",
+      "zh_tw": "我們要取每一個測試案例，並與提示合併。",
+      "zh_cn": "我们要取每一个测试案例，並与提示合併。"
+    },
+    "3": {
+      "en": "We're then going to take the result and feed it into clod.",
+      "zh_tw": "然後把結果餵給 Claude。",
+      "zh_cn": "然后把结果餵给 Claude。"
+    },
+    "4": {
+      "en": "And then once we have all these different outputs, we're going to feed them through our grader.",
+      "zh_tw": "一旦我們有了所有不同的輸出，我們就要把它們通過評分器。",
+      "zh_cn": "一旦我们有了所有不同的输出，我们就要把它们通过评分器。"
+    },
+    "5": {
+      "en": "Remember, we have not discussed graders just yet.",
+      "zh_tw": "記住，我們還沒有討論評分器。",
+      "zh_cn": "记住，我们还没有討论评分器。"
+    },
+    "6": {
+      "en": "Don't worry, that's going to come up very quickly.",
+      "zh_tw": "別擔心，這個主題很快就會出現。",
+      "zh_cn": "別担心，这个主题很快就会出现。"
+    },
+    "7": {
+      "en": "And once again, just to save a little bit of time, I've written out a little bit of code here just to help guide this next phase of our workflow.",
+      "zh_tw": "為了節省一點時間，我在這裡寫了一些程式碼來幫助引導我們工作流程的下一階段。",
+      "zh_cn": "为了节省一点时间，我在这里写了一些代码來幫助引导我们工作流程的下一阶段。"
+    },
+    "8": {
+      "en": "I put together three separate functions with a very clear comment on what each one does.",
+      "zh_tw": "我準備了三個獨立的函式，每個都有非常清楚的註解說明它的功能。",
+      "zh_cn": "我准备了三个独立的函数，每个都有非常清楚的註解说明它的功能。"
+    },
+    "9": {
+      "en": "The first one that's easiest to understand is the run prompt function.",
+      "zh_tw": "最容易理解的第一個是 run prompt 函式。",
+      "zh_cn": "最容易理解的第一个是 run prompt 函数。"
+    },
+    "10": {
+      "en": "This is going to be called with a test case.",
+      "zh_tw": "它會被呼叫並傳入一個測試案例。",
+      "zh_cn": "它会被调用並传入一个测试案例。"
+    },
+    "11": {
+      "en": "And those JSON objects that we generated just a moment ago, each of these is a test case.",
+      "zh_tw": "我們剛剛生成的那些 JSON 物件，每一個都是一個測試案例。",
+      "zh_cn": "我们剛剛生成的那些 JSON 对象，每一个都是一个测试案例。"
+    },
+    "12": {
+      "en": "So you can imagine that each of these one by one are going to flow into the run prompt function.",
+      "zh_tw": "你可以想像這些物件會一個接一個地流入 run prompt 函式。",
+      "zh_cn": "你可以想像这些对象会一个接一个地流入 run prompt 函数。"
+    },
+    "13": {
+      "en": "So inside of here, our goal is to merge that task that we generated with our prompt, generate some text with clod, and then return the result.",
+      "zh_tw": "在裡面，我們的目標是將生成的任務與提示合併，用 Claude 生成一些文字，然後回傳結果。",
+      "zh_cn": "在里面，我们的目标是将生成的任务与提示合併，用 Claude 生成一些文字，然后返回结果。"
+    },
+    "14": {
+      "en": "So let's do that right away.",
+      "zh_tw": "那我們馬上來做。",
+      "zh_cn": "那我们马上來做。"
+    },
+    "15": {
+      "en": "I'm going to put in my V1 prompt right here, which is very simple.",
+      "zh_tw": "我要在這裡放入我的第一版提示，非常簡單。",
+      "zh_cn": "我要在这里放入我的第一版提示，非常简单。"
+    },
+    "16": {
+      "en": "Remember, we are starting off as simple as possible here.",
+      "zh_tw": "記住，我們一開始要盡可能簡單。",
+      "zh_cn": "记住，我们一开始要尽可能简单。"
+    },
+    "17": {
+      "en": "So it'll just say something like, please solve the following task.",
+      "zh_tw": "所以它會說類似「請解決以下任務」這樣的內容。",
+      "zh_cn": "所以它会说类似「请解决以下任务」这样的內容。"
+    },
+    "18": {
+      "en": "And I want this to be a F string.",
+      "zh_tw": "我想讓它是一個 f-string。",
+      "zh_cn": "我想让它是一个 f-string。"
+    },
+    "19": {
+      "en": "And I'm going to put in test case task.",
+      "zh_tw": "然後我要放入 test_case['task']。",
+      "zh_cn": "然后我要放入 test_case['task']。"
+    },
+    "20": {
+      "en": "Next up, we want to send this off to clod.",
+      "zh_tw": "接下來，我們要把它送給 Claude。",
+      "zh_cn": "接下來，我们要把它送给 Claude。"
+    },
+    "21": {
+      "en": "So I'll make a list of messages.",
+      "zh_tw": "所以我建立一個訊息列表。",
+      "zh_cn": "所以我建立一个信息列表。"
+    },
+    "22": {
+      "en": "I'll add in a user message.",
+      "zh_tw": "加入一個使用者訊息。",
+      "zh_cn": "加入一个使用者信息。"
+    },
+    "23": {
+      "en": "I'm then going to pass this off to clod by calling chat.",
+      "zh_tw": "然後把它傳給 Claude，呼叫 chat。",
+      "zh_cn": "然后把它传给 Claude，调用 chat。"
+    },
+    "24": {
+      "en": "And we're going to get back some resulting text, some result, or maybe we'll call it output this time around.",
+      "zh_tw": "我們會得到一些結果文字，或者這次我們叫它 output。",
+      "zh_cn": "我们会得到一些结果文字，或者这次我们叫它 output。"
+    },
+    "25": {
+      "en": "And then for right now, I'll just return the output.",
+      "zh_tw": "然後目前先回傳 output。",
+      "zh_cn": "然后目前先返回 output。"
+    },
+    "26": {
+      "en": "Now, remember, we don't have any kind of formatting included or any formatting instructions inside the prompt right now.",
+      "zh_tw": "現在記住，我們目前沒有在提示中包含任何格式化或格式化指令。",
+      "zh_cn": "现在记住，我们目前没有在提示中包含任何格式化或格式化命令。"
+    },
+    "27": {
+      "en": "So we're going to probably get back a lot more output than we ever asked for.",
+      "zh_tw": "所以我們可能會得到比我們要求的更多的輸出。",
+      "zh_cn": "所以我们可能会得到比我们要求的更多的输出。"
+    },
+    "28": {
+      "en": "The real goal of our prompt is to make sure that we get just Python or JSON or that regular expression.",
+      "zh_tw": "我們提示的真正目標是確保我們只得到 Python 或 JSON 或正則表達式。",
+      "zh_cn": "我们提示的真正目标是确保我们只得到 Python 或 JSON 或正则表达式。"
+    },
+    "29": {
+      "en": "And we don't have anything for that right now.",
+      "zh_tw": "我們目前還沒有做這方面的處理。",
+      "zh_cn": "我们目前还没有做这方面的处理。"
+    },
+    "30": {
+      "en": "So we'll almost definitely have to come back and make some improvements.",
+      "zh_tw": "所以我們幾乎一定需要回來做一些改進。",
+      "zh_cn": "所以我们幾乎一定需要回來做一些改进。"
+    },
+    "31": {
+      "en": "But for right now, we at least have a start to run prompt.",
+      "zh_tw": "但目前，我們至少有了 run prompt 的雛形。",
+      "zh_cn": "但目前，我们至少有了 run prompt 的雛形。"
+    },
+    "32": {
+      "en": "The next thing we're going to work on is run test case.",
+      "zh_tw": "接下來我們要做的是 run test case。",
+      "zh_cn": "接下來我们要做的是 run test case。"
+    },
+    "33": {
+      "en": "The goal of this function is to take in one of those individual cases, call the run prompt function we just put together, get some output from clod, and then grade the result and return a dictionary describing everything that happened there.",
+      "zh_tw": "這個函式的目標是接收一個個別案例，呼叫我們剛才建立的 run prompt 函式，從 Claude 取得一些輸出，然後評分結果並回傳一個描述所有事情的字典。",
+      "zh_cn": "这个函数的目标是接收一个个別案例，调用我们剛才建立的 run prompt 函数，从 Claude 取得一些输出，然后评分结果並返回一个描述所有事情的字典。"
+    },
+    "34": {
+      "en": "Now, that sounds really complicated, but in reality, it's going to be surprisingly simple.",
+      "zh_tw": "聽起來很複雜，但實際上會出乎意料地簡單。",
+      "zh_cn": "聽起來很复杂，但实际上会出乎意料地简单。"
+    },
+    "35": {
+      "en": "So let me show you all we have to do here.",
+      "zh_tw": "讓我告訴你我們需要做的所有事情。",
+      "zh_cn": "让我告訴你我们需要做的所有事情。"
+    },
+    "36": {
+      "en": "We're going to put in output.",
+      "zh_tw": "我們要放入 output。",
+      "zh_cn": "我们要放入 output。"
+    },
+    "37": {
+      "en": "That's going to come from calling the function that we were just working on a moment ago.",
+      "zh_tw": "它會來自呼叫我們剛才做的函式。",
+      "zh_cn": "它会來自调用我们剛才做的函数。"
+    },
+    "38": {
+      "en": "So this run prompt function.",
+      "zh_tw": "就是這個 run prompt 函式。",
+      "zh_cn": "就是这个 run prompt 函数。"
+    },
+    "39": {
+      "en": "Put in our test case.",
+      "zh_tw": "傳入我們的測試案例。",
+      "zh_cn": "传入我们的测试案例。"
+    },
+    "40": {
+      "en": "And then we're going to do some grading right here.",
+      "zh_tw": "然後我們要在這裡做一些評分。",
+      "zh_cn": "然后我们要在这里做一些评分。"
+    },
+    "41": {
+      "en": "That's going to be a to do.",
+      "zh_tw": "目前先設為待辦事項。",
+      "zh_cn": "目前先设为待办事项。"
+    },
+    "42": {
+      "en": "For right now, I'll just say that we have a hard-coded score of 10.",
+      "zh_tw": "暫時我只是說我們有一個固定分數 10。",
+      "zh_cn": "暫时我只是说我们有一个固定分数 10。"
+    },
+    "43": {
+      "en": "So we definitely have to come back and do a lot of heavy lifting right there.",
+      "zh_tw": "所以我們絕對需要回來做大量的重要工作。",
+      "zh_cn": "所以我们绝对需要回來做大量的重要工作。"
+    },
+    "44": {
+      "en": "And then at the bottom, we're just going to return some information that summarizes everything about running this test case.",
+      "zh_tw": "然後在底部，我們只是要回傳一些資訊來總結執行這個測試案例的所有事情。",
+      "zh_cn": "然后在底部，我们只是要返回一些资讯來总结执行这个测试案例的所有事情。"
+    },
+    "45": {
+      "en": "So I will return a dictionary with some output.",
+      "zh_tw": "我會回傳一個字典，包含一些 output。",
+      "zh_cn": "我会返回一个字典，包含一些 output。"
+    },
+    "46": {
+      "en": "It's going to be whatever we got back from clod.",
+      "zh_tw": "就是我們從 Claude 得到的東西。",
+      "zh_cn": "就是我们从 Claude 得到的東西。"
+    },
+    "47": {
+      "en": "I'll include the test case.",
+      "zh_tw": "我會包含測試案例。",
+      "zh_cn": "我会包含测试案例。"
+    },
+    "48": {
+      "en": "And then our score.",
+      "zh_tw": "然後是我們的分數。",
+      "zh_cn": "然后是我们的分数。"
+    },
+    "49": {
+      "en": "And then one final step here, we have to implement run eval.",
+      "zh_tw": "最後一步，我們需要實作 run eval。",
+      "zh_cn": "最后一步，我们需要实作 run eval。"
+    },
+    "50": {
+      "en": "So this function is going to load up our data set or receive it as an argument.",
+      "zh_tw": "這個函式會載入我們的資料集或將它作為參數接收。",
+      "zh_cn": "这个函数会載入我们的数据集或将它作为参数接收。"
+    },
+    "51": {
+      "en": "Either one is fine.",
+      "zh_tw": "兩種方式都可以。",
+      "zh_cn": "兩种方式都可以。"
+    },
+    "52": {
+      "en": "And then we're going to loop through that data set.",
+      "zh_tw": "然後我們要遍歷資料集。",
+      "zh_cn": "然后我们要遍历数据集。"
+    },
+    "53": {
+      "en": "And for every test case, we will call run test case and then just assemble all the results together.",
+      "zh_tw": "對每一個測試案例，呼叫 run test case，然後把所有結果組裝在一起。",
+      "zh_cn": "对每一个测试案例，调用 run test case，然后把所有结果组装在一起。"
+    },
+    "54": {
+      "en": "So for our implementation here, I'll say results.",
+      "zh_tw": "所以我們的實作是這樣的，我先設 results",
+      "zh_cn": "所以我们的实作是这样的，我先设 results"
+    },
+    "55": {
+      "en": "It's going to start off as an empty list.",
+      "zh_tw": "為一個空列表。",
+      "zh_cn": "为一个空列表。"
+    },
+    "56": {
+      "en": "And for every test case in data set, I'm going to get our result from calling run test case and pass in the test case to it.",
+      "zh_tw": "對資料集中的每一個測試案例，我從呼叫 run test case 取得結果，並傳入測試案例。",
+      "zh_cn": "对数据集中的每一个测试案例，我从调用 run test case 取得结果，並传入测试案例。"
+    },
+    "57": {
+      "en": "And then add that into our list of results.",
+      "zh_tw": "然後把它加入我們的結果列表。",
+      "zh_cn": "然后把它加入我们的结果列表。"
+    },
+    "58": {
+      "en": "And then down here, I'm just going to print up all of our results.",
+      "zh_tw": "然後在下面，我只是要印出所有結果。",
+      "zh_cn": "然后在下面，我只是要印出所有结果。"
+    },
+    "59": {
+      "en": "Actually, you know what?",
+      "zh_tw": "其實，你知道嗎？",
+      "zh_cn": "其实，你知道嗎？"
+    },
+    "60": {
+      "en": "Let's actually just go ahead and return results.",
+      "zh_tw": "我們還是直接回傳 results 吧。",
+      "zh_cn": "我们还是直接返回 results 吧。"
+    },
+    "61": {
+      "en": "I think that's a little bit better.",
+      "zh_tw": "我覺得這樣比較好。",
+      "zh_cn": "我覺得这样比較好。"
+    },
+    "62": {
+      "en": "Okay, so there's the outline for our three major functions.",
+      "zh_tw": "好的，這就是我們三個主要函式的架構。",
+      "zh_cn": "好的，这就是我们三个主要函数的架构。"
+    },
+    "63": {
+      "en": "Now, believe it or not, this is like a vast majority of what a eval pipeline is.",
+      "zh_tw": "信不信由你，這基本上就是評估管線的絕大部分了。",
+      "zh_cn": "信不信由你，这基本上就是评估管线的绝大部分了。"
+    },
+    "64": {
+      "en": "We just put together the vast majority with the obvious exception of grading.",
+      "zh_tw": "我們剛剛完成了絕大部分，明顯的例外就是評分。",
+      "zh_cn": "我们剛剛完成了绝大部分，明显的例外就是评分。"
+    },
+    "65": {
+      "en": "So as you can see, there's not a whole lot of code that goes into this.",
+      "zh_tw": "所以如你所見，這裡面並沒有太多程式碼。",
+      "zh_cn": "所以如你所見，这里面並没有太多代码。"
+    },
+    "66": {
+      "en": "Let's now test this out.",
+      "zh_tw": "現在讓我們測試一下。",
+      "zh_cn": "现在让我们测试一下。"
+    },
+    "67": {
+      "en": "So down here in the next cell down, I'm going to open up our data set JSON file.",
+      "zh_tw": "在下面的下一個儲存格中，我要開啟我們的 dataset.json 檔案。",
+      "zh_cn": "在下面的下一个存储格中，我要开啟我们的 dataset.json 文件。"
+    },
+    "68": {
+      "en": "And parse it as JSON.",
+      "zh_tw": "解析為 JSON。",
+      "zh_cn": "解析为 JSON。"
+    },
+    "69": {
+      "en": "And then call the run eval function.",
+      "zh_tw": "然後呼叫 run eval 函式。",
+      "zh_cn": "然后调用 run eval 函数。"
+    },
+    "70": {
+      "en": "That's the one that we were just putting together right here.",
+      "zh_tw": "就是我們剛才在這裡建構的那個。",
+      "zh_cn": "就是我们剛才在这里建构的那个。"
+    },
+    "71": {
+      "en": "With the entire data set.",
+      "zh_tw": "傳入整個資料集。",
+      "zh_cn": "传入整个数据集。"
+    },
+    "72": {
+      "en": "Finally, I'm going to assign the results of that to results.",
+      "zh_tw": "最後，我把結果指派給 results。",
+      "zh_cn": "最后，我把结果指派给 results。"
+    },
+    "73": {
+      "en": "I'm going to rerun all the cells above just to make sure that I executed all of them.",
+      "zh_tw": "我要重新執行上面的所有儲存格，確保全部都執行過了。",
+      "zh_cn": "我要重新执行上面的所有存储格，确保全部都执行过了。"
+    },
+    "74": {
+      "en": "And then I'm going to run the cell.",
+      "zh_tw": "然後執行這個儲存格。",
+      "zh_cn": "然后执行这个存储格。"
+    },
+    "75": {
+      "en": "We'll see what happens.",
+      "zh_tw": "看看會發生什麼。",
+      "zh_cn": "看看会发生什麼。"
+    },
+    "76": {
+      "en": "And just so you know, the first time you run this, it is going to take a pretty good amount of time.",
+      "zh_tw": "提醒你一下，第一次執行時，需要花相當長的時間。",
+      "zh_cn": "提醒你一下，第一次执行时，需要花相当长的时间。"
+    },
+    "77": {
+      "en": "Even if you are using Haiku.",
+      "zh_tw": "即使你使用的是 Haiku。",
+      "zh_cn": "即使你使用的是 Haiku。"
+    },
+    "78": {
+      "en": "It's going to end up taking me about 31 seconds to complete this with Haiku.",
+      "zh_tw": "使用 Haiku 大概需要花我約 31 秒來完成。",
+      "zh_cn": "使用 Haiku 大概需要花我约 31 秒來完成。"
+    },
+    "79": {
+      "en": "I'm going to show you some techniques for speeding up our eval runtime.",
+      "zh_tw": "我之後會示範一些加速評估執行的技巧。",
+      "zh_cn": "我之后会示范一些加速评估执行的技巧。"
+    },
+    "80": {
+      "en": "But for right now, we're just going to have it take a little bit longer.",
+      "zh_tw": "但目前，我們就讓它花久一點。",
+      "zh_cn": "但目前，我们就让它花久一点。"
+    },
+    "81": {
+      "en": "But don't worry, we will speed it up.",
+      "zh_tw": "不過別擔心，我們會加速它的。",
+      "zh_cn": "不过別担心，我们会加速它的。"
+    },
+    "82": {
+      "en": "So now let's take a look at results and see what we have.",
+      "zh_tw": "現在讓我們看看 results，看看我們有什麼。",
+      "zh_cn": "现在让我们看看 results，看看我们有什麼。"
+    },
+    "83": {
+      "en": "Results is going to be a rather large JSON object.",
+      "zh_tw": "Results 會是一個相當大的 JSON 物件。",
+      "zh_cn": "Results 会是一个相当大的 JSON 对象。"
+    },
+    "84": {
+      "en": "So I'm going to print it out really nicely with a print.",
+      "zh_tw": "所以我要用 print 漂亮地印出來。",
+      "zh_cn": "所以我要用 print 漂亮地印出來。"
+    },
+    "85": {
+      "en": "JSON dumps with results and an indent of two.",
+      "zh_tw": "json.dumps，傳入 results，縮排設為二。",
+      "zh_cn": "json.dumps，传入 results，缩排设为二。"
+    },
+    "86": {
+      "en": "There we go.",
+      "zh_tw": "好了。",
+      "zh_cn": "好了。"
+    },
+    "87": {
+      "en": "So now we get an array of objects.",
+      "zh_tw": "現在我們得到了一個物件陣列。",
+      "zh_cn": "现在我们得到了一个对象数组。"
+    },
+    "88": {
+      "en": "Every object represents the output from one of our individual test cases.",
+      "zh_tw": "每個物件代表一個個別測試案例的輸出。",
+      "zh_cn": "每个对象代表一个个別测试案例的输出。"
+    },
+    "89": {
+      "en": "I've got the output right here.",
+      "zh_tw": "我在這裡看到輸出。",
+      "zh_cn": "我在这里看到输出。"
+    },
+    "90": {
+      "en": "That's the output coming from Claude.",
+      "zh_tw": "這是來自 Claude 的輸出。",
+      "zh_cn": "这是來自 Claude 的输出。"
+    },
+    "91": {
+      "en": "And we can see there is a lot of stuff generated here.",
+      "zh_tw": "我們可以看到這裡生成了很多東西。",
+      "zh_cn": "我们可以看到这里生成了很多東西。"
+    },
+    "92": {
+      "en": "And if I scroll down a little bit, I'll see the definition of the test case that this was based upon.",
+      "zh_tw": "如果我往下捲一點，會看到這是基於哪個測試案例的定義。",
+      "zh_cn": "如果我往下捲一点，会看到这是基於哪个测试案例的定义。"
+    },
+    "93": {
+      "en": "And then the score, which again, right now is just hard-coded at 10.",
+      "zh_tw": "然後是分數，目前仍然只是固定為 10。",
+      "zh_cn": "然后是分数，目前仍然只是固定为 10。"
+    },
+    "94": {
+      "en": "And then that's just going to repeat over and over again.",
+      "zh_tw": "然後就是一直重複這樣。",
+      "zh_cn": "然后就是一直重复这样。"
+    },
+    "95": {
+      "en": "All right.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "96": {
+      "en": "So at this point in time, we have successfully gone through this step right here.",
+      "zh_tw": "在這個時間點上，我們已經成功完成了這一步。",
+      "zh_cn": "在这个时间点上，我们已经成功完成了这一步。"
+    },
+    "97": {
+      "en": "We merged together our data set with our test prompt, and we got some output from Claude,",
+      "zh_tw": "我們把資料集和測試提示合併在一起，得到了一些 Claude 的輸出，",
+      "zh_cn": "我们把数据集和测试提示合併在一起，得到了一些 Claude 的输出，"
+    },
+    "98": {
+      "en": "and we kind of collated all this stuff together.",
+      "zh_tw": "然後把所有東西整理在一起。",
+      "zh_cn": "然后把所有東西整理在一起。"
+    },
+    "99": {
+      "en": "So now the last thing we really have to do here is take the input and the result that we got out of Claude",
+      "zh_tw": "所以現在最後我們真正需要做的是把輸入和從 Claude 得到的結果",
+      "zh_cn": "所以现在最后我们真正需要做的是把输入和从 Claude 得到的结果"
+    },
+    "100": {
+      "en": "and feed it into one of these different graders.",
+      "zh_tw": "餵入其中一個評分器。",
+      "zh_cn": "餵入其中一个评分器。"
+    },
+    "101": {
+      "en": "So this finally is the time where we're going to start to learn about graders.",
+      "zh_tw": "所以終於到了我們要開始學習評分器的時候了。",
+      "zh_cn": "所以终於到了我们要开始学習评分器的时候了。"
+    },
+    "102": {
+      "en": "We're going to start to discuss them in the next video.",
+      "zh_tw": "我們在下一個影片中開始討論。",
+      "zh_cn": "我们在下一个视频中开始討论。"
+    }
+  }
+}

@@ -1,0 +1,432 @@
+{
+  "srt_file": "JSON_message_types_UaJREBzo.srt",
+  "video_file": "JSON_message_types_UaJREBzo.mp4",
+  "max_valid_entry": 85,
+  "entries": {
+    "1": {
+      "en": "We have gotten through a couple of topics, and before we move on, I just want to give you a little heads up.",
+      "zh_tw": "我們已經介紹了幾個主題，在繼續之前，我想先給你一個提醒。",
+      "zh_cn": "我们已经介绍了幾个主题，在继续之前，我想先给你一个提醒。"
+    },
+    "2": {
+      "en": "You see, the next two or three videos are going to be focused on MCP messages and the standard IO transport.",
+      "zh_tw": "接下來兩三支影片會專注於 MCP 訊息和標準 IO 傳輸方式。",
+      "zh_cn": "接下來兩三支视频会專注於 MCP 信息和标准 IO 传输方式。"
+    },
+    "3": {
+      "en": "These videos might seem a little bit dry and a little bit boring, but there's a very important reason that we're going to cover these topics.",
+      "zh_tw": "這些影片可能看起來有點枯燥無聊，但我們要涵蓋這些主題有一個非常重要的原因。",
+      "zh_cn": "这些视频可能看起來有点枯燥无聊，但我们要涵蓋这些主题有一个非常重要的原因。"
+    },
+    "4": {
+      "en": "One of the big goals of this course is to help you understand the streamable HTTP transport,",
+      "zh_tw": "這門課程的一個主要目標是幫助你理解 Streamable HTTP 傳輸方式，",
+      "zh_cn": "这门课程的一个主要目标是幫助你理解 Streamable HTTP 传输方式，"
+    },
+    "5": {
+      "en": "which allows clients to connect to remotely hosted MCP servers.",
+      "zh_tw": "它允許客戶端連接到遠端託管的 MCP 伺服器。",
+      "zh_cn": "它允许客户端连接到远端托管的 MCP 服务器。"
+    },
+    "6": {
+      "en": "The issue is that in some cases, there are some big limitations on what a MCP server can do when it is using the HTTP transport.",
+      "zh_tw": "問題是在某些情況下，使用 HTTP 傳輸方式時，MCP 伺服器的功能會有一些很大的限制。",
+      "zh_cn": "问题是在某些情況下，使用 HTTP 传输方式时，MCP 服务器的功能会有一些很大的限制。"
+    },
+    "7": {
+      "en": "Understanding those limitations can be rather challenging,",
+      "zh_tw": "理解這些限制可能相當困難，",
+      "zh_cn": "理解这些限制可能相当困难，"
+    },
+    "8": {
+      "en": "and it's a lot easier to understand if you have a solid footing in MCP messages and a standard IO transport.",
+      "zh_tw": "如果你對 MCP 訊息和標準 IO 傳輸方式有紮實的基礎，理解起來會容易得多。",
+      "zh_cn": "如果你对 MCP 信息和标准 IO 传输方式有紮实的基础，理解起來会容易得多。"
+    },
+    "9": {
+      "en": "So that's why we're going to spend some time on these first two topics.",
+      "zh_tw": "這就是為什麼我們要花一些時間在這前兩個主題上。",
+      "zh_cn": "这就是为什麼我们要花一些时间在这前兩个主题上。"
+    },
+    "10": {
+      "en": "So with all this in mind, let's take a look at the format that MCP uses to communicate, specifically the messages format.",
+      "zh_tw": "帶著這些想法，讓我們來看看 MCP 用來通訊的格式，特別是訊息格式。",
+      "zh_cn": "帶著这些想法，让我们來看看 MCP 用來通讯的格式，特別是信息格式。"
+    },
+    "11": {
+      "en": "Clients and servers communicate using JSON.",
+      "zh_tw": "客戶端和伺服器使用 JSON 來通訊。",
+      "zh_cn": "客户端和服务器使用 JSON 來通讯。"
+    },
+    "12": {
+      "en": "We refer to these snippets of JSON as messages.",
+      "zh_tw": "我們把這些 JSON 片段稱為訊息。",
+      "zh_cn": "我们把这些 JSON 片段称为信息。"
+    },
+    "13": {
+      "en": "There are many different types of messages defined inside the MCP spec, each of which are designed for a distinct purpose.",
+      "zh_tw": "MCP 規範裡定義了許多不同類型的訊息，每一種都設計用於不同的目的。",
+      "zh_cn": "MCP 规范里定义了许多不同类型的信息，每一种都设计用於不同的目的。"
+    },
+    "14": {
+      "en": "So let me show you an example right away.",
+      "zh_tw": "讓我馬上給你看一個範例。",
+      "zh_cn": "让我马上给你看一个范例。"
+    },
+    "15": {
+      "en": "As an example, if a language model connected to a MCP client decides to call a tool provided by MCP server,",
+      "zh_tw": "舉例來說，如果一個連接到 MCP 客戶端的語言模型決定呼叫 MCP 伺服器提供的工具，",
+      "zh_cn": "舉例來说，如果一个连接到 MCP 客户端的语言模型决定调用 MCP 服务器提供的工具，"
+    },
+    "16": {
+      "en": "the client will send a message over to the server.",
+      "zh_tw": "客戶端會向伺服器發送一條訊息。",
+      "zh_cn": "客户端会向服务器发送一条信息。"
+    },
+    "17": {
+      "en": "This type of message is named a call tool request.",
+      "zh_tw": "這種類型的訊息叫做 call tool request。",
+      "zh_cn": "这种类型的信息叫做 call tool request。"
+    },
+    "18": {
+      "en": "And I've got an example of a call tool request at the top of this diagram.",
+      "zh_tw": "在圖表的頂部，我有一個 call tool request 的範例。",
+      "zh_cn": "在圖表的頂部，我有一个 call tool request 的范例。"
+    },
+    "19": {
+      "en": "The MCP server will then run the tool and then put the result of the tool run into another message type named a call tool result.",
+      "zh_tw": "MCP 伺服器接著會執行工具，然後把工具執行的結果放入另一種叫做 call tool result 的訊息類型中。",
+      "zh_cn": "MCP 服务器接著会执行工具，然后把工具执行的结果放入另一种叫做 call tool result 的信息类型中。"
+    },
+    "20": {
+      "en": "And I've got an example of that on the bottom of the diagram as well.",
+      "zh_tw": "在圖表底部我也有一個範例。",
+      "zh_cn": "在圖表底部我也有一个范例。"
+    },
+    "21": {
+      "en": "Now, as I mentioned, the MCP spec defines a full list of all the different message types.",
+      "zh_tw": "如同我提到的，MCP 規範定義了所有不同訊息類型的完整列表。",
+      "zh_cn": "如同我提到的，MCP 规范定义了所有不同信息类型的完整列表。"
+    },
+    "22": {
+      "en": "You can find the full list inside the MCP spec repository hosted on GitHub.",
+      "zh_tw": "你可以在 GitHub 上託管的 MCP 規範儲存庫裡找到完整列表。",
+      "zh_cn": "你可以在 GitHub 上托管的 MCP 规范仓库里找到完整列表。"
+    },
+    "23": {
+      "en": "And we're going to take a look at that in just a moment.",
+      "zh_tw": "我們馬上就會來看一下。",
+      "zh_cn": "我们马上就会來看一下。"
+    },
+    "24": {
+      "en": "But first, to be clear about this repository that we're going to take a look at,",
+      "zh_tw": "但首先，要說清楚我們要看的這個儲存庫，",
+      "zh_cn": "但首先，要说清楚我们要看的这个仓库，"
+    },
+    "25": {
+      "en": "this specification repo is separate from all the different SDK repositories, like the Python or the TypeScript MCP SDKs.",
+      "zh_tw": "這個規範儲存庫和各種不同的 SDK 儲存庫是分開的，比如 Python 或 TypeScript MCP SDK。",
+      "zh_cn": "这个规范仓库和各种不同的 SDK 仓库是分开的，比如 Python 或 TypeScript MCP SDK。"
+    },
+    "26": {
+      "en": "This specification repo has some different documents that describe how the MCP spec works.",
+      "zh_tw": "這個規範儲存庫有一些不同的文件描述 MCP 規範是如何運作的。",
+      "zh_cn": "这个规范仓库有一些不同的文件描述 MCP 规范是如何运作的。"
+    },
+    "27": {
+      "en": "So in this repository, the full list of message types is written inside of a TypeScript file.",
+      "zh_tw": "在這個儲存庫裡，所有訊息類型的完整列表寫在一個 TypeScript 檔案中。",
+      "zh_cn": "在这个仓库里，所有信息类型的完整列表写在一个 TypeScript 文件中。"
+    },
+    "28": {
+      "en": "Again, to be clear here, this TypeScript file isn't ever executed by anything.",
+      "zh_tw": "再說清楚一點，這個 TypeScript 檔案不會被任何東西實際執行。",
+      "zh_cn": "再说清楚一点，这个 TypeScript 文件不会被任何東西实际执行。"
+    },
+    "29": {
+      "en": "It's not included in any of the different SDKs.",
+      "zh_tw": "它不包含在任何不同的 SDK 裡面。",
+      "zh_cn": "它不包含在任何不同的 SDK 里面。"
+    },
+    "30": {
+      "en": "The types are just written in TypeScript because TypeScript is a really convenient language for describing type data.",
+      "zh_tw": "這些型別用 TypeScript 來寫，只是因為 TypeScript 是一個非常方便描述型別資料的語言。",
+      "zh_cn": "这些型別用 TypeScript 來写，只是因为 TypeScript 是一个非常方便描述型別数据的语言。"
+    },
+    "31": {
+      "en": "So I'd like to show you this schema file that lists out all the different message types,",
+      "zh_tw": "我想讓你看看這個列出所有不同訊息類型的 schema 檔案，",
+      "zh_cn": "我想让你看看这个列出所有不同信息类型的 schema 文件，"
+    },
+    "32": {
+      "en": "just because there are some really interesting insights to be pulled out of it.",
+      "zh_tw": "因為裡面有一些非常有趣的見解可以提取出來。",
+      "zh_cn": "因为里面有一些非常有趣的見解可以提取出來。"
+    },
+    "33": {
+      "en": "So I'm going to navigate to the address you see up here at the top of the screen.",
+      "zh_tw": "我要導航到你在螢幕頂部看到的這個網址。",
+      "zh_cn": "我要导航到你在屏幕頂部看到的这个网址。"
+    },
+    "34": {
+      "en": "And then inside this repository, you will find at a certain path a file called schema.ts.",
+      "zh_tw": "然後在這個儲存庫裡，你會在某個路徑下找到一個叫做 schema.ts 的檔案。",
+      "zh_cn": "然后在这个仓库里，你会在某个路徑下找到一个叫做 schema.ts 的文件。"
+    },
+    "35": {
+      "en": "The schema.ts file contains all the different message types that are available to us.",
+      "zh_tw": "schema.ts 檔案包含了所有我們可以使用的不同訊息類型。",
+      "zh_cn": "schema.ts 文件包含了所有我们可以使用的不同信息类型。"
+    },
+    "36": {
+      "en": "So inside this file, I can do a search for call tool request.",
+      "zh_tw": "在這個檔案裡，我可以搜尋 call tool request。",
+      "zh_cn": "在这个文件里，我可以搜尋 call tool request。"
+    },
+    "37": {
+      "en": "And here we go.",
+      "zh_tw": "在這裡。",
+      "zh_cn": "在这里。"
+    },
+    "38": {
+      "en": "Here's an example of what a call tool request looks like.",
+      "zh_tw": "這是一個 call tool request 長什麼樣子的範例。",
+      "zh_cn": "这是一个 call tool request 长什麼样子的范例。"
+    },
+    "39": {
+      "en": "So a call tool request must have a method of tool slash call and then a params object that has the name of the tool we want to call and some arguments to pass into it.",
+      "zh_tw": "call tool request 必須有一個 method 為 tools/call，然後一個 params 物件包含我們要呼叫的工具名稱和一些要傳入的引數。",
+      "zh_cn": "call tool request 必须有一个 method 为 tools/call，然后一个 params 对象包含我们要调用的工具名称和一些要传入的引数。"
+    },
+    "40": {
+      "en": "You might notice that in the diagram I showed you a moment ago back over here, there's also this JSON RPC and an ID on there as well.",
+      "zh_tw": "你可能注意到在我剛才展示的圖表中，還有 JSON RPC 和 ID 在上面。",
+      "zh_cn": "你可能注意到在我剛才展示的圖表中，还有 JSON RPC 和 ID 在上面。"
+    },
+    "41": {
+      "en": "Those are actually defined on a separate object back inside the schema file called a JSON RPC request.",
+      "zh_tw": "那些實際上是定義在 schema 檔案中另一個叫做 JSON RPC request 的物件上。",
+      "zh_cn": "那些实际上是定义在 schema 文件中另一个叫做 JSON RPC request 的对象上。"
+    },
+    "42": {
+      "en": "So if I look that up, I'll see, okay, here is JSON RPC request.",
+      "zh_tw": "如果我查一下，就會看到，這裡是 JSON RPC request。",
+      "zh_cn": "如果我查一下，就会看到，这里是 JSON RPC request。"
+    },
+    "43": {
+      "en": "And it also must have an ID as well.",
+      "zh_tw": "它也必須有一個 ID。",
+      "zh_cn": "它也必须有一个 ID。"
+    },
+    "44": {
+      "en": "Now out of this entire file, what I really want you to focus on are some different types that are defined at the very bottom.",
+      "zh_tw": "在整個檔案中，我真正想讓你關注的是定義在最底部的一些不同型別。",
+      "zh_cn": "在整个文件中，我真正想让你关注的是定义在最底部的一些不同型別。"
+    },
+    "45": {
+      "en": "So I'm going to scroll down to the very bottom, very, very bottom of the file.",
+      "zh_tw": "我要捲到最底部，最最底部。",
+      "zh_cn": "我要捲到最底部，最最底部。"
+    },
+    "46": {
+      "en": "I'll then scroll up just a little bit.",
+      "zh_tw": "然後稍微往上捲一點。",
+      "zh_cn": "然后稍微往上捲一点。"
+    },
+    "47": {
+      "en": "And I'm going to find a comment that says server messages and a comment that says client messages.",
+      "zh_tw": "我會找到一個寫著 server messages 的註解和一個寫著 client messages 的註解。",
+      "zh_cn": "我会找到一个写著 server messages 的註解和一个写著 client messages 的註解。"
+    },
+    "48": {
+      "en": "You'll notice that inside these two sections, there are some kind of similarly named types.",
+      "zh_tw": "你會注意到在這兩個區段裡，有一些名稱類似的型別。",
+      "zh_cn": "你会注意到在这兩个区段里，有一些名称类似的型別。"
+    },
+    "49": {
+      "en": "So inside of client messages, there are client request, client notification, and client result.",
+      "zh_tw": "在 client messages 裡面，有 client request、client notification 和 client result。",
+      "zh_cn": "在 client messages 里面，有 client request、client notification 和 client result。"
+    },
+    "50": {
+      "en": "And then down inside the server section, there is server request, server notification, and server result.",
+      "zh_tw": "然後在 server 區段裡面，有 server request、server notification 和 server result。",
+      "zh_cn": "然后在 server 区段里面，有 server request、server notification 和 server result。"
+    },
+    "51": {
+      "en": "So let me show you a diagram that's going to help you understand what these different types inside this file and specifically the client and server sections are really telling us.",
+      "zh_tw": "讓我展示一個圖表來幫助你理解這個檔案裡的這些不同型別，特別是 client 和 server 區段到底在告訴我們什麼。",
+      "zh_cn": "让我展示一个圖表來幫助你理解这个文件里的这些不同型別，特別是 client 和 server 区段到底在告訴我们什麼。"
+    },
+    "52": {
+      "en": "Okay, here we go.",
+      "zh_tw": "好的，開始。",
+      "zh_cn": "好的，开始。"
+    },
+    "53": {
+      "en": "So inside that type file, we can kind of divide all these different types of messages into two or three different categories.",
+      "zh_tw": "在那個型別檔案裡，我們可以把所有不同類型的訊息大致分為兩到三個不同的類別。",
+      "zh_cn": "在那个型別文件里，我们可以把所有不同类型的信息大致分为兩到三个不同的类別。"
+    },
+    "54": {
+      "en": "First, on the left-hand side of this diagram, there are request result messages.",
+      "zh_tw": "首先，在圖表的左邊，有 request-result 訊息。",
+      "zh_cn": "首先，在圖表的左边，有 request-result 信息。"
+    },
+    "55": {
+      "en": "These are message types that always come in pairs.",
+      "zh_tw": "這些是總是成對出現的訊息類型。",
+      "zh_cn": "这些是总是成对出现的信息类型。"
+    },
+    "56": {
+      "en": "They're always going to have a name of something, something request, and then a paired message type of something, something result.",
+      "zh_tw": "它們總是有一個叫做某某 request 的名稱，然後配對一個某某 result 的訊息類型。",
+      "zh_cn": "它们总是有一个叫做某某 request 的名称，然后配对一个某某 result 的信息类型。"
+    },
+    "57": {
+      "en": "So as an example, we have call tool request that gets paired up with a call tool result.",
+      "zh_tw": "例如，我們有 call tool request 和配對的 call tool result。",
+      "zh_cn": "例如，我们有 call tool request 和配对的 call tool result。"
+    },
+    "58": {
+      "en": "We have a initialized request that gets paired up with a initialized result.",
+      "zh_tw": "我們有 initialized request 和配對的 initialized result。",
+      "zh_cn": "我们有 initialized request 和配对的 initialized result。"
+    },
+    "59": {
+      "en": "All these different message types, I bet you could guess what they do for us.",
+      "zh_tw": "所有這些不同的訊息類型，我打賭你能猜到它們為我們做什麼。",
+      "zh_cn": "所有这些不同的信息类型，我打賭你能猜到它们为我们做什麼。"
+    },
+    "60": {
+      "en": "They describe messages that we send off either to a client or a server, and then the type of message that we expect to get back in response.",
+      "zh_tw": "它們描述我們發送到客戶端或伺服器的訊息，以及我們期望收到的回應訊息類型。",
+      "zh_cn": "它们描述我们发送到客户端或服务器的信息，以及我们期望收到的回应信息类型。"
+    },
+    "61": {
+      "en": "So if I ever send off a call tool request, I would expect to get back a call tool result.",
+      "zh_tw": "如果我發送一個 call tool request，我會期望收到一個 call tool result。",
+      "zh_cn": "如果我发送一个 call tool request，我会期望收到一个 call tool result。"
+    },
+    "62": {
+      "en": "The other type of messages that we're going to work with are notification messages.",
+      "zh_tw": "另一種我們要處理的訊息是通知訊息。",
+      "zh_cn": "另一种我们要处理的信息是通知信息。"
+    },
+    "63": {
+      "en": "These are more like events.",
+      "zh_tw": "這些更像是事件。",
+      "zh_cn": "这些更像是事件。"
+    },
+    "64": {
+      "en": "They tell the client or the server about something that just occurred, but they don't really need a response.",
+      "zh_tw": "它們告訴客戶端或伺服器剛才發生了什麼事，但並不需要回應。",
+      "zh_cn": "它们告訴客户端或服务器剛才发生了什麼事，但並不需要回应。"
+    },
+    "65": {
+      "en": "So we have types like progress notification, logging message notification, tool has changed notification, and so on.",
+      "zh_tw": "我們有像 progress notification、logging message notification、tool has changed notification 等等。",
+      "zh_cn": "我们有像 progress notification、logging message notification、tool has changed notification 等等。"
+    },
+    "66": {
+      "en": "Now back inside of the type file that we were looking at a moment ago, you may have noticed that we have the headers here of server messages and client messages.",
+      "zh_tw": "回到剛才看的型別檔案，你可能注意到有 server messages 和 client messages 的標題。",
+      "zh_cn": "回到剛才看的型別文件，你可能注意到有 server messages 和 client messages 的标题。"
+    },
+    "67": {
+      "en": "These comments and the types inside of each one are meant to indicate whether or not these types of messages are meant to be sent by the client or the server.",
+      "zh_tw": "這些註解和裡面的型別是用來指示這些訊息類型是要由客戶端還是伺服器發送的。",
+      "zh_cn": "这些註解和里面的型別是用來指示这些信息类型是要由客户端还是服务器发送的。"
+    },
+    "68": {
+      "en": "So for example, this client request type describes all of the different types of requests that are expected to be sent from the client.",
+      "zh_tw": "例如，這個 client request 型別描述了所有預期從客戶端發送的不同請求類型。",
+      "zh_cn": "例如，这个 client request 型別描述了所有预期从客户端发送的不同请求类型。"
+    },
+    "69": {
+      "en": "And likewise down here, these are all requests that are expected to be sent from the server.",
+      "zh_tw": "同樣在下面，這些是預期從伺服器發送的所有請求。",
+      "zh_cn": "同样在下面，这些是预期从服务器发送的所有请求。"
+    },
+    "70": {
+      "en": "And the same thing for server notifications.",
+      "zh_tw": "server notifications 也一樣。",
+      "zh_cn": "server notifications 也一样。"
+    },
+    "71": {
+      "en": "These are all notifications issued by the server, and these are all notifications that are issued by the client.",
+      "zh_tw": "這些是伺服器發出的所有通知，而這些是客戶端發出的所有通知。",
+      "zh_cn": "这些是服务器发出的所有通知，而这些是客户端发出的所有通知。"
+    },
+    "72": {
+      "en": "So we can kind of summarize everything in a diagram a little bit like this.",
+      "zh_tw": "我們可以用一個圖表來大致總結一切。",
+      "zh_cn": "我们可以用一个圖表來大致总结一切。"
+    },
+    "73": {
+      "en": "Now this doesn't show every type of message.",
+      "zh_tw": "這並不顯示每一種訊息類型。",
+      "zh_cn": "这並不显示每一种信息类型。"
+    },
+    "74": {
+      "en": "I just mean to indicate that there are some requests that are meant to come from the MCP client, and I've got examples of those right here.",
+      "zh_tw": "我只是要表示有一些請求是從 MCP 客戶端發出的，這裡有範例。",
+      "zh_cn": "我只是要表示有一些请求是从 MCP 客户端发出的，这里有范例。"
+    },
+    "75": {
+      "en": "There are results that are meant to come from the server.",
+      "zh_tw": "有一些結果是從伺服器發出的。",
+      "zh_cn": "有一些结果是从服务器发出的。"
+    },
+    "76": {
+      "en": "There are results that are meant to be sent from the client.",
+      "zh_tw": "有一些結果是從客戶端發出的。",
+      "zh_cn": "有一些结果是从客户端发出的。"
+    },
+    "77": {
+      "en": "There are requests that are meant to be sent from the server, and so on.",
+      "zh_tw": "有一些請求是從伺服器發出的，等等。",
+      "zh_cn": "有一些请求是从服务器发出的，等等。"
+    },
+    "78": {
+      "en": "All right, so here's the critical thing that I want you to understand.",
+      "zh_tw": "好的，這裡是我想讓你理解的關鍵事情。",
+      "zh_cn": "好的，这里是我想让你理解的关键事情。"
+    },
+    "79": {
+      "en": "The big takeaway from this video that's going to become really important as we start to talk about the streamable HTTP transport.",
+      "zh_tw": "這支影片最重要的收穫，當我們開始討論 Streamable HTTP 傳輸方式時會變得非常重要。",
+      "zh_cn": "这支视频最重要的收穫，当我们开始討论 Streamable HTTP 传输方式时会变得非常重要。"
+    },
+    "80": {
+      "en": "The big critical thing to understand here is that there are a bunch of different messages that are meant to be sent from the server over to the client.",
+      "zh_tw": "要理解的最關鍵的事情是，有很多不同的訊息是要從伺服器發送到客戶端的。",
+      "zh_cn": "要理解的最关键的事情是，有很多不同的信息是要从服务器发送到客户端的。"
+    },
+    "81": {
+      "en": "So the server request types right here, and the server notification types.",
+      "zh_tw": "也就是這裡的 server request 類型和 server notification 類型。",
+      "zh_cn": "也就是这里的 server request 类型和 server notification 类型。"
+    },
+    "82": {
+      "en": "These are all messages that are going to be sent from the server over to the client.",
+      "zh_tw": "這些都是要從伺服器發送到客戶端的訊息。",
+      "zh_cn": "这些都是要从服务器发送到客户端的信息。"
+    },
+    "83": {
+      "en": "And I know right now that might seem like just completely irrelevant, just why is that important to know at all?",
+      "zh_tw": "我知道現在這可能看起來完全無關，為什麼知道這個很重要？",
+      "zh_cn": "我知道现在这可能看起來完全无关，为什麼知道这个很重要？"
+    },
+    "84": {
+      "en": "Again, this is going to become really important as we start to look at the streamable HTTP transport.",
+      "zh_tw": "再次強調，當我們開始看 Streamable HTTP 傳輸方式時，這會變得非常重要。",
+      "zh_cn": "再次強调，当我们开始看 Streamable HTTP 传输方式时，这会变得非常重要。"
+    },
+    "85": {
+      "en": "So just keep that in mind for a little bit.",
+      "zh_tw": "所以先記住這一點。",
+      "zh_cn": "所以先记住这一点。"
+    }
+  }
+}

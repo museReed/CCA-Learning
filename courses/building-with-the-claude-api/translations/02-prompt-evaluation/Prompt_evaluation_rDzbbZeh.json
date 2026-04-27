@@ -1,0 +1,117 @@
+{
+  "srt_file": "Prompt_evaluation_rDzbbZeh.srt",
+  "video_file": "Prompt_evaluation_rDzbbZeh.mp4",
+  "max_valid_entry": 22,
+  "entries": {
+    "1": {
+      "en": "Now that we understand how to access Claude, we're going to shift our focus a little bit and look at two new topics,",
+      "zh_tw": "現在我們了解了如何存取 Claude，接下來要稍微轉換一下焦點，來看看兩個新主題：",
+      "zh_cn": "现在我们了解了如何访问 Claude，接下來要稍微转换一下焦点，來看看兩个新主题："
+    },
+    "2": {
+      "en": "prompt engineering and prompt evaluation.",
+      "zh_tw": "提示工程和提示評估。",
+      "zh_cn": "提示工程和提示评估。"
+    },
+    "3": {
+      "en": "These two topics are all about making sure that we are writing prompts that will get us the best possible output from Claude.",
+      "zh_tw": "這兩個主題都是關於確保我們撰寫的提示能從 Claude 獲得最佳的輸出結果。",
+      "zh_cn": "这兩个主题都是关於确保我们撰写的提示能从 Claude 获得最佳的输出结果。"
+    },
+    "4": {
+      "en": "Prompt engineering is a series of techniques that we'll use anytime that we want to write or edit a prompt.",
+      "zh_tw": "提示工程是一系列技術，每當我們想要撰寫或編輯提示時都會用到。",
+      "zh_cn": "提示工程是一系列技术，每当我们想要撰写或编輯提示时都会用到。"
+    },
+    "5": {
+      "en": "These techniques will aid Claude in understanding what we're asking of it and how we want it to respond.",
+      "zh_tw": "這些技術將幫助 Claude 理解我們要求它做什麼，以及我們希望它如何回應。",
+      "zh_cn": "这些技术将幫助 Claude 理解我们要求它做什麼，以及我们希望它如何回应。"
+    },
+    "6": {
+      "en": "Prompt evaluation, on the other hand, is where we do some automated testing of a prompt.",
+      "zh_tw": "另一方面，提示評估是對提示進行自動化測試的過程，",
+      "zh_cn": "另一方面，提示评估是对提示进行自动化测试的过程，"
+    },
+    "7": {
+      "en": "With a goal of getting some kind of objective metric that tells us if our prompt is effective or not.",
+      "zh_tw": "目標是獲得某種客觀指標來告訴我們提示是否有效。",
+      "zh_cn": "目标是获得某种客观指标來告訴我们提示是否有效。"
+    },
+    "8": {
+      "en": "In this section, we're going to be mostly focused on prompt evaluation.",
+      "zh_tw": "在本節中，我們將主要專注於提示評估。",
+      "zh_cn": "在本节中，我们将主要專注於提示评估。"
+    },
+    "9": {
+      "en": "After we understand how to measure the effectiveness of a prompt, we'll then take a look at some prompt engineering techniques.",
+      "zh_tw": "在我們了解如何衡量提示的有效性之後，我們接著會看一些提示工程技術。",
+      "zh_cn": "在我们了解如何衡量提示的有效性之后，我们接著会看一些提示工程技术。"
+    },
+    "10": {
+      "en": "So let's get to it.",
+      "zh_tw": "那我們就開始吧。",
+      "zh_cn": "那我们就开始吧。"
+    },
+    "11": {
+      "en": "The first thing I want to do is help you understand where prompt evaluation fits in to the prompt writing process in general.",
+      "zh_tw": "我首先想幫你了解的是提示評估在整個提示撰寫過程中的定位。",
+      "zh_cn": "我首先想幫你了解的是提示评估在整个提示撰写过程中的定位。"
+    },
+    "12": {
+      "en": "Whenever you first write a prompt, you generally have three different paths ahead of you.",
+      "zh_tw": "每當你第一次撰寫一個提示時，通常會有三條不同的路徑擺在你面前。",
+      "zh_cn": "每当你第一次撰写一个提示时，通常会有三条不同的路徑擺在你面前。"
+    },
+    "13": {
+      "en": "Three different ways you can go from there.",
+      "zh_tw": "三種不同的方式可以從那裡繼續前進。",
+      "zh_cn": "三种不同的方式可以从那里继续前进。"
+    },
+    "14": {
+      "en": "With option number one, you might take that prompt you put together, maybe test it once or twice, and decide it is good enough to use in production.",
+      "zh_tw": "第一個選項，你可能拿著你寫好的提示，測試個一兩次，然後就決定它已經夠好可以用在正式環境了。",
+      "zh_cn": "第一个选项，你可能拿著你写好的提示，测试个一兩次，然后就决定它已经够好可以用在正式环境了。"
+    },
+    "15": {
+      "en": "With option number two, you might test the prompt a couple of times with your own custom inputs, and maybe tweak it a little bit to handle a corner case or two that you notice.",
+      "zh_tw": "第二個選項，你可能用自己自訂的輸入測試提示幾次，也許稍微調整一下以處理你注意到的一兩個邊界情況。",
+      "zh_cn": "第二个选项，你可能用自己自定义的输入测试提示幾次，也许稍微调整一下以处理你注意到的一兩个边界情況。"
+    },
+    "16": {
+      "en": "Now right away, I want you to understand that options number one and number two are kind of traps that all engineers fall into, myself included.",
+      "zh_tw": "現在我馬上要讓你了解的是，第一和第二個選項其實都是所有工程師都會掉入的陷阱，包括我自己。",
+      "zh_cn": "现在我马上要让你了解的是，第一和第二个选项其实都是所有工程師都会掉入的陷阱，包括我自己。"
+    },
+    "17": {
+      "en": "It happens to everybody.",
+      "zh_tw": "每個人都會這樣。",
+      "zh_cn": "每个人都会这样。"
+    },
+    "18": {
+      "en": "We all start writing out prompts that are going to eventually be used in serious applications, and we don't really test them enough to make sure that they are working as expected.",
+      "zh_tw": "我們都會開始撰寫最終要用在正式應用程式中的提示，卻沒有真正充分測試它們以確保它們按預期運作。",
+      "zh_cn": "我们都会开始撰写最终要用在正式应用程序中的提示，卻没有真正充分测试它们以确保它们按预期运作。"
+    },
+    "19": {
+      "en": "So whenever you write a prompt, I highly recommend going with option number three.",
+      "zh_tw": "所以每當你撰寫提示時，我強烈建議選擇第三個選項。",
+      "zh_cn": "所以每当你撰写提示时，我強烈建议选择第三个选项。"
+    },
+    "20": {
+      "en": "Run your prompt through an evaluation pipeline to get an objective score that will tell you how well your prompt is performing.",
+      "zh_tw": "讓你的提示通過一個評估管線來獲得客觀分數，告訴你提示的表現如何。",
+      "zh_cn": "让你的提示通过一个评估管线來获得客观分数，告訴你提示的表现如何。"
+    },
+    "21": {
+      "en": "You can then try to iterate on your prompt a little bit and make sure that it's performing as well as it possibly can.",
+      "zh_tw": "然後你可以嘗試對提示進行迭代改進，確保它盡可能地表現良好。",
+      "zh_cn": "然后你可以嘗试对提示进行迭代改进，确保它尽可能地表现良好。"
+    },
+    "22": {
+      "en": "Run your prompt.",
+      "zh_tw": "執行你的提示。",
+      "zh_cn": "执行你的提示。"
+    }
+  }
+}

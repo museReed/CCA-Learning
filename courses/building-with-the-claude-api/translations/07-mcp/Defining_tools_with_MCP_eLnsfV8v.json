@@ -1,0 +1,412 @@
+{
+  "srt_file": "Defining_tools_with_MCP_eLnsfV8v.srt",
+  "video_file": "Defining_tools_with_MCP_eLnsfV8v.mp4",
+  "max_valid_entry": 81,
+  "entries": {
+    "1": {
+      "en": "Let's start to make an MCP server for our CLI chatbot.",
+      "zh_tw": "讓我們開始為我們的 CLI 聊天機器人建立 MCP 伺服器。",
+      "zh_cn": "让我们开始为我们的 CLI 聊天机器人建立 MCP 服务器。"
+    },
+    "2": {
+      "en": "As you saw, the CLI itself already works, and we can already chat with Claude,",
+      "zh_tw": "如你所見，CLI 本身已經能運作了，我們已經可以跟 Claude 聊天，",
+      "zh_cn": "如你所見，CLI 本身已经能运作了，我们已经可以跟 Claude 聊天，"
+    },
+    "3": {
+      "en": "but there's no additional functionality around the MCP server tied to it just yet.",
+      "zh_tw": "但還沒有任何 MCP 伺服器的功能連接到它。",
+      "zh_cn": "但还没有任何 MCP 服务器的功能连接到它。"
+    },
+    "4": {
+      "en": "So we're going to work on adding in this MCP server that is going to have two tools in it for right now.",
+      "zh_tw": "所以我們要加入這個 MCP 伺服器，目前會有兩個工具。",
+      "zh_cn": "所以我们要加入这个 MCP 服务器，目前会有兩个工具。"
+    },
+    "5": {
+      "en": "It is going to have one tool to read a document, and one tool to update the contents of a document.",
+      "zh_tw": "一個工具讀取文件，一個工具更新文件的內容。",
+      "zh_cn": "一个工具读取文件，一个工具更新文件的內容。"
+    },
+    "6": {
+      "en": "The implementation of the server is going to be placed into the MCPServer.py file inside of the root project directory.",
+      "zh_tw": "伺服器的實作會放在專案根目錄的 MCPServer.py 檔案中。",
+      "zh_cn": "服务器的实作会放在项目根目录的 MCPServer.py 文件中。"
+    },
+    "7": {
+      "en": "Inside of here, I've already gone through a little bit of work to set up a basic MCP server.",
+      "zh_tw": "裡面我已經做了一些設定基本 MCP 伺服器的工作。",
+      "zh_cn": "里面我已经做了一些设定基本 MCP 服务器的工作。"
+    },
+    "8": {
+      "en": "And then I defined a collection of documents that are going to exist only in memory.",
+      "zh_tw": "然後我定義了一組只存在於記憶體中的文件。",
+      "zh_cn": "然后我定义了一组只存在於记忆体中的文件。"
+    },
+    "9": {
+      "en": "And then finally, I put together some different to-do items.",
+      "zh_tw": "最後，我放了一些不同的 TODO 項目。",
+      "zh_cn": "最后，我放了一些不同的 TODO 项目。"
+    },
+    "10": {
+      "en": "So these are different tasks that you and I are going to complete inside of this file.",
+      "zh_tw": "這些是你和我要在這個檔案中完成的不同任務。",
+      "zh_cn": "这些是你和我要在这个文件中完成的不同任务。"
+    },
+    "11": {
+      "en": "For right now, as I just mentioned, we're going to be working only on these first two items, writing out two tools.",
+      "zh_tw": "目前如我所說，我們只處理前兩個項目，寫出兩個工具。",
+      "zh_cn": "目前如我所说，我们只处理前兩个项目，写出兩个工具。"
+    },
+    "12": {
+      "en": "Now we have authored tools in the past, and we saw that, well, there's a lot of syntax there.",
+      "zh_tw": "我們之前寫過工具，看到有很多語法。",
+      "zh_cn": "我们之前写过工具，看到有很多语法。"
+    },
+    "13": {
+      "en": "There's those big JSON schemas.",
+      "zh_tw": "有那些大的 JSON schema。",
+      "zh_cn": "有那些大的 JSON schema。"
+    },
+    "14": {
+      "en": "But I got good news for you here.",
+      "zh_tw": "但我有好消息。",
+      "zh_cn": "但我有好消息。"
+    },
+    "15": {
+      "en": "In this project, we're making use of the official MCP Python SDK.",
+      "zh_tw": "在這個專案中，我們使用官方的 MCP Python SDK。",
+      "zh_cn": "在这个项目中，我们使用官方的 MCP Python SDK。"
+    },
+    "16": {
+      "en": "So that's what this MCP package is that we're making use inside of here.",
+      "zh_tw": "這就是我們在這裡使用的 MCP 套件。",
+      "zh_cn": "这就是我们在这里使用的 MCP 套件。"
+    },
+    "17": {
+      "en": "This MCP package is going to create our MCP server for us with just one line of code, like what you see right there.",
+      "zh_tw": "這個 MCP 套件只用一行程式碼就能為我們建立 MCP 伺服器，就像那裡看到的。",
+      "zh_cn": "这个 MCP 套件只用一行代码就能为我们建立 MCP 服务器，就像那里看到的。"
+    },
+    "18": {
+      "en": "This SDK also makes it really easy to define tools.",
+      "zh_tw": "這個 SDK 也讓定義工具變得非常容易。",
+      "zh_cn": "这个 SDK 也让定义工具变得非常容易。"
+    },
+    "19": {
+      "en": "To define a tool, all we have to do is write out what you see on the right-hand side over here.",
+      "zh_tw": "要定義工具，我們只需要寫出右邊看到的內容。",
+      "zh_cn": "要定义工具，我们只需要写出右边看到的內容。"
+    },
+    "20": {
+      "en": "This will make a tool named add integers with this description and two arguments that are going to be required to be passed into it.",
+      "zh_tw": "這會建立一個叫做 add_integers 的工具，有描述和兩個必要的參數。",
+      "zh_cn": "这会建立一个叫做 add_integers 的工具，有描述和兩个必要的参数。"
+    },
+    "21": {
+      "en": "Once we write out a tool definition like this, behind the scenes, MCP is going to generate a tool JSON schema for us, which we can take and pass off to Claude.",
+      "zh_tw": "寫完這樣的工具定義後，MCP 會在幕後為我們生成工具 JSON schema，我們可以把它傳給 Claude。",
+      "zh_cn": "写完这样的工具定义后，MCP 会在幕后为我们生成工具 JSON schema，我们可以把它传给 Claude。"
+    },
+    "22": {
+      "en": "So right away, as you can see, it starts to get a lot easier to do some basic things like define tools.",
+      "zh_tw": "所以馬上你可以看到，做一些基本的事情像定義工具變得容易多了。",
+      "zh_cn": "所以马上你可以看到，做一些基本的事情像定义工具变得容易多了。"
+    },
+    "23": {
+      "en": "Now, as I mentioned, our first task is going to be to implement these two different tools.",
+      "zh_tw": "如我所說，第一個任務是實作這兩個不同的工具。",
+      "zh_cn": "如我所说，第一个任务是实作这兩个不同的工具。"
+    },
+    "24": {
+      "en": "So let's go back over to our MCP server.py file right away, and we're going to start to implement the first tool of reading a document.",
+      "zh_tw": "讓我們馬上回到 MCP server.py 檔案，開始實作讀取文件的第一個工具。",
+      "zh_cn": "让我们马上回到 MCP server.py 文件，开始实作读取文件的第一个工具。"
+    },
+    "25": {
+      "en": "So the only goal here is to take in the name of some document and return the contents of it.",
+      "zh_tw": "唯一的目標是接收某個文件的名稱並回傳它的內容。",
+      "zh_cn": "唯一的目标是接收某个文件的名称並返回它的內容。"
+    },
+    "26": {
+      "en": "All of our documents are already placed inside of this docs dictionary.",
+      "zh_tw": "所有文件已經放在 docs 字典中。",
+      "zh_cn": "所有文件已经放在 docs 字典中。"
+    },
+    "27": {
+      "en": "The keys are the IDs or essentially names of a document, and the value is a document's contents.",
+      "zh_tw": "鍵是文件的 ID 或基本上是名稱，值是文件的內容。",
+      "zh_cn": "键是文件的 ID 或基本上是名称，值是文件的內容。"
+    },
+    "28": {
+      "en": "So our tool is really simple.",
+      "zh_tw": "所以我們的工具很簡單。",
+      "zh_cn": "所以我们的工具很简单。"
+    },
+    "29": {
+      "en": "We're going to take in one of these strings, look up the appropriate value inside the docs dictionary, and then return it.",
+      "zh_tw": "接收這些字串之一，在 docs 字典中查找相應的值，然後回傳。",
+      "zh_cn": "接收这些字符串之一，在 docs 字典中查找相应的值，然后返回。"
+    },
+    "30": {
+      "en": "That's all we need to do.",
+      "zh_tw": "就是這樣。",
+      "zh_cn": "就是这样。"
+    },
+    "31": {
+      "en": "So to implement this, I'm going to find the first to-do, and right underneath it, I'm going to define a new tool by writing out at mcp.tool.",
+      "zh_tw": "要實作這個，我找到第一個 TODO，在它下面定義新工具，寫 @mcp.tool。",
+      "zh_cn": "要实作这个，我找到第一个 TODO，在它下面定义新工具，写 @mcp.tool。"
+    },
+    "32": {
+      "en": "I'm going to give this tool a name of readdoc contents, and a description of read the contents of a document and return it as a string.",
+      "zh_tw": "給這個工具取名 read_doc_contents，描述是 read the contents of a document and return it as a string。",
+      "zh_cn": "给这个工具取名 read_doc_contents，描述是 read the contents of a document and return it as a string。"
+    },
+    "33": {
+      "en": "And remember, in a perfect world, we would put in a really fleshed out description right here to make sure it's super clear to Claude exactly when to use this tool.",
+      "zh_tw": "記住，理想情況下我們會放一個非常完整的描述，確保 Claude 非常清楚何時使用這個工具。",
+      "zh_cn": "记住，理想情況下我们会放一个非常完整的描述，确保 Claude 非常清楚何时使用这个工具。"
+    },
+    "34": {
+      "en": "But for right now, just as usual, to save a little bit of time and keep you from having to type out a bunch of text here, I'm just going to leave in a very simple description.",
+      "zh_tw": "但現在為了節省時間，我只放一個很簡單的描述。",
+      "zh_cn": "但现在为了节省时间，我只放一个很简单的描述。"
+    },
+    "35": {
+      "en": "Then I will define my actual tool function.",
+      "zh_tw": "然後定義實際的工具函式。",
+      "zh_cn": "然后定义实际的工具函数。"
+    },
+    "36": {
+      "en": "So this is the function to run whenever we decide to run this tool.",
+      "zh_tw": "這是我們決定執行這個工具時要跑的函式。",
+      "zh_cn": "这是我们决定执行这个工具时要跑的函数。"
+    },
+    "37": {
+      "en": "I will call it read document.",
+      "zh_tw": "我叫它 read_document。",
+      "zh_cn": "我叫它 read_document。"
+    },
+    "38": {
+      "en": "It's going to take in an argument of doc ID that is going to be a string.",
+      "zh_tw": "它接收一個 doc_id 參數，是字串。",
+      "zh_cn": "它接收一个 doc_id 参数，是字符串。"
+    },
+    "39": {
+      "en": "I'm going to set that to a field with a description of ID of the document to read.",
+      "zh_tw": "我設定它為一個 Field，描述是 ID of the document to read。",
+      "zh_cn": "我设定它为一个 Field，描述是 ID of the document to read。"
+    },
+    "40": {
+      "en": "And then we need to make sure that we import this field class at the top.",
+      "zh_tw": "然後確保在頂部匯入 Field 類別。",
+      "zh_cn": "然后确保在頂部匯入 Field 类別。"
+    },
+    "41": {
+      "en": "So I'm going to go up to the top and add an import from Pydantic import field.",
+      "zh_tw": "到頂部加入 from pydantic import Field。",
+      "zh_cn": "到頂部加入 from pydantic import Field。"
+    },
+    "42": {
+      "en": "Then back down here, inside of the function body, I'm going to put in my actual implementation.",
+      "zh_tw": "回到下面，在函式主體中放入實際實作。",
+      "zh_cn": "回到下面，在函数主体中放入实际实作。"
+    },
+    "43": {
+      "en": "So the first thing I'm going to do is just make sure I handle the case in which Claude asks for a document that doesn't actually exist.",
+      "zh_tw": "首先處理 Claude 要求不存在的文件的情況。",
+      "zh_cn": "首先处理 Claude 要求不存在的文件的情況。"
+    },
+    "44": {
+      "en": "So I'll say if doc ID not in docs.",
+      "zh_tw": "if doc_id not in docs。",
+      "zh_cn": "if doc_id not in docs。"
+    },
+    "45": {
+      "en": "So in other words, if the provided document ID is not found as a key inside of this dictionary, then I'm going to raise a value error.",
+      "zh_tw": "如果提供的文件 ID 不是字典的鍵，就 raise ValueError。",
+      "zh_cn": "如果提供的文件 ID 不是字典的键，就 raise ValueError。"
+    },
+    "46": {
+      "en": "So I'll go ahead and return the actual document.",
+      "zh_tw": "然後回傳實際文件。",
+      "zh_cn": "然后返回实际文件。"
+    },
+    "47": {
+      "en": "So I'll return docs at doc ID.",
+      "zh_tw": "return docs[doc_id]。",
+      "zh_cn": "return docs[doc_id]。"
+    },
+    "48": {
+      "en": "And that's it.",
+      "zh_tw": "就這樣。",
+      "zh_cn": "就这样。"
+    },
+    "49": {
+      "en": "That's all it takes to define a tool.",
+      "zh_tw": "定義工具就是這麼簡單。",
+      "zh_cn": "定义工具就是这麼简单。"
+    },
+    "50": {
+      "en": "So we've specified the name of the tool, its description, the argument that is expected, its type, and a description for that argument as well.",
+      "zh_tw": "我們指定了工具名稱、描述、預期的參數、型別、以及參數的描述。",
+      "zh_cn": "我们指定了工具名称、描述、预期的参数、型別、以及参数的描述。"
+    },
+    "51": {
+      "en": "All these different decorators and field types and whatnot are all going to be taken together by this Python MCP SDK.",
+      "zh_tw": "所有這些裝飾器和 Field 類型等等都會被 Python MCP SDK 綜合在一起。",
+      "zh_cn": "所有这些装饰器和 Field 类型等等都会被 Python MCP SDK 综合在一起。"
+    },
+    "52": {
+      "en": "And it's going to generate a JSON schema for us.",
+      "zh_tw": "它會為我們生成 JSON schema。",
+      "zh_cn": "它会为我们生成 JSON schema。"
+    },
+    "53": {
+      "en": "Now that we've implemented this first tool, I'm going to remove the to do right there.",
+      "zh_tw": "實作完第一個工具後，我移除那裡的 TODO。",
+      "zh_cn": "实作完第一个工具后，我移除那里的 TODO。"
+    },
+    "54": {
+      "en": "And then we will implement our other tool, the one to edit a document.",
+      "zh_tw": "然後實作另一個工具，編輯文件的那個。",
+      "zh_cn": "然后实作另一个工具，编輯文件的那个。"
+    },
+    "55": {
+      "en": "So we're going to repeat the exact same process.",
+      "zh_tw": "重複完全相同的過程。",
+      "zh_cn": "重复完全相同的过程。"
+    },
+    "56": {
+      "en": "I'll say MCP dot tool.",
+      "zh_tw": "寫 @mcp.tool。",
+      "zh_cn": "写 @mcp.tool。"
+    },
+    "57": {
+      "en": "I'll give it a name of edit document with a description of edit a document by replacing a string in the documents context or something content with a new string.",
+      "zh_tw": "取名 edit_document，描述是 edit a document by replacing a string in the document's content with a new string。",
+      "zh_cn": "取名 edit_document，描述是 edit a document by replacing a string in the document's content with a new string。"
+    },
+    "58": {
+      "en": "Then for the implementation, I'll call this function edit doc.",
+      "zh_tw": "實作部分，叫這個函式 edit_document。",
+      "zh_cn": "实作部分，叫这个函数 edit_document。"
+    },
+    "59": {
+      "en": "Actually, we'll be consistent, call it edit document.",
+      "zh_tw": "然後接收幾個不同的參數。",
+      "zh_cn": "然后接收幾个不同的参数。"
+    },
+    "60": {
+      "en": "And then we're going to take in a couple of different arguments here.",
+      "zh_tw": "首先是文件 ID，然後是要找的舊字串，然後是要替換的新字串。",
+      "zh_cn": "首先是文件 ID，然后是要找的旧字符串，然后是要替换的新字符串。"
+    },
+    "61": {
+      "en": "First is going to be a document ID and then a old string to find and then a new string to replace the old string with.",
+      "zh_tw": "寫出來。",
+      "zh_cn": "写出來。"
+    },
+    "62": {
+      "en": "So let's write this all out.",
+      "zh_tw": "doc_id 會是字串。",
+      "zh_cn": "doc_id 会是字符串。"
+    },
+    "63": {
+      "en": "We're going to have a doc ID.",
+      "zh_tw": "描述是 ID",
+      "zh_cn": "描述是 ID"
+    },
+    "64": {
+      "en": "That will be a string.",
+      "zh_tw": "of the document",
+      "zh_cn": "of the document"
+    },
+    "65": {
+      "en": "With a description of ID.",
+      "zh_tw": "that will be edited。",
+      "zh_cn": "that will be edited。"
+    },
+    "66": {
+      "en": "Of the document.",
+      "zh_tw": "old_string 是字串。",
+      "zh_cn": "old_string 是字符串。"
+    },
+    "67": {
+      "en": "That will be edited.",
+      "zh_tw": "描述是 the text to replace, must match exactly including whitespace。",
+      "zh_cn": "描述是 the text to replace, must match exactly including whitespace。"
+    },
+    "68": {
+      "en": "Old string will be a string.",
+      "zh_tw": "然後 new_string。",
+      "zh_cn": "然后 new_string。"
+    },
+    "69": {
+      "en": "With a description of the text to replace must match exactly, including white space.",
+      "zh_tw": "the new text to insert in place of the old text。",
+      "zh_cn": "the new text to insert in place of the old text。"
+    },
+    "70": {
+      "en": "And then our new string.",
+      "zh_tw": "我們的文件編輯就是很簡單的查找和替換。",
+      "zh_cn": "我们的文件编輯就是很简单的查找和替换。"
+    },
+    "71": {
+      "en": "The new text to insert in place of the old text.",
+      "zh_tw": "就這樣。",
+      "zh_cn": "就这样。"
+    },
+    "72": {
+      "en": "So our document editing here is just a very simple find and replace.",
+      "zh_tw": "同樣，確保 Claude 要求的文件真的存在。",
+      "zh_cn": "同样，确保 Claude 要求的文件真的存在。"
+    },
+    "73": {
+      "en": "That's it.",
+      "zh_tw": "if doc_id not in docs。",
+      "zh_cn": "if doc_id not in docs。"
+    },
+    "74": {
+      "en": "Once again, inside of here, I'm going to make sure that Claude is asking for a document that actually exists.",
+      "zh_tw": "raise ValueError。",
+      "zh_cn": "raise ValueError。"
+    },
+    "75": {
+      "en": "So if doc ID not in docs.",
+      "zh_tw": "用 f 字串 doc with ID",
+      "zh_cn": "用 f 字符串 doc with ID"
+    },
+    "76": {
+      "en": "Raise value error.",
+      "zh_tw": "not found。",
+      "zh_cn": "not found。"
+    },
+    "77": {
+      "en": "With a F string of doc with ID.",
+      "zh_tw": "如果找到正確的文件，這是我們的編輯方式。",
+      "zh_cn": "如果找到正确的文件，这是我们的编輯方式。"
+    },
+    "78": {
+      "en": "Not found.",
+      "zh_tw": "docs[doc_id] = docs[doc_id]",
+      "zh_cn": "docs[doc_id] = docs[doc_id]"
+    },
+    "79": {
+      "en": "And then if we do find the correct document, here's how we will do our edit.",
+      "zh_tw": ".replace(old_string, new_string)。",
+      "zh_cn": ".replace(old_string, new_string)。"
+    },
+    "80": {
+      "en": "We'll say docs at doc ID is docs at doc ID.",
+      "zh_tw": ".replace(old_string, new_string)。",
+      "zh_cn": ".replace(old_string, new_string)。"
+    },
+    "81": {
+      "en": "Replace old string with the new string.",
+      "zh_tw": ".replace(old_string, new_string)。",
+      "zh_cn": ".replace(old_string, new_string)。"
+    }
+  }
+}

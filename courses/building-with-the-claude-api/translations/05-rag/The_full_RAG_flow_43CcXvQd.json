@@ -1,0 +1,467 @@
+{
+  "srt_file": "The_full_RAG_flow_43CcXvQd.srt",
+  "video_file": "The_full_RAG_flow_43CcXvQd.mp4",
+  "max_valid_entry": 92,
+  "entries": {
+    "1": {
+      "en": "At this point in the module, I've given you a high-level overview of how the RAG pipeline works.",
+      "zh_tw": "在模組的這個階段，我已經給你一個 RAG 管線如何運作的高層次概覽。",
+      "zh_cn": "在模组的这个阶段，我已经给你一个 RAG 管线如何运作的高层次概览。"
+    },
+    "2": {
+      "en": "We've spoken a little bit about text chunking, and we've got just a taste of text embeddings.",
+      "zh_tw": "我們談了一些關於文字分塊的內容，也稍微接觸了文字嵌入。",
+      "zh_cn": "我们谈了一些关於文字分块的內容，也稍微接触了文字嵌入。"
+    },
+    "3": {
+      "en": "So now we're going to take these three different topics, our high-level overview of the RAG process,",
+      "zh_tw": "所以現在我們要把這三個不同的主題，我們對 RAG 流程的高層次概覽、",
+      "zh_cn": "所以现在我们要把这三个不同的主题，我们对 RAG 流程的高层次概览、"
+    },
+    "4": {
+      "en": "text embeddings, and text chunking, and we're going to merge them all together and really",
+      "zh_tw": "文字嵌入和文字分塊，合併在一起，真正",
+      "zh_cn": "文字嵌入和文字分块，合併在一起，真正"
+    },
+    "5": {
+      "en": "understand the entire RAG pipeline. So we're going to go through a complete RAG example",
+      "zh_tw": "理解整個 RAG 管線。所以我們要走過一個完整的 RAG 範例，",
+      "zh_cn": "理解整个 RAG 管线。所以我们要走过一个完整的 RAG 范例，"
+    },
+    "6": {
+      "en": "and go through a lot of detail and really understand everything step-by-step. So let's",
+      "zh_tw": "進行很多細節說明，真正一步一步地理解所有東西。好，讓我們",
+      "zh_cn": "进行很多细节说明，真正一步一步地理解所有東西。好，让我们"
+    },
+    "7": {
+      "en": "get to it. Step number one, just as before, we're going to take some source document and chunk it",
+      "zh_tw": "開始吧。第一步，跟之前一樣，我們要拿一份來源文件，把它分割",
+      "zh_cn": "开始吧。第一步，跟之前一样，我们要拿一份來源文件，把它分割"
+    },
+    "8": {
+      "en": "into separate pieces of text. So for this example, I'm going to assume I just have two pieces of text",
+      "zh_tw": "成獨立的文字片段。在這個例子中，我假設我只有兩段文字，",
+      "zh_cn": "成独立的文字片段。在这个例子中，我假设我只有兩段文字，"
+    },
+    "9": {
+      "en": "here, just section one, medical research, and section two, software engineering. Step two,",
+      "zh_tw": "就是 section one 醫學研究和 section two 軟體工程。第二步，",
+      "zh_cn": "就是 section one 醫学研究和 section two 软件工程。第二步，"
+    },
+    "10": {
+      "en": "we're going to generate embeddings for each of these different chunks of text. Now in this example,",
+      "zh_tw": "我們要為每個不同的文字區塊生成嵌入。在這個例子中，",
+      "zh_cn": "我们要为每个不同的文字区块生成嵌入。在这个例子中，"
+    },
+    "11": {
+      "en": "we're going to pretend that we have this imaginary, super perfect embedding model. And this embedding",
+      "zh_tw": "我們要假裝我們有一個假想的、超級完美的嵌入模型。而這個嵌入",
+      "zh_cn": "我们要假装我们有一个假想的、超级完美的嵌入模型。而这个嵌入"
+    },
+    "12": {
+      "en": "model has two very important characteristics. First, we're going to assume that it always",
+      "zh_tw": "模型有兩個非常重要的特徵。首先，我們假設它總是",
+      "zh_cn": "模型有兩个非常重要的特徵。首先，我们假设它总是"
+    },
+    "13": {
+      "en": "returns embeddings of length two, so just two separate numbers. And we're going to also assume",
+      "zh_tw": "回傳長度為二的嵌入，所以只有兩個數字。我們也假設",
+      "zh_cn": "返回长度为二的嵌入，所以只有兩个数字。我们也假设"
+    },
+    "14": {
+      "en": "that we know exactly what each number is really scoring about the source text. Remember, in reality,",
+      "zh_tw": "我們確切知道每個數字真正在評分來源文字的什麼。記住，在現實中，",
+      "zh_cn": "我们确切知道每个数字真正在评分來源文字的什麼。记住，在现实中，"
+    },
+    "15": {
+      "en": "that is not the case. But in this scenario, we're going to imagine we know exactly what each number",
+      "zh_tw": "情況不是這樣的。但在這個情境中，我們假設我們確切知道每個數字",
+      "zh_cn": "情況不是这样的。但在这个情境中，我们假设我们确切知道每个数字"
+    },
+    "16": {
+      "en": "is really talking about. So we're going to say that the first number is how much the text is talking",
+      "zh_tw": "真正在談什麼。所以我們要說第一個數字是文字談論",
+      "zh_cn": "真正在谈什麼。所以我们要说第一个数字是文字谈论"
+    },
+    "17": {
+      "en": "about the medical field. And the second is how much the text is talking about software engineering.",
+      "zh_tw": "醫學領域的程度。第二個是文字談論軟體工程的程度。",
+      "zh_cn": "醫学领域的程度。第二个是文字谈论软件工程的程度。"
+    },
+    "18": {
+      "en": "So for the first chunk of text, when we embed it, this thing is definitely talking about medical",
+      "zh_tw": "對於第一段文字區塊，當我們嵌入它時，這東西絕對是在談醫學",
+      "zh_cn": "对於第一段文字区块，当我们嵌入它时，这東西绝对是在谈醫学"
+    },
+    "19": {
+      "en": "research. So I would give it maybe a score of 0.97 to say, yes, absolutely. This is very much talking",
+      "zh_tw": "研究。所以我會給它一個大約 0.97 的分數，表示是的，絕對的。這非常在講",
+      "zh_cn": "研究。所以我会给它一个大约 0.97 的分数，表示是的，绝对的。这非常在讲"
+    },
+    "20": {
+      "en": "about the medical field. And then it also uses the term bug, which has a slight software engineering",
+      "zh_tw": "醫學領域。然後它也用了 bug 這個詞，有輕微的軟體工程",
+      "zh_cn": "醫学领域。然后它也用了 bug 这个词，有轻微的软件工程"
+    },
+    "21": {
+      "en": "connotation. In addition, medical itself is pretty heavy on software engineering. So I'm going to give",
+      "zh_tw": "含意。此外，醫學本身在軟體工程方面也相當重。所以我要給它",
+      "zh_cn": "含意。此外，醫学本身在软件工程方面也相当重。所以我要给它"
+    },
+    "22": {
+      "en": "it a score of 3.4 for software engineering. Then for the second piece of text here, well, it's",
+      "zh_tw": "一個 0.34 的軟體工程分數。然後對於第二段文字，嗯，它",
+      "zh_cn": "一个 0.34 的软件工程分数。然后对於第二段文字，嗯，它"
+    },
+    "23": {
+      "en": "definitely talking about software engineering. So I'm going to give it a score of 0.97 for that.",
+      "zh_tw": "絕對是在談軟體工程。所以我會給它 0.97 的分數。",
+      "zh_cn": "绝对是在谈软件工程。所以我会给它 0.97 的分数。"
+    },
+    "24": {
+      "en": "And then it also mentions infection vectors, which has that connotation of medicine. So I'll give it",
+      "zh_tw": "然後它也提到了感染向量，有醫學的含意。所以我會給它",
+      "zh_cn": "然后它也提到了感染向量，有醫学的含意。所以我会给它"
+    },
+    "25": {
+      "en": "a slightly higher medicine score as well of 0.3. Now that we have generated these embeddings,",
+      "zh_tw": "一個稍高的醫學分數 0.3。現在我們生成了這些嵌入，",
+      "zh_cn": "一个稍高的醫学分数 0.3。现在我们生成了这些嵌入，"
+    },
+    "26": {
+      "en": "we're going to go through an extra little step of mathematics here, something referred to as",
+      "zh_tw": "我們要做一個額外的數學小步驟，叫做正規化。",
+      "zh_cn": "我们要做一个额外的数学小步驟，叫做正规化。"
+    },
+    "27": {
+      "en": "normalization. Now you do not really have to understand normalization that much. This is already going",
+      "zh_tw": "你真的不需要太深入理解正規化。在絕大多數情況下，你使用的嵌入 API 會自動為你做這件事。",
+      "zh_cn": "你真的不需要太深入理解正规化。在绝大多数情況下，你使用的嵌入 API 会自动为你做这件事。"
+    },
+    "28": {
+      "en": "to be done for you in the vast majority of cases by the embedding API that you are using.",
+      "zh_tw": "這個正規化步驟會把每對向量的幅值縮放到 1.0。",
+      "zh_cn": "这个正规化步驟会把每对向量的幅值缩放到 1.0。"
+    },
+    "29": {
+      "en": "This normalization step is going to scale the magnitude of each of these pairs of vectors to 1.0.",
+      "zh_tw": "如果你不理解那個術語，完全沒關係。別太擔心。只要",
+      "zh_cn": "如果你不理解那个术语，完全没关係。別太担心。只要"
+    },
+    "30": {
+      "en": "And if you don't understand that terminology, totally fine. Don't sweat it too much. Just",
+      "zh_tw": "理解我們會對每個數字的實際幅值做一個小小的調整。",
+      "zh_cn": "理解我们会对每个数字的实际幅值做一个小小的调整。"
+    },
+    "31": {
+      "en": "understand that we're going to do a slight little adjustment to the actual magnitude of each number.",
+      "zh_tw": "一旦我們生成了這些嵌入並正規化，我們可以在像這樣的圖表上視覺化它們。",
+      "zh_cn": "一旦我们生成了这些嵌入並正规化，我们可以在像这样的圖表上視覺化它们。"
+    },
+    "32": {
+      "en": "Once we have generated these embeddings and normalized them, we can kind of visualize them on a",
+      "zh_tw": "在這個圖表上，我畫了一個單位圓，代表兩個嵌入的每個點都會恰好落在圓上，因為我們把它們的長度正規化到恰好一。",
+      "zh_cn": "在这个圖表上，我画了一个单位圓，代表兩个嵌入的每个点都会恰好落在圓上，因为我们把它们的长度正规化到恰好一。"
+    },
+    "33": {
+      "en": "plot like this. So on this plot, I've drawn a unit circle and each of our points representing",
+      "zh_tw": "所以軟體工程的部分在這裡上面，而醫學研究在這裡。",
+      "zh_cn": "所以软件工程的部分在这里上面，而醫学研究在这里。"
+    },
+    "34": {
+      "en": "both those embeddings will lie exactly on the circle because we have normalized their lengths to",
+      "zh_tw": "所以現在我們有了這些嵌入，我們要進入下一步。",
+      "zh_cn": "所以现在我们有了这些嵌入，我们要进入下一步。"
+    },
+    "35": {
+      "en": "exactly one. So we've got the software engineering section up here, and here's medical research over here.",
+      "zh_tw": "在這一步中，我們要把這些嵌入存入一種叫做向量資料庫的東西。",
+      "zh_cn": "在这一步中，我们要把这些嵌入存入一种叫做向量数据库的東西。"
+    },
+    "36": {
+      "en": "So now that we have these embeddings, we're going to move on to the next step. In this step,",
+      "zh_tw": "這是一個專門為儲存、比較和查找長數字列表而優化的資料庫，",
+      "zh_cn": "这是一个專门为存储、比較和查找长数字列表而优化的数据库，"
+    },
+    "37": {
+      "en": "we are going to take these embeddings and store them inside of something called a vector database.",
+      "zh_tw": "就像我們的嵌入一樣。在這個時間點，我們算是暫停了，休息一下，",
+      "zh_cn": "就像我们的嵌入一样。在这个时间点，我们算是暫停了，休息一下，"
+    },
+    "38": {
+      "en": "This is a database that has been optimized for storing, comparing, and looking up long lists of",
+      "zh_tw": "因為這些都是我們事先做的前處理工作。所以在這個時間點，我們算是坐在那裡",
+      "zh_cn": "因为这些都是我们事先做的前处理工作。所以在这个时间点，我们算是坐在那里"
+    },
+    "39": {
+      "en": "numbers, exactly like what our embeddings are. Now at this point in time, we kind of pause, we take a break,",
+      "zh_tw": "等待使用者真的向我們的應用程式提交查詢。",
+      "zh_cn": "等待使用者真的向我们的应用程序提交查询。"
+    },
+    "40": {
+      "en": "because this has all been pre-processing work that we did ahead of time. So at this point, we kind of just sit",
+      "zh_tw": "所以我們會想像在某個時間點，終於有使用者來到我們的應用程式，也許在聊天機器人之類的地方打字，",
+      "zh_cn": "所以我们会想像在某个时间点，终於有使用者來到我们的应用程序，也许在聊天机器人之类的地方打字，"
+    },
+    "41": {
+      "en": "around and wait for a user to actually submit a query to our application. So we will imagine that at some",
+      "zh_tw": "打入一個問題或他們的查詢。也許在這種情況下，他們的問題會是像，",
+      "zh_cn": "打入一个问题或他们的查询。也许在这种情況下，他们的问题会是像，"
+    },
+    "42": {
+      "en": "point in time, finally, a user will come to our app and maybe type into a chatbot or something like that,",
+      "zh_tw": "我對這家公司很好奇，特別是軟體工程部門今年做了什麼？",
+      "zh_cn": "我对这家公司很好奇，特別是软件工程部门今年做了什麼？"
+    },
+    "43": {
+      "en": "either a question or their query. Maybe in this case, their question is going to be something like,",
+      "zh_tw": "在這個時間點，我們要拿使用者的問題，把它通過",
+      "zh_cn": "在这个时间点，我们要拿使用者的问题，把它通过"
+    },
+    "44": {
+      "en": "I'm curious about the company in particular, what did the software engineering department do this",
+      "zh_tw": "完全相同的假想嵌入模型。在這個情境中，因為使用者的問題",
+      "zh_cn": "完全相同的假想嵌入模型。在这个情境中，因为使用者的问题"
+    },
+    "45": {
+      "en": "year? Now at this point in time, we're going to take that user's question, and we're going to run",
+      "zh_tw": "特別是在問軟體工程，我會給它 0.89 的分數。然後因為它也",
+      "zh_cn": "特別是在问软件工程，我会给它 0.89 的分数。然后因为它也"
+    },
+    "46": {
+      "en": "it through the exact same imaginary embedding model. In this scenario, because the user's question is",
+      "zh_tw": "在談論公司，而且軟體工程跟醫學領域也有些關聯，",
+      "zh_cn": "在谈论公司，而且软件工程跟醫学领域也有些关聯，"
+    },
+    "47": {
+      "en": "asking specifically about software engineering, I'll give it a score of 0.89. And then because it's also",
+      "zh_tw": "我也會給它一個非常輕微的醫學分數 0.1。現在我們有了這個嵌入，",
+      "zh_cn": "我也会给它一个非常轻微的醫学分数 0.1。现在我们有了这个嵌入，"
+    },
+    "48": {
+      "en": "talking about company, and again, software engineering is kind of tied up in the medical field,",
+      "zh_tw": "我們要去做那個正規化步驟。最後，我們要使用",
+      "zh_cn": "我们要去做那个正规化步驟。最后，我们要使用"
+    },
+    "49": {
+      "en": "I'll give it a very slight medical score as well of 0.1. Now that we have this embedding,",
+      "zh_tw": "我們的向量資料庫。我們要拿使用者的查詢，把它送入向量",
+      "zh_cn": "我们的向量数据库。我们要拿使用者的查询，把它送入向量"
+    },
+    "50": {
+      "en": "we're going to go and go through that normalization step again. And then finally, we're going to make",
+      "zh_tw": "資料庫，然後說，請搜尋你裡面儲存的所有向量，",
+      "zh_cn": "数据库，然后说，请搜尋你里面存储的所有向量，"
+    },
+    "51": {
+      "en": "use of our vector database. We're going to take the user's query, we're going to feed it into the",
+      "zh_tw": "給我們與這個最接近的向量。在我們的例子中，我大概預期",
+      "zh_cn": "给我们与这个最接近的向量。在我们的例子中，我大概预期"
+    },
+    "52": {
+      "en": "vector database and say, please search through all the vectors we have stored inside of you,",
+      "zh_tw": "會是軟體工程，因為那就是使用者在這邊問的。但讓我",
+      "zh_cn": "会是软件工程，因为那就是使用者在这边问的。但让我"
+    },
+    "53": {
+      "en": "and give us the vector that is closest in nature to this one. So in our case, I would kind of expect",
+      "zh_tw": "告訴你向量資料庫內部到底發生了什麼，它能給我們這個非常",
+      "zh_cn": "告訴你向量数据库內部到底发生了什麼，它能给我们这个非常"
+    },
+    "54": {
+      "en": "to software engineering, because that's kind of what the user asked about over here. But let me",
+      "zh_tw": "相關的結果。好的，所以這裡有一些數學，別擔心，不會太多。當我們",
+      "zh_cn": "相关的结果。好的，所以这里有一些数学，別担心，不会太多。当我们"
+    },
+    "55": {
+      "en": "tell you exactly what is happening inside of the vector database that is able to give us this very",
+      "zh_tw": "把使用者的查詢加到這個圖表上，我們馬上就能看到，視覺上使用者的查詢",
+      "zh_cn": "把使用者的查询加到这个圖表上，我们马上就能看到，視覺上使用者的查询"
+    },
+    "56": {
+      "en": "closely related result. Okay, so a little bit of math here, don't worry, won't be too much. So when we",
+      "zh_tw": "就是跟軟體工程非常接近。所以你我作為人類，我們可以看這個圖表然後說，",
+      "zh_cn": "就是跟软件工程非常接近。所以你我作为人类，我们可以看这个圖表然后说，"
+    },
+    "57": {
+      "en": "take the user's query and add it onto this chart, we can see right away that visually, the user's query",
+      "zh_tw": "哦，是的，很明顯，這兩個東西非常接近。使用者的查詢跟軟體",
+      "zh_cn": "哦，是的，很明显，这兩个東西非常接近。使用者的查询跟软件"
+    },
+    "58": {
+      "en": "is just really close to software engineering. So you and I as humans, we could look at this chart and say,",
+      "zh_tw": "工程非常相似。所以顯然，如果我們想在向量資料庫中找到與使用者",
+      "zh_cn": "工程非常相似。所以显然，如果我们想在向量数据库中找到与使用者"
+    },
+    "59": {
+      "en": "oh, yeah, clearly, these two things are very close. The user's query is very similar to software",
+      "zh_tw": "查詢相關的區塊，這就是我們想要的。但當然，我們這裡用的是電腦。我們的電腦",
+      "zh_cn": "查询相关的区块，这就是我们想要的。但当然，我们这里用的是电脑。我们的电脑"
+    },
+    "60": {
+      "en": "engineering. So obviously, if we want to find some chunks inside the vector database related to the user",
+      "zh_tw": "不是真的做一個像這樣的圖表然後看，背後有一些實際的計算在進行。",
+      "zh_cn": "不是真的做一个像这样的圖表然后看，背后有一些实际的计算在进行。"
+    },
+    "61": {
+      "en": "query, this would be the one that we want. But of course, we are using computers here. And our computer",
+      "zh_tw": "所以讓我們來看看那個計算到底是什麼。了解它對你來說很重要，因為",
+      "zh_cn": "所以让我们來看看那个计算到底是什麼。了解它对你來说很重要，因为"
+    },
+    "62": {
+      "en": "doesn't actually just make a chart like this, and then look at it, there's some actual calculation going on",
+      "zh_tw": "最終當你開始使用向量資料庫時，它們會使用很多",
+      "zh_cn": "最终当你开始使用向量数据库时，它们会使用很多"
+    },
+    "63": {
+      "en": "behind the scenes. So let's examine exactly what that calculation is. And it's kind of important for you to",
+      "zh_tw": "與這種幕後數學相關的術語。要真正好好地與",
+      "zh_cn": "与这种幕后数学相关的术语。要真正好好地与"
+    },
+    "64": {
+      "en": "know it because eventually, when you start using vector databases, they're going to use a lot of",
+      "zh_tw": "向量資料庫互動，你至少需要對數學有非常基本的理解。",
+      "zh_cn": "向量数据库互动，你至少需要对数学有非常基本的理解。"
+    },
+    "65": {
+      "en": "terminology that's related to this kind of math going on behind the scenes. And to actually interface",
+      "zh_tw": "所以這就是為什麼我要你理解它。好的，這是向量資料庫內部",
+      "zh_cn": "所以这就是为什麼我要你理解它。好的，这是向量数据库內部"
+    },
+    "66": {
+      "en": "well with the vector database, you kind of need to have at least a very basic understanding of the math.",
+      "zh_tw": "正在進行的數學的高層次概覽。要找出哪些嵌入與使用者查詢最相似，",
+      "zh_cn": "正在进行的数学的高层次概览。要找出哪些嵌入与使用者查询最相似，"
+    },
+    "67": {
+      "en": "So that's why I want you to understand it. All right, here's a high level look at the math that is",
+      "zh_tw": "我們要計算一種叫做餘弦相似度的東西。這是使用者查詢與",
+      "zh_cn": "我们要计算一种叫做余弦相似度的東西。这是使用者查询与"
+    },
+    "68": {
+      "en": "being done inside of your vector database. To find which embeddings are most similar to the user's query,",
+      "zh_tw": "資料庫中儲存的每個其他嵌入之間角度的餘弦值。所以我們要找到",
+      "zh_cn": "数据库中存储的每个其他嵌入之间角度的余弦值。所以我们要找到"
+    },
+    "69": {
+      "en": "we want to calculate something called the cosine similarity. This is the cosine of the angle between",
+      "zh_tw": "這裡的角度 A 並取其餘弦值，以及這裡的角度 B 並取其餘弦值。",
+      "zh_cn": "这里的角度 A 並取其余弦值，以及这里的角度 B 並取其余弦值。"
+    },
+    "70": {
+      "en": "the user's query and each of the other embeddings stored in the database. So we'd want to find the",
+      "zh_tw": "數學公式顯示在右邊。這個計算的結果會是一個介於",
+      "zh_cn": "数学公式显示在右边。这个计算的结果会是一个介於"
+    },
+    "71": {
+      "en": "angle A right here and take the cosine of it, and angle B right here and take the cosine of it. The",
+      "zh_tw": "負一和一之間的數字。如果我們得到接近一的結果，就像我們這裡得到的，那表示我們",
+      "zh_cn": "负一和一之间的数字。如果我们得到接近一的结果，就像我们这里得到的，那表示我们"
+    },
+    "72": {
+      "en": "math for this is shown on the right hand side. The result of this calculation will be a number between",
+      "zh_tw": "找到了一個與使用者查詢非常相似的嵌入。接近負一的結果表示我們找到了",
+      "zh_cn": "找到了一个与使用者查询非常相似的嵌入。接近负一的结果表示我们找到了"
+    },
+    "73": {
+      "en": "negative one and one. If we get a result close to one as we did right here, then that means that we",
+      "zh_tw": "一個與使用者查詢完全不相似的嵌入。在我們的例子中，使用者查詢",
+      "zh_cn": "一个与使用者查询完全不相似的嵌入。在我们的例子中，使用者查询"
+    },
+    "74": {
+      "en": "have found an embedding very similar to the user's query. Results closer to negative one mean we have",
+      "zh_tw": "與軟體工程區塊之間的餘弦相似度是 0.983，表示這兩個嵌入",
+      "zh_cn": "与软件工程区块之间的余弦相似度是 0.983，表示这兩个嵌入"
+    },
+    "75": {
+      "en": "found an embedding that are not at all similar to the user's query. In our case, the cosine similarity",
+      "zh_tw": "非常相似。所以這對我們來說是一個信號，我們會想要把軟體工程的文字區塊",
+      "zh_cn": "非常相似。所以这对我们來说是一个信号，我们会想要把软件工程的文字区块"
+    },
+    "76": {
+      "en": "between our user query and the software engineering chunk is 0.983, meaning that these two embeddings",
+      "zh_tw": "包含在我們的提示詞中，連同使用者的問題。在我們繼續之前，還有一件",
+      "zh_cn": "包含在我们的提示词中，连同使用者的问题。在我们继续之前，还有一件"
+    },
+    "77": {
+      "en": "are very similar. So this is a sign to us that we would want to take the software engineering chunk of",
+      "zh_tw": "現在可能有點混亂但以後會非常有用的事情，",
+      "zh_cn": "现在可能有点混亂但以后会非常有用的事情，"
+    },
+    "78": {
+      "en": "text and include it in our prompt with the user's question. Now, before we move on, one other quick",
+      "zh_tw": "當你開始使用向量資料庫時。在很多向量資料庫的文件中，你會看到",
+      "zh_cn": "当你开始使用向量数据库时。在很多向量数据库的文件中，你会看到"
+    },
+    "79": {
+      "en": "thing that's going to be a little confusing right now, but it's going to be very, very helpful to know later on",
+      "zh_tw": "一種叫做餘弦距離的東西。這跟餘弦相似度不同。它的計算方式是",
+      "zh_cn": "一种叫做余弦距离的東西。这跟余弦相似度不同。它的计算方式是"
+    },
+    "80": {
+      "en": "when you start working with vector databases. In a lot of vector database documentation, you're going to see",
+      "zh_tw": "1 減去餘弦相似度。這個調整通常只是為了給我們一個更容易解讀的數字。",
+      "zh_cn": "1 減去余弦相似度。这个调整通常只是为了给我们一个更容易解读的数字。"
+    },
+    "81": {
+      "en": "something referred to as a cosine distance. This is different than the cosine similarity. It is calculated as",
+      "zh_tw": "用餘弦距離，接近 0 的值表示你有很大的相似度，比那更大的值",
+      "zh_cn": "用余弦距离，接近 0 的值表示你有很大的相似度，比那更大的值"
+    },
+    "82": {
+      "en": "1 minus the cosine similarity. This adjustment is often done just to give us an easier to interpret number.",
+      "zh_tw": "表示我們有較少的相似度。同樣，這是你在向量",
+      "zh_cn": "表示我们有較少的相似度。同样，这是你在向量"
+    },
+    "83": {
+      "en": "With a cosine distance, values close to 0 mean you have a large similarity, and larger values than that",
+      "zh_tw": "資料庫文件中會非常常看到的，所以每當你看到餘弦距離和餘弦相似度這些術語時要注意。",
+      "zh_cn": "数据库文件中会非常常看到的，所以每当你看到余弦距离和余弦相似度这些术语时要注意。"
+    },
+    "84": {
+      "en": "mean we have less similarity. Again, this is something you're going to see very often in vector",
+      "zh_tw": "現在我們在非常高的層次上理解了這些數學，讓我們回到正軌。",
+      "zh_cn": "现在我们在非常高的层次上理解了这些数学，让我们回到正軌。"
+    },
+    "85": {
+      "en": "database documentation, so just be aware of it whenever you see the term cosine distance and cosine similarity.",
+      "zh_tw": "一旦我們找到與使用者問題高度相似的文字區塊，",
+      "zh_cn": "一旦我们找到与使用者问题高度相似的文字区块，"
+    },
+    "86": {
+      "en": "So now that we understand some of this math at a very high level, let's get back on track.",
+      "zh_tw": "我們要把使用者的問題加入提示詞中，也把我們找到的",
+      "zh_cn": "我们要把使用者的问题加入提示词中，也把我们找到的"
+    },
+    "87": {
+      "en": "Once we have found a text chunk with a high similarity to the user's question,",
+      "zh_tw": "最相關的文字區塊放入提示詞中。然後我們把那個提示詞送給",
+      "zh_cn": "最相关的文字区块放入提示词中。然后我们把那个提示词送给"
+    },
+    "88": {
+      "en": "we're going to take the user's question, add it into our prompt, and the text chunk that we found",
+      "zh_tw": "Claude。這就是整個流程，非常非常詳細。所以現在我們理解了從頭到尾的所有東西，",
+      "zh_cn": "Claude。这就是整个流程，非常非常详细。所以现在我们理解了从头到尾的所有東西，"
+    },
+    "89": {
+      "en": "that's most relevant and put that into our prompt as well. We then take that prompt and send it off",
+      "zh_tw": "包括幕後所有的技術細節，甚至一些數學，",
+      "zh_cn": "包括幕后所有的技术细节，甚至一些数学，"
+    },
+    "90": {
+      "en": "to Claude. And that's the entire process in great, great detail. So now that we understand everything",
+      "zh_tw": "讓我們馬上開始在筆記本中實作這個。",
+      "zh_cn": "让我们马上开始在笔记本中实作这个。"
+    },
+    "91": {
+      "en": "from start to finish with all the kind of tech behind the scenes going on, and even some of the math,",
+      "zh_tw": "讓我們馬上開始在筆記本中實作這個。",
+      "zh_cn": "让我们马上开始在笔记本中实作这个。"
+    },
+    "92": {
+      "en": "let's start to implement this inside of a notebook in just a moment.",
+      "zh_tw": "讓我們馬上開始在筆記本中實作這個。",
+      "zh_cn": "让我们马上开始在笔记本中实作这个。"
+    }
+  }
+}

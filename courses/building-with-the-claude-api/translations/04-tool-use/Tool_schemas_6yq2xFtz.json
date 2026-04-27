@@ -1,0 +1,322 @@
+{
+  "srt_file": "Tool_schemas_6yq2xFtz.srt",
+  "video_file": "Tool_schemas_6yq2xFtz.mp4",
+  "max_valid_entry": 63,
+  "entries": {
+    "1": {
+      "en": "Now that we've got our tool function put together, we are going to move on to step two,",
+      "zh_tw": "現在我們的工具函式已經準備好了，我們要進入第二步，",
+      "zh_cn": "现在我们的工具函数已经准备好了，我们要进入第二步，"
+    },
+    "2": {
+      "en": "which is where we are going to write out a JSON schema.",
+      "zh_tw": "在這裡我們要寫出一個 JSON Schema。",
+      "zh_cn": "在这里我们要写出一个 JSON Schema。"
+    },
+    "3": {
+      "en": "We are going to eventually send all this configuration off to Claude.",
+      "zh_tw": "我們最終會把所有這些設定送給 Claude。",
+      "zh_cn": "我们最终会把所有这些设定送给 Claude。"
+    },
+    "4": {
+      "en": "Claude is going to use it to understand the different tool functions that are available",
+      "zh_tw": "Claude 會用它來了解可用的工具函式",
+      "zh_cn": "Claude 会用它來了解可用的工具函数"
+    },
+    "5": {
+      "en": "and the different arguments that must be provided to these tool functions as well.",
+      "zh_tw": "以及必須提供給這些工具函式的不同參數。",
+      "zh_cn": "以及必须提供给这些工具函数的不同参数。"
+    },
+    "6": {
+      "en": "The first thing I want you to understand here is exactly what JSON schema is all about.",
+      "zh_tw": "我首先要讓你了解的是 JSON Schema 到底是什麼。",
+      "zh_cn": "我首先要让你了解的是 JSON Schema 到底是什麼。"
+    },
+    "7": {
+      "en": "So this entire object you see on the right hand side, this is not technically a JSON schema per se.",
+      "zh_tw": "你在右邊看到的整個物件，技術上來說並不完全是 JSON Schema。",
+      "zh_cn": "你在右边看到的整个对象，技术上來说並不完全是 JSON Schema。"
+    },
+    "8": {
+      "en": "Instead, at the very top, there is a name and a description.",
+      "zh_tw": "相反的，最上面有一個 name 和一個 description。",
+      "zh_cn": "相反的，最上面有一个 name 和一个 description。"
+    },
+    "9": {
+      "en": "I'll tell you what those are about in just a little bit.",
+      "zh_tw": "我稍後會告訴你它們的用途。",
+      "zh_cn": "我稍后会告訴你它们的用途。"
+    },
+    "10": {
+      "en": "Underneath that, there is a key of input schema.",
+      "zh_tw": "在下面有一個 input schema 的鍵。",
+      "zh_cn": "在下面有一个 input schema 的键。"
+    },
+    "11": {
+      "en": "And then assigned to that is that dictionary right there.",
+      "zh_tw": "然後指派給它的就是那個字典。",
+      "zh_cn": "然后指派给它的就是那个字典。"
+    },
+    "12": {
+      "en": "What I've now highlighted, that is technically what a JSON schema is.",
+      "zh_tw": "我現在標記的部分，技術上才是 JSON Schema。",
+      "zh_cn": "我现在标记的部分，技术上才是 JSON Schema。"
+    },
+    "13": {
+      "en": "So again, let me give you a little bit more background.",
+      "zh_tw": "讓我再給你一些背景。",
+      "zh_cn": "让我再给你一些背景。"
+    },
+    "14": {
+      "en": "The idea of JSON schema is not specifically tied to language models or tool calling or anything like that.",
+      "zh_tw": "JSON Schema 的概念並不是專門和語言模型或工具呼叫之類的東西綁定的。",
+      "zh_cn": "JSON Schema 的概念並不是專门和语言模型或工具调用之类的東西綁定的。"
+    },
+    "15": {
+      "en": "JSON schema is a data validation specification.",
+      "zh_tw": "JSON Schema 是一個資料驗證規格。",
+      "zh_cn": "JSON Schema 是一个数据验证规格。"
+    },
+    "16": {
+      "en": "So it is a set of rules that can be used to validate any kind of JSON data.",
+      "zh_tw": "它是一組可以用來驗證任何 JSON 資料的規則。",
+      "zh_cn": "它是一组可以用來验证任何 JSON 数据的规则。"
+    },
+    "17": {
+      "en": "So again, it is not specifically tied to language models or tools or anything like that.",
+      "zh_tw": "所以它不是專門和語言模型或工具之類的東西綁定的。",
+      "zh_cn": "所以它不是專门和语言模型或工具之类的東西綁定的。"
+    },
+    "18": {
+      "en": "The language model community decided at some point in time that JSON schema is just a really convenient way of wiring up and handling tool calls.",
+      "zh_tw": "語言模型社群在某個時間點決定 JSON Schema 是連接和處理工具呼叫的一種非常方便的方式。",
+      "zh_cn": "语言模型社群在某个时间点决定 JSON Schema 是连接和处理工具调用的一种非常方便的方式。"
+    },
+    "19": {
+      "en": "This is a widely understood technology that has been around for many, many years.",
+      "zh_tw": "這是一種廣泛被理解的技術，已經存在很多年了。",
+      "zh_cn": "这是一种广泛被理解的技术，已经存在很多年了。"
+    },
+    "20": {
+      "en": "Now, at this point, I still haven't really explained what the JSON schema spec is all about.",
+      "zh_tw": "到目前為止，我還沒有真正解釋這個 JSON Schema 規格是什麼。",
+      "zh_cn": "到目前为止，我还没有真正解釋这个 JSON Schema 规格是什麼。"
+    },
+    "21": {
+      "en": "So in total, this thing is used to inform Claude about the different tools that are available to it.",
+      "zh_tw": "總的來說，這個東西是用來通知 Claude 可用的不同工具。",
+      "zh_cn": "总的來说，这个東西是用來通知 Claude 可用的不同工具。"
+    },
+    "22": {
+      "en": "We are going to provide a name for the tool.",
+      "zh_tw": "我們會提供工具的名稱。",
+      "zh_cn": "我们会提供工具的名称。"
+    },
+    "23": {
+      "en": "So in this case, it might be get weather and then a description for the tool.",
+      "zh_tw": "在這個例子中可能是 get weather，然後是工具的描述。",
+      "zh_cn": "在这个例子中可能是 get weather，然后是工具的描述。"
+    },
+    "24": {
+      "en": "This description is meant to tell Claude what the tool does, when to use it, and what kind of data it is going to return.",
+      "zh_tw": "描述是告訴 Claude 工具做什麼、何時使用、以及會回傳什麼資料。",
+      "zh_cn": "描述是告訴 Claude 工具做什麼、何时使用、以及会返回什麼数据。"
+    },
+    "25": {
+      "en": "Best practice is to make sure you have a description around three to four sentences long.",
+      "zh_tw": "最佳做法是確保描述大約三到四句話。",
+      "zh_cn": "最佳做法是确保描述大约三到四句话。"
+    },
+    "26": {
+      "en": "So even though right here I'm showing only retrieves current weather, in reality, I would definitely want to have a much longer description than this.",
+      "zh_tw": "所以雖然這裡我只寫了「取得目前天氣」，實際上我絕對會想要比這長得多的描述。",
+      "zh_cn": "所以雖然这里我只写了「取得目前天气」，实际上我绝对会想要比这长得多的描述。"
+    },
+    "27": {
+      "en": "Then, under this input schema key is going to be the actual JSON schema spec.",
+      "zh_tw": "在 input schema 鍵下面是實際的 JSON Schema 規格。",
+      "zh_cn": "在 input schema 键下面是实际的 JSON Schema 规格。"
+    },
+    "28": {
+      "en": "This is going to describe the different arguments that should be passed into our function.",
+      "zh_tw": "這會描述應該傳入函式的不同參數。",
+      "zh_cn": "这会描述应该传入函数的不同参数。"
+    },
+    "29": {
+      "en": "So in this example back over here, if I had a get weather function that received just a location, I would put in input schema with location right here.",
+      "zh_tw": "在這個例子中，如果我有一個 get weather 函式只接收 location，我會在 input schema 中放入 location。",
+      "zh_cn": "在这个例子中，如果我有一个 get weather 函数只接收 location，我会在 input schema 中放入 location。"
+    },
+    "30": {
+      "en": "It needs to be a string.",
+      "zh_tw": "它需要是字串。",
+      "zh_cn": "它需要是字符串。"
+    },
+    "31": {
+      "en": "And here's a description of the purpose of that argument.",
+      "zh_tw": "這裡是參數目的的描述。",
+      "zh_cn": "这里是参数目的的描述。"
+    },
+    "32": {
+      "en": "Again, we would want this description of the argument to also be about three to four sentences long and help Claude understand exactly what this argument controls and how it affects the overall function call.",
+      "zh_tw": "同樣，參數的描述也應該大約三到四句話，幫助 Claude 理解這個參數控制什麼以及它如何影響整體函式呼叫。",
+      "zh_cn": "同样，参数的描述也应该大约三到四句话，幫助 Claude 理解这个参数控制什麼以及它如何影响整体函数调用。"
+    },
+    "33": {
+      "en": "Now, like I mentioned, it might be a little bit intimidating to think that you have to write out all this configuration on your own.",
+      "zh_tw": "就像我提到的，可能會覺得必須自己寫出所有這些設定有點嚇人。",
+      "zh_cn": "就像我提到的，可能会覺得必须自己写出所有这些设定有点嚇人。"
+    },
+    "34": {
+      "en": "Luckily, I've got a trick that is going to help you write out a almost perfect JSON schema spec for every tool you ever put together.",
+      "zh_tw": "幸運的是，我有一個技巧可以幫你寫出幾乎完美的 JSON Schema 規格。",
+      "zh_cn": "幸运的是，我有一个技巧可以幫你写出幾乎完美的 JSON Schema 规格。"
+    },
+    "35": {
+      "en": "So let me show you the trick.",
+      "zh_tw": "讓我告訴你這個技巧。",
+      "zh_cn": "让我告訴你这个技巧。"
+    },
+    "36": {
+      "en": "First, I'm going to go back over to my editor and I'm going to find our tool function.",
+      "zh_tw": "首先回到編輯器，找到我們的工具函式。",
+      "zh_cn": "首先回到编輯器，找到我们的工具函数。"
+    },
+    "37": {
+      "en": "So for us, it is the get current date time function.",
+      "zh_tw": "對我們來說就是 get current date time 函式。",
+      "zh_cn": "对我们來说就是 get current date time 函数。"
+    },
+    "38": {
+      "en": "I'm then going to take this over to a Claude window.",
+      "zh_tw": "然後拿到 Claude 視窗。",
+      "zh_cn": "然后拿到 Claude 視窗。"
+    },
+    "39": {
+      "en": "So I'm at Claude.ai here.",
+      "zh_tw": "我在 claude.ai 這裡。",
+      "zh_cn": "我在 claude.ai 这里。"
+    },
+    "40": {
+      "en": "I'm going to write out a very simple prompt.",
+      "zh_tw": "寫一個非常簡單的提示。",
+      "zh_cn": "写一个非常简单的提示。"
+    },
+    "41": {
+      "en": "I'm going to ask Claude to write a valid JSON schema spec for the purposes of tool calling for this function.",
+      "zh_tw": "要求 Claude 為這個函式寫一個有效的 JSON Schema 規格，用於工具呼叫。",
+      "zh_cn": "要求 Claude 为这个函数写一个有效的 JSON Schema 规格，用於工具调用。"
+    },
+    "42": {
+      "en": "And then I will also ask Claude to follow the best practices listed in the attached documentation.",
+      "zh_tw": "然後還要求 Claude 遵循附加文件中列出的最佳做法。",
+      "zh_cn": "然后还要求 Claude 遵循附加文件中列出的最佳做法。"
+    },
+    "43": {
+      "en": "Then I'm going to put in my tool function like so.",
+      "zh_tw": "然後放入工具函式。",
+      "zh_cn": "然后放入工具函数。"
+    },
+    "44": {
+      "en": "And then here's the real trick.",
+      "zh_tw": "這才是真正的技巧。",
+      "zh_cn": "这才是真正的技巧。"
+    },
+    "45": {
+      "en": "I'm going to go over to the Anthropic API documentation.",
+      "zh_tw": "去 Anthropic API 文件。",
+      "zh_cn": "去 Anthropic API 文件。"
+    },
+    "46": {
+      "en": "In the user guide section, there is a entire page on tool use with Claude.",
+      "zh_tw": "在使用者指南部分，有一整頁關於 Claude 工具使用的內容。",
+      "zh_cn": "在使用者指南部分，有一整页关於 Claude 工具使用的內容。"
+    },
+    "47": {
+      "en": "This entire page has a lot of different best practices and examples of good tool descriptions and bad tool descriptions.",
+      "zh_tw": "這一頁有很多不同的最佳做法和好壞工具描述的範例。",
+      "zh_cn": "这一页有很多不同的最佳做法和好坏工具描述的范例。"
+    },
+    "48": {
+      "en": "So I'm going to just copy all the text here, go back over to my Claude window, paste it in as an attachment, and run this.",
+      "zh_tw": "複製所有文字，回到 Claude 視窗，作為附件貼入，然後執行。",
+      "zh_cn": "复製所有文字，回到 Claude 視窗，作为附件貼入，然后执行。"
+    },
+    "49": {
+      "en": "Claude is then going to respond with probably a very strong JSON schema spec.",
+      "zh_tw": "Claude 會回應一個很不錯的 JSON Schema 規格。",
+      "zh_cn": "Claude 会回应一个很不错的 JSON Schema 规格。"
+    },
+    "50": {
+      "en": "So I'm now going to copy this, take it back over to my editor, and I'm going to paste it in right underneath my existing get current date time function.",
+      "zh_tw": "複製它，回到編輯器，貼在現有 get current date time 函式下面。",
+      "zh_cn": "复製它，回到编輯器，貼在现有 get current date time 函数下面。"
+    },
+    "51": {
+      "en": "So we'll say get current date time schema.",
+      "zh_tw": "我們叫它 get current date time schema。",
+      "zh_cn": "我们叫它 get current date time schema。"
+    },
+    "52": {
+      "en": "Like so.",
+      "zh_tw": "就這樣。",
+      "zh_cn": "就这样。"
+    },
+    "53": {
+      "en": "Now as a little naming pattern that I like to use here, I'll give my tool function, whatever name I want.",
+      "zh_tw": "我喜歡用的命名模式是，給工具函式取個名字，",
+      "zh_cn": "我喜欢用的命名模式是，给工具函数取个名字，"
+    },
+    "54": {
+      "en": "And then the schema to match up with it will be underscore schema.",
+      "zh_tw": "然後配對的 schema 會是下底線 schema。",
+      "zh_cn": "然后配对的 schema 会是下底线 schema。"
+    },
+    "55": {
+      "en": "So the same name underscore schema, and it makes it a lot easier to keep track of my different schemas.",
+      "zh_tw": "同名加上 _schema，這讓追蹤不同的 schema 更容易。",
+      "zh_cn": "同名加上 _schema，这让追蹤不同的 schema 更容易。"
+    },
+    "56": {
+      "en": "There's one last thing I'm going to do at the top of this cell.",
+      "zh_tw": "最後一件事，在儲存格頂部",
+      "zh_cn": "最后一件事，在存储格頂部"
+    },
+    "57": {
+      "en": "I'm going to add in an import from Anthropic dot types.",
+      "zh_tw": "加入一個 import，從 anthropic.types",
+      "zh_cn": "加入一个 import，从 anthropic.types"
+    },
+    "58": {
+      "en": "I will import tool param.",
+      "zh_tw": "匯入 ToolParam。",
+      "zh_cn": "匯入 ToolParam。"
+    },
+    "59": {
+      "en": "I'm going to take this tool param and wrap it around this entire dictionary.",
+      "zh_tw": "然後用 ToolParam 包裹整個字典。",
+      "zh_cn": "然后用 ToolParam 包裹整个字典。"
+    },
+    "60": {
+      "en": "So I'll put in right here, tool param, opening parentheses, and then a closing parentheses down here at the bottom.",
+      "zh_tw": "在這裡放 ToolParam，左括號，然後在底部放右括號。",
+      "zh_cn": "在这里放 ToolParam，左括号，然后在底部放右括号。"
+    },
+    "61": {
+      "en": "Adding in this tool param thing is not strictly necessary.",
+      "zh_tw": "加入 ToolParam 不是必須的。",
+      "zh_cn": "加入 ToolParam 不是必须的。"
+    },
+    "62": {
+      "en": "In other words, our code is still going to work without it, but it's going to prevent a type error later on when we eventually take this schema and make use of it.",
+      "zh_tw": "換句話說，我們的程式碼沒有它也能運作，但它會防止之後我們使用這個 schema 時出現型別錯誤。",
+      "zh_cn": "换句话说，我们的代码没有它也能运作，但它会防止之后我们使用这个 schema 时出现型別错误。"
+    },
+    "63": {
+      "en": "So I'll put in right here.",
+      "zh_tw": "就放在這裡。",
+      "zh_cn": "就放在这里。"
+    }
+  }
+}

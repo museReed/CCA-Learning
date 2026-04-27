@@ -1,0 +1,722 @@
+{
+  "srt_file": "StreamableHTTP_in_depth_8PKjstab.srt",
+  "video_file": "StreamableHTTP_in_depth_8PKjstab.mp4",
+  "max_valid_entry": 143,
+  "entries": {
+    "1": {
+      "en": "Let's do a quick recap of the last couple of videos just to make sure that we are on the same page.",
+      "zh_tw": "讓我們快速回顧一下過去幾支影片，確保我們在同一頁上。",
+      "zh_cn": "让我们快速回顧一下过去幾支视频，确保我们在同一页上。"
+    },
+    "2": {
+      "en": "The first thing that we understood was that some MCP functionality, namely things like sampling and notifications and logging,",
+      "zh_tw": "我們首先理解到一些 MCP 功能，比如取樣、通知和日誌記錄，",
+      "zh_cn": "我们首先理解到一些 MCP 功能，比如取样、通知和日志记录，"
+    },
+    "3": {
+      "en": "relies upon the server making a request to the client.",
+      "zh_tw": "依賴於伺服器向客戶端發送請求。",
+      "zh_cn": "依賴於服务器向客户端发送请求。"
+    },
+    "4": {
+      "en": "Shortly after that, we learned that when we are making use of HTTP in general,",
+      "zh_tw": "不久之後，我們了解到當我們使用 HTTP 時，",
+      "zh_cn": "不久之后，我们了解到当我们使用 HTTP 时，"
+    },
+    "5": {
+      "en": "it's kind of hard to allow a server to make a request to a client.",
+      "zh_tw": "讓伺服器向客戶端發送請求是比較困難的。",
+      "zh_cn": "让服务器向客户端发送请求是比較困难的。"
+    },
+    "6": {
+      "en": "So these first two points are kind of butting heads. They are at odds.",
+      "zh_tw": "所以前兩點有點衝突。它們是矛盾的。",
+      "zh_cn": "所以前兩点有点冲突。它们是矛盾的。"
+    },
+    "7": {
+      "en": "We need a server to be able to make a request to a client to get full functionality.",
+      "zh_tw": "我們需要伺服器能向客戶端發送請求才能獲得完整功能。",
+      "zh_cn": "我们需要服务器能向客户端发送请求才能获得完整功能。"
+    },
+    "8": {
+      "en": "But at the same time, that is hard to do when using HTTP.",
+      "zh_tw": "但同時，使用 HTTP 時這很難做到。",
+      "zh_cn": "但同时，使用 HTTP 时这很难做到。"
+    },
+    "9": {
+      "en": "Now, as I mentioned, streamable HTTP has a workaround to fix this.",
+      "zh_tw": "如同我提到的，Streamable HTTP 有一個解決方案。",
+      "zh_cn": "如同我提到的，Streamable HTTP 有一个解决方案。"
+    },
+    "10": {
+      "en": "And I'm going to show you exactly what that workaround is and how the transport works in general in this video.",
+      "zh_tw": "我要在這支影片中確切地展示那個解決方案是什麼以及傳輸方式一般是怎麼運作的。",
+      "zh_cn": "我要在这支视频中确切地展示那个解决方案是什麼以及传输方式一般是怎麼运作的。"
+    },
+    "11": {
+      "en": "So we're going to finally get going to get clarity on exactly what's going on.",
+      "zh_tw": "我們終於要弄清楚到底發生了什麼。",
+      "zh_cn": "我们终於要弄清楚到底发生了什麼。"
+    },
+    "12": {
+      "en": "Lastly, keep in mind that in some scenarios, we are going to set those two flags to true.",
+      "zh_tw": "我要先展示幾個圖表幫你理解幕後的過程。",
+      "zh_cn": "我要先展示幾个圖表幫你理解幕后的过程。"
+    },
+    "13": {
+      "en": "And we'll discuss why we'd ever set them to true.",
+      "zh_tw": "然後展示一個簡短的示範，你會看到所有請求實際上被發送以及整個系統在一個小型示範應用程式中如何運作。",
+      "zh_cn": "然后展示一个简短的示范，你会看到所有请求实际上被发送以及整个系统在一个小型示范应用程序中如何运作。"
+    },
+    "14": {
+      "en": "And when you do so, that breaks the workaround.",
+      "zh_tw": "開始吧。",
+      "zh_cn": "开始吧。"
+    },
+    "15": {
+      "en": "And that's kind of why streamable HTTP as a transport is a little bit tough to wrap your head around.",
+      "zh_tw": "首先我要你回想當客戶端最初連接到伺服器時會發生什麼。",
+      "zh_cn": "首先我要你回想当客户端最初连接到服务器时会发生什麼。"
+    },
+    "16": {
+      "en": "Because we've got this limitation around HTTP.",
+      "zh_tw": "根據 MCP 規範，客戶端必須向伺服器發送一個 initialized request。",
+      "zh_cn": "根据 MCP 规范，客户端必须向服务器发送一个 initialized request。"
+    },
+    "17": {
+      "en": "We got the workaround.",
+      "zh_tw": "伺服器回覆一個 result。",
+      "zh_cn": "服务器回覆一个 result。"
+    },
+    "18": {
+      "en": "But in some cases, we want to not use that workaround per se.",
+      "zh_tw": "然後客戶端必須發送一個後續請求，帶著 initialized notification。",
+      "zh_cn": "然后客户端必须发送一个后续请求，帶著 initialized notification。"
+    },
+    "19": {
+      "en": "That's why it's a tricky subject.",
+      "zh_tw": "此時，伺服器認為客戶端已連接，一切就緒。",
+      "zh_cn": "此时，服务器认为客户端已连接，一切就绪。"
+    },
+    "20": {
+      "en": "Well, without further ado, let's get to it.",
+      "zh_tw": "當我們開始使用 HTTP 傳輸方式時，這個流程會稍微改變。",
+      "zh_cn": "当我们开始使用 HTTP 传输方式时，这个流程会稍微改变。"
+    },
+    "21": {
+      "en": "Let's understand how this transport actually works.",
+      "zh_tw": "使用這個傳輸方式後，從伺服器發回的 initialized result 會在 HTTP 回應中帶有一個標頭。",
+      "zh_cn": "使用这个传输方式后，从服务器发回的 initialized result 会在 HTTP 回应中帶有一个标头。"
+    },
+    "22": {
+      "en": "I'm going to begin by showing you a couple of different diagrams to help you understand the behind-the-scenes process.",
+      "zh_tw": "這個標頭就是 MCP session ID。",
+      "zh_cn": "这个标头就是 MCP session ID。"
+    },
+    "23": {
+      "en": "And I'm going to show you a short demonstration where you're going to see all these requests actually made and the entire system come together in a very small demo application.",
+      "zh_tw": "這是一個隨機的數字和字母字串，分配給我們的客戶端。",
+      "zh_cn": "这是一个随机的数字和字母字符串，分配给我们的客户端。"
+    },
+    "24": {
+      "en": "So here we go.",
+      "zh_tw": "它基本上是我們與伺服器連接的標識符。",
+      "zh_cn": "它基本上是我们与服务器连接的标识符。"
+    },
+    "25": {
+      "en": "First thing I want you to recall is what happens when a client initially connects to a server.",
+      "zh_tw": "一旦收到那個標頭，我們必須在之後所有發給伺服器的請求中都包含它。",
+      "zh_cn": "一旦收到那个标头，我们必须在之后所有发给服务器的请求中都包含它。"
+    },
+    "26": {
+      "en": "According to the MCP spec, the client must send an initialized request to the server.",
+      "zh_tw": "這讓伺服器能識別我們的客戶端。",
+      "zh_cn": "这让服务器能识別我们的客户端。"
+    },
+    "27": {
+      "en": "Server replies with a result.",
+      "zh_tw": "完成初始化並取得 session ID 之後，神奇的部分開始了。",
+      "zh_cn": "完成初始化並取得 session ID 之后，神奇的部分开始了。"
+    },
+    "28": {
+      "en": "And then the client has to make a follow-up request with the initialized notification.",
+      "zh_tw": "這就是允許伺服器向客戶端發送請求的大型解決方案。",
+      "zh_cn": "这就是允许服务器向客户端发送请求的大型解决方案。"
+    },
+    "29": {
+      "en": "At that point in time, the server then considers the client to be connected and everything is good to go.",
+      "zh_tw": "初始化完成後，客戶端可以選擇性地——不一定要這樣做——",
+      "zh_cn": "初始化完成后，客户端可以选择性地——不一定要这样做——"
+    },
+    "30": {
+      "en": "Now, as soon as we start to use the HTTP transport, this flow changes ever so slightly.",
+      "zh_tw": "向 MCP 伺服器發送一個 GET 請求，並在請求中包含 session ID。",
+      "zh_cn": "向 MCP 服务器发送一个 GET 请求，並在请求中包含 session ID。"
+    },
+    "31": {
+      "en": "So as soon as you start using this transport, the initialized result that gets sent back from the server is going to have a header inside the HTTP response.",
+      "zh_tw": "我們收到的回應非常特殊。",
+      "zh_cn": "我们收到的回应非常特殊。"
+    },
+    "32": {
+      "en": "This header is the MCP session ID.",
+      "zh_tw": "它是一個 SSE 回應。",
+      "zh_cn": "它是一个 SSE 回应。"
+    },
+    "33": {
+      "en": "This is a random string of numbers and letters that gets assigned to our client.",
+      "zh_tw": "SSE 是 Server Sent Events 的縮寫。",
+      "zh_cn": "SSE 是 Server Sent Events 的缩写。"
+    },
+    "34": {
+      "en": "It's essentially an identifier for our connection to the server.",
+      "zh_tw": "這是一種可以保持開啟任意長時間的回應。",
+      "zh_cn": "这是一种可以保持开啟任意长时间的回应。"
+    },
+    "35": {
+      "en": "As soon as we receive that header, we are required to include it in all follow-up requests we make to the server.",
+      "zh_tw": "一旦和客戶端建立了這個回應，伺服器就可以串流回一些小片段的資訊，基本上就是個別的訊息，到我們的客戶端。",
+      "zh_cn": "一旦和客户端建立了这个回应，服务器就可以流式回一些小片段的资讯，基本上就是个別的信息，到我们的客户端。"
+    },
+    "36": {
+      "en": "This allows the server to identify our client.",
+      "zh_tw": "一旦建立了這個連接，這是真正關鍵的部分，它現在允許伺服器在任何時間點向客戶端發送訊息。",
+      "zh_cn": "一旦建立了这个连接，这是真正关键的部分，它现在允许服务器在任何时间点向客户端发送信息。"
+    },
+    "37": {
+      "en": "Now, after we have done this initialization and gotten that session ID, here's where the magic part begins.",
+      "zh_tw": "這個連接基本上可以用來允許伺服器向客戶端發送請求。",
+      "zh_cn": "这个连接基本上可以用來允许服务器向客户端发送请求。"
+    },
+    "38": {
+      "en": "So this is kind of the big workaround that allows the server to make requests to the client.",
+      "zh_tw": "這就是技巧。",
+      "zh_cn": "这就是技巧。"
+    },
+    "39": {
+      "en": "As soon as we finish that initialization, the client, optionally, it doesn't have to do this.",
+      "zh_tw": "這就是 HTTP 傳輸方式使用的解決方案。",
+      "zh_cn": "这就是 HTTP 传输方式使用的解决方案。"
+    },
+    "40": {
+      "en": "Optionally, it can make a GET request to the MCP server and include that session ID inside the request.",
+      "zh_tw": "它利用這個長時間存在的 SSE 回應，串流它想發送給客戶端的訊息。",
+      "zh_cn": "它利用这个长时间存在的 SSE 回应，流式它想发送给客户端的信息。"
+    },
+    "41": {
+      "en": "The response we get back is very special.",
+      "zh_tw": "現在讓我們更進一步，看看當客戶端想要呼叫工具時會發生什麼，因為複雜度還沒完。",
+      "zh_cn": "现在让我们更进一步，看看当客户端想要调用工具时会发生什麼，因为复杂度还没完。"
+    },
+    "42": {
+      "en": "It is a SSE response.",
+      "zh_tw": "還有一個關鍵部分你需要理解。",
+      "zh_cn": "还有一个关键部分你需要理解。"
+    },
+    "43": {
+      "en": "SSE is short for Server Sent Events.",
+      "zh_tw": "在圖表頂部，我有我們剛建立的 SSE 回應。",
+      "zh_cn": "在圖表頂部，我有我们剛建立的 SSE 回应。"
+    },
+    "44": {
+      "en": "This is a kind of response that can be held open for an arbitrary amount of time.",
+      "zh_tw": "記住，那個回應，那個開啟的連接，它有一個綁定的 session ID。",
+      "zh_cn": "记住，那个回应，那个开啟的连接，它有一个綁定的 session ID。"
+    },
+    "45": {
+      "en": "Once this response has been established with our client, the server can then stream back little bits of information, essentially individual messages, down to our client.",
+      "zh_tw": "所以 MCP 伺服器知道那個連接屬於哪個客戶端。",
+      "zh_cn": "所以 MCP 服务器知道那个连接属於哪个客户端。"
+    },
+    "46": {
+      "en": "So once this connection has been made, now at this point in time, this is the real critical part, this now allows the server to send down messages to the client at any point in time.",
+      "zh_tw": "然後在之後的某個時間點，當那個回應仍在運行時，我們的客戶端可能決定向伺服器發送一個 call tool request。",
+      "zh_cn": "然后在之后的某个时间点，当那个回应仍在运行时，我们的客户端可能决定向服务器发送一个 call tool request。"
+    },
+    "47": {
+      "en": "And this connection can be used essentially to allow the server to make a request to the client.",
+      "zh_tw": "發送這個請求時，它會包含 session ID 作為標頭。",
+      "zh_cn": "发送这个请求时，它会包含 session ID 作为标头。"
+    },
+    "48": {
+      "en": "So this is the trick.",
+      "zh_tw": "然後 MCP 伺服器會開啟第二個 SSE 回應。",
+      "zh_cn": "然后 MCP 服务器会开啟第二个 SSE 回应。"
+    },
+    "49": {
+      "en": "This is the workaround that the HTTP transport uses.",
+      "zh_tw": "此時我們有兩個獨立的 SSE 回應。",
+      "zh_cn": "此时我们有兩个独立的 SSE 回应。"
+    },
+    "50": {
+      "en": "It makes use of this long-lived SSE response, and it's going to stream down messages that it wants to send to the client.",
+      "zh_tw": "頂部第一個是用來處理從伺服器發送到客戶端的請求。",
+      "zh_cn": "頂部第一个是用來处理从服务器发送到客户端的请求。"
+    },
+    "51": {
+      "en": "So now let's go a little bit further and walk through what happens now whenever the client might want to call a tool, because the complexity is not quite done just yet.",
+      "zh_tw": "第二個全新的 SSE 回應是用來處理與這個 call tool request 相關的訊息。",
+      "zh_cn": "第二个全新的 SSE 回应是用來处理与这个 call tool request 相关的信息。"
+    },
+    "52": {
+      "en": "There's one other critical part for you to understand.",
+      "zh_tw": "重要的是，這是關鍵部分，第二個 SSE 回應在 call tool result 訊息發送後就自動關閉。",
+      "zh_cn": "重要的是，这是关键部分，第二个 SSE 回应在 call tool result 信息发送后就自动关闭。"
+    },
+    "53": {
+      "en": "So now at the top of this diagram, I've got that SSE response that we just created.",
+      "zh_tw": "底部的回應在我們收到結果後很快就自動關閉。",
+      "zh_cn": "底部的回应在我们收到结果后很快就自动关闭。"
+    },
+    "54": {
+      "en": "And remember, that response, that open connection, it has a session ID tied to it.",
+      "zh_tw": "而上面的回應可以保持開啟任意長時間。",
+      "zh_cn": "而上面的回应可以保持开啟任意长时间。"
+    },
+    "55": {
+      "en": "So the MCP server knows exactly what that connection or which client that connection belongs to.",
+      "zh_tw": "然後記住，我們的最終目標是呼叫一個工具。",
+      "zh_cn": "然后记住，我们的最终目标是调用一个工具。"
+    },
+    "56": {
+      "en": "So then later on at some future point in time, while that response is still running, our client might decide to make a call tool request to the server.",
+      "zh_tw": "所以也許我們呼叫我們看過很多次的 add 工具。",
+      "zh_cn": "所以也许我们调用我们看过很多次的 add 工具。"
+    },
+    "57": {
+      "en": "When it makes this request, it's going to include its session ID as a header.",
+      "zh_tw": "我展示過幾次的實作裡有一些日誌訊息和進度通知。",
+      "zh_cn": "我展示过幾次的实作里有一些日志信息和进度通知。"
+    },
+    "58": {
+      "en": "Then the MCP server is going to open up a second SSE response.",
+      "zh_tw": "最終會回傳結果，也就是 call tool result。",
+      "zh_cn": "最终会返回结果，也就是 call tool result。"
+    },
+    "59": {
+      "en": "So now at this point in time, we have two separate SSE responses.",
+      "zh_tw": "這裡有另一個有點棘手的部分。",
+      "zh_cn": "这里有另一个有点棘手的部分。"
+    },
+    "60": {
+      "en": "The first one at the top, it is intended to be used for requests that are going from the server down to the client.",
+      "zh_tw": "技術上，日誌訊息和進度通知都和 call tool request 相關。",
+      "zh_cn": "技术上，日志信息和进度通知都和 call tool request 相关。"
+    },
+    "61": {
+      "en": "The second brand new SSE response is intended to be used for messages that are related to this call tool request.",
+      "zh_tw": "所以你會覺得這兩個訊息都應該在底部的回應中發送回來，因為它們都和這個 call tool request 相關。",
+      "zh_cn": "所以你会覺得这兩个信息都应该在底部的回应中发送回來，因为它们都和这个 call tool request 相关。"
+    },
+    "62": {
+      "en": "And importantly, this is the critical part, this second SSE response, it is closed automatically as soon as the call tool result message is sent.",
+      "zh_tw": "但目前許多 SDK 不是這樣運作的。",
+      "zh_cn": "但目前许多 SDK 不是这样运作的。"
+    },
+    "63": {
+      "en": "So the bottom response closed automatically very shortly as soon as we get a result.",
+      "zh_tw": "進度通知被認為和傳入的 call tool request 是分開的。",
+      "zh_cn": "进度通知被认为和传入的 call tool request 是分开的。"
+    },
+    "64": {
+      "en": "And the upper response is meant to be held open for an arbitrary amount of time.",
+      "zh_tw": "所以進度通知實際上在第一個 SSE 回應中發送。",
+      "zh_cn": "所以进度通知实际上在第一个 SSE 回应中发送。"
+    },
+    "65": {
+      "en": "Then remember, our ultimate goal here was to actually call a tool.",
+      "zh_tw": "那就是打算保持長時間開啟以允許伺服器向客戶端發送請求的那個。",
+      "zh_cn": "那就是打算保持长时间开啟以允许服务器向客户端发送请求的那个。"
+    },
+    "66": {
+      "en": "So maybe we call the add tool that we've seen many times.",
+      "zh_tw": "而日誌訊息和實際的 call tool result 在回應 POST 請求或 call tool request 的回應中發送回來。",
+      "zh_cn": "而日志信息和实际的 call tool result 在回应 POST 请求或 call tool request 的回应中发送回來。"
+    },
+    "67": {
+      "en": "And the implementation of that that I've shown you a couple times, it has some logging messages inside of it and some progress notifications.",
+      "zh_tw": "這就是整個流程。",
+      "zh_cn": "这就是整个流程。"
+    },
+    "68": {
+      "en": "And eventually it returns a result, which would be our call tool result.",
+      "zh_tw": "為了確保這一切非常清楚，我想帶你看一個非常快速的示範，讓你以非常視覺化的方式看到所有不同的請求。",
+      "zh_cn": "为了确保这一切非常清楚，我想帶你看一个非常快速的示范，让你以非常視覺化的方式看到所有不同的请求。"
+    },
+    "69": {
+      "en": "Now here's another kind of little tricky part here.",
+      "zh_tw": "我組裝了一個小示範。",
+      "zh_cn": "我组装了一个小示范。"
+    },
+    "70": {
+      "en": "Technically, both the logging message and the progress notification are really tied to the call tool request.",
+      "zh_tw": "首先，我有一個簡單的 MCP 伺服器，又是那個簡單的 add 工具。",
+      "zh_cn": "首先，我有一个简单的 MCP 服务器，又是那个简单的 add 工具。"
+    },
+    "71": {
+      "en": "So you would kind of think that both these first messages would be sent back in the bottom response because they're both really tied to this call to a request.",
+      "zh_tw": "add 工具會記錄一些資訊、等待兩秒、發送進度報告，然後回傳結果。",
+      "zh_cn": "add 工具会记录一些资讯、等待兩秒、发送进度报告，然后返回结果。"
+    },
+    "72": {
+      "en": "Well, that's not quite how many SDKs work right now.",
+      "zh_tw": "我用瀏覽器裡運行的客戶端連接到了這個 MCP 伺服器。",
+      "zh_cn": "我用浏览器里运行的客户端连接到了这个 MCP 服务器。"
+    },
+    "73": {
+      "en": "The progress notification ends up being considered to be separate from the incoming call tool request.",
+      "zh_tw": "這個客戶端讓我們可以向伺服器發送一些不同的請求，然後顯示我們收到的確切回應。",
+      "zh_cn": "这个客户端让我们可以向服务器发送一些不同的请求，然后显示我们收到的确切回应。"
+    },
+    "74": {
+      "en": "So the progress notification actually gets sent in the first SSE response.",
+      "zh_tw": "整體來說，這個客戶端會走過你在螢幕上看到的流程。",
+      "zh_cn": "整体來说，这个客户端会走过你在屏幕上看到的流程。"
+    },
+    "75": {
+      "en": "So that's the one that is meant to be held open for a long time to allow the server to make a request down to the client.",
+      "zh_tw": "我知道這裡很多東西，但本質上，我們先用頂部的步驟完成整個初始化過程。",
+      "zh_cn": "我知道这里很多東西，但本质上，我们先用頂部的步驟完成整个初始化过程。"
+    },
+    "76": {
+      "en": "And then the logging message and the actual call to a result is sent back in the response to the post request or the get tool request that was made.",
+      "zh_tw": "然後建立 GET SSE 連接，讓伺服器能向客戶端發送請求。",
+      "zh_cn": "然后建立 GET SSE 连接，让服务器能向客户端发送请求。"
+    },
+    "77": {
+      "en": "So that is the entire flow.",
+      "zh_tw": "然後我們會做一個 call tool request，建立第二個 SSE 連接，負責處理與這個特定 call tool request 相關的訊息。",
+      "zh_cn": "然后我们会做一个 call tool request，建立第二个 SSE 连接，负責处理与这个特定 call tool request 相关的信息。"
+    },
+    "78": {
+      "en": "Now to make sure that all this is crystal clear, I want to walk you through a very quick demonstration where you can see all these different requests being made in a very visual way.",
+      "zh_tw": "讓我們執行看看會發生什麼。",
+      "zh_cn": "让我们执行看看会发生什麼。"
+    },
+    "79": {
+      "en": "So I put together a little demonstration.",
+      "zh_tw": "首先，我要發送 initialized request。",
+      "zh_cn": "首先，我要发送 initialized request。"
+    },
+    "80": {
+      "en": "First, I've got a simple MCP server put together once again with a simple add tool.",
+      "zh_tw": "發送出去。",
+      "zh_cn": "发送出去。"
+    },
+    "81": {
+      "en": "The add tool is going to log some information, wait for two seconds, make a progress report, and then return a result.",
+      "zh_tw": "那會給我 session ID，在之後的任何請求中唯一標識我的客戶端。",
+      "zh_cn": "那会给我 session ID，在之后的任何请求中唯一标识我的客户端。"
+    },
+    "82": {
+      "en": "I've connected to this MCP server with this client that is running inside the browser.",
+      "zh_tw": "記住，session ID 只在使用 Streamable HTTP 傳輸方式時提供。",
+      "zh_cn": "记住，session ID 只在使用 Streamable HTTP 传输方式时提供。"
+    },
+    "83": {
+      "en": "This client will allow us to make a handful of different requests to the server and then show the exact response that we get.",
+      "zh_tw": "標準 IO 傳輸方式完全不使用它。",
+      "zh_cn": "标准 IO 传输方式完全不使用它。"
+    },
+    "84": {
+      "en": "Now in total, this client is going to go through the flow that you see on the screen.",
+      "zh_tw": "你會注意到它以 EAA 開頭。",
+      "zh_cn": "你会注意到它以 EAA 开头。"
+    },
+    "85": {
+      "en": "So I know there's a lot here, but in essence, we're going to first go through the entire initialization process with the stuff up here at the top.",
+      "zh_tw": "這個標頭會自動被取出並套用到所有後續請求。",
+      "zh_cn": "这个标头会自动被取出並套用到所有后续请求。"
+    },
+    "86": {
+      "en": "We're then going to form the get SSE connection, which allows the server to send a request to the client.",
+      "zh_tw": "如果我往下捲到下一個請求，你會注意到 MCP session ID 已經自動套用了上面請求取得的正確 session ID。",
+      "zh_cn": "如果我往下捲到下一个请求，你会注意到 MCP session ID 已经自动套用了上面请求取得的正确 session ID。"
+    },
+    "87": {
+      "en": "And then we'll do a call tool request that's going to form a second SSE connection that's going to be responsible for handling messages related to this particular call tool request.",
+      "zh_tw": "發送了 initialized request 之後，第二個請求是 initialized notification。",
+      "zh_cn": "发送了 initialized request 之后，第二个请求是 initialized notification。"
+    },
+    "88": {
+      "en": "So let's run this and see what happens.",
+      "zh_tw": "我要發送它。",
+      "zh_cn": "我要发送它。"
+    },
+    "89": {
+      "en": "First, I'm going to make the initialized request.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "90": {
+      "en": "So I'll send that off.",
+      "zh_tw": "到目前為止，我們處理完了前三個步驟。",
+      "zh_cn": "到目前为止，我们处理完了前三个步驟。"
+    },
+    "91": {
+      "en": "That's going to get me my session ID, which uniquely identifies my client to the server on any future request.",
+      "zh_tw": "現在我們要向伺服器發送 GET 請求。",
+      "zh_cn": "现在我们要向服务器发送 GET 请求。"
+    },
+    "92": {
+      "en": "Remember, the session ID is only provided when you are using the streamable HTTP transport.",
+      "zh_tw": "這個 GET 請求會保持長時間開啟。",
+      "zh_cn": "这个 GET 请求会保持长时间开啟。"
+    },
+    "93": {
+      "en": "It is not used with the standard IO transport at all.",
+      "zh_tw": "這就是允許伺服器隨時向我們的客戶端發送請求的東西。",
+      "zh_cn": "这就是允许服务器随时向我们的客户端发送请求的東西。"
+    },
+    "94": {
+      "en": "You'll notice it begins with EAA.",
+      "zh_tw": "它會用於取樣或任何伺服器發起的請求。",
+      "zh_cn": "它会用於取样或任何服务器发起的请求。"
+    },
+    "95": {
+      "en": "This header is automatically taken and applied to all future requests.",
+      "zh_tw": "要發送那個請求，我會用右下角的這個小框。",
+      "zh_cn": "要发送那个请求，我会用右下角的这个小框。"
+    },
+    "96": {
+      "en": "So if I scroll down to the next request, you'll notice the MCP session ID has automatically been applied with the correct session ID that I got from the request right above.",
+      "zh_tw": "我要點擊 start GET SSE。",
+      "zh_cn": "我要点击 start GET SSE。"
+    },
+    "97": {
+      "en": "So now that we have sent the initialized request, that one right there, our second request is initialized notification.",
+      "zh_tw": "這個請求也會包含 session ID。",
+      "zh_cn": "这个请求也会包含 session ID。"
+    },
+    "98": {
+      "en": "So I'm going to send that off.",
+      "zh_tw": "現在我已經建立了那個連接。",
+      "zh_cn": "现在我已经建立了那个连接。"
+    },
+    "99": {
+      "en": "Okay.",
+      "zh_tw": "理論上，伺服器隨時可以向我的客戶端發送訊息，用於取樣、日誌、進度通知等等。",
+      "zh_cn": "理论上，服务器随时可以向我的客户端发送信息，用於取样、日志、进度通知等等。"
+    },
+    "100": {
+      "en": "So now at this point in time, we've taken care of the first three boxes on here.",
+      "zh_tw": "如果我收到任何這些，它們應該會出現在這個框裡。",
+      "zh_cn": "如果我收到任何这些，它们应该会出现在这个框里。"
+    },
+    "101": {
+      "en": "So now we're going to make our Git request to the server.",
+      "zh_tw": "最後一步。",
+      "zh_cn": "最后一步。"
+    },
+    "102": {
+      "en": "This Git request is going to be held open for a long time.",
+      "zh_tw": "我要呼叫 add 函式。",
+      "zh_cn": "我要调用 add 函数。"
+    },
+    "103": {
+      "en": "This is what allows the server to send a request down to our client at any point in time that it wishes.",
+      "zh_tw": "裡面又有正確的 session ID。",
+      "zh_cn": "里面又有正确的 session ID。"
+    },
+    "104": {
+      "en": "It's going to be used for things like sampling or any kind of server initiated request.",
+      "zh_tw": "提醒你，當我點這個時，理論上我們會想看到日誌語句、進度語句和最終的 call tool result 都出現在這個框裡。",
+      "zh_cn": "提醒你，当我点这个时，理论上我们会想看到日志语句、进度语句和最终的 call tool result 都出现在这个框里。"
+    },
+    "105": {
+      "en": "To make that request, I'm going to use this little box down here on the bottom right-hand side.",
+      "zh_tw": "但實際上，由於 Python MCP SDK 的設定方式，進度通知實際上會作為上面這個回應的一部分發送。",
+      "zh_cn": "但实际上，由於 Python MCP SDK 的设定方式，进度通知实际上会作为上面这个回应的一部分发送。"
+    },
+    "106": {
+      "en": "So I'm going to click on start Git SSE.",
+      "zh_tw": "我們應該在這裡看到日誌語句和 call tool result。",
+      "zh_cn": "我们应该在这里看到日志语句和 call tool result。"
+    },
+    "107": {
+      "en": "This request is also going to include that session ID as well.",
+      "zh_tw": "進度語句會出現在右下角的框裡。",
+      "zh_cn": "进度语句会出现在右下角的框里。"
+    },
+    "108": {
+      "en": "And now I have formed that connection.",
+      "zh_tw": "讓我們執行看看。",
+      "zh_cn": "让我们执行看看。"
+    },
+    "109": {
+      "en": "So now in theory, at any point in time, the server can send down a message to my client for things like sampling or logging or progress notifications and so on.",
+      "zh_tw": "好的，我要執行。",
+      "zh_cn": "好的，我要执行。"
+    },
+    "110": {
+      "en": "And if I receive any of those, they should appear inside of this box.",
+      "zh_tw": "稍後會有一點延遲，因為記住裡面有兩秒的暫停，然後我們會得到結果。",
+      "zh_cn": "稍后会有一点延迟，因为记住里面有兩秒的暫停，然后我们会得到结果。"
+    },
+    "111": {
+      "en": "So now here's the last step.",
+      "zh_tw": "果然，在右下角，我有一個 notifications/progress。",
+      "zh_cn": "果然，在右下角，我有一个 notifications/progress。"
+    },
+    "112": {
+      "en": "I'm going to call the add function.",
+      "zh_tw": "那就是進度語句。",
+      "zh_cn": "那就是进度语句。"
+    },
+    "113": {
+      "en": "I've once again got the correct session ID inside there.",
+      "zh_tw": "我在 100% 中完成了 80%。",
+      "zh_cn": "我在 100% 中完成了 80%。"
+    },
+    "114": {
+      "en": "Now, to remind you, when I click on this, in theory, we would kind of want to see the log statement, progress statement, and the final call to a result all to appear in this box right here, which represents that part of the response.",
+      "zh_tw": "那是在那個回應通道中發送的。",
+      "zh_cn": "那是在那个回应通道中发送的。"
+    },
+    "115": {
+      "en": "But in reality, just because the way that the MCP SDK for Python is set up, the progress notification is actually going to be sent as a part of this response up here.",
+      "zh_tw": "然後對我 call tool request 的實際回應有一個以 notification/message 形式的日誌語句。",
+      "zh_cn": "然后对我 call tool request 的实际回应有一个以 notification/message 形式的日志语句。"
+    },
+    "116": {
+      "en": "So we should see a log statement and a call to a result right here.",
+      "zh_tw": "然後在那之後，我有 call tool request 的實際結果。",
+      "zh_cn": "然后在那之后，我有 call tool request 的实际结果。"
+    },
+    "117": {
+      "en": "And we should see the progress statement down here on the bottom right in that box.",
+      "zh_tw": "這是我的 call tool result。",
+      "zh_cn": "这是我的 call tool result。"
+    },
+    "118": {
+      "en": "So let's run it and see what happens.",
+      "zh_tw": "兩個數字相加的答案是 8。",
+      "zh_cn": "兩个数字相加的答案是 8。"
+    },
+    "119": {
+      "en": "Okay, so I'm going to run it.",
+      "zh_tw": "記住，一旦收到 call tool result，這個連接就自動關閉。",
+      "zh_cn": "记住，一旦收到 call tool result，这个连接就自动关闭。"
+    },
+    "120": {
+      "en": "And then after a little delay, because remember, there's the two second pause inside there, we're then going to get our result.",
+      "zh_tw": "我看到那裡了，是的，連接已關閉。",
+      "zh_cn": "我看到那里了，是的，连接已关闭。"
+    },
+    "121": {
+      "en": "So sure enough, down here on the bottom right hand side, I've got a notifications progress.",
+      "zh_tw": "我不能再在這個 SSE 回應上接收任何訊息了。",
+      "zh_cn": "我不能再在这个 SSE 回应上接收任何信息了。"
+    },
+    "122": {
+      "en": "So that is the progress statement.",
+      "zh_tw": "好的，就這樣。",
+      "zh_cn": "好的，就这样。"
+    },
+    "123": {
+      "en": "I'm at 80 out of 100% completion.",
+      "zh_tw": "這就是整個流程。",
+      "zh_cn": "这就是整个流程。"
+    },
+    "124": {
+      "en": "So that was sent in that response channel right there.",
+      "zh_tw": "你現在理解了 Streamable HTTP 傳輸方式幕後發生的事情。",
+      "zh_cn": "你现在理解了 Streamable HTTP 传输方式幕后发生的事情。"
+    },
+    "125": {
+      "en": "And then the actual response to my call to a request has a login statement in the form of notification slash message.",
+      "zh_tw": "但我們還沒完全結束。",
+      "zh_cn": "但我们还没完全结束。"
+    },
+    "126": {
+      "en": "And then after that, I've got the actual result of the call tool request.",
+      "zh_tw": "記住，我多次說過有一些場景你會想把那些旗標設為 true。",
+      "zh_cn": "记住，我多次说过有一些场景你会想把那些旗标设为 true。"
+    },
+    "127": {
+      "en": "So this is my call to a result.",
+      "zh_tw": "而那會破壞這個流程的某些部分。",
+      "zh_cn": "而那会破坏这个流程的某些部分。"
+    },
+    "128": {
+      "en": "And the answer to adding those two numbers together is 8.",
+      "zh_tw": "所以那是我們最後需要理解的。",
+      "zh_cn": "所以那是我们最后需要理解的。"
+    },
+    "129": {
+      "en": "And then remember, as soon as we get back that call to a result, this connection is automatically closed.",
+      "zh_tw": "為什麼我們要把它們設為 true？",
+      "zh_cn": "为什麼我们要把它们设为 true？"
+    },
+    "130": {
+      "en": "So I see right there, yes, the connection was closed.",
+      "zh_tw": "因為那是你在某些時候可能會想做的事。",
+      "zh_cn": "因为那是你在某些时候可能会想做的事。"
+    },
+    "131": {
+      "en": "And I can no longer receive any messages along this SSC response we got.",
+      "zh_tw": "它到底會破壞什麼？",
+      "zh_cn": "它到底会破坏什麼？"
+    },
+    "132": {
+      "en": "All right, so that's it.",
+      "zh_tw": "這是我們最後需要弄清楚的。",
+      "zh_cn": "这是我们最后需要弄清楚的。"
+    },
+    "133": {
+      "en": "That's the entire flow.",
+      "zh_tw": "這就是最後需要處理的事。",
+      "zh_cn": "这就是最后需要处理的事。"
+    },
+    "134": {
+      "en": "So now you understand what's going on behind the scenes with the streamable HTTP transport.",
+      "zh_tw": "現在你了解了 Streamable HTTP 傳輸在幕後發生了什麼。",
+      "zh_cn": "现在你了解了 Streamable HTTP 传输在幕后发生了什麼。"
+    },
+    "135": {
+      "en": "But we're not quite done just yet.",
+      "zh_tw": "但我們還沒有完全結束。",
+      "zh_cn": "但我们还没有完全结束。"
+    },
+    "136": {
+      "en": "Remember, I said many times that there are scenarios where you're going to want to set these flags to be true.",
+      "zh_tw": "記住，我說過很多次，有些情境下你會想把這些旗標設為 true。",
+      "zh_cn": "记住，我说过很多次，有些情境下你会想把这些旗标设为 true。"
+    },
+    "137": {
+      "en": "And it's going to break portions of this flow.",
+      "zh_tw": "而這會破壞這個流程的某些部分。",
+      "zh_cn": "而这会破坏这个流程的某些部分。"
+    },
+    "138": {
+      "en": "So that's the last thing we need to understand.",
+      "zh_tw": "這是我們需要理解的最後一件事。",
+      "zh_cn": "这是我们需要理解的最后一件事。"
+    },
+    "139": {
+      "en": "Why would we ever set those to true?",
+      "zh_tw": "為什麼我們要把它們設為 true？",
+      "zh_cn": "为什麼我们要把它们设为 true？"
+    },
+    "140": {
+      "en": "Because it is something that you probably are going to want to do at some point.",
+      "zh_tw": "因為這是你在某個時候可能會想做的事。",
+      "zh_cn": "因为这是你在某个时候可能会想做的事。"
+    },
+    "141": {
+      "en": "And exactly what does it break?",
+      "zh_tw": "那它究竟會破壞什麼？",
+      "zh_cn": "那它究竟会破坏什麼？"
+    },
+    "142": {
+      "en": "So that's the last thing we really need to figure out.",
+      "zh_tw": "這是我們真正需要搞清楚的最後一件事。",
+      "zh_cn": "这是我们真正需要搞清楚的最后一件事。"
+    },
+    "143": {
+      "en": "So that's the last thing we need to do at some point.",
+      "zh_tw": "這是我們在某個時候需要做的最後一件事。",
+      "zh_cn": "这是我们在某个时候需要做的最后一件事。"
+    }
+  }
+}

@@ -1,0 +1,812 @@
+{
+  "srt_file": "Code_execution_and_the_Files_API_C9T2ygXC.srt",
+  "video_file": "Code_execution_and_the_Files_API_C9T2ygXC.mp4",
+  "max_valid_entry": 161,
+  "entries": {
+    "1": {
+      "en": "In this video, we're going to take a look at two features offered through the Anthropic API.",
+      "zh_tw": "在這個影片中，我們要看看 Anthropic API 提供的兩個功能。",
+      "zh_cn": "在这个视频中，我们要看看 Anthropic API 提供的兩个功能。"
+    },
+    "2": {
+      "en": "And these two features are going to seem a little bit different, just a little bit separate,",
+      "zh_tw": "這兩個功能看起來可能有點不同，稍微分開一些，",
+      "zh_cn": "这兩个功能看起來可能有点不同，稍微分开一些，"
+    },
+    "3": {
+      "en": "but it turns out they can be combined together in really interesting ways.",
+      "zh_tw": "但事實上它們可以以非常有趣的方式組合在一起。",
+      "zh_cn": "但事实上它们可以以非常有趣的方式组合在一起。"
+    },
+    "4": {
+      "en": "So let's get to it.",
+      "zh_tw": "好，開始吧。",
+      "zh_cn": "好，开始吧。"
+    },
+    "5": {
+      "en": "We're going to first begin by understanding what the files API is all about.",
+      "zh_tw": "我們首先要了解 Files API 是什麼。",
+      "zh_cn": "我们首先要了解 Files API 是什麼。"
+    },
+    "6": {
+      "en": "Earlier on inside this course, we discussed how you can pass images into Claude",
+      "zh_tw": "在課程的前面部分，我們討論了如何把圖片傳給 Claude",
+      "zh_cn": "在课程的前面部分，我们討论了如何把圖片传给 Claude"
+    },
+    "7": {
+      "en": "and ask Claude to interpret the image itself.",
+      "zh_tw": "並要求 Claude 解讀圖片本身。",
+      "zh_cn": "並要求 Claude 解读圖片本身。"
+    },
+    "8": {
+      "en": "And I showed you how we can include an image block,",
+      "zh_tw": "我展示了如何加入一個圖片區塊，",
+      "zh_cn": "我展示了如何加入一个圖片区块，"
+    },
+    "9": {
+      "en": "which can include the actual raw image data encoded in Base64.",
+      "zh_tw": "裡面可以包含以 Base64 編碼的原始圖片資料。",
+      "zh_cn": "里面可以包含以 Base64 编码的原始圖片数据。"
+    },
+    "10": {
+      "en": "We also saw a very similar process being used for uploading of PDF documents as well.",
+      "zh_tw": "我們也看到了上傳 PDF 文件時使用了非常類似的流程。",
+      "zh_cn": "我们也看到了上传 PDF 文件时使用了非常类似的流程。"
+    },
+    "11": {
+      "en": "The files API allows for a little bit of a twist on this whole system.",
+      "zh_tw": "Files API 在這整個系統上做了一點變化。",
+      "zh_cn": "Files API 在这整个系统上做了一点变化。"
+    },
+    "12": {
+      "en": "With the file API, we can make a individual request ahead of time to upload a particular document,",
+      "zh_tw": "透過 Files API，我們可以提前發送一個獨立的請求來上傳特定文件，",
+      "zh_cn": "透过 Files API，我们可以提前发送一个独立的请求來上传特定文件，"
+    },
+    "13": {
+      "en": "be it a PDF or an image or a text file or whatever else.",
+      "zh_tw": "無論是 PDF、圖片、文字檔或其他什麼。",
+      "zh_cn": "无论是 PDF、圖片、文字档或其他什麼。"
+    },
+    "14": {
+      "en": "So we might make an initial request off to Claude to upload that file.",
+      "zh_tw": "所以我們可能先發送一個初始請求給 Claude 來上傳那個檔案。",
+      "zh_cn": "所以我们可能先发送一个初始请求给 Claude 來上传那个文件。"
+    },
+    "15": {
+      "en": "We'll then get back something called a file metadata object.",
+      "zh_tw": "然後我們會得到一個叫做檔案中繼資料物件的東西。",
+      "zh_cn": "然后我们会得到一个叫做文件中继数据对象的東西。"
+    },
+    "16": {
+      "en": "This file metadata object contains some different information,",
+      "zh_tw": "這個檔案中繼資料物件包含一些不同的資訊，",
+      "zh_cn": "这个文件中继数据对象包含一些不同的资讯，"
+    },
+    "17": {
+      "en": "but the most interesting or important property to us is the file ID.",
+      "zh_tw": "但對我們來說最有趣或最重要的屬性是檔案 ID。",
+      "zh_cn": "但对我们來说最有趣或最重要的属性是文件 ID。"
+    },
+    "18": {
+      "en": "This idea allows us to refer back to that uploaded file at some point in time in the future.",
+      "zh_tw": "這個 ID 讓我們能在未來某個時間點參照回那個已上傳的檔案。",
+      "zh_cn": "这个 ID 让我们能在未來某个时间点参照回那个已上传的文件。"
+    },
+    "19": {
+      "en": "So then later on, at some point in the future,",
+      "zh_tw": "所以之後，在未來某個時間點，",
+      "zh_cn": "所以之后，在未來某个时间点，"
+    },
+    "20": {
+      "en": "a user can submit a message like, what do you see inside this image?",
+      "zh_tw": "使用者可以提交像是「你在這張圖片裡看到什麼？」這樣的訊息。",
+      "zh_cn": "使用者可以提交像是「你在这張圖片里看到什麼？」这样的信息。"
+    },
+    "21": {
+      "en": "And inside of our image block right here,",
+      "zh_tw": "在我們的圖片區塊裡，",
+      "zh_cn": "在我们的圖片区块里，"
+    },
+    "22": {
+      "en": "rather than including the raw file data from the image itself,",
+      "zh_tw": "不用包含圖片本身的原始檔案資料，",
+      "zh_cn": "不用包含圖片本身的原始文件数据，"
+    },
+    "23": {
+      "en": "we can include just the file ID.",
+      "zh_tw": "我們可以只包含檔案 ID。",
+      "zh_cn": "我们可以只包含文件 ID。"
+    },
+    "24": {
+      "en": "So we can put in the file ID right there.",
+      "zh_tw": "所以我們可以把檔案 ID 放在那裡。",
+      "zh_cn": "所以我们可以把文件 ID 放在那里。"
+    },
+    "25": {
+      "en": "And that's going to get Claude to go and find that image that we had uploaded ahead of time.",
+      "zh_tw": "這會讓 Claude 去找到我們之前上傳的那張圖片。",
+      "zh_cn": "这会让 Claude 去找到我们之前上传的那張圖片。"
+    },
+    "26": {
+      "en": "Claude is then going to try to interpret the image as best as it can.",
+      "zh_tw": "然後 Claude 會盡其所能地解讀圖片。",
+      "zh_cn": "然后 Claude 会尽其所能地解读圖片。"
+    },
+    "27": {
+      "en": "So the file API allows us to upload a file ahead of time and then make a request later on",
+      "zh_tw": "所以 Files API 讓我們能提前上傳檔案，然後稍後發送請求，",
+      "zh_cn": "所以 Files API 让我们能提前上传文件，然后稍后发送请求，"
+    },
+    "28": {
+      "en": "and include some data about the original file inside the request to Claude.",
+      "zh_tw": "在請求中包含原始檔案的一些資料。",
+      "zh_cn": "在请求中包含原始文件的一些数据。"
+    },
+    "29": {
+      "en": "So you can really just think of this as being another way that we can provide an image or PDF to Claude.",
+      "zh_tw": "你真的可以把這想成是提供圖片或 PDF 給 Claude 的另一種方式。",
+      "zh_cn": "你真的可以把这想成是提供圖片或 PDF 给 Claude 的另一种方式。"
+    },
+    "30": {
+      "en": "Now that we understand the basics behind this file API,",
+      "zh_tw": "現在我們理解了 Files API 背後的基本概念，",
+      "zh_cn": "现在我们理解了 Files API 背后的基本概念，"
+    },
+    "31": {
+      "en": "just the idea that allows us to submit a file and then refer back to it at a future point in time,",
+      "zh_tw": "也就是讓我們能提交檔案，然後在未來某個時間點再參照它，",
+      "zh_cn": "也就是让我们能提交文件，然后在未來某个时间点再参照它，"
+    },
+    "32": {
+      "en": "we are going to switch gears and discuss the other focus of this video, which is code execution.",
+      "zh_tw": "我們要換個方向，討論這個影片的另一個重點，也就是程式碼執行。",
+      "zh_cn": "我们要换个方向，討论这个视频的另一个重点，也就是代码执行。"
+    },
+    "33": {
+      "en": "Code execution is a server-based tool.",
+      "zh_tw": "程式碼執行是一個伺服器端工具。",
+      "zh_cn": "代码执行是一个服务器端工具。"
+    },
+    "34": {
+      "en": "So we do not have to provide an actual implementation for this tool.",
+      "zh_tw": "所以我們不需要提供這個工具的實際實作。",
+      "zh_cn": "所以我们不需要提供这个工具的实际实作。"
+    },
+    "35": {
+      "en": "All we have to do is provide a predefined tool schema.",
+      "zh_tw": "我們只需要提供一個預定義的工具 schema。",
+      "zh_cn": "我们只需要提供一个预定义的工具 schema。"
+    },
+    "36": {
+      "en": "Inside of the initial request we make off to Claude, we will include this specially defined tool schema,",
+      "zh_tw": "在我們發給 Claude 的初始請求中，我們會包含這個特別定義的工具 schema，",
+      "zh_cn": "在我们发给 Claude 的初始请求中，我们会包含这个特別定义的工具 schema，"
+    },
+    "37": {
+      "en": "along with whatever user submitted message we want to include.",
+      "zh_tw": "以及我們想要包含的使用者訊息。",
+      "zh_cn": "以及我们想要包含的使用者信息。"
+    },
+    "38": {
+      "en": "Then behind the scenes, Claude can optionally decide to execute some amount of Python code",
+      "zh_tw": "然後在幕後，Claude 可以選擇在隔離的 Docker 容器中執行一些 Python 程式碼。",
+      "zh_cn": "然后在幕后，Claude 可以选择在隔离的 Docker 容器中执行一些 Python 代码。"
+    },
+    "39": {
+      "en": "inside of an isolated Docker container.",
+      "zh_tw": "Claude 可以在容器中多次執行程式碼。",
+      "zh_cn": "Claude 可以在容器中多次执行代码。"
+    },
+    "40": {
+      "en": "Claude can run code inside this container multiple different times.",
+      "zh_tw": "Claude 從這些程式碼執行中印出的任何內容都會被送回 Claude，",
+      "zh_cn": "Claude 从这些代码执行中印出的任何內容都会被送回 Claude，"
+    },
+    "41": {
+      "en": "Whatever Claude prints up from these code executions will be sent back to Claude,",
+      "zh_tw": "然後 Claude 可以解讀結果並寫出最終回應。",
+      "zh_cn": "然后 Claude 可以解读结果並写出最终回应。"
+    },
+    "42": {
+      "en": "and the Claude can interpret the results and write a final response to us.",
+      "zh_tw": "這些 Docker 容器沒有任何網路存取。",
+      "zh_cn": "这些 Docker 容器没有任何网络访问。"
+    },
+    "43": {
+      "en": "These Docker containers do not have any network access.",
+      "zh_tw": "這表示 Claude 不能寫出任何會發送網路請求",
+      "zh_cn": "这表示 Claude 不能写出任何会发送网络请求"
+    },
+    "44": {
+      "en": "That means that Claude cannot write out any code that will make a network request",
+      "zh_tw": "或嘗試存取任何外部 API 的程式碼。",
+      "zh_cn": "或嘗试访问任何外部 API 的代码。"
+    },
+    "45": {
+      "en": "or attempt to access any kind of outside API.",
+      "zh_tw": "相反地，要把資訊送入 Docker 容器和從中取出資訊，",
+      "zh_cn": "相反地，要把资讯送入 Docker 容器和从中取出资讯，"
+    },
+    "46": {
+      "en": "Instead, to get information into the Docker container and to get information out of it,",
+      "zh_tw": "我們依賴於把剛討論的 Files API",
+      "zh_cn": "我们依賴於把剛討论的 Files API"
+    },
+    "47": {
+      "en": "we rely upon mixing together that file API that we just discussed,",
+      "zh_tw": "和程式碼執行工具混合使用。",
+      "zh_cn": "和代码执行工具混合使用。"
+    },
+    "48": {
+      "en": "along with this code execution tool.",
+      "zh_tw": "讓我展示這整個流程是如何運作的。",
+      "zh_cn": "让我展示这整个流程是如何运作的。"
+    },
+    "49": {
+      "en": "So let me show you how this works in total.",
+      "zh_tw": "假設我們有一個 CSV 檔案叫做 mydata.csv，",
+      "zh_cn": "假设我们有一个 CSV 文件叫做 mydata.csv，"
+    },
+    "50": {
+      "en": "Let's imagine that we have a CSV file called maybe mydata.csv,",
+      "zh_tw": "裡面包含很多我們想讓 Claude 分析的表格資訊。",
+      "zh_cn": "里面包含很多我们想让 Claude 分析的表格资讯。"
+    },
+    "51": {
+      "en": "and it contains a lot of tabular information that we want to get analyzed by Claude.",
+      "zh_tw": "與其經歷非常複雜的程式碼設定，",
+      "zh_cn": "与其经历非常复杂的代码设定，"
+    },
+    "52": {
+      "en": "Rather than going through some really complicated code setup,",
+      "zh_tw": "讓 Claude 寫出一些程式碼，然後我們自己手動執行，",
+      "zh_cn": "让 Claude 写出一些代码，然后我们自己手动执行，"
+    },
+    "53": {
+      "en": "where we ask Claude to write out some code, and then we manually execute that ourself,",
+      "zh_tw": "我們可以改用 Files API 和程式碼執行工具結合，",
+      "zh_cn": "我们可以改用 Files API 和代码执行工具结合，"
+    },
+    "54": {
+      "en": "we can instead make use of this file API and the code execution tool together",
+      "zh_tw": "讓 Claude 自動分析檔案並為我們產生結果。",
+      "zh_cn": "让 Claude 自动分析文件並为我们产生结果。"
+    },
+    "55": {
+      "en": "to get Claude to automatically analyze the file and produce some results for us.",
+      "zh_tw": "為此，我們首先用 Files API 上傳我們的 CSV 檔案。",
+      "zh_cn": "为此，我们首先用 Files API 上传我们的 CSV 文件。"
+    },
+    "56": {
+      "en": "So to do so, we will first use the file API to upload our CSV file.",
+      "zh_tw": "我們先在上面上傳包含一些資料的 CSV 檔案。",
+      "zh_cn": "我们先在上面上传包含一些数据的 CSV 文件。"
+    },
+    "57": {
+      "en": "So we'll initially up here, upload our CSV file with some amount of data inside of it.",
+      "zh_tw": "這會給我們一個檔案 ID。",
+      "zh_cn": "这会给我们一个文件 ID。"
+    },
+    "58": {
+      "en": "And that's going to give us back a file ID.",
+      "zh_tw": "然後我們會在後續請求中包含那個檔案 ID。",
+      "zh_cn": "然后我们会在后续请求中包含那个文件 ID。"
+    },
+    "59": {
+      "en": "We will then include that file ID inside of a follow-up request to Claude.",
+      "zh_tw": "我們會加入一個叫做 container upload 區塊的東西。",
+      "zh_cn": "我们会加入一个叫做 container upload 区块的東西。"
+    },
+    "60": {
+      "en": "So we will add in something called a container upload block.",
+      "zh_tw": "container upload 區塊表示我們要把之前上傳的檔案",
+      "zh_cn": "container upload 区块表示我们要把之前上传的文件"
+    },
+    "61": {
+      "en": "A container upload block just means that we want to take a file that we previously uploaded to Claude",
+      "zh_tw": "注入或放入容器中。",
+      "zh_cn": "注入或放入容器中。"
+    },
+    "62": {
+      "en": "and somehow inject it or place it inside of the container.",
+      "zh_tw": "所以我們要加入這個特別製作的區塊，type 為 container_upload，",
+      "zh_cn": "所以我们要加入这个特別製作的区块，type 为 container_upload，"
+    },
+    "63": {
+      "en": "So we're going to add in this very specially crafted block with a type of container upload",
+      "zh_tw": "file_id 屬性是我們上傳原始檔案時得到的 ID。",
+      "zh_cn": "file_id 属性是我们上传原始文件时得到的 ID。"
+    },
+    "64": {
+      "en": "and a file ID property of whatever ID we got back from when we had uploaded our original file.",
+      "zh_tw": "然後在另一個文字區塊中，我們會要求 Claude 做一些分析，",
+      "zh_cn": "然后在另一个文字区块中，我们会要求 Claude 做一些分析，"
+    },
+    "65": {
+      "en": "Then inside of a separate text block, we'll ask Claude to do some analysis,",
+      "zh_tw": "也許像是「分析這個檔案中的資料」這麼簡單。",
+      "zh_cn": "也许像是「分析这个文件中的数据」这麼简单。"
+    },
+    "66": {
+      "en": "maybe something as simple as analyze the data inside this file.",
+      "zh_tw": "然後在幕後，Claude 會使用程式碼執行工具。",
+      "zh_cn": "然后在幕后，Claude 会使用代码执行工具。"
+    },
+    "67": {
+      "en": "Then behind the scenes, Claude is going to make use of the code execution tool.",
+      "zh_tw": "Claude 會在 Docker 容器中存取那個已上傳的檔案。",
+      "zh_cn": "Claude 会在 Docker 容器中访问那个已上传的文件。"
+    },
+    "68": {
+      "en": "Claude is going to have access to that uploaded file inside the Docker container.",
+      "zh_tw": "Claude 可以寫出程式碼來分析檔案、處理結果，",
+      "zh_cn": "Claude 可以写出代码來分析文件、处理结果，"
+    },
+    "69": {
+      "en": "So Claude can write out some code to analyze the file, process the results,",
+      "zh_tw": "然後給我們一份關於檔案中所有資料的完整報告。",
+      "zh_cn": "然后给我们一份关於文件中所有数据的完整报告。"
+    },
+    "70": {
+      "en": "and then give us a full report of all the data inside that file.",
+      "zh_tw": "現在讓我們看一個這整個流程的範例。",
+      "zh_cn": "现在让我们看一个这整个流程的范例。"
+    },
+    "71": {
+      "en": "Let's now take a look at an example of this entire flow.",
+      "zh_tw": "我提前準備了一個筆記本叫做 005 code execution。",
+      "zh_cn": "我提前准备了一个笔记本叫做 005 code execution。"
+    },
+    "72": {
+      "en": "So I've put together a notebook ahead of time called 005 code execution.",
+      "zh_tw": "我也建立了一個獨立的 CSV 檔案叫做 streaming.csv。",
+      "zh_cn": "我也建立了一个独立的 CSV 文件叫做 streaming.csv。"
+    },
+    "73": {
+      "en": "I've also created a separate CSV file called streaming.csv.",
+      "zh_tw": "裡面是來自影片串流服務的一堆假資料。",
+      "zh_cn": "里面是來自视频流式服务的一堆假数据。"
+    },
+    "74": {
+      "en": "Inside of here is a bunch of fake data from a video streaming service.",
+      "zh_tw": "這個檔案包含了特定使用者的資訊，",
+      "zh_cn": "这个文件包含了特定使用者的资讯，"
+    },
+    "75": {
+      "en": "This file contains information about particular users,",
+      "zh_tw": "他們的訂閱等級，也就是他們有什麼層級的存取權限，",
+      "zh_cn": "他们的订阅等级，也就是他们有什麼层级的访问权限，"
+    },
+    "76": {
+      "en": "what subscription tier they are included in, so what kind of level of access they have,",
+      "zh_tw": "然後是這個特定使用者的很多統計資料。",
+      "zh_cn": "然后是这个特定使用者的很多统计数据。"
+    },
+    "77": {
+      "en": "and then a lot of statistics about this particular user.",
+      "zh_tw": "總觀看時數、最喜歡的類型等等。",
+      "zh_cn": "总观看时数、最喜欢的类型等等。"
+    },
+    "78": {
+      "en": "So the total number of hours they have viewed, top genre, etc., etc.",
+      "zh_tw": "然後最後一欄叫做 churned。",
+      "zh_cn": "然后最后一欄叫做 churned。"
+    },
+    "79": {
+      "en": "And then at the very end, the very last column is called churned.",
+      "zh_tw": "churned 表示使用者是否已取消訂閱。",
+      "zh_cn": "churned 表示使用者是否已取消订阅。"
+    },
+    "80": {
+      "en": "Churned is an indication of whether or not the user has canceled their subscription.",
+      "zh_tw": "0 表示他們沒有取消訂閱，",
+      "zh_cn": "0 表示他们没有取消订阅，"
+    },
+    "81": {
+      "en": "So zero means they have not canceled their subscription,",
+      "zh_tw": "1 表示他們已取消訂閱。",
+      "zh_cn": "1 表示他们已取消订阅。"
+    },
+    "82": {
+      "en": "and a one means they have canceled their subscription.",
+      "zh_tw": "我可以寫很多程式碼來分析這個檔案中的資料，",
+      "zh_cn": "我可以写很多代码來分析这个文件中的数据，"
+    },
+    "83": {
+      "en": "Now, I could write out a lot of code to analyze the data inside this file,",
+      "zh_tw": "找出這些不同特徵之間是否有某種關聯，",
+      "zh_cn": "找出这些不同特徵之间是否有某种关聯，"
+    },
+    "84": {
+      "en": "and figure out whether or not there is some correlation between these different features,",
+      "zh_tw": "以及使用者是否取消了訂閱。",
+      "zh_cn": "以及使用者是否取消了订阅。"
+    },
+    "85": {
+      "en": "and whether or not a user has canceled their subscription.",
+      "zh_tw": "但我可能決定不自己做這些，而是把整個任務交給 Claude。",
+      "zh_cn": "但我可能决定不自己做这些，而是把整个任务交给 Claude。"
+    },
+    "86": {
+      "en": "But instead of doing all this myself, I might decide to just hand the entire task off to Claude.",
+      "zh_tw": "我可以先上傳這個 streaming.csv 檔案，",
+      "zh_cn": "我可以先上传这个 streaming.csv 文件，"
+    },
+    "87": {
+      "en": "I could first upload this stringing.csv file,",
+      "zh_tw": "然後要求 Claude 使用程式碼執行工具對裡面所有資料做分析。",
+      "zh_cn": "然后要求 Claude 使用代码执行工具对里面所有数据做分析。"
+    },
+    "88": {
+      "en": "and then ask Claude to make use of its code execution tool to do an analysis of all the data inside of here.",
+      "zh_tw": "讓我展示我們怎麼做。",
+      "zh_cn": "让我展示我们怎麼做。"
+    },
+    "89": {
+      "en": "So let me show you how we would do that.",
+      "zh_tw": "首先，回到筆記本中，我要你看一下 helper function 儲存格。",
+      "zh_cn": "首先，回到笔记本中，我要你看一下 helper function 存储格。"
+    },
+    "90": {
+      "en": "First, back inside the notebook, I want you to take a look at the helper function cell.",
+      "zh_tw": "往下捲一點，你會注意到我加入了幾個不同的函式。",
+      "zh_cn": "往下捲一点，你会注意到我加入了幾个不同的函数。"
+    },
+    "91": {
+      "en": "If you scroll down a little bit, you'll notice that I added in a couple of different functions.",
+      "zh_tw": "我加入了一個 upload 函式，它會自動上傳特定檔案，給定檔案路徑。",
+      "zh_cn": "我加入了一个 upload 函数，它会自动上传特定文件，给定文件路徑。"
+    },
+    "92": {
+      "en": "I added in a upload function, which will automatically upload a particular file, given a file path.",
+      "zh_tw": "我加入了一個 list files 函式，會列出所有上傳到 Claude 的不同檔案。",
+      "zh_cn": "我加入了一个 list files 函数，会列出所有上传到 Claude 的不同文件。"
+    },
+    "93": {
+      "en": "I have added in a list files function, which will list out all the different files we have uploaded to Claude.",
+      "zh_tw": "我們可以刪除檔案、下載檔案，以及取得特定檔案的資訊。",
+      "zh_cn": "我们可以刪除文件、下載文件，以及取得特定文件的资讯。"
+    },
+    "94": {
+      "en": "We can delete a file, we can download a file, and we get information about a particular file as well.",
+      "zh_tw": "我們很快就會使用這些函式。",
+      "zh_cn": "我们很快就会使用这些函数。"
+    },
+    "95": {
+      "en": "We're going to make use of these functions very shortly.",
+      "zh_tw": "我要摺疊那個儲存格，當然也確保執行它。",
+      "zh_cn": "我要摺叠那个存储格，当然也确保执行它。"
+    },
+    "96": {
+      "en": "So I'm going to collapse that cell, and of course, make sure that I run it as well.",
+      "zh_tw": "然後在下一個儲存格中，我要嘗試上傳 streaming.csv 檔案。",
+      "zh_cn": "然后在下一个存储格中，我要嘗试上传 streaming.csv 文件。"
+    },
+    "97": {
+      "en": "Then in the next cell down, I'm going to attempt to upload the streaming.csv file.",
+      "zh_tw": "我要立刻執行那個儲存格，我們會得到檔案中繼資料物件。",
+      "zh_cn": "我要立刻执行那个存储格，我们会得到文件中继数据对象。"
+    },
+    "98": {
+      "en": "So I'm going to run that cell right away, and we'll get back our file metadata object.",
+      "zh_tw": "裡面有我們的 ID。",
+      "zh_cn": "里面有我们的 ID。"
+    },
+    "99": {
+      "en": "And inside of here, there's our ID.",
+      "zh_tw": "那就是在 Claude 中識別這個檔案的唯一 ID。",
+      "zh_cn": "那就是在 Claude 中识別这个文件的唯一 ID。"
+    },
+    "100": {
+      "en": "So that is the unique ID that identifies this file to Claude.",
+      "zh_tw": "如果我們未來想在對話中包含它，我們會參照那個特定的 ID。",
+      "zh_cn": "如果我们未來想在对话中包含它，我们会参照那个特定的 ID。"
+    },
+    "101": {
+      "en": "And if we ever want to include it inside of a conversation in the future, we'll refer to that particular ID.",
+      "zh_tw": "然後在下一個儲存格中，我有一個簡短的提示詞，要求 Claude 執行詳細分析，找出客戶為什麼要取消訂閱。",
+      "zh_cn": "然后在下一个存储格中，我有一个简短的提示词，要求 Claude 执行详细分析，找出客戶为什麼要取消订阅。"
+    },
+    "102": {
+      "en": "Then inside the next cell down, I've got a short prompt that is asking Claude to run a detailed analysis and figure out why customers are canceling their subscription.",
+      "zh_tw": "我也要求 Claude 印出一個總結所有發現的圖表。",
+      "zh_cn": "我也要求 Claude 印出一个总结所有发现的圖表。"
+    },
+    "103": {
+      "en": "I'm also asking Claude to print out a plot that summarizes all of its findings.",
+      "zh_tw": "之後，我有 container upload 區塊，它會把上傳的檔案實際包含在我們的請求中。",
+      "zh_cn": "之后，我有 container upload 区块，它会把上传的文件实际包含在我们的请求中。"
+    },
+    "104": {
+      "en": "Then after that, I've got the container upload block, which is going to actually include that uploaded file inside of our request.",
+      "zh_tw": "現在我要執行這個儲存格，請注意每當你使用程式碼執行時，有時候完成需要一些時間。",
+      "zh_cn": "现在我要执行这个存储格，请注意每当你使用代码执行时，有时候完成需要一些时间。"
+    },
+    "105": {
+      "en": "So now I'm going to run the cell, and just be aware that whenever you make use of code execution, it sometimes actually takes a little bit of time to complete.",
+      "zh_tw": "我們得到的回應會包含大量的文字。",
+      "zh_cn": "我们得到的回应会包含大量的文字。"
+    },
+    "106": {
+      "en": "The response that we get back is going to contain a tremendous amount of text.",
+      "zh_tw": "這個訊息中會有 Claude 決定寫的所有程式碼，以及所有的 print 語句和輸出，還有一些最終分析。",
+      "zh_cn": "这个信息中会有 Claude 决定写的所有代码，以及所有的 print 语句和输出，还有一些最终分析。"
+    },
+    "107": {
+      "en": "Inside this message is going to be all the code that Claude decided to write, along with all the print statements and output that it got, along with some final analysis as well.",
+      "zh_tw": "Claude 可以在容器中多次執行程式碼。",
+      "zh_cn": "Claude 可以在容器中多次执行代码。"
+    },
+    "108": {
+      "en": "Claude can decide to run code multiple times inside the container.",
+      "zh_tw": "所以我們可能會在訊息中看到多個程式碼區塊和多個執行結果。",
+      "zh_cn": "所以我们可能会在信息中看到多个代码区块和多个执行结果。"
+    },
+    "109": {
+      "en": "So we might actually see multiple code blocks and multiple execution results inside this message.",
+      "zh_tw": "為了幫你理解訊息中發生了什麼，我把所有內容格式化得更漂亮一些，這樣我們能理解發生了什麼。",
+      "zh_cn": "为了幫你理解信息中发生了什麼，我把所有內容格式化得更漂亮一些，这样我们能理解发生了什麼。"
+    },
+    "110": {
+      "en": "Now to help you understand what's going on inside the message, I took all that content and I formatted it just a little bit more nicely so we can understand what's happening.",
+      "zh_tw": "這就是那個訊息。",
+      "zh_cn": "这就是那个信息。"
+    },
+    "111": {
+      "en": "So here's that message.",
+      "zh_tw": "我的 content 列表裡有各種不同的區塊。",
+      "zh_cn": "我的 content 列表里有各种不同的区块。"
+    },
+    "112": {
+      "en": "I got my content list with a variety of different blocks inside of it.",
+      "zh_tw": "第一個區塊是文字區塊，包含一些 Claude 描述初始問題的文字。",
+      "zh_cn": "第一个区块是文字区块，包含一些 Claude 描述初始问题的文字。"
+    },
+    "113": {
+      "en": "The first block is a text block, which is going to contain some amount of text that just has Claude framing the initial problem.",
+      "zh_tw": "然後 Claude 會提供一個 server tool use 區塊。",
+      "zh_cn": "然后 Claude 会提供一个 server tool use 区块。"
+    },
+    "114": {
+      "en": "Claude is then going to provide a server tool use block.",
+      "zh_tw": "這會包含一些 Claude 想在容器中執行的程式碼。",
+      "zh_cn": "这会包含一些 Claude 想在容器中执行的代码。"
+    },
+    "115": {
+      "en": "This is going to contain some amount of code that Claude wants to run inside the container.",
+      "zh_tw": "然後這是我們的程式碼執行工具結果。",
+      "zh_cn": "然后这是我们的代码执行工具结果。"
+    },
+    "116": {
+      "en": "And then here is our code execution tool result.",
+      "zh_tw": "它會包含關於程式碼實際執行的一些資訊。",
+      "zh_cn": "它会包含关於代码实际执行的一些资讯。"
+    },
+    "117": {
+      "en": "It's going to contain some information about the actual execution of that code.",
+      "zh_tw": "標準輸出、標準錯誤的資料、回傳碼，以防有錯誤處理需要等等。",
+      "zh_cn": "标准输出、标准错误的数据、返回码，以防有错误处理需要等等。"
+    },
+    "118": {
+      "en": "So data from standard out, standard error, return code in case there's any error handling required, and so on.",
+      "zh_tw": "看起來在這種情況下，Claude 之後決定執行更多程式碼。",
+      "zh_cn": "看起來在这种情況下，Claude 之后决定执行更多代码。"
+    },
+    "119": {
+      "en": "And then it looks like in this case, Claude decided to run some more code after that.",
+      "zh_tw": "它做了更多分析，得到更多結果，然後又做了更多分析。",
+      "zh_cn": "它做了更多分析，得到更多结果，然后又做了更多分析。"
+    },
+    "120": {
+      "en": "So it did some further analysis right here, got back some more results, and it did some more analysis and so on.",
+      "zh_tw": "在這種情況下，Claude 連續執行了幾次程式碼來做徹底的分析。",
+      "zh_cn": "在这种情況下，Claude 连续执行了幾次代码來做徹底的分析。"
+    },
+    "121": {
+      "en": "So in this case, Claude ran some code several times in a row to do some thorough analysis.",
+      "zh_tw": "你是否決定把所有這些內容展示給使用者，完全取決於你和你的特定應用程式。",
+      "zh_cn": "你是否决定把所有这些內容展示给使用者，完全取决於你和你的特定应用程序。"
+    },
+    "122": {
+      "en": "Now, whether or not you decide to show all this content to your users is totally up to you and the particular application that you are working on.",
+      "zh_tw": "如果你想的話，你可以建構一個很好看的報告，也許像這樣。",
+      "zh_cn": "如果你想的话，你可以建构一个很好看的报告，也许像这样。"
+    },
+    "123": {
+      "en": "If you want to, you could build up a really nice looking report, maybe something like this.",
+      "zh_tw": "我把剛才看到的所有資訊拿來，用 Claude 來格式化得很漂亮。",
+      "zh_cn": "我把剛才看到的所有资讯拿來，用 Claude 來格式化得很漂亮。"
+    },
+    "124": {
+      "en": "So I took all that information that we were just looking at, and I use Claude to just format it very nicely.",
+      "zh_tw": "現在我可以看到初始回應。",
+      "zh_cn": "现在我可以看到初始回应。"
+    },
+    "125": {
+      "en": "So now I can see the initial response right there.",
+      "zh_tw": "那就是我們得到的初始文字區塊中的確切資訊。",
+      "zh_cn": "那就是我们得到的初始文字区块中的确切资讯。"
+    },
+    "126": {
+      "en": "So that's the exact information from the initial text block that we got back.",
+      "zh_tw": "然後這是我的程式碼執行工具。",
+      "zh_cn": "然后这是我的代码执行工具。"
+    },
+    "127": {
+      "en": "Then here's my code execution tool.",
+      "zh_tw": "Claude 決定執行的程式碼以及執行的輸出都在這裡。",
+      "zh_cn": "Claude 决定执行的代码以及执行的输出都在这里。"
+    },
+    "128": {
+      "en": "There's the code that Claude decided to run, along with the output from executing it.",
+      "zh_tw": "我們可以看到這重複了好幾次。",
+      "zh_cn": "我们可以看到这重复了好幾次。"
+    },
+    "129": {
+      "en": "And we can see this is repeated several times in a row.",
+      "zh_tw": "現在這裡有更多文字，另一個程式碼執行，以此類推。",
+      "zh_cn": "现在这里有更多文字，另一个代码执行，以此类推。"
+    },
+    "130": {
+      "en": "So now I've got some more text right here, another code execution, and so on.",
+      "zh_tw": "最後，我想展示程式碼執行最有趣的一個方面。",
+      "zh_cn": "最后，我想展示代码执行最有趣的一个方面。"
+    },
+    "131": {
+      "en": "Finally, I want to show you one of the most interesting aspects of code execution.",
+      "zh_tw": "你可能還記得在我發送的提示詞中，我要求 Claude 包含一個詳細的圖表來總結它的發現。",
+      "zh_cn": "你可能还记得在我发送的提示词中，我要求 Claude 包含一个详细的圖表來总结它的发现。"
+    },
+    "132": {
+      "en": "So you may recall that back inside this prompt that I sent off, I asked Claude to include one detailed plot summarizing its findings.",
+      "zh_tw": "Claude 在幕後確實在圖片檔案中生成了一個圖表，它儲存在我們的 Docker 容器中。",
+      "zh_cn": "Claude 在幕后确实在圖片文件中生成了一个圖表，它存储在我们的 Docker 容器中。"
+    },
+    "133": {
+      "en": "Claude behind the scenes did generate a plot inside of a image file, and that is stored inside of our Docker container.",
+      "zh_tw": "我們可以用 Files API 下載在 Docker 容器中生成的圖表。",
+      "zh_cn": "我们可以用 Files API 下載在 Docker 容器中生成的圖表。"
+    },
+    "134": {
+      "en": "We can use the file API to download that generated plot inside of the Docker container.",
+      "zh_tw": "讓我展示怎麼做。",
+      "zh_cn": "让我展示怎麼做。"
+    },
+    "135": {
+      "en": "Let me show you how.",
+      "zh_tw": "首先，我要仔細看看我格式化的那個訊息。",
+      "zh_cn": "首先，我要仔细看看我格式化的那个信息。"
+    },
+    "136": {
+      "en": "First, I'm going to go and take a close look at the message that I formatted over here.",
+      "zh_tw": "往下捲，我最終可能會看到一個有額外巢狀 content 屬性的文字區塊。",
+      "zh_cn": "往下捲，我最终可能会看到一个有额外巢状 content 属性的文字区块。"
+    },
+    "137": {
+      "en": "So if I scroll through, I might eventually see a text block that has an extra nested content property.",
+      "zh_tw": "裡面我可能會看到 type 為 code_execution_output。",
+      "zh_cn": "里面我可能会看到 type 为 code_execution_output。"
+    },
+    "138": {
+      "en": "And inside that, I might see a type of code execution output.",
+      "zh_tw": "這是我的。",
+      "zh_cn": "这是我的。"
+    },
+    "139": {
+      "en": "So here's mine right here.",
+      "zh_tw": "如果你在回應中沒看到它，試著搜尋 code_execution_output。",
+      "zh_cn": "如果你在回应中没看到它，试著搜尋 code_execution_output。"
+    },
+    "140": {
+      "en": "If you don't see it inside of your response, try searching for code execution output.",
+      "zh_tw": "在那下面是一個檔案 ID。",
+      "zh_cn": "在那下面是一个文件 ID。"
+    },
+    "141": {
+      "en": "Right underneath that is a file ID.",
+      "zh_tw": "我可以用這個檔案 ID 來下載檔案。",
+      "zh_cn": "我可以用这个文件 ID 來下載文件。"
+    },
+    "142": {
+      "en": "So I can use this file ID to download the file.",
+      "zh_tw": "我要複製它，回到我的筆記本。",
+      "zh_cn": "我要复製它，回到我的笔记本。"
+    },
+    "143": {
+      "en": "I'm going to copy it, go back over to my notebook.",
+      "zh_tw": "我要到最底部加入一個新的儲存格。",
+      "zh_cn": "我要到最底部加入一个新的存储格。"
+    },
+    "144": {
+      "en": "I'm going to go down to the very bottom and add in a new cell.",
+      "zh_tw": "好了。",
+      "zh_cn": "好了。"
+    },
+    "145": {
+      "en": "Here we go.",
+      "zh_tw": "我要呼叫 download_file，這是我們在影片開頭看到的預定義函式之一。",
+      "zh_cn": "我要调用 download_file，这是我们在视频开头看到的预定义函数之一。"
+    },
+    "146": {
+      "en": "I'm going to call download file, which was one of those predefined functions that we took a look at at the start of this video.",
+      "zh_tw": "我要貼上剛在回應中找到的檔案 ID。",
+      "zh_cn": "我要貼上剛在回应中找到的文件 ID。"
+    },
+    "147": {
+      "en": "And I'm going to paste in the file ID that I just found inside the response.",
+      "zh_tw": "然後執行這個。",
+      "zh_cn": "然后执行这个。"
+    },
+    "148": {
+      "en": "I'm then going to run this.",
+      "zh_tw": "它會成功執行。",
+      "zh_cn": "它会成功执行。"
+    },
+    "149": {
+      "en": "It's going to run successfully.",
+      "zh_tw": "現在如果我看看筆記本所在的同一個目錄，我會找到一個 PNG 或 JPEG 檔案。",
+      "zh_cn": "现在如果我看看笔记本所在的同一个目录，我会找到一个 PNG 或 JPEG 文件。"
+    },
+    "150": {
+      "en": "And now if I take a look at the same directory that my notebook is in, I'm going to find maybe a PNG or a JPEG file inside there.",
+      "zh_tw": "它的名稱會是隨機的。",
+      "zh_cn": "它的名称会是随机的。"
+    },
+    "151": {
+      "en": "Their name is going to be random.",
+      "zh_tw": "不是真的隨機。",
+      "zh_cn": "不是真的随机。"
+    },
+    "152": {
+      "en": "It's not truly random per se.",
+      "zh_tw": "它會是 Claude 決定取的名稱。",
+      "zh_cn": "它会是 Claude 决定取的名称。"
+    },
+    "153": {
+      "en": "It's going to be whatever Claude decided to name it.",
+      "zh_tw": "如果我打開那個檔案，我會看到 Claude 從 CSV 檔案中提取的一堆資訊。",
+      "zh_cn": "如果我打开那个文件，我会看到 Claude 从 CSV 文件中提取的一堆资讯。"
+    },
+    "154": {
+      "en": "If I then open up that file, if I then open up that file, I'll see a bunch of information that Claude extracted from that CSV file.",
+      "zh_tw": "這是一個很好的視覺化，告訴我所有我需要知道的。",
+      "zh_cn": "这是一个很好的視覺化，告訴我所有我需要知道的。"
+    },
+    "155": {
+      "en": "So this is a great visualization that tells me everything I need to know.",
+      "zh_tw": "按觀看時數的流失率、按月費範圍的等等。",
+      "zh_cn": "按观看时数的流失率、按月费范圍的等等。"
+    },
+    "156": {
+      "en": "So churn rate by viewing hours, by monthly cost ranges, and so on.",
+      "zh_tw": "Claude 做了非常徹底的分析來幫我理解這個檔案的內容。",
+      "zh_cn": "Claude 做了非常徹底的分析來幫我理解这个文件的內容。"
+    },
+    "157": {
+      "en": "Claude did a very thorough analysis here to help me understand the contents of this file.",
+      "zh_tw": "如你所見，從這個示範來看，結合 Files API 和程式碼執行工具讓我們能把相當複雜的任務委託給 Claude。",
+      "zh_cn": "如你所見，从这个示范來看，结合 Files API 和代码执行工具让我们能把相当复杂的任务委托给 Claude。"
+    },
+    "158": {
+      "en": "So as you can see, based upon this demo, combining together the file API and the code execution tool allows us to delegate rather complex tasks off to Claude.",
+      "zh_tw": "當然，你不僅限於做資料分析。",
+      "zh_cn": "当然，你不僅限於做数据分析。"
+    },
+    "159": {
+      "en": "Of course, you are not limited to just doing data analysis.",
+      "zh_tw": "你可以使用程式碼執行和 Files API 的組合來執行各種不同的任務。",
+      "zh_cn": "你可以使用代码执行和 Files API 的组合來执行各种不同的任务。"
+    },
+    "160": {
+      "en": "You can use the combination of code execution along with the files API to execute a wide variety of different tasks.",
+      "zh_tw": "這真的取決於你如何把它整合到你的應用程式中。",
+      "zh_cn": "这真的取决於你如何把它整合到你的应用程序中。"
+    },
+    "161": {
+      "en": "And it's really up to you to decide how to integrate this into your application.",
+      "zh_tw": "這真的取決於你如何把它整合到你的應用程式中。",
+      "zh_cn": "这真的取决於你如何把它整合到你的应用程序中。"
+    }
+  }
+}

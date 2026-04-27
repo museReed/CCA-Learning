@@ -1,0 +1,577 @@
+{
+  "srt_file": "Image_support_ujsNfqDk.srt",
+  "video_file": "Image_support_ujsNfqDk.mp4",
+  "max_valid_entry": 114,
+  "entries": {
+    "1": {
+      "en": "The next advanced capability of Claude that we are going to investigate is Claude's vision",
+      "zh_tw": "我們要研究的下一個 Claude 進階能力是 Claude 的視覺",
+      "zh_cn": "我们要研究的下一个 Claude 进阶能力是 Claude 的視覺"
+    },
+    "2": {
+      "en": "capabilities. Whenever we send a user message off to Claude, we can optionally include images inside",
+      "zh_tw": "功能。每當我們發送使用者訊息給 Claude 時，我們可以選擇在訊息中包含圖片。",
+      "zh_cn": "功能。每当我们发送使用者信息给 Claude 时，我们可以选择在信息中包含圖片。"
+    },
+    "3": {
+      "en": "of the message. We can then ask Claude to do just about anything you can possibly imagine with these",
+      "zh_tw": "然後我們可以要求 Claude 對這些圖片做任何你能想像的事情。",
+      "zh_cn": "然后我们可以要求 Claude 对这些圖片做任何你能想像的事情。"
+    },
+    "4": {
+      "en": "images. So we could ask Claude to tell us what is contained inside them. We could ask Claude to",
+      "zh_tw": "我們可以要求 Claude 告訴我們圖片中包含什麼。我們可以要求 Claude",
+      "zh_cn": "我们可以要求 Claude 告訴我们圖片中包含什麼。我们可以要求 Claude"
+    },
+    "5": {
+      "en": "compare different images. We can ask Claude to count different objects. Really, there's a lot of",
+      "zh_tw": "比較不同的圖片。我們可以要求 Claude 數不同的物件。真的有很多",
+      "zh_cn": "比較不同的圖片。我们可以要求 Claude 数不同的对象。真的有很多"
+    },
+    "6": {
+      "en": "different possibilities here. The first thing I want you to understand around image handling is",
+      "zh_tw": "不同的可能性。關於圖片處理，我首先想讓你理解的是",
+      "zh_cn": "不同的可能性。关於圖片处理，我首先想让你理解的是"
+    },
+    "7": {
+      "en": "some of the different restrictions or requirements. We can send up to 100 images across all the",
+      "zh_tw": "一些不同的限制或要求。我們可以在一次請求中跨所有訊息發送最多 100 張圖片。",
+      "zh_cn": "一些不同的限制或要求。我们可以在一次请求中跨所有信息发送最多 100 張圖片。"
+    },
+    "8": {
+      "en": "messages inside of a single request. There are some limitations around the size of each image and the",
+      "zh_tw": "每張圖片的大小和寬度都有一些限制。",
+      "zh_cn": "每張圖片的大小和寬度都有一些限制。"
+    },
+    "9": {
+      "en": "width as well. And finally, you need to understand that whenever you send an image off to Claude,",
+      "zh_tw": "最後你需要理解的是，每當你發送圖片給 Claude，",
+      "zh_cn": "最后你需要理解的是，每当你发送圖片给 Claude，"
+    },
+    "10": {
+      "en": "that is going to count for some number of tokens that you are going to be charged for. There is an",
+      "zh_tw": "那會佔用一定數量的 token，你會被收費。有一個",
+      "zh_cn": "那会佔用一定数量的 token，你会被收费。有一个"
+    },
+    "11": {
+      "en": "equation you can use to roughly calculate how many tokens you'll be charged for based upon the height",
+      "zh_tw": "等式可以用來根據圖片的高度和寬度（以像素為單位）大致計算你會被收取多少 token。",
+      "zh_cn": "等式可以用來根据圖片的高度和寬度（以像素为单位）大致计算你会被收取多少 token。"
+    },
+    "12": {
+      "en": "and the width of the image in pixels. To send an image off to Claude, we are going to include yet",
+      "zh_tw": "要發送圖片給 Claude，我們要在使用者訊息中包含",
+      "zh_cn": "要发送圖片给 Claude，我们要在使用者信息中包含"
+    },
+    "13": {
+      "en": "another type of block inside of a user message. This is an image block. We can attach multiple",
+      "zh_tw": "另一種類型的區塊。這是一個圖片區塊。我們可以在一個使用者訊息中附加多個",
+      "zh_cn": "另一种类型的区块。这是一个圖片区块。我们可以在一个使用者信息中附加多个"
+    },
+    "14": {
+      "en": "different image blocks inside of one single user message. Each image block is going to hold a",
+      "zh_tw": "不同的圖片區塊。每個圖片區塊會持有",
+      "zh_cn": "不同的圖片区块。每个圖片区块会持有"
+    },
+    "15": {
+      "en": "reference to a single image. Inside this image block, we can attach either the raw image data,",
+      "zh_tw": "對一張圖片的參照。在這個圖片區塊中，我們可以附加原始圖片資料，",
+      "zh_cn": "对一張圖片的参照。在这个圖片区块中，我们可以附加原始圖片数据，"
+    },
+    "16": {
+      "en": "which is what I showed in this diagram over here on the right-hand side, or alternatively,",
+      "zh_tw": "這就是我在右邊圖表中展示的，或者，",
+      "zh_cn": "这就是我在右边圖表中展示的，或者，"
+    },
+    "17": {
+      "en": "we can provide a URL to a image that is hosted somewhere online. So now that we understand some of the",
+      "zh_tw": "我們可以提供一個在線上某處託管的圖片 URL。現在我們理解了一些",
+      "zh_cn": "我们可以提供一个在线上某处托管的圖片 URL。现在我们理解了一些"
+    },
+    "18": {
+      "en": "technical limitations here and how we send an image off, there's something really important that I want to",
+      "zh_tw": "技術限制以及如何發送圖片，有一件非常重要的事我想",
+      "zh_cn": "技术限制以及如何发送圖片，有一件非常重要的事我想"
+    },
+    "19": {
+      "en": "address right away. Whenever an engineer starts making use of images with Claude, well, I notice",
+      "zh_tw": "馬上說明。每當工程師開始搭配圖片使用 Claude 時，我注意到",
+      "zh_cn": "马上说明。每当工程師开始搭配圖片使用 Claude 时，我注意到"
+    },
+    "20": {
+      "en": "very often they start using prompts that are very simple, even kind of like the prompt I've got in",
+      "zh_tw": "他們常常開始使用非常簡單的提示詞，甚至有點像我在",
+      "zh_cn": "他们常常开始使用非常简单的提示词，甚至有点像我在"
+    },
+    "21": {
+      "en": "this example right here. The number one way to get good results out of Claude when you are making use",
+      "zh_tw": "這個例子中的提示詞。使用圖片時從 Claude 獲得好結果的第一方法",
+      "zh_cn": "这个例子中的提示词。使用圖片时从 Claude 获得好结果的第一方法"
+    },
+    "22": {
+      "en": "of images is to continue to have a strong focus on prompting techniques. So if you just throw an image",
+      "zh_tw": "是繼續對提示詞技巧保持強烈的關注。如果你只是把圖片",
+      "zh_cn": "是继续对提示词技巧保持強烈的关注。如果你只是把圖片"
+    },
+    "23": {
+      "en": "off to Claude and then put in a very simple prompt, very often you are not going to get back a good result.",
+      "zh_tw": "丟給 Claude 然後放一個很簡單的提示詞，通常你不會得到好結果。",
+      "zh_cn": "丟给 Claude 然后放一个很简单的提示词，通常你不会得到好结果。"
+    },
+    "24": {
+      "en": "For example, consider the conversation on the right-hand side. I put in an image with 12 marbles.",
+      "zh_tw": "例如，看右邊的對話。我放入了一張有 12 顆彈珠的圖片。",
+      "zh_cn": "例如，看右边的对话。我放入了一張有 12 颗彈珠的圖片。"
+    },
+    "25": {
+      "en": "I actually tested this, by the way, and I asked it very simply, how many marbles are in this image?",
+      "zh_tw": "我實際測試過，順便說一下，我很簡單地問它，這張圖片中有多少顆彈珠？",
+      "zh_cn": "我实际测试过，顺便说一下，我很简单地问它，这張圖片中有多少颗彈珠？"
+    },
+    "26": {
+      "en": "And sure enough, I got back an incorrect count of 13. We can dramatically increase Claude's accuracy",
+      "zh_tw": "果然，我得到了不正確的 13 顆計數。我們可以大幅提高 Claude 在",
+      "zh_cn": "果然，我得到了不正确的 13 颗计数。我们可以大幅提高 Claude 在"
+    },
+    "27": {
+      "en": "when working with images by using the same kind of prompting techniques that we've already learned",
+      "zh_tw": "處理圖片時的準確度，方法是使用我們在",
+      "zh_cn": "处理圖片时的准确度，方法是使用我们在"
+    },
+    "28": {
+      "en": "earlier on inside this course. So techniques like providing guidelines, providing analysis steps,",
+      "zh_tw": "課程前面學到的同樣的提示詞技巧。像是提供指導方針、提供分析步驟、",
+      "zh_cn": "课程前面学到的同样的提示词技巧。像是提供指导方針、提供分析步驟、"
+    },
+    "29": {
+      "en": "or by using one-shot or even multi-shot examples. So let me show you two ways in which we could very",
+      "zh_tw": "或使用一次或多次示範。讓我展示兩種我們可以很",
+      "zh_cn": "或使用一次或多次示范。让我展示兩种我们可以很"
+    },
+    "30": {
+      "en": "easily enhance this prompt and actually get back the correct result. And again, I actually tested",
+      "zh_tw": "容易地增強這個提示詞並得到正確結果的方式。同樣，我實際測試過",
+      "zh_cn": "容易地增強这个提示词並得到正确结果的方式。同样，我实际测试过"
+    },
+    "31": {
+      "en": "this out and made sure that these examples, at least for me, worked as expected. So the first thing",
+      "zh_tw": "這些，確保這些例子至少對我有效。第一件事",
+      "zh_cn": "这些，确保这些例子至少对我有效。第一件事"
+    },
+    "32": {
+      "en": "we might do is provide a series of steps for Claude to go through in analyzing the image. Now, of course,",
+      "zh_tw": "我們可以做的是提供一系列步驟讓 Claude 在分析圖片時遵循。當然，",
+      "zh_cn": "我们可以做的是提供一系列步驟让 Claude 在分析圖片时遵循。当然，"
+    },
+    "33": {
+      "en": "this is only really going to work if we kind of already understand the content of the image that",
+      "zh_tw": "這只有在我們對送入 Claude 的圖片內容有一定了解時才會真正有效。",
+      "zh_cn": "这只有在我们对送入 Claude 的圖片內容有一定了解时才会真正有效。"
+    },
+    "34": {
+      "en": "we're feeding into Claude. So in this scenario, I might ask Claude to first take a look and try to",
+      "zh_tw": "在這個情境中，我可能要求 Claude 先看看並嘗試",
+      "zh_cn": "在这个情境中，我可能要求 Claude 先看看並嘗试"
+    },
+    "35": {
+      "en": "identify each individual marble and just count each of them one by one, and then ask it to recount a",
+      "zh_tw": "識別每顆彈珠，一個一個計數，然後要求它重新計數",
+      "zh_cn": "识別每颗彈珠，一个一个计数，然后要求它重新计数"
+    },
+    "36": {
+      "en": "second time to verify the initial count and provide it a different mechanism or different strategy for",
+      "zh_tw": "第二次來驗證初始計數，並提供不同的機制或策略來",
+      "zh_cn": "第二次來验证初始计数，並提供不同的机制或策略來"
+    },
+    "37": {
+      "en": "counting the number of marbles. And then finally at the bottom, I ask, okay, now let's kind of compare",
+      "zh_tw": "計算彈珠數量。最後在底部，我問好了，現在讓我們比較",
+      "zh_cn": "计算彈珠数量。最后在底部，我问好了，现在让我们比較"
+    },
+    "38": {
+      "en": "those two different counts and figure out what the correct answer is. So by providing a more",
+      "zh_tw": "這兩個不同的計數，找出正確答案。通過提供更",
+      "zh_cn": "这兩个不同的计数，找出正确答案。通过提供更"
+    },
+    "39": {
+      "en": "sophisticated prompt, I was able to get results with a correct count of 12 marbles.",
+      "zh_tw": "精緻的提示詞，我能得到正確的 12 顆彈珠計數。",
+      "zh_cn": "精緻的提示词，我能得到正确的 12 颗彈珠计数。"
+    },
+    "40": {
+      "en": "Another technique we might use here is one shot or multi shot prompting. So here's how that would",
+      "zh_tw": "我們可以使用的另一個技巧是一次或多次示範提示。方法是這樣的。",
+      "zh_cn": "我们可以使用的另一个技巧是一次或多次示范提示。方法是这样的。"
+    },
+    "41": {
+      "en": "work. Inside of my user message, I can alternate the presence of a image part and a text part.",
+      "zh_tw": "在我的使用者訊息中，我可以交替放置圖片部分和文字部分。",
+      "zh_cn": "在我的使用者信息中，我可以交替放置圖片部分和文字部分。"
+    },
+    "42": {
+      "en": "So in this scenario, I have a image part up here, a text part underneath it, and then another image,",
+      "zh_tw": "在這個情境中，上面有一個圖片部分，下面是文字部分，然後另一個圖片，",
+      "zh_cn": "在这个情境中，上面有一个圖片部分，下面是文字部分，然后另一个圖片，"
+    },
+    "43": {
+      "en": "and then a text part. In the initial pair, I provide a image with 11 marbles and then say very plainly,",
+      "zh_tw": "然後文字部分。在最初的配對中，我提供了一張有 11 顆彈珠的圖片，然後很直白地說，",
+      "zh_cn": "然后文字部分。在最初的配对中，我提供了一張有 11 颗彈珠的圖片，然后很直白地说，"
+    },
+    "44": {
+      "en": "the image above has 11 marbles inside of it. Providing an example like this can easily improve",
+      "zh_tw": "上面的圖片中有 11 顆彈珠。提供這樣的示例可以輕鬆提高",
+      "zh_cn": "上面的圖片中有 11 颗彈珠。提供这样的示例可以轻鬆提高"
+    },
+    "45": {
+      "en": "Claude's accuracy when it goes to tackle your image later on. As usual, I would like to test out this",
+      "zh_tw": "Claude 處理你圖片時的準確度。跟往常一樣，我想在 Jupyter 筆記本中測試",
+      "zh_cn": "Claude 处理你圖片时的准确度。跟往常一样，我想在 Jupyter 笔记本中测试"
+    },
+    "46": {
+      "en": "feature in Claude inside of a Jupyter notebook, but this time around, we're going to have a little",
+      "zh_tw": "Claude 的這個功能，但這次我們會有一個稍微",
+      "zh_cn": "Claude 的这个功能，但这次我们会有一个稍微"
+    },
+    "47": {
+      "en": "more complicated example, and I want you to understand the scenario that we're going to walk",
+      "zh_tw": "複雜的例子，我想讓你提前了解我們將在筆記本中走過的情境。",
+      "zh_cn": "复杂的例子，我想让你提前了解我们将在笔记本中走过的情境。"
+    },
+    "48": {
+      "en": "through here inside of our notebook ahead of time by showing you a quick diagram. All right, so here is",
+      "zh_tw": "好的，這裡是我們如何使用 Claude 圖片支援功能的一個範例使用案例。",
+      "zh_cn": "好的，这里是我们如何使用 Claude 圖片支持功能的一个范例使用案例。"
+    },
+    "49": {
+      "en": "a sample use case of how we might use Claude's image support capability. So in case you're not aware,",
+      "zh_tw": "如果你不知道的話，在美國很多地方，我們有非常嚴重的野火問題，野火會開始",
+      "zh_cn": "如果你不知道的话，在美國很多地方，我们有非常嚴重的野火问题，野火会开始"
+    },
+    "50": {
+      "en": "in many parts of the United States, we have really bad wildfire problems where wildfire will begin",
+      "zh_tw": "席捲一個區域，燒毀大量房屋。因為這是非常常見的風險，",
+      "zh_cn": "席捲一个区域，烧毁大量房屋。因为这是非常常見的风险，"
+    },
+    "51": {
+      "en": "sweep through an area and burn down a ton of houses. And because this is a very common risk,",
+      "zh_tw": "很多人想要火災保險來保障他們的房屋。",
+      "zh_cn": "很多人想要火災保险來保障他们的房屋。"
+    },
+    "52": {
+      "en": "a lot of people want fire insurance to insure their home in case it gets burned down.",
+      "zh_tw": "但這些保險公司非常清楚一棟房子完全可能在明天",
+      "zh_cn": "但这些保险公司非常清楚一棟房子完全可能在明天"
+    },
+    "53": {
+      "en": "But these insurers are very much aware that a house can absolutely be burned down tomorrow",
+      "zh_tw": "或明年或很快就被燒毀。所以這些保險公司經常會要求想要",
+      "zh_cn": "或明年或很快就被烧毁。所以这些保险公司经常会要求想要"
+    },
+    "54": {
+      "en": "or next year or very shortly. So these insurers will very often require a homeowner who wants to",
+      "zh_tw": "投保的屋主修剪樹木，甚至完全砍掉房屋周圍的樹木。保險公司",
+      "zh_cn": "投保的屋主修剪樹木，甚至完全砍掉房屋周圍的樹木。保险公司"
+    },
+    "55": {
+      "en": "insure their home to trim trees or even cut trees down entirely around their house. Now the insurer",
+      "zh_tw": "需要實際驗證和確保屋主適當地照顧樹木。",
+      "zh_cn": "需要实际验证和确保屋主适当地照顧樹木。"
+    },
+    "56": {
+      "en": "needs to actually verify and make sure that the homeowner is taking care of the trees appropriately.",
+      "zh_tw": "但要驗證這一點，他們可能必須派人去檢查每個房產，而且可能",
+      "zh_cn": "但要验证这一点，他们可能必须派人去检查每个房产，而且可能"
+    },
+    "57": {
+      "en": "But to verify that, they might have to send out a person to inspect each property and probably do",
+      "zh_tw": "每年或每兩年做一次檢查。那會非常迅速地變得昂貴。",
+      "zh_cn": "每年或每兩年做一次检查。那会非常迅速地变得昂貴。"
+    },
+    "58": {
+      "en": "that inspection maybe once every year or once every two years. That would become expensive really,",
+      "zh_tw": "所以自動化這個過程的一種方式是取得高解析度的",
+      "zh_cn": "所以自动化这个过程的一种方式是取得高解析度的"
+    },
+    "59": {
+      "en": "really quickly. So one way that we could automate this process is by getting high-resolution",
+      "zh_tw": "最新衛星影像，然後送入 Claude，要求 Claude 做火災風險評估。",
+      "zh_cn": "最新卫星影像，然后送入 Claude，要求 Claude 做火災风险评估。"
+    },
+    "60": {
+      "en": "up-to-date satellite imagery and then feed it into Claude and ask Claude for a fire risk assessment.",
+      "zh_tw": "我們可能特別要求 Claude 嘗試偵測房產上的主要住宅。換句話說，",
+      "zh_cn": "我们可能特別要求 Claude 嘗试偵测房产上的主要住宅。换句话说，"
+    },
+    "61": {
+      "en": "We might ask Claude in particular to try to detect the main residence on the property. So in other",
+      "zh_tw": "在衛星影像中找到主要的住宅，",
+      "zh_cn": "在卫星影像中找到主要的住宅，"
+    },
+    "62": {
+      "en": "words, inside of a satellite image of a property, find the main home that is presumably insured,",
+      "zh_tw": "然後看看是否有樹枝懸掛在住宅上方，這是非常",
+      "zh_cn": "然后看看是否有樹枝懸掛在住宅上方，这是非常"
+    },
+    "63": {
+      "en": "and then take a look for maybe tree branches that are overhanging the residence, which is a very",
+      "zh_tw": "常見的火災風險。也許試著評估消防服務要進入",
+      "zh_cn": "常見的火災风险。也许试著评估消防服务要进入"
+    },
+    "64": {
+      "en": "common risk of fire. Maybe try to gauge how difficult it is for fire services to actually access the",
+      "zh_tw": "住宅有多困難。換句話說，確保有一條通往房屋的清楚路徑。而且",
+      "zh_cn": "住宅有多困难。换句话说，确保有一条通往房屋的清楚路徑。而且"
+    },
+    "65": {
+      "en": "residence. So make sure, in other words, there's kind of a clear path to get to the home. And also",
+      "zh_tw": "看看房屋周圍的樹木，確保它們不會太密集，",
+      "zh_cn": "看看房屋周圍的樹木，确保它们不会太密集，"
+    },
+    "66": {
+      "en": "take a look at the trees around the home and make sure that they are not too closely or tightly packed,",
+      "zh_tw": "這本身就可能是火災風險。好的，讓我們到筆記本看看",
+      "zh_cn": "这本身就可能是火災风险。好的，让我们到笔记本看看"
+    },
+    "67": {
+      "en": "which in its own right could be a fire risk as well. All right, so let's go over to Notebook and see how",
+      "zh_tw": "我們如何實作這個。我在一個叫做 002 Images 的新筆記本中。裡面我已經為我們",
+      "zh_cn": "我们如何实作这个。我在一个叫做 002 Images 的新笔记本中。里面我已经为我们"
+    },
+    "68": {
+      "en": "we could implement this. I'm inside of a new notebook called 002 Images. Inside of here, I have already put",
+      "zh_tw": "準備了一個起始提示詞。注意這個提示詞非常詳細，引導 Claude 通過",
+      "zh_cn": "准备了一个起始提示词。注意这个提示词非常详细，引导 Claude 通过"
+    },
+    "69": {
+      "en": "together a starter prompt for us. Now notice that this prompt is highly detailed and walks Claude through",
+      "zh_tw": "不同的要點或我想在圖片中分析的不同想法。我可以寫一個非常",
+      "zh_cn": "不同的要点或我想在圖片中分析的不同想法。我可以写一个非常"
+    },
+    "70": {
+      "en": "different points or different ideas that I want analyzed inside the image. I could have written out a very",
+      "zh_tw": "簡單的提示詞，像是「根據這個房產的衛星影像提供火災風險評分」然後",
+      "zh_cn": "简单的提示词，像是「根据这个房产的卫星影像提供火災风险评分」然后"
+    },
+    "71": {
+      "en": "simple prompt of something like provide a fire risk score based upon the satellite image of this property and",
+      "zh_tw": "就這樣。我幾乎可以保證我不會得到好結果。相反地，我應用了一些",
+      "zh_cn": "就这样。我幾乎可以保证我不会得到好结果。相反地，我应用了一些"
+    },
+    "72": {
+      "en": "just left it there. I can almost guarantee you I would not get a good result. So instead, I applied some of the",
+      "zh_tw": "之前學到的提示詞工程技巧。我提供了一系列不同的",
+      "zh_cn": "之前学到的提示词工程技巧。我提供了一系列不同的"
+    },
+    "73": {
+      "en": "different prompt engineering techniques we have learned about previously. And I provided a series of different",
+      "zh_tw": "分析步驟讓 Claude 遵循。第一步，首先找到",
+      "zh_cn": "分析步驟让 Claude 遵循。第一步，首先找到"
+    },
+    "74": {
+      "en": "analysis steps for Claude to go through. Step one, first, find the actual primary residence inside of the",
+      "zh_tw": "衛星照片中實際的主要住宅。第二步，看看樹木密度。然後看看消防",
+      "zh_cn": "卫星照片中实际的主要住宅。第二步，看看樹木密度。然后看看消防"
+    },
+    "75": {
+      "en": "satellite photo. Step two, take a look at the tree density. Then take a look at the ability for fire",
+      "zh_tw": "服務實際進入房產的能力。看看有多少樹木或特別是樹枝",
+      "zh_cn": "服务实际进入房产的能力。看看有多少樹木或特別是樹枝"
+    },
+    "76": {
+      "en": "services to actually access the property. Take a look at how many trees or specifically branches are",
+      "zh_tw": "懸掛在屋頂上，這是非常常見的火災風險。最後根據",
+      "zh_cn": "懸掛在屋頂上，这是非常常見的火災风险。最后根据"
+    },
+    "77": {
+      "en": "overhanging the roof, which is a very common fire risk. And then finally assign a fire risk rating based",
+      "zh_tw": "所有這些不同的品質指派一個火災風險等級。我提供了一些標準來幫助它決定應該是",
+      "zh_cn": "所有这些不同的品质指派一个火災风险等级。我提供了一些标准來幫助它决定应该是"
+    },
+    "78": {
+      "en": "upon all these different qualities. And I provide some criteria on helping it decide whether it should be a",
+      "zh_tw": "一、二、三還是四。最後在最底部，為每項寫一句話的摘要",
+      "zh_cn": "一、二、三还是四。最后在最底部，为每项写一句话的摘要"
+    },
+    "79": {
+      "en": "one, two, three, or four. And then finally, at the very bottom, write a one sentence summary for each",
+      "zh_tw": "加上最終分數。這就是我們的提示詞。我確保執行那個儲存格。然後讓我們到",
+      "zh_cn": "加上最终分数。这就是我们的提示词。我确保执行那个存储格。然后让我们到"
+    },
+    "80": {
+      "en": "with a final score. So that's our prompt. I'm going to make sure I run that cell. And then let's go down",
+      "zh_tw": "底部這裡。我們要寫一些程式碼來讀取範例圖片並送入",
+      "zh_cn": "底部这里。我们要写一些代码來读取范例圖片並送入"
+    },
+    "81": {
+      "en": "here to the bottom. And we're going to write out some code to read in a sample image and feed it into",
+      "zh_tw": "Claude 連同那個提示詞，看看我們能得到什麼結果。另外一個小項目。本課程附帶",
+      "zh_cn": "Claude 连同那个提示词，看看我们能得到什麼结果。另外一个小项目。本课程附帶"
+    },
+    "82": {
+      "en": "Claude with that prompt and see what kind of result we can. One other quick item. Attached to this lecture,",
+      "zh_tw": "一個叫做 images.zip 的壓縮檔。確保你解壓那個檔案並把 images",
+      "zh_cn": "一个叫做 images.zip 的压缩档。确保你解压那个文件並把 images"
+    },
+    "83": {
+      "en": "you will find a zip archive called images.zip. Make sure you extract that archive and place the images",
+      "zh_tw": "資料夾放到跟筆記本相同的目錄中。這個資料夾包含一些不同的衛星影像，",
+      "zh_cn": "文件夹放到跟笔记本相同的目录中。这个文件夹包含一些不同的卫星影像，"
+    },
+    "84": {
+      "en": "directory into the same folder as your notebook. This folder contains some different satellite imagery of",
+      "zh_tw": "不同的房屋周圍有一些樹木。例如，image one 有一棟房屋，",
+      "zh_cn": "不同的房屋周圍有一些樹木。例如，image one 有一棟房屋，"
+    },
+    "85": {
+      "en": "different houses with some number of trees around it. So for example, image one has a house with",
+      "zh_tw": "絕對有相當多的樹木懸掛。Image two 絕對樹木少很多，但它們仍然",
+      "zh_cn": "绝对有相当多的樹木懸掛。Image two 绝对樹木少很多，但它们仍然"
+    },
+    "86": {
+      "en": "definitely a good amount of tree overhang. Image two has definitely a lot less trees, but they're still",
+      "zh_tw": "有一棵樹離房產比較近。你可以看看其餘的，驗證",
+      "zh_cn": "有一棵樹离房产比較近。你可以看看其余的，验证"
+    },
+    "87": {
+      "en": "a little bit close tree right here to the property. And you can go through the rest and just verify",
+      "zh_tw": "我們確實有一些衛星影像。所以我們的目標是把",
+      "zh_cn": "我们确实有一些卫星影像。所以我们的目标是把"
+    },
+    "88": {
+      "en": "that, yeah, we've definitely got some satellite imagery here. So our goal is going to be to send",
+      "zh_tw": "這些不同的圖片送入 Claude，為每張取得火災評分。回到筆記本中，",
+      "zh_cn": "这些不同的圖片送入 Claude，为每張取得火災评分。回到笔记本中，"
+    },
+    "89": {
+      "en": "these different images into Claude and get a fire score rating for each. Back inside my notebook,",
+      "zh_tw": "我首先要開啟一個圖片檔案，把內容轉換成 base64。",
+      "zh_cn": "我首先要开啟一个圖片文件，把內容转换成 base64。"
+    },
+    "90": {
+      "en": "I'm going to first begin by opening up an image file and converting its contents into base 64.",
+      "zh_tw": "我用 with open 在 images 目錄中。我要特別找 image seven。",
+      "zh_cn": "我用 with open 在 images 目录中。我要特別找 image seven。"
+    },
+    "91": {
+      "en": "So I'll do a width open in the images directory. I'm going to look for image seven specifically.",
+      "zh_tw": "我用那張圖片是因為它完全被樹木包圍。這是",
+      "zh_cn": "我用那張圖片是因为它完全被樹木包圍。这是"
+    },
+    "92": {
+      "en": "And I'm using that image in particular because it is absolutely surrounded by trees. So here's",
+      "zh_tw": "prop seven.png。如你所見，火災方面絕對有很多問題。我要取得",
+      "zh_cn": "prop seven.png。如你所見，火災方面绝对有很多问题。我要取得"
+    },
+    "93": {
+      "en": "prop seven dot PNG. As you can see, definitely a lot of issues with fire here. I'm going to get the",
+      "zh_tw": "image bytes，用 base64 standard_b64encode。我傳入 f.read，",
+      "zh_cn": "image bytes，用 base64 standard_b64encode。我传入 f.read，"
+    },
+    "94": {
+      "en": "image bites as base 64 standard underscore B 64 and code. I'm going to pass an F dot read,",
+      "zh_tw": "然後 decode 成 UTF-8。接著我要加入一個空的訊息列表。",
+      "zh_cn": "然后 decode 成 UTF-8。接著我要加入一个空的信息列表。"
+    },
+    "95": {
+      "en": "and I'll decode into UTF dash eight. I'm then going to add in a empty list of messages.",
+      "zh_tw": "加入一個使用者訊息。這個訊息會有兩個獨立的",
+      "zh_cn": "加入一个使用者信息。这个信息会有兩个独立的"
+    },
+    "96": {
+      "en": "I'll add a user message into it. And this message that I'm adding in is going to have two separate",
+      "zh_tw": "區塊。首先是一個圖片區塊，結構就像你在這裡看到的。",
+      "zh_cn": "区块。首先是一个圖片区块，结构就像你在这里看到的。"
+    },
+    "97": {
+      "en": "blocks. It is first going to have an image block exactly with the structure that you see right here.",
+      "zh_tw": "然後是一個文字區塊，文字區塊包含我想送給 Claude 的實際指示。",
+      "zh_cn": "然后是一个文字区块，文字区块包含我想送给 Claude 的实际指示。"
+    },
+    "98": {
+      "en": "And then we'll have a text block and a text block is going to contain the actual directions",
+      "zh_tw": "我會先加入一個代表圖片區塊的字典。",
+      "zh_cn": "我会先加入一个代表圖片区块的字典。"
+    },
+    "99": {
+      "en": "that I want to feed into Claude. So I will add in first a dictionary to represent the image block.",
+      "zh_tw": "type 為 image，巢狀字典指派給 source，type 為 base64，",
+      "zh_cn": "type 为 image，巢状字典指派给 source，type 为 base64，"
+    },
+    "100": {
+      "en": "So a type of image with a nested dictionary assigned to source that has a type of base 64,",
+      "zh_tw": "media_type 為 image/png，data 就是以 base64 編碼的圖片 bytes。",
+      "zh_cn": "media_type 为 image/png，data 就是以 base64 编码的圖片 bytes。"
+    },
+    "101": {
+      "en": "a media underscore type of image slash PNG and data. That's going to be the image bites encoded as base",
+      "zh_tw": "在那個字典之後，我加入實際的提示詞。type 為 text，然後",
+      "zh_cn": "在那个字典之后，我加入实际的提示词。type 为 text，然后"
+    },
+    "102": {
+      "en": "64. Then after that dictionary, I'll add in my actual prompt. So I'll give this a type of text and then the",
+      "zh_tw": "我想送入的提示詞指派給上面的 prompt 變數。所以 text",
+      "zh_cn": "我想送入的提示词指派给上面的 prompt 变量。所以 text"
+    },
+    "103": {
+      "en": "prompt that I want to send in, I assigned to the prompt variable right there. So I'll do a text",
+      "zh_tw": "為 prompt。好的。最後呼叫 chat，傳入訊息列表。執行這個，",
+      "zh_cn": "为 prompt。好的。最后调用 chat，传入信息列表。执行这个，"
+    },
+    "104": {
+      "en": "of prompt. All right. Finally, I'll call chat and pass in my list of messages. I'm going to run this and",
+      "zh_tw": "看看結果。看回應，我捲到最底部，",
+      "zh_cn": "看看结果。看回应，我捲到最底部，"
+    },
+    "105": {
+      "en": "let's see what we get. Looking at the response, I'm going to scroll down to the very bottom and I",
+      "zh_tw": "應該會看到火災風險等級。在這種情況下，我得到高風險或特別是三分。",
+      "zh_cn": "应该会看到火災风险等级。在这种情況下，我得到高风险或特別是三分。"
+    },
+    "106": {
+      "en": "should see a fire risk rating. In this case, I got a fire risk of high or a score in particular of three.",
+      "zh_tw": "我覺得 Claude 在評估主要房產周圍的所有樹木",
+      "zh_cn": "我覺得 Claude 在评估主要房产周圍的所有樹木"
+    },
+    "107": {
+      "en": "So I think Claude did a pretty reasonable job of evaluating all the trees around the main property",
+      "zh_tw": "並判斷這裡可能會有問題方面做得相當合理。在繼續之前，",
+      "zh_cn": "並判断这里可能会有问题方面做得相当合理。在继续之前，"
+    },
+    "108": {
+      "en": "and deciding that, yeah, there's probably going to be an issue here. Before we move on, there is one",
+      "zh_tw": "關於圖片我想提醒你最後一件事。使用圖片從 Claude 獲得好結果",
+      "zh_cn": "关於圖片我想提醒你最后一件事。使用圖片从 Claude 获得好结果"
+    },
+    "109": {
+      "en": "last thing I want to remind you around images. Getting good results out of Claude when feeding images in",
+      "zh_tw": "完全取決於你的提示詞技巧。正如我們研究了很多改善",
+      "zh_cn": "完全取决於你的提示词技巧。正如我们研究了很多改善"
+    },
+    "110": {
+      "en": "all comes down to your prompting technique. Just as we examined a lot of different ways of improving",
+      "zh_tw": "純文字提示詞的不同方式，同樣的技巧也適用於圖片領域。",
+      "zh_cn": "纯文字提示词的不同方式，同样的技巧也适用於圖片领域。"
+    },
+    "111": {
+      "en": "your prompt when using plain text, those same techniques apply to the world of images as well.",
+      "zh_tw": "所以我真的鼓勵你始終確保準備一個非常完善和",
+      "zh_cn": "所以我真的鼓勵你始终确保准备一个非常完善和"
+    },
+    "112": {
+      "en": "So I would really encourage you to always make sure that you put together a very well-developed",
+      "zh_tw": "經過充分評估的提示詞，因為如果你依賴簡單的提示詞，像我這裡放的，",
+      "zh_cn": "经过充分评估的提示词，因为如果你依賴简单的提示词，像我这里放的，"
+    },
+    "113": {
+      "en": "and well-evaluated prompt, because if you rely upon simple prompts, like what I'm putting in right here,",
+      "zh_tw": "它可能不會像你預期的那樣好用。",
+      "zh_cn": "它可能不会像你预期的那样好用。"
+    },
+    "114": {
+      "en": "it's probably not going to work quite as well as you might expect.",
+      "zh_tw": "它可能不會像你預期的那樣好用。",
+      "zh_cn": "它可能不会像你预期的那样好用。"
+    }
+  }
+}

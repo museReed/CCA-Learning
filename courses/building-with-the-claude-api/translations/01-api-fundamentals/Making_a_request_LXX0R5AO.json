@@ -1,0 +1,392 @@
+{
+  "srt_file": "Making_a_request_LXX0R5AO.srt",
+  "video_file": "Making_a_request_LXX0R5AO.mp4",
+  "max_valid_entry": 77,
+  "entries": {
+    "1": {
+      "en": "We have done quite a bit of talking, so in this video we're going to change things and get our hands dirty by writing out a little bit of code.",
+      "zh_tw": "我們已經討論了不少，所以在這支影片中我們要改變一下，開始動手寫一點程式碼。",
+      "zh_cn": "我们已经討论了不少，所以在这支视频中我们要改变一下，开始动手写一点代码。"
+    },
+    "2": {
+      "en": "We're going to learn how to make a simple and basic request off to the Anthropic API.",
+      "zh_tw": "我們要學習如何向 Anthropic API 發送一個簡單的基本請求。",
+      "zh_cn": "我们要学習如何向 Anthropic API 发送一个简单的基本请求。"
+    },
+    "3": {
+      "en": "I'm going to walk you through four setup steps.",
+      "zh_tw": "我要帶你走過四個設定步驟。",
+      "zh_cn": "我要帶你走过四个设定步驟。"
+    },
+    "4": {
+      "en": "So step one, we're going to open up a Jupyter notebook and install the Anthropic Python SDK along with a package called python.env.",
+      "zh_tw": "第一步，我們要打開一個 Jupyter 筆記本，安裝 Anthropic Python SDK 和一個叫做 python-dotenv 的套件。",
+      "zh_cn": "第一步，我们要打开一个 Jupyter 笔记本，安装 Anthropic Python SDK 和一个叫做 python-dotenv 的套件。"
+    },
+    "5": {
+      "en": "To get started, I'm going to open up a notebook on my own.",
+      "zh_tw": "首先，我要自己打開一個筆記本。",
+      "zh_cn": "首先，我要自己打开一个笔记本。"
+    },
+    "6": {
+      "en": "I've already added in some comments to my notebook just to guide myself through this process.",
+      "zh_tw": "我已經在筆記本裡加了一些註解來引導自己完成這個過程。",
+      "zh_cn": "我已经在笔记本里加了一些註解來引导自己完成这个过程。"
+    },
+    "7": {
+      "en": "In step one up here, I'm going to add in a magic install command.",
+      "zh_tw": "在上面的第一步，我要加入一個魔術安裝命令。",
+      "zh_cn": "在上面的第一步，我要加入一个魔术安装命令。"
+    },
+    "8": {
+      "en": "So percent pip install Anthropic python.env.",
+      "zh_tw": "也就是 %pip install anthropic python-dotenv。",
+      "zh_cn": "也就是 %pip install anthropic python-dotenv。"
+    },
+    "9": {
+      "en": "If you're writing your notebook inside a Visual Studio Code as I am, you might notice a red syntax error coming from the percent over here.",
+      "zh_tw": "如果你像我一樣在 Visual Studio Code 裡寫筆記本，你可能會注意到百分號這裡有一個紅色語法錯誤。",
+      "zh_cn": "如果你像我一样在 Visual Studio Code 里写笔记本，你可能会注意到百分号这里有一个紅色语法错误。"
+    },
+    "10": {
+      "en": "If you see that syntax error, it is totally fine.",
+      "zh_tw": "如果你看到那個語法錯誤，完全沒問題。",
+      "zh_cn": "如果你看到那个语法错误，完全没问题。"
+    },
+    "11": {
+      "en": "You can ignore it.",
+      "zh_tw": "你可以忽略它。",
+      "zh_cn": "你可以忽略它。"
+    },
+    "12": {
+      "en": "Once I've written out this command, I'm going to run it to install these packages.",
+      "zh_tw": "寫完這個命令後，我要執行它來安裝這些套件。",
+      "zh_cn": "写完这个命令后，我要执行它來安装这些套件。"
+    },
+    "13": {
+      "en": "I'm then going to clear the output just so you can see what's going on my screen a little bit more easily.",
+      "zh_tw": "然後我要清除輸出，這樣你可以更清楚地看到我螢幕上的東西。",
+      "zh_cn": "然后我要清除输出，这样你可以更清楚地看到我屏幕上的東西。"
+    },
+    "14": {
+      "en": "Next, we are going to use that python.env package to store and load our API key.",
+      "zh_tw": "接下來，我們要用 python-dotenv 套件來儲存和載入我們的 API 金鑰。",
+      "zh_cn": "接下來，我们要用 python-dotenv 套件來存储和載入我们的 API 金钥。"
+    },
+    "15": {
+      "en": "As a reminder, I put in some directions on creating an API key in the previous lecture.",
+      "zh_tw": "提醒一下，我在前一堂課中放了建立 API 金鑰的說明。",
+      "zh_cn": "提醒一下，我在前一堂课中放了建立 API 金钥的说明。"
+    },
+    "16": {
+      "en": "So if you did not create an API key, I would encourage you to go back to the previous lecture and find those directions.",
+      "zh_tw": "如果你還沒建立 API 金鑰，我建議你回去前一堂課找那些說明。",
+      "zh_cn": "如果你还没建立 API 金钥，我建议你回去前一堂课找那些说明。"
+    },
+    "17": {
+      "en": "To store this key, inside of my editor, I'm going to create a file in the same directory as my notebook with a very special name.",
+      "zh_tw": "要儲存這個金鑰，在編輯器裡，我要在和筆記本相同的目錄中建立一個非常特別名稱的檔案。",
+      "zh_cn": "要存储这个金钥，在编輯器里，我要在和笔记本相同的目录中建立一个非常特別名称的文件。"
+    },
+    "18": {
+      "en": "I'm going to name this file .env.",
+      "zh_tw": "我要把這個檔案命名為 .env。",
+      "zh_cn": "我要把这个文件命名为 .env。"
+    },
+    "19": {
+      "en": "And then inside of here, I'm going to place the API key that I generated a moment ago.",
+      "zh_tw": "然後在裡面，我要放入剛才生成的 API 金鑰。",
+      "zh_cn": "然后在里面，我要放入剛才生成的 API 金钥。"
+    },
+    "20": {
+      "en": "I will write out exactly anthropic underscore API underscore key, and then an equal sign.",
+      "zh_tw": "我會寫上 ANTHROPIC_API_KEY，然後等號。",
+      "zh_cn": "我会写上 ANTHROPIC_API_KEY，然后等号。"
+    },
+    "21": {
+      "en": "And then inside of double quotes, I will put in that key.",
+      "zh_tw": "然後在雙引號裡面放入那個金鑰。",
+      "zh_cn": "然后在双引号里面放入那个金钥。"
+    },
+    "22": {
+      "en": "As a quick side note, the whole reason that we are creating this file and putting our key inside of here is so that we can now ignore this file when we are making use of version control.",
+      "zh_tw": "順帶一提，我們建立這個檔案並把金鑰放在裡面的原因是，這樣我們使用版本控制時就可以忽略這個檔案。",
+      "zh_cn": "顺帶一提，我们建立这个文件並把金钥放在里面的原因是，这样我们使用版本控制时就可以忽略这个文件。"
+    },
+    "23": {
+      "en": "So that we do not accidentally commit this file, say to git, and then accidentally push it up to some public repository where anyone can see this file.",
+      "zh_tw": "這樣我們不會不小心把這個檔案提交到 git，然後不小心推送到公開的儲存庫讓任何人都能看到。",
+      "zh_cn": "这样我们不会不小心把这个文件提交到 git，然后不小心推送到公开的仓库让任何人都能看到。"
+    },
+    "24": {
+      "en": "So again, if you're making use of git or a similar version control system, I would encourage you to make sure that you ignore this file anytime you are committing your work.",
+      "zh_tw": "同樣，如果你使用 git 或類似的版本控制系統，我建議你確保每次提交時都忽略這個檔案。",
+      "zh_cn": "同样，如果你使用 git 或类似的版本控制系统，我建议你确保每次提交时都忽略这个文件。"
+    },
+    "25": {
+      "en": "Now, back inside of my notebook, I can securely load up that environment variable.",
+      "zh_tw": "回到筆記本裡，我可以安全地載入那個環境變數。",
+      "zh_cn": "回到笔记本里，我可以安全地載入那个环境变量。"
+    },
+    "26": {
+      "en": "Then, on to set number three, where we will create our API client using the anthropic package.",
+      "zh_tw": "然後進入第三步，我們用 anthropic 套件建立 API 客戶端。",
+      "zh_cn": "然后进入第三步，我们用 anthropic 套件建立 API 客户端。"
+    },
+    "27": {
+      "en": "Inside this cell, I'm also going to declare a variable name model.",
+      "zh_tw": "在這個儲存格裡，我還要宣告一個叫 model 的變數。",
+      "zh_cn": "在这个存储格里，我还要宣告一个叫 model 的变量。"
+    },
+    "28": {
+      "en": "This will be a string.",
+      "zh_tw": "它是一個字串。",
+      "zh_cn": "它是一个字符串。"
+    },
+    "29": {
+      "en": "It's going to contain the name of the model that we want to run inside of the anthropic API.",
+      "zh_tw": "包含我們想在 Anthropic API 中執行的模型名稱。",
+      "zh_cn": "包含我们想在 Anthropic API 中执行的模型名称。"
+    },
+    "30": {
+      "en": "We are going to use Claude Sonnet 4.",
+      "zh_tw": "我們要用 Claude Sonnet 4。",
+      "zh_cn": "我们要用 Claude Sonnet 4。"
+    },
+    "31": {
+      "en": "Now, on to the last step, where we are going to actually make a request using that client that we just created.",
+      "zh_tw": "進入最後一步，我們實際上要用剛建立的客戶端發送請求。",
+      "zh_cn": "进入最后一步，我们实际上要用剛建立的客户端发送请求。"
+    },
+    "32": {
+      "en": "Before we write out any code, however, I want to show you a little bit of terminology, just some stuff that's going to make things a little bit easier down the line.",
+      "zh_tw": "不過在寫程式碼之前，我想展示一些術語，讓之後的事情更容易理解。",
+      "zh_cn": "不过在写代码之前，我想展示一些术语，让之后的事情更容易理解。"
+    },
+    "33": {
+      "en": "So the first thing to understand here is that we are going to access Claude by using the create function inside the anthropic SDK.",
+      "zh_tw": "首先要理解的是，我們要透過 Anthropic SDK 裡的 create 函式來存取 Claude。",
+      "zh_cn": "首先要理解的是，我们要透过 Anthropic SDK 里的 create 函数來访问 Claude。"
+    },
+    "34": {
+      "en": "This function requires three different keyword arguments, a model, max tokens, and messages.",
+      "zh_tw": "這個函式需要三個不同的關鍵字引數：model、max_tokens 和 messages。",
+      "zh_cn": "这个函数需要三个不同的关键字引数：model、max_tokens 和 messages。"
+    },
+    "35": {
+      "en": "The model keyword argument is just going to be the name of the model we want to run.",
+      "zh_tw": "model 關鍵字引數就是我們想執行的模型名稱。",
+      "zh_cn": "model 关键字引数就是我们想执行的模型名称。"
+    },
+    "36": {
+      "en": "We already defined that variable ahead of time in our previous cell.",
+      "zh_tw": "我們已經在前一個儲存格中提前定義了那個變數。",
+      "zh_cn": "我们已经在前一个存储格中提前定义了那个变量。"
+    },
+    "37": {
+      "en": "The second required keyword argument is max underscore tokens.",
+      "zh_tw": "第二個必要的關鍵字引數是 max_tokens。",
+      "zh_cn": "第二个必要的关键字引数是 max_tokens。"
+    },
+    "38": {
+      "en": "This sets a maximum budget on the number of tokens that Claude can generate.",
+      "zh_tw": "它設定 Claude 可以生成的最大 token 數量。",
+      "zh_cn": "它设定 Claude 可以生成的最大 token 数量。"
+    },
+    "39": {
+      "en": "For example, if we pass in a max tokens of 1,000, if Claude tries to generate anything longer than that, then the generation will be automatically stopped, and we will receive back the first 1,000 tokens that were generated.",
+      "zh_tw": "例如，如果我們傳入 max_tokens 為 1,000，如果 Claude 嘗試生成超過那個長度的東西，生成會自動停止，我們會收到前 1,000 個 token。",
+      "zh_cn": "例如，如果我们传入 max_tokens 为 1,000，如果 Claude 嘗试生成超过那个长度的東西，生成会自动停止，我们会收到前 1,000 个 token。"
+    },
+    "40": {
+      "en": "One thing to note here is that Claude doesn't try to target your number of max tokens.",
+      "zh_tw": "這裡要注意的是 Claude 不會嘗試以你的 max tokens 數為目標。",
+      "zh_cn": "这里要注意的是 Claude 不会嘗试以你的 max tokens 数为目标。"
+    },
+    "41": {
+      "en": "In other words, Claude won't try to write a response of 1,000 tokens.",
+      "zh_tw": "換句話說，Claude 不會試著寫一個 1,000 token 的回應。",
+      "zh_cn": "换句话说，Claude 不会试著写一个 1,000 token 的回应。"
+    },
+    "42": {
+      "en": "It'll just write whatever response it thinks is appropriate.",
+      "zh_tw": "它只會寫出它認為合適的回應。",
+      "zh_cn": "它只会写出它认为合适的回应。"
+    },
+    "43": {
+      "en": "And as such, you should really view max tokens as being like a safety mechanism to ensure that you're not generating too much text.",
+      "zh_tw": "因此，你應該把 max tokens 看作一個安全機制，確保你不會生成太多文字。",
+      "zh_cn": "因此，你应该把 max tokens 看作一个安全机制，确保你不会生成太多文字。"
+    },
+    "44": {
+      "en": "Finally, messages.",
+      "zh_tw": "最後是 messages。",
+      "zh_cn": "最后是 messages。"
+    },
+    "45": {
+      "en": "And this is the part that I really want to focus on because messages are going to be a huge focus for us in the coming videos.",
+      "zh_tw": "這是我真正想集中說明的部分，因為 messages 會是接下來影片中的一個重要焦點。",
+      "zh_cn": "这是我真正想集中说明的部分，因为 messages 会是接下來视频中的一个重要焦点。"
+    },
+    "46": {
+      "en": "To understand what messages are all about, I would like you to think back to the chat application we discussed a moment ago.",
+      "zh_tw": "要理解 messages 到底是什麼，我希望你回想一下剛才討論的聊天應用程式。",
+      "zh_cn": "要理解 messages 到底是什麼，我希望你回想一下剛才討论的聊天应用程序。"
+    },
+    "47": {
+      "en": "So a user might type in some question to Claude and then expect to get an answer back.",
+      "zh_tw": "使用者可能向 Claude 輸入一些問題然後期望收到回答。",
+      "zh_cn": "使用者可能向 Claude 输入一些问题然后期望收到回答。"
+    },
+    "48": {
+      "en": "The messages that we're talking about when we pass these things into this create function are meant to represent exchanges like this.",
+      "zh_tw": "我們傳入 create 函式的 messages 就是要代表這樣的交流。",
+      "zh_cn": "我们传入 create 函数的 messages 就是要代表这样的交流。"
+    },
+    "49": {
+      "en": "There are two types of messages, a user message and assistant message.",
+      "zh_tw": "有兩種類型的 messages：使用者訊息和助手訊息。",
+      "zh_cn": "有兩种类型的 messages：使用者信息和助手信息。"
+    },
+    "50": {
+      "en": "User messages contain text that we want to feed into Claude.",
+      "zh_tw": "使用者訊息包含我們要餵給 Claude 的文字。",
+      "zh_cn": "使用者信息包含我们要餵给 Claude 的文字。"
+    },
+    "51": {
+      "en": "The content inside of a user message is text that either a user or you and I as developers have authored.",
+      "zh_tw": "使用者訊息裡的內容是使用者或我們開發者撰寫的文字。",
+      "zh_cn": "使用者信息里的內容是使用者或我们开发者撰写的文字。"
+    },
+    "52": {
+      "en": "So in other words, a user message will contain text that has been written by some person.",
+      "zh_tw": "換句話說，使用者訊息會包含某個人寫的文字。",
+      "zh_cn": "换句话说，使用者信息会包含某个人写的文字。"
+    },
+    "53": {
+      "en": "The second type of message is an assistant message.",
+      "zh_tw": "第二種訊息是助手訊息。",
+      "zh_cn": "第二种信息是助手信息。"
+    },
+    "54": {
+      "en": "These messages contain text that have been produced by a model and sent back to us.",
+      "zh_tw": "這些訊息包含模型產生並發送回來的文字。",
+      "zh_cn": "这些信息包含模型产生並发送回來的文字。"
+    },
+    "55": {
+      "en": "Now, at this point, I think we have enough knowledge to at least make our first request.",
+      "zh_tw": "到這裡，我覺得我們有足夠的知識來發送第一個請求了。",
+      "zh_cn": "到这里，我覺得我们有足够的知识來发送第一个请求了。"
+    },
+    "56": {
+      "en": "So let's do that and then discuss messages a little bit more.",
+      "zh_tw": "讓我們來做，然後再多討論一下 messages。",
+      "zh_cn": "让我们來做，然后再多討论一下 messages。"
+    },
+    "57": {
+      "en": "Back inside of my notebook, in the very last cell, I'm going to declare a variable of message.",
+      "zh_tw": "回到筆記本裡，在最後一個儲存格，我要宣告一個 message 變數。",
+      "zh_cn": "回到笔记本里，在最后一个存储格，我要宣告一个 message 变量。"
+    },
+    "58": {
+      "en": "And that will come from client messages create.",
+      "zh_tw": "來自 client.messages.create。",
+      "zh_cn": "來自 client.messages.create。"
+    },
+    "59": {
+      "en": "And I'm going to pass in those different arguments that we just discussed.",
+      "zh_tw": "我要傳入我們剛討論的那些不同引數。",
+      "zh_cn": "我要传入我们剛討论的那些不同引数。"
+    },
+    "60": {
+      "en": "So I'll put in a model of model, a max tokens, and I'll use 1000 here, which I think is definitely a safe limit.",
+      "zh_tw": "我會放入 model=model、max_tokens，我用 1000 這裡，我覺得是一個安全的限制。",
+      "zh_cn": "我会放入 model=model、max_tokens，我用 1000 这里，我覺得是一个安全的限制。"
+    },
+    "61": {
+      "en": "And then a list of input messages.",
+      "zh_tw": "然後一個輸入訊息列表。",
+      "zh_cn": "然后一个输入信息列表。"
+    },
+    "62": {
+      "en": "So inside of here, I'm going to put in one single user message and it will contain my question or my query that I want to send off to Claude.",
+      "zh_tw": "在裡面，我要放入一條使用者訊息，包含我想發送給 Claude 的問題或查詢。",
+      "zh_cn": "在里面，我要放入一条使用者信息，包含我想发送给 Claude 的问题或查询。"
+    },
+    "63": {
+      "en": "To create a user message, we'll create a dictionary that will have a role of user and then a content that will contain the actual string that we want to send into Claude.",
+      "zh_tw": "要建立使用者訊息，我們建立一個字典，有 role 為 user，然後 content 包含要發送給 Claude 的實際字串。",
+      "zh_cn": "要建立使用者信息，我们建立一个字典，有 role 为 user，然后 content 包含要发送给 Claude 的实际字符串。"
+    },
+    "64": {
+      "en": "So in this case, I'm going to ask Claude to define quantum computing with something like what is quantum computing answer in one sentence.",
+      "zh_tw": "在這個例子中，我要請 Claude 定義量子運算，像是「什麼是量子運算，用一句話回答」。",
+      "zh_cn": "在这个例子中，我要请 Claude 定义量子运算，像是「什麼是量子运算，用一句话回答」。"
+    },
+    "65": {
+      "en": "Then I'm going to run this.",
+      "zh_tw": "然後我要執行這個。",
+      "zh_cn": "然后我要执行这个。"
+    },
+    "66": {
+      "en": "And we'll take a moment or two to run because we are actually accessing Claude here.",
+      "zh_tw": "需要一兩秒才能跑完，因為我們實際上在存取 Claude。",
+      "zh_cn": "需要一兩秒才能跑完，因为我们实际上在访问 Claude。"
+    },
+    "67": {
+      "en": "And then in the next cell down, I'm going to try to print out the message variable.",
+      "zh_tw": "在下一個儲存格，我要嘗試印出 message 變數。",
+      "zh_cn": "在下一个存储格，我要嘗试印出 message 变量。"
+    },
+    "68": {
+      "en": "We'll see what we get.",
+      "zh_tw": "看看我們得到什麼。",
+      "zh_cn": "看看我们得到什麼。"
+    },
+    "69": {
+      "en": "All right.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "70": {
+      "en": "So inside of here, we can see that there's a lot of stuff coming out.",
+      "zh_tw": "我們可以看到裡面有很多東西出來。",
+      "zh_cn": "我们可以看到里面有很多東西出來。"
+    },
+    "71": {
+      "en": "But noticeably, we have a definition right around here of what quantum computing actually is.",
+      "zh_tw": "但明顯地，在這裡附近有一個量子運算的定義。",
+      "zh_cn": "但明显地，在这里附近有一个量子运算的定义。"
+    },
+    "72": {
+      "en": "So inside of this message variable that we got back, our text is kind of deeply nested.",
+      "zh_tw": "在我們收到的 message 變數裡，文字嵌套得比較深。",
+      "zh_cn": "在我们收到的 message 变量里，文字嵌套得比較深。"
+    },
+    "73": {
+      "en": "We very often want to get just the text that Claude has generated.",
+      "zh_tw": "我們通常只想要 Claude 生成的文字。",
+      "zh_cn": "我们通常只想要 Claude 生成的文字。"
+    },
+    "74": {
+      "en": "And very often, we don't really care about any of these other properties that are contained inside this thing.",
+      "zh_tw": "而且通常不太關心這個東西裡面的其他屬性。",
+      "zh_cn": "而且通常不太关心这个東西里面的其他属性。"
+    },
+    "75": {
+      "en": "So to access just the generated text, we would write out message.content0.text like so.",
+      "zh_tw": "要只存取生成的文字，我們寫 message.content[0].text。",
+      "zh_cn": "要只访问生成的文字，我们写 message.content[0].text。"
+    },
+    "76": {
+      "en": "And if I run that cell again, now I'll see just the generated text and nothing else.",
+      "zh_tw": "如果我再次執行那個儲存格，現在我只會看到生成的文字，其他什麼都沒有。",
+      "zh_cn": "如果我再次执行那个存储格，现在我只会看到生成的文字，其他什麼都没有。"
+    },
+    "77": {
+      "en": "So let's see.",
+      "zh_tw": "讓我們看看。",
+      "zh_cn": "让我们看看。"
+    }
+  }
+}

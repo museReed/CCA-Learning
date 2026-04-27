@@ -1,0 +1,357 @@
+{
+  "srt_file": "Introducing_Retrieval_Augmented_Generation_0dYp9ofW.srt",
+  "video_file": "Introducing_Retrieval_Augmented_Generation_0dYp9ofW.mp4",
+  "max_valid_entry": 70,
+  "entries": {
+    "1": {
+      "en": "In this module, we are going to discuss a tremendous amount about a technique referred to as retrieval augmented generation, or RAG for short.",
+      "zh_tw": "在這個模組中，我們將大量討論一種稱為檢索增強生成的技術，簡稱 RAG。",
+      "zh_cn": "在这个模组中，我们将大量討论一种称为检索增強生成的技术，简称 RAG。"
+    },
+    "2": {
+      "en": "In this video in particular, I want to give you a really solid idea of what RAG is all about.",
+      "zh_tw": "在這個影片中，我特別想讓你對 RAG 有一個非常紮實的理解。",
+      "zh_cn": "在这个视频中，我特別想让你对 RAG 有一个非常紮实的理解。"
+    },
+    "3": {
+      "en": "To help you understand RAG, we're going to walk through a very quick example.",
+      "zh_tw": "為了幫助你理解 RAG，我們會走過一個非常快速的範例。",
+      "zh_cn": "为了幫助你理解 RAG，我们会走过一个非常快速的范例。"
+    },
+    "4": {
+      "en": "So I want you to imagine that you have a very large financial document, like the one seen on the right-hand side.",
+      "zh_tw": "我希望你想像你有一份非常大的財務文件，就像右手邊看到的那樣。",
+      "zh_cn": "我希望你想像你有一份非常大的财务文件，就像右手边看到的那样。"
+    },
+    "5": {
+      "en": "There might be a tremendous amount of text in this. It might have anywhere from, who knows, 100 to 1,000 pages.",
+      "zh_tw": "裡面可能有大量的文字。它可能有大概一百到一千頁。",
+      "zh_cn": "里面可能有大量的文字。它可能有大概一百到一千页。"
+    },
+    "6": {
+      "en": "And we might want to ask Claude very specific questions about very specific areas of the document.",
+      "zh_tw": "而我們可能想要問 Claude 關於文件中非常特定區域的非常具體的問題。",
+      "zh_cn": "而我们可能想要问 Claude 关於文件中非常特定区域的非常具体的问题。"
+    },
+    "7": {
+      "en": "For example, we might want to ask a question like, what risk factors does this company have?",
+      "zh_tw": "例如，我們可能想問一個問題，像是「這家公司有哪些風險因素？」",
+      "zh_cn": "例如，我们可能想问一个问题，像是「这家公司有哪些风险因素？」"
+    },
+    "8": {
+      "en": "Now presumably, this document might have some relevant information inside of it.",
+      "zh_tw": "現在，假設這份文件裡面可能有一些相關的資訊。",
+      "zh_cn": "现在，假设这份文件里面可能有一些相关的资讯。"
+    },
+    "9": {
+      "en": "So we need to solve a very fundamental issue here.",
+      "zh_tw": "所以我們需要解決一個非常根本的問題。",
+      "zh_cn": "所以我们需要解决一个非常根本的问题。"
+    },
+    "10": {
+      "en": "How do we get some information out of this document and into Claude so it can help us answer our question?",
+      "zh_tw": "我們要怎麼從這份文件中取得一些資訊，並送入 Claude，讓它能幫我們回答問題？",
+      "zh_cn": "我们要怎麼从这份文件中取得一些资讯，並送入 Claude，让它能幫我们回答问题？"
+    },
+    "11": {
+      "en": "I want to show you two possible ways that we could solve this problem.",
+      "zh_tw": "我想向你展示兩種可能解決這個問題的方式。",
+      "zh_cn": "我想向你展示兩种可能解决这个问题的方式。"
+    },
+    "12": {
+      "en": "So option number one, we could take all of the text out of this document and just place it directly into a prompt, like the one you see on the right-hand side.",
+      "zh_tw": "選項一，我們可以把這份文件中所有的文字取出來，直接放進提示詞中，就像你在右邊看到的那樣。",
+      "zh_cn": "选项一，我们可以把这份文件中所有的文字取出來，直接放进提示词中，就像你在右边看到的那样。"
+    },
+    "13": {
+      "en": "So we might ask Claude to answer a user's question.",
+      "zh_tw": "所以我們可能會要求 Claude 回答使用者的問題。",
+      "zh_cn": "所以我们可能会要求 Claude 回答使用者的问题。"
+    },
+    "14": {
+      "en": "We'll then put in the user question and then take all the text out of the document and put it into the prompt as well.",
+      "zh_tw": "然後我們會放入使用者的問題，接著把文件中所有的文字也放進提示詞中。",
+      "zh_cn": "然后我们会放入使用者的问题，接著把文件中所有的文字也放进提示词中。"
+    },
+    "15": {
+      "en": "Now, this is perhaps not the best solution.",
+      "zh_tw": "現在，這可能不是最好的解決方案。",
+      "zh_cn": "现在，这可能不是最好的解决方案。"
+    },
+    "16": {
+      "en": "It might work.",
+      "zh_tw": "它可能會有效。",
+      "zh_cn": "它可能会有效。"
+    },
+    "17": {
+      "en": "It also might not.",
+      "zh_tw": "也可能不會。",
+      "zh_cn": "也可能不会。"
+    },
+    "18": {
+      "en": "Just so you know, there is a hard limit on how much text we can feed into Claude.",
+      "zh_tw": "讓你知道一下，我們能塞進 Claude 的文字量是有硬性上限的。",
+      "zh_cn": "让你知道一下，我们能塞进 Claude 的文字量是有硬性上限的。"
+    },
+    "19": {
+      "en": "So if this document is really, really long and we take all the text out of it and feed all the text into Claude, we might immediately end up getting an error.",
+      "zh_tw": "所以如果這份文件真的非常非常長，而我們把所有文字都取出來塞進 Claude，可能會立刻收到錯誤。",
+      "zh_cn": "所以如果这份文件真的非常非常长，而我们把所有文字都取出來塞进 Claude，可能会立刻收到错误。"
+    },
+    "20": {
+      "en": "Which means just right out the gate, this solution would not work if our document is really, really long.",
+      "zh_tw": "這表示從一開始，如果我們的文件真的非常長，這個解決方案就行不通。",
+      "zh_cn": "这表示从一开始，如果我们的文件真的非常长，这个解决方案就行不通。"
+    },
+    "21": {
+      "en": "The second problem with this approach is that Claude gets a little bit less effective as your prompt gets longer.",
+      "zh_tw": "這種方法的第二個問題是，隨著提示詞變長，Claude 的效果會降低一些。",
+      "zh_cn": "这种方法的第二个问题是，随著提示词变长，Claude 的效果会降低一些。"
+    },
+    "22": {
+      "en": "So if you start putting a tremendous amount of text into a prompt, Claude is going to have just a harder time understanding exactly what you want and answering your question because there is just a tremendous amount of information inside the prompt.",
+      "zh_tw": "所以如果你開始在提示詞中放入大量文字，Claude 會更難理解你到底想要什麼，也更難回答你的問題，因為提示詞中有太多資訊了。",
+      "zh_cn": "所以如果你开始在提示词中放入大量文字，Claude 会更难理解你到底想要什麼，也更难回答你的问题，因为提示词中有太多资讯了。"
+    },
+    "23": {
+      "en": "And then finally, larger prompts cost more money to process and take longer to process.",
+      "zh_tw": "最後，更大的提示詞會花更多錢來處理，也需要更長時間來處理。",
+      "zh_cn": "最后，更大的提示词会花更多钱來处理，也需要更长时间來处理。"
+    },
+    "24": {
+      "en": "So there is a financial burden here as well and a user experience burden because they just have to wait around longer to get back some kind of answer.",
+      "zh_tw": "所以這裡也有財務上的負擔，以及使用者體驗上的負擔，因為他們只能等著拿回某種答案。",
+      "zh_cn": "所以这里也有财务上的负担，以及使用者体验上的负担，因为他们只能等著拿回某种答案。"
+    },
+    "25": {
+      "en": "So option number one might work in some scenarios.",
+      "zh_tw": "所以選項一在某些情境下可能有效。",
+      "zh_cn": "所以选项一在某些情境下可能有效。"
+    },
+    "26": {
+      "en": "In other scenarios, it might fail entirely.",
+      "zh_tw": "在其他情境下，它可能完全失敗。",
+      "zh_cn": "在其他情境下，它可能完全失敗。"
+    },
+    "27": {
+      "en": "So with that in mind, let's take a look at option number two.",
+      "zh_tw": "考慮到這一點，讓我們來看看選項二。",
+      "zh_cn": "考慮到这一点，让我们來看看选项二。"
+    },
+    "28": {
+      "en": "Option number two is a little bit more complex.",
+      "zh_tw": "選項二稍微複雜一些。",
+      "zh_cn": "选项二稍微复杂一些。"
+    },
+    "29": {
+      "en": "So option number two has two separate steps.",
+      "zh_tw": "選項二有兩個獨立的步驟。",
+      "zh_cn": "选项二有兩个独立的步驟。"
+    },
+    "30": {
+      "en": "In step one, we'll take all the text out of the document and break it up into small chunks.",
+      "zh_tw": "在第一步中，我們會把文件中所有的文字取出來，分割成小塊。",
+      "zh_cn": "在第一步中，我们会把文件中所有的文字取出來，分割成小块。"
+    },
+    "31": {
+      "en": "Then whenever a user asks a question, we're going to take their question and put it into the prompt as before.",
+      "zh_tw": "然後每當使用者提問時，我們會像之前一樣把他們的問題放入提示詞中。",
+      "zh_cn": "然后每当使用者提问时，我们会像之前一样把他们的问题放入提示词中。"
+    },
+    "32": {
+      "en": "But we're also going to go through an extra little step.",
+      "zh_tw": "但我們還會多做一個小步驟。",
+      "zh_cn": "但我们还会多做一个小步驟。"
+    },
+    "33": {
+      "en": "We're going to examine the user's question very closely.",
+      "zh_tw": "我們會非常仔細地檢視使用者的問題。",
+      "zh_cn": "我们会非常仔细地检視使用者的问题。"
+    },
+    "34": {
+      "en": "And we're going to find a chunk of text that seems most relevant to the user's question.",
+      "zh_tw": "然後找到一段看起來與使用者問題最相關的文字區塊。",
+      "zh_cn": "然后找到一段看起來与使用者问题最相关的文字区块。"
+    },
+    "35": {
+      "en": "In this case, if a user asks us, what risk does this company face?",
+      "zh_tw": "在這種情況下，如果使用者問我們「這家公司面臨什麼風險？」",
+      "zh_cn": "在这种情況下，如果使用者问我们「这家公司面臨什麼风险？」"
+    },
+    "36": {
+      "en": "And we have a chunk of text right here that seems to be about risk factors.",
+      "zh_tw": "而我們這裡有一段文字似乎是關於風險因素的。",
+      "zh_cn": "而我们这里有一段文字似乎是关於风险因素的。"
+    },
+    "37": {
+      "en": "We would then take that chunk of text and include it inside of the prompt.",
+      "zh_tw": "我們就會取出那段文字，並把它放進提示詞中。",
+      "zh_cn": "我们就会取出那段文字，並把它放进提示词中。"
+    },
+    "38": {
+      "en": "So now we are focusing all of Claude's attention on just this very small snippet of the overall financial document.",
+      "zh_tw": "所以現在我們把 Claude 的注意力集中在整份財務文件的一小段摘錄上。",
+      "zh_cn": "所以现在我们把 Claude 的注意力集中在整份财务文件的一小段摘录上。"
+    },
+    "39": {
+      "en": "And hopefully Claude can do a much better job of answering the user's question than before when we were just putting all of the text of the document into the prompt.",
+      "zh_tw": "希望 Claude 能比之前把整份文件文字都放入提示詞時，更好地回答使用者的問題。",
+      "zh_cn": "希望 Claude 能比之前把整份文件文字都放入提示词时，更好地回答使用者的问题。"
+    },
+    "40": {
+      "en": "So option number two has a distinct set of upsides and downsides.",
+      "zh_tw": "所以選項二有一組明確的優點和缺點。",
+      "zh_cn": "所以选项二有一组明确的优点和缺点。"
+    },
+    "41": {
+      "en": "The upsides here are that Claude can focus on just the relevant content.",
+      "zh_tw": "這裡的優點是 Claude 可以只專注於相關內容。",
+      "zh_cn": "这里的优点是 Claude 可以只專注於相关內容。"
+    },
+    "42": {
+      "en": "Secondly, this can scale up to really, really large documents with a tremendous number of pages.",
+      "zh_tw": "其次，這可以擴展到非常非常大的文件，有大量的頁數。",
+      "zh_cn": "其次，这可以扩展到非常非常大的文件，有大量的页数。"
+    },
+    "43": {
+      "en": "And it also works if we have multiple documents.",
+      "zh_tw": "而且如果我們有多份文件也能運作。",
+      "zh_cn": "而且如果我们有多份文件也能运作。"
+    },
+    "44": {
+      "en": "We can take all these different documents, separate them all into chunks, and then once again, only include chunks relevant to a user's question inside of a prompt.",
+      "zh_tw": "我們可以把所有不同的文件都分成區塊，然後再次只在提示詞中包含與使用者問題相關的區塊。",
+      "zh_cn": "我们可以把所有不同的文件都分成区块，然后再次只在提示词中包含与使用者问题相关的区块。"
+    },
+    "45": {
+      "en": "This technique also generally leads to much smaller prompts, which means it's going to take less time to run, and it's going to cost us a lot less.",
+      "zh_tw": "這個技術通常也會產生更小的提示詞，這表示執行時間更短，成本也更低。",
+      "zh_cn": "这个技术通常也会产生更小的提示词，这表示执行时间更短，成本也更低。"
+    },
+    "46": {
+      "en": "But there are some big downsides to this approach as well.",
+      "zh_tw": "但這個方法也有一些很大的缺點。",
+      "zh_cn": "但这个方法也有一些很大的缺点。"
+    },
+    "47": {
+      "en": "First off, there's just naturally a lot more complexity.",
+      "zh_tw": "首先，自然會有更多的複雜性。",
+      "zh_cn": "首先，自然会有更多的复杂性。"
+    },
+    "48": {
+      "en": "This requires a preprocessing step where we take all the text out of the document and split it into chunks.",
+      "zh_tw": "這需要一個前處理步驟，我們要從文件中取出所有文字並分割成區塊。",
+      "zh_cn": "这需要一个前处理步驟，我们要从文件中取出所有文字並分割成区块。"
+    },
+    "49": {
+      "en": "We also have to figure out some way of searching through all these chunks to find the ones that are most relevant to the user's question.",
+      "zh_tw": "我們還必須找出某種方式來搜尋所有這些區塊，找到與使用者問題最相關的那些。",
+      "zh_cn": "我们还必须找出某种方式來搜尋所有这些区块，找到与使用者问题最相关的那些。"
+    },
+    "50": {
+      "en": "And we even need to define what it means to be relevant to the user's question.",
+      "zh_tw": "我們甚至需要定義什麼叫做「與使用者的問題相關」。",
+      "zh_cn": "我们甚至需要定义什麼叫做「与使用者的问题相关」。"
+    },
+    "51": {
+      "en": "When we do find some relevant chunks and include them in the prompt, there's really no guarantee that they will contain all the context that Claude needs to actually answer the question.",
+      "zh_tw": "當我們找到一些相關的區塊並把它們放入提示詞時，並不能保證它們會包含 Claude 真正回答問題所需的所有上下文。",
+      "zh_cn": "当我们找到一些相关的区块並把它们放入提示词时，並不能保证它们会包含 Claude 真正回答问题所需的所有上下文。"
+    },
+    "52": {
+      "en": "If the user asks, what risk does this company face, and we include only the risk factor section, that might include some other important area of the document, maybe strategy outlook, where some of those risks get addressed in some way.",
+      "zh_tw": "如果使用者問「這家公司面臨什麼風險」，而我們只包含了風險因素章節，那可能還有其他重要的文件區域，也許是策略展望，其中有些風險以某種方式被處理了。",
+      "zh_cn": "如果使用者问「这家公司面臨什麼风险」，而我们只包含了风险因素章节，那可能还有其他重要的文件区域，也许是策略展望，其中有些风险以某种方式被处理了。"
+    },
+    "53": {
+      "en": "And then finally, there are many different ways in which we can split the text up.",
+      "zh_tw": "最後，有很多不同的方式可以分割文字。",
+      "zh_cn": "最后，有很多不同的方式可以分割文字。"
+    },
+    "54": {
+      "en": "So we could just take all the text of the document and divide it into equal portions.",
+      "zh_tw": "所以我們可以把文件的所有文字分成等長的部分。",
+      "zh_cn": "所以我们可以把文件的所有文字分成等长的部分。"
+    },
+    "55": {
+      "en": "Or we could go through the document and find all these different headers and say for every header, we're going to make a new chunk.",
+      "zh_tw": "或者我們可以遍歷文件，找到所有不同的標題，然後說每個標題開始一個新的區塊。",
+      "zh_cn": "或者我们可以遍历文件，找到所有不同的标题，然后说每个标题开始一个新的区块。"
+    },
+    "56": {
+      "en": "So we might have chunk one, and then two, and then three somewhere down here.",
+      "zh_tw": "所以我們可能有區塊一，然後是二，然後三在下面某處。",
+      "zh_cn": "所以我们可能有区块一，然后是二，然后三在下面某处。"
+    },
+    "57": {
+      "en": "There are many different ways in which we can define what a chunk is.",
+      "zh_tw": "有很多不同的方式可以定義什麼是一個區塊。",
+      "zh_cn": "有很多不同的方式可以定义什麼是一个区块。"
+    },
+    "58": {
+      "en": "And so we have to do a little bit of evaluation and decide which technique is the best for our particular application.",
+      "zh_tw": "所以我們必須做一些評估，決定哪種技術最適合我們的特定應用程式。",
+      "zh_cn": "所以我们必须做一些评估，决定哪种技术最适合我们的特定应用程序。"
+    },
+    "59": {
+      "en": "So as you might guess, option number two is RAG.",
+      "zh_tw": "所以你可能已經猜到了，選項二就是 RAG。",
+      "zh_cn": "所以你可能已经猜到了，选项二就是 RAG。"
+    },
+    "60": {
+      "en": "It is retrieval augmented generation.",
+      "zh_tw": "就是檢索增強生成。",
+      "zh_cn": "就是检索增強生成。"
+    },
+    "61": {
+      "en": "As we just discussed, RAG has many big upsides and many big downsides as well.",
+      "zh_tw": "正如我們剛才討論的，RAG 有很多重大的優點，也有很多重大的缺點。",
+      "zh_cn": "正如我们剛才討论的，RAG 有很多重大的优点，也有很多重大的缺点。"
+    },
+    "62": {
+      "en": "There's a lot of technical challenges around it.",
+      "zh_tw": "它有很多技術挑戰。",
+      "zh_cn": "它有很多技术挑战。"
+    },
+    "63": {
+      "en": "It requires a pre-processing step.",
+      "zh_tw": "它需要一個前處理步驟。",
+      "zh_cn": "它需要一个前处理步驟。"
+    },
+    "64": {
+      "en": "We also have to figure out some kind of searching mechanism to find those relevant chunks.",
+      "zh_tw": "我們還必須找出某種搜尋機制來找到那些相關的區塊。",
+      "zh_cn": "我们还必须找出某种搜尋机制來找到那些相关的区块。"
+    },
+    "65": {
+      "en": "We have to chunk documents.",
+      "zh_tw": "我們必須分割文件。",
+      "zh_cn": "我们必须分割文件。"
+    },
+    "66": {
+      "en": "All in all, there's just a lot more work than option number one.",
+      "zh_tw": "總的來說，這比選項一有更多的工作。",
+      "zh_cn": "总的來说，这比选项一有更多的工作。"
+    },
+    "67": {
+      "en": "So whenever we are considering implementing RAG inside of an application, we really have to analyze all these different steps and figure out whether or not it is right for our particular use case.",
+      "zh_tw": "所以每當我們考慮在應用程式中實作 RAG 時，我們真的必須分析所有這些不同的步驟，弄清楚它是否適合我們的特定使用案例。",
+      "zh_cn": "所以每当我们考慮在应用程序中实作 RAG 时，我们真的必须分析所有这些不同的步驟，弄清楚它是否适合我们的特定使用案例。"
+    },
+    "68": {
+      "en": "All right, so now that we have kind of a very, very high level understanding of what RAG is all about, let's start to take a look at the actual implementation of this process in just a moment.",
+      "zh_tw": "好的，現在我們對 RAG 有了非常非常高層次的理解，讓我們開始來看看實際實作這個流程。",
+      "zh_cn": "好的，现在我们对 RAG 有了非常非常高层次的理解，让我们开始來看看实际实作这个流程。"
+    },
+    "69": {
+      "en": "So let's start to take a look at the actual implementation of this process.",
+      "zh_tw": "讓我們開始來看看這個流程的實際實作。",
+      "zh_cn": "让我们开始來看看这个流程的实际实作。"
+    },
+    "70": {
+      "en": "So let's take a look at the actual implementation of this process.",
+      "zh_tw": "讓我們來看看這個流程的實際實作。",
+      "zh_cn": "让我们來看看这个流程的实际实作。"
+    }
+  }
+}

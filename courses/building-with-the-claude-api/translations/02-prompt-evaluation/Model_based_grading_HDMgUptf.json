@@ -1,0 +1,627 @@
+{
+  "srt_file": "Model_based_grading_HDMgUptf.srt",
+  "video_file": "Model_based_grading_HDMgUptf.mp4",
+  "max_valid_entry": 124,
+  "entries": {
+    "1": {
+      "en": "The next thing we're going to implement inside of our prompt evaluation workflow is a grading system.",
+      "zh_tw": "接下來我們要在提示評估工作流程中實作的是評分系統。",
+      "zh_cn": "接下來我们要在提示评估工作流程中实作的是评分系统。"
+    },
+    "2": {
+      "en": "Now, as a reminder, a grader is going to take in some output coming from our model.",
+      "zh_tw": "提醒一下，評分器會接收模型的輸出。",
+      "zh_cn": "提醒一下，评分器会接收模型的输出。"
+    },
+    "3": {
+      "en": "And then our hope is that the grader is going to give us some kind of objective signal.",
+      "zh_tw": "然後我們希望評分器能給我們某種客觀的訊號。",
+      "zh_cn": "然后我们希望评分器能给我们某种客观的讯号。"
+    },
+    "4": {
+      "en": "It might be a number or a true or false value.",
+      "zh_tw": "可以是一個數字或布林值。",
+      "zh_cn": "可以是一个数字或布林值。"
+    },
+    "5": {
+      "en": "It can be really anything, but very commonly, very frequently, you're going to see a number output between 1 and 10,",
+      "zh_tw": "可以是任何東西，但非常常見的是你會看到輸出介於 1 到 10 之間的數字，",
+      "zh_cn": "可以是任何東西，但非常常見的是你会看到输出介於 1 到 10 之间的数字，"
+    },
+    "6": {
+      "en": "where 10 means that we got a very high quality output, and 1 means we got a very low quality output.",
+      "zh_tw": "10 表示我們得到了非常高品質的輸出，1 表示我們得到了非常低品質的輸出。",
+      "zh_cn": "10 表示我们得到了非常高品质的输出，1 表示我们得到了非常低品质的输出。"
+    },
+    "7": {
+      "en": "Again, that's not a requirement.",
+      "zh_tw": "再說一次，這不是必須的。",
+      "zh_cn": "再说一次，这不是必须的。"
+    },
+    "8": {
+      "en": "We don't have to get numbers out of these graders, but it's a very common practice you're going to see very often.",
+      "zh_tw": "我們不一定要從評分器得到數字，但這是你會經常看到的非常常見的做法。",
+      "zh_cn": "我们不一定要从评分器得到数字，但这是你会经常看到的非常常見的做法。"
+    },
+    "9": {
+      "en": "There's three different kinds of graders that we're going to discuss in this video.",
+      "zh_tw": "在這個影片中我們要討論三種不同的評分器。",
+      "zh_cn": "在这个视频中我们要討论三种不同的评分器。"
+    },
+    "10": {
+      "en": "Code, model, and human.",
+      "zh_tw": "程式碼評分、模型評分和人工評分。",
+      "zh_cn": "代码评分、模型评分和人工评分。"
+    },
+    "11": {
+      "en": "Let's first figure out what code-based graders are all about.",
+      "zh_tw": "讓我們先了解程式碼評分器是什麼。",
+      "zh_cn": "让我们先了解代码评分器是什麼。"
+    },
+    "12": {
+      "en": "With a code-based grader, we're going to take the output from our model and feed it into a snippet of code that you and I author.",
+      "zh_tw": "使用程式碼評分器，我們會把模型的輸出餵入你和我編寫的一段程式碼。",
+      "zh_cn": "使用代码评分器，我们会把模型的输出餵入你和我编写的一段代码。"
+    },
+    "13": {
+      "en": "Inside this code, we can do just about any kind of programmatic check you can imagine.",
+      "zh_tw": "在這段程式碼中，我們可以做任何你能想像到的程式化檢查。",
+      "zh_cn": "在这段代码中，我们可以做任何你能想像到的程序化检查。"
+    },
+    "14": {
+      "en": "So we might verify to make sure that the output from the model was not too long or too short.",
+      "zh_tw": "我們可以驗證模型的輸出是否太長或太短。",
+      "zh_cn": "我们可以验证模型的输出是否太长或太短。"
+    },
+    "15": {
+      "en": "We might make sure that the output does have or doesn't have certain words.",
+      "zh_tw": "我們可以確保輸出中有或沒有某些特定的字詞。",
+      "zh_cn": "我们可以确保输出中有或没有某些特定的字词。"
+    },
+    "16": {
+      "en": "If we are returning JSON or code, we can do syntax validation programmatically.",
+      "zh_tw": "如果我們回傳的是 JSON 或程式碼，我們可以用程式方式做語法驗證。",
+      "zh_cn": "如果我们返回的是 JSON 或代码，我们可以用程序方式做语法验证。"
+    },
+    "17": {
+      "en": "And we can even do more complex checks, like implement a readability score,",
+      "zh_tw": "我們甚至可以做更複雜的檢查，像是實作一個可讀性分數，",
+      "zh_cn": "我们甚至可以做更复杂的检查，像是实作一个可读性分数，"
+    },
+    "18": {
+      "en": "where we make sure that the generated text is at an appropriate reading level for our particular use case.",
+      "zh_tw": "確保生成的文字對我們特定的使用案例來說處於適當的閱讀難度。",
+      "zh_cn": "确保生成的文字对我们特定的使用案例來说处於适当的阅读难度。"
+    },
+    "19": {
+      "en": "The only requirement here is that when we run this code, we return some kind of actual signal we can use.",
+      "zh_tw": "唯一的要求是，當我們執行這段程式碼時，要回傳某種我們可以使用的實際訊號。",
+      "zh_cn": "唯一的要求是，当我们执行这段代码时，要返回某种我们可以使用的实际讯号。"
+    },
+    "20": {
+      "en": "And again, usually that's going to be a number between 1 and 10, but that is not a hard requirement.",
+      "zh_tw": "再說一次，通常會是 1 到 10 之間的數字，但這不是硬性要求。",
+      "zh_cn": "再说一次，通常会是 1 到 10 之间的数字，但这不是硬性要求。"
+    },
+    "21": {
+      "en": "The next kind of grader that you're going to see very often is a model-based grader.",
+      "zh_tw": "接下來你會經常看到的另一種評分器是基於模型的評分器。",
+      "zh_cn": "接下來你会经常看到的另一种评分器是基於模型的评分器。"
+    },
+    "22": {
+      "en": "This is where we take the output from our original model call, so the one that we already made,",
+      "zh_tw": "這是我們把原始模型呼叫的輸出，也就是我們已經做過的那個，",
+      "zh_cn": "这是我们把原始模型调用的输出，也就是我们已经做过的那个，"
+    },
+    "23": {
+      "en": "and we feed it into an additional model.",
+      "zh_tw": "餵入另一個模型。",
+      "zh_cn": "餵入另一个模型。"
+    },
+    "24": {
+      "en": "So this is another API request.",
+      "zh_tw": "這是另一個 API 請求。",
+      "zh_cn": "这是另一个 API 请求。"
+    },
+    "25": {
+      "en": "When we use a model grader, we get a tremendous amount of flexibility.",
+      "zh_tw": "當我們使用模型評分器時，我們得到了巨大的靈活性。",
+      "zh_cn": "当我们使用模型评分器时，我们得到了巨大的灵活性。"
+    },
+    "26": {
+      "en": "We can ask a model to evaluate a response based upon its general quality,",
+      "zh_tw": "我們可以要求模型根據回應的整體品質來評估，",
+      "zh_cn": "我们可以要求模型根据回应的整体品质來评估，"
+    },
+    "27": {
+      "en": "maybe how well it followed prompt instructions, maybe the completeness of the response,",
+      "zh_tw": "也許是它遵循提示指令的程度，也許是回應的完整性，",
+      "zh_cn": "也许是它遵循提示命令的程度，也许是回应的完整性，"
+    },
+    "28": {
+      "en": "really just about anything you can imagine.",
+      "zh_tw": "真的是你能想像的任何東西。",
+      "zh_cn": "真的是你能想像的任何東西。"
+    },
+    "29": {
+      "en": "Once again, the only real requirement here is that the model gives us back some kind of hard objective signal,",
+      "zh_tw": "再一次，唯一真正的要求是模型給我們某種客觀的硬性訊號，",
+      "zh_cn": "再一次，唯一真正的要求是模型给我们某种客观的硬性讯号，"
+    },
+    "30": {
+      "en": "usually as a number between 1 and 10.",
+      "zh_tw": "通常是 1 到 10 之間的數字。",
+      "zh_cn": "通常是 1 到 10 之间的数字。"
+    },
+    "31": {
+      "en": "And then finally, human-based grading.",
+      "zh_tw": "最後是人工評分。",
+      "zh_cn": "最后是人工评分。"
+    },
+    "32": {
+      "en": "With human-based grading, we're going to take all the outputs from our model",
+      "zh_tw": "使用人工評分，我們要把模型的所有輸出",
+      "zh_cn": "使用人工评分，我们要把模型的所有输出"
+    },
+    "33": {
+      "en": "and then put them in front of an actual person.",
+      "zh_tw": "放在一個真人面前。",
+      "zh_cn": "放在一个真人面前。"
+    },
+    "34": {
+      "en": "This person is then going to be in charge of evaluating these responses in some particular way.",
+      "zh_tw": "這個人負責以某種特定方式評估這些回應。",
+      "zh_cn": "这个人负責以某种特定方式评估这些回应。"
+    },
+    "35": {
+      "en": "As you can imagine, humans are very flexible, so we can ask them to evaluate responses in",
+      "zh_tw": "你可以想像，人類非常靈活，所以我們可以要求他們以",
+      "zh_cn": "你可以想像，人类非常灵活，所以我们可以要求他们以"
+    },
+    "36": {
+      "en": "just about any fashion or for any metric you can possibly imagine.",
+      "zh_tw": "你能想像的任何方式或任何指標來評估回應。",
+      "zh_cn": "你能想像的任何方式或任何指标來评估回应。"
+    },
+    "37": {
+      "en": "The one big downside to human-based grading is that it generally does take a lot of time,",
+      "zh_tw": "人工評分的一大缺點是它通常需要很多時間，",
+      "zh_cn": "人工评分的一大缺点是它通常需要很多时间，"
+    },
+    "38": {
+      "en": "and it's certainly very tedious work.",
+      "zh_tw": "而且確實是非常乏味的工作。",
+      "zh_cn": "而且确实是非常乏味的工作。"
+    },
+    "39": {
+      "en": "Now, no matter what style of grading you are using,",
+      "zh_tw": "不管你使用什麼風格的評分，",
+      "zh_cn": "不管你使用什麼风格的评分，"
+    },
+    "40": {
+      "en": "you need to decide up front what your evaluation criteria is going to be.",
+      "zh_tw": "你都需要事先決定你的評估標準是什麼。",
+      "zh_cn": "你都需要事先决定你的评估标准是什麼。"
+    },
+    "41": {
+      "en": "So in other words, exactly what aspects of these responses are you going to be focusing on?",
+      "zh_tw": "換句話說，你到底要專注於回應的哪些方面？",
+      "zh_cn": "换句话说，你到底要專注於回应的哪些方面？"
+    },
+    "42": {
+      "en": "For our particular use case, I've centered on three different evaluation criteria.",
+      "zh_tw": "對於我們特定的使用案例，我確定了三個不同的評估標準。",
+      "zh_cn": "对於我们特定的使用案例，我确定了三个不同的评估标准。"
+    },
+    "43": {
+      "en": "I think first off, we should evaluate the responses to make sure that we're only getting back",
+      "zh_tw": "首先，我認為我們應該評估回應，確保只得到",
+      "zh_cn": "首先，我认为我们应该评估回应，确保只得到"
+    },
+    "44": {
+      "en": "Python, JSON, or regular expression without any additional explanation being provided by Claude.",
+      "zh_tw": "Python、JSON 或正則表達式，不帶任何 Claude 額外的解釋。",
+      "zh_cn": "Python、JSON 或正则表达式，不帶任何 Claude 额外的解釋。"
+    },
+    "45": {
+      "en": "Secondly, whenever we get that Python, JSON, or RegEx,",
+      "zh_tw": "其次，每當我們得到 Python、JSON 或正則表達式時，",
+      "zh_cn": "其次，每当我们得到 Python、JSON 或正则表达式时，"
+    },
+    "46": {
+      "en": "we should make sure that it has some valid syntax,",
+      "zh_tw": "我們應該確保它有正確的語法，",
+      "zh_cn": "我们应该确保它有正确的语法，"
+    },
+    "47": {
+      "en": "so there should be no typos in there or anything like that.",
+      "zh_tw": "所以不應該有任何錯字或類似的問題。",
+      "zh_cn": "所以不应该有任何错字或类似的问题。"
+    },
+    "48": {
+      "en": "And then finally, we should probably do some general task following",
+      "zh_tw": "最後，我們可能應該做一些一般性的任務遵循檢查，",
+      "zh_cn": "最后，我们可能应该做一些一般性的任务遵循检查，"
+    },
+    "49": {
+      "en": "and make sure that the model clearly addressed the user's task",
+      "zh_tw": "確保模型清楚地回應了使用者的任務，",
+      "zh_cn": "确保模型清楚地回应了使用者的任务，"
+    },
+    "50": {
+      "en": "and answered it with some generally accurate code",
+      "zh_tw": "並以一些大致準確的程式碼回答，",
+      "zh_cn": "並以一些大致准确的代码回答，"
+    },
+    "51": {
+      "en": "that doesn't contain any major errors or logic mistakes.",
+      "zh_tw": "不包含任何重大錯誤或邏輯失誤。",
+      "zh_cn": "不包含任何重大错误或逻輯失误。"
+    },
+    "52": {
+      "en": "So for these three different evaluation criteria,",
+      "zh_tw": "所以對於這三個不同的評估標準，",
+      "zh_cn": "所以对於这三个不同的评估标准，"
+    },
+    "53": {
+      "en": "I think we can evaluate the first two with a code grader.",
+      "zh_tw": "我認為我們可以用程式碼評分器評估前兩個。",
+      "zh_cn": "我认为我们可以用代码评分器评估前兩个。"
+    },
+    "54": {
+      "en": "So we can evaluate the format and make sure we got actual Python, JSON, or RegEx with code.",
+      "zh_tw": "我們可以用程式碼來評估格式，確保我們得到的確實是 Python、JSON 或正則表達式。",
+      "zh_cn": "我们可以用代码來评估格式，确保我们得到的确实是 Python、JSON 或正则表达式。"
+    },
+    "55": {
+      "en": "And we can also validate the syntax of that code using, well, additional code.",
+      "zh_tw": "我們也可以用更多程式碼來驗證該程式碼的語法。",
+      "zh_cn": "我们也可以用更多代码來验证该代码的语法。"
+    },
+    "56": {
+      "en": "And then finally, the general response and making sure that the user's question was clearly addressed.",
+      "zh_tw": "然後最後，一般性回應和確保使用者的問題被清楚回應，",
+      "zh_cn": "然后最后，一般性回应和确保使用者的问题被清楚回应，"
+    },
+    "57": {
+      "en": "That would be more appropriate to address through a model grader, given its flexibility.",
+      "zh_tw": "這更適合用模型評分器來處理，因為它有更大的靈活性。",
+      "zh_cn": "这更适合用模型评分器來处理，因为它有更大的灵活性。"
+    },
+    "58": {
+      "en": "All right, let's start to implement first the model grader,",
+      "zh_tw": "好的，讓我們先開始實作模型評分器，",
+      "zh_cn": "好的，让我们先开始实作模型评分器，"
+    },
+    "59": {
+      "en": "because that's, believe it or not, going to be the easiest one to put together.",
+      "zh_tw": "因為信不信由你，它是最容易組裝的。",
+      "zh_cn": "因为信不信由你，它是最容易组装的。"
+    },
+    "60": {
+      "en": "I'm going to first begin by going back over to my notebook.",
+      "zh_tw": "我先回到筆記本。",
+      "zh_cn": "我先回到笔记本。"
+    },
+    "61": {
+      "en": "I'm going to find that to-do we had put together right here inside of our run test case function.",
+      "zh_tw": "我要找到我們在 run test case 函式中放的那個待辦事項。",
+      "zh_cn": "我要找到我们在 run test case 函数中放的那个待办事项。"
+    },
+    "62": {
+      "en": "And then right above that cell, I'm going to add a new cell",
+      "zh_tw": "然後在那個儲存格的上方，加入一個新的儲存格，",
+      "zh_cn": "然后在那个存储格的上方，加入一个新的存储格，"
+    },
+    "63": {
+      "en": "with a function that I'm going to call grade by model.",
+      "zh_tw": "裡面放一個我要叫做 grade by model 的函式。",
+      "zh_cn": "里面放一个我要叫做 grade by model 的函数。"
+    },
+    "64": {
+      "en": "And I'm going to assume that I'm going to pass in my test case dictionary.",
+      "zh_tw": "我假設要傳入我的測試案例字典。",
+      "zh_cn": "我假设要传入我的测试案例字典。"
+    },
+    "65": {
+      "en": "Remember, the test case dictionary is essentially these objects right here.",
+      "zh_tw": "記住，測試案例字典基本上就是這裡的這些物件。",
+      "zh_cn": "记住，测试案例字典基本上就是这里的这些对象。"
+    },
+    "66": {
+      "en": "For each of these data set values, these are our test cases.",
+      "zh_tw": "對於每一個資料集的值，這些就是我們的測試案例。",
+      "zh_cn": "对於每一个数据集的值，这些就是我们的测试案例。"
+    },
+    "67": {
+      "en": "I'm also going to pass in the output from our original model call.",
+      "zh_tw": "我也要傳入原始模型呼叫的輸出。",
+      "zh_cn": "我也要传入原始模型调用的输出。"
+    },
+    "68": {
+      "en": "And then inside of here, we're going to essentially make a call off to a model",
+      "zh_tw": "然後在裡面，我們基本上要對模型發出一個呼叫，",
+      "zh_cn": "然后在里面，我们基本上要对模型发出一个调用，"
+    },
+    "69": {
+      "en": "and ask it to grade the output.",
+      "zh_tw": "要求它對輸出進行評分。",
+      "zh_cn": "要求它对输出进行评分。"
+    },
+    "70": {
+      "en": "So for this, we usually end up writing a fairly long prompt.",
+      "zh_tw": "為此，我們通常會寫一個相當長的提示。",
+      "zh_cn": "为此，我们通常会写一个相当长的提示。"
+    },
+    "71": {
+      "en": "And again, just to save us a little bit of time, I'm going to copy paste a prompt in.",
+      "zh_tw": "同樣為了節省時間，我要複製貼上一個提示。",
+      "zh_cn": "同样为了节省时间，我要复製貼上一个提示。"
+    },
+    "72": {
+      "en": "So here we go.",
+      "zh_tw": "好，就是這個。",
+      "zh_cn": "好，就是这个。"
+    },
+    "73": {
+      "en": "I'm going to paste this in.",
+      "zh_tw": "我要貼進去。",
+      "zh_cn": "我要貼进去。"
+    },
+    "74": {
+      "en": "And yes, it is a little bit long, but this is kind of the bare minimum of what we want.",
+      "zh_tw": "是的，它有點長，但這大約是我們想要的最低限度。",
+      "zh_cn": "是的，它有点长，但这大约是我们想要的最低限度。"
+    },
+    "75": {
+      "en": "So this prompt is going to set a role.",
+      "zh_tw": "這個提示會設定一個角色。",
+      "zh_cn": "这个提示会设定一个角色。"
+    },
+    "76": {
+      "en": "It's then going to ask very clearly for the model to evaluate a AI generated solution.",
+      "zh_tw": "然後會非常清楚地要求模型評估一個 AI 生成的解決方案。",
+      "zh_cn": "然后会非常清楚地要求模型评估一个 AI 生成的解决方案。"
+    },
+    "77": {
+      "en": "We're then going to print out the task.",
+      "zh_tw": "接著我們會印出任務。",
+      "zh_cn": "接著我们会印出任务。"
+    },
+    "78": {
+      "en": "We're then going to list out the solution that was generated by the model.",
+      "zh_tw": "然後列出模型生成的解決方案。",
+      "zh_cn": "然后列出模型生成的解决方案。"
+    },
+    "79": {
+      "en": "And then we're going to provide some directions on exactly how to respond.",
+      "zh_tw": "然後提供一些關於如何回應的指示。",
+      "zh_cn": "然后提供一些关於如何回应的指示。"
+    },
+    "80": {
+      "en": "In this particular case, I'm asking the model to give me a list of strengths and weaknesses",
+      "zh_tw": "在這個特定案例中，我要求模型給我一個 AI 生成解決方案的優缺點列表，",
+      "zh_cn": "在这个特定案例中，我要求模型给我一个 AI 生成解决方案的优缺点列表，"
+    },
+    "81": {
+      "en": "of the AI generated solution, all along with some reasoning behind that and an actual score.",
+      "zh_tw": "連同背後的推理和實際的分數。",
+      "zh_cn": "连同背后的推理和实际的分数。"
+    },
+    "82": {
+      "en": "Now we could just ask for a score by itself, but if you do so, you're going to see very",
+      "zh_tw": "我們可以只要求分數，但如果你這樣做，你會發現",
+      "zh_cn": "我们可以只要求分数，但如果你这样做，你会发现"
+    },
+    "83": {
+      "en": "often you tend to get scores of just six.",
+      "zh_tw": "經常只會得到六分。",
+      "zh_cn": "经常只会得到六分。"
+    },
+    "84": {
+      "en": "So if you don't ask for any additional strengths or weaknesses or reasoning, you're going to",
+      "zh_tw": "如果你不要求任何額外的優缺點或推理，你會",
+      "zh_cn": "如果你不要求任何额外的优缺点或推理，你会"
+    },
+    "85": {
+      "en": "very often just get very middling scores because the model kind of assumes, well, could",
+      "zh_tw": "經常得到非常中庸的分數，因為模型大概會假設，嗯，可以",
+      "zh_cn": "经常得到非常中庸的分数，因为模型大概会假设，嗯，可以"
+    },
+    "86": {
+      "en": "be better, could be worse.",
+      "zh_tw": "更好，也可以更差。",
+      "zh_cn": "更好，也可以更差。"
+    },
+    "87": {
+      "en": "We'll give it a six.",
+      "zh_tw": "那就給六分吧。",
+      "zh_cn": "那就给六分吧。"
+    },
+    "88": {
+      "en": "By asking the model to provide some reasoning, strengths and weaknesses, you really make",
+      "zh_tw": "藉由要求模型提供一些推理、優點和缺點，你真的讓",
+      "zh_cn": "藉由要求模型提供一些推理、优点和缺点，你真的让"
+    },
+    "89": {
+      "en": "it hone in and decide upon a more concrete score.",
+      "zh_tw": "它去深入思考並決定一個更具體的分數。",
+      "zh_cn": "它去深入思考並决定一个更具体的分数。"
+    },
+    "90": {
+      "en": "So now that we have that prompt in here, I'm going to call our additional grading model.",
+      "zh_tw": "現在我們已經把提示放進去了，我要呼叫我們額外的評分模型。",
+      "zh_cn": "现在我们已经把提示放进去了，我要调用我们额外的评分模型。"
+    },
+    "91": {
+      "en": "So right underneath it, I'll again, make a messages list.",
+      "zh_tw": "在下面，我再次建立一個訊息列表。",
+      "zh_cn": "在下面，我再次建立一个信息列表。"
+    },
+    "92": {
+      "en": "I'll add in a user message.",
+      "zh_tw": "加入一個使用者訊息。",
+      "zh_cn": "加入一个使用者信息。"
+    },
+    "93": {
+      "en": "And then because we are getting back some JSON here, we need to once again, make sure we extract",
+      "zh_tw": "然後因為我們這裡要取回 JSON，我們需要再次確保透過預填的助手訊息和停止序列來乾淨地擷取。",
+      "zh_cn": "然后因为我们这里要取回 JSON，我们需要再次确保透过预填的助手信息和停止序列來乾淨地提取。"
+    },
+    "94": {
+      "en": "that cleanly by using a pre-filled assistant message and a stop sequence.",
+      "zh_tw": "所以我加入一個助手訊息。",
+      "zh_cn": "所以我加入一个助手信息。"
+    },
+    "95": {
+      "en": "So we'll add a assistant message.",
+      "zh_tw": "用反引號加 json。",
+      "zh_cn": "用反引号加 json。"
+    },
+    "96": {
+      "en": "With backticks.json.",
+      "zh_tw": "然後取回一些評估文字。",
+      "zh_cn": "然后取回一些评估文字。"
+    },
+    "97": {
+      "en": "And then I'll get back some eval text.",
+      "zh_tw": "用訊息和停止序列呼叫 chat，停止序列還是三個反引號。",
+      "zh_cn": "用信息和停止序列调用 chat，停止序列还是三个反引号。"
+    },
+    "98": {
+      "en": "And we'll call chat with messages and a stop sequence or stop sequences of once again, closing",
+      "zh_tw": "現在這個 eval text 應該是一個具有這種結構的 JSON 物件。",
+      "zh_cn": "现在这个 eval text 应该是一个具有这种结构的 JSON 对象。"
+    },
+    "99": {
+      "en": "backticks.",
+      "zh_tw": "接著我要解析它並回傳。",
+      "zh_cn": "接著我要解析它並返回。"
+    },
+    "100": {
+      "en": "Now this eval text should be a JSON object with this kind of structure right here.",
+      "zh_tw": "所以我回傳 json.loads(eval_text)。",
+      "zh_cn": "所以我返回 json.loads(eval_text)。"
+    },
+    "101": {
+      "en": "So I'm going to parse that and just return it.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "102": {
+      "en": "So I'll return a JSON.loads with eval text.",
+      "zh_tw": "這就是我們的模型評分器了。",
+      "zh_cn": "这就是我们的模型评分器了。"
+    },
+    "103": {
+      "en": "Okay.",
+      "zh_tw": "至少要開始使用的話，真的就只需要這些。",
+      "zh_cn": "至少要开始使用的话，真的就只需要这些。"
+    },
+    "104": {
+      "en": "So that is our model grader.",
+      "zh_tw": "所以現在我們需要確保真的有呼叫這個評分器。",
+      "zh_cn": "所以现在我们需要确保真的有调用这个评分器。"
+    },
+    "105": {
+      "en": "That's really all it takes to at least get started.",
+      "zh_tw": "要呼叫評分器，我回到下面我們的待辦事項。",
+      "zh_cn": "要调用评分器，我回到下面我们的待办事项。"
+    },
+    "106": {
+      "en": "So now we need to make sure we actually call this grader.",
+      "zh_tw": "我要把 score 替換成 model grade。",
+      "zh_cn": "我要把 score 替换成 model grade。"
+    },
+    "107": {
+      "en": "To call the grader, I'll go down to our to do right here.",
+      "zh_tw": "它會來自我們的 grade by model 函式。",
+      "zh_cn": "它会來自我们的 grade by model 函数。"
+    },
+    "108": {
+      "en": "I'm going to replace score with model grade.",
+      "zh_tw": "記住，我們需要傳入測試案例和實際執行提示後的輸出。",
+      "zh_cn": "记住，我们需要传入测试案例和实际执行提示后的输出。"
+    },
+    "109": {
+      "en": "And that's going to be coming from our grade by model function.",
+      "zh_tw": "然後從中取得 model grade 中的分數。",
+      "zh_cn": "然后从中取得 model grade 中的分数。"
+    },
+    "110": {
+      "en": "And remember, we have to pass in the test case along with the output from actually running",
+      "zh_tw": "我也要從回傳的字典中擷取分數背後的推理。",
+      "zh_cn": "我也要从返回的字典中提取分数背后的推理。"
+    },
+    "111": {
+      "en": "the prompt.",
+      "zh_tw": "在這個我們回傳的 model grade 字典中，還會有",
+      "zh_cn": "在这个我们返回的 model grade 字典中，还会有"
+    },
+    "112": {
+      "en": "And then from this, we're going to get a score from model grade.",
+      "zh_tw": "優缺點列表。",
+      "zh_cn": "优缺点列表。"
+    },
+    "113": {
+      "en": "And I'm also going to extract from that dictionary that gets returned the reasoning behind the",
+      "zh_tw": "你當然也可以把那些擷取出來，但我只是要讓我們的",
+      "zh_cn": "你当然也可以把那些提取出來，但我只是要让我们的"
+    },
+    "114": {
+      "en": "score.",
+      "zh_tw": "範例更簡潔一點。",
+      "zh_cn": "范例更简潔一点。"
+    },
+    "115": {
+      "en": "Inside of this model grade dictionary that we are returning, there is also going to be",
+      "zh_tw": "我要把分數和推理放入最終的輸出字典中。",
+      "zh_cn": "我要把分数和推理放入最终的输出字典中。"
+    },
+    "116": {
+      "en": "the strengths and weaknesses list.",
+      "zh_tw": "所以我要在這裡加入一些額外的鍵，score。",
+      "zh_cn": "所以我要在这里加入一些额外的键，score。"
+    },
+    "117": {
+      "en": "You could definitely extract those as well as you want, but I'm just going to keep our",
+      "zh_tw": "哦，我這裡已經有 score 了。",
+      "zh_cn": "哦，我这里已经有 score 了。"
+    },
+    "118": {
+      "en": "example a little bit more concise.",
+      "zh_tw": "我的錯。",
+      "zh_cn": "我的错。"
+    },
+    "119": {
+      "en": "I'm going to take the score and reasoning and put them into this final output dictionary.",
+      "zh_tw": "我不需要那個，但我需要 reasoning。",
+      "zh_cn": "我不需要那个，但我需要 reasoning。"
+    },
+    "120": {
+      "en": "So I will add in some additional keys here of score.",
+      "zh_tw": "那就是 reasoning。",
+      "zh_cn": "那就是 reasoning。"
+    },
+    "121": {
+      "en": "Oh, I already have score right there.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "122": {
+      "en": "My mistakes.",
+      "zh_tw": "所以",
+      "zh_cn": "所以"
+    },
+    "123": {
+      "en": "I don't need that, but I do need reasoning.",
+      "zh_tw": "我們",
+      "zh_cn": "我们"
+    },
+    "124": {
+      "en": "And that will be reasoning.",
+      "zh_tw": "現在",
+      "zh_cn": "现在"
+    }
+  }
+}

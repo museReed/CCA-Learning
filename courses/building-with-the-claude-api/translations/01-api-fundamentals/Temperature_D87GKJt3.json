@@ -1,0 +1,362 @@
+{
+  "srt_file": "Temperature_D87GKJt3.srt",
+  "video_file": "Temperature_D87GKJt3.mp4",
+  "max_valid_entry": 71,
+  "entries": {
+    "1": {
+      "en": "Earlier on inside this course, we spoke very briefly about how Claude actually generates text.",
+      "zh_tw": "在這門課程的前面，我們非常簡短地談到了 Claude 實際上如何生成文字。",
+      "zh_cn": "在这门课程的前面，我们非常简短地谈到了 Claude 实际上如何生成文字。"
+    },
+    "2": {
+      "en": "Remember, we feed some amount of text into Claude, like the words, what do you think?",
+      "zh_tw": "記住，我們把一些文字餵入 Claude，像是「你覺得怎麼樣」。",
+      "zh_cn": "记住，我们把一些文字餵入 Claude，像是「你覺得怎麼样」。"
+    },
+    "3": {
+      "en": "Claude is then going to tokenize this text or break it up into smaller chunks.",
+      "zh_tw": "Claude 接著會把這段文字 token 化，或者把它分解成更小的片段。",
+      "zh_cn": "Claude 接著会把这段文字 token 化，或者把它分解成更小的片段。"
+    },
+    "4": {
+      "en": "Claude is then going to go through a prediction phase where it decides what possible words could",
+      "zh_tw": "然後把這些 token 轉換成嵌入向量。",
+      "zh_cn": "然后把这些 token 转换成嵌入向量。"
+    },
+    "5": {
+      "en": "come next and assign a probability to each of those different options. Finally, in the sampling",
+      "zh_tw": "然後把這些嵌入向量上下文化。",
+      "zh_cn": "然后把这些嵌入向量上下文化。"
+    },
+    "6": {
+      "en": "phase, a token is actually chosen based upon these probabilities. So in this diagram, I have",
+      "zh_tw": "最後，生成步驟會為下一個 token 的所有候選詞產生一組機率。",
+      "zh_cn": "最后，生成步驟会为下一个 token 的所有候选词产生一组机率。"
+    },
+    "7": {
+      "en": "on the screen. Given inputs of what do you think possible next tokens might be about, would, of,",
+      "zh_tw": "模型要選擇其中一個候選詞。",
+      "zh_cn": "模型要选择其中一个候选词。"
+    },
+    "8": {
+      "en": "and so on. Everything you see here on the right-hand side. Each of these gets assigned a probability.",
+      "zh_tw": "溫度參數控制的就是這裡的選擇過程。",
+      "zh_cn": "溫度参数控制的就是这里的选择过程。"
+    },
+    "9": {
+      "en": "And then maybe in this case, Claude settles on about as being the best possible next token.",
+      "zh_tw": "溫度是一個介於 0 和 1 之間的值。",
+      "zh_cn": "溫度是一个介於 0 和 1 之间的值。"
+    },
+    "10": {
+      "en": "So we would end up with the phrase, what do you think about? This entire process is then repeated",
+      "zh_tw": "低溫度，接近 0，會使模型傾向選擇機率最高的候選詞。",
+      "zh_cn": "低溫度，接近 0，会使模型傾向选择机率最高的候选词。"
+    },
+    "11": {
+      "en": "to complete the sentence or complete the entire message. Now, just to make sure things are really",
+      "zh_tw": "這使得輸出更可預測和確定性。",
+      "zh_cn": "这使得输出更可预测和确定性。"
+    },
+    "12": {
+      "en": "clear, the numbers I'm showing here are probabilities, the percentage chance of each token being",
+      "zh_tw": "高溫度，接近 1，會使模型更願意選擇機率較低的候選詞。",
+      "zh_cn": "高溫度，接近 1，会使模型更愿意选择机率較低的候选词。"
+    },
+    "13": {
+      "en": "selected. Now, just to make things a little bit more clear with these probabilities, I'm going to",
+      "zh_tw": "這使得輸出更有創意和多樣。",
+      "zh_cn": "这使得输出更有创意和多样。"
+    },
+    "14": {
+      "en": "display them in a chart for the rest of this video. So still the same probabilities, just in a format",
+      "zh_tw": "讓我給你看一個快速的示範。",
+      "zh_cn": "让我给你看一个快速的示范。"
+    },
+    "15": {
+      "en": "that's easier for us to understand. You'll also notice I've kind of sorted them from left to right.",
+      "zh_tw": "我要用溫度 0 向 Claude 發送同樣的請求五次。",
+      "zh_cn": "我要用溫度 0 向 Claude 发送同样的请求五次。"
+    },
+    "16": {
+      "en": "There's no actual internal sorting going on. I'm just sorting them, greatest to least probability,",
+      "zh_tw": "然後用溫度 1 做同樣的事。",
+      "zh_cn": "然后用溫度 1 做同样的事。"
+    },
+    "17": {
+      "en": "just to make this chart a little bit easier to understand. So now that we have a reminder on how",
+      "zh_tw": "讓我們看看結果有什麼不同。",
+      "zh_cn": "让我们看看结果有什麼不同。"
+    },
+    "18": {
+      "en": "Claude generates text, I want to show you one way that we can directly influence these probabilities",
+      "zh_tw": "好的，溫度為 0 時，我要問 Claude 為什麼天空是藍色的。",
+      "zh_cn": "好的，溫度为 0 时，我要问 Claude 为什麼天空是蓝色的。"
+    },
+    "19": {
+      "en": "and control which token Claude might actually decide to select. So we can control these probabilities",
+      "zh_tw": "讓我執行五次。",
+      "zh_cn": "让我执行五次。"
+    },
+    "20": {
+      "en": "using a parameter called temperature. Temperature is a decimal value between zero and one that we",
+      "zh_tw": "你可以看到每次回應幾乎完全相同。",
+      "zh_cn": "你可以看到每次回应幾乎完全相同。"
+    },
+    "21": {
+      "en": "provide when we make our model call. So whenever we call that converse function, temperature is going",
+      "zh_tw": "這是因為低溫度使模型總是選擇最高機率的下一個 token。",
+      "zh_cn": "这是因为低溫度使模型总是选择最高机率的下一个 token。"
+    },
+    "22": {
+      "en": "to influence the exact distribution of probabilities. This is a little bit tricky to understand. So you",
+      "zh_tw": "所以它基本上走的是相同的路徑。",
+      "zh_cn": "所以它基本上走的是相同的路徑。"
+    },
+    "23": {
+      "en": "can look at the plot or these charts I've got right here, or alternatively, I put together a quick little",
+      "zh_tw": "現在讓我把溫度改為 1 再試一次。",
+      "zh_cn": "现在让我把溫度改为 1 再试一次。"
+    },
+    "24": {
+      "en": "demo with Claude itself, just to give you a better idea of what's going on. So let me show you that demo.",
+      "zh_tw": "這次回應會更加多樣。",
+      "zh_cn": "这次回应会更加多样。"
+    },
+    "25": {
+      "en": "Okay, so this is the same chart we were just looking at in that diagram a moment ago. Whenever we",
+      "zh_tw": "每次的回應可能都不太一樣。",
+      "zh_cn": "每次的回应可能都不太一样。"
+    },
+    "26": {
+      "en": "provide a temperature value going down to zero, so you'll see I got temperature right here,",
+      "zh_tw": "有些可能會用不同的類比或範例。",
+      "zh_cn": "有些可能会用不同的类比或范例。"
+    },
+    "27": {
+      "en": "the highest probability becomes more likely to occur. So our highest probability was about and it's going",
+      "zh_tw": "有些可能會從不同的角度來解釋。",
+      "zh_cn": "有些可能会从不同的角度來解釋。"
+    },
+    "28": {
+      "en": "to increase all the way up to 100%. So at temperatures of zero, we start to get what we call deterministic",
+      "zh_tw": "這就是高溫度帶來的多樣性。",
+      "zh_cn": "这就是高溫度帶來的多样性。"
+    },
+    "29": {
+      "en": "output, where we always select the token that has the highest initial probability. Then as we start to",
+      "zh_tw": "那麼你什麼時候該用低溫度，什麼時候該用高溫度呢？",
+      "zh_cn": "那麼你什麼时候该用低溫度，什麼时候该用高溫度呢？"
+    },
+    "30": {
+      "en": "increase our temperature, it increases the chances of us selecting a token that has a lower initial",
+      "zh_tw": "一般來說，如果你的任務需要準確性和一致性，就用低溫度。",
+      "zh_cn": "一般來说，如果你的任务需要准确性和一致性，就用低溫度。"
+    },
+    "31": {
+      "en": "probability. So we go from maybe having a zero percent chance of selecting we as the next",
+      "zh_tw": "例如，資料擷取、分類、或程式碼生成，",
+      "zh_cn": "例如，数据提取、分类、或代码生成，"
+    },
+    "32": {
+      "en": "token, all the way up to say 9%. So this is the theory behind temperature. But what does this",
+      "zh_tw": "你想要可預測和可靠的輸出。",
+      "zh_cn": "你想要可预测和可靠的输出。"
+    },
+    "33": {
+      "en": "actually mean in the real world? Well, we start to use different values of temperature, given the",
+      "zh_tw": "如果你的任務需要創意和多樣性，就用高溫度。",
+      "zh_cn": "如果你的任务需要创意和多样性，就用高溫度。"
+    },
+    "34": {
+      "en": "actual task that we're trying to complete. These are some example ranges and tasks that might fit into",
+      "zh_tw": "例如，創意寫作、腦力激盪、或故事生成。",
+      "zh_cn": "例如，创意写作、脑力激盪、或故事生成。"
+    },
+    "35": {
+      "en": "each sample range. For something like say data extraction, we really don't want a lot of randomness",
+      "zh_tw": "在 API 中設定溫度非常簡單。",
+      "zh_cn": "在 API 中设定溫度非常简单。"
+    },
+    "36": {
+      "en": "or creativity. If we give Claude a big chunk of text and ask it to extract very specific pieces of",
+      "zh_tw": "你只需要在 create 函式中加入 temperature 參數。",
+      "zh_cn": "你只需要在 create 函数中加入 temperature 参数。"
+    },
+    "37": {
+      "en": "information, no real creativity required there whatsoever. We just want Claude to look at the",
+      "zh_tw": "讓我在筆記本中展示。",
+      "zh_cn": "让我在笔记本中展示。"
+    },
+    "38": {
+      "en": "exact text we provided and pull out the most relevant information. And then on the higher",
+      "zh_tw": "我在 create 呼叫中加入 temperature=0。",
+      "zh_cn": "我在 create 调用中加入 temperature=0。"
+    },
+    "39": {
+      "en": "temperature side, this is where we start to get more creative. We start to see less common tokens",
+      "zh_tw": "就這樣。",
+      "zh_cn": "就这样。"
+    },
+    "40": {
+      "en": "being used. We probably are going to want to use higher temperatures anytime we are doing any kind of",
+      "zh_tw": "你也可以用浮點數像 0.5 或 0.7。",
+      "zh_cn": "你也可以用浮点数像 0.5 或 0.7。"
+    },
+    "41": {
+      "en": "really creative focus task, such as brainstorming, writing, maybe doing some really creative marketing,",
+      "zh_tw": "如果你不指定溫度，Claude 會使用預設值 1。",
+      "zh_cn": "如果你不指定溫度，Claude 会使用默认值 1。"
+    },
+    "42": {
+      "en": "or something like a joke where a lot of jokes really depend upon using words in ways that are",
+      "zh_tw": "所以預設行為是使用較高的溫度，也就是更多的多樣性。",
+      "zh_cn": "所以默认行为是使用較高的溫度，也就是更多的多样性。"
+    },
+    "43": {
+      "en": "not always quite expected. Now that we understand what temperature is all about, let's go back over",
+      "zh_tw": "有一件值得注意的事。",
+      "zh_cn": "有一件值得注意的事。"
+    },
+    "44": {
+      "en": "to our notebook and understand how we can adjust temperature on the fly. I would like to update",
+      "zh_tw": "即使溫度為 0，你可能偶爾還是會看到些微的變化。",
+      "zh_cn": "即使溫度为 0，你可能偶尔还是会看到些微的变化。"
+    },
+    "45": {
+      "en": "our chat function so that it takes in a temperature argument that we're going to pass through to our",
+      "zh_tw": "這是正常的。",
+      "zh_cn": "这是正常的。"
+    },
+    "46": {
+      "en": "create function call. So inside of the list of arguments, I'm going to add in temperature,",
+      "zh_tw": "溫度為 0 並不保證百分之百完全相同的輸出。",
+      "zh_cn": "溫度为 0 並不保证百分之百完全相同的输出。"
+    },
+    "47": {
+      "en": "and I'm going to default my temperature to be 1.0. So I want to fall on the more creative side of",
+      "zh_tw": "但變化會非常小。",
+      "zh_cn": "但变化会非常小。"
+    },
+    "48": {
+      "en": "things. Then I'm going to take in that argument and add it into the params object as temperature.",
+      "zh_tw": "對於大多數實際應用來說，",
+      "zh_cn": "对於大多数实际应用來说，"
+    },
+    "49": {
+      "en": "And that's all we have to do to add in support for adjusting the temperature inside of our application.",
+      "zh_tw": "你大概會想用中等的溫度。",
+      "zh_cn": "你大概会想用中等的溫度。"
+    },
+    "50": {
+      "en": "So now to test this out, I'm going to rerun this cell. I'm then going to go down to the next cell,",
+      "zh_tw": "可能在 0.3 到 0.7 之間。",
+      "zh_cn": "可能在 0.3 到 0.7 之间。"
+    },
+    "51": {
+      "en": "and I'm going to ask Claude to generate a one-sentence movie idea. And initially, I'm going to provide",
+      "zh_tw": "這給你可靠性和多樣性之間的良好平衡。",
+      "zh_cn": "这给你可靠性和多样性之间的良好平衡。"
+    },
+    "52": {
+      "en": "a temperature of 0.0. So now in theory, I should be getting back movie ideas that always tend to be",
+      "zh_tw": "但當然，最好的溫度取決於你的特定使用場景。",
+      "zh_cn": "但当然，最好的溫度取决於你的特定使用场景。"
+    },
+    "53": {
+      "en": "a little bit similar in nature. So I'm going to run this. And the first time I'm going to get back",
+      "zh_tw": "我建議你用不同的值做實驗來找到最適合你需求的。",
+      "zh_cn": "我建议你用不同的值做实验來找到最适合你需求的。"
+    },
+    "54": {
+      "en": "a time-traveling archaeologist. You're going to see that this is a very common pattern, at least for me.",
+      "zh_tw": "好的，讓我快速總結一下。",
+      "zh_cn": "好的，让我快速总结一下。"
+    },
+    "55": {
+      "en": "I very often, when I have a temperature of zero, get movie ideas that are about a time-traveling",
+      "zh_tw": "溫度控制文字生成中的隨機性。",
+      "zh_cn": "溫度控制文字生成中的随机性。"
+    },
+    "56": {
+      "en": "something. So if I run this again, I'm probably going to see another time-traveling thing. Yep,",
+      "zh_tw": "低溫度意味著更可預測的輸出。",
+      "zh_cn": "低溫度意味著更可预测的输出。"
+    },
+    "57": {
+      "en": "same thing. Maybe one more time. And yeah, same kind of idea, a jaded time-traveling historian.",
+      "zh_tw": "高溫度意味著更有創意和多樣的輸出。",
+      "zh_cn": "高溫度意味著更有创意和多样的输出。"
+    },
+    "58": {
+      "en": "Let's now try adjusting our temperature a little bit to hopefully encourage Claude to give us some",
+      "zh_tw": "你應該根據你的任務選擇適當的溫度。",
+      "zh_cn": "你应该根据你的任务选择适当的溫度。"
+    },
+    "59": {
+      "en": "more original or creative ideas. I'm going to try adjusting my temperature up to 1.0. Now,",
+      "zh_tw": "資料擷取和程式碼生成用低溫度。",
+      "zh_cn": "数据提取和代码生成用低溫度。"
+    },
+    "60": {
+      "en": "if I run this again, I hopefully will not get an idea about a jaded time-traveler or something like",
+      "zh_tw": "創意寫作用高溫度。",
+      "zh_cn": "创意写作用高溫度。"
+    },
+    "61": {
+      "en": "that. And almost immediately, you can see that I do. So this is something to be aware of.",
+      "zh_tw": "而且如果你不確定，就從預設值開始然後做調整。",
+      "zh_cn": "而且如果你不确定，就从默认值开始然后做调整。"
+    },
+    "62": {
+      "en": "Just because you dial up the temperature doesn't mean you're always going to get dramatically",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "63": {
+      "en": "different ideas. It just increases the chances of getting a different one. So if I run this again,",
+      "zh_tw": "到目前為止這個模組中，",
+      "zh_cn": "到目前为止这个模组中，"
+    },
+    "64": {
+      "en": "I might end up seeing a more creative idea. Okay, that's definitely more creative. Nothing about",
+      "zh_tw": "我們已經涵蓋了相當多的基礎知識。",
+      "zh_cn": "我们已经涵蓋了相当多的基础知识。"
+    },
+    "65": {
+      "en": "time-travel this time. And we get one more test here. And there we go. Again, not about a time-traveler",
+      "zh_tw": "我們了解了 API 存取的完整生命週期。",
+      "zh_cn": "我们了解了 API 访问的完整生命週期。"
+    },
+    "66": {
+      "en": "or anything like that. All right, so that is temperature. Now, remember, there's some general",
+      "zh_tw": "我們學會了建立請求。",
+      "zh_cn": "我们学会了建立请求。"
+    },
+    "67": {
+      "en": "guidance here. Whenever we are doing tasks that require less creativity, or whenever we want to have a",
+      "zh_tw": "我們學會了多輪對話。",
+      "zh_cn": "我们学会了多轮对话。"
+    },
+    "68": {
+      "en": "very deterministic output, we want to use that lower temperature value. And whenever we have a",
+      "zh_tw": "我們學會了系統提示。",
+      "zh_cn": "我们学会了系统提示。"
+    },
+    "69": {
+      "en": "task that requires a little bit more creativity, that's when we want to start to think about dialing",
+      "zh_tw": "現在我們學會了溫度。",
+      "zh_cn": "现在我们学会了溫度。"
+    },
+    "70": {
+      "en": "up the temperature a little bit.",
+      "zh_tw": "這些都是你用 Claude API 建構任何東西時的核心基礎。",
+      "zh_cn": "这些都是你用 Claude API 建构任何東西时的核心基础。"
+    },
+    "71": {
+      "en": "So, let's go ahead and see.",
+      "zh_tw": "在接下來的影片中，我們會繼續在這些概念上建構。",
+      "zh_cn": "在接下來的视频中，我们会继续在这些概念上建构。"
+    }
+  }
+}

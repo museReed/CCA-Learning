@@ -1,0 +1,412 @@
+{
+  "srt_file": "Defining_prompts_iTkIPnL7.srt",
+  "video_file": "Defining_prompts_iTkIPnL7.mp4",
+  "max_valid_entry": 81,
+  "entries": {
+    "1": {
+      "en": "The last major focus we're going to have inside of our MCP server is going to be on prompts.",
+      "zh_tw": "我們在 MCP 伺服器裡要關注的最後一個主要功能是提示。",
+      "zh_cn": "我们在 MCP 服务器里要关注的最后一个主要功能是提示。"
+    },
+    "2": {
+      "en": "Once again, just like we did with resources, we're going to implement a small feature inside",
+      "zh_tw": "就像我們處理資源時一樣，我們要在",
+      "zh_cn": "就像我们处理资源时一样，我们要在"
+    },
+    "3": {
+      "en": "of our project, and we're going to use this feature to understand what prompts are all about,",
+      "zh_tw": "專案裡實作一個小功能，然後用這個功能來理解提示到底是什麼，",
+      "zh_cn": "项目里实作一个小功能，然后用这个功能來理解提示到底是什麼，"
+    },
+    "4": {
+      "en": "just like we did with resources a moment ago.",
+      "zh_tw": "就像我們剛才處理資源時做的那樣。",
+      "zh_cn": "就像我们剛才处理资源时做的那样。"
+    },
+    "5": {
+      "en": "Let me tell you about the feature we're going to add into our program.",
+      "zh_tw": "讓我告訴你我們要在程式裡加入什麼功能。",
+      "zh_cn": "让我告訴你我们要在程序里加入什麼功能。"
+    },
+    "6": {
+      "en": "We're going to add in support for slash commands.",
+      "zh_tw": "我們要加入對斜線命令的支援。",
+      "zh_cn": "我们要加入对斜线命令的支持。"
+    },
+    "7": {
+      "en": "So for example, I want to have a format command.",
+      "zh_tw": "例如，我想要有一個 format 命令。",
+      "zh_cn": "例如，我想要有一个 format 命令。"
+    },
+    "8": {
+      "en": "I've got some screenshots over here of how it's going to work.",
+      "zh_tw": "這裡有一些截圖展示它會怎麼運作。",
+      "zh_cn": "这里有一些截圖展示它会怎麼运作。"
+    },
+    "9": {
+      "en": "Whenever a user types in a slash, we're going to list out some number of commands that are",
+      "zh_tw": "每當使用者輸入斜線時，我們要列出應用程式",
+      "zh_cn": "每当使用者输入斜线时，我们要列出应用程序"
+    },
+    "10": {
+      "en": "supported by our application.",
+      "zh_tw": "支援的一些命令。",
+      "zh_cn": "支持的一些命令。"
+    },
+    "11": {
+      "en": "For right now, we're going to have just one command called format.",
+      "zh_tw": "目前，我們只會有一個叫做 format 的命令。",
+      "zh_cn": "目前，我们只会有一个叫做 format 的命令。"
+    },
+    "12": {
+      "en": "So if I type in just slash, I should see a little autocomplete right here, and the only",
+      "zh_tw": "所以如果我只輸入斜線，我應該會看到一個小小的自動完成選單，而唯一的",
+      "zh_cn": "所以如果我只输入斜线，我应该会看到一个小小的自动完成选单，而唯一的"
+    },
+    "13": {
+      "en": "autocomplete option should be format.",
+      "zh_tw": "自動完成選項應該是 format。",
+      "zh_cn": "自动完成选项应该是 format。"
+    },
+    "14": {
+      "en": "If I then select format, I should be prompted to add in some document ID after it.",
+      "zh_tw": "如果我選擇 format，我應該會被提示在後面加入某個文件 ID。",
+      "zh_cn": "如果我选择 format，我应该会被提示在后面加入某个文件 ID。"
+    },
+    "15": {
+      "en": "So one of our different document names like report.pdf or whatever else.",
+      "zh_tw": "也就是我們某個文件的名稱，像是 report.pdf 或其他什麼的。",
+      "zh_cn": "也就是我们某个文件的名称，像是 report.pdf 或其他什麼的。"
+    },
+    "16": {
+      "en": "Then whenever a user runs this command, the goal is to get clod to reformat this document",
+      "zh_tw": "然後每當使用者執行這個命令，目標是讓 Claude 用",
+      "zh_cn": "然后每当使用者执行这个命令，目标是让 Claude 用"
+    },
+    "17": {
+      "en": "using markdown syntax.",
+      "zh_tw": "Markdown 語法來重新格式化這個文件。",
+      "zh_cn": "Markdown 语法來重新格式化这个文件。"
+    },
+    "18": {
+      "en": "So in other words, take the plain string that we have without any special formatting tied",
+      "zh_tw": "換句話說，就是把我們目前每個文件裡面那個",
+      "zh_cn": "换句话说，就是把我们目前每个文件里面那个"
+    },
+    "19": {
+      "en": "to it inside of each of our documents right now.",
+      "zh_tw": "沒有任何特殊格式的純文字字串拿來處理。",
+      "zh_cn": "没有任何特殊格式的纯文字字符串拿來处理。"
+    },
+    "20": {
+      "en": "Remember inside of our MCP server, our current document content is just plain text.",
+      "zh_tw": "記住在我們的 MCP 伺服器裡，目前的文件內容就是純文字。",
+      "zh_cn": "记住在我们的 MCP 服务器里，目前的文件內容就是纯文字。"
+    },
+    "21": {
+      "en": "We want to feed this into clod and somehow get clod to rewrite it using markdown syntax.",
+      "zh_tw": "我們想把它餵給 Claude，然後讓 Claude 用 Markdown 語法來改寫它。",
+      "zh_cn": "我们想把它餵给 Claude，然后让 Claude 用 Markdown 语法來改写它。"
+    },
+    "22": {
+      "en": "So I would expect to see some output like this, something that says, I'll help you reformat",
+      "zh_tw": "所以我預期會看到類似這樣的輸出，像是「我來幫你重新格式化",
+      "zh_cn": "所以我预期会看到类似这样的输出，像是「我來幫你重新格式化"
+    },
+    "23": {
+      "en": "the document.",
+      "zh_tw": "文件」。",
+      "zh_cn": "文件」。"
+    },
+    "24": {
+      "en": "Claude is then going to use a tool to read the contents of the document.",
+      "zh_tw": "Claude 接著會使用工具來讀取文件的內容。",
+      "zh_cn": "Claude 接著会使用工具來读取文件的內容。"
+    },
+    "25": {
+      "en": "And then finally, inside the final response, I want to see the content of that document",
+      "zh_tw": "然後最後，在最終的回應裡，我想看到文件的內容",
+      "zh_cn": "然后最后，在最终的回应里，我想看到文件的內容"
+    },
+    "26": {
+      "en": "rewritten down here in markdown syntax.",
+      "zh_tw": "在下面用 Markdown 語法重寫。",
+      "zh_cn": "在下面用 Markdown 语法重写。"
+    },
+    "27": {
+      "en": "Now, there is something interesting about this feature that I want to point out.",
+      "zh_tw": "關於這個功能，有一件有趣的事我想指出。",
+      "zh_cn": "关於这个功能，有一件有趣的事我想指出。"
+    },
+    "28": {
+      "en": "The real core of this feature, like the real goal here is to allow a user to reformat",
+      "zh_tw": "這個功能真正的核心，也就是真正的目標，是允許使用者將",
+      "zh_cn": "这个功能真正的核心，也就是真正的目标，是允许使用者将"
+    },
+    "29": {
+      "en": "a document into markdown syntax.",
+      "zh_tw": "文件重新格式化為 Markdown 語法。",
+      "zh_cn": "文件重新格式化为 Markdown 语法。"
+    },
+    "30": {
+      "en": "And that is an operation that actually doesn't require you and I, the developers to write out",
+      "zh_tw": "而那是一個實際上不需要你我這些開發者寫出",
+      "zh_cn": "而那是一个实际上不需要你我这些开发者写出"
+    },
+    "31": {
+      "en": "any code to implement.",
+      "zh_tw": "任何程式碼來實作的操作。",
+      "zh_cn": "任何代码來实作的操作。"
+    },
+    "32": {
+      "en": "What do I mean by that?",
+      "zh_tw": "我這是什麼意思？",
+      "zh_cn": "我这是什麼意思？"
+    },
+    "33": {
+      "en": "Well, a user can already launch our CLI and say something like reformat the report.pedia",
+      "zh_tw": "嗯，使用者已經可以啟動我們的 CLI 然後說類似重新格式化 report.pdf",
+      "zh_cn": "嗯，使用者已经可以啟动我们的 CLI 然后说类似重新格式化 report.pdf"
+    },
+    "34": {
+      "en": "file in markdown syntax.",
+      "zh_tw": "為 Markdown 語法這樣的話。",
+      "zh_cn": "为 Markdown 语法这样的话。"
+    },
+    "35": {
+      "en": "A user can already do this.",
+      "zh_tw": "使用者已經可以做到這個了。",
+      "zh_cn": "使用者已经可以做到这个了。"
+    },
+    "36": {
+      "en": "No issue whatsoever.",
+      "zh_tw": "完全沒有問題。",
+      "zh_cn": "完全没有问题。"
+    },
+    "37": {
+      "en": "And clod is going to do a reasonable job of it.",
+      "zh_tw": "而 Claude 會做得相當不錯。",
+      "zh_cn": "而 Claude 会做得相当不错。"
+    },
+    "38": {
+      "en": "It's going to take the contents of our document and reformat it into markdown.",
+      "zh_tw": "它會把我們文件的內容重新格式化為 Markdown。",
+      "zh_cn": "它会把我们文件的內容重新格式化为 Markdown。"
+    },
+    "39": {
+      "en": "And as you can see right here, it worked entirely perfectly.",
+      "zh_tw": "如你所見，它完全正確地運作了。",
+      "zh_cn": "如你所見，它完全正确地运作了。"
+    },
+    "40": {
+      "en": "So what are we really doing with this feature?",
+      "zh_tw": "那我們這個功能到底在做什麼呢？",
+      "zh_cn": "那我们这个功能到底在做什麼呢？"
+    },
+    "41": {
+      "en": "Well, the thought process here is that if we just left this up to users and allow them",
+      "zh_tw": "這裡的思路是，如果我們把這件事留給使用者，讓他們",
+      "zh_cn": "这里的思路是，如果我们把这件事留给使用者，让他们"
+    },
+    "42": {
+      "en": "to manually type in something like convert this to markdown, they might get a okay result,",
+      "zh_tw": "手動輸入像是「把這個轉換成 Markdown」，他們可能會得到還可以的結果，",
+      "zh_cn": "手动输入像是「把这个转换成 Markdown」，他们可能会得到还可以的结果，"
+    },
+    "43": {
+      "en": "but they might get much better result if they had a really strong prompt that is custom",
+      "zh_tw": "但如果有一個真的很好的提示，是針對把文件轉換成 Markdown 這個",
+      "zh_cn": "但如果有一个真的很好的提示，是針对把文件转换成 Markdown 这个"
+    },
+    "44": {
+      "en": "tailored for this particular scenario of converting a document into markdown.",
+      "zh_tw": "特定場景客製化的，他們可能會得到好得多的結果。",
+      "zh_cn": "特定场景自定义的，他们可能会得到好得多的结果。"
+    },
+    "45": {
+      "en": "So a user might be a lot happier if you and I sat down as the MCP server authors and wrote",
+      "zh_tw": "所以使用者可能會更滿意，如果你我作為 MCP 伺服器的作者坐下來",
+      "zh_cn": "所以使用者可能会更满意，如果你我作为 MCP 服务器的作者坐下來"
+    },
+    "46": {
+      "en": "out and tested and evaled and went through the entire process of developing a really thorough,",
+      "zh_tw": "撰寫、測試、評估，經歷開發一個非常周全的、",
+      "zh_cn": "撰写、测试、评估，经历开发一个非常周全的、"
+    },
+    "47": {
+      "en": "fantastic prompt like the one you see on the right hand side.",
+      "zh_tw": "出色的提示的整個過程，就像你在右手邊看到的那樣。",
+      "zh_cn": "出色的提示的整个过程，就像你在右手边看到的那样。"
+    },
+    "48": {
+      "en": "So again, just repeat.",
+      "zh_tw": "再說一次，重複一下。",
+      "zh_cn": "再说一次，重复一下。"
+    },
+    "49": {
+      "en": "Yes, a user can execute this entire workflow on their own, but if they use this fancy prompt",
+      "zh_tw": "是的，使用者可以自己執行這整個工作流程，但如果他們使用這裡的這個精心設計的提示",
+      "zh_cn": "是的，使用者可以自己执行这整个工作流程，但如果他们使用这里的这个精心设计的提示"
+    },
+    "50": {
+      "en": "over here instead, well, I think they would be all the better.",
+      "zh_tw": "的話，我認為會好很多。",
+      "zh_cn": "的话，我认为会好很多。"
+    },
+    "51": {
+      "en": "This is the real goal of the prompts feature inside of MCP servers.",
+      "zh_tw": "這就是 MCP 伺服器裡面提示功能的真正目標。",
+      "zh_cn": "这就是 MCP 服务器里面提示功能的真正目标。"
+    },
+    "52": {
+      "en": "The thought here is that ahead of time, we can define a set of prompts inside of our server",
+      "zh_tw": "這裡的想法是，我們可以提前在伺服器裡面定義一組提示，",
+      "zh_cn": "这里的想法是，我们可以提前在服务器里面定义一组提示，"
+    },
+    "53": {
+      "en": "that are custom tailored to whatever our server is really specialized to do.",
+      "zh_tw": "這些提示是針對我們伺服器真正擅長做的事情客製化的。",
+      "zh_cn": "这些提示是針对我们服务器真正擅长做的事情自定义的。"
+    },
+    "54": {
+      "en": "In our case, our server is all about managing documents, reading documents, editing documents,",
+      "zh_tw": "在我們的情況下，伺服器就是關於管理文件、讀取文件、編輯文件",
+      "zh_cn": "在我们的情況下，服务器就是关於管理文件、读取文件、编輯文件"
+    },
+    "55": {
+      "en": "and so on.",
+      "zh_tw": "等等。",
+      "zh_cn": "等等。"
+    },
+    "56": {
+      "en": "So we might decide to add in a set of prompts that are very high quality that have been evaled",
+      "zh_tw": "所以我們可能會決定加入一組高品質的、經過評估",
+      "zh_cn": "所以我们可能会决定加入一组高品质的、经过评估"
+    },
+    "57": {
+      "en": "and tested.",
+      "zh_tw": "和測試的提示。",
+      "zh_cn": "和测试的提示。"
+    },
+    "58": {
+      "en": "And we know that they work in a wide variety of different scenarios.",
+      "zh_tw": "而且我們知道這些提示在各種不同的場景下都能運作。",
+      "zh_cn": "而且我们知道这些提示在各种不同的场景下都能运作。"
+    },
+    "59": {
+      "en": "We can then expose these prompts for use inside of any client application, like the CLI app",
+      "zh_tw": "我們可以把這些提示暴露出來，在任何客戶端應用程式中使用，像是我們",
+      "zh_cn": "我们可以把这些提示暴露出來，在任何客户端应用程序中使用，像是我们"
+    },
+    "60": {
+      "en": "that we are putting together right now.",
+      "zh_tw": "目前正在組裝的這個 CLI 應用程式。",
+      "zh_cn": "目前正在组装的这个 CLI 应用程序。"
+    },
+    "61": {
+      "en": "Now, one thing I want to point out here is that we could develop this prompt and just put",
+      "zh_tw": "有一點我想指出的是，我們可以開發這個提示然後直接把它",
+      "zh_cn": "有一点我想指出的是，我们可以开发这个提示然后直接把它"
+    },
+    "62": {
+      "en": "it directly into our CLI code base.",
+      "zh_tw": "放進我們的 CLI 程式碼庫。",
+      "zh_cn": "放进我们的 CLI 代码庫。"
+    },
+    "63": {
+      "en": "That is totally possible.",
+      "zh_tw": "那完全是可行的。",
+      "zh_cn": "那完全是可行的。"
+    },
+    "64": {
+      "en": "We could do that, obviously.",
+      "zh_tw": "我們顯然可以那樣做。",
+      "zh_cn": "我们显然可以那样做。"
+    },
+    "65": {
+      "en": "But again, the thought here is that your MCP server that might specialize in some particular",
+      "zh_tw": "但再次強調，這裡的思路是你的 MCP 伺服器可能專門做某些",
+      "zh_cn": "但再次強调，这里的思路是你的 MCP 服务器可能專门做某些"
+    },
+    "66": {
+      "en": "task might expose some number of prompts that people can just come and use without having",
+      "zh_tw": "特定任務，它可能暴露一些提示，人們可以直接拿來用，而不需要",
+      "zh_cn": "特定任务，它可能暴露一些提示，人们可以直接拿來用，而不需要"
+    },
+    "67": {
+      "en": "to worry about developing them ahead of time.",
+      "zh_tw": "擔心提前開發它們。",
+      "zh_cn": "担心提前开发它们。"
+    },
+    "68": {
+      "en": "To define a prompt inside of our MCP server, we're going to write out a little bit of syntax,",
+      "zh_tw": "要在 MCP 伺服器裡定義一個提示，我們要寫出一小段語法，",
+      "zh_cn": "要在 MCP 服务器里定义一个提示，我们要写出一小段语法，"
+    },
+    "69": {
+      "en": "very similar to the tools and resources we have already put together.",
+      "zh_tw": "和我們已經做的工具和資源非常類似。",
+      "zh_cn": "和我们已经做的工具和资源非常类似。"
+    },
+    "70": {
+      "en": "We will use the prompt decorator.",
+      "zh_tw": "我們會使用 prompt 裝飾器。",
+      "zh_cn": "我们会使用 prompt 装饰器。"
+    },
+    "71": {
+      "en": "We will add a name to the prompt and optionally a description as well.",
+      "zh_tw": "我們會給提示加一個名稱，還可以選擇性地加入描述。",
+      "zh_cn": "我们会给提示加一个名称，还可以选择性地加入描述。"
+    },
+    "72": {
+      "en": "Then whenever the client asks for this prompt, we'll send back a list of messages.",
+      "zh_tw": "然後每當客戶端請求這個提示時，我們會送回一個訊息列表。",
+      "zh_cn": "然后每当客户端请求这个提示时，我们会送回一个信息列表。"
+    },
+    "73": {
+      "en": "These are actual user and assistant messages.",
+      "zh_tw": "這些是實際的使用者和助手訊息。",
+      "zh_cn": "这些是实际的使用者和助手信息。"
+    },
+    "74": {
+      "en": "So we can take the messages and send them off to CLI directly.",
+      "zh_tw": "所以我們可以把這些訊息拿過來直接發送給 CLI。",
+      "zh_cn": "所以我们可以把这些信息拿过來直接发送给 CLI。"
+    },
+    "75": {
+      "en": "All right.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "76": {
+      "en": "So let's go over to our server and we're going to try putting together our own prompt.",
+      "zh_tw": "讓我們回到伺服器，來試著組裝我們自己的提示。",
+      "zh_cn": "让我们回到服务器，來试著组装我们自己的提示。"
+    },
+    "77": {
+      "en": "And just like you see right here, it's going to be all about taking the contents of a document",
+      "zh_tw": "就像你在這裡看到的，它將是關於取得文件的內容",
+      "zh_cn": "就像你在这里看到的，它将是关於取得文件的內容"
+    },
+    "78": {
+      "en": "and somehow rewriting it in Markdown format.",
+      "zh_tw": "然後以某種方式用 Markdown 格式來改寫它。",
+      "zh_cn": "然后以某种方式用 Markdown 格式來改写它。"
+    },
+    "79": {
+      "en": "Okay.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "80": {
+      "en": "So back inside my editor, I'm going to find my MCP server file.",
+      "zh_tw": "回到我的編輯器，我要找到 MCP 伺服器的檔案。",
+      "zh_cn": "回到我的编輯器，我要找到 MCP 服务器的文件。"
+    },
+    "81": {
+      "en": "I'm going to go down a little bit.",
+      "zh_tw": "我要往下捲動一點。",
+      "zh_cn": "我要往下捲动一点。"
+    }
+  }
+}

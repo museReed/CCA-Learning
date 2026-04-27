@@ -1,0 +1,487 @@
+{
+  "srt_file": "Implementing_multiple_turns_c5RmeDQS.srt",
+  "video_file": "Implementing_multiple_turns_c5RmeDQS.mp4",
+  "max_valid_entry": 96,
+  "entries": {
+    "1": {
+      "en": "Now that we are done with that refactor, we are going to start to implement a",
+      "zh_tw": "重構完成後，我們要開始實作",
+      "zh_cn": "重构完成后，我们要开始实作"
+    },
+    "2": {
+      "en": "function like this run conversation function.",
+      "zh_tw": "像 run conversation 這樣的函式。",
+      "zh_cn": "像 run conversation 这样的函数。"
+    },
+    "3": {
+      "en": "In reality, our real implementation is going to look almost identical to what",
+      "zh_tw": "實際上，我們的實作會幾乎和",
+      "zh_cn": "实际上，我们的实作会幾乎和"
+    },
+    "4": {
+      "en": "you see here on the right hand side.",
+      "zh_tw": "你在右邊看到的一模一樣。",
+      "zh_cn": "你在右边看到的一模一样。"
+    },
+    "5": {
+      "en": "Remember the entire goal of this function is to keep calling Claude until it no",
+      "zh_tw": "記住這個函式的目標是不斷呼叫 Claude 直到它",
+      "zh_cn": "记住这个函数的目标是不断调用 Claude 直到它"
+    },
+    "6": {
+      "en": "longer asked to use a tool.",
+      "zh_tw": "不再要求使用工具。",
+      "zh_cn": "不再要求使用工具。"
+    },
+    "7": {
+      "en": "When it doesn't ask to use a tool anymore, that is a sign to us that Claude has a",
+      "zh_tw": "當它不再要求使用工具時，這對我們來說是個信號，表示 Claude 有了",
+      "zh_cn": "当它不再要求使用工具时，这对我们來说是个信号，表示 Claude 有了"
+    },
+    "8": {
+      "en": "final response that is ready for us to send back to our users.",
+      "zh_tw": "可以送回給使用者的最終回應。",
+      "zh_cn": "可以送回给使用者的最终回应。"
+    },
+    "9": {
+      "en": "And the first thing for us to really understand here is how we know if Claude",
+      "zh_tw": "我們首先需要理解的是如何知道 Claude",
+      "zh_cn": "我们首先需要理解的是如何知道 Claude"
+    },
+    "10": {
+      "en": "wants to use a tool or not.",
+      "zh_tw": "是否想使用工具。",
+      "zh_cn": "是否想使用工具。"
+    },
+    "11": {
+      "en": "We could just take a look at the response message and see if there's a tool use",
+      "zh_tw": "我們可以查看回應訊息，看裡面是否有 tool use",
+      "zh_cn": "我们可以查看回应信息，看里面是否有 tool use"
+    },
+    "12": {
+      "en": "block inside there, but there's a little bit more convenient way of doing this.",
+      "zh_tw": "block，但有一個更方便的方式。",
+      "zh_cn": "block，但有一个更方便的方式。"
+    },
+    "13": {
+      "en": "Back inside my notebook, I'm going to run that little sample again, where I'm",
+      "zh_tw": "回到筆記本，我要重新執行那個範例，",
+      "zh_cn": "回到笔记本，我要重新执行那个范例，"
+    },
+    "14": {
+      "en": "making use of client messages, create directly, not using our chat function.",
+      "zh_tw": "直接使用 client.messages.create，不用 chat 函式。",
+      "zh_cn": "直接使用 client.messages.create，不用 chat 函数。"
+    },
+    "15": {
+      "en": "I'm going to run that.",
+      "zh_tw": "執行它。",
+      "zh_cn": "执行它。"
+    },
+    "16": {
+      "en": "And here's my message response.",
+      "zh_tw": "這是回應訊息。",
+      "zh_cn": "这是回应信息。"
+    },
+    "17": {
+      "en": "Now buried inside of here, you'll notice that there is a field named stop reason,",
+      "zh_tw": "裡面藏著一個叫 stop_reason 的欄位，",
+      "zh_cn": "里面藏著一个叫 stop_reason 的字段，"
+    },
+    "18": {
+      "en": "and it is set to a string of tool underscore use.",
+      "zh_tw": "設為字串 tool_use。",
+      "zh_cn": "设为字符串 tool_use。"
+    },
+    "19": {
+      "en": "So let me tell you about that field just a little bit.",
+      "zh_tw": "讓我告訴你一下這個欄位。",
+      "zh_cn": "让我告訴你一下这个字段。"
+    },
+    "20": {
+      "en": "This field tells us about why Claude decided to stop generating any more text.",
+      "zh_tw": "這個欄位告訴我們 Claude 為什麼決定停止生成更多文字。",
+      "zh_cn": "这个字段告訴我们 Claude 为什麼决定停止生成更多文字。"
+    },
+    "21": {
+      "en": "Our current value of tool use is a sign to us that Claude has decided that it needs to",
+      "zh_tw": "目前的值 tool_use 告訴我們 Claude 決定需要",
+      "zh_cn": "目前的值 tool_use 告訴我们 Claude 决定需要"
+    },
+    "22": {
+      "en": "call a tool.",
+      "zh_tw": "呼叫工具。",
+      "zh_cn": "调用工具。"
+    },
+    "23": {
+      "en": "So if our response message, the assistant message that we get back from Claude has",
+      "zh_tw": "如果回應訊息有 stop_reason 為 tool_use，",
+      "zh_cn": "如果回应信息有 stop_reason 为 tool_use，"
+    },
+    "24": {
+      "en": "a stop reason of tool use, that is a very clear and immediate sign that Claude wants",
+      "zh_tw": "這是非常清楚直接的信號，表示 Claude 想",
+      "zh_cn": "这是非常清楚直接的信号，表示 Claude 想"
+    },
+    "25": {
+      "en": "to use a tool.",
+      "zh_tw": "使用工具。",
+      "zh_cn": "使用工具。"
+    },
+    "26": {
+      "en": "There are some other possible values of stop reason, and we could definitely check for",
+      "zh_tw": "stop_reason 還有其他可能的值，我們可以檢查，",
+      "zh_cn": "stop_reason 还有其他可能的值，我们可以检查，"
+    },
+    "27": {
+      "en": "these, but definitely the one you're going to check for the most is probably going to be",
+      "zh_tw": "但你最常檢查的絕對是",
+      "zh_cn": "但你最常检查的绝对是"
+    },
+    "28": {
+      "en": "tool use so that's how we're going to implement that little if statement right there.",
+      "zh_tw": "tool_use，這就是我們要怎麼實作那個 if 判斷。",
+      "zh_cn": "tool_use，这就是我们要怎麼实作那个 if 判断。"
+    },
+    "29": {
+      "en": "All right.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "30": {
+      "en": "So let's go back over to our notebook.",
+      "zh_tw": "回到筆記本。",
+      "zh_cn": "回到笔记本。"
+    },
+    "31": {
+      "en": "We're going to start to implement this run conversation function.",
+      "zh_tw": "開始實作 run conversation 函式。",
+      "zh_cn": "开始实作 run conversation 函数。"
+    },
+    "32": {
+      "en": "So back over here, I'm going to clear out that cell.",
+      "zh_tw": "回到這裡，清空那個儲存格。",
+      "zh_cn": "回到这里，清空那个存储格。"
+    },
+    "33": {
+      "en": "It was just there for demonstration purposes.",
+      "zh_tw": "它只是用來示範的。",
+      "zh_cn": "它只是用來示范的。"
+    },
+    "34": {
+      "en": "I'm going to define my run conversation function.",
+      "zh_tw": "定義 run conversation 函式。",
+      "zh_cn": "定义 run conversation 函数。"
+    },
+    "35": {
+      "en": "It's going to take in a list of messages and then we will set up our loop inside of here.",
+      "zh_tw": "接收訊息列表，然後設定迴圈。",
+      "zh_cn": "接收信息列表，然后设定循环。"
+    },
+    "36": {
+      "en": "We will get a response from calling Claude through our newly upgraded chat function, which",
+      "zh_tw": "透過升級後的 chat 函式呼叫 Claude 取得回應，",
+      "zh_cn": "透过升级后的 chat 函数调用 Claude 取得回应，"
+    },
+    "37": {
+      "en": "now supports tools.",
+      "zh_tw": "現在支援工具了。",
+      "zh_cn": "现在支持工具了。"
+    },
+    "38": {
+      "en": "So I'll pass in my list of messages along with some tools that Claude can call.",
+      "zh_tw": "傳入訊息列表和 Claude 可以呼叫的工具。",
+      "zh_cn": "传入信息列表和 Claude 可以调用的工具。"
+    },
+    "39": {
+      "en": "In this case, we currently only have one tool.",
+      "zh_tw": "目前只有一個工具。",
+      "zh_cn": "目前只有一个工具。"
+    },
+    "40": {
+      "en": "So I'll add it in right here.",
+      "zh_tw": "加入進去。",
+      "zh_cn": "加入进去。"
+    },
+    "41": {
+      "en": "It's our get current date time schema.",
+      "zh_tw": "就是 get current date time schema。",
+      "zh_cn": "就是 get current date time schema。"
+    },
+    "42": {
+      "en": "Then I'm going to take that response.",
+      "zh_tw": "取得回應。",
+      "zh_cn": "取得回应。"
+    },
+    "43": {
+      "en": "I get back and add it into my message conversation history using the newly upgraded add assistant",
+      "zh_tw": "用升級後的 add assistant message 函式加入對話歷史。",
+      "zh_cn": "用升级后的 add assistant message 函数加入对话历史。"
+    },
+    "44": {
+      "en": "message function.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "45": {
+      "en": "I'm then going to print out that response using the text from message function we just put together.",
+      "zh_tw": "然後用 text from message 函式印出回應。",
+      "zh_cn": "然后用 text from message 函数印出回应。"
+    },
+    "46": {
+      "en": "I'm printing it out.",
+      "zh_tw": "印出來。",
+      "zh_cn": "印出來。"
+    },
+    "47": {
+      "en": "Just we have an understanding of what Claude is currently doing.",
+      "zh_tw": "只是為了了解 Claude 目前在做什麼。",
+      "zh_cn": "只是为了了解 Claude 目前在做什麼。"
+    },
+    "48": {
+      "en": "So I will print out text from message with response.",
+      "zh_tw": "印出 text from message(response)。",
+      "zh_cn": "印出 text from message(response)。"
+    },
+    "49": {
+      "en": "Okay.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "50": {
+      "en": "Now here is the part where we are going to use the stop reason.",
+      "zh_tw": "現在是使用 stop reason 的部分。",
+      "zh_cn": "现在是使用 stop reason 的部分。"
+    },
+    "51": {
+      "en": "We need to take a look at the message that we just got back from Claude and understand",
+      "zh_tw": "需要看看剛從 Claude 得到的訊息",
+      "zh_cn": "需要看看剛从 Claude 得到的信息"
+    },
+    "52": {
+      "en": "whether or not Claude wants to use a tool.",
+      "zh_tw": "Claude 是否想使用工具。",
+      "zh_cn": "Claude 是否想使用工具。"
+    },
+    "53": {
+      "en": "If it doesn't want to use a tool, then we want to immediately break out of this while loop.",
+      "zh_tw": "如果不想用工具，就要立即跳出 while 迴圈。",
+      "zh_cn": "如果不想用工具，就要立即跳出 while 循环。"
+    },
+    "54": {
+      "en": "So we'll say if response.stop underscore reason is not equal to tool underscore use, then that",
+      "zh_tw": "如果 response.stop_reason 不等於 tool_use，",
+      "zh_cn": "如果 response.stop_reason 不等於 tool_use，"
+    },
+    "55": {
+      "en": "is a sign that Claude is all done and it doesn't need to make use of any more tools.",
+      "zh_tw": "就是 Claude 完成了，不需要再使用工具的信號。",
+      "zh_cn": "就是 Claude 完成了，不需要再使用工具的信号。"
+    },
+    "56": {
+      "en": "So we will immediately break.",
+      "zh_tw": "立即 break。",
+      "zh_cn": "立即 break。"
+    },
+    "57": {
+      "en": "If we get past that if statement, then we know that Claude wants to call a tool.",
+      "zh_tw": "如果通過了那個 if 判斷，就知道 Claude 想呼叫工具。",
+      "zh_cn": "如果通过了那个 if 判断，就知道 Claude 想调用工具。"
+    },
+    "58": {
+      "en": "So we're going to put together a new function in just a moment.",
+      "zh_tw": "我們馬上要寫一個新函式。",
+      "zh_cn": "我们马上要写一个新函数。"
+    },
+    "59": {
+      "en": "We're going to call it run tools.",
+      "zh_tw": "叫它 run tools。",
+      "zh_cn": "叫它 run tools。"
+    },
+    "60": {
+      "en": "We're going to pass in the message that we just got back from Claude.",
+      "zh_tw": "傳入剛從 Claude 得到的訊息。",
+      "zh_cn": "传入剛从 Claude 得到的信息。"
+    },
+    "61": {
+      "en": "The goal of run tools is to take a look at all the tool use blocks inside this message",
+      "zh_tw": "run tools 的目標是查看訊息中所有 tool use block，",
+      "zh_cn": "run tools 的目标是查看信息中所有 tool use block，"
+    },
+    "62": {
+      "en": "and run the appropriate tool for each one.",
+      "zh_tw": "並為每一個執行對應的工具。",
+      "zh_cn": "並为每一个执行对应的工具。"
+    },
+    "63": {
+      "en": "I'm going to define the run tools function in a new cell right above run conversation.",
+      "zh_tw": "在 run conversation 上面的新儲存格中定義 run tools 函式。",
+      "zh_cn": "在 run conversation 上面的新存储格中定义 run tools 函数。"
+    },
+    "64": {
+      "en": "So up here, I will put together a new function called run tools, and this is going to take",
+      "zh_tw": "上面放一個新函式 run tools，接收",
+      "zh_cn": "上面放一个新函数 run tools，接收"
+    },
+    "65": {
+      "en": "in a single message.",
+      "zh_tw": "單一訊息。",
+      "zh_cn": "单一信息。"
+    },
+    "66": {
+      "en": "Now this function is going to be just a little tricky to put together because we have to write",
+      "zh_tw": "這個函式寫起來有點棘手，因為要假設",
+      "zh_cn": "这个函数写起來有点棘手，因为要假设"
+    },
+    "67": {
+      "en": "it out assuming that there might be multiple tool calls inside of here.",
+      "zh_tw": "裡面可能有多個工具呼叫。",
+      "zh_cn": "里面可能有多个工具调用。"
+    },
+    "68": {
+      "en": "So let me show you a diagram to just make sure it's really clear what needs to happen inside",
+      "zh_tw": "讓我展示一張圖確保清楚 run tools 中",
+      "zh_cn": "让我展示一張圖确保清楚 run tools 中"
+    },
+    "69": {
+      "en": "of run tools.",
+      "zh_tw": "需要做什麼。",
+      "zh_cn": "需要做什麼。"
+    },
+    "70": {
+      "en": "As a very quick reminder, whenever Claude gives us back an assistant message, it can possibly",
+      "zh_tw": "快速提醒，當 Claude 回傳助手訊息時，可能",
+      "zh_cn": "快速提醒，当 Claude 返回助手信息时，可能"
+    },
+    "71": {
+      "en": "have more than one tool use block inside of it.",
+      "zh_tw": "有多個 tool use block。",
+      "zh_cn": "有多个 tool use block。"
+    },
+    "72": {
+      "en": "And we took a look at this earlier.",
+      "zh_tw": "之前看過了。",
+      "zh_cn": "之前看过了。"
+    },
+    "73": {
+      "en": "So if we ask Claude initially to add together 10 plus 10 and 30 plus 30, it can send back",
+      "zh_tw": "如果我們要求 Claude 計算 10 加 10 和 30 加 30，它可以送回",
+      "zh_cn": "如果我们要求 Claude 计算 10 加 10 和 30 加 30，它可以送回"
+    },
+    "74": {
+      "en": "to us two separate tool use blocks.",
+      "zh_tw": "兩個獨立的 tool use block。",
+      "zh_cn": "兩个独立的 tool use block。"
+    },
+    "75": {
+      "en": "One might ask us to run a calculator tool to evaluate 10 plus 10.",
+      "zh_tw": "一個要求用 calculator 工具計算 10 加 10。",
+      "zh_cn": "一个要求用 calculator 工具计算 10 加 10。"
+    },
+    "76": {
+      "en": "And the second tool use block might ask us to evaluate 30 plus 30.",
+      "zh_tw": "第二個要求計算 30 加 30。",
+      "zh_cn": "第二个要求计算 30 加 30。"
+    },
+    "77": {
+      "en": "So we need to set up this run tools function, assuming that we might have more than one tool",
+      "zh_tw": "需要假設可能有多個 tool use block 來設定 run tools 函式。",
+      "zh_cn": "需要假设可能有多个 tool use block 來设定 run tools 函数。"
+    },
+    "78": {
+      "en": "use block.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "79": {
+      "en": "So here's how this function is going to work.",
+      "zh_tw": "函式的運作方式如下。",
+      "zh_cn": "函数的运作方式如下。"
+    },
+    "80": {
+      "en": "We're going to take a look at that message that we just got specifically the content property",
+      "zh_tw": "查看訊息的 content 屬性，",
+      "zh_cn": "查看信息的 content 属性，"
+    },
+    "81": {
+      "en": "on it when that content property is going to be a list of blocks inside there.",
+      "zh_tw": "content 是一個 block 列表。",
+      "zh_cn": "content 是一个 block 列表。"
+    },
+    "82": {
+      "en": "We might have a text block that tells us what Claude is currently thinking or what it's currently",
+      "zh_tw": "可能有 text block 告訴我們 Claude 目前在想什麼或做什麼。",
+      "zh_cn": "可能有 text block 告訴我们 Claude 目前在想什麼或做什麼。"
+    },
+    "83": {
+      "en": "doing.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "84": {
+      "en": "We don't really care about that text block too much.",
+      "zh_tw": "我們不太在意那個 text block。",
+      "zh_cn": "我们不太在意那个 text block。"
+    },
+    "85": {
+      "en": "So I'm going to delete it out of this diagram.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "86": {
+      "en": "And then we're left with just the two separate or possibly more for that matter, tool use blocks.",
+      "zh_tw": "從圖中刪掉它。",
+      "zh_cn": "从圖中刪掉它。"
+    },
+    "87": {
+      "en": "So inside of this run tools function, we are going to iterate over all the different tool",
+      "zh_tw": "然後剩下的就是兩個（或可能更多）獨立的 tool use block。",
+      "zh_cn": "然后剩下的就是兩个（或可能更多）独立的 tool use block。"
+    },
+    "88": {
+      "en": "use blocks we got.",
+      "zh_tw": "在 run tools 函式中，我們要遍歷所有",
+      "zh_cn": "在 run tools 函数中，我们要遍历所有"
+    },
+    "89": {
+      "en": "And for each one, we're going to run the specified tool with a given inputs.",
+      "zh_tw": "得到的 tool use block。",
+      "zh_cn": "得到的 tool use block。"
+    },
+    "90": {
+      "en": "So we'll take a look at this name field right here.",
+      "zh_tw": "對每一個，用給定的輸入執行指定的工具。",
+      "zh_cn": "对每一个，用给定的输入执行指定的工具。"
+    },
+    "91": {
+      "en": "We'll find the appropriate tool function to run and we will run it with the given input.",
+      "zh_tw": "查看 name 欄位。",
+      "zh_cn": "查看 name 字段。"
+    },
+    "92": {
+      "en": "Then we're going to take all the outputs from each of these different tool runs, and we're",
+      "zh_tw": "找到對應的工具函式來執行，用給定的輸入執行它。",
+      "zh_cn": "找到对应的工具函数來执行，用给定的输入执行它。"
+    },
+    "93": {
+      "en": "going to assemble them into separate tool result blocks.",
+      "zh_tw": "然後把所有工具執行的輸出組裝成獨立的 tool result block。",
+      "zh_cn": "然后把所有工具执行的输出组装成独立的 tool result block。"
+    },
+    "94": {
+      "en": "Remember, a tool result block is how we communicate the result of running a tool back over to Claude.",
+      "zh_tw": "記住，tool result block 是我們把執行工具的結果傳回 Claude 的方式。",
+      "zh_cn": "记住，tool result block 是我们把执行工具的结果传回 Claude 的方式。"
+    },
+    "95": {
+      "en": "Once we have assembled all these different tool result blocks, we're going to put them",
+      "zh_tw": "組裝好所有 tool result block 後，把它們",
+      "zh_cn": "组装好所有 tool result block 后，把它们"
+    },
+    "96": {
+      "en": "all together into a list and return them from the run tools function.",
+      "zh_tw": "全部放進列表中，從 run tools 函式回傳。",
+      "zh_cn": "全部放进列表中，从 run tools 函数返回。"
+    }
+  }
+}

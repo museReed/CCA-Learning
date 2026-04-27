@@ -1,0 +1,312 @@
+{
+  "srt_file": "Introducing_tool_use_EYMBO8qx.srt",
+  "video_file": "Introducing_tool_use_EYMBO8qx.mp4",
+  "max_valid_entry": 61,
+  "entries": {
+    "1": {
+      "en": "In this module, we are going to discuss tool use.",
+      "zh_tw": "在這個模組中，我們要討論工具使用。",
+      "zh_cn": "在这个模组中，我们要討论工具使用。"
+    },
+    "2": {
+      "en": "Tools allow Claude to access information from the outside world.",
+      "zh_tw": "工具讓 Claude 能夠從外部世界取得資訊。",
+      "zh_cn": "工具让 Claude 能够从外部世界取得资讯。"
+    },
+    "3": {
+      "en": "Now, understanding tool use can be a little bit challenging,",
+      "zh_tw": "理解工具使用可能有點困難，",
+      "zh_cn": "理解工具使用可能有点困难，"
+    },
+    "4": {
+      "en": "so in this video, I'm going to give you a really soft introduction.",
+      "zh_tw": "所以在這個影片中，我會給你一個非常溫和的入門介紹。",
+      "zh_cn": "所以在这个视频中，我会给你一个非常溫和的入门介绍。"
+    },
+    "5": {
+      "en": "We are going to walk through the entire flow of tool use",
+      "zh_tw": "我們會走過工具使用的整個流程，",
+      "zh_cn": "我们会走过工具使用的整个流程，"
+    },
+    "6": {
+      "en": "and understand what it's all about.",
+      "zh_tw": "了解它到底是什麼。",
+      "zh_cn": "了解它到底是什麼。"
+    },
+    "7": {
+      "en": "I want to first begin by giving you an example of where Claude can,",
+      "zh_tw": "我首先想給你一個例子，說明 Claude 有時候",
+      "zh_cn": "我首先想给你一个例子，说明 Claude 有时候"
+    },
+    "8": {
+      "en": "unfortunately, sometimes hit its limits.",
+      "zh_tw": "會碰到它的限制。",
+      "zh_cn": "会碰到它的限制。"
+    },
+    "9": {
+      "en": "Remember, by default, Claude only has access to information",
+      "zh_tw": "記住，預設情況下，Claude 只能存取",
+      "zh_cn": "记住，默认情況下，Claude 只能访问"
+    },
+    "10": {
+      "en": "that was actually trained on.",
+      "zh_tw": "它實際訓練過的資訊。",
+      "zh_cn": "它实际训练过的资讯。"
+    },
+    "11": {
+      "en": "So in general, it doesn't really have any information",
+      "zh_tw": "所以一般來說，它對很近期的",
+      "zh_cn": "所以一般來说，它对很近期的"
+    },
+    "12": {
+      "en": "about very recent current events.",
+      "zh_tw": "時事並沒有太多了解。",
+      "zh_cn": "时事並没有太多了解。"
+    },
+    "13": {
+      "en": "As an example of this, if we had a user making use of our chatbot",
+      "zh_tw": "舉個例子，如果我們的聊天機器人有一個使用者",
+      "zh_cn": "舉个例子，如果我们的聊天机器人有一个使用者"
+    },
+    "14": {
+      "en": "ask a question of something like,",
+      "zh_tw": "問了像這樣的問題：",
+      "zh_cn": "问了像这样的问题："
+    },
+    "15": {
+      "en": "what's the weather in San Francisco, California right now?",
+      "zh_tw": "「舊金山現在的天氣怎麼樣？」",
+      "zh_cn": "「旧金山现在的天气怎麼样？」"
+    },
+    "16": {
+      "en": "And sent that off to Claude,",
+      "zh_tw": "然後送給 Claude，",
+      "zh_cn": "然后送给 Claude，"
+    },
+    "17": {
+      "en": "we would probably get a response back of something like,",
+      "zh_tw": "我們可能會得到這樣的回應：",
+      "zh_cn": "我们可能会得到这样的回应："
+    },
+    "18": {
+      "en": "I'm sorry, but I don't have access to up-to-date weather information like that.",
+      "zh_tw": "「抱歉，我無法存取那樣的即時天氣資訊。」",
+      "zh_cn": "「抱歉，我无法访问那样的即时天气资讯。」"
+    },
+    "19": {
+      "en": "To fix this and give the user a better response,",
+      "zh_tw": "為了修復這個問題，給使用者更好的回應，",
+      "zh_cn": "为了修复这个问题，给使用者更好的回应，"
+    },
+    "20": {
+      "en": "we can make use of tools.",
+      "zh_tw": "我們可以使用工具。",
+      "zh_cn": "我们可以使用工具。"
+    },
+    "21": {
+      "en": "Let me show you a diagram that's going to break down tools",
+      "zh_tw": "讓我用一張圖來分解工具，",
+      "zh_cn": "让我用一張圖來分解工具，"
+    },
+    "22": {
+      "en": "with really simple terminology.",
+      "zh_tw": "用非常簡單的術語。",
+      "zh_cn": "用非常简单的术语。"
+    },
+    "23": {
+      "en": "And then I'll show you another one that's going to give you an example",
+      "zh_tw": "然後我再展示另一張圖，給你一個例子，",
+      "zh_cn": "然后我再展示另一張圖，给你一个例子，"
+    },
+    "24": {
+      "en": "of how we would solve this specific weather problem.",
+      "zh_tw": "說明我們如何解決這個特定的天氣問題。",
+      "zh_cn": "说明我们如何解决这个特定的天气问题。"
+    },
+    "25": {
+      "en": "Okay, so here's the entire flow that we're going to eventually implement",
+      "zh_tw": "好的，這是我們最終要實作的整個流程，",
+      "zh_cn": "好的，这是我们最终要实作的整个流程，"
+    },
+    "26": {
+      "en": "when we start to make use of tools.",
+      "zh_tw": "當我們開始使用工具時。",
+      "zh_cn": "当我们开始使用工具时。"
+    },
+    "27": {
+      "en": "We're going to send off an initial request to Claude.",
+      "zh_tw": "我們會送一個初始請求給 Claude。",
+      "zh_cn": "我们会送一个初始请求给 Claude。"
+    },
+    "28": {
+      "en": "We're going to ask a question or maybe give Claude a task.",
+      "zh_tw": "我們會問一個問題或給 Claude 一個任務。",
+      "zh_cn": "我们会问一个问题或给 Claude 一个任务。"
+    },
+    "29": {
+      "en": "And along with that, we're going to include instructions",
+      "zh_tw": "同時，我們會附上指示，",
+      "zh_cn": "同时，我们会附上指示，"
+    },
+    "30": {
+      "en": "on how Claude can get some extra data from the outside world.",
+      "zh_tw": "說明 Claude 如何從外部世界取得額外資料。",
+      "zh_cn": "说明 Claude 如何从外部世界取得额外数据。"
+    },
+    "31": {
+      "en": "Claude will then take a look at whatever question it was asked",
+      "zh_tw": "Claude 接著會看看被問到的問題",
+      "zh_cn": "Claude 接著会看看被问到的问题"
+    },
+    "32": {
+      "en": "or whatever task it was given.",
+      "zh_tw": "或被指派的任務。",
+      "zh_cn": "或被指派的任务。"
+    },
+    "33": {
+      "en": "And it might decide that it needs to ask for some extra data.",
+      "zh_tw": "它可能會決定需要請求一些額外資料。",
+      "zh_cn": "它可能会决定需要请求一些额外数据。"
+    },
+    "34": {
+      "en": "So it'll send a response back to us where it asked for some extra data.",
+      "zh_tw": "所以它會送回一個回應，要求一些額外資料。",
+      "zh_cn": "所以它会送回一个回应，要求一些额外数据。"
+    },
+    "35": {
+      "en": "And it's going to give us some details on exactly what information it needs.",
+      "zh_tw": "並且會給我們一些細節，說明它確切需要什麼資訊。",
+      "zh_cn": "並且会给我们一些细节，说明它确切需要什麼资讯。"
+    },
+    "36": {
+      "en": "Then on our server, we are going to run a little bit of code",
+      "zh_tw": "然後在我們的伺服器上，我們會執行一小段程式碼，",
+      "zh_cn": "然后在我们的服务器上，我们会执行一小段代码，"
+    },
+    "37": {
+      "en": "that will go and get the information that Claude asked for",
+      "zh_tw": "去取得 Claude 要求的資訊，",
+      "zh_cn": "去取得 Claude 要求的资讯，"
+    },
+    "38": {
+      "en": "and then respond with that on a follow-up request back to Claude.",
+      "zh_tw": "然後在後續的請求中把它回傳給 Claude。",
+      "zh_cn": "然后在后续的请求中把它返回给 Claude。"
+    },
+    "39": {
+      "en": "Now Claude has all the information it needs, in theory, to give us a response.",
+      "zh_tw": "現在 Claude 理論上有了所有需要的資訊來給我們回應。",
+      "zh_cn": "现在 Claude 理论上有了所有需要的资讯來给我们回应。"
+    },
+    "40": {
+      "en": "So it will generate a final response that will be hopefully augmented",
+      "zh_tw": "所以它會生成一個最終回應，希望透過那些額外資料",
+      "zh_cn": "所以它会生成一个最终回应，希望透过那些额外数据"
+    },
+    "41": {
+      "en": "or improved by that extra data.",
+      "zh_tw": "得到增強或改善。",
+      "zh_cn": "得到增強或改善。"
+    },
+    "42": {
+      "en": "Now I'm going to show you the same exact flow,",
+      "zh_tw": "現在我要展示完全相同的流程，",
+      "zh_cn": "现在我要展示完全相同的流程，"
+    },
+    "43": {
+      "en": "but I'm going to customize each of these little steps for this scenario",
+      "zh_tw": "但我會把每一個步驟客製化，",
+      "zh_cn": "但我会把每一个步驟自定义，"
+    },
+    "44": {
+      "en": "where a user asks us for some current weather in a particular location.",
+      "zh_tw": "用在使用者詢問特定地點目前天氣的場景中。",
+      "zh_cn": "用在使用者询问特定地点目前天气的场景中。"
+    },
+    "45": {
+      "en": "So here's what would happen.",
+      "zh_tw": "以下是會發生的事情。",
+      "zh_cn": "以下是会发生的事情。"
+    },
+    "46": {
+      "en": "We would send an initial query off to Claude",
+      "zh_tw": "我們會送一個初始查詢給 Claude，",
+      "zh_cn": "我们会送一个初始查询给 Claude，"
+    },
+    "47": {
+      "en": "and it would include a prompt where the user asks about the weather.",
+      "zh_tw": "其中包含使用者詢問天氣的提示。",
+      "zh_cn": "其中包含使用者询问天气的提示。"
+    },
+    "48": {
+      "en": "And inside of that initial request, we're going to include details",
+      "zh_tw": "在初始請求中，我們會附上",
+      "zh_cn": "在初始请求中，我们会附上"
+    },
+    "49": {
+      "en": "on specifically how to retrieve current weather data.",
+      "zh_tw": "如何取得目前天氣資料的細節。",
+      "zh_cn": "如何取得目前天气数据的细节。"
+    },
+    "50": {
+      "en": "Claude would take a look at the prompt and decide,",
+      "zh_tw": "Claude 會看看提示並決定，",
+      "zh_cn": "Claude 会看看提示並决定，"
+    },
+    "51": {
+      "en": "hey, to answer this question, I need to get some current weather data.",
+      "zh_tw": "嘿，要回答這個問題，我需要取得一些目前的天氣資料。",
+      "zh_cn": "嘿，要回答这个问题，我需要取得一些目前的天气数据。"
+    },
+    "52": {
+      "en": "It sent a response back to us where we would then run some code",
+      "zh_tw": "它送回回應給我們，然後我們執行一些程式碼，",
+      "zh_cn": "它送回回应给我们，然后我们执行一些代码，"
+    },
+    "53": {
+      "en": "that would reach out to some maybe third-party weather API",
+      "zh_tw": "連接到某個第三方天氣 API，",
+      "zh_cn": "连接到某个第三方天气 API，"
+    },
+    "54": {
+      "en": "and actually get some live details on what the current weather is",
+      "zh_tw": "實際取得特定地點的即時天氣詳情。",
+      "zh_cn": "实际取得特定地点的即时天气详情。"
+    },
+    "55": {
+      "en": "for a particular location.",
+      "zh_tw": "一旦我們從外部 API 取得這些詳情，",
+      "zh_cn": "一旦我们从外部 API 取得这些详情，"
+    },
+    "56": {
+      "en": "Once we have those details from that outside API,",
+      "zh_tw": "我們就會對 Claude 發出後續請求，",
+      "zh_cn": "我们就会对 Claude 发出后续请求，"
+    },
+    "57": {
+      "en": "we would then make a follow-up request to Claude",
+      "zh_tw": "附上目前的天氣資料。",
+      "zh_cn": "附上目前的天气数据。"
+    },
+    "58": {
+      "en": "with that current weather data.",
+      "zh_tw": "現在 Claude 有了所有需要的資訊。",
+      "zh_cn": "现在 Claude 有了所有需要的资讯。"
+    },
+    "59": {
+      "en": "And now Claude has all the information it needs.",
+      "zh_tw": "它有原始提示加上最新的天氣資料，",
+      "zh_cn": "它有原始提示加上最新的天气数据，"
+    },
+    "60": {
+      "en": "It has the original prompt along with the up-to-date weather data",
+      "zh_tw": "所以可以生成最終回應並送回給我們。",
+      "zh_cn": "所以可以生成最终回应並送回给我们。"
+    },
+    "61": {
+      "en": "so it can generate a final response and send it back to us.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    }
+  }
+}

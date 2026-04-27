@@ -1,0 +1,372 @@
+{
+  "srt_file": "The_StreamableHTTP_transport_G2sDMd5D.srt",
+  "video_file": "The_StreamableHTTP_transport_G2sDMd5D.mp4",
+  "max_valid_entry": 73,
+  "entries": {
+    "1": {
+      "en": "Time to discuss the streamable HTTP transport. This transport allows us to send messages between",
+      "zh_tw": "是時候討論 Streamable HTTP 傳輸方式了。這個傳輸方式允許我們透過 HTTP 連接在",
+      "zh_cn": "是时候討论 Streamable HTTP 传输方式了。这个传输方式允许我们透过 HTTP 连接在"
+    },
+    "2": {
+      "en": "a client and a server over an HTTP connection. The nice thing about this transport is that it",
+      "zh_tw": "客戶端和伺服器之間發送訊息。這個傳輸方式的好處是它",
+      "zh_cn": "客户端和服务器之间发送信息。这个传输方式的好处是它"
+    },
+    "3": {
+      "en": "really enables remotely hosted MCP servers. So whereas with the standard IO transport,",
+      "zh_tw": "真正實現了遠端託管的 MCP 伺服器。使用標準 IO 傳輸方式時，",
+      "zh_cn": "真正实现了远端托管的 MCP 服务器。使用标准 IO 传输方式时，"
+    },
+    "4": {
+      "en": "we always had to run the client and the server on the same machine, with the streamable HTTP",
+      "zh_tw": "我們總是必須在同一台機器上執行客戶端和伺服器，而使用 Streamable HTTP",
+      "zh_cn": "我们总是必须在同一台机器上执行客户端和服务器，而使用 Streamable HTTP"
+    },
+    "5": {
+      "en": "transport, we can remotely host our server. So our remote server might be hosted at",
+      "zh_tw": "傳輸方式，我們可以遠端託管伺服器。我們的遠端伺服器可能託管在",
+      "zh_cn": "传输方式，我们可以远端托管服务器。我们的远端服务器可能托管在"
+    },
+    "6": {
+      "en": "mcpserver.com or something like that. This really opens the door to a much wider range of possibilities",
+      "zh_tw": "mcpserver.com 或類似的地方。這真的為 MCP 伺服器打開了更廣泛的可能性，",
+      "zh_cn": "mcpserver.com 或类似的地方。这真的为 MCP 服务器打开了更广泛的可能性，"
+    },
+    "7": {
+      "en": "around MCP servers, because you can make a public server that anyone can connect to.",
+      "zh_tw": "因為你可以做一個公開的伺服器讓任何人連接。",
+      "zh_cn": "因为你可以做一个公开的服务器让任何人连接。"
+    },
+    "8": {
+      "en": "However, as I've hinted at over the last couple of videos, there are some settings that you might",
+      "zh_tw": "然而，如同我在前幾支影片中暗示的，有一些設定你可能",
+      "zh_cn": "然而，如同我在前幾支视频中暗示的，有一些设定你可能"
+    },
+    "9": {
+      "en": "need to apply to this transport that will limit the functionality of your MCP server, specifically",
+      "zh_tw": "需要套用到這個傳輸方式，這會限制 MCP 伺服器的功能，特別是",
+      "zh_cn": "需要套用到这个传输方式，这会限制 MCP 服务器的功能，特別是"
+    },
+    "10": {
+      "en": "limit the types of messages that you can send from the server back over to the client. So that is the",
+      "zh_tw": "限制你可以從伺服器發送回客戶端的訊息類型。所以那就是",
+      "zh_cn": "限制你可以从服务器发送回客户端的信息类型。所以那就是"
+    },
+    "11": {
+      "en": "big issue that I want you to be aware of. There are some settings that are going to restrict the",
+      "zh_tw": "我想讓你注意的大問題。有一些設定會限制",
+      "zh_cn": "我想让你注意的大问题。有一些设定会限制"
+    },
+    "12": {
+      "en": "functionality of the server when you are using this particular transport. So if you are ever",
+      "zh_tw": "使用這個特定傳輸方式時伺服器的功能。所以如果你",
+      "zh_cn": "使用这个特定传输方式时服务器的功能。所以如果你"
+    },
+    "13": {
+      "en": "developing an application on your local machine, and everything is working just fine with the standard",
+      "zh_tw": "在本機開發應用程式，用標準 IO 傳輸方式一切運作正常，",
+      "zh_cn": "在本机开发应用程序，用标准 IO 传输方式一切运作正常，"
+    },
+    "14": {
+      "en": "IO transport, and then you deploy and you start to use the HTTP transport and things aren't working",
+      "zh_tw": "然後你部署並開始使用 HTTP 傳輸方式，結果東西不太",
+      "zh_cn": "然后你部署並开始使用 HTTP 传输方式，结果東西不太"
+    },
+    "15": {
+      "en": "quite so well, this is the video you want to come back to to understand what is going on.",
+      "zh_tw": "正常，這支影片就是你要回來看的，來理解發生了什麼。",
+      "zh_cn": "正常，这支视频就是你要回來看的，來理解发生了什麼。"
+    },
+    "16": {
+      "en": "To get started, I would like to give you a quick demonstration of an app that I showed you",
+      "zh_tw": "開始之前，我想給你快速示範一下我之前在這個課程中展示過的應用程式。",
+      "zh_cn": "开始之前，我想给你快速示范一下我之前在这个课程中展示过的应用程序。"
+    },
+    "17": {
+      "en": "previously inside of this course. You might recall this Wikipedia research assistant, it makes use",
+      "zh_tw": "你可能還記得這個維基百科研究助手，它使用",
+      "zh_cn": "你可能还记得这个维基百科研究助手，它使用"
+    },
+    "18": {
+      "en": "of a next JS application that is connected to an MCP server that implements a research tool.",
+      "zh_tw": "一個 Next.js 應用程式連接到一個實作了 research 工具的 MCP 伺服器。",
+      "zh_cn": "一个 Next.js 应用程序连接到一个实作了 research 工具的 MCP 服务器。"
+    },
+    "19": {
+      "en": "This server is using the streamable HTTP transport. So I will be able to use this application to show",
+      "zh_tw": "這個伺服器使用 Streamable HTTP 傳輸方式。所以我可以用這個應用程式來展示",
+      "zh_cn": "这个服务器使用 Streamable HTTP 传输方式。所以我可以用这个应用程序來展示"
+    },
+    "20": {
+      "en": "you a couple scenarios where the streamable HTTP transport doesn't quite work as expected.",
+      "zh_tw": "一些 Streamable HTTP 傳輸方式不太如預期運作的場景。",
+      "zh_cn": "一些 Streamable HTTP 传输方式不太如预期运作的场景。"
+    },
+    "21": {
+      "en": "First, I'm going to send off a request here, just gonna ask for a report on archaeology,",
+      "zh_tw": "首先，我要發送一個請求，就請求一份考古學報告，",
+      "zh_cn": "首先，我要发送一个请求，就请求一份考古学报告，"
+    },
+    "22": {
+      "en": "just to remind you what this application looks like. So usually when I send in a query like this,",
+      "zh_tw": "提醒你這個應用程式長什麼樣。通常當我發送這樣的查詢時，",
+      "zh_cn": "提醒你这个应用程序长什麼样。通常当我发送这样的查询时，"
+    },
+    "23": {
+      "en": "I'm going to see a call tool request here, and I get a nice progress bar, I get status updates,",
+      "zh_tw": "我會看到一個 call tool request，然後有一個漂亮的進度條，有狀態更新，",
+      "zh_cn": "我会看到一个 call tool request，然后有一个漂亮的进度条，有状态更新，"
+    },
+    "24": {
+      "en": "and eventually if I wait just a little bit, I will get a full response. Now over here inside the source",
+      "zh_tw": "最終如果我等一下，就會得到完整的回應。在 MCP 伺服器的",
+      "zh_cn": "最终如果我等一下，就会得到完整的回应。在 MCP 服务器的"
+    },
+    "25": {
+      "en": "code for the MCP server, you'll notice that there are two settings that I have commented out,",
+      "zh_tw": "原始碼裡，你會注意到有兩個我註解掉的設定，",
+      "zh_cn": "原始码里，你会注意到有兩个我註解掉的设定，"
+    },
+    "26": {
+      "en": "stateless HTTP and JSON response. By default, these settings are set to false. But there are going to be",
+      "zh_tw": "stateless HTTP 和 JSON response。預設情況下，這些設定是 false。但有一些",
+      "zh_cn": "stateless HTTP 和 JSON response。默认情況下，这些设定是 false。但有一些"
+    },
+    "27": {
+      "en": "some scenarios where you very much have to enable them or set them to true. And we'll go into more",
+      "zh_tw": "場景你非常需要啟用它們或把它們設為 true。我們稍後會更詳細",
+      "zh_cn": "场景你非常需要啟用它们或把它们设为 true。我们稍后会更详细"
+    },
+    "28": {
+      "en": "details on what those scenarios are a little bit later on. Changing these settings to true is going",
+      "zh_tw": "說明那些場景是什麼。把這些設定改為 true 會",
+      "zh_cn": "说明那些场景是什麼。把这些设定改为 true 会"
+    },
+    "29": {
+      "en": "to impact the functionality of your MCP server. And in some cases, it might even break how your client",
+      "zh_tw": "影響 MCP 伺服器的功能。在某些情況下，甚至可能破壞你的客戶端",
+      "zh_cn": "影响 MCP 服务器的功能。在某些情況下，甚至可能破坏你的客户端"
+    },
+    "30": {
+      "en": "works. So let me show you an example of this right away. I'm going to change stateless HTTP to be true.",
+      "zh_tw": "的運作方式。讓我馬上給你看一個範例。我要把 stateless HTTP 改為 true。",
+      "zh_cn": "的运作方式。让我马上给你看一个范例。我要把 stateless HTTP 改为 true。"
+    },
+    "31": {
+      "en": "I'm going to save the file. Then I'm going to reload the page and run the exact same query again.",
+      "zh_tw": "儲存檔案。然後重新載入頁面，再次執行完全相同的查詢。",
+      "zh_cn": "存储文件。然后重新載入页面，再次执行完全相同的查询。"
+    },
+    "32": {
+      "en": "And now you're not going to see a big difference here. But there is something you'll notice right away.",
+      "zh_tw": "你不會看到很大的差異。但有一件事你會馬上注意到。",
+      "zh_cn": "你不会看到很大的差异。但有一件事你会马上注意到。"
+    },
+    "33": {
+      "en": "You'll notice that now I don't get a progress bar anymore. So no progress bar whatsoever above the log",
+      "zh_tw": "你會注意到我現在不再有進度條了。日誌語句上面完全沒有進度條。",
+      "zh_cn": "你会注意到我现在不再有进度条了。日志语句上面完全没有进度条。"
+    },
+    "34": {
+      "en": "statements. In addition, if I let this just sit here for a while, and I'm going to speed the video up.",
+      "zh_tw": "而且，如果我讓它一直停在這裡，我會加速影片。",
+      "zh_cn": "而且，如果我让它一直停在这里，我会加速视频。"
+    },
+    "35": {
+      "en": "We will see that eventually the request fails entirely without generating any text. Now I'm going to refresh",
+      "zh_tw": "最終我們會看到請求完全失敗，沒有生成任何文字。現在我要重新整理",
+      "zh_cn": "最终我们会看到请求完全失敗，没有生成任何文字。现在我要重新整理"
+    },
+    "36": {
+      "en": "the page, I'm going to turn on JSON response to be true, save the file, and then run the exact same query",
+      "zh_tw": "頁面，把 JSON response 開啟為 true，儲存檔案，然後執行完全相同的查詢",
+      "zh_cn": "页面，把 JSON response 开啟为 true，存储文件，然后执行完全相同的查询"
+    },
+    "37": {
+      "en": "again. Now we'll see that with both these settings set to true, we get some even more surprising results.",
+      "zh_tw": "。現在我們會看到兩個設定都設為 true 時，結果更令人驚訝。",
+      "zh_cn": "。现在我们会看到兩个设定都设为 true 时，结果更令人驚訝。"
+    },
+    "38": {
+      "en": "Now I don't see any progress bar, I don't get any log statements, and take my word for it, if we let",
+      "zh_tw": "現在沒有進度條、沒有日誌語句，相信我，如果我們讓",
+      "zh_cn": "现在没有进度条、没有日志语句，相信我，如果我们让"
+    },
+    "39": {
+      "en": "this just sit here, the request is going to fail again. So right away, we can see that these two",
+      "zh_tw": "它停在這裡，請求又會失敗。所以馬上就可以看到這兩個",
+      "zh_cn": "它停在这里，请求又会失敗。所以马上就可以看到这兩个"
+    },
+    "40": {
+      "en": "settings, although seemingly innocuous, have a big impact on our MCP server. So the rest of this video",
+      "zh_tw": "設定，雖然看似無害，卻對 MCP 伺服器有很大的影響。所以這支影片剩下的部分",
+      "zh_cn": "设定，雖然看似无害，卻对 MCP 服务器有很大的影响。所以这支视频剩下的部分"
+    },
+    "41": {
+      "en": "is all about helping you understand what these settings are talking about, why we might set them to",
+      "zh_tw": "就是幫你理解這些設定在說什麼，為什麼我們可能把它們設為",
+      "zh_cn": "就是幫你理解这些设定在说什麼，为什麼我们可能把它们设为"
+    },
+    "42": {
+      "en": "true, and exactly what's going on here. First, I want to give you a very quick reminder of a diagram",
+      "zh_tw": "true，以及這裡到底發生了什麼。首先，我想快速提醒你上支影片的一個圖表，",
+      "zh_cn": "true，以及这里到底发生了什麼。首先，我想快速提醒你上支视频的一个圖表，"
+    },
+    "43": {
+      "en": "I showed you in the last video, and I made a big deal about how the standard IO transport had the",
+      "zh_tw": "我強調了標準 IO 傳輸方式有",
+      "zh_cn": "我強调了标准 IO 传输方式有"
+    },
+    "44": {
+      "en": "ability to initiate a request from the client to the server, and then get a response back. And likewise,",
+      "zh_tw": "從客戶端向伺服器發起請求然後收到回應的能力。同樣，",
+      "zh_cn": "从客户端向服务器发起请求然后收到回应的能力。同样，"
+    },
+    "45": {
+      "en": "the server at any point in time could initiate a request off to the client and get a response back.",
+      "zh_tw": "伺服器在任何時間點都可以向客戶端發起請求並收到回應。",
+      "zh_cn": "服务器在任何时间点都可以向客户端发起请求並收到回应。"
+    },
+    "46": {
+      "en": "So keep that in mind for just a moment, as I give you a quick review on HTTP communication.",
+      "zh_tw": "把這個記住，我來快速複習一下 HTTP 通訊。",
+      "zh_cn": "把这个记住，我來快速复習一下 HTTP 通讯。"
+    },
+    "47": {
+      "en": "So this is going back to some of the basics around HTTP, and this is all HTTP communication,",
+      "zh_tw": "這是回到 HTTP 的一些基礎，這是所有的 HTTP 通訊，",
+      "zh_cn": "这是回到 HTTP 的一些基础，这是所有的 HTTP 通讯，"
+    },
+    "48": {
+      "en": "not just MCP related stuff. So as a reminder, if we have a client and a server, at any point in time,",
+      "zh_tw": "不只是 MCP 相關的東西。提醒一下，如果我們有客戶端和伺服器，在任何時間點，",
+      "zh_cn": "不只是 MCP 相关的東西。提醒一下，如果我们有客户端和服务器，在任何时间点，"
+    },
+    "49": {
+      "en": "a client can very easily make a request off to the server. For example, on the right hand side,",
+      "zh_tw": "客戶端都可以非常容易地向伺服器發送請求。例如，在右邊，",
+      "zh_cn": "客户端都可以非常容易地向服务器发送请求。例如，在右边，"
+    },
+    "50": {
+      "en": "the client can make a post request off to the server and expect to get back some kind of response.",
+      "zh_tw": "客戶端可以向伺服器發送 POST 請求並期望收到某種回應。",
+      "zh_cn": "客户端可以向服务器发送 POST 请求並期望收到某种回应。"
+    },
+    "51": {
+      "en": "No issue with this setup whatsoever. So translating this over to the MCP world, that means that if we",
+      "zh_tw": "這個設定完全沒問題。把這轉換到 MCP 世界，意思是如果我們",
+      "zh_cn": "这个设定完全没问题。把这转换到 MCP 世界，意思是如果我们"
+    },
+    "52": {
+      "en": "want to make an initial request from the client to the server, no problem, it's going to work.",
+      "zh_tw": "想從客戶端向伺服器發送初始請求，沒問題，可以運作。",
+      "zh_cn": "想从客户端向服务器发送初始请求，没问题，可以运作。"
+    },
+    "53": {
+      "en": "And if we want to get a response from the server back with the client, no problem whatsoever,",
+      "zh_tw": "如果我們想從伺服器收到回應給客戶端，完全沒問題，",
+      "zh_cn": "如果我们想从服务器收到回应给客户端，完全没问题，"
+    },
+    "54": {
+      "en": "it's going to work just fine. However, if we consider the reverse scenario, if the server wants",
+      "zh_tw": "運作得很好。然而，如果我們考慮相反的場景，如果伺服器想",
+      "zh_cn": "运作得很好。然而，如果我们考慮相反的场景，如果服务器想"
+    },
+    "55": {
+      "en": "to initiate a request down to the client, that's not quite so easy with HTTP requests. At a very",
+      "zh_tw": "向客戶端發起請求，用 HTTP 請求就不那麼容易了。在非常",
+      "zh_cn": "向客户端发起请求，用 HTTP 请求就不那麼容易了。在非常"
+    },
+    "56": {
+      "en": "basic level, the server doesn't know the address of the client, and the client might not even be",
+      "zh_tw": "基本的層面上，伺服器不知道客戶端的地址，而且客戶端甚至可能不是",
+      "zh_cn": "基本的层面上，服务器不知道客户端的地址，而且客户端甚至可能不是"
+    },
+    "57": {
+      "en": "publicly accessible. So it's very challenging in traditional HTTP for the server to initiate a",
+      "zh_tw": "公開可存取的。所以在傳統 HTTP 中，伺服器向客戶端發起",
+      "zh_cn": "公开可访问的。所以在传统 HTTP 中，服务器向客户端发起"
+    },
+    "58": {
+      "en": "request down to the client. And that means that in our MCP world, it's really hard for the server to",
+      "zh_tw": "請求非常困難。這意味著在 MCP 世界裡，伺服器很難發送",
+      "zh_cn": "请求非常困难。这意味著在 MCP 世界里，服务器很难发送"
+    },
+    "59": {
+      "en": "send that initial request down. And it also means that it's kind of hard to imagine how we would",
+      "zh_tw": "初始請求。也意味著很難想像我們如何能",
+      "zh_cn": "初始请求。也意味著很难想像我们如何能"
+    },
+    "60": {
+      "en": "ever expect to get a response from the client back to the server. So if we consider this diagram that",
+      "zh_tw": "期望從客戶端收到回應。如果我們考慮剛才看的這個圖表，",
+      "zh_cn": "期望从客户端收到回应。如果我们考慮剛才看的这个圖表，"
+    },
+    "61": {
+      "en": "we looked at a moment ago, where I had told you that there are some requests that are being issued",
+      "zh_tw": "我告訴你有一些請求是從伺服器向客戶端發出的，",
+      "zh_cn": "我告訴你有一些请求是从服务器向客户端发出的，"
+    },
+    "62": {
+      "en": "from the server down to the client, that means that in this HTTP world, there are some message types",
+      "zh_tw": "這意味著在 HTTP 世界中，有一些訊息類型",
+      "zh_cn": "这意味著在 HTTP 世界中，有一些信息类型"
+    },
+    "63": {
+      "en": "that are just plain tough to implement with normal HTTP requests, specifically sampling requests,",
+      "zh_tw": "用普通的 HTTP 請求很難實作，特別是 sampling request、",
+      "zh_cn": "用普通的 HTTP 请求很难实作，特別是 sampling request、"
+    },
+    "64": {
+      "en": "listing routes, progress notifications, and logging notifications, all in with some other message",
+      "zh_tw": "listing roots、progress notification 和 logging notification，加上一些其他",
+      "zh_cn": "listing roots、progress notification 和 logging notification，加上一些其他"
+    },
+    "65": {
+      "en": "types that I'm just not showing on this diagram are tougher to implement in an HTTP world. And sure",
+      "zh_tw": "我沒在圖表中展示的訊息類型，在 HTTP 世界中更難實作。果然，",
+      "zh_cn": "我没在圖表中展示的信息类型，在 HTTP 世界中更难实作。果然，"
+    },
+    "66": {
+      "en": "enough, that's kind of what you saw back over here with this demo. As soon as I started to flip some",
+      "zh_tw": "那就是你在這個示範中看到的。當我開始把一些",
+      "zh_cn": "那就是你在这个示范中看到的。当我开始把一些"
+    },
+    "67": {
+      "en": "of these properties from false to true, well, you saw some different parts of the application start to",
+      "zh_tw": "屬性從 false 改為 true，你看到應用程式的不同部分開始",
+      "zh_cn": "属性从 false 改为 true，你看到应用程序的不同部分开始"
+    },
+    "68": {
+      "en": "break and just not work as expected. And what exactly broke? Well, that's right, the progress",
+      "zh_tw": "壞掉，不如預期運作。到底什麼壞了？對了，progress",
+      "zh_cn": "坏掉，不如预期运作。到底什麼坏了？对了，progress"
+    },
+    "69": {
+      "en": "notification broke, the logging broke, and sampling or essentially the create message request broke as",
+      "zh_tw": "notification 壞了、logging 壞了、sampling 或者說 create message request 也壞了。",
+      "zh_cn": "notification 坏了、logging 坏了、sampling 或者说 create message request 也坏了。"
+    },
+    "70": {
+      "en": "well. Sampling was being used to author the final research report. Now I do have some good news. Even",
+      "zh_tw": "Sampling 被用來撰寫最終的研究報告。好消息是，即使",
+      "zh_cn": "Sampling 被用來撰写最终的研究报告。好消息是，即使"
+    },
+    "71": {
+      "en": "though making requests from a server down to a client is challenging in a pure HTTP world, the streamable",
+      "zh_tw": "在純 HTTP 世界中從伺服器向客戶端發送請求很困難，Streamable",
+      "zh_cn": "在纯 HTTP 世界中从服务器向客户端发送请求很困难，Streamable"
+    },
+    "72": {
+      "en": "HTTP transport does have a clever solution. But there are some caveats that you need to be aware of.",
+      "zh_tw": "HTTP 傳輸方式有一個巧妙的解決方案。但有一些需要注意的地方。",
+      "zh_cn": "HTTP 传输方式有一个巧妙的解决方案。但有一些需要注意的地方。"
+    },
+    "73": {
+      "en": "Let's take a look at how the transport actually works and exactly what those caveats are in just a moment.",
+      "zh_tw": "讓我們接下來看看傳輸方式實際上怎麼運作，以及那些注意事項到底是什麼。",
+      "zh_cn": "让我们接下來看看传输方式实际上怎麼运作，以及那些注意事项到底是什麼。"
+    }
+  }
+}

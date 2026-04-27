@@ -1,0 +1,427 @@
+{
+  "srt_file": "Roots_THAazXK6.srt",
+  "video_file": "Roots_THAazXK6.mp4",
+  "max_valid_entry": 84,
+  "entries": {
+    "1": {
+      "en": "Our next topic is the root system. Roots allow users to grant a server access to some particular set of files and folders. You can really think of roots as being like a codified way of saying, hey, MCP server, you can access these files. But roots do more than just grant permission. Let me walk you through a quick example to help you understand how they work.",
+      "zh_tw": "我們的下一個主題是根目錄系統。根目錄允許使用者授予伺服器存取特定檔案和資料夾的權限。你可以把根目錄想成是一種標準化的方式來說：嘿，MCP 伺服器，你可以存取這些檔案。但根目錄做的不只是授予權限。讓我用一個快速範例來幫你理解它們是如何運作的。",
+      "zh_cn": "我们的下一个主题是根目录系统。根目录允许使用者授予服务器访问特定文件和文件夹的权限。你可以把根目录想成是一种标准化的方式來说：嘿，MCP 服务器，你可以访问这些文件。但根目录做的不只是授予权限。让我用一个快速范例來幫你理解它们是如何运作的。"
+    },
+    "2": {
+      "en": "In this example, I'm going to first show you a common problem that we would run into if roots did not exist. Once we understand the issue, we'll then see how roots solve that problem. So in this example, we're going to have a very simple MCP server with one single tool called convert video. This tool is going to take in a path to a video file on the user's local machine, and it's going to convert that video file into some other file type. So maybe a MP4 to a MOV.",
+      "zh_tw": "在這個範例中，我要先展示如果根目錄不存在，我們會遇到的一個常見問題。一旦我們理解了問題，就會看到根目錄如何解決它。在這個範例中，我們會有一個非常簡單的 MCP 伺服器，只有一個叫做 convert video 的工具。這個工具會接收使用者本機上一個影片檔的路徑，然後把它轉換成其他檔案類型。比如 MP4 轉 MOV。",
+      "zh_cn": "在这个范例中，我要先展示如果根目录不存在，我们会遇到的一个常見问题。一旦我们理解了问题，就会看到根目录如何解决它。在这个范例中，我们会有一个非常简单的 MCP 服务器，只有一个叫做 convert video 的工具。这个工具会接收使用者本机上一个视频档的路徑，然后把它转换成其他文件类型。比如 MP4 转 MOV。"
+    },
+    "3": {
+      "en": "Now, let's imagine how a user would actually make use of this. A user might type into some CLI application or something like that, asking Claude to convert a biking.mp4 video file into MOV format. Claude would then take a look at the list of tools that are provided by this MCP server and see that the convert video tool is available.",
+      "zh_tw": "現在，讓我們想像使用者實際上會怎麼使用這個。使用者可能在某個 CLI 應用程式中輸入，要求 Claude 把 biking.mp4 影片檔轉換成 MOV 格式。Claude 接著會看看 MCP 伺服器提供的工具列表，看到 convert video 工具可用。",
+      "zh_cn": "现在，让我们想像使用者实际上会怎麼使用这个。使用者可能在某个 CLI 应用程序中输入，要求 Claude 把 biking.mp4 视频档转换成 MOV 格式。Claude 接著会看看 MCP 服务器提供的工具列表，看到 convert video 工具可用。"
+    },
+    "4": {
+      "en": "So Claude would probably decide, fantastic, I'm going to call that tool and I'm going to pass in a path of biking.mp4.",
+      "zh_tw": "所以 Claude 大概會決定：太好了，我要呼叫那個工具，傳入路徑 biking.mp4。",
+      "zh_cn": "所以 Claude 大概会决定：太好了，我要调用那个工具，传入路徑 biking.mp4。"
+    },
+    "5": {
+      "en": "Because that's exactly what the user asked for. The user asked for a conversion of a video file named biking.mp4.",
+      "zh_tw": "因為那正是使用者要求的。使用者要求轉換一個叫 biking.mp4 的影片檔。",
+      "zh_cn": "因为那正是使用者要求的。使用者要求转换一个叫 biking.mp4 的视频档。"
+    },
+    "6": {
+      "en": "And here's what I would probably expect to see in response from that tool. I would probably expect to see an error come back saying something like,",
+      "zh_tw": "而這是我可能會看到的回應。我大概會看到一個錯誤訊息說，",
+      "zh_cn": "而这是我可能会看到的回应。我大概会看到一个错误信息说，"
+    },
+    "7": {
+      "en": "there's no such biking.mp4 file available. So why would I expect to see that error exactly? Well, remember, the user's file system might be really complex.",
+      "zh_tw": "沒有可用的 biking.mp4 檔案。那為什麼我會預期看到這個錯誤呢？記住，使用者的檔案系統可能非常複雜。",
+      "zh_cn": "没有可用的 biking.mp4 文件。那为什麼我会预期看到这个错误呢？记住，使用者的文件系统可能非常复杂。"
+    },
+    "8": {
+      "en": "They might have a wide variety of different files and folders, tons of different documents all over the place.",
+      "zh_tw": "他們可能有各式各樣不同的檔案和資料夾，到處都是大量的文件。",
+      "zh_cn": "他们可能有各式各样不同的文件和文件夹，到处都是大量的文件。"
+    },
+    "9": {
+      "en": "So a user might know that the biking.mp4 file is inside this movies directory, but there's no real way that Claude would understand that.",
+      "zh_tw": "所以使用者可能知道 biking.mp4 在 movies 目錄裡面，但 Claude 沒有辦法理解這一點。",
+      "zh_cn": "所以使用者可能知道 biking.mp4 在 movies 目录里面，但 Claude 没有办法理解这一点。"
+    },
+    "10": {
+      "en": "So if a user just asked for biking.mp4, Claude doesn't really have the ability to search over the user's file system and figure out exactly where that particular document is.",
+      "zh_tw": "如果使用者只是要求 biking.mp4，Claude 並不真的有能力搜尋使用者的檔案系統來找出那個文件到底在哪裡。",
+      "zh_cn": "如果使用者只是要求 biking.mp4，Claude 並不真的有能力搜尋使用者的文件系统來找出那个文件到底在哪里。"
+    },
+    "11": {
+      "en": "Now, one way that we could solve this would be to just require a user to always pass in a full path to some video file.",
+      "zh_tw": "一種解決方法是要求使用者總是傳入影片檔的完整路徑。",
+      "zh_cn": "一种解决方法是要求使用者总是传入视频档的完整路徑。"
+    },
+    "12": {
+      "en": "So we might say, you know what, if you want to use this tool, you must pass in a fully qualified path like movies slash biking.mp4.",
+      "zh_tw": "我們可能會說：如果你想用這個工具，你必須傳入完整路徑，像是 movies/biking.mp4。",
+      "zh_cn": "我们可能会说：如果你想用这个工具，你必须传入完整路徑，像是 movies/biking.mp4。"
+    },
+    "13": {
+      "en": "And now, probably this would work, but it's not super convenient.",
+      "zh_tw": "這大概可以運作，但不太方便。",
+      "zh_cn": "这大概可以运作，但不太方便。"
+    },
+    "14": {
+      "en": "Users don't really want to sit there and have to type out full paths to every file they ever try to access.",
+      "zh_tw": "使用者不想坐在那裡為每個要存取的檔案都打出完整路徑。",
+      "zh_cn": "使用者不想坐在那里为每个要访问的文件都打出完整路徑。"
+    },
+    "15": {
+      "en": "They really probably just want to put in something like convert this video and then just put in the name to it to some other format.",
+      "zh_tw": "他們可能只是想輸入像是「轉換這個影片」然後放入名稱，轉換成其他格式。",
+      "zh_cn": "他们可能只是想输入像是「转换这个视频」然后放入名称，转换成其他格式。"
+    },
+    "16": {
+      "en": "So now that we understand the issue, let me show you how we could solve it by using the idea of roots.",
+      "zh_tw": "現在我們理解了問題，讓我展示如何用根目錄的概念來解決它。",
+      "zh_cn": "现在我们理解了问题，让我展示如何用根目录的概念來解决它。"
+    },
+    "17": {
+      "en": "So we're going to solve this problem by adding in some additional tools to our MCP server.",
+      "zh_tw": "我們要透過在 MCP 伺服器中加入一些額外的工具來解決這個問題。",
+      "zh_cn": "我们要透过在 MCP 服务器中加入一些额外的工具來解决这个问题。"
+    },
+    "18": {
+      "en": "We're still going to have the same convert video tool, but we're also going to add in a tool of read directory.",
+      "zh_tw": "我們仍然會有同樣的 convert video 工具，但我們還要加入一個 read directory 工具。",
+      "zh_cn": "我们仍然会有同样的 convert video 工具，但我们还要加入一个 read directory 工具。"
+    },
+    "19": {
+      "en": "I bet you could guess what that does.",
+      "zh_tw": "我打賭你能猜到那個做什麼。",
+      "zh_cn": "我打賭你能猜到那个做什麼。"
+    },
+    "20": {
+      "en": "It's just going to list out all the files and folders in some specific directory.",
+      "zh_tw": "它就是列出某個特定目錄中的所有檔案和資料夾。",
+      "zh_cn": "它就是列出某个特定目录中的所有文件和文件夹。"
+    },
+    "21": {
+      "en": "And then the third tool that we're going to have is going to be called list routes.",
+      "zh_tw": "然後第三個工具叫做 list roots。",
+      "zh_cn": "然后第三个工具叫做 list roots。"
+    },
+    "22": {
+      "en": "This is going to return back a list of routes.",
+      "zh_tw": "它會回傳一個根目錄列表。",
+      "zh_cn": "它会返回一个根目录列表。"
+    },
+    "23": {
+      "en": "A route is a file or a folder that the user has granted permission to be read ahead of time.",
+      "zh_tw": "根目錄就是使用者事先授權可以讀取的檔案或資料夾。",
+      "zh_cn": "根目录就是使用者事先授权可以读取的文件或文件夹。"
+    },
+    "24": {
+      "en": "So in other words, when they first start up this MCP server, they might pass in as command line arguments,",
+      "zh_tw": "換句話說，當他們第一次啟動 MCP 伺服器時，可能會透過命令列引數傳入",
+      "zh_cn": "换句话说，当他们第一次啟动 MCP 服务器时，可能会透过命令列引数传入"
+    },
+    "25": {
+      "en": "a list of files and folders that the server is allowed to read.",
+      "zh_tw": "伺服器被允許讀取的檔案和資料夾列表。",
+      "zh_cn": "服务器被允许读取的文件和文件夹列表。"
+    },
+    "26": {
+      "en": "On top of that, we're also going to put in a little requirement in our other tools.",
+      "zh_tw": "除此之外，我們還要在其他工具裡加入一些要求。",
+      "zh_cn": "除此之外，我们还要在其他工具里加入一些要求。"
+    },
+    "27": {
+      "en": "We're going to add in some code to our read directory tool and the convert video tool.",
+      "zh_tw": "我們要在 read directory 和 convert video 工具裡加入一些程式碼。",
+      "zh_cn": "我们要在 read directory 和 convert video 工具里加入一些代码。"
+    },
+    "28": {
+      "en": "And we're going to make sure that whenever they try to access some directory or some video file,",
+      "zh_tw": "確保每當它們嘗試存取某個目錄或影片檔時，",
+      "zh_cn": "确保每当它们嘗试访问某个目录或视频档时，"
+    },
+    "29": {
+      "en": "they only get to access files and folders that are contained inside of one of these different routes.",
+      "zh_tw": "只能存取包含在其中一個根目錄裡面的檔案和資料夾。",
+      "zh_cn": "只能访问包含在其中一个根目录里面的文件和文件夹。"
+    },
+    "30": {
+      "en": "To help you understand how these three different tools come together,",
+      "zh_tw": "為了幫你理解這三個工具如何配合，",
+      "zh_cn": "为了幫你理解这三个工具如何配合，"
+    },
+    "31": {
+      "en": "I put together a very small sample application.",
+      "zh_tw": "我組裝了一個非常小的範例應用程式。",
+      "zh_cn": "我组装了一个非常小的范例应用程序。"
+    },
+    "32": {
+      "en": "So let me give you a quick demo right away.",
+      "zh_tw": "讓我馬上給你看一個快速示範。",
+      "zh_cn": "让我马上给你看一个快速示范。"
+    },
+    "33": {
+      "en": "To run this program, I execute uvrun main.py.",
+      "zh_tw": "要執行這個程式，我執行 uv run main.py。",
+      "zh_cn": "要执行这个程序，我执行 uv run main.py。"
+    },
+    "34": {
+      "en": "And then the program is set up to accept a list of additional command line arguments.",
+      "zh_tw": "這個程式設定成接受額外的命令列引數。",
+      "zh_cn": "这个程序设定成接受额外的命令列引数。"
+    },
+    "35": {
+      "en": "So if I want to, I could put in desktop like so.",
+      "zh_tw": "如果我想的話，我可以放入 desktop。",
+      "zh_cn": "如果我想的话，我可以放入 desktop。"
+    },
+    "36": {
+      "en": "And that's going to be set up as a route inside of the MCP server.",
+      "zh_tw": "那會被設定為 MCP 伺服器裡的一個根目錄。",
+      "zh_cn": "那会被设定为 MCP 服务器里的一个根目录。"
+    },
+    "37": {
+      "en": "So I'm essentially saying that I want the server to be able to access the desktop folder and all the files inside of it.",
+      "zh_tw": "我基本上是在說我想讓伺服器能存取 desktop 資料夾和裡面的所有檔案。",
+      "zh_cn": "我基本上是在说我想让服务器能访问 desktop 文件夹和里面的所有文件。"
+    },
+    "38": {
+      "en": "Then on the right hand side over here, you can see my desktop directory.",
+      "zh_tw": "然後在右邊，你可以看到我的 desktop 目錄。",
+      "zh_cn": "然后在右边，你可以看到我的 desktop 目录。"
+    },
+    "39": {
+      "en": "Inside there is a file called viking.mp4.",
+      "zh_tw": "裡面有一個叫 viking.mp4 的檔案。",
+      "zh_cn": "里面有一个叫 viking.mp4 的文件。"
+    },
+    "40": {
+      "en": "So now I'm going to run this.",
+      "zh_tw": "現在我要執行這個。",
+      "zh_cn": "现在我要执行这个。"
+    },
+    "41": {
+      "en": "And I'm going to ask Claude to turn the viking.mp4 file into a MOV file.",
+      "zh_tw": "我要請 Claude 把 viking.mp4 轉換成 MOV 檔案。",
+      "zh_cn": "我要请 Claude 把 viking.mp4 转换成 MOV 文件。"
+    },
+    "42": {
+      "en": "Now I'm going to run that.",
+      "zh_tw": "現在我要執行。",
+      "zh_cn": "现在我要执行。"
+    },
+    "43": {
+      "en": "And we'll see a couple of tool calls printed out.",
+      "zh_tw": "我們會看到印出幾個工具呼叫。",
+      "zh_cn": "我们会看到印出幾个工具调用。"
+    },
+    "44": {
+      "en": "First, Claude is going to take a look at all the different files and folders it can access by calling the list roots tool.",
+      "zh_tw": "首先，Claude 會透過呼叫 list roots 工具來看看它可以存取的所有不同檔案和資料夾。",
+      "zh_cn": "首先，Claude 会透过调用 list roots 工具來看看它可以访问的所有不同文件和文件夹。"
+    },
+    "45": {
+      "en": "It's then going to see that there's only one directory you can access, the desktop folder, because that's the only one that I granted access to in this program.",
+      "zh_tw": "它接著會看到只有一個目錄可以存取，就是 desktop 資料夾，因為那是我在程式中唯一授權的。",
+      "zh_cn": "它接著会看到只有一个目录可以访问，就是 desktop 文件夹，因为那是我在程序中唯一授权的。"
+    },
+    "46": {
+      "en": "It's then going to try to read that directory.",
+      "zh_tw": "它接著會嘗試讀取那個目錄。",
+      "zh_cn": "它接著会嘗试读取那个目录。"
+    },
+    "47": {
+      "en": "And it's going to discover the viking.mp4 file inside there.",
+      "zh_tw": "然後它會在裡面發現 viking.mp4 檔案。",
+      "zh_cn": "然后它会在里面发现 viking.mp4 文件。"
+    },
+    "48": {
+      "en": "And so at that point in time, it now has everything it needs to actually successfully run the convert video tool.",
+      "zh_tw": "到這時候，它就有了成功執行 convert video 工具所需的一切。",
+      "zh_cn": "到这时候，它就有了成功执行 convert video 工具所需的一切。"
+    },
+    "49": {
+      "en": "So it can run that tool with a path of the fully qualified path to my desktop folder viking.mp4.",
+      "zh_tw": "它可以帶著完整路徑 desktop/viking.mp4 來執行那個工具。",
+      "zh_cn": "它可以帶著完整路徑 desktop/viking.mp4 來执行那个工具。"
+    },
+    "50": {
+      "en": "Now remember, roots are intended to limit what files and folders the MCP server can access.",
+      "zh_tw": "記住，根目錄的目的是限制 MCP 伺服器可以存取的檔案和資料夾。",
+      "zh_cn": "记住，根目录的目的是限制 MCP 服务器可以访问的文件和文件夹。"
+    },
+    "51": {
+      "en": "So in addition to that desktop folder, I also have a documents folder inside of here.",
+      "zh_tw": "除了 desktop 資料夾之外，我這裡還有一個 documents 資料夾。",
+      "zh_cn": "除了 desktop 文件夹之外，我这里还有一个 documents 文件夹。"
+    },
+    "52": {
+      "en": "Inside of that directory is a swimming.mp4 file.",
+      "zh_tw": "那個目錄裡有一個 swimming.mp4 檔案。",
+      "zh_cn": "那个目录里有一个 swimming.mp4 文件。"
+    },
+    "53": {
+      "en": "So now I'm going to ask Claude to convert the swimming.mp4 file into a MOV as well.",
+      "zh_tw": "現在我要請 Claude 也把 swimming.mp4 轉換成 MOV。",
+      "zh_cn": "现在我要请 Claude 也把 swimming.mp4 转换成 MOV。"
+    },
+    "54": {
+      "en": "And this time around, I'm going to provide the full path to the mp4 file.",
+      "zh_tw": "這次我要提供 mp4 檔案的完整路徑。",
+      "zh_cn": "这次我要提供 mp4 文件的完整路徑。"
+    },
+    "55": {
+      "en": "So now in theory, Claude doesn't need to take a look at the list of roots.",
+      "zh_tw": "理論上，Claude 不需要看根目錄列表了。",
+      "zh_cn": "理论上，Claude 不需要看根目录列表了。"
+    },
+    "56": {
+      "en": "It can just directly call the convert video tool because it's already got a fully qualified path to the particular file it wants to convert.",
+      "zh_tw": "它可以直接呼叫 convert video 工具，因為它已經有了要轉換的檔案的完整路徑。",
+      "zh_cn": "它可以直接调用 convert video 工具，因为它已经有了要转换的文件的完整路徑。"
+    },
+    "57": {
+      "en": "So I'm going to run this and we'll see what happens.",
+      "zh_tw": "我要執行看看會發生什麼。",
+      "zh_cn": "我要执行看看会发生什麼。"
+    },
+    "58": {
+      "en": "So it's going to immediately try to call convert video, but it's going to return early because Claude is going to say,",
+      "zh_tw": "它會立刻嘗試呼叫 convert video，但會提前返回，因為 Claude 會說，",
+      "zh_cn": "它会立刻嘗试调用 convert video，但会提前返回，因为 Claude 会说，"
+    },
+    "59": {
+      "en": "sorry, but I got an error around running that tool.",
+      "zh_tw": "抱歉，執行那個工具時出了錯。",
+      "zh_cn": "抱歉，执行那个工具时出了错。"
+    },
+    "60": {
+      "en": "It was not able to find the particular file.",
+      "zh_tw": "它找不到那個特定的檔案。",
+      "zh_cn": "它找不到那个特定的文件。"
+    },
+    "61": {
+      "en": "Claude is then going to try to take a look at the roots that are available, read the only root that is available, in this case the desktop.",
+      "zh_tw": "Claude 接著會嘗試看看可用的根目錄，讀取唯一可用的根目錄，在這裡就是 desktop。",
+      "zh_cn": "Claude 接著会嘗试看看可用的根目录，读取唯一可用的根目录，在这里就是 desktop。"
+    },
+    "62": {
+      "en": "And then Claude is going to realize, hey, it looks like I actually can't access that file at all.",
+      "zh_tw": "然後 Claude 會意識到，看起來我根本無法存取那個檔案。",
+      "zh_cn": "然后 Claude 会意识到，看起來我根本无法访问那个文件。"
+    },
+    "63": {
+      "en": "The only directory I can access is desktop.",
+      "zh_tw": "我唯一能存取的目錄是 desktop。",
+      "zh_cn": "我唯一能访问的目录是 desktop。"
+    },
+    "64": {
+      "en": "And if you want me to convert the swimming file, well, I just can't access it.",
+      "zh_tw": "如果你想讓我轉換 swimming 檔案，我就是無法存取它。",
+      "zh_cn": "如果你想让我转换 swimming 文件，我就是无法访问它。"
+    },
+    "65": {
+      "en": "So try to give me access or move the file or whatever else.",
+      "zh_tw": "嘗試給我存取權限，或移動檔案，或其他方式。",
+      "zh_cn": "嘗试给我访问权限，或移动文件，或其他方式。"
+    },
+    "66": {
+      "en": "Now, based upon that demonstration, you might notice that roots really have two distinct purposes.",
+      "zh_tw": "根據那個示範，你可能注意到根目錄真的有兩個不同的目的。",
+      "zh_cn": "根据那个示范，你可能注意到根目录真的有兩个不同的目的。"
+    },
+    "67": {
+      "en": "On the one hand, they allow users to grant access to particular files and folders.",
+      "zh_tw": "一方面，它們允許使用者授予特定檔案和資料夾的存取權限。",
+      "zh_cn": "一方面，它们允许使用者授予特定文件和文件夹的访问权限。"
+    },
+    "68": {
+      "en": "But on the other hand, the other really nice benefit to them is that they allow Claude to focus on just particular areas of your file system.",
+      "zh_tw": "但另一方面，另一個真的很好的好處是它們允許 Claude 只專注於你檔案系統的特定區域。",
+      "zh_cn": "但另一方面，另一个真的很好的好处是它们允许 Claude 只專注於你文件系统的特定区域。"
+    },
+    "69": {
+      "en": "So as we saw, we don't have to put in fully qualified paths to some particular directory or file that we might want Claude to access.",
+      "zh_tw": "如同我們所見，我們不需要輸入我們可能想讓 Claude 存取的某個目錄或檔案的完整路徑。",
+      "zh_cn": "如同我们所見，我们不需要输入我们可能想让 Claude 访问的某个目录或文件的完整路徑。"
+    },
+    "70": {
+      "en": "Instead, Claude can autonomously decide to take a look at the available roots and then search through those roots to find some particular file.",
+      "zh_tw": "相反，Claude 可以自主地決定查看可用的根目錄，然後在那些根目錄中搜尋特定的檔案。",
+      "zh_cn": "相反，Claude 可以自主地决定查看可用的根目录，然后在那些根目录中搜尋特定的文件。"
+    },
+    "71": {
+      "en": "The one thing that I haven't quite mentioned here, but is very critical for you to understand, the idea of roots is kind of loose.",
+      "zh_tw": "有一件我還沒完全提到但你理解起來非常關鍵的事：根目錄的概念有點鬆散。",
+      "zh_cn": "有一件我还没完全提到但你理解起來非常关键的事：根目录的概念有点鬆散。"
+    },
+    "72": {
+      "en": "And there's not a tremendous amount of implementation around them.",
+      "zh_tw": "周圍並沒有大量的實作。",
+      "zh_cn": "周圍並没有大量的实作。"
+    },
+    "73": {
+      "en": "So in other words, there's nothing inside of any MCP SDK that will actually automatically limit access to particular files and folders.",
+      "zh_tw": "換句話說，任何 MCP SDK 裡面都沒有東西會自動限制對特定檔案和資料夾的存取。",
+      "zh_cn": "换句话说，任何 MCP SDK 里面都没有東西会自动限制对特定文件和文件夹的访问。"
+    },
+    "74": {
+      "en": "Instead, it is up to you in your MCP server to make sure that whenever a tool tries to access a file or a folder, it is listed or contained inside of one of these different roots.",
+      "zh_tw": "相反，由你在 MCP 伺服器裡確保每當工具嘗試存取檔案或資料夾時，它必須列在或包含在其中一個根目錄裡。",
+      "zh_cn": "相反，由你在 MCP 服务器里确保每当工具嘗试访问文件或文件夹时，它必须列在或包含在其中一个根目录里。"
+    },
+    "75": {
+      "en": "And you might do that by implementing a function like you see on the top right hand side here, something like is path allowed.",
+      "zh_tw": "你可能透過實作一個像右上角這裡的函式來做到，類似 is_path_allowed。",
+      "zh_cn": "你可能透过实作一个像右上角这里的函数來做到，类似 is_path_allowed。"
+    },
+    "76": {
+      "en": "Inside that function, it takes in some requested path.",
+      "zh_tw": "在那個函式裡面，它接收某個請求的路徑。",
+      "zh_cn": "在那个函数里面，它接收某个请求的路徑。"
+    },
+    "77": {
+      "en": "It's then going to get a list of roots from the client and then see if the path that the tool wants to use is contained within one of those roots.",
+      "zh_tw": "然後它會從客戶端取得根目錄列表，看看工具想使用的路徑是否包含在其中一個根目錄裡。",
+      "zh_cn": "然后它会从客户端取得根目录列表，看看工具想使用的路徑是否包含在其中一个根目录里。"
+    },
+    "78": {
+      "en": "And if it is fantastic, we'll allow access.",
+      "zh_tw": "如果是的話，太好了，我們允許存取。",
+      "zh_cn": "如果是的话，太好了，我们允许访问。"
+    },
+    "79": {
+      "en": "Otherwise, nope, we're not going to allow access at all.",
+      "zh_tw": "否則，不行，我們完全不允許存取。",
+      "zh_cn": "否则，不行，我们完全不允许访问。"
+    },
+    "80": {
+      "en": "Now, the last thing I want to mention is that I showed implementing a tool of something like list roots and allowing Claude to call that tool at any point in time.",
+      "zh_tw": "最後我想提到的是，我展示了實作一個像 list roots 這樣的工具，讓 Claude 隨時可以呼叫。",
+      "zh_cn": "最后我想提到的是，我展示了实作一个像 list roots 这样的工具，让 Claude 随时可以调用。"
+    },
+    "81": {
+      "en": "That is not strictly required.",
+      "zh_tw": "那不是嚴格必要的。",
+      "zh_cn": "那不是嚴格必要的。"
+    },
+    "82": {
+      "en": "You can also just take the list of roots and toss them all into a prompt manually.",
+      "zh_tw": "你也可以直接把根目錄列表放進提示裡。",
+      "zh_cn": "你也可以直接把根目录列表放进提示里。"
+    },
+    "83": {
+      "en": "So you don't have to make that tool.",
+      "zh_tw": "所以你不一定要做那個工具。",
+      "zh_cn": "所以你不一定要做那个工具。"
+    },
+    "84": {
+      "en": "It's just a pattern that I found was kind of helpful for allowing Claude to look at the list of roots whenever it decides that it needs to figure out what files and folders it can access.",
+      "zh_tw": "那只是我發現的一個蠻有用的模式，讓 Claude 在決定需要知道它可以存取什麼檔案和資料夾時，能查看根目錄列表。",
+      "zh_cn": "那只是我发现的一个蠻有用的模式，让 Claude 在决定需要知道它可以访问什麼文件和文件夹时，能查看根目录列表。"
+    }
+  }
+}

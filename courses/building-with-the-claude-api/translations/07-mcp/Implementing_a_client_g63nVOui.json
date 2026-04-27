@@ -1,0 +1,237 @@
+{
+  "srt_file": "Implementing_a_client_g63nVOui.srt",
+  "video_file": "Implementing_a_client_g63nVOui.mp4",
+  "max_valid_entry": 46,
+  "entries": {
+    "1": {
+      "en": "Now that our server is in a good place, we're going to shift gears a little bit and start working on our MCP client.",
+      "zh_tw": "伺服器到了不錯的狀態後，我們要轉換方向，開始處理 MCP 客戶端。",
+      "zh_cn": "服务器到了不错的状态后，我们要转换方向，开始处理 MCP 客户端。"
+    },
+    "2": {
+      "en": "The client can be found inside the MCP client.py file inside the root project directory.",
+      "zh_tw": "客戶端在專案根目錄的 mcp_client.py 檔案中。",
+      "zh_cn": "客户端在项目根目录的 mcp_client.py 文件中。"
+    },
+    "3": {
+      "en": "Now, before we do anything inside this file, I just want to give you a very quick reminder here.",
+      "zh_tw": "在這個檔案中做任何事之前，我想給你一個快速提醒。",
+      "zh_cn": "在这个文件中做任何事之前，我想给你一个快速提醒。"
+    },
+    "4": {
+      "en": "Remember what I told you about earlier.",
+      "zh_tw": "記住我之前告訴你的。",
+      "zh_cn": "记住我之前告訴你的。"
+    },
+    "5": {
+      "en": "Usually in a typical project, we are either making use of a client or we are implementing a server.",
+      "zh_tw": "通常在典型的專案中，我們使用客戶端或實作伺服器。",
+      "zh_cn": "通常在典型的项目中，我们使用客户端或实作服务器。"
+    },
+    "6": {
+      "en": "It's just in this one particular project that we are working on that we are doing both.",
+      "zh_tw": "只有在我們正在做的這個特定專案中，我們同時做兩者。",
+      "zh_cn": "只有在我们正在做的这个特定项目中，我们同时做兩者。"
+    },
+    "7": {
+      "en": "Again, just so you can see both sides of the puzzle.",
+      "zh_tw": "同樣，只是為了讓你看到拼圖的兩面。",
+      "zh_cn": "同样，只是为了让你看到拼圖的兩面。"
+    },
+    "8": {
+      "en": "Now the MCP client itself inside of this file is consisting of a single class.",
+      "zh_tw": "檔案中的 MCP 客戶端本身由一個類別組成。",
+      "zh_cn": "文件中的 MCP 客户端本身由一个类別组成。"
+    },
+    "9": {
+      "en": "You'll notice there's a lot of code inside of here and it doesn't look quite as pretty as some of the code we just wrote out inside of the server.",
+      "zh_tw": "你會注意到裡面有很多程式碼，看起來不像我們在伺服器中寫的那麼漂亮。",
+      "zh_cn": "你会注意到里面有很多代码，看起來不像我们在服务器中写的那麼漂亮。"
+    },
+    "10": {
+      "en": "So let me tell you exactly what's going on inside this file and exactly why it is so large.",
+      "zh_tw": "讓我告訴你這個檔案中到底發生了什麼，以及為什麼它這麼大。",
+      "zh_cn": "让我告訴你这个文件中到底发生了什麼，以及为什麼它这麼大。"
+    },
+    "11": {
+      "en": "Okay.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "12": {
+      "en": "So inside this file, we are making the MCP client class.",
+      "zh_tw": "在這個檔案中，我們建立 MCP client 類別。",
+      "zh_cn": "在这个文件中，我们建立 MCP client 类別。"
+    },
+    "13": {
+      "en": "This class is going to wrap up something called a client session.",
+      "zh_tw": "這個類別會包裝一個叫做 client session 的東西。",
+      "zh_cn": "这个类別会包装一个叫做 client session 的東西。"
+    },
+    "14": {
+      "en": "The client session is the actual connection to our MCP server.",
+      "zh_tw": "client session 是到我們 MCP 伺服器的實際連接。",
+      "zh_cn": "client session 是到我们 MCP 服务器的实际连接。"
+    },
+    "15": {
+      "en": "This client session is a part of the MCP Python SDK.",
+      "zh_tw": "這個 client session 是 MCP Python SDK 的一部分。",
+      "zh_cn": "这个 client session 是 MCP Python SDK 的一部分。"
+    },
+    "16": {
+      "en": "So again, this session is what gives us this connection to the outside server.",
+      "zh_tw": "同樣，這個 session 就是給我們到外部伺服器連接的東西。",
+      "zh_cn": "同样，这个 session 就是给我们到外部服务器连接的東西。"
+    },
+    "17": {
+      "en": "The session itself requires a little bit of resource cleanup.",
+      "zh_tw": "session 本身需要一些資源清理。",
+      "zh_cn": "session 本身需要一些资源清理。"
+    },
+    "18": {
+      "en": "In other words, whenever we close down our program or decide that we don't need the server anymore, we have to go through a little bit of a cleanup process.",
+      "zh_tw": "換句話說，每當我們關閉程式或決定不再需要伺服器時，要經過一些清理過程。",
+      "zh_cn": "换句话说，每当我们关闭程序或决定不再需要服务器时，要经过一些清理过程。"
+    },
+    "19": {
+      "en": "And I have already written out a lot of that cleanup code inside of the MCP client class.",
+      "zh_tw": "我已經在 MCP client 類別中寫了很多清理程式碼。",
+      "zh_cn": "我已经在 MCP client 类別中写了很多清理代码。"
+    },
+    "20": {
+      "en": "So that's really why this class exists at all.",
+      "zh_tw": "這就是為什麼這個類別存在。",
+      "zh_cn": "这就是为什麼这个类別存在。"
+    },
+    "21": {
+      "en": "Just to make that cleanup a little bit easier.",
+      "zh_tw": "只是為了讓清理容易一些。",
+      "zh_cn": "只是为了让清理容易一些。"
+    },
+    "22": {
+      "en": "You can see some of that cleanup code inside of the connect function and down a little bit lower.",
+      "zh_tw": "你可以在 connect 函式和稍微下面的地方看到一些清理程式碼。",
+      "zh_cn": "你可以在 connect 函数和稍微下面的地方看到一些清理代码。"
+    },
+    "23": {
+      "en": "At the cleanup, async enter and async exit functions as well.",
+      "zh_tw": "在 __aenter__ 和 __aexit__ 函式中也有。",
+      "zh_cn": "在 __aenter__ 和 __aexit__ 函数中也有。"
+    },
+    "24": {
+      "en": "So it's very common practice to not just make use of this client session directly.",
+      "zh_tw": "所以不直接使用 client session 是非常常見的做法。",
+      "zh_cn": "所以不直接使用 client session 是非常常見的做法。"
+    },
+    "25": {
+      "en": "Instead, very common to wrap it up inside of a larger class that's going to manage some of this different resource stuff for you.",
+      "zh_tw": "相反地，很常把它包裝在更大的類別中，為你管理一些資源。",
+      "zh_cn": "相反地，很常把它包装在更大的类別中，为你管理一些资源。"
+    },
+    "26": {
+      "en": "The next thing I want to clarify is why this client exists at all.",
+      "zh_tw": "我想澄清的下一件事是為什麼這個客戶端存在。",
+      "zh_cn": "我想澄清的下一件事是为什麼这个客户端存在。"
+    },
+    "27": {
+      "en": "So in other words, what is the client really doing for us here?",
+      "zh_tw": "換句話說，客戶端到底為我們做了什麼？",
+      "zh_cn": "换句话说，客户端到底为我们做了什麼？"
+    },
+    "28": {
+      "en": "Well, remember this flow that we looked at a little bit ago.",
+      "zh_tw": "記住我們稍早看的流程。",
+      "zh_cn": "记住我们稍早看的流程。"
+    },
+    "29": {
+      "en": "So we had our code right here.",
+      "zh_tw": "我們有程式碼。",
+      "zh_cn": "我们有代码。"
+    },
+    "30": {
+      "en": "And at certain points in time, we needed, say, a list of tools to send off to Claude.",
+      "zh_tw": "在某些時間點，我們需要一個工具列表送給 Claude。",
+      "zh_cn": "在某些时间点，我们需要一个工具列表送给 Claude。"
+    },
+    "31": {
+      "en": "And then later on after that, we also needed to run a tool that was requested by Claude.",
+      "zh_tw": "之後，我們也需要執行 Claude 要求的工具。",
+      "zh_cn": "之后，我们也需要执行 Claude 要求的工具。"
+    },
+    "32": {
+      "en": "In order to reach out to our MCP server and get this list of tools or to run a tool, that's where we are making use of the MCP client.",
+      "zh_tw": "為了連接到 MCP 伺服器取得工具列表或執行工具，就是我們使用 MCP 客戶端的地方。",
+      "zh_cn": "为了连接到 MCP 服务器取得工具列表或执行工具，就是我们使用 MCP 客户端的地方。"
+    },
+    "33": {
+      "en": "So we can imagine that this client is exposing some functionality that belongs to the server to the rest of our code base.",
+      "zh_tw": "我們可以想像客戶端把屬於伺服器的一些功能公開給我們程式碼的其他部分。",
+      "zh_cn": "我们可以想像客户端把属於服务器的一些功能公开给我们代码的其他部分。"
+    },
+    "34": {
+      "en": "So inside of our code base, inside this project, specifically inside of the core directory, there is a lot of code already inside there that I put together that is making use of this class.",
+      "zh_tw": "在專案中，特別是 core 目錄裡，已經有很多我準備好的程式碼在使用這個類別。",
+      "zh_cn": "在项目中，特別是 core 目录里，已经有很多我准备好的代码在使用这个类別。"
+    },
+    "35": {
+      "en": "So there is some other code that's going to call some of the different functions you see inside of here, like list tools, call tool, list prompts, get prompt, and so on.",
+      "zh_tw": "有其他程式碼會呼叫你在這裡看到的不同函式，像 list_tools、call_tool、list_prompts、get_prompt 等等。",
+      "zh_cn": "有其他代码会调用你在这里看到的不同函数，像 list_tools、call_tool、list_prompts、get_prompt 等等。"
+    },
+    "36": {
+      "en": "For right now, in this video, we're going to focus on implementing two functions, list tools and call tool.",
+      "zh_tw": "現在在這個影片中，我們專注於實作兩個函式，list_tools 和 call_tool。",
+      "zh_cn": "现在在这个视频中，我们專注於实作兩个函数，list_tools 和 call_tool。"
+    },
+    "37": {
+      "en": "So as you just saw in the diagram, we looked at a moment ago, these two functions are going to be used in different parts of our code base to get a list of tools to provide off to Claude and eventually call a tool.",
+      "zh_tw": "如你在圖表中看到的，這兩個函式會在程式碼的不同部分被使用，以取得工具列表給 Claude，最終呼叫工具。",
+      "zh_cn": "如你在圖表中看到的，这兩个函数会在代码的不同部分被使用，以取得工具列表给 Claude，最终调用工具。"
+    },
+    "38": {
+      "en": "Whenever Claude requests to call a tool, implementing these two functions is going to be really simple and straightforward.",
+      "zh_tw": "每當 Claude 要求呼叫工具時，實作這兩個函式會非常簡單直接。",
+      "zh_cn": "每当 Claude 要求调用工具时，实作这兩个函数会非常简单直接。"
+    },
+    "39": {
+      "en": "So let me show you how we're going to do it.",
+      "zh_tw": "讓我展示怎麼做。",
+      "zh_cn": "让我展示怎麼做。"
+    },
+    "40": {
+      "en": "We'll first begin with list tools.",
+      "zh_tw": "先從 list_tools 開始。",
+      "zh_cn": "先从 list_tools 开始。"
+    },
+    "41": {
+      "en": "I'm going to remove the to do inside there and replace it with result is await self dot session.",
+      "zh_tw": "移除裡面的 TODO，替換成 result = await self.session.",
+      "zh_cn": "移除里面的 TODO，替换成 result = await self.session."
+    },
+    "42": {
+      "en": "I'm going to call that like a function list underscore tools, and then I will return result dot tools.",
+      "zh_tw": "呼叫 list_tools()，然後 return result.tools。",
+      "zh_cn": "调用 list_tools()，然后 return result.tools。"
+    },
+    "43": {
+      "en": "And that's it.",
+      "zh_tw": "就這樣。",
+      "zh_cn": "就这样。"
+    },
+    "44": {
+      "en": "So this is going to get access to our session, which is our actual connection to the MCP server.",
+      "zh_tw": "這會存取我們的 session，也就是到 MCP 伺服器的實際連接。",
+      "zh_cn": "这会访问我们的 session，也就是到 MCP 服务器的实际连接。"
+    },
+    "45": {
+      "en": "It's going to call a built-in function to get a definition or a list of all the different tools that are implemented by that server.",
+      "zh_tw": "呼叫內建函式取得伺服器實作的所有工具的定義或列表。",
+      "zh_cn": "调用內建函数取得服务器实作的所有工具的定义或列表。"
+    },
+    "46": {
+      "en": "I'm going to get back result and then just return the tools.",
+      "zh_tw": "得到 result 然後回傳 tools。",
+      "zh_cn": "得到 result 然后返回 tools。"
+    }
+  }
+}

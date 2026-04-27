@@ -1,0 +1,312 @@
+{
+  "srt_file": "Sampling_9O1zhiax.srt",
+  "video_file": "Sampling_9O1zhiax.mp4",
+  "max_valid_entry": 61,
+  "entries": {
+    "1": {
+      "en": "Sampling allows a server to access a language model like Claude through a connected MCP client.",
+      "zh_tw": "取樣允許伺服器透過已連接的 MCP 客戶端來存取像 Claude 這樣的語言模型。",
+      "zh_cn": "取样允许服务器透过已连接的 MCP 客户端來访问像 Claude 这样的语言模型。"
+    },
+    "2": {
+      "en": "To help you understand what that means and what sampling is all about,",
+      "zh_tw": "為了幫助你理解這是什麼意思以及取樣到底是什麼，",
+      "zh_cn": "为了幫助你理解这是什麼意思以及取样到底是什麼，"
+    },
+    "3": {
+      "en": "I want to show you a quick demo application. So here we go. This is a chat application that is",
+      "zh_tw": "我想給你看一個快速的示範應用程式。好的，開始吧。這是一個由",
+      "zh_cn": "我想给你看一个快速的示范应用程序。好的，开始吧。这是一个由"
+    },
+    "4": {
+      "en": "powered by Claude, so I can ask it, what's 1 plus 1? And I'll get a response back. This chat",
+      "zh_tw": "Claude 驅動的聊天應用程式，我可以問它 1 加 1 等於多少，然後會得到回應。這個聊天",
+      "zh_cn": "Claude 驱动的聊天应用程序，我可以问它 1 加 1 等於多少，然后会得到回应。这个聊天"
+    },
+    "5": {
+      "en": "application is also connected to a single MCP server that implements one tool called the",
+      "zh_tw": "應用程式也連接到一個 MCP 伺服器，它實作了一個叫做",
+      "zh_cn": "应用程序也连接到一个 MCP 服务器，它实作了一个叫做"
+    },
+    "6": {
+      "en": "research tool. I can use this tool to ask Claude to maybe write a report on archaeology. When I do so,",
+      "zh_tw": "research 工具的東西。我可以用這個工具請 Claude 寫一份關於考古學的報告。當我這樣做時，",
+      "zh_cn": "research 工具的東西。我可以用这个工具请 Claude 写一份关於考古学的报告。当我这样做时，"
+    },
+    "7": {
+      "en": "Claude is going to decide to use that research tool. So I'm going to go and do some research,",
+      "zh_tw": "Claude 會決定使用那個 research 工具。所以它會去做一些研究，",
+      "zh_cn": "Claude 会决定使用那个 research 工具。所以它会去做一些研究，"
+    },
+    "8": {
+      "en": "synthesize all the results, and then present a report back to me. Now that you have seen this",
+      "zh_tw": "綜合所有結果，然後把報告呈現給我。現在你已經看到這個",
+      "zh_cn": "综合所有结果，然后把报告呈现给我。现在你已经看到这个"
+    },
+    "9": {
+      "en": "research tool run, I'd like to show you what is going on behind the scenes in this application",
+      "zh_tw": "research 工具運行了，我想讓你看看這個應用程式幕後發生了什麼，",
+      "zh_cn": "research 工具运行了，我想让你看看这个应用程序幕后发生了什麼，"
+    },
+    "10": {
+      "en": "and how the research tool actually works. All right, so here's a high-level overview of what's",
+      "zh_tw": "以及 research 工具實際上是怎麼運作的。好的，這裡有一個高層次的概覽，說明發生了",
+      "zh_cn": "以及 research 工具实际上是怎麼运作的。好的，这里有一个高层次的概览，说明发生了"
+    },
+    "11": {
+      "en": "going on. First, at the very top left, I've got a Next.js application. That's what's actually",
+      "zh_tw": "什麼事。首先，在左上角，我有一個 Next.js 應用程式。那就是實際上在",
+      "zh_cn": "什麼事。首先，在左上角，我有一个 Next.js 应用程序。那就是实际上在"
+    },
+    "12": {
+      "en": "rendering some content inside the browser, and that's got a integrated MCP client inside of it.",
+      "zh_tw": "瀏覽器中渲染內容的東西，而且它裡面有一個整合的 MCP 客戶端。",
+      "zh_cn": "浏览器中渲染內容的東西，而且它里面有一个整合的 MCP 客户端。"
+    },
+    "13": {
+      "en": "A user at some point in time is going to ask us to research a topic like archaeology. We're going",
+      "zh_tw": "使用者在某個時間點會要求我們研究一個主題，像是考古學。我們會",
+      "zh_cn": "使用者在某个时间点会要求我们研究一个主题，像是考古学。我们会"
+    },
+    "14": {
+      "en": "to send that query off to Claude, and Claude is going to decide to run the research tool that it has",
+      "zh_tw": "把那個查詢發送給 Claude，然後 Claude 會決定執行它事先被提供的 research 工具。",
+      "zh_cn": "把那个查询发送给 Claude，然后 Claude 会决定执行它事先被提供的 research 工具。"
+    },
+    "15": {
+      "en": "been provided ahead of time. Our MCP client on the Next.js application is going to translate that into",
+      "zh_tw": "我們 Next.js 應用程式上的 MCP 客戶端會把它轉換成",
+      "zh_cn": "我们 Next.js 应用程序上的 MCP 客户端会把它转换成"
+    },
+    "16": {
+      "en": "a tool call request and send it over to the MCP server. Then on the MCP server, the research tool",
+      "zh_tw": "一個 tool call request 然後發送到 MCP 伺服器。然後在 MCP 伺服器上，research 工具",
+      "zh_cn": "一个 tool call request 然后发送到 MCP 服务器。然后在 MCP 服务器上，research 工具"
+    },
+    "17": {
+      "en": "is going to run. It's going to make a number of requests off to Wikipedia and try to find some",
+      "zh_tw": "會執行。它會向維基百科發出一些請求，嘗試找到一些",
+      "zh_cn": "会执行。它会向维基百科发出一些请求，嘗试找到一些"
+    },
+    "18": {
+      "en": "articles around archaeology and then some related content and so on. Once the research tool has",
+      "zh_tw": "關於考古學的文章，然後是一些相關的內容等等。一旦 research 工具",
+      "zh_cn": "关於考古学的文章，然后是一些相关的內容等等。一旦 research 工具"
+    },
+    "19": {
+      "en": "fetched some number of pages from Wikipedia, we need to take all that content and synthesize it into",
+      "zh_tw": "從維基百科取得了一些頁面，我們需要把所有內容綜合成",
+      "zh_cn": "从维基百科取得了一些页面，我们需要把所有內容综合成"
+    },
+    "20": {
+      "en": "a final report that can be displayed to the user. And there's more than one way that we could do that.",
+      "zh_tw": "一份最終報告顯示給使用者。而做到這件事有不只一種方法。",
+      "zh_cn": "一份最终报告显示给使用者。而做到这件事有不只一种方法。"
+    },
+    "21": {
+      "en": "Let me show you two different options we have. In option number one, we could have the",
+      "zh_tw": "讓我展示給你兩個不同的選項。在選項一中，我們可以讓",
+      "zh_cn": "让我展示给你兩个不同的选项。在选项一中，我们可以让"
+    },
+    "22": {
+      "en": "MCP server reach out directly to Claude or some similar LLM and ask it to summarize all the results",
+      "zh_tw": "MCP 伺服器直接呼叫 Claude 或類似的 LLM，請它總結從",
+      "zh_cn": "MCP 服务器直接调用 Claude 或类似的 LLM，请它总结从"
+    },
+    "23": {
+      "en": "that found from the Wikipedia searches. So in this case, we would be giving our MCP server direct access",
+      "zh_tw": "維基百科搜索找到的所有結果。在這種情況下，我們會給 MCP 伺服器直接",
+      "zh_cn": "维基百科搜索找到的所有结果。在这种情況下，我们会给 MCP 服务器直接"
+    },
+    "24": {
+      "en": "to a language model. This would absolutely work. It is definitely something we could do. However,",
+      "zh_tw": "存取語言模型的權限。這絕對可以運作。確實是我們可以做到的。然而，",
+      "zh_cn": "访问语言模型的权限。这绝对可以运作。确实是我们可以做到的。然而，"
+    },
+    "25": {
+      "en": "this adds a lot of complexity to our MCP server. We would have to write in some amount of code to allow",
+      "zh_tw": "這會給 MCP 伺服器增加很多複雜度。我們需要寫一些程式碼來讓",
+      "zh_cn": "这会给 MCP 服务器增加很多复杂度。我们需要写一些代码來让"
+    },
+    "26": {
+      "en": "the MCP server to make a request off to Claude, get the response back, extract the generated text,",
+      "zh_tw": "MCP 伺服器向 Claude 發送請求、取回回應、提取生成的文字",
+      "zh_cn": "MCP 服务器向 Claude 发送请求、取回回应、提取生成的文字"
+    },
+    "27": {
+      "en": "and so on. We would also have to make sure that the MCP server has a API key to access Claude or",
+      "zh_tw": "等等。我們還需要確保 MCP 伺服器有 API 金鑰來存取 Claude 或",
+      "zh_cn": "等等。我们还需要确保 MCP 服务器有 API 金钥來访问 Claude 或"
+    },
+    "28": {
+      "en": "whatever other language model we were using. So again, option number one would work, but it adds",
+      "zh_tw": "我們使用的其他語言模型。所以再次強調，選項一可以運作，但它增加了",
+      "zh_cn": "我们使用的其他语言模型。所以再次強调，选项一可以运作，但它增加了"
+    },
+    "29": {
+      "en": "a decent amount of complexity. So on to option two. In option two, we're going to have our MCP server",
+      "zh_tw": "相當多的複雜度。所以來看看選項二。在選項二中，我們的 MCP 伺服器會",
+      "zh_cn": "相当多的复杂度。所以來看看选项二。在选项二中，我们的 MCP 服务器会"
+    },
+    "30": {
+      "en": "make use of a technique referred to as sampling. With sampling, we're going to have our MCP server",
+      "zh_tw": "使用一種叫做取樣的技術。透過取樣，我們的 MCP 伺服器會",
+      "zh_cn": "使用一种叫做取样的技术。透过取样，我们的 MCP 服务器会"
+    },
+    "31": {
+      "en": "ask the client to run a prompt on its behalf. So in short, the MCP server is going to write off a prompt,",
+      "zh_tw": "請客戶端代替它執行一個提示。簡單來說，MCP 伺服器會撰寫一個提示，",
+      "zh_cn": "请客户端代替它执行一个提示。简单來说，MCP 服务器会撰写一个提示，"
+    },
+    "32": {
+      "en": "send it off to the MCP client and say, hey, could you feed this into Claude for me? The MCP client that",
+      "zh_tw": "把它發送給 MCP 客戶端說：嘿，你能幫我把這個餵給 Claude 嗎？我們組裝的 MCP 客戶端",
+      "zh_cn": "把它发送给 MCP 客户端说：嘿，你能幫我把这个餵给 Claude 嗎？我们组装的 MCP 客户端"
+    },
+    "33": {
+      "en": "we've put together is then going to take that prompt and send it off to Claude. It will get a response back",
+      "zh_tw": "接著會拿那個提示發送給 Claude。它會取得回應",
+      "zh_cn": "接著会拿那个提示发送给 Claude。它会取得回应"
+    },
+    "34": {
+      "en": "and then send the result of that text generation back to the MCP server, where it can then do whatever",
+      "zh_tw": "然後把文字生成的結果發送回 MCP 伺服器，然後伺服器可以對",
+      "zh_cn": "然后把文字生成的结果发送回 MCP 服务器，然后服务器可以对"
+    },
+    "35": {
+      "en": "it wants to do with that generated text. This approach moves the complexity over to the MCP",
+      "zh_tw": "那個生成的文字做任何想做的事。這個方法把複雜度轉移到 MCP",
+      "zh_cn": "那个生成的文字做任何想做的事。这个方法把复杂度转移到 MCP"
+    },
+    "36": {
+      "en": "client. And in this case, it's kind of okay, because as you saw, our MCP client or that Next.js",
+      "zh_tw": "客戶端。在這種情況下，這還可以接受，因為如你所見，我們的 MCP 客戶端或那個 Next.js",
+      "zh_cn": "客户端。在这种情況下，这还可以接受，因为如你所見，我们的 MCP 客户端或那个 Next.js"
+    },
+    "37": {
+      "en": "application already has an existing connection to Claude, it is already making requests off to Claude.",
+      "zh_tw": "應用程式已經有和 Claude 的現有連接了，它已經在向 Claude 發送請求了。",
+      "zh_cn": "应用程序已经有和 Claude 的现有连接了，它已经在向 Claude 发送请求了。"
+    },
+    "38": {
+      "en": "So it's not that much more to just run one additional request on behalf of the MCP server.",
+      "zh_tw": "所以代替 MCP 伺服器多執行一個請求並不算太多。",
+      "zh_cn": "所以代替 MCP 服务器多执行一个请求並不算太多。"
+    },
+    "39": {
+      "en": "The other obvious benefit here is that the MCP server does not need a API key to access Claude at all.",
+      "zh_tw": "另一個明顯的好處是 MCP 伺服器完全不需要 API 金鑰來存取 Claude。",
+      "zh_cn": "另一个明显的好处是 MCP 服务器完全不需要 API 金钥來访问 Claude。"
+    },
+    "40": {
+      "en": "And if this is a publicly accessible MCP server, now it doesn't need to worry about paying for",
+      "zh_tw": "如果這是一個公開的 MCP 伺服器，現在它不需要擔心為",
+      "zh_cn": "如果这是一个公开的 MCP 服务器，现在它不需要担心为"
+    },
+    "41": {
+      "en": "tokens generated on behalf of someone else making use of the server. So this technique is referred",
+      "zh_tw": "別人使用伺服器時代替他們生成的 token 付費。所以這個技術就叫做",
+      "zh_cn": "別人使用服务器时代替他们生成的 token 付费。所以这个技术就叫做"
+    },
+    "42": {
+      "en": "to as sampling. It allows a MCP server to ask the client to run Claude or any other language model",
+      "zh_tw": "取樣。它允許 MCP 伺服器請客戶端執行 Claude 或任何其他語言模型",
+      "zh_cn": "取样。它允许 MCP 服务器请客户端执行 Claude 或任何其他语言模型"
+    },
+    "43": {
+      "en": "to generate some amount of text. You can really think of sampling as moving the responsibility of",
+      "zh_tw": "來生成一些文字。你可以把取樣看作是把呼叫 Claude 的責任從",
+      "zh_cn": "來生成一些文字。你可以把取样看作是把调用 Claude 的責任从"
+    },
+    "44": {
+      "en": "calling Claude from a server off to the client. Sampling is most useful anytime you are putting",
+      "zh_tw": "伺服器轉移到客戶端。取樣在你建構",
+      "zh_cn": "服务器转移到客户端。取样在你建构"
+    },
+    "45": {
+      "en": "together a publicly accessible MCP server. You don't want to have a MCP server that is publicly",
+      "zh_tw": "公開的 MCP 伺服器時最有用。你不會想有一個公開",
+      "zh_cn": "公开的 MCP 服务器时最有用。你不会想有一个公开"
+    },
+    "46": {
+      "en": "available for anyone to use that is just going to allow anyone to come and generate some text.",
+      "zh_tw": "讓任何人使用的 MCP 伺服器，卻允許任何人來生成文字。",
+      "zh_cn": "让任何人使用的 MCP 服务器，卻允许任何人來生成文字。"
+    },
+    "47": {
+      "en": "For your publicly accessible server, you would want to make use of sampling and move the responsibility",
+      "zh_tw": "對於你的公開伺服器，你會想使用取樣，把生成文字的責任",
+      "zh_cn": "对於你的公开服务器，你会想使用取样，把生成文字的責任"
+    },
+    "48": {
+      "en": "of generating text from your server off to whatever client is connecting to it.",
+      "zh_tw": "從伺服器轉移到連接它的任何客戶端。",
+      "zh_cn": "从服务器转移到连接它的任何客户端。"
+    },
+    "49": {
+      "en": "Making use of sampling requires a little bit of setup on both the server and the client.",
+      "zh_tw": "使用取樣需要在伺服器和客戶端兩邊都做一些設定。",
+      "zh_cn": "使用取样需要在服务器和客户端兩边都做一些设定。"
+    },
+    "50": {
+      "en": "First off on the server inside of a tool function, you will call the create message function.",
+      "zh_tw": "首先在伺服器的工具函式裡面，你會呼叫 create_message 函式。",
+      "zh_cn": "首先在服务器的工具函数里面，你会调用 create_message 函数。"
+    },
+    "51": {
+      "en": "And you're going to pass into that a list of messages that you want to be eventually handed",
+      "zh_tw": "你要傳入一個你想最終交給",
+      "zh_cn": "你要传入一个你想最终交给"
+    },
+    "52": {
+      "en": "off to Claude. This list of messages is going to be formulated into a request that gets sent down",
+      "zh_tw": "Claude 的訊息列表。這個訊息列表會被組裝成一個請求發送到",
+      "zh_cn": "Claude 的信息列表。这个信息列表会被组装成一个请求发送到"
+    },
+    "53": {
+      "en": "to the client. Then on the client, you have to write out a little bit more code, specifically",
+      "zh_tw": "客戶端。然後在客戶端，你需要多寫一些程式碼，特別是",
+      "zh_cn": "客户端。然后在客户端，你需要多写一些代码，特別是"
+    },
+    "54": {
+      "en": "something called a sampling callback. I've got an example sampling callback at the top of this",
+      "zh_tw": "一個叫做取樣回呼的東西。在右邊這個程式碼片段的頂部，我有一個範例取樣回呼。",
+      "zh_cn": "一个叫做取样回调的東西。在右边这个代码片段的頂部，我有一个范例取样回调。"
+    },
+    "55": {
+      "en": "code snippet on the right hand side. Your sampling callback is going to receive the messages that",
+      "zh_tw": "你的取樣回呼會收到從",
+      "zh_cn": "你的取样回调会收到从"
+    },
+    "56": {
+      "en": "were sent from the server. Then inside this callback, it is up to you to call Claude or whatever",
+      "zh_tw": "伺服器發送來的訊息。然後在這個回呼裡面，由你來呼叫 Claude 或你使用的",
+      "zh_cn": "服务器发送來的信息。然后在这个回调里面，由你來调用 Claude 或你使用的"
+    },
+    "57": {
+      "en": "other language model you are making use of, generate some text, and then return a create",
+      "zh_tw": "任何其他語言模型，生成一些文字，然後回傳一個 create",
+      "zh_cn": "任何其他语言模型，生成一些文字，然后返回一个 create"
+    },
+    "58": {
+      "en": "message result. All right, so that is sampling. As you can see, it's not terribly complicated.",
+      "zh_tw": "message result。好的，所以那就是取樣。如你所見，並不是特別複雜。",
+      "zh_cn": "message result。好的，所以那就是取样。如你所見，並不是特別复杂。"
+    },
+    "59": {
+      "en": "It's really just this concept or this idea of shifting the burden of generating some text",
+      "zh_tw": "它真的就是這個概念或想法，把生成文字的負擔",
+      "zh_cn": "它真的就是这个概念或想法，把生成文字的负担"
+    },
+    "60": {
+      "en": "from the server back over to the client. And again, this is a technique you're definitely",
+      "zh_tw": "從伺服器轉移回客戶端。再次強調，這是一個你",
+      "zh_cn": "从服务器转移回客户端。再次強调，这是一个你"
+    },
+    "61": {
+      "en": "going to want to look at anytime you are putting together a publicly accessible MCP server.",
+      "zh_tw": "在建構公開的 MCP 伺服器時絕對會想要考慮的技術。",
+      "zh_cn": "在建构公开的 MCP 服务器时绝对会想要考慮的技术。"
+    }
+  }
+}

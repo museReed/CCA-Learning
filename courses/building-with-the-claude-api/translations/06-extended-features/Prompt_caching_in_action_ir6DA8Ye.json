@@ -1,0 +1,377 @@
+{
+  "srt_file": "Prompt_caching_in_action_ir6DA8Ye.srt",
+  "video_file": "Prompt_caching_in_action_ir6DA8Ye.mp4",
+  "max_valid_entry": 74,
+  "entries": {
+    "1": {
+      "en": "Time to get our hands dirty with prompt caching. I've created a new notebook called 003 caching.",
+      "zh_tw": "是時候親自動手做提示詞快取了。我建了一個新筆記本叫 003 caching。",
+      "zh_cn": "是时候亲自动手做提示词缓存了。我建了一个新笔记本叫 003 caching。"
+    },
+    "2": {
+      "en": "You will of course find it attached to this lecture. Inside of here you'll find a section",
+      "zh_tw": "當然它附在這個課程中。裡面你會找到一個",
+      "zh_cn": "当然它附在这个课程中。里面你会找到一个"
+    },
+    "3": {
+      "en": "called prompt with 6k tokens. So this is meant to serve as a system prompt. We're going to use it in",
+      "zh_tw": "叫做 prompt with 6k tokens 的區段。這是用來當系統提示詞的。我們等一下會用它。",
+      "zh_cn": "叫做 prompt with 6k tokens 的区段。这是用來当系统提示词的。我们等一下会用它。"
+    },
+    "4": {
+      "en": "a little bit. In addition there is a tool schema section. It has several different tool schemas",
+      "zh_tw": "此外還有一個工具 schema 區段。裡面定義了好幾個不同的工具 schema。",
+      "zh_cn": "此外还有一个工具 schema 区段。里面定义了好幾个不同的工具 schema。"
+    },
+    "5": {
+      "en": "to find inside of it. All these different tool schemas put together total up to about 1.7k tokens.",
+      "zh_tw": "所有這些工具 schema 加起來總共約 1.7k token。",
+      "zh_cn": "所有这些工具 schema 加起來总共约 1.7k token。"
+    },
+    "6": {
+      "en": "We're going to work on updating our chat function which is inside the cell up here called",
+      "zh_tw": "我們要更新 helper functions 儲存格裡的 chat 函式。",
+      "zh_cn": "我们要更新 helper functions 存储格里的 chat 函数。"
+    },
+    "7": {
+      "en": "helper functions. We're going to make sure that our chat function always enables prompt caching",
+      "zh_tw": "我們要確保 chat 函式預設總是為工具 schema 和系統提示詞啟用提示詞快取。",
+      "zh_cn": "我们要确保 chat 函数默认总是为工具 schema 和系统提示词啟用提示词缓存。"
+    },
+    "8": {
+      "en": "for our tool schemas and our system prompt by default. So let me show you how you would do that.",
+      "zh_tw": "讓我展示你怎麼做。",
+      "zh_cn": "让我展示你怎麼做。"
+    },
+    "9": {
+      "en": "Inside the helper function cell I'm going to scroll down to our chat function. Here it is right here.",
+      "zh_tw": "在 helper function 儲存格中，我捲到 chat 函式。就在這裡。",
+      "zh_cn": "在 helper function 存储格中，我捲到 chat 函数。就在这里。"
+    },
+    "10": {
+      "en": "I'm going to scroll down a little bit further and you'll notice I added in two to-do items. First",
+      "zh_tw": "再往下捲一點，你會注意到我加了兩個 TODO 項目。首先",
+      "zh_cn": "再往下捲一点，你会注意到我加了兩个 TODO 项目。首先"
+    },
+    "11": {
+      "en": "if a tools list is provided I want to always cache the list of tools. Secondly if we provide a system",
+      "zh_tw": "如果提供了工具列表，我想總是快取工具列表。其次如果我們提供系統",
+      "zh_cn": "如果提供了工具列表，我想总是缓存工具列表。其次如果我们提供系统"
+    },
+    "12": {
+      "en": "prompt I want to cache that as well. Remember that we can have multiple different cache breakpoints",
+      "zh_tw": "提示詞，我也要快取它。記住我們可以在一次請求中有多個不同的快取中斷點。",
+      "zh_cn": "提示词，我也要缓存它。记住我们可以在一次请求中有多个不同的缓存中断点。"
+    },
+    "13": {
+      "en": "inside of a single request. So if we end up passing both a system prompt and a list of tools",
+      "zh_tw": "所以如果我們同時傳入系統提示詞和工具列表，",
+      "zh_cn": "所以如果我们同时传入系统提示词和工具列表，"
+    },
+    "14": {
+      "en": "we're going to set two different cache breakpoints. Let's first take care of caching our list of tools.",
+      "zh_tw": "我們會設定兩個不同的快取中斷點。先處理快取工具列表。",
+      "zh_cn": "我们会设定兩个不同的缓存中断点。先处理缓存工具列表。"
+    },
+    "15": {
+      "en": "Now to do so remember we need to modify the very last tool schema that we pass into clod.",
+      "zh_tw": "記住我們需要修改傳給 Claude 的最後一個工具 schema。",
+      "zh_cn": "记住我们需要修改传给 Claude 的最后一个工具 schema。"
+    },
+    "16": {
+      "en": "We need to in particular add on that cache control field. So we could do something like this. We could",
+      "zh_tw": "特別是要加上 cache_control 欄位。我們可以這樣做，",
+      "zh_cn": "特別是要加上 cache_control 字段。我们可以这样做，"
+    },
+    "17": {
+      "en": "just say tools negative one and then set a cache control field on it of type ephemeral like so.",
+      "zh_tw": "寫 tools[-1] 然後設定 cache_control 欄位為 type ephemeral。",
+      "zh_cn": "写 tools[-1] 然后设定 cache_control 字段为 type ephemeral。"
+    },
+    "18": {
+      "en": "This would definitely work but it's not the best coding technique. You see this will actually modify",
+      "zh_tw": "這肯定能用，但不是最好的寫法。這會通過加入 cache_control 欄位來修改",
+      "zh_cn": "这肯定能用，但不是最好的写法。这会通过加入 cache_control 字段來修改"
+    },
+    "19": {
+      "en": "our tool schema by adding in the cache control field to it. There might be some scenario in our",
+      "zh_tw": "我們的工具 schema。可能有某種情境在應用程式中",
+      "zh_cn": "我们的工具 schema。可能有某种情境在应用程序中"
+    },
+    "20": {
+      "en": "application where we later on decide to change the order of our tool schemas that we're passing in.",
+      "zh_tw": "我們之後決定更改傳入的工具 schema 順序。",
+      "zh_cn": "我们之后决定更改传入的工具 schema 顺序。"
+    },
+    "21": {
+      "en": "And if we did so we would then end up with multiple different cache breakpoints being set up inside of",
+      "zh_tw": "如果這樣做，我們最終會在工具 schema 中設定多個快取中斷點，",
+      "zh_cn": "如果这样做，我们最终会在工具 schema 中设定多个缓存中断点，"
+    },
+    "22": {
+      "en": "our tool schema which might not be exactly what we desire. So a little bit better way of doing this",
+      "zh_tw": "這可能不是我們想要的。所以稍微好一點的做法",
+      "zh_cn": "这可能不是我们想要的。所以稍微好一点的做法"
+    },
+    "23": {
+      "en": "would be to first create a copy of our tools list. Then we will clone the last tool schema inside there",
+      "zh_tw": "是先建立工具列表的副本。然後複製裡面最後一個工具 schema，",
+      "zh_cn": "是先建立工具列表的副本。然后复製里面最后一个工具 schema，"
+    },
+    "24": {
+      "en": "and add the cache control field to it. So let me show you how to do that. I'm going to make a new",
+      "zh_tw": "加上 cache_control 欄位。讓我展示怎麼做。建一個新",
+      "zh_cn": "加上 cache_control 字段。让我展示怎麼做。建一个新"
+    },
+    "25": {
+      "en": "variable called tools clone which will come from calling tools.copy. So that's going to make a",
+      "zh_tw": "變數 tools_clone = tools.copy()。那會建立",
+      "zh_cn": "变量 tools_clone = tools.copy()。那会建立"
+    },
+    "26": {
+      "en": "total copy of the list. Next I'm going to copy the very last tool inside there.",
+      "zh_tw": "列表的完整副本。接下來複製裡面最後一個工具。",
+      "zh_cn": "列表的完整副本。接下來复製里面最后一个工具。"
+    },
+    "27": {
+      "en": "I'm then going to add on the cache control field to the last tool schema.",
+      "zh_tw": "然後在最後一個工具 schema 上加上 cache_control 欄位。",
+      "zh_cn": "然后在最后一个工具 schema 上加上 cache_control 字段。"
+    },
+    "28": {
+      "en": "So that will be type ephemeral. Then I'm going to overwrite the last element inside tools clone with",
+      "zh_tw": "type 為 ephemeral。然後把 tools_clone 的最後一個元素覆蓋為",
+      "zh_cn": "type 为 ephemeral。然后把 tools_clone 的最后一个元素覆蓋为"
+    },
+    "29": {
+      "en": "the tool schema copy that I just made tools clone at negative one will be the last tool. And I'm going",
+      "zh_tw": "剛做的工具 schema 副本。tools_clone[-1] = last_tool。然後把",
+      "zh_cn": "剛做的工具 schema 副本。tools_clone[-1] = last_tool。然后把"
+    },
+    "30": {
+      "en": "to assign my tools clone to the tools param. Now just to repeat here really quickly all this copy logic I",
+      "zh_tw": "tools_clone 指派給 tools 參數。再快速重複一下，這裡所有的複製邏輯",
+      "zh_cn": "tools_clone 指派给 tools 参数。再快速重复一下，这里所有的复製逻輯"
+    },
+    "31": {
+      "en": "have inside of here it's not strictly necessary it's just good practice again in case we ever decide",
+      "zh_tw": "不是嚴格必要的，只是好的做法，以防我們之後決定",
+      "zh_cn": "不是嚴格必要的，只是好的做法，以防我们之后决定"
+    },
+    "32": {
+      "en": "to change our list of tools at some point in time. Next up we'll take care of the second to do. So if we",
+      "zh_tw": "更改工具列表。接下來處理第二個 TODO。如果",
+      "zh_cn": "更改工具列表。接下來处理第二个 TODO。如果"
+    },
+    "33": {
+      "en": "pass in a system prompt I want to make sure that we always set a cache breakpoint on it. To do so I'm",
+      "zh_tw": "傳入系統提示詞，我要確保總是設定快取中斷點。為此我",
+      "zh_cn": "传入系统提示词，我要确保总是设定缓存中断点。为此我"
+    },
+    "34": {
+      "en": "going to remove the comment. I will replace system with a list. We're going to put inside of here a",
+      "zh_tw": "要移除註解。把 system 替換成列表。裡面放一個",
+      "zh_cn": "要移除註解。把 system 替换成列表。里面放一个"
+    },
+    "35": {
+      "en": "text block. So it will be a dictionary with a type of text. Text of system. And then finally a",
+      "zh_tw": "文字區塊。字典 type 為 text。text 為 system。然後",
+      "zh_cn": "文字区块。字典 type 为 text。text 为 system。然后"
+    },
+    "36": {
+      "en": "cache control type ephemeral. And that's it. All right. So let's now run the cell. We're going to go down",
+      "zh_tw": "cache_control type ephemeral。就這樣。好的。執行儲存格。到",
+      "zh_cn": "cache_control type ephemeral。就这样。好的。执行存储格。到"
+    },
+    "37": {
+      "en": "to the very bottom and test out this caching that we have set up. So down here at the very bottom I've already",
+      "zh_tw": "最底部測試我們設定的快取。底部我已經",
+      "zh_cn": "最底部测试我们设定的缓存。底部我已经"
+    },
+    "38": {
+      "en": "defined a list of tools. These are tool schemas that are defined inside the cell right above. We've also got that",
+      "zh_tw": "定義了工具列表。這些是上面儲存格中定義的工具 schema。我們也有那個",
+      "zh_cn": "定义了工具列表。这些是上面存储格中定义的工具 schema。我们也有那个"
+    },
+    "39": {
+      "en": "very large system prompt right here of code prompt. So let's first try just passing in nothing at all. So no list of",
+      "zh_tw": "很大的系統提示詞 code_prompt。先試試什麼都不傳。不傳工具列表，",
+      "zh_cn": "很大的系统提示词 code_prompt。先试试什麼都不传。不传工具列表，"
+    },
+    "40": {
+      "en": "tools no prompt whatsoever. And we're just going to see the number of tokens that are used to process the message of",
+      "zh_tw": "不傳提示詞。我們只看處理 what's one plus one 這個訊息",
+      "zh_cn": "不传提示词。我们只看处理 what's one plus one 这个信息"
+    },
+    "41": {
+      "en": "what's one plus one and generate a response. So if I run this I'll get back an output and we can notice that there is a",
+      "zh_tw": "和生成回應需要用多少 token。執行後得到輸出，我們注意到有一個",
+      "zh_cn": "和生成回应需要用多少 token。执行后得到输出，我们注意到有一个"
+    },
+    "42": {
+      "en": "usage field inside of here. So it looks like we sent in 14 tokens and we got 11 out. Let's now try adding in our list of",
+      "zh_tw": "usage 欄位。看起來我們送入了 14 個 token，得到 11 個。現在試試加入",
+      "zh_cn": "usage 字段。看起來我们送入了 14 个 token，得到 11 个。现在试试加入"
+    },
+    "43": {
+      "en": "tools. So when I add that in and run this we're now going to see a very different usage field. Now our usage has a cache creation",
+      "zh_tw": "工具列表。加入後執行，我們會看到非常不同的 usage 欄位。現在 usage 有 cache_creation",
+      "zh_cn": "工具列表。加入后执行，我们会看到非常不同的 usage 字段。现在 usage 有 cache_creation"
+    },
+    "44": {
+      "en": "input tokens of 1700. That means that Claude has seen that we want to do cache our schemas. So it has",
+      "zh_tw": "input_tokens 為 1700。表示 Claude 看到我們要快取 schema。所以它把",
+      "zh_cn": "input_tokens 为 1700。表示 Claude 看到我们要缓存 schema。所以它把"
+    },
+    "45": {
+      "en": "written into the cache a total of about 1700 tokens. So now if we make a follow-up request immediately",
+      "zh_tw": "總共約 1700 個 token 寫入快取。如果我們立刻發送後續請求",
+      "zh_cn": "总共约 1700 个 token 写入缓存。如果我们立刻发送后续请求"
+    },
+    "46": {
+      "en": "without changing anything about it we'll see that we are now going to read a certain number of tokens",
+      "zh_tw": "不改變任何東西，我們會看到從快取中讀取了一定數量的 token。",
+      "zh_cn": "不改变任何東西，我们会看到从缓存中读取了一定数量的 token。"
+    },
+    "47": {
+      "en": "out of our cache. So now we've got a cache read of 1700. That means that we have successfully stored",
+      "zh_tw": "現在 cache_read 為 1700。表示我們成功地把",
+      "zh_cn": "现在 cache_read 为 1700。表示我们成功地把"
+    },
+    "48": {
+      "en": "our schemas inside the cache and then retrieve them at some point in time in the future.",
+      "zh_tw": "schema 存入快取，然後在未來某個時間點取回它們。",
+      "zh_cn": "schema 存入缓存，然后在未來某个时间点取回它们。"
+    },
+    "49": {
+      "en": "Now if we change our user message here in any way maybe by deleting that question mark at the end",
+      "zh_tw": "如果我們以任何方式改變使用者訊息，也許刪掉末尾的問號",
+      "zh_cn": "如果我们以任何方式改变使用者信息，也许刪掉末尾的问号"
+    },
+    "50": {
+      "en": "and then rerun this we are still going to read out of the cache because remember the caching order is",
+      "zh_tw": "然後重新執行，我們仍然會從快取讀取，因為記住快取順序是",
+      "zh_cn": "然后重新执行，我们仍然会从缓存读取，因为记住缓存顺序是"
+    },
+    "51": {
+      "en": "the list of tools then our system prompt and then our different messages. So we'll still read out of",
+      "zh_tw": "工具列表、系統提示詞、然後訊息。所以我們仍然會",
+      "zh_cn": "工具列表、系统提示词、然后信息。所以我们仍然会"
+    },
+    "52": {
+      "en": "the cache like so. However if we change any of our tools in any way whatsoever we're going to invalidate",
+      "zh_tw": "從快取讀取。然而如果我們以任何方式更改工具，我們會讓",
+      "zh_cn": "从缓存读取。然而如果我们以任何方式更改工具，我们会让"
+    },
+    "53": {
+      "en": "the cache. So if I go up to my list of tools I'm going to change the description on the very first tool.",
+      "zh_tw": "快取失效。如果我到工具列表上面，更改第一個工具的描述。",
+      "zh_cn": "缓存失效。如果我到工具列表上面，更改第一个工具的描述。"
+    },
+    "54": {
+      "en": "I'm going to remove the s on the word adds. So now let's just add a specified duration.",
+      "zh_tw": "我要把 adds 的 s 刪掉。現在重新執行儲存格，",
+      "zh_cn": "我要把 adds 的 s 刪掉。现在重新执行存储格，"
+    },
+    "55": {
+      "en": "Now if I rerun the cell I've changed my tool schema and that means that the cache breakpoint that we've",
+      "zh_tw": "我改了工具 schema，表示我們設定在所有工具上的快取中斷點",
+      "zh_cn": "我改了工具 schema，表示我们设定在所有工具上的缓存中断点"
+    },
+    "56": {
+      "en": "applied to all of our different tools is no longer going to apply. If I run the very bottom cell again",
+      "zh_tw": "不再適用。再次執行底部儲存格，",
+      "zh_cn": "不再适用。再次执行底部存储格，"
+    },
+    "57": {
+      "en": "we'll see an updated value of usage. So now we're going to have a cache write once again. So we're no",
+      "zh_tw": "我們會看到更新的 usage 值。現在又回到寫入快取了。",
+      "zh_cn": "我们会看到更新的 usage 值。现在又回到写入缓存了。"
+    },
+    "58": {
+      "en": "longer reading we're now back to writing because we have sent in a list of tools that as far as Claude is",
+      "zh_tw": "不再是讀取，而是回到寫入，因為我們送入了一個對 Claude 來說",
+      "zh_cn": "不再是读取，而是回到写入，因为我们送入了一个对 Claude 來说"
+    },
+    "59": {
+      "en": "concerned is completely different. All right so now let's try adding in our system prompt. I'm going",
+      "zh_tw": "完全不同的工具列表。好的，現在試試加入系統提示詞。",
+      "zh_cn": "完全不同的工具列表。好的，现在试试加入系统提示词。"
+    },
+    "60": {
+      "en": "to go to our chat function and I'll add in system code prompt. So now when we make this request remember",
+      "zh_tw": "到 chat 函式加入 system=code_prompt。現在發送請求，記住",
+      "zh_cn": "到 chat 函数加入 system=code_prompt。现在发送请求，记住"
+    },
+    "61": {
+      "en": "the order of caching it is tools then the system prompt and then our list of messages. Because we",
+      "zh_tw": "快取順序是工具、系統提示詞、然後訊息列表。因為我們",
+      "zh_cn": "缓存顺序是工具、系统提示词、然后信息列表。因为我们"
+    },
+    "62": {
+      "en": "are leaving our list of tools completely identical but we are changing the system prompt I would expect",
+      "zh_tw": "保持工具列表完全相同但更改了系統提示詞，我預期",
+      "zh_cn": "保持工具列表完全相同但更改了系统提示词，我预期"
+    },
+    "63": {
+      "en": "to see a partial cache read and then a cache write at the same time. The cache read that we're going to see",
+      "zh_tw": "會同時看到部分快取讀取和快取寫入。快取讀取",
+      "zh_cn": "会同时看到部分缓存读取和缓存写入。缓存读取"
+    },
+    "64": {
+      "en": "is because we are making use of the same list of tools and the cache write is going to because we are",
+      "zh_tw": "是因為我們使用了相同的工具列表，快取寫入是因為我們",
+      "zh_cn": "是因为我们使用了相同的工具列表，缓存写入是因为我们"
+    },
+    "65": {
+      "en": "setting up a new cache breakpoint by sending in this new prompt. So I'm going to run this and now we should",
+      "zh_tw": "設定了新的快取中斷點，送入這個新的提示詞。執行後現在應該",
+      "zh_cn": "设定了新的缓存中断点，送入这个新的提示词。执行后现在应该"
+    },
+    "66": {
+      "en": "see a there we go a cache read of 1700 and a cache write of 6.3. Now just like our list of tools if we go",
+      "zh_tw": "看到，好了，cache_read 為 1700，cache_write 為 6.3k。跟工具列表一樣，如果我們",
+      "zh_cn": "看到，好了，cache_read 为 1700，cache_write 为 6.3k。跟工具列表一样，如果我们"
+    },
+    "67": {
+      "en": "up to our system prompt and we change this prompt in any way maybe by just removing the word builder at the very",
+      "zh_tw": "到系統提示詞上面，以任何方式更改提示詞，也許刪掉最後的 builder 這個字",
+      "zh_cn": "到系统提示词上面，以任何方式更改提示词，也许刪掉最后的 builder 这个字"
+    },
+    "68": {
+      "en": "end here and then rerunning that cell. Now once again as far as Claude is concerned if we send in",
+      "zh_tw": "然後重新執行儲存格。對 Claude 來說如果我們再送",
+      "zh_cn": "然后重新执行存储格。对 Claude 來说如果我们再送"
+    },
+    "69": {
+      "en": "another request this will be a completely different system prompt. So we are going to lose out on all",
+      "zh_tw": "請求，這會是完全不同的系統提示詞。所以我們會失去之前",
+      "zh_cn": "请求，这会是完全不同的系统提示词。所以我们会失去之前"
+    },
+    "70": {
+      "en": "the cache data we had previously around the system prompt. So now I'll send this again and we will once",
+      "zh_tw": "系統提示詞的所有快取資料。再送一次，又會",
+      "zh_cn": "系统提示词的所有缓存数据。再送一次，又会"
+    },
+    "71": {
+      "en": "again see a cache read of about 1.7. There we go and then we are once again writing this brand new system",
+      "zh_tw": "看到 cache_read 約 1.7k。好了。然後又一次寫入全新的系統",
+      "zh_cn": "看到 cache_read 约 1.7k。好了。然后又一次写入全新的系统"
+    },
+    "72": {
+      "en": "prompt. So that's another 6.3. All right my friends that is prompt caching. Again you're going to very",
+      "zh_tw": "提示詞。又是 6.3k。好了朋友們，這就是提示詞快取。同樣你會非常",
+      "zh_cn": "提示词。又是 6.3k。好了朋友们，这就是提示词缓存。同样你会非常"
+    },
+    "73": {
+      "en": "often use prompt caching anytime you are sending in identical content either in the form of the",
+      "zh_tw": "經常使用提示詞快取，每當你送入相同的內容，無論是",
+      "zh_cn": "经常使用提示词缓存，每当你送入相同的內容，无论是"
+    },
+    "74": {
+      "en": "same list of messages the same tool schemas or the same system prompt.",
+      "zh_tw": "相同的訊息列表、相同的工具 schema 或相同的系統提示詞。",
+      "zh_cn": "相同的信息列表、相同的工具 schema 或相同的系统提示词。"
+    }
+  }
+}

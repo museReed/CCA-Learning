@@ -1,0 +1,717 @@
+{
+  "srt_file": "Sending_tool_results_0jrBmtEo.srt",
+  "video_file": "Sending_tool_results_0jrBmtEo.mp4",
+  "max_valid_entry": 142,
+  "entries": {
+    "1": {
+      "en": "Onto step four, where we run the tool function that Claude requested us to run.",
+      "zh_tw": "進入第四步，執行 Claude 要求我們執行的工具函式。",
+      "zh_cn": "进入第四步，执行 Claude 要求我们执行的工具函数。"
+    },
+    "2": {
+      "en": "Remember, in the last step, we got back a response from Claude that included a tool use block.",
+      "zh_tw": "記得上一步我們得到了包含 tool use block 的 Claude 回應。",
+      "zh_cn": "记得上一步我们得到了包含 tool use block 的 Claude 回应。"
+    },
+    "3": {
+      "en": "Let's print that out inside of our notebook really quickly.",
+      "zh_tw": "在筆記本中快速印出來看看。",
+      "zh_cn": "在笔记本中快速印出來看看。"
+    },
+    "4": {
+      "en": "So back over here, remember we've got this response variable.",
+      "zh_tw": "回到這裡，記得有 response 變數。",
+      "zh_cn": "回到这里，记得有 response 变量。"
+    },
+    "5": {
+      "en": "I'm going to go down, create a new cell, and print out response.",
+      "zh_tw": "往下建一個新儲存格，印出 response。",
+      "zh_cn": "往下建一个新存储格，印出 response。"
+    },
+    "6": {
+      "en": "Now inside of here, we get back a message that has a content property,",
+      "zh_tw": "裡面有一個 content 屬性的訊息，",
+      "zh_cn": "里面有一个 content 属性的信息，"
+    },
+    "7": {
+      "en": "and the second block inside that list is a tool use block.",
+      "zh_tw": "列表中第二個 block 就是 tool use block。",
+      "zh_cn": "列表中第二个 block 就是 tool use block。"
+    },
+    "8": {
+      "en": "So to access that thing, I would do response content at one.",
+      "zh_tw": "要存取它，用 response.content[1]。",
+      "zh_cn": "要访问它，用 response.content[1]。"
+    },
+    "9": {
+      "en": "Then inside of here, we're given a input field.",
+      "zh_tw": "裡面有個 input 欄位。",
+      "zh_cn": "里面有个 input 字段。"
+    },
+    "10": {
+      "en": "This is the input or the arguments that Claude is requesting that we pass into the get current date time function.",
+      "zh_tw": "這是 Claude 要求我們傳入 get current date time 函式的輸入或參數。",
+      "zh_cn": "这是 Claude 要求我们传入 get current date time 函数的输入或参数。"
+    },
+    "11": {
+      "en": "So to get that dictionary right there, we would chain on a dot input.",
+      "zh_tw": "要取得那個字典，接上 .input。",
+      "zh_cn": "要取得那个字典，接上 .input。"
+    },
+    "12": {
+      "en": "Now, when we add on the dot input, you might end up getting a type error here.",
+      "zh_tw": "加上 .input 時，你可能會得到 type error。",
+      "zh_cn": "加上 .input 时，你可能会得到 type error。"
+    },
+    "13": {
+      "en": "We're going to ignore type errors just in this video,",
+      "zh_tw": "在這個影片中我們先忽略 type error，",
+      "zh_cn": "在这个视频中我们先忽略 type error，"
+    },
+    "14": {
+      "en": "and we're going to come back very, very quickly and fix all the type errors.",
+      "zh_tw": "很快就會回來修正所有的 type error。",
+      "zh_cn": "很快就会回來修正所有的 type error。"
+    },
+    "15": {
+      "en": "But just, you know, if you see any type errors in this video, totally fine.",
+      "zh_tw": "所以如果在這個影片中看到 type error，完全沒問題。",
+      "zh_cn": "所以如果在这个视频中看到 type error，完全没问题。"
+    },
+    "16": {
+      "en": "Just ignore them for right now.",
+      "zh_tw": "暫時忽略就好。",
+      "zh_cn": "暫时忽略就好。"
+    },
+    "17": {
+      "en": "So now our goal is to take this dictionary right here and provide it to our get current date time function.",
+      "zh_tw": "現在目標是把這個字典提供給 get current date time 函式。",
+      "zh_cn": "现在目标是把这个字典提供给 get current date time 函数。"
+    },
+    "18": {
+      "en": "Just one thing to be aware of here.",
+      "zh_tw": "有一件事要注意。",
+      "zh_cn": "有一件事要注意。"
+    },
+    "19": {
+      "en": "Remember our get current date time function.",
+      "zh_tw": "記得 get current date time 函式",
+      "zh_cn": "记得 get current date time 函数"
+    },
+    "20": {
+      "en": "Defined back up here doesn't take in a dictionary.",
+      "zh_tw": "在上面定義的，不接收字典。",
+      "zh_cn": "在上面定义的，不接收字典。"
+    },
+    "21": {
+      "en": "It takes in a keyword argument of date format.",
+      "zh_tw": "它接收關鍵字參數 date_format。",
+      "zh_cn": "它接收关键字参数 date_format。"
+    },
+    "22": {
+      "en": "So to convert that dictionary into a list of keyword arguments and apply them to the function, here's what we would do.",
+      "zh_tw": "要把字典轉換成關鍵字參數列表並套用到函式，做法如下。",
+      "zh_cn": "要把字典转换成关键字参数列表並套用到函数，做法如下。"
+    },
+    "23": {
+      "en": "I'm going to call get current date time star star and then response content one input.",
+      "zh_tw": "呼叫 get current date time 加兩個星號，然後 response.content[1].input。",
+      "zh_cn": "调用 get current date time 加兩个星号，然后 response.content[1].input。"
+    },
+    "24": {
+      "en": "And now if I run that, I'll get back my current date time in the real world.",
+      "zh_tw": "執行它，就會得到真實世界中目前的日期時間。",
+      "zh_cn": "执行它，就会得到真实世界中目前的日期时间。"
+    },
+    "25": {
+      "en": "So for me, it's 241 or 1441.",
+      "zh_tw": "對我來說是 1441。",
+      "zh_cn": "对我來说是 1441。"
+    },
+    "26": {
+      "en": "Besides the type error that we need to fix up, that ended up being pretty easy.",
+      "zh_tw": "除了需要修正的 type error 外，這其實很簡單。",
+      "zh_cn": "除了需要修正的 type error 外，这其实很简单。"
+    },
+    "27": {
+      "en": "So let's now move on to step five.",
+      "zh_tw": "讓我們繼續第五步。",
+      "zh_cn": "让我们继续第五步。"
+    },
+    "28": {
+      "en": "So in step five, we are now going to send a follow-up request back to Claude.",
+      "zh_tw": "在第五步中，我們要向 Claude 發送後續請求。",
+      "zh_cn": "在第五步中，我们要向 Claude 发送后续请求。"
+    },
+    "29": {
+      "en": "This request is going to include our full conversation history.",
+      "zh_tw": "這個請求會包含完整的對話歷史。",
+      "zh_cn": "这个请求会包含完整的对话历史。"
+    },
+    "30": {
+      "en": "So we'll have our original user message.",
+      "zh_tw": "會有原始的使用者訊息。",
+      "zh_cn": "会有原始的使用者信息。"
+    },
+    "31": {
+      "en": "It will have the assistant message that we just processed with the tool use block.",
+      "zh_tw": "會有我們剛處理的帶有 tool use block 的助手訊息。",
+      "zh_cn": "会有我们剛处理的帶有 tool use block 的助手信息。"
+    },
+    "32": {
+      "en": "And now we are going to append on to the very end, another user message.",
+      "zh_tw": "然後我們要在最後面加上另一個使用者訊息。",
+      "zh_cn": "然后我们要在最后面加上另一个使用者信息。"
+    },
+    "33": {
+      "en": "This user message is going to have a new kind of block that we have not seen before called the tool result block.",
+      "zh_tw": "這個使用者訊息會有一種之前沒見過的新 block，叫做 tool result block。",
+      "zh_cn": "这个使用者信息会有一种之前没見过的新 block，叫做 tool result block。"
+    },
+    "34": {
+      "en": "Let me tell you about how this block works.",
+      "zh_tw": "讓我告訴你這個 block 是怎麼運作的。",
+      "zh_cn": "让我告訴你这个 block 是怎麼运作的。"
+    },
+    "35": {
+      "en": "The tool result block is going to be placed inside of a user message.",
+      "zh_tw": "tool result block 會放在使用者訊息中。",
+      "zh_cn": "tool result block 会放在使用者信息中。"
+    },
+    "36": {
+      "en": "The tool result is going to contain the result of running a tool.",
+      "zh_tw": "tool result 會包含執行工具的結果。",
+      "zh_cn": "tool result 会包含执行工具的结果。"
+    },
+    "37": {
+      "en": "So we're essentially taking whatever we get back from the tool function that we just called,",
+      "zh_tw": "基本上就是把我們從剛呼叫的工具函式得到的東西，",
+      "zh_cn": "基本上就是把我们从剛调用的工具函数得到的東西，"
+    },
+    "38": {
+      "en": "and we are feeding it right back into Claude.",
+      "zh_tw": "直接餵回給 Claude。",
+      "zh_cn": "直接餵回给 Claude。"
+    },
+    "39": {
+      "en": "The tool result block is going to have a couple of different keys inside of it.",
+      "zh_tw": "tool result block 裡面會有幾個不同的鍵。",
+      "zh_cn": "tool result block 里面会有幾个不同的键。"
+    },
+    "40": {
+      "en": "And it's important for you to understand exactly what these keys are doing.",
+      "zh_tw": "了解這些鍵在做什麼很重要。",
+      "zh_cn": "了解这些键在做什麼很重要。"
+    },
+    "41": {
+      "en": "The first one is probably the trickiest to understand, the tool use ID.",
+      "zh_tw": "第一個可能是最難理解的，tool use ID。",
+      "zh_cn": "第一个可能是最难理解的，tool use ID。"
+    },
+    "42": {
+      "en": "So let me very quickly tell you what the tool use ID is all about.",
+      "zh_tw": "讓我很快告訴你 tool use ID 是什麼。",
+      "zh_cn": "让我很快告訴你 tool use ID 是什麼。"
+    },
+    "43": {
+      "en": "I want you to imagine for just a moment that we create a new tool called calculator.",
+      "zh_tw": "想像一下我們建立了一個叫 calculator 的新工具。",
+      "zh_cn": "想像一下我们建立了一个叫 calculator 的新工具。"
+    },
+    "44": {
+      "en": "And this tool is meant to evaluate a math expression.",
+      "zh_tw": "用來計算數學表達式。",
+      "zh_cn": "用來计算数学表达式。"
+    },
+    "45": {
+      "en": "And then maybe a user sends in a message of something like what's 10 plus 10.",
+      "zh_tw": "然後使用者送了一個訊息像「10 加 10 等於多少。",
+      "zh_cn": "然后使用者送了一个信息像「10 加 10 等於多少。"
+    },
+    "46": {
+      "en": "Also what's 30 plus 30.",
+      "zh_tw": "還有 30 加 30。」",
+      "zh_cn": "还有 30 加 30。」"
+    },
+    "47": {
+      "en": "In this case, Claude might want to make two separate calls to the calculator tool.",
+      "zh_tw": "在這種情況下，Claude 可能想呼叫 calculator 工具兩次。",
+      "zh_cn": "在这种情況下，Claude 可能想调用 calculator 工具兩次。"
+    },
+    "48": {
+      "en": "One call to solve 10 plus 10 and a second to solve 30 plus 30.",
+      "zh_tw": "一次計算 10 加 10，第二次計算 30 加 30。",
+      "zh_cn": "一次计算 10 加 10，第二次计算 30 加 30。"
+    },
+    "49": {
+      "en": "To do so, Claude will respond with an assistant message that has multiple tool use blocks inside of it.",
+      "zh_tw": "為此，Claude 會回應一個有多個 tool use block 的助手訊息。",
+      "zh_cn": "为此，Claude 会回应一个有多个 tool use block 的助手信息。"
+    },
+    "50": {
+      "en": "So we might have tool use block one right here, where the expression that we need to evaluate is 10 plus 10.",
+      "zh_tw": "第一個 tool use block 的表達式是 10 加 10。",
+      "zh_cn": "第一个 tool use block 的表达式是 10 加 10。"
+    },
+    "51": {
+      "en": "And then in the second, we might have an expression of 30 plus 30.",
+      "zh_tw": "第二個的表達式是 30 加 30。",
+      "zh_cn": "第二个的表达式是 30 加 30。"
+    },
+    "52": {
+      "en": "We would then execute our calculator tool twice.",
+      "zh_tw": "我們就會執行 calculator 工具兩次。",
+      "zh_cn": "我们就会执行 calculator 工具兩次。"
+    },
+    "53": {
+      "en": "Once for this expression and once for this expression.",
+      "zh_tw": "一次用這個表達式，一次用這個表達式。",
+      "zh_cn": "一次用这个表达式，一次用这个表达式。"
+    },
+    "54": {
+      "en": "And then we would send a follow-up request back to Claude.",
+      "zh_tw": "然後送後續請求回 Claude。",
+      "zh_cn": "然后送后续请求回 Claude。"
+    },
+    "55": {
+      "en": "Inside of our follow-up request, we would add in a user message that has two separate tool result blocks.",
+      "zh_tw": "後續請求中，加入一個有兩個獨立 tool result block 的使用者訊息。",
+      "zh_cn": "后续请求中，加入一个有兩个独立 tool result block 的使用者信息。"
+    },
+    "56": {
+      "en": "So we'd have tool result one and tool result two.",
+      "zh_tw": "所以有 tool result 一和 tool result 二。",
+      "zh_cn": "所以有 tool result 一和 tool result 二。"
+    },
+    "57": {
+      "en": "Now when we send these back into Claude, Claude needs to be able to figure out which result belongs with which request.",
+      "zh_tw": "送回 Claude 時，Claude 需要能對應哪個結果屬於哪個請求。",
+      "zh_cn": "送回 Claude 时，Claude 需要能对应哪个结果属於哪个请求。"
+    },
+    "58": {
+      "en": "So we've got request one and request two, and then result one and result two.",
+      "zh_tw": "有請求一和請求二，然後結果一和結果二。",
+      "zh_cn": "有请求一和请求二，然后结果一和结果二。"
+    },
+    "59": {
+      "en": "Claude doesn't want to just rely upon these things being ordered in the same order.",
+      "zh_tw": "Claude 不想只靠它們的順序。",
+      "zh_cn": "Claude 不想只靠它们的顺序。"
+    },
+    "60": {
+      "en": "Instead, it's going to make use of IDs.",
+      "zh_tw": "它會使用 ID。",
+      "zh_cn": "它会使用 ID。"
+    },
+    "61": {
+      "en": "So inside the original tool use, we have an ID up here of AB3.",
+      "zh_tw": "原始 tool use 中有 ID AB3。",
+      "zh_cn": "原始 tool use 中有 ID AB3。"
+    },
+    "62": {
+      "en": "And then in the second, we have the ID of P09.",
+      "zh_tw": "第二個的 ID 是 P09。",
+      "zh_cn": "第二个的 ID 是 P09。"
+    },
+    "63": {
+      "en": "Inside of our follow-up request that we send back to Claude, we need to make sure that the IDs that we put down here match up with the output.",
+      "zh_tw": "在送回 Claude 的後續請求中，需要確保下面的 ID 和輸出對應。",
+      "zh_cn": "在送回 Claude 的后续请求中，需要确保下面的 ID 和输出对应。"
+    },
+    "64": {
+      "en": "So in other words, P09 being tied to 30 plus 30, then we would want to make sure that we have P09 tied to 60 down here.",
+      "zh_tw": "換句話說，P09 對應 30 加 30，我們要確保 P09 對應結果 60。",
+      "zh_cn": "换句话说，P09 对应 30 加 30，我们要确保 P09 对应结果 60。"
+    },
+    "65": {
+      "en": "And likewise, AB3 with 10 plus 10, we'd want to have that tied to AB3 with an output of 20.",
+      "zh_tw": "同理，AB3 對應 10 加 10，要確保 AB3 對應輸出 20。",
+      "zh_cn": "同理，AB3 对应 10 加 10，要确保 AB3 对应输出 20。"
+    },
+    "66": {
+      "en": "So that's what the tool use ID is all about.",
+      "zh_tw": "這就是 tool use ID 的用途。",
+      "zh_cn": "这就是 tool use ID 的用途。"
+    },
+    "67": {
+      "en": "It helps us tie tool use requests to tool result outputs.",
+      "zh_tw": "幫助我們把工具使用請求和工具結果輸出對應起來。",
+      "zh_cn": "幫助我们把工具使用请求和工具结果输出对应起來。"
+    },
+    "68": {
+      "en": "The other properties on here that you need to be aware of is content.",
+      "zh_tw": "另一個需要知道的屬性是 content。",
+      "zh_cn": "另一个需要知道的属性是 content。"
+    },
+    "69": {
+      "en": "So that's going to be whatever output you get from your tool function.",
+      "zh_tw": "就是工具函式回傳的任何輸出。",
+      "zh_cn": "就是工具函数返回的任何输出。"
+    },
+    "70": {
+      "en": "Even if your tool function returns something like a number or a dictionary or a list, you're just going to turn it into a string, usually by just converting into plain JSON.",
+      "zh_tw": "即使工具函式回傳的是數字、字典或列表，你都要把它轉成字串，通常用 JSON 格式。",
+      "zh_cn": "即使工具函数返回的是数字、字典或列表，你都要把它转成字符串，通常用 JSON 格式。"
+    },
+    "71": {
+      "en": "And then finally, optionally, we can also put in an is error field.",
+      "zh_tw": "最後，可選地放一個 is_error 欄位。",
+      "zh_cn": "最后，可选地放一个 is_error 字段。"
+    },
+    "72": {
+      "en": "If anything goes wrong with running your tool function, you will set this to be true.",
+      "zh_tw": "如果執行工具函式出了問題，設為 true。",
+      "zh_cn": "如果执行工具函数出了问题，设为 true。"
+    },
+    "73": {
+      "en": "By default, it's always going to be false.",
+      "zh_tw": "預設永遠是 false。",
+      "zh_cn": "默认永远是 false。"
+    },
+    "74": {
+      "en": "Now that we have a better idea of what this tool result block is all about, I want to give you a quick reminder of what we need to do next.",
+      "zh_tw": "現在我們更了解 tool result block 了，快速提醒接下來要做什麼。",
+      "zh_cn": "现在我们更了解 tool result block 了，快速提醒接下來要做什麼。"
+    },
+    "75": {
+      "en": "So we just got back an assistant message from Claude that asked us to run a tool.",
+      "zh_tw": "剛從 Claude 得到一個要求執行工具的助手訊息。",
+      "zh_cn": "剛从 Claude 得到一个要求执行工具的助手信息。"
+    },
+    "76": {
+      "en": "We know that it was asking us to run a tool because it had a tool use block inside of it.",
+      "zh_tw": "知道它要執行工具是因為裡面有 tool use block。",
+      "zh_cn": "知道它要执行工具是因为里面有 tool use block。"
+    },
+    "77": {
+      "en": "We then executed our tool with the provided arguments.",
+      "zh_tw": "用提供的參數執行了工具。",
+      "zh_cn": "用提供的参数执行了工具。"
+    },
+    "78": {
+      "en": "So now that we have the result of the tool function, we need to make a follow-up request back to Claude.",
+      "zh_tw": "有了工具函式的結果後，需要向 Claude 發後續請求。",
+      "zh_cn": "有了工具函数的结果后，需要向 Claude 发后续请求。"
+    },
+    "79": {
+      "en": "Inside of this request, we're going to include our full message history.",
+      "zh_tw": "請求中包含完整的訊息歷史。",
+      "zh_cn": "请求中包含完整的信息历史。"
+    },
+    "80": {
+      "en": "So it's going to be our original user message, the assistant message with a tool use block inside of it.",
+      "zh_tw": "有原始使用者訊息，帶有 tool use block 的助手訊息。",
+      "zh_cn": "有原始使用者信息，帶有 tool use block 的助手信息。"
+    },
+    "81": {
+      "en": "And now we are going to append in one additional message, a user message that has a tool result block.",
+      "zh_tw": "現在再加一個訊息，一個有 tool result block 的使用者訊息。",
+      "zh_cn": "现在再加一个信息，一个有 tool result block 的使用者信息。"
+    },
+    "82": {
+      "en": "That's what we just discussed.",
+      "zh_tw": "就是剛才討論的。",
+      "zh_cn": "就是剛才討论的。"
+    },
+    "83": {
+      "en": "So it's this thing right here.",
+      "zh_tw": "就是這個東西。",
+      "zh_cn": "就是这个東西。"
+    },
+    "84": {
+      "en": "Inside of this tool result block, it's going to have the result of the actual function call.",
+      "zh_tw": "tool result block 裡有實際函式呼叫的結果。",
+      "zh_cn": "tool result block 里有实际函数调用的结果。"
+    },
+    "85": {
+      "en": "So let's now go back over to our notebook and we're going to get our list of messages and add in this new user message with the tool result block inside of it.",
+      "zh_tw": "回到筆記本，取得訊息列表，加入帶有 tool result block 的新使用者訊息。",
+      "zh_cn": "回到笔记本，取得信息列表，加入帶有 tool result block 的新使用者信息。"
+    },
+    "86": {
+      "en": "All right.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "87": {
+      "en": "So back inside of my notebook, I'm going to get my list of messages.",
+      "zh_tw": "回到筆記本，取得訊息列表。",
+      "zh_cn": "回到笔记本，取得信息列表。"
+    },
+    "88": {
+      "en": "I'm going to append in a new message that has a role of user.",
+      "zh_tw": "加入一個 role 為 user 的新訊息。",
+      "zh_cn": "加入一个 role 为 user 的新信息。"
+    },
+    "89": {
+      "en": "And then a content list that will contain just one block.",
+      "zh_tw": "content 列表包含一個 block。",
+      "zh_cn": "content 列表包含一个 block。"
+    },
+    "90": {
+      "en": "It's going to have a tool result block.",
+      "zh_tw": "是 tool result block。",
+      "zh_cn": "是 tool result block。"
+    },
+    "91": {
+      "en": "So we'll give it a type of tool underscore results, a tool use ID that matches the ID of this tool use block right here.",
+      "zh_tw": "type 設為 tool_result，tool_use_id 要和上面 tool use block 的 ID 匹配。",
+      "zh_cn": "type 设为 tool_result，tool_use_id 要和上面 tool use block 的 ID 匹配。"
+    },
+    "92": {
+      "en": "To get access to that ID right there, we will refer to response content one dot ID.",
+      "zh_tw": "要存取那個 ID，用 response.content[1].id。",
+      "zh_cn": "要访问那个 ID，用 response.content[1].id。"
+    },
+    "93": {
+      "en": "And when I put that in, I'm going to once again, get a type air.",
+      "zh_tw": "放進去時又會得到 type error。",
+      "zh_cn": "放进去时又会得到 type error。"
+    },
+    "94": {
+      "en": "Remember we are totally okay with type airs for right now.",
+      "zh_tw": "記得目前完全可以忽略 type error。",
+      "zh_cn": "记得目前完全可以忽略 type error。"
+    },
+    "95": {
+      "en": "We're going to ignore it and we'll fix it up very shortly.",
+      "zh_tw": "之後很快會修正。",
+      "zh_cn": "之后很快会修正。"
+    },
+    "96": {
+      "en": "I'll then add in some content.",
+      "zh_tw": "然後加入一些 content。",
+      "zh_cn": "然后加入一些 content。"
+    },
+    "97": {
+      "en": "So that's going to be the result of calling my function right here.",
+      "zh_tw": "就是呼叫函式的結果。",
+      "zh_cn": "就是调用函数的结果。"
+    },
+    "98": {
+      "en": "So I'm going to assign the result of calling get current date time to how about just result.",
+      "zh_tw": "把呼叫 get current date time 的結果指派給 result。",
+      "zh_cn": "把调用 get current date time 的结果指派给 result。"
+    },
+    "99": {
+      "en": "I'm going to rerun that.",
+      "zh_tw": "重新執行。",
+      "zh_cn": "重新执行。"
+    },
+    "100": {
+      "en": "And then I'll refer to content result.",
+      "zh_tw": "然後 content 設為 result。",
+      "zh_cn": "然后 content 设为 result。"
+    },
+    "101": {
+      "en": "And then finally, when we ran this function, there was no air.",
+      "zh_tw": "執行函式時沒有錯誤。",
+      "zh_cn": "执行函数时没有错误。"
+    },
+    "102": {
+      "en": "So I'll put in is air false.",
+      "zh_tw": "所以 is_error 設為 false。",
+      "zh_cn": "所以 is_error 设为 false。"
+    },
+    "103": {
+      "en": "Not strictly necessary because that is the default, but I'll put it in there anyways.",
+      "zh_tw": "不是必須的因為預設就是，但還是放上去。",
+      "zh_cn": "不是必须的因为默认就是，但还是放上去。"
+    },
+    "104": {
+      "en": "Okay.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "105": {
+      "en": "So now that we have updated our list of messages, I'm going to print out the list.",
+      "zh_tw": "更新了訊息列表後，印出來。",
+      "zh_cn": "更新了信息列表后，印出來。"
+    },
+    "106": {
+      "en": "Just to make sure we are doing everything correctly.",
+      "zh_tw": "確認一切正確。",
+      "zh_cn": "确认一切正确。"
+    },
+    "107": {
+      "en": "So now we have our entire conversation history here.",
+      "zh_tw": "現在有完整的對話歷史了。",
+      "zh_cn": "现在有完整的对话历史了。"
+    },
+    "108": {
+      "en": "We have the original user request.",
+      "zh_tw": "有原始使用者請求。",
+      "zh_cn": "有原始使用者请求。"
+    },
+    "109": {
+      "en": "We've got Claude's request for us to use a tool.",
+      "zh_tw": "有 Claude 要求使用工具的訊息。",
+      "zh_cn": "有 Claude 要求使用工具的信息。"
+    },
+    "110": {
+      "en": "And now we have appended in a new user message that has a tool result block inside of it.",
+      "zh_tw": "現在加入了帶有 tool result block 的新使用者訊息。",
+      "zh_cn": "现在加入了帶有 tool result block 的新使用者信息。"
+    },
+    "111": {
+      "en": "So now the last thing we need to do is take this list of messages and send it back into Claude.",
+      "zh_tw": "最後要做的就是把訊息列表送回 Claude。",
+      "zh_cn": "最后要做的就是把信息列表送回 Claude。"
+    },
+    "112": {
+      "en": "I'm going to add in another code cell down here at the bottom.",
+      "zh_tw": "在下面加入另一個儲存格。",
+      "zh_cn": "在下面加入另一个存储格。"
+    },
+    "113": {
+      "en": "And once again, call client messages, create with my model, max tokens, the list of messages.",
+      "zh_tw": "再次呼叫 client.messages.create，傳入模型、max tokens、訊息列表。",
+      "zh_cn": "再次调用 client.messages.create，传入模型、max tokens、信息列表。"
+    },
+    "114": {
+      "en": "And then whenever we make a follow-up request that includes some tool use, we need to also include the original tool schema.",
+      "zh_tw": "包含工具使用的後續請求，還需要包含原始工具 schema。",
+      "zh_cn": "包含工具使用的后续请求，还需要包含原始工具 schema。"
+    },
+    "115": {
+      "en": "Even though we are not probably going to use any tools here, we still have to tell Claude about the existence of this tool because we are referring to it inside of the tool use block right here and the tool result block right here as well.",
+      "zh_tw": "雖然這裡可能不會再用工具，但仍然要告訴 Claude 這個工具的存在，因為 tool use block 和 tool result block 中都有引用。",
+      "zh_cn": "雖然这里可能不会再用工具，但仍然要告訴 Claude 这个工具的存在，因为 tool use block 和 tool result block 中都有引用。"
+    },
+    "116": {
+      "en": "So we need to make sure that we still include our list of tools, which would be a list of git current date time schema.",
+      "zh_tw": "所以需要包含工具列表，也就是 get current date time schema 的列表。",
+      "zh_cn": "所以需要包含工具列表，也就是 get current date time schema 的列表。"
+    },
+    "117": {
+      "en": "And that should be it.",
+      "zh_tw": "這樣應該就好了。",
+      "zh_cn": "这样应该就好了。"
+    },
+    "118": {
+      "en": "So now let's run this and we should see a final response out of Claude.",
+      "zh_tw": "執行它，應該會看到 Claude 的最終回應。",
+      "zh_cn": "执行它，应该会看到 Claude 的最终回应。"
+    },
+    "119": {
+      "en": "And so there it is right there.",
+      "zh_tw": "就是它了。",
+      "zh_cn": "就是它了。"
+    },
+    "120": {
+      "en": "Here's our final response.",
+      "zh_tw": "這是最終回應。",
+      "zh_cn": "这是最终回应。"
+    },
+    "121": {
+      "en": "We have a text block that says the current time is 15 04.",
+      "zh_tw": "text block 說目前時間是 15:04。",
+      "zh_cn": "text block 说目前时间是 15:04。"
+    },
+    "122": {
+      "en": "Well, that is a successful tool call.",
+      "zh_tw": "這是一次成功的工具呼叫。",
+      "zh_cn": "这是一次成功的工具调用。"
+    },
+    "123": {
+      "en": "So we've gone through the entire process.",
+      "zh_tw": "我們走過了整個流程。",
+      "zh_cn": "我们走过了整个流程。"
+    },
+    "124": {
+      "en": "Let's do a very quick review.",
+      "zh_tw": "做一個快速回顧。",
+      "zh_cn": "做一个快速回顧。"
+    },
+    "125": {
+      "en": "So everything began with us writing out a tool function and then writing a tool schema to describe it.",
+      "zh_tw": "一切從寫工具函式開始，然後寫工具 schema 來描述它。",
+      "zh_cn": "一切从写工具函数开始，然后写工具 schema 來描述它。"
+    },
+    "126": {
+      "en": "The goal of the tool schema was to help Claude understand the different tools available to it and how to actually call those different tools.",
+      "zh_tw": "工具 schema 的目標是幫助 Claude 了解可用的不同工具以及如何呼叫它們。",
+      "zh_cn": "工具 schema 的目标是幫助 Claude 了解可用的不同工具以及如何调用它们。"
+    },
+    "127": {
+      "en": "We have to include that tool schema with every request that we make from here on out.",
+      "zh_tw": "每次請求都必須包含工具 schema。",
+      "zh_cn": "每次请求都必须包含工具 schema。"
+    },
+    "128": {
+      "en": "So that's why I'm showing it right here and down here as well.",
+      "zh_tw": "所以這裡和下面都有顯示。",
+      "zh_cn": "所以这里和下面都有显示。"
+    },
+    "129": {
+      "en": "When Claude responded to us, it sent back an assistant message that had two separate blocks inside of it.",
+      "zh_tw": "Claude 回應時送回一個助手訊息，裡面有兩個獨立的 block。",
+      "zh_cn": "Claude 回应时送回一个助手信息，里面有兩个独立的 block。"
+    },
+    "130": {
+      "en": "So a text block right here and a tool use block right here.",
+      "zh_tw": "text block 和 tool use block。",
+      "zh_cn": "text block 和 tool use block。"
+    },
+    "131": {
+      "en": "The text block is intended to be displayed to a user.",
+      "zh_tw": "text block 用來顯示給使用者。",
+      "zh_cn": "text block 用來显示给使用者。"
+    },
+    "132": {
+      "en": "So the user understands what's going on.",
+      "zh_tw": "讓使用者了解正在發生什麼。",
+      "zh_cn": "让使用者了解正在发生什麼。"
+    },
+    "133": {
+      "en": "And the tool use block includes some information about a tool that Claude wants to call.",
+      "zh_tw": "tool use block 包含 Claude 想呼叫的工具資訊。",
+      "zh_cn": "tool use block 包含 Claude 想调用的工具资讯。"
+    },
+    "134": {
+      "en": "So it includes the name of the tool it wants to call along with some input arguments to it.",
+      "zh_tw": "包含工具名稱和輸入參數。",
+      "zh_cn": "包含工具名称和输入参数。"
+    },
+    "135": {
+      "en": "Claude then on our server, we executed the tool function and then we sent a follow-up request back to Claude.",
+      "zh_tw": "然後在伺服器上執行工具函式，再送後續請求回 Claude。",
+      "zh_cn": "然后在服务器上执行工具函数，再送后续请求回 Claude。"
+    },
+    "136": {
+      "en": "The follow-up request included the entire conversation history along with the list of tool schemas as well.",
+      "zh_tw": "後續請求包含完整對話歷史和工具 schema 列表。",
+      "zh_cn": "后续请求包含完整对话历史和工具 schema 列表。"
+    },
+    "137": {
+      "en": "The final message inside of our request was a user message that included a tool result block.",
+      "zh_tw": "請求中最後一個訊息是帶有 tool result block 的使用者訊息。",
+      "zh_cn": "请求中最后一个信息是帶有 tool result block 的使用者信息。"
+    },
+    "138": {
+      "en": "The tool result block is used to inform Claude about the result of running some tool function.",
+      "zh_tw": "tool result block 用來通知 Claude 執行工具函式的結果。",
+      "zh_cn": "tool result block 用來通知 Claude 执行工具函数的结果。"
+    },
+    "139": {
+      "en": "So inside this block, we put the current time, which is what Claude was really asking for.",
+      "zh_tw": "block 中放入目前時間，就是 Claude 真正要求的。",
+      "zh_cn": "block 中放入目前时间，就是 Claude 真正要求的。"
+    },
+    "140": {
+      "en": "Then Claude sent us one final result that was just an assistant message with only a text block.",
+      "zh_tw": "然後 Claude 送出最終結果，只是一個帶 text block 的助手訊息。",
+      "zh_cn": "然后 Claude 送出最终结果，只是一个帶 text block 的助手信息。"
+    },
+    "141": {
+      "en": "And it made use of the inputs that we fed into it through this tool result block.",
+      "zh_tw": "它利用了我們透過 tool result block 餵入的輸入。",
+      "zh_cn": "它利用了我们透过 tool result block 餵入的输入。"
+    },
+    "142": {
+      "en": "The first thing that we did is to call the first tool block.",
+      "zh_tw": "我們做的第一件事就是呼叫第一個工具 block。",
+      "zh_cn": "我们做的第一件事就是调用第一个工具 block。"
+    }
+  }
+}

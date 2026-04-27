@@ -1,0 +1,267 @@
+{
+  "srt_file": "Prompts_in_the_client_xQu08m25.srt",
+  "video_file": "Prompts_in_the_client_xQu08m25.mp4",
+  "max_valid_entry": 52,
+  "entries": {
+    "1": {
+      "en": "Our last major task is to implement some functionality inside of our MCP client",
+      "zh_tw": "我們最後一個主要任務是在 MCP 客戶端中實作一些功能，",
+      "zh_cn": "我们最后一个主要任务是在 MCP 客户端中实作一些功能，"
+    },
+    "2": {
+      "en": "and allow us to list out all the different prompts that are defined inside the MCP server",
+      "zh_tw": "讓我們能列出 MCP 伺服器中定義的所有不同提示詞，",
+      "zh_cn": "让我们能列出 MCP 服务器中定义的所有不同提示词，"
+    },
+    "3": {
+      "en": "and also get a particular prompt with some variables interpolated into it.",
+      "zh_tw": "也能取得特定提示詞並把變數插入其中。",
+      "zh_cn": "也能取得特定提示词並把变量插入其中。"
+    },
+    "4": {
+      "en": "So let's first implement list prompts.",
+      "zh_tw": "先實作 list_prompts。",
+      "zh_cn": "先实作 list_prompts。"
+    },
+    "5": {
+      "en": "I will delete the comment and replace it with a result is await self session list prompts.",
+      "zh_tw": "刪除註解，替換成 result = await self.session.list_prompts()。",
+      "zh_cn": "刪除註解，替换成 result = await self.session.list_prompts()。"
+    },
+    "6": {
+      "en": "And then I will return result dot prompts.",
+      "zh_tw": "然後 return result.prompts。",
+      "zh_cn": "然后 return result.prompts。"
+    },
+    "7": {
+      "en": "And that's pretty much it.",
+      "zh_tw": "基本上就這樣。",
+      "zh_cn": "基本上就这样。"
+    },
+    "8": {
+      "en": "And then get prompt.",
+      "zh_tw": "然後 get_prompt。",
+      "zh_cn": "然后 get_prompt。"
+    },
+    "9": {
+      "en": "Now, to be clear, when we get a individual prompt, we're going to be given some number",
+      "zh_tw": "要清楚，當我們取得個別提示詞時，會給一些",
+      "zh_cn": "要清楚，当我们取得个別提示词时，会给一些"
+    },
+    "10": {
+      "en": "of arguments.",
+      "zh_tw": "參數。",
+      "zh_cn": "参数。"
+    },
+    "11": {
+      "en": "These arguments will eventually show up inside of our prompt function.",
+      "zh_tw": "這些參數最終會出現在我們的提示詞函式中。",
+      "zh_cn": "这些参数最终会出现在我们的提示词函数中。"
+    },
+    "12": {
+      "en": "So for example, inside a format document right here, we expect to receive a document ID.",
+      "zh_tw": "例如，在 format_document 中，我們預期收到 document_id。",
+      "zh_cn": "例如，在 format_document 中，我们预期收到 document_id。"
+    },
+    "13": {
+      "en": "Inside of this arcs dictionary, the expectation is that there will be a document ID key, and",
+      "zh_tw": "在這個 args 字典中，預期會有 document_id 鍵，",
+      "zh_cn": "在这个 args 字典中，预期会有 document_id 键，"
+    },
+    "14": {
+      "en": "that will be passed in to the appropriate function over here.",
+      "zh_tw": "它會被傳入那邊相應的函式。",
+      "zh_cn": "它会被传入那边相应的函数。"
+    },
+    "15": {
+      "en": "And then we will get that value interpolated into the prompt itself.",
+      "zh_tw": "然後那個值會被插入到提示詞本身中。",
+      "zh_cn": "然后那个值会被插入到提示词本身中。"
+    },
+    "16": {
+      "en": "So inside of the get prompt function, I will get a result from self session, get prompt.",
+      "zh_tw": "在 get_prompt 函式中，result = self.session.get_prompt。",
+      "zh_cn": "在 get_prompt 函数中，result = self.session.get_prompt。"
+    },
+    "17": {
+      "en": "I'm going to pass in the prompt name.",
+      "zh_tw": "傳入提示詞名稱。",
+      "zh_cn": "传入提示词名称。"
+    },
+    "18": {
+      "en": "That's the name of the prompt I want to retrieve.",
+      "zh_tw": "那是我要取得的提示詞的名稱。",
+      "zh_cn": "那是我要取得的提示词的名称。"
+    },
+    "19": {
+      "en": "And then I'll pass in the arguments.",
+      "zh_tw": "然後傳入參數。",
+      "zh_cn": "然后传入参数。"
+    },
+    "20": {
+      "en": "And then I will return result dot messages.",
+      "zh_tw": "return result.messages。",
+      "zh_cn": "return result.messages。"
+    },
+    "21": {
+      "en": "So those are the messages coming back.",
+      "zh_tw": "那些是回來的訊息。",
+      "zh_cn": "那些是回來的信息。"
+    },
+    "22": {
+      "en": "They form some kind of conversation that we want to feed directly into Claude.",
+      "zh_tw": "它們形成某種對話，我們要直接送給 Claude。",
+      "zh_cn": "它们形成某种对话，我们要直接送给 Claude。"
+    },
+    "23": {
+      "en": "And that's it.",
+      "zh_tw": "就這樣。",
+      "zh_cn": "就这样。"
+    },
+    "24": {
+      "en": "That's all we have to do for our client.",
+      "zh_tw": "客戶端的部分只需要這些。",
+      "zh_cn": "客户端的部分只需要这些。"
+    },
+    "25": {
+      "en": "So now we can test this out inside of the CLI itself.",
+      "zh_tw": "現在可以在 CLI 中測試。",
+      "zh_cn": "现在可以在 CLI 中测试。"
+    },
+    "26": {
+      "en": "I'll flip back over, run the project again.",
+      "zh_tw": "切回去，再次執行專案。",
+      "zh_cn": "切回去，再次执行项目。"
+    },
+    "27": {
+      "en": "And now if I put in a slash right here, I'll see that I can access this format command.",
+      "zh_tw": "現在打一個斜線，會看到可以存取 format 命令。",
+      "zh_cn": "现在打一个斜线，会看到可以访问 format 命令。"
+    },
+    "28": {
+      "en": "Now format is really just the name of the prompt that we're going to invoke.",
+      "zh_tw": "format 其實就是我們要呼叫的提示詞名稱。",
+      "zh_cn": "format 其实就是我们要调用的提示词名称。"
+    },
+    "29": {
+      "en": "So if I select that and then hit space, I'll then be asked to select one of the different",
+      "zh_tw": "選擇後按空格，會被要求選擇一個",
+      "zh_cn": "选择后按空格，会被要求选择一个"
+    },
+    "30": {
+      "en": "documents and you'll go with plan dot MD.",
+      "zh_tw": "文件，選 plan.md。",
+      "zh_cn": "文件，选 plan.md。"
+    },
+    "31": {
+      "en": "I'll hit enter.",
+      "zh_tw": "按 Enter。",
+      "zh_cn": "按 Enter。"
+    },
+    "32": {
+      "en": "And then we're taking that entire prompt, really just that single user message and feeding it",
+      "zh_tw": "然後把整個提示詞，真的只是那一個使用者訊息直接送",
+      "zh_cn": "然后把整个提示词，真的只是那一个使用者信息直接送"
+    },
+    "33": {
+      "en": "directly into Claude.",
+      "zh_tw": "給 Claude。",
+      "zh_cn": "给 Claude。"
+    },
+    "34": {
+      "en": "So Claude now has the instructions to go and reformat a document into Markdown syntax.",
+      "zh_tw": "Claude 現在有重新格式化文件成 Markdown 語法的指示。",
+      "zh_cn": "Claude 现在有重新格式化文件成 Markdown 语法的指示。"
+    },
+    "35": {
+      "en": "And it has also been given the ID of the document that we want to reformat.",
+      "zh_tw": "它也被給了我們要重新格式化的文件 ID。",
+      "zh_cn": "它也被给了我们要重新格式化的文件 ID。"
+    },
+    "36": {
+      "en": "So the first thing it needs to do here is go and fetch that document's contents.",
+      "zh_tw": "首先需要去取那個文件的內容。",
+      "zh_cn": "首先需要去取那个文件的內容。"
+    },
+    "37": {
+      "en": "And it will do so by using the get document tool.",
+      "zh_tw": "會用 get_document 工具來做。",
+      "zh_cn": "会用 get_document 工具來做。"
+    },
+    "38": {
+      "en": "And then finally, Claude is going to respond with the Markdown version of this document.",
+      "zh_tw": "然後 Claude 會回應這個文件的 Markdown 版本。",
+      "zh_cn": "然后 Claude 会回应这个文件的 Markdown 版本。"
+    },
+    "39": {
+      "en": "So here is the document with a bunch of Markdown syntax inside of it.",
+      "zh_tw": "這裡是帶有一堆 Markdown 語法的文件。",
+      "zh_cn": "这里是帶有一堆 Markdown 语法的文件。"
+    },
+    "40": {
+      "en": "All right.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "41": {
+      "en": "Since it looked like this worked just fine, let's do a quick recap on prompts and make",
+      "zh_tw": "看起來運作正常，快速回顧提示詞，確保",
+      "zh_cn": "看起來运作正常，快速回顧提示词，确保"
+    },
+    "42": {
+      "en": "sure we understand what they are all about.",
+      "zh_tw": "理解它們是什麼。",
+      "zh_cn": "理解它们是什麼。"
+    },
+    "43": {
+      "en": "We begin by writing out and evaling a prompt that has some relevancy to our MCP server's",
+      "zh_tw": "我們從撰寫和評估與 MCP 伺服器目的相關的提示詞開始。",
+      "zh_cn": "我们从撰写和评估与 MCP 服务器目的相关的提示词开始。"
+    },
+    "44": {
+      "en": "purpose.",
+      "zh_tw": "目的相關的提示詞開始。",
+      "zh_cn": "目的相关的提示词开始。"
+    },
+    "45": {
+      "en": "In our case, we were making a document server.",
+      "zh_tw": "在我們的例子中，我們做的是文件伺服器。",
+      "zh_cn": "在我们的例子中，我们做的是文件服务器。"
+    },
+    "46": {
+      "en": "So having some functionality or something about rewriting a document in a different style,",
+      "zh_tw": "有一些關於用不同風格重寫文件的功能，",
+      "zh_cn": "有一些关於用不同风格重写文件的功能，"
+    },
+    "47": {
+      "en": "I think it kind of makes sense.",
+      "zh_tw": "我覺得蠻合理的。",
+      "zh_cn": "我覺得蠻合理的。"
+    },
+    "48": {
+      "en": "Once we have put our prompt together, we'll define a prompt inside the MCP server.",
+      "zh_tw": "準備好提示詞後，在 MCP 伺服器中定義提示詞。",
+      "zh_cn": "准备好提示词后，在 MCP 服务器中定义提示词。"
+    },
+    "49": {
+      "en": "And then our client can ask for that prompt at any point in time.",
+      "zh_tw": "客戶端可以隨時要求那個提示詞。",
+      "zh_cn": "客户端可以随时要求那个提示词。"
+    },
+    "50": {
+      "en": "When we ask for the prompt, we will put in some number of arguments that will be provided",
+      "zh_tw": "要求提示詞時，會放入一些參數，作為關鍵字參數提供",
+      "zh_cn": "要求提示词时，会放入一些参数，作为关键字参数提供"
+    },
+    "51": {
+      "en": "to this prompting function right here as keyword arguments.",
+      "zh_tw": "給這裡的提示詞函式。",
+      "zh_cn": "给这里的提示词函数。"
+    },
+    "52": {
+      "en": "And then our function can make use of those keyword arguments inside the prompt itself.",
+      "zh_tw": "函式可以在提示詞中使用那些關鍵字參數。",
+      "zh_cn": "函数可以在提示词中使用那些关键字参数。"
+    }
+  }
+}

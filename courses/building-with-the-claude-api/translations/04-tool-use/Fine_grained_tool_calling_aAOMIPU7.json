@@ -1,0 +1,697 @@
+{
+  "srt_file": "Fine_grained_tool_calling_aAOMIPU7.srt",
+  "video_file": "Fine_grained_tool_calling_aAOMIPU7.mp4",
+  "max_valid_entry": 138,
+  "entries": {
+    "1": {
+      "en": "In this video, we're going to take a look at combining together tool use with streaming.",
+      "zh_tw": "在這個影片中，我們要看看工具使用結合串流的情況。",
+      "zh_cn": "在这个视频中，我们要看看工具使用结合流式的情況。"
+    },
+    "2": {
+      "en": "You'll recall that we discussed streaming from the API earlier.",
+      "zh_tw": "你應該記得我們之前討論過從 API 進行串流。",
+      "zh_cn": "你应该记得我们之前討论过从 API 进行流式。"
+    },
+    "3": {
+      "en": "Streaming allows us to give users a better idea of what's going on in our app.",
+      "zh_tw": "串流讓我們能給使用者更好地了解應用程式中正在發生什麼。",
+      "zh_cn": "流式让我们能给使用者更好地了解应用程序中正在发生什麼。"
+    },
+    "4": {
+      "en": "So whenever we have streaming enabled and we make a request off to Claude,",
+      "zh_tw": "當啟用串流並向 Claude 發請求時，",
+      "zh_cn": "当啟用流式並向 Claude 发请求时，"
+    },
+    "5": {
+      "en": "we're going to get back some initial response,",
+      "zh_tw": "會先得到一些初始回應，",
+      "zh_cn": "会先得到一些初始回应，"
+    },
+    "6": {
+      "en": "and then we'll receive a series of different events,",
+      "zh_tw": "然後收到一系列不同的事件，",
+      "zh_cn": "然后收到一系列不同的事件，"
+    },
+    "7": {
+      "en": "and each event will have some additional piece of text",
+      "zh_tw": "每個事件會有一些額外的文字片段",
+      "zh_cn": "每个事件会有一些额外的文字片段"
+    },
+    "8": {
+      "en": "that we might want to display to the user.",
+      "zh_tw": "我們可能想顯示給使用者。",
+      "zh_cn": "我们可能想显示给使用者。"
+    },
+    "9": {
+      "en": "You might recall that there are many different types of events",
+      "zh_tw": "你可能記得在應用程式中",
+      "zh_cn": "你可能记得在应用程序中"
+    },
+    "10": {
+      "en": "that we might need to handle inside of our application,",
+      "zh_tw": "需要處理很多不同類型的事件，",
+      "zh_cn": "需要处理很多不同类型的事件，"
+    },
+    "11": {
+      "en": "and a very common one that we need to be on the lookout for is content block delta.",
+      "zh_tw": "非常常見的一個是 content block delta。",
+      "zh_cn": "非常常見的一个是 content block delta。"
+    },
+    "12": {
+      "en": "To make use of tools with streaming,",
+      "zh_tw": "要在串流中使用工具，",
+      "zh_cn": "要在流式中使用工具，"
+    },
+    "13": {
+      "en": "we're going to add in an additional type of event that we need to handle,",
+      "zh_tw": "需要加入一個額外的事件類型來處理，",
+      "zh_cn": "需要加入一个额外的事件类型來处理，"
+    },
+    "14": {
+      "en": "and it's called the input JSON event.",
+      "zh_tw": "叫做 input JSON event。",
+      "zh_cn": "叫做 input JSON event。"
+    },
+    "15": {
+      "en": "So now if we turn on streaming and try to make use of tools,",
+      "zh_tw": "現在如果開啟串流並嘗試使用工具，",
+      "zh_cn": "现在如果开啟流式並嘗试使用工具，"
+    },
+    "16": {
+      "en": "Claude might send back a new type of event to us called the input JSON event.",
+      "zh_tw": "Claude 可能會送回一個叫 input JSON event 的新事件類型。",
+      "zh_cn": "Claude 可能会送回一个叫 input JSON event 的新事件类型。"
+    },
+    "17": {
+      "en": "This object is going to have two important properties on it.",
+      "zh_tw": "這個物件有兩個重要的屬性。",
+      "zh_cn": "这个对象有兩个重要的属性。"
+    },
+    "18": {
+      "en": "First, there's going to be a partial JSON,",
+      "zh_tw": "首先是 partial JSON，",
+      "zh_cn": "首先是 partial JSON，"
+    },
+    "19": {
+      "en": "which is going to be a piece of JSON that represents a part of an argument",
+      "zh_tw": "是一段 JSON 片段，代表 Claude 想送入工具的",
+      "zh_cn": "是一段 JSON 片段，代表 Claude 想送入工具的"
+    },
+    "20": {
+      "en": "that Claude wants to send into our tool.",
+      "zh_tw": "部分參數。",
+      "zh_cn": "部分参数。"
+    },
+    "21": {
+      "en": "We're also going to get something called the snapshot,",
+      "zh_tw": "還會得到叫做 snapshot 的東西，",
+      "zh_cn": "还会得到叫做 snapshot 的東西，"
+    },
+    "22": {
+      "en": "which is a cumulative sum of all the different partial JSON pieces that we have received so far.",
+      "zh_tw": "是目前收到的所有不同 partial JSON 片段的累積總和。",
+      "zh_cn": "是目前收到的所有不同 partial JSON 片段的累积总和。"
+    },
+    "23": {
+      "en": "To give you a better idea of how this works,",
+      "zh_tw": "為了更好地了解這如何運作，",
+      "zh_cn": "为了更好地了解这如何运作，"
+    },
+    "24": {
+      "en": "I put together a new notebook called 003 tool streaming.",
+      "zh_tw": "我建了一個叫 003 tool streaming 的新筆記本。",
+      "zh_cn": "我建了一个叫 003 tool streaming 的新笔记本。"
+    },
+    "25": {
+      "en": "It's attached to this lecture.",
+      "zh_tw": "附在課程中。",
+      "zh_cn": "附在课程中。"
+    },
+    "26": {
+      "en": "This notebook contains a modified run conversation function.",
+      "zh_tw": "筆記本包含修改過的 run conversation 函式。",
+      "zh_cn": "笔记本包含修改过的 run conversation 函数。"
+    },
+    "27": {
+      "en": "It's going to use a new function called chat stream to open up a response stream from the Anthropoc API.",
+      "zh_tw": "用新的 chat stream 函式從 Anthropic API 開啟回應串流。",
+      "zh_cn": "用新的 chat stream 函数从 Anthropic API 开啟回应流式。"
+    },
+    "28": {
+      "en": "Then for every chunk in that stream,",
+      "zh_tw": "對串流中的每個 chunk，",
+      "zh_cn": "对流式中的每个 chunk，"
+    },
+    "29": {
+      "en": "we're going to process each one depending upon the type of chunk it is.",
+      "zh_tw": "根據 chunk 類型來處理每一個。",
+      "zh_cn": "根据 chunk 类型來处理每一个。"
+    },
+    "30": {
+      "en": "In the case of receiving an input JSON chunk,",
+      "zh_tw": "收到 input JSON chunk 時，",
+      "zh_cn": "收到 input JSON chunk 时，"
+    },
+    "31": {
+      "en": "all we're going to do right now is print it out.",
+      "zh_tw": "目前只是把它印出來。",
+      "zh_cn": "目前只是把它印出來。"
+    },
+    "32": {
+      "en": "So I'm going to go down to the bottom where I've already put together a prompt",
+      "zh_tw": "往下到底部，已經準備好了一個提示",
+      "zh_cn": "往下到底部，已经准备好了一个提示"
+    },
+    "33": {
+      "en": "along with a new tool called save article schema.",
+      "zh_tw": "和一個叫 save article schema 的新工具。",
+      "zh_cn": "和一个叫 save article schema 的新工具。"
+    },
+    "34": {
+      "en": "I'm going to run this notebook and let's just see what happens.",
+      "zh_tw": "執行筆記本看看會發生什麼。",
+      "zh_cn": "执行笔记本看看会发生什麼。"
+    },
+    "35": {
+      "en": "Pretty quickly, we'll see each chunk of the response come in,",
+      "zh_tw": "很快就會看到回應的每個 chunk 進來，",
+      "zh_cn": "很快就会看到回应的每个 chunk 进來，"
+    },
+    "36": {
+      "en": "including the arguments for the tool call.",
+      "zh_tw": "包括工具呼叫的參數。",
+      "zh_cn": "包括工具调用的参数。"
+    },
+    "37": {
+      "en": "You'll notice that this notebook is also generating a scholarly article",
+      "zh_tw": "你會注意到這個筆記本也在生成學術文章，",
+      "zh_cn": "你会注意到这个笔记本也在生成学术文章，"
+    },
+    "38": {
+      "en": "just with a few different properties compared to what we had previously.",
+      "zh_tw": "只是和之前相比有幾個不同的屬性。",
+      "zh_cn": "只是和之前相比有幾个不同的属性。"
+    },
+    "39": {
+      "en": "Now, to be honest, there isn't really a lot more to tool streaming beyond this.",
+      "zh_tw": "老實說，工具串流除此之外沒有太多東西。",
+      "zh_cn": "老实说，工具流式除此之外没有太多東西。"
+    },
+    "40": {
+      "en": "We really just need to make sure that we handle that additional type of event.",
+      "zh_tw": "真的只需要確保處理那個額外的事件類型。",
+      "zh_cn": "真的只需要确保处理那个额外的事件类型。"
+    },
+    "41": {
+      "en": "Having said that, there is one other aspect of tool streaming that I would like to tell you about,",
+      "zh_tw": "話雖如此，工具串流還有另一個方面我想告訴你，",
+      "zh_cn": "话雖如此，工具流式还有另一个方面我想告訴你，"
+    },
+    "42": {
+      "en": "but it's around a very, very particular feature that you might not ever need to make use of.",
+      "zh_tw": "但是關於一個非常非常特殊的功能，你可能永遠不需要使用。",
+      "zh_cn": "但是关於一个非常非常特殊的功能，你可能永远不需要使用。"
+    },
+    "43": {
+      "en": "So let me give you a very quick overview,",
+      "zh_tw": "讓我給你一個很快的概覽，",
+      "zh_cn": "让我给你一个很快的概览，"
+    },
+    "44": {
+      "en": "and then you can decide if you want to hear about this very specialized feature or not.",
+      "zh_tw": "然後你可以決定是否想了解這個非常專業的功能。",
+      "zh_cn": "然后你可以决定是否想了解这个非常專業的功能。"
+    },
+    "45": {
+      "en": "If I rerun this notebook, you might notice that it appears that we are getting streaming behavior.",
+      "zh_tw": "如果重新執行筆記本，你可能注意到看似有串流行為。",
+      "zh_cn": "如果重新执行笔记本，你可能注意到看似有流式行为。"
+    },
+    "46": {
+      "en": "Text is appearing chunk by chunk.",
+      "zh_tw": "文字一塊一塊出現。",
+      "zh_cn": "文字一块一块出现。"
+    },
+    "47": {
+      "en": "But for our tool call arguments in particular,",
+      "zh_tw": "但對於工具呼叫的參數，",
+      "zh_cn": "但对於工具调用的参数，"
+    },
+    "48": {
+      "en": "you'll notice that we have to sit around and wait for a few seconds,",
+      "zh_tw": "你會注意到必須等待幾秒，",
+      "zh_cn": "你会注意到必须等待幾秒，"
+    },
+    "49": {
+      "en": "and then all of a sudden, a giant chunk of text appears.",
+      "zh_tw": "然後突然一大塊文字出現。",
+      "zh_cn": "然后突然一大块文字出现。"
+    },
+    "50": {
+      "en": "The fact that there's this really big delay, and then we get a giant chunk of text,",
+      "zh_tw": "這個很大的延遲然後一大塊文字出現的事實，",
+      "zh_cn": "这个很大的延迟然后一大块文字出现的事实，"
+    },
+    "51": {
+      "en": "might not be a big deal to you at all.",
+      "zh_tw": "可能對你來說完全不是問題。",
+      "zh_cn": "可能对你來说完全不是问题。"
+    },
+    "52": {
+      "en": "However, you might be working on an application where it's really important",
+      "zh_tw": "然而，你可能在開發一個應用程式，",
+      "zh_cn": "然而，你可能在开发一个应用程序，"
+    },
+    "53": {
+      "en": "to show very precise content updates to your users as soon as possible.",
+      "zh_tw": "需要盡快向使用者顯示非常精確的內容更新。",
+      "zh_cn": "需要尽快向使用者显示非常精确的內容更新。"
+    },
+    "54": {
+      "en": "Or perhaps you want to receive portions of a tool call as quickly as possible,",
+      "zh_tw": "或者你可能想盡快收到工具呼叫的部分，",
+      "zh_cn": "或者你可能想尽快收到工具调用的部分，"
+    },
+    "55": {
+      "en": "so you can start doing some processing work as fast as you possibly can.",
+      "zh_tw": "以便盡快開始做一些處理工作。",
+      "zh_cn": "以便尽快开始做一些处理工作。"
+    },
+    "56": {
+      "en": "So in the remainder of this video,",
+      "zh_tw": "在這個影片的剩餘部分，",
+      "zh_cn": "在这个视频的剩余部分，"
+    },
+    "57": {
+      "en": "I'm going to help you understand why there is that big delay,",
+      "zh_tw": "我要幫你理解為什麼會有那個大延遲，",
+      "zh_cn": "我要幫你理解为什麼会有那个大延迟，"
+    },
+    "58": {
+      "en": "and then a giant chunk of text appears.",
+      "zh_tw": "然後一大塊文字出現。",
+      "zh_cn": "然后一大块文字出现。"
+    },
+    "59": {
+      "en": "And I'm going to show you a feature in the Anthropic API to get rid of that delay.",
+      "zh_tw": "我也要展示 Anthropic API 中消除這個延遲的功能。",
+      "zh_cn": "我也要展示 Anthropic API 中消除这个延迟的功能。"
+    },
+    "60": {
+      "en": "So let's get to it.",
+      "zh_tw": "那我們開始。",
+      "zh_cn": "那我们开始。"
+    },
+    "61": {
+      "en": "The first thing I would like to do is clarify the tool that I have added into this notebook.",
+      "zh_tw": "首先我想說明一下我加到筆記本中的工具。",
+      "zh_cn": "首先我想说明一下我加到笔记本中的工具。"
+    },
+    "62": {
+      "en": "So I've slightly adjusted the tool that we had previously that was generating a scholarly article.",
+      "zh_tw": "稍微調整了之前生成學術文章的工具。",
+      "zh_cn": "稍微调整了之前生成学术文章的工具。"
+    },
+    "63": {
+      "en": "We're still generating an article, but now it has a slightly different input structure to it.",
+      "zh_tw": "仍然在生成文章，但現在有稍微不同的輸入結構。",
+      "zh_cn": "仍然在生成文章，但现在有稍微不同的输入结构。"
+    },
+    "64": {
+      "en": "I've got an example of the expected input on the bottom left-hand side.",
+      "zh_tw": "左下角有一個預期輸入的範例。",
+      "zh_cn": "左下角有一个预期输入的范例。"
+    },
+    "65": {
+      "en": "So we expect to receive a key of abstract, that's kind of like a summary of a scholarly paper,",
+      "zh_tw": "期望收到 abstract 鍵，類似學術論文的摘要，",
+      "zh_cn": "期望收到 abstract 键，类似学术论文的摘要，"
+    },
+    "66": {
+      "en": "and a meta object.",
+      "zh_tw": "和一個 meta 物件。",
+      "zh_cn": "和一个 meta 对象。"
+    },
+    "67": {
+      "en": "And the meta object is going to have a word count and a review.",
+      "zh_tw": "meta 物件會有 word count 和 review。",
+      "zh_cn": "meta 对象会有 word count 和 review。"
+    },
+    "68": {
+      "en": "And the review, in theory, is going to be some long review of the particular paper that's been generated.",
+      "zh_tw": "review 理論上是對生成論文的一段長評論。",
+      "zh_cn": "review 理论上是对生成论文的一段长评论。"
+    },
+    "69": {
+      "en": "Now, out of this example input right here,",
+      "zh_tw": "在這個範例輸入中，",
+      "zh_cn": "在这个范例输入中，"
+    },
+    "70": {
+      "en": "there's something that I really just want to examine really quickly or just kind of point out.",
+      "zh_tw": "有一點我想快速指出。",
+      "zh_cn": "有一点我想快速指出。"
+    },
+    "71": {
+      "en": "In this big object that we get, we're going to have two top-level keys.",
+      "zh_tw": "在這個大物件中，會有兩個頂層鍵。",
+      "zh_cn": "在这个大对象中，会有兩个頂层键。"
+    },
+    "72": {
+      "en": "In other words, the top-level keys inside the entire big object.",
+      "zh_tw": "換句話說，整個大物件中的頂層鍵。",
+      "zh_cn": "换句话说，整个大对象中的頂层键。"
+    },
+    "73": {
+      "en": "There's abstract and there's meta.",
+      "zh_tw": "有 abstract 和 meta。",
+      "zh_cn": "有 abstract 和 meta。"
+    },
+    "74": {
+      "en": "So we would refer to those as top-level keys.",
+      "zh_tw": "我們稱它們為頂層鍵。",
+      "zh_cn": "我们称它们为頂层键。"
+    },
+    "75": {
+      "en": "Meta is going to point to an object that has some additional key value pairs inside of it.",
+      "zh_tw": "meta 會指向一個內含額外鍵值對的物件。",
+      "zh_cn": "meta 会指向一个內含额外键值对的对象。"
+    },
+    "76": {
+      "en": "But again, the top-level keys are abstract and meta.",
+      "zh_tw": "但再說一次，頂層鍵是 abstract 和 meta。",
+      "zh_cn": "但再说一次，頂层键是 abstract 和 meta。"
+    },
+    "77": {
+      "en": "So just keep that in your head for a little bit.",
+      "zh_tw": "先記住這個。",
+      "zh_cn": "先记住这个。"
+    },
+    "78": {
+      "en": "So now I want to help you understand what goes on behind the scenes inside the Anthropoc API",
+      "zh_tw": "現在我想幫你理解 Anthropic API 幕後發生的事情，",
+      "zh_cn": "现在我想幫你理解 Anthropic API 幕后发生的事情，"
+    },
+    "79": {
+      "en": "whenever we generate some arguments for a tool call in streaming mode.",
+      "zh_tw": "每當在串流模式中為工具呼叫生成參數時。",
+      "zh_cn": "每当在流式模式中为工具调用生成参数时。"
+    },
+    "80": {
+      "en": "So it doesn't quite behave as you might expect.",
+      "zh_tw": "行為和你預期的不太一樣。",
+      "zh_cn": "行为和你预期的不太一样。"
+    },
+    "81": {
+      "en": "In this diagram, on the top left-hand side, I've got our call being sent off to the Anthropoc API.",
+      "zh_tw": "在圖的左上方，是我們送給 Anthropic API 的呼叫。",
+      "zh_cn": "在圖的左上方，是我们送给 Anthropic API 的调用。"
+    },
+    "82": {
+      "en": "Once it receives our request, Cloud will start to generate some JSON,",
+      "zh_tw": "收到請求後，Claude 會開始生成一些 JSON，",
+      "zh_cn": "收到请求后，Claude 会开始生成一些 JSON，"
+    },
+    "83": {
+      "en": "which will be the input to our tool call.",
+      "zh_tw": "作為工具呼叫的輸入。",
+      "zh_cn": "作为工具调用的输入。"
+    },
+    "84": {
+      "en": "The JSON isn't generated all at once.",
+      "zh_tw": "JSON 不是一次全部生成的。",
+      "zh_cn": "JSON 不是一次全部生成的。"
+    },
+    "85": {
+      "en": "Instead, it is created chunk by chunk.",
+      "zh_tw": "而是一塊一塊建立的。",
+      "zh_cn": "而是一块一块建立的。"
+    },
+    "86": {
+      "en": "Now, something kind of surprising happens at this point.",
+      "zh_tw": "這時候發生了一些令人驚訝的事。",
+      "zh_cn": "这时候发生了一些令人驚訝的事。"
+    },
+    "87": {
+      "en": "The Anthropoc API doesn't immediately take these chunks",
+      "zh_tw": "Anthropic API 不會立即把這些 chunk",
+      "zh_cn": "Anthropic API 不会立即把这些 chunk"
+    },
+    "88": {
+      "en": "and send them right back to our server immediately.",
+      "zh_tw": "馬上送回我們的伺服器。",
+      "zh_cn": "马上送回我们的服务器。"
+    },
+    "89": {
+      "en": "Instead, it's going to hang onto them for a little bit of time.",
+      "zh_tw": "它會保留一段時間。",
+      "zh_cn": "它会保留一段时间。"
+    },
+    "90": {
+      "en": "The reason for hanging onto these chunks is that Cloud can sometimes generate invalid JSON.",
+      "zh_tw": "保留的原因是 Claude 有時候會生成無效的 JSON。",
+      "zh_cn": "保留的原因是 Claude 有时候会生成无效的 JSON。"
+    },
+    "91": {
+      "en": "So rather than immediately sending each chunk to us,",
+      "zh_tw": "所以 API 不會立即送出每個 chunk，",
+      "zh_cn": "所以 API 不会立即送出每个 chunk，"
+    },
+    "92": {
+      "en": "the API is going to attempt to do a validation step,",
+      "zh_tw": "而是嘗試做驗證步驟，",
+      "zh_cn": "而是嘗试做验证步驟，"
+    },
+    "93": {
+      "en": "where it makes sure that it is sending us valid JSON.",
+      "zh_tw": "確保送給我們的是有效的 JSON。",
+      "zh_cn": "确保送给我们的是有效的 JSON。"
+    },
+    "94": {
+      "en": "Let me show you how the validation step works.",
+      "zh_tw": "讓我展示驗證步驟的運作方式。",
+      "zh_cn": "让我展示验证步驟的运作方式。"
+    },
+    "95": {
+      "en": "First, as a reminder, we have two top-level keys for our tool call, abstract and meta.",
+      "zh_tw": "提醒一下，工具呼叫有兩個頂層鍵，abstract 和 meta。",
+      "zh_cn": "提醒一下，工具调用有兩个頂层键，abstract 和 meta。"
+    },
+    "96": {
+      "en": "So the API isn't going to wait for the entire object to be generated to do the validation.",
+      "zh_tw": "API 不會等整個物件生成完才做驗證。",
+      "zh_cn": "API 不会等整个对象生成完才做验证。"
+    },
+    "97": {
+      "en": "Instead, it will wait for a single top-level key value pair to be generated.",
+      "zh_tw": "而是等待單一頂層鍵值對生成完。",
+      "zh_cn": "而是等待单一頂层键值对生成完。"
+    },
+    "98": {
+      "en": "So in the case of the abstract key,",
+      "zh_tw": "以 abstract 鍵為例，",
+      "zh_cn": "以 abstract 键为例，"
+    },
+    "99": {
+      "en": "the Anthropoc API will wait until it sees a closing quote for the abstract value string.",
+      "zh_tw": "Anthropic API 會等到看到 abstract 值字串的結束引號。",
+      "zh_cn": "Anthropic API 会等到看到 abstract 值字符串的结束引号。"
+    },
+    "100": {
+      "en": "As soon as it sees that closing quote on the very far right-hand side on chunk number four,",
+      "zh_tw": "一旦在最右邊的第四個 chunk 看到結束引號，",
+      "zh_cn": "一旦在最右边的第四个 chunk 看到结束引号，"
+    },
+    "101": {
+      "en": "then the API knows that it has at least one key value pair generated.",
+      "zh_tw": "API 就知道至少生成了一個鍵值對。",
+      "zh_cn": "API 就知道至少生成了一个键值对。"
+    },
+    "102": {
+      "en": "In this case, the abstract key value pair.",
+      "zh_tw": "這裡是 abstract 鍵值對。",
+      "zh_cn": "这里是 abstract 键值对。"
+    },
+    "103": {
+      "en": "The API will then attempt to validate just that key value pair in isolation.",
+      "zh_tw": "API 接著會嘗試單獨驗證這個鍵值對。",
+      "zh_cn": "API 接著会嘗试单独验证这个键值对。"
+    },
+    "104": {
+      "en": "It's going to compare it against the JSON schema that we provided",
+      "zh_tw": "會和我們提供的 JSON Schema 比對，",
+      "zh_cn": "会和我们提供的 JSON Schema 比对，"
+    },
+    "105": {
+      "en": "and make sure that valid JSON has been produced.",
+      "zh_tw": "確保生成了有效的 JSON。",
+      "zh_cn": "确保生成了有效的 JSON。"
+    },
+    "106": {
+      "en": "If it is valid, then each of the original chunks that were produced",
+      "zh_tw": "如果有效，原始生成的每個 chunk",
+      "zh_cn": "如果有效，原始生成的每个 chunk"
+    },
+    "107": {
+      "en": "will be sent back down to our server.",
+      "zh_tw": "會被送回我們的伺服器。",
+      "zh_cn": "会被送回我们的服务器。"
+    },
+    "108": {
+      "en": "Note that we do get each individual chunk,",
+      "zh_tw": "注意我們確實收到每個單獨的 chunk，",
+      "zh_cn": "注意我们确实收到每个单独的 chunk，"
+    },
+    "109": {
+      "en": "not the entire key value pair as one single chunk.",
+      "zh_tw": "不是整個鍵值對作為一個 chunk。",
+      "zh_cn": "不是整个键值对作为一个 chunk。"
+    },
+    "110": {
+      "en": "If you were to log out all the different chunks that we receive inside of our notebook,",
+      "zh_tw": "如果在筆記本中記錄收到的所有 chunk，",
+      "zh_cn": "如果在笔记本中记录收到的所有 chunk，"
+    },
+    "111": {
+      "en": "you will see that we do in fact receive a ton of different individual chunks.",
+      "zh_tw": "會看到確實收到了大量個別的 chunk。",
+      "zh_cn": "会看到确实收到了大量个別的 chunk。"
+    },
+    "112": {
+      "en": "They just all happen to arrive at our server at just about the same time",
+      "zh_tw": "它們只是幾乎同時到達伺服器，",
+      "zh_cn": "它们只是幾乎同时到达服务器，"
+    },
+    "113": {
+      "en": "because the chunks have been buffered on the API so that it can go through this validation step.",
+      "zh_tw": "因為 chunk 被 API 緩衝以進行驗證步驟。",
+      "zh_cn": "因为 chunk 被 API 缓冲以进行验证步驟。"
+    },
+    "114": {
+      "en": "Then this generation process is going to continue with the meta top-level key.",
+      "zh_tw": "然後生成過程會繼續處理 meta 頂層鍵。",
+      "zh_cn": "然后生成过程会继续处理 meta 頂层键。"
+    },
+    "115": {
+      "en": "So once again, the API will wait until the entire meta top-level key value pair is generated.",
+      "zh_tw": "API 再次等待整個 meta 頂層鍵值對生成完。",
+      "zh_cn": "API 再次等待整个 meta 頂层键值对生成完。"
+    },
+    "116": {
+      "en": "It's then going to validate it and then send us each of the individual chunks back down to our server.",
+      "zh_tw": "然後驗證它，再把每個 chunk 送回伺服器。",
+      "zh_cn": "然后验证它，再把每个 chunk 送回服务器。"
+    },
+    "117": {
+      "en": "So this is why even with streaming enabled, we end up getting these really big pauses",
+      "zh_tw": "這就是即使啟用串流也會有大暫停的原因，",
+      "zh_cn": "这就是即使啟用流式也会有大暫停的原因，"
+    },
+    "118": {
+      "en": "as the chunks are buffered on the API.",
+      "zh_tw": "因為 chunk 被 API 緩衝了。",
+      "zh_cn": "因为 chunk 被 API 缓冲了。"
+    },
+    "119": {
+      "en": "And then all of a sudden we see a big group of chunks appear",
+      "zh_tw": "然後突然看到一大組 chunk 出現，",
+      "zh_cn": "然后突然看到一大组 chunk 出现，"
+    },
+    "120": {
+      "en": "or big chunk of text appear all at once, all of a sudden.",
+      "zh_tw": "或一大塊文字突然全部出現。",
+      "zh_cn": "或一大块文字突然全部出现。"
+    },
+    "121": {
+      "en": "Now, again, this behavior might be okay for you.",
+      "zh_tw": "這個行為對你來說可能沒問題。",
+      "zh_cn": "这个行为对你來说可能没问题。"
+    },
+    "122": {
+      "en": "You might not mind this buffering and validation step,",
+      "zh_tw": "你可能不介意這個緩衝和驗證步驟，",
+      "zh_cn": "你可能不介意这个缓冲和验证步驟，"
+    },
+    "123": {
+      "en": "but if you are building a UI where you want to show users updates as soon as possible,",
+      "zh_tw": "但如果你在建構 UI 想盡快給使用者更新，",
+      "zh_cn": "但如果你在建构 UI 想尽快给使用者更新，"
+    },
+    "124": {
+      "en": "or if you want to do some tool processing as soon as possible,",
+      "zh_tw": "或想盡快做工具處理，",
+      "zh_cn": "或想尽快做工具处理，"
+    },
+    "125": {
+      "en": "then this big pause might be a little irritating.",
+      "zh_tw": "這個大暫停可能有點煩。",
+      "zh_cn": "这个大暫停可能有点煩。"
+    },
+    "126": {
+      "en": "Now, if that's the case, I do have good news.",
+      "zh_tw": "如果是這樣，有好消息。",
+      "zh_cn": "如果是这样，有好消息。"
+    },
+    "127": {
+      "en": "There is a feature in the API called fine-grained tool calling.",
+      "zh_tw": "API 中有一個叫 fine-grained tool calling 的功能。",
+      "zh_cn": "API 中有一个叫 fine-grained tool calling 的功能。"
+    },
+    "128": {
+      "en": "At its core, fine-grained tool calling does really just one thing.",
+      "zh_tw": "核心就是一件事。",
+      "zh_cn": "核心就是一件事。"
+    },
+    "129": {
+      "en": "It disables the JSON validation step.",
+      "zh_tw": "它停用 JSON 驗證步驟。",
+      "zh_cn": "它停用 JSON 验证步驟。"
+    },
+    "130": {
+      "en": "So if you enable fine-grained tool calling,",
+      "zh_tw": "啟用 fine-grained tool calling 後，",
+      "zh_cn": "啟用 fine-grained tool calling 后，"
+    },
+    "131": {
+      "en": "the API will wait for Claude to generate a couple of chunks.",
+      "zh_tw": "API 會等 Claude 生成幾個 chunk。",
+      "zh_cn": "API 会等 Claude 生成幾个 chunk。"
+    },
+    "132": {
+      "en": "It's going to join them together and then send that big chunk down to your server.",
+      "zh_tw": "把它們合在一起然後送到你的伺服器。",
+      "zh_cn": "把它们合在一起然后送到你的服务器。"
+    },
+    "133": {
+      "en": "So with this feature, you will see a more traditional streaming output when generating tool inputs.",
+      "zh_tw": "有了這個功能，生成工具輸入時會看到更傳統的串流輸出。",
+      "zh_cn": "有了这个功能，生成工具输入时会看到更传统的流式输出。"
+    },
+    "134": {
+      "en": "I do want to repeat, with fine-grained tool calling, JSON validation on the API is disabled.",
+      "zh_tw": "要再次強調，fine-grained tool calling 會停用 API 上的 JSON 驗證。",
+      "zh_cn": "要再次強调，fine-grained tool calling 会停用 API 上的 JSON 验证。"
+    },
+    "135": {
+      "en": "So your code running on your server now really should assume that you might be given invalid JSON,",
+      "zh_tw": "你伺服器上的程式碼應該假設可能收到無效的 JSON，",
+      "zh_cn": "你服务器上的代码应该假设可能收到无效的 JSON，"
+    },
+    "136": {
+      "en": "and you should implement some appropriate error handling.",
+      "zh_tw": "應該實作適當的錯誤處理。",
+      "zh_cn": "应该实作适当的错误处理。"
+    },
+    "137": {
+      "en": "The notebook that we were working on is set up for fine-grained tool calling.",
+      "zh_tw": "我們使用的筆記本已經設定好 fine-grained tool calling。",
+      "zh_cn": "我们使用的笔记本已经设定好 fine-grained tool calling。"
+    },
+    "138": {
+      "en": "So let's see what happens to our response when we turn it on.",
+      "zh_tw": "讓我們看看啟用後回應會怎樣。",
+      "zh_cn": "让我们看看啟用后回应会怎样。"
+    }
+  }
+}

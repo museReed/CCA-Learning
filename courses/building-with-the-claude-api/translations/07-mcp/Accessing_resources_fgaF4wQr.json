@@ -1,0 +1,332 @@
+{
+  "srt_file": "Accessing_resources_fgaF4wQr.srt",
+  "video_file": "Accessing_resources_fgaF4wQr.mp4",
+  "max_valid_entry": 65,
+  "entries": {
+    "1": {
+      "en": "We have defined two separate resources inside of our MCP server.",
+      "zh_tw": "我們在 MCP 伺服器中定義了兩個獨立的資源。",
+      "zh_cn": "我们在 MCP 服务器中定义了兩个独立的资源。"
+    },
+    "2": {
+      "en": "So now our client needs the ability to request these resources.",
+      "zh_tw": "所以現在客戶端需要有能力請求這些資源。",
+      "zh_cn": "所以现在客户端需要有能力请求这些资源。"
+    },
+    "3": {
+      "en": "To do so, we're going to add in a single function inside of our MCP client.",
+      "zh_tw": "為此，我們要在 MCP 客戶端中加入一個函式。",
+      "zh_cn": "为此，我们要在 MCP 客户端中加入一个函数。"
+    },
+    "4": {
+      "en": "And remember, this MCP client is going to have some functionality that we're putting",
+      "zh_tw": "記住，這個 MCP 客戶端會有一些功能，",
+      "zh_cn": "记住，这个 MCP 客户端会有一些功能，"
+    },
+    "5": {
+      "en": "together that is going to be used by the rest of our application.",
+      "zh_tw": "會被應用程式的其他部分使用。",
+      "zh_cn": "会被应用程序的其他部分使用。"
+    },
+    "6": {
+      "en": "And I've already put together that code already.",
+      "zh_tw": "我已經準備好那些程式碼了。",
+      "zh_cn": "我已经准备好那些代码了。"
+    },
+    "7": {
+      "en": "So somewhere else inside this project, something is going to try to make use of this function",
+      "zh_tw": "在專案的其他地方，有東西會嘗試使用我們即將加入 MCP 客戶端的這個函式。",
+      "zh_cn": "在项目的其他地方，有東西会嘗试使用我们即将加入 MCP 客户端的这个函数。"
+    },
+    "8": {
+      "en": "that we're about to add into the MCP client.",
+      "zh_tw": "在專案的其他地方，有東西會嘗試使用我們即將加入 MCP 客戶端的這個函式。",
+      "zh_cn": "在项目的其他地方，有東西会嘗试使用我们即将加入 MCP 客户端的这个函数。"
+    },
+    "9": {
+      "en": "To get started, I'm going to open up the MCP client file again.",
+      "zh_tw": "首先我要再次打開 MCP 客戶端檔案。",
+      "zh_cn": "首先我要再次打开 MCP 客户端文件。"
+    },
+    "10": {
+      "en": "I'm going to scroll down and find read resource right here.",
+      "zh_tw": "往下捲找到 read_resource。",
+      "zh_cn": "往下捲找到 read_resource。"
+    },
+    "11": {
+      "en": "So our goal inside of here is to read a particular resource by making a request off to our MCP",
+      "zh_tw": "我們的目標是通過向 MCP 伺服器發送請求來讀取特定資源，",
+      "zh_cn": "我们的目标是通过向 MCP 服务器发送请求來读取特定资源，"
+    },
+    "12": {
+      "en": "server and then parse the contents that come back depending upon its MIME type and then",
+      "zh_tw": "然後根據 MIME type 解析回來的內容，",
+      "zh_cn": "然后根据 MIME type 解析回來的內容，"
+    },
+    "13": {
+      "en": "just return whatever data we get.",
+      "zh_tw": "然後回傳我們得到的資料。",
+      "zh_cn": "然后返回我们得到的数据。"
+    },
+    "14": {
+      "en": "So you'll notice that a argument to it is the URI.",
+      "zh_tw": "你會注意到它的參數是 URI。",
+      "zh_cn": "你会注意到它的参数是 URI。"
+    },
+    "15": {
+      "en": "This is going to be the URI of the resource that we want to fetch from the server.",
+      "zh_tw": "這會是我們想從伺服器取得的資源的 URI。",
+      "zh_cn": "这会是我们想从服务器取得的资源的 URI。"
+    },
+    "16": {
+      "en": "In order to make a request, just to get all of our types nicely, we're going to add two",
+      "zh_tw": "為了讓所有型別正確，我們要在檔案頂部加兩個",
+      "zh_cn": "为了让所有型別正确，我们要在文件頂部加兩个"
+    },
+    "17": {
+      "en": "imports at the very top of the file.",
+      "zh_tw": "匯入。",
+      "zh_cn": "匯入。"
+    },
+    "18": {
+      "en": "I'm going to add in an import for the JSON module.",
+      "zh_tw": "加入 json 模組的匯入。",
+      "zh_cn": "加入 json 模组的匯入。"
+    },
+    "19": {
+      "en": "And from PyDantic, I will import any URL.",
+      "zh_tw": "從 pydantic 匯入 AnyUrl。",
+      "zh_cn": "从 pydantic 匯入 AnyUrl。"
+    },
+    "20": {
+      "en": "Then I'll go back down to our read resource function.",
+      "zh_tw": "回到 read_resource 函式。",
+      "zh_cn": "回到 read_resource 函数。"
+    },
+    "21": {
+      "en": "I'm going to clear out the comment and the return statement.",
+      "zh_tw": "清除註解和 return 語句。",
+      "zh_cn": "清除註解和 return 语句。"
+    },
+    "22": {
+      "en": "Then I'll get a result from calling await self session.",
+      "zh_tw": "result = await self.session.",
+      "zh_cn": "result = await self.session."
+    },
+    "23": {
+      "en": "I want to read resource.",
+      "zh_tw": "read_resource。",
+      "zh_cn": "read_resource。"
+    },
+    "24": {
+      "en": "And then again, this is really just to get the types to work out.",
+      "zh_tw": "同樣，這只是為了讓型別正確。",
+      "zh_cn": "同样，这只是为了让型別正确。"
+    },
+    "25": {
+      "en": "We're going to put in a any URL with the input URI.",
+      "zh_tw": "放入 AnyUrl(uri)。",
+      "zh_cn": "放入 AnyUrl(uri)。"
+    },
+    "26": {
+      "en": "Then I'm going to take from that result.",
+      "zh_tw": "從 result 中取得。",
+      "zh_cn": "从 result 中取得。"
+    },
+    "27": {
+      "en": "Response or excuse me, result contents at zero.",
+      "zh_tw": "result.contents[0]。",
+      "zh_cn": "result.contents[0]。"
+    },
+    "28": {
+      "en": "And I want to make this clear right here why we are adding this in.",
+      "zh_tw": "我想在這裡說清楚為什麼要加這個。",
+      "zh_cn": "我想在这里说清楚为什麼要加这个。"
+    },
+    "29": {
+      "en": "So just a moment ago inside of our inspector, we saw the response we get back.",
+      "zh_tw": "剛才在 inspector 中我們看到了回來的回應。",
+      "zh_cn": "剛才在 inspector 中我们看到了回來的回应。"
+    },
+    "30": {
+      "en": "So this is essentially that result variable.",
+      "zh_tw": "那基本上就是 result 變數。",
+      "zh_cn": "那基本上就是 result 变量。"
+    },
+    "31": {
+      "en": "The result has a contents list and there's going to be a list of elements inside there.",
+      "zh_tw": "result 有一個 contents 列表，裡面會有一個元素列表。",
+      "zh_cn": "result 有一个 contents 列表，里面会有一个元素列表。"
+    },
+    "32": {
+      "en": "We really only care about the very first one.",
+      "zh_tw": "我們只關心第一個。",
+      "zh_cn": "我们只关心第一个。"
+    },
+    "33": {
+      "en": "So I want to get the first dictionary.",
+      "zh_tw": "我要取得第一個字典。",
+      "zh_cn": "我要取得第一个字典。"
+    },
+    "34": {
+      "en": "I want to access the type property and the MIME type.",
+      "zh_tw": "存取 type 屬性和 MIME type。",
+      "zh_cn": "访问 type 属性和 MIME type。"
+    },
+    "35": {
+      "en": "I want specifically the MIME type because it's going to help me understand what kind of data we got back.",
+      "zh_tw": "我特別想要 MIME type，因為它會幫我理解我們得到了什麼類型的資料。",
+      "zh_cn": "我特別想要 MIME type，因为它会幫我理解我们得到了什麼类型的数据。"
+    },
+    "36": {
+      "en": "If it is JSON, then I want to make sure I parse the text as JSON and return that result.",
+      "zh_tw": "如果是 JSON，要確保把文字解析為 JSON 並回傳結果。",
+      "zh_cn": "如果是 JSON，要确保把文字解析为 JSON 並返回结果。"
+    },
+    "37": {
+      "en": "So let me show you how we're going to do that.",
+      "zh_tw": "讓我展示怎麼做。",
+      "zh_cn": "让我展示怎麼做。"
+    },
+    "38": {
+      "en": "I'm going to add in a if is instance of resource types text resource contents.",
+      "zh_tw": "加入 if isinstance，resource 類型是 TextResourceContents。",
+      "zh_cn": "加入 if isinstance，resource 类型是 TextResourceContents。"
+    },
+    "39": {
+      "en": "And inside there, if resource MIME type is equal to application JSON.",
+      "zh_tw": "如果 resource.mime_type == 'application/json'。",
+      "zh_cn": "如果 resource.mime_type == 'application/json'。"
+    },
+    "40": {
+      "en": "So this is our hint in use.",
+      "zh_tw": "這就是我們使用提示的地方。",
+      "zh_cn": "这就是我们使用提示的地方。"
+    },
+    "41": {
+      "en": "If the server told us that it's giving us back some JSON, we need to make sure that we parse the text content as JSON.",
+      "zh_tw": "如果伺服器告訴我們它給的是 JSON，我們需要確保把文字內容解析為 JSON。",
+      "zh_cn": "如果服务器告訴我们它给的是 JSON，我们需要确保把文字內容解析为 JSON。"
+    },
+    "42": {
+      "en": "So I will return in that case a JSON loads of resource dot text.",
+      "zh_tw": "所以 return json.loads(resource.text)。",
+      "zh_cn": "所以 return json.loads(resource.text)。"
+    },
+    "43": {
+      "en": "And then otherwise, if we don't fall into that if statement and return early, I want to just return resource dot text.",
+      "zh_tw": "否則，如果沒有進入那個 if 語句並提前回傳，就直接 return resource.text。",
+      "zh_cn": "否则，如果没有进入那个 if 语句並提前返回，就直接 return resource.text。"
+    },
+    "44": {
+      "en": "So in this scenario, we'd be returning the text as just plain text.",
+      "zh_tw": "在這個情境中，我們會回傳文字作為純文字。",
+      "zh_cn": "在这个情境中，我们会返回文字作为纯文字。"
+    },
+    "45": {
+      "en": "We're not parsing anything.",
+      "zh_tw": "不做任何解析。",
+      "zh_cn": "不做任何解析。"
+    },
+    "46": {
+      "en": "So this would really be the case in which we get back the contents of a single document.",
+      "zh_tw": "這真的就是我們得到單一文件內容的情況。",
+      "zh_cn": "这真的就是我们得到单一文件內容的情況。"
+    },
+    "47": {
+      "en": "All right.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "48": {
+      "en": "So that should really be it.",
+      "zh_tw": "這應該就是了。",
+      "zh_cn": "这应该就是了。"
+    },
+    "49": {
+      "en": "We've got our read resource put together.",
+      "zh_tw": "read_resource 準備好了。",
+      "zh_cn": "read_resource 准备好了。"
+    },
+    "50": {
+      "en": "Now, again, I want to remind you, I know I've said this several times, but I just want to remind you because I think it might be a little bit unclear.",
+      "zh_tw": "我知道我說過好幾次了，但我想提醒你，因為可能有點不清楚。",
+      "zh_cn": "我知道我说过好幾次了，但我想提醒你，因为可能有点不清楚。"
+    },
+    "51": {
+      "en": "The code that we're writing inside of the MCP client is being used from several other places inside of this code base.",
+      "zh_tw": "我們在 MCP 客戶端中寫的程式碼在程式碼庫的其他地方被使用。",
+      "zh_cn": "我们在 MCP 客户端中写的代码在代码庫的其他地方被使用。"
+    },
+    "52": {
+      "en": "So somewhere else in this code base, we're going to be calling that function that we just put together to get the list of document names and then eventually get the contents of a document to put into a prompt.",
+      "zh_tw": "在程式碼庫的其他地方，會呼叫我們剛寫的函式來取得文件名稱列表，最終取得文件內容放入提示詞中。",
+      "zh_cn": "在代码庫的其他地方，会调用我们剛写的函数來取得文件名称列表，最终取得文件內容放入提示词中。"
+    },
+    "53": {
+      "en": "So at this point, everything should essentially work because the rest of the work has already been done for us.",
+      "zh_tw": "所以此時一切應該基本上能運作了，因為其餘的工作已經為我們完成了。",
+      "zh_cn": "所以此时一切应该基本上能运作了，因为其余的工作已经为我们完成了。"
+    },
+    "54": {
+      "en": "So with that in mind, let's go back over to our terminal and we're going to test out our CLI application again and see if this mention feature works.",
+      "zh_tw": "考慮到這一點，回到終端機測試 CLI 應用程式，看看提及功能是否能用。",
+      "zh_cn": "考慮到这一点，回到终端测试 CLI 应用程序，看看提及功能是否能用。"
+    },
+    "55": {
+      "en": "Okay.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "56": {
+      "en": "So back over here, I'll do a UV run main dot pi.",
+      "zh_tw": "回到這裡，跑 uv run main.py。",
+      "zh_cn": "回到这里，跑 uv run main.py。"
+    },
+    "57": {
+      "en": "And now I should be able to say something like what's in the at.",
+      "zh_tw": "現在應該能說像「@裡面有什麼」。",
+      "zh_cn": "现在应该能说像「@里面有什麼」。"
+    },
+    "58": {
+      "en": "And there we go.",
+      "zh_tw": "好了。",
+      "zh_cn": "好了。"
+    },
+    "59": {
+      "en": "I see my list of resources and I can use the arrow key to scroll through.",
+      "zh_tw": "看到資源列表了，可以用方向鍵捲動。",
+      "zh_cn": "看到资源列表了，可以用方向键捲动。"
+    },
+    "60": {
+      "en": "Once I am at a resource I like, I'll just hit space and we'll insert that resource.",
+      "zh_tw": "到了喜歡的資源，按空格插入。",
+      "zh_cn": "到了喜欢的资源，按空格插入。"
+    },
+    "61": {
+      "en": "So what's in the report dot PDF document.",
+      "zh_tw": "report.pdf 文件裡有什麼。",
+      "zh_cn": "report.pdf 文件里有什麼。"
+    },
+    "62": {
+      "en": "And now I can tell you that everything is working as expected here.",
+      "zh_tw": "現在可以告訴你一切正常運作。",
+      "zh_cn": "现在可以告訴你一切正常运作。"
+    },
+    "63": {
+      "en": "In other words, the contents of this document is being sent off to Claude inside of a prompt.",
+      "zh_tw": "換句話說，這個文件的內容正在被送入 Claude 的提示詞中。",
+      "zh_cn": "换句话说，这个文件的內容正在被送入 Claude 的提示词中。"
+    },
+    "64": {
+      "en": "So if I submit this, I should see an immediate response and it's going to tell me what is inside of report PDF.",
+      "zh_tw": "提交後應該看到立即的回應，告訴我 report PDF 裡有什麼。",
+      "zh_cn": "提交后应该看到立即的回应，告訴我 report PDF 里有什麼。"
+    },
+    "65": {
+      "en": "So this time around, Claude did not have to use a tool to read the contents of the document.",
+      "zh_tw": "這次 Claude 不需要使用工具來讀取文件內容。",
+      "zh_cn": "这次 Claude 不需要使用工具來读取文件內容。"
+    }
+  }
+}

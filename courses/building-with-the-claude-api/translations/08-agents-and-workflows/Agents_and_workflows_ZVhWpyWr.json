@@ -1,0 +1,402 @@
+{
+  "srt_file": "Agents_and_workflows_ZVhWpyWr.srt",
+  "video_file": "Agents_and_workflows_ZVhWpyWr.mp4",
+  "max_valid_entry": 79,
+  "entries": {
+    "1": {
+      "en": "In this module, we are going to focus on workflows and agents.",
+      "zh_tw": "在這個模組中，我們將專注於工作流程和代理。",
+      "zh_cn": "在这个模组中，我们将專注於工作流程和代理。"
+    },
+    "2": {
+      "en": "Let's dive in immediately and understand what these things are.",
+      "zh_tw": "讓我們立即深入了解這些東西是什麼。",
+      "zh_cn": "让我们立即深入了解这些東西是什麼。"
+    },
+    "3": {
+      "en": "Workflows and agents are strategies that we use to handle user tasks",
+      "zh_tw": "工作流程和代理是我們用來處理使用者任務的策略，",
+      "zh_cn": "工作流程和代理是我们用來处理使用者任务的策略，"
+    },
+    "4": {
+      "en": "that can't be completed by Claude in a single request.",
+      "zh_tw": "這些任務無法由 Claude 在單一請求中完成。",
+      "zh_cn": "这些任务无法由 Claude 在单一请求中完成。"
+    },
+    "5": {
+      "en": "Believe it or not, you have already been creating workflows and agents throughout this course.",
+      "zh_tw": "信不信由你，你在這門課程中已經在建立工作流程和代理了。",
+      "zh_cn": "信不信由你，你在这门课程中已经在建立工作流程和代理了。"
+    },
+    "6": {
+      "en": "For example, when learning about tools, we fed tasks into Claude",
+      "zh_tw": "例如，在學習工具時，我們向 Claude 輸入任務，",
+      "zh_cn": "例如，在学習工具时，我们向 Claude 输入任务，"
+    },
+    "7": {
+      "en": "and relied upon Claude to figure out how to complete them using some provided tools.",
+      "zh_tw": "並依靠 Claude 用一些提供的工具來找出如何完成它們。",
+      "zh_cn": "並依靠 Claude 用一些提供的工具來找出如何完成它们。"
+    },
+    "8": {
+      "en": "That was an example of an agent.",
+      "zh_tw": "那就是代理的一個例子。",
+      "zh_cn": "那就是代理的一个例子。"
+    },
+    "9": {
+      "en": "Now here's the rule of thumb that we use whenever we are trying to decide",
+      "zh_tw": "現在這裡有一個經驗法則，每當我們試圖決定",
+      "zh_cn": "现在这里有一个经验法则，每当我们试圖决定"
+    },
+    "10": {
+      "en": "whether to create a workflow or an agent.",
+      "zh_tw": "是建立工作流程還是代理時都會使用。",
+      "zh_cn": "是建立工作流程还是代理时都会使用。"
+    },
+    "11": {
+      "en": "If we have a very precise idea of the task we need to complete",
+      "zh_tw": "如果我們對需要完成的任務有非常精確的想法，",
+      "zh_cn": "如果我们对需要完成的任务有非常精确的想法，"
+    },
+    "12": {
+      "en": "and we know the exact series of steps that are used to complete it, we'll use a workflow.",
+      "zh_tw": "而且我們知道完成它所用的確切步驟序列，我們就使用工作流程。",
+      "zh_cn": "而且我们知道完成它所用的确切步驟序列，我们就使用工作流程。"
+    },
+    "13": {
+      "en": "Otherwise, if we're not really sure about the details of a task that Claude needs to solve,",
+      "zh_tw": "否則，如果我們不太確定 Claude 需要解決的任務的細節，",
+      "zh_cn": "否则，如果我们不太确定 Claude 需要解决的任务的细节，"
+    },
+    "14": {
+      "en": "we'll use an agent.",
+      "zh_tw": "我們就使用代理。",
+      "zh_cn": "我们就使用代理。"
+    },
+    "15": {
+      "en": "In this video and the next couple, we're going to be 100% focused on workflows.",
+      "zh_tw": "在這個影片和接下來的幾個影片中，我們將百分之百專注於工作流程。",
+      "zh_cn": "在这个视频和接下來的幾个视频中，我们将百分之百專注於工作流程。"
+    },
+    "16": {
+      "en": "I'm going to show you several examples of workflows,",
+      "zh_tw": "我會展示幾個工作流程的範例，",
+      "zh_cn": "我会展示幾个工作流程的范例，"
+    },
+    "17": {
+      "en": "so let's take a look at our first one right now.",
+      "zh_tw": "讓我們現在就來看看第一個。",
+      "zh_cn": "让我们现在就來看看第一个。"
+    },
+    "18": {
+      "en": "Let's imagine that we are building a small web application.",
+      "zh_tw": "讓我們想像我們正在建構一個小型網頁應用程式。",
+      "zh_cn": "让我们想像我们正在建构一个小型网页应用程序。"
+    },
+    "19": {
+      "en": "The goal of this app is to allow a user to drag and drop an image of some metal part onto the screen.",
+      "zh_tw": "這個應用程式的目標是允許使用者將某個金屬零件的圖片拖放到螢幕上。",
+      "zh_cn": "这个应用程序的目标是允许使用者将某个金属零件的圖片拖放到屏幕上。"
+    },
+    "20": {
+      "en": "We're then going to take that image and then somehow build a 3D model out of it.",
+      "zh_tw": "然後我們要拿那張圖片，以某種方式用它建立一個 3D 模型。",
+      "zh_cn": "然后我们要拿那張圖片，以某种方式用它建立一个 3D 模型。"
+    },
+    "21": {
+      "en": "We're then going to give the user back something called a step file.",
+      "zh_tw": "然後我們會給使用者回傳一個叫做 STEP 檔案的東西。",
+      "zh_cn": "然后我们会给使用者返回一个叫做 STEP 文件的東西。"
+    },
+    "22": {
+      "en": "Now, if you're not familiar with a step file, totally fine.",
+      "zh_tw": "如果你不熟悉 STEP 檔案，完全沒關係。",
+      "zh_cn": "如果你不熟悉 STEP 文件，完全没关係。"
+    },
+    "23": {
+      "en": "Step file is just a industry standard way of communicating or sharing 3D models.",
+      "zh_tw": "STEP 檔案只是一種傳達或分享 3D 模型的產業標準方式。",
+      "zh_cn": "STEP 文件只是一种传达或分享 3D 模型的产業标准方式。"
+    },
+    "24": {
+      "en": "So essentially, we're making a 3D model out of an image.",
+      "zh_tw": "基本上，我們是從圖片製作 3D 模型。",
+      "zh_cn": "基本上，我们是从圖片製作 3D 模型。"
+    },
+    "25": {
+      "en": "Now, even if you are not very familiar with 3D modeling, with a little bit of help and a little bit of time,",
+      "zh_tw": "即使你對 3D 建模不太熟悉，只要有一點幫助和時間，",
+      "zh_cn": "即使你对 3D 建模不太熟悉，只要有一点幫助和时间，"
+    },
+    "26": {
+      "en": "I bet you could figure out a way to implement this application.",
+      "zh_tw": "我相信你能想出一種方法來實作這個應用程式。",
+      "zh_cn": "我相信你能想出一种方法來实作这个应用程序。"
+    },
+    "27": {
+      "en": "Here's how we might do it.",
+      "zh_tw": "以下是我們可能的做法。",
+      "zh_cn": "以下是我们可能的做法。"
+    },
+    "28": {
+      "en": "We might take the image that the user uploaded and feed it into Claude and ask Claude to describe this object in great detail.",
+      "zh_tw": "我們可以把使用者上傳的圖片傳給 Claude，要求 Claude 詳細描述這個物體。",
+      "zh_cn": "我们可以把使用者上传的圖片传给 Claude，要求 Claude 详细描述这个物体。"
+    },
+    "29": {
+      "en": "Then we could take that description, feed it back into Claude separately,",
+      "zh_tw": "然後我們可以把那個描述單獨傳回 Claude，",
+      "zh_cn": "然后我们可以把那个描述单独传回 Claude，"
+    },
+    "30": {
+      "en": "and ask Claude to use a Python library called CADQuery to model the object.",
+      "zh_tw": "要求 Claude 使用一個叫做 CADQuery 的 Python 套件來建模物體。",
+      "zh_cn": "要求 Claude 使用一个叫做 CADQuery 的 Python 套件來建模物体。"
+    },
+    "31": {
+      "en": "CADQuery is a Python library that allows you to do 3D solid modeling,",
+      "zh_tw": "CADQuery 是一個 Python 套件，允許你進行 3D 實體建模，",
+      "zh_cn": "CADQuery 是一个 Python 套件，允许你进行 3D 实体建模，"
+    },
+    "32": {
+      "en": "and then you can output a step file from that process.",
+      "zh_tw": "然後你可以從那個過程中輸出 STEP 檔案。",
+      "zh_cn": "然后你可以从那个过程中输出 STEP 文件。"
+    },
+    "33": {
+      "en": "Now, it's entirely possible that Claude is not going to get this model entirely accurate the first time around.",
+      "zh_tw": "現在，Claude 第一次完全不可能把這個模型做得完全精確。",
+      "zh_cn": "现在，Claude 第一次完全不可能把这个模型做得完全精确。"
+    },
+    "34": {
+      "en": "So once we build out this initial model, we might decide to add in a little error-checking step,",
+      "zh_tw": "所以一旦我們建出這個初始模型，我們可能會決定加入一個小小的錯誤檢查步驟，",
+      "zh_cn": "所以一旦我们建出这个初始模型，我们可能会决定加入一个小小的错误检查步驟，"
+    },
+    "35": {
+      "en": "where we could create a rendering as a plain image,",
+      "zh_tw": "我們可以建立一個純圖片的渲染，",
+      "zh_cn": "我们可以建立一个纯圖片的渲染，"
+    },
+    "36": {
+      "en": "and then feed that image back into Claude and ask it how well this image represents the original image that the user uploaded.",
+      "zh_tw": "然後把那張圖片回傳給 Claude，問它這張圖片和使用者上傳的原始圖片有多相似。",
+      "zh_cn": "然后把那張圖片返回给 Claude，问它这張圖片和使用者上传的原始圖片有多相似。"
+    },
+    "37": {
+      "en": "And if Claude decides that there are major issues in our rendering,",
+      "zh_tw": "如果 Claude 判斷我們的渲染有重大問題，",
+      "zh_cn": "如果 Claude 判断我们的渲染有重大问题，"
+    },
+    "38": {
+      "en": "we can then go back to the second step and ask Claude to attempt to render the part again.",
+      "zh_tw": "我們就可以回到第二步，要求 Claude 再次嘗試渲染零件。",
+      "zh_cn": "我们就可以回到第二步，要求 Claude 再次嘗试渲染零件。"
+    },
+    "39": {
+      "en": "We can then repeat this process over and over again,",
+      "zh_tw": "我們可以一遍又一遍地重複這個過程，",
+      "zh_cn": "我们可以一遍又一遍地重复这个过程，"
+    },
+    "40": {
+      "en": "until hopefully we eventually end up with some kind of accurate model of the original part.",
+      "zh_tw": "直到我們最終得到某種原始零件的精確模型。",
+      "zh_cn": "直到我们最终得到某种原始零件的精确模型。"
+    },
+    "41": {
+      "en": "Now, the important thing to understand here is that this is an entire flow of steps",
+      "zh_tw": "現在，重要的是要理解，這是一整個步驟流程，",
+      "zh_cn": "现在，重要的是要理解，这是一整个步驟流程，"
+    },
+    "42": {
+      "en": "that we can kind of imagine ahead of time.",
+      "zh_tw": "我們可以提前想像出來。",
+      "zh_cn": "我们可以提前想像出來。"
+    },
+    "43": {
+      "en": "We can sit down and design out this entire process.",
+      "zh_tw": "我們可以坐下來設計出整個過程。",
+      "zh_cn": "我们可以坐下來设计出整个过程。"
+    },
+    "44": {
+      "en": "We could easily write out some code to implement it.",
+      "zh_tw": "我們很容易就能寫出一些程式碼來實作它。",
+      "zh_cn": "我们很容易就能写出一些代码來实作它。"
+    },
+    "45": {
+      "en": "As a matter of fact, I have previously implemented something almost exactly like this.",
+      "zh_tw": "事實上，我之前就實作過幾乎完全相同的東西。",
+      "zh_cn": "事实上，我之前就实作过幾乎完全相同的東西。"
+    },
+    "46": {
+      "en": "Because we can explicitly list out and detail all these steps ahead of time,",
+      "zh_tw": "因為我們可以事先明確列出和詳述所有這些步驟，",
+      "zh_cn": "因为我们可以事先明确列出和详述所有这些步驟，"
+    },
+    "47": {
+      "en": "we would refer to this as a workflow.",
+      "zh_tw": "我們將此稱為工作流程。",
+      "zh_cn": "我们将此称为工作流程。"
+    },
+    "48": {
+      "en": "Remember, we define a workflow as a series of calls off to Claude",
+      "zh_tw": "記住，我們將工作流程定義為一系列對 Claude 的呼叫，",
+      "zh_cn": "记住，我们将工作流程定义为一系列对 Claude 的调用，"
+    },
+    "49": {
+      "en": "meant to solve some very specific problem,",
+      "zh_tw": "用來解決某個非常具體的問題，",
+      "zh_cn": "用來解决某个非常具体的问题，"
+    },
+    "50": {
+      "en": "where we really know exactly what those steps are supposed to be ahead of time.",
+      "zh_tw": "而且我們確實事先知道那些步驟應該是什麼。",
+      "zh_cn": "而且我们确实事先知道那些步驟应该是什麼。"
+    },
+    "51": {
+      "en": "This modeling workflow that I've described",
+      "zh_tw": "我所描述的這個建模工作流程",
+      "zh_cn": "我所描述的这个建模工作流程"
+    },
+    "52": {
+      "en": "is an example of something we call an evaluator optimizer.",
+      "zh_tw": "是一個我們稱之為評估器-最佳化器的範例。",
+      "zh_cn": "是一个我们称之为评估器-最佳化器的范例。"
+    },
+    "53": {
+      "en": "The idea behind this workflow is that we push some input into something called a producer.",
+      "zh_tw": "這個工作流程背後的想法是我們把一些輸入推送到一個叫做生產者的東西中。",
+      "zh_cn": "这个工作流程背后的想法是我们把一些输入推送到一个叫做生产者的東西中。"
+    },
+    "54": {
+      "en": "In our case, the producer is Claude,",
+      "zh_tw": "在我們的情況中，生產者就是 Claude，",
+      "zh_cn": "在我们的情況中，生产者就是 Claude，"
+    },
+    "55": {
+      "en": "using the CAD query library to model a part and then creating a rendering out of it.",
+      "zh_tw": "使用 CADQuery 套件來建模零件，然後建立一個渲染。",
+      "zh_cn": "使用 CADQuery 套件來建模零件，然后建立一个渲染。"
+    },
+    "56": {
+      "en": "This output, the rendering, is fed into something called a grader.",
+      "zh_tw": "這個輸出——渲染——被傳入一個叫做評分器的東西。",
+      "zh_cn": "这个输出——渲染——被传入一个叫做评分器的東西。"
+    },
+    "57": {
+      "en": "The grader will look at the output and decide if it meets some criteria.",
+      "zh_tw": "評分器會查看輸出並決定它是否符合某些標準。",
+      "zh_cn": "评分器会查看输出並决定它是否符合某些标准。"
+    },
+    "58": {
+      "en": "If it does, then the workflow ends.",
+      "zh_tw": "如果符合，工作流程就結束了。",
+      "zh_cn": "如果符合，工作流程就结束了。"
+    },
+    "59": {
+      "en": "Otherwise, if the output doesn't meet some criteria,",
+      "zh_tw": "否則，如果輸出不符合某些標準，",
+      "zh_cn": "否则，如果输出不符合某些标准，"
+    },
+    "60": {
+      "en": "feedback is given back into the producer,",
+      "zh_tw": "回饋會被傳回生產者，",
+      "zh_cn": "反馈会被传回生产者，"
+    },
+    "61": {
+      "en": "which gets an opportunity to improve the output in some way.",
+      "zh_tw": "它有機會以某種方式改進輸出。",
+      "zh_cn": "它有机会以某种方式改进输出。"
+    },
+    "62": {
+      "en": "This cycle is then going to keep on repeating",
+      "zh_tw": "這個循環會持續重複，",
+      "zh_cn": "这个循环会持续重复，"
+    },
+    "63": {
+      "en": "until eventually the grader accepts the output.",
+      "zh_tw": "直到最終評分器接受輸出。",
+      "zh_cn": "直到最终评分器接受输出。"
+    },
+    "64": {
+      "en": "Now, at this point in time,",
+      "zh_tw": "現在，到目前為止，",
+      "zh_cn": "现在，到目前为止，"
+    },
+    "65": {
+      "en": "you've probably got a somewhat reasonable idea",
+      "zh_tw": "你大概已經對這個評估器-最佳化器有了相當合理的概念。",
+      "zh_cn": "你大概已经对这个评估器-最佳化器有了相当合理的概念。"
+    },
+    "66": {
+      "en": "of what this evaluator optimizer thing is all about.",
+      "zh_tw": "但你可能在想，",
+      "zh_cn": "但你可能在想，"
+    },
+    "67": {
+      "en": "But you're probably wondering,",
+      "zh_tw": "好吧，這些工作流程到底是怎麼一回事？",
+      "zh_cn": "好吧，这些工作流程到底是怎麼一回事？"
+    },
+    "68": {
+      "en": "okay, what exactly is going on with these workflows?",
+      "zh_tw": "所以有一件事我想在這裡快速澄清一下。",
+      "zh_cn": "所以有一件事我想在这里快速澄清一下。"
+    },
+    "69": {
+      "en": "So there's just something I want to clarify here really quickly.",
+      "zh_tw": "識別工作流程本身並不會真正為我們帶來什麼。",
+      "zh_cn": "识別工作流程本身並不会真正为我们帶來什麼。"
+    },
+    "70": {
+      "en": "Identifying workflows doesn't really inherently do anything for us.",
+      "zh_tw": "我們仍然必須寫下並寫出實際的程式碼來實作這些東西。",
+      "zh_cn": "我们仍然必须写下並写出实际的代码來实作这些東西。"
+    },
+    "71": {
+      "en": "We still have to write down and write out the actual code to implement these things.",
+      "zh_tw": "我們討論工作流程的唯一原因，",
+      "zh_cn": "我们討论工作流程的唯一原因，"
+    },
+    "72": {
+      "en": "The only reason that we are discussing workflows",
+      "zh_tw": "以及你會看到工作流程成為熱門討論主題的原因，",
+      "zh_cn": "以及你会看到工作流程成为熱门討论主题的原因，"
+    },
+    "73": {
+      "en": "and the reason that you're going to see workflows as a popular discussion topic",
+      "zh_tw": "是許多其他工程師已經使用",
+      "zh_cn": "是许多其他工程師已经使用"
+    },
+    "74": {
+      "en": "is that many other engineers have implemented workflows",
+      "zh_tw": "這些完全相同的模式實作了工作流程，並取得了很大的成功。",
+      "zh_cn": "这些完全相同的模式实作了工作流程，並取得了很大的成功。"
+    },
+    "75": {
+      "en": "using these exact same patterns and found a lot of success.",
+      "zh_tw": "所以我展示這些不同工作流程的原因",
+      "zh_cn": "所以我展示这些不同工作流程的原因"
+    },
+    "76": {
+      "en": "So the reason I'm showing you these different workflows",
+      "zh_tw": "是讓你能在自己的專案中使用這些相同的模式，",
+      "zh_cn": "是让你能在自己的项目中使用这些相同的模式，"
+    },
+    "77": {
+      "en": "is so that you can use these same patterns on your own projects",
+      "zh_tw": "並希望能取得一些成功，",
+      "zh_cn": "並希望能取得一些成功，"
+    },
+    "78": {
+      "en": "and hopefully find some success with them",
+      "zh_tw": "因為它們對其他工程師確實效果很好。",
+      "zh_cn": "因为它们对其他工程師确实效果很好。"
+    },
+    "79": {
+      "en": "because they have worked well for other engineers.",
+      "zh_tw": "因為它們對其他工程師確實效果很好。",
+      "zh_cn": "因为它们对其他工程師确实效果很好。"
+    }
+  }
+}

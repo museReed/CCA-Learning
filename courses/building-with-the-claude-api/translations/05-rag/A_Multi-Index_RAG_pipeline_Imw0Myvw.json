@@ -1,0 +1,372 @@
+{
+  "srt_file": "A_Multi-Index_RAG_pipeline_Imw0Myvw.srt",
+  "video_file": "A_Multi-Index_RAG_pipeline_Imw0Myvw.mp4",
+  "max_valid_entry": 73,
+  "entries": {
+    "1": {
+      "en": "We now have an implementation for semantic search and an implementation for lexical search. So now",
+      "zh_tw": "我們現在有了語義搜尋的實作和詞彙搜尋的實作。所以現在",
+      "zh_cn": "我们现在有了语义搜尋的实作和词彙搜尋的实作。所以现在"
+    },
+    "2": {
+      "en": "we need to wire these things up together. Let me show you how we're going to do that. The first",
+      "zh_tw": "我們需要把這些東西串接在一起。讓我告訴你我們要怎麼做。首先",
+      "zh_cn": "我们需要把这些東西串接在一起。让我告訴你我们要怎麼做。首先"
+    },
+    "3": {
+      "en": "thing to notice is that the implementation for both these searching functionalities have the",
+      "zh_tw": "要注意的是，這兩種搜尋功能的實作具有",
+      "zh_cn": "要注意的是，这兩种搜尋功能的实作具有"
+    },
+    "4": {
+      "en": "almost exact same public API. So we have a vector index class on the left hand side that has methods",
+      "zh_tw": "幾乎完全相同的公開 API。左邊我們有一個 vector index 類別，有像",
+      "zh_cn": "幾乎完全相同的公开 API。左边我们有一个 vector index 类別，有像"
+    },
+    "5": {
+      "en": "like add document and search. And we have almost identical methods inside of our BM25 index as well.",
+      "zh_tw": "add document 和 search 這樣的方法。在我們的 BM25 index 裡面也有幾乎相同的方法。",
+      "zh_cn": "add document 和 search 这样的方法。在我们的 BM25 index 里面也有幾乎相同的方法。"
+    },
+    "6": {
+      "en": "So to connect these two things together into a single search pipeline, we're going to wrap them",
+      "zh_tw": "為了把這兩個東西連接成一個單一的搜尋管線，我們要把它們",
+      "zh_cn": "为了把这兩个東西连接成一个单一的搜尋管线，我们要把它们"
+    },
+    "7": {
+      "en": "up inside of a new class that we will call retriever. This retriever is going to receive a user's question",
+      "zh_tw": "包裝在一個新的類別裡，我們叫它 retriever。這個 retriever 會接收使用者的問題，",
+      "zh_cn": "包装在一个新的类別里，我们叫它 retriever。这个 retriever 会接收使用者的问题，"
+    },
+    "8": {
+      "en": "and then forward it on to the search methods of vector index and BM25 index. The retriever will",
+      "zh_tw": "然後轉發給 vector index 和 BM25 index 的搜尋方法。retriever 接著",
+      "zh_cn": "然后转发给 vector index 和 BM25 index 的搜尋方法。retriever 接著"
+    },
+    "9": {
+      "en": "then receive the results from both them and figure out some way of actually merging the results together.",
+      "zh_tw": "會從兩者接收結果，然後想出某種方式來實際合併結果。",
+      "zh_cn": "会从兩者接收结果，然后想出某种方式來实际合併结果。"
+    },
+    "10": {
+      "en": "Now it turns out that the merge operation is actually a little bit tricky. So I want to go",
+      "zh_tw": "事實上，合併操作其實有點棘手。所以我想",
+      "zh_cn": "事实上，合併操作其实有点棘手。所以我想"
+    },
+    "11": {
+      "en": "into a little bit of detail on how you can merge results that are coming out of these different",
+      "zh_tw": "詳細說明一下如何合併來自不同",
+      "zh_cn": "详细说明一下如何合併來自不同"
+    },
+    "12": {
+      "en": "search methodologies. To combine the results together, we're going to use a technique known",
+      "zh_tw": "搜尋方法的結果。為了合併結果，我們要使用一種叫做",
+      "zh_cn": "搜尋方法的结果。为了合併结果，我们要使用一种叫做"
+    },
+    "13": {
+      "en": "as reciprocal rank fusion. The easiest way to understand this technique is to go through an",
+      "zh_tw": "倒數排名融合的技術。理解這個技術最簡單的方式是走過一個",
+      "zh_cn": "倒数排名融合的技术。理解这个技术最简单的方式是走过一个"
+    },
+    "14": {
+      "en": "example. So let's do that right now. Let's imagine that we run a search on the vector index and we get",
+      "zh_tw": "例子。讓我們現在就做。想像我們在 vector index 上執行搜尋，得到",
+      "zh_cn": "例子。让我们现在就做。想像我们在 vector index 上执行搜尋，得到"
+    },
+    "15": {
+      "en": "outputs of section two, seven, and then six. And then we do the same exact search on BM25 and we get",
+      "zh_tw": "section two、seven、然後 six 的輸出。然後我們在 BM25 上做同樣的搜尋，得到",
+      "zh_cn": "section two、seven、然后 six 的输出。然后我们在 BM25 上做同样的搜尋，得到"
+    },
+    "16": {
+      "en": "six, two, and seven. So now we need to take these two lists of results and combine them together in",
+      "zh_tw": "six、two 和 seven。現在我們需要把這兩個結果列表以某種方式",
+      "zh_cn": "six、two 和 seven。现在我们需要把这兩个结果列表以某种方式"
+    },
+    "17": {
+      "en": "some way. To do so, I'm going to take all the search results and put them together on a single",
+      "zh_tw": "合併在一起。為此，我要把所有搜尋結果放在一個",
+      "zh_cn": "合併在一起。为此，我要把所有搜尋结果放在一个"
+    },
+    "18": {
+      "en": "table like so. So now I've got text chunk two, seven, and six, and I've recorded the rank from the",
+      "zh_tw": "表格上。現在我有 text chunk two、seven 和 six，我記錄了來自",
+      "zh_cn": "表格上。现在我有 text chunk two、seven 和 six，我记录了來自"
+    },
+    "19": {
+      "en": "vector index output and the rank from the BM25 index output. And to be clear, when I'm talking about",
+      "zh_tw": "vector index 輸出的排名和來自 BM25 index 輸出的排名。要清楚，當我說",
+      "zh_cn": "vector index 输出的排名和來自 BM25 index 输出的排名。要清楚，当我说"
+    },
+    "20": {
+      "en": "rank, I just mean kind of search output position. So rank one, two, three, rank one, two, three. I'm just",
+      "zh_tw": "排名時，我只是指搜尋輸出的位置。所以排名一、二、三，排名一、二、三。我只是",
+      "zh_cn": "排名时，我只是指搜尋输出的位置。所以排名一、二、三，排名一、二、三。我只是"
+    },
+    "21": {
+      "en": "kind of putting those same exact numbers on this chart down here. Once I have all those ranks in",
+      "zh_tw": "把那些相同的數字放在下面的圖表上。一旦我把所有排名",
+      "zh_cn": "把那些相同的数字放在下面的圖表上。一旦我把所有排名"
+    },
+    "22": {
+      "en": "place, I'm then going to apply a formula. Here's the exact formula right here. And I know it looks",
+      "zh_tw": "就位，我就要套用一個公式。確切的公式在這裡。我知道它看起來",
+      "zh_cn": "就位，我就要套用一个公式。确切的公式在这里。我知道它看起來"
+    },
+    "23": {
+      "en": "really terrible, but don't worry. It's not as complicated as it looks. Here's how it works",
+      "zh_tw": "很可怕，但別擔心。它沒有看起來那麼複雜。它是這樣運作的，",
+      "zh_cn": "很可怕，但別担心。它没有看起來那麼复杂。它是这样运作的，"
+    },
+    "24": {
+      "en": "for every rank column we have. So like that column right there and that column right there,",
+      "zh_tw": "對於我們有的每個排名欄。像是那個欄和那個欄，",
+      "zh_cn": "对於我们有的每个排名欄。像是那个欄和那个欄，"
+    },
+    "25": {
+      "en": "we're going to write out a separate term. So here's the term for the first column. Here's the term for",
+      "zh_tw": "我們要寫出一個獨立的項。所以這是第一欄的項。這是",
+      "zh_cn": "我们要写出一个独立的项。所以这是第一欄的项。这是"
+    },
+    "26": {
+      "en": "the second column. In the first term, we're going to write out one over one plus whatever number is",
+      "zh_tw": "第二欄的項。在第一項中，我們寫出 1 除以 1 加上那裡的任何數字。",
+      "zh_cn": "第二欄的项。在第一项中，我们写出 1 除以 1 加上那里的任何数字。"
+    },
+    "27": {
+      "en": "right there. So we end up with one over one plus one. And then the second term will be one over one",
+      "zh_tw": "所以我們得到 1/(1+1)。然後第二項是 1 除以 1",
+      "zh_cn": "所以我们得到 1/(1+1)。然后第二项是 1 除以 1"
+    },
+    "28": {
+      "en": "plus whatever number is right there. So one over one plus two. Once we have calculated the score for",
+      "zh_tw": "加上那裡的任何數字。所以是 1/(1+2)。一旦我們計算出每個 text chunk 的分數，",
+      "zh_cn": "加上那里的任何数字。所以是 1/(1+2)。一旦我们计算出每个 text chunk 的分数，"
+    },
+    "29": {
+      "en": "each text chunk, we're then going to sort the table based upon the score from greatest to least.",
+      "zh_tw": "我們就要根據分數從大到小排序表格。",
+      "zh_cn": "我们就要根据分数从大到小排序表格。"
+    },
+    "30": {
+      "en": "So we would end up with something like this. So we'd end up with text chunk for section two as being",
+      "zh_tw": "所以我們最終會得到像這樣的結果。section two 會是",
+      "zh_cn": "所以我们最终会得到像这样的结果。section two 会是"
+    },
+    "31": {
+      "en": "the most relevant search result. Section six would be the second most and section seven will be the",
+      "zh_tw": "最相關的搜尋結果。Section six 會是第二相關的，section seven 會是",
+      "zh_cn": "最相关的搜尋结果。Section six 会是第二相关的，section seven 会是"
+    },
+    "32": {
+      "en": "least relevant. And this kind of makes sense. We can kind of visually confirm that these outputs",
+      "zh_tw": "最不相關的。這某種程度上是合理的。我們可以視覺上確認這些輸出",
+      "zh_cn": "最不相关的。这某种程度上是合理的。我们可以視覺上确认这些输出"
+    },
+    "33": {
+      "en": "make sense. If you just look at the individual rank outputs from each search methodology. So section two",
+      "zh_tw": "是合理的。如果你看看每個搜尋方法的個別排名輸出。Section two",
+      "zh_cn": "是合理的。如果你看看每个搜尋方法的个別排名输出。Section two"
+    },
+    "34": {
+      "en": "was rank one and two. That means, hey, in general, it's trending up towards the top. Section six is one",
+      "zh_tw": "是排名一和二。表示它整體趨向頂部。Section six 是一",
+      "zh_cn": "是排名一和二。表示它整体趋向頂部。Section six 是一"
+    },
+    "35": {
+      "en": "and three. That's kind of like in the middle. It has a good score and a bad score. And then section seven",
+      "zh_tw": "和三。那有點在中間。有好的分數和不好的分數。然後 section seven",
+      "zh_cn": "和三。那有点在中间。有好的分数和不好的分数。然后 section seven"
+    },
+    "36": {
+      "en": "is two and three. And so it trends down towards the bottom. So with a visual inspection, the results,",
+      "zh_tw": "是二和三。所以它趨向底部。用視覺檢查，結果",
+      "zh_cn": "是二和三。所以它趋向底部。用視覺检查，结果"
+    },
+    "37": {
+      "en": "I think do make a decent amount of sense. All right, so now that we understand how we're going to combine",
+      "zh_tw": "我覺得相當合理。好的，現在我們理解了如何合併",
+      "zh_cn": "我覺得相当合理。好的，现在我们理解了如何合併"
+    },
+    "38": {
+      "en": "the results together, let's go back over to our Jupyter notebook. And we're going to take a look at a",
+      "zh_tw": "結果，讓我們回到 Jupyter 筆記本。我們要看一下",
+      "zh_cn": "结果，让我们回到 Jupyter 笔记本。我们要看一下"
+    },
+    "39": {
+      "en": "sample implementation of a retriever class, and a sample implementation of merging the results.",
+      "zh_tw": "retriever 類別的範例實作和合併結果的範例實作。",
+      "zh_cn": "retriever 类別的范例实作和合併结果的范例实作。"
+    },
+    "40": {
+      "en": "Okay, so back over here, I move on to the next notebook, which is 005 hybrid. Once again,",
+      "zh_tw": "好的，回到這裡，我移到下一個筆記本，是 005 hybrid。同樣，",
+      "zh_cn": "好的，回到这里，我移到下一个笔记本，是 005 hybrid。同样，"
+    },
+    "41": {
+      "en": "there's a lot of setup up here. So I've got the vector database implementation, the BM25 implementation,",
+      "zh_tw": "上面有很多設定。我有向量資料庫實作、BM25 實作，",
+      "zh_cn": "上面有很多设定。我有向量数据库实作、BM25 实作，"
+    },
+    "42": {
+      "en": "and now I've added in a implementation for the retriever class as well. The retriever has method",
+      "zh_tw": "現在我也加入了 retriever 類別的實作。Retriever 有",
+      "zh_cn": "现在我也加入了 retriever 类別的实作。Retriever 有"
+    },
+    "43": {
+      "en": "of add document. And if you call add document, it's just going to take whatever document you pass in",
+      "zh_tw": "add document 方法。如果你呼叫 add document，它只會把你傳入的任何文件",
+      "zh_cn": "add document 方法。如果你调用 add document，它只会把你传入的任何文件"
+    },
+    "44": {
+      "en": "and pass it off to each of the different indexes that are contained inside the retriever. So in our",
+      "zh_tw": "傳遞給 retriever 裡面包含的每個不同的索引。在我們的",
+      "zh_cn": "传遞给 retriever 里面包含的每个不同的索引。在我们的"
+    },
+    "45": {
+      "en": "case, our indexes are the vector index and the BM25 index. Then the retriever also has a search",
+      "zh_tw": "例子中，索引是 vector index 和 BM25 index。然後 retriever 也有一個 search",
+      "zh_cn": "例子中，索引是 vector index 和 BM25 index。然后 retriever 也有一个 search"
+    },
+    "46": {
+      "en": "function. If you pass in some query text to it, that query text will be passed off to each of the",
+      "zh_tw": "函式。如果你傳入某個查詢文字，那個查詢文字會被傳遞給",
+      "zh_cn": "函数。如果你传入某个查询文字，那个查询文字会被传遞给"
+    },
+    "47": {
+      "en": "different indexes that are contained inside the retriever. We then take all the results that come",
+      "zh_tw": "retriever 裡面包含的每個不同的索引。然後我們把所有回來的結果",
+      "zh_cn": "retriever 里面包含的每个不同的索引。然后我们把所有回來的结果"
+    },
+    "48": {
+      "en": "back and combine them together. So here's the merge logic that implements that reciprocal rank fusion.",
+      "zh_tw": "合併在一起。這裡是實作倒數排名融合的合併邏輯。",
+      "zh_cn": "合併在一起。这里是实作倒数排名融合的合併逻輯。"
+    },
+    "49": {
+      "en": "All right, so time to do a little test here. Now I want you to recall what led us down this entire",
+      "zh_tw": "好的，是時候做個小測試了。現在我要你回想一下，是什麼讓我們走上整條",
+      "zh_cn": "好的，是时候做个小测试了。现在我要你回想一下，是什麼让我们走上整条"
+    },
+    "50": {
+      "en": "path was back on our vector database implementation. So this notebook over here, we found that if we",
+      "zh_tw": "路的，是回到我們的向量資料庫實作。這裡的這個筆記本，我們發現如果我們",
+      "zh_cn": "路的，是回到我们的向量数据库实作。这里的这个笔记本，我们发现如果我们"
+    },
+    "51": {
+      "en": "search for something like what happened with incident 2023, we got back some unexpected results",
+      "zh_tw": "搜尋像 what happened with incident 2023 這樣的東西，我們得到了一些意想不到的結果，",
+      "zh_cn": "搜尋像 what happened with incident 2023 这样的東西，我们得到了一些意想不到的结果，"
+    },
+    "52": {
+      "en": "where we had section 10, which was good as the first result. And then section three was the second",
+      "zh_tw": "section 10 作為第一個結果是好的。然後 section three 是第二個",
+      "zh_cn": "section 10 作为第一个结果是好的。然后 section three 是第二个"
+    },
+    "53": {
+      "en": "result. And that was really unexpected. We want that second result to be software engineering.",
+      "zh_tw": "結果。那真的很出乎意料。我們希望第二個結果是 software engineering。",
+      "zh_cn": "结果。那真的很出乎意料。我们希望第二个结果是 software engineering。"
+    },
+    "54": {
+      "en": "So when we now run this hybrid approach that combines together multiple different indexes,",
+      "zh_tw": "當我們現在執行這個結合多個不同索引的混合方法時，",
+      "zh_cn": "当我们现在执行这个结合多个不同索引的混合方法时，"
+    },
+    "55": {
+      "en": "my hope is that we're going to get first section 10 and then whatever section the software engineering",
+      "zh_tw": "我希望我們會先得到 section 10，然後是 software engineering",
+      "zh_cn": "我希望我们会先得到 section 10，然后是 software engineering"
+    },
+    "56": {
+      "en": "one is. I think it's section two. So let's test this out inside of our new notebook. I'm going to go",
+      "zh_tw": "的那個章節。我覺得是 section two。讓我們在新筆記本中測試。我要到",
+      "zh_cn": "的那个章节。我覺得是 section two。让我们在新笔记本中测试。我要到"
+    },
+    "57": {
+      "en": "down to the bottom and I'll do a results is retriever search. What happened with incident 2023",
+      "zh_tw": "底部，做 results = retriever.search('What happened with incident 2023",
+      "zh_cn": "底部，做 results = retriever.search('What happened with incident 2023"
+    },
+    "58": {
+      "en": "Q4 0 1 1 1. And I'm going to get the first three search results. And then once again, I'm going to print",
+      "zh_tw": "Q4 0 1 1 1')。我要取前三個搜尋結果。然後同樣，我要印出",
+      "zh_cn": "Q4 0 1 1 1')。我要取前三个搜尋结果。然后同样，我要印出"
+    },
+    "59": {
+      "en": "them all out like so, and I'll do the score, a new line, the content of the document, but just the",
+      "zh_tw": "它們，顯示 score、換行、文件內容但只有前",
+      "zh_cn": "它们，显示 score、换行、文件內容但只有前"
+    },
+    "60": {
+      "en": "first 200 lines, and then just a little separator between each chunk. So I'm going to run this",
+      "zh_tw": "200 行，然後每個區塊之間加個分隔符號。我執行這個，",
+      "zh_cn": "200 行，然后每个区块之间加个分隔符号。我执行这个，"
+    },
+    "61": {
+      "en": "and now we get a, some much better search results than what we had before. So I've got section 10",
+      "zh_tw": "現在我們得到了比之前好得多的搜尋結果。我得到 section 10，",
+      "zh_cn": "现在我们得到了比之前好得多的搜尋结果。我得到 section 10，"
+    },
+    "62": {
+      "en": "and then section two, exactly what we wanted. And then section five, but that one's not super relevant",
+      "zh_tw": "然後 section two，完全是我們想要的。然後 section five，但那個不是很相關。",
+      "zh_cn": "然后 section two，完全是我们想要的。然后 section five，但那个不是很相关。"
+    },
+    "63": {
+      "en": "here. So we now have a much better output by combining together these two different search",
+      "zh_tw": "所以我們現在通過結合這兩種不同的搜尋技術得到了好得多的輸出。",
+      "zh_cn": "所以我们现在通过结合这兩种不同的搜尋技术得到了好得多的输出。"
+    },
+    "64": {
+      "en": "techniques. And the nice thing about this is we were able to author each of these indexes kind of",
+      "zh_tw": "而且好的一點是我們可以各自獨立地撰寫每個索引。",
+      "zh_cn": "而且好的一点是我们可以各自独立地撰写每个索引。"
+    },
+    "65": {
+      "en": "in isolation. They're their own separate classes. And because we made each implementation have the",
+      "zh_tw": "它們是各自獨立的類別。因為我們讓每個實作有",
+      "zh_cn": "它们是各自独立的类別。因为我们让每个实作有"
+    },
+    "66": {
+      "en": "same exact API with that search function and the add document function, we were able to easily wrap",
+      "zh_tw": "完全相同的 API，有 search 函式和 add document 函式，我們可以輕鬆地",
+      "zh_cn": "完全相同的 API，有 search 函数和 add document 函数，我们可以轻鬆地"
+    },
+    "67": {
+      "en": "them up into this larger retriever class. So if we wanted to, we could absolutely add in some",
+      "zh_tw": "把它們包裝在這個更大的 retriever 類別中。所以如果我們想的話，我們絕對可以再加入某個",
+      "zh_cn": "把它们包装在这个更大的 retriever 类別中。所以如果我们想的话，我们绝对可以再加入某个"
+    },
+    "68": {
+      "en": "additional search index here that maybe implements some other completely different searching",
+      "zh_tw": "額外的搜尋索引，也許實作某種完全不同的搜尋",
+      "zh_cn": "额外的搜尋索引，也许实作某种完全不同的搜尋"
+    },
+    "69": {
+      "en": "functionality. And as long as it has that search function and the add document function, we can very",
+      "zh_tw": "功能。只要它有 search 函式和 add document 函式，我們可以很",
+      "zh_cn": "功能。只要它有 search 函数和 add document 函数，我们可以很"
+    },
+    "70": {
+      "en": "easily add it, have it generate some results and then merge the results along with the results coming",
+      "zh_tw": "容易地加入它，讓它產生一些結果，然後把結果跟來自",
+      "zh_cn": "容易地加入它，让它产生一些结果，然后把结果跟來自"
+    },
+    "71": {
+      "en": "from the other search methodologies as well. Okay. So let's say this is a good success, but we're not",
+      "zh_tw": "其他搜尋方法的結果一起合併。好的。這算是一個成功，但我們還沒有",
+      "zh_cn": "其他搜尋方法的结果一起合併。好的。这算是一个成功，但我们还没有"
+    },
+    "72": {
+      "en": "quite done yet. There's still some other techniques that we're going to go over to improve the accuracy",
+      "zh_tw": "完全完成。還有一些其他技術我們要介紹，來改善",
+      "zh_cn": "完全完成。还有一些其他技术我们要介绍，來改善"
+    },
+    "73": {
+      "en": "of our rag pipeline.",
+      "zh_tw": "我們 RAG 管線的準確性。",
+      "zh_cn": "我们 RAG 管线的准确性。"
+    }
+  }
+}

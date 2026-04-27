@@ -1,0 +1,507 @@
+{
+  "srt_file": "The_text_edit_tool_fFoetGxi.srt",
+  "video_file": "The_text_edit_tool_fFoetGxi.mp4",
+  "max_valid_entry": 100,
+  "entries": {
+    "1": {
+      "en": "As we saw earlier on inside this module, usually you and I as developers author all the different",
+      "zh_tw": "如同在本模組中稍早看到的，通常是我們開發者撰寫所有要",
+      "zh_cn": "如同在本模组中稍早看到的，通常是我们开发者撰写所有要"
+    },
+    "2": {
+      "en": "tools that we want to pass off to Claude. But there is one tool that Claude has access to",
+      "zh_tw": "傳給 Claude 的工具。但有一個工具 Claude 預設就可以使用。",
+      "zh_cn": "传给 Claude 的工具。但有一个工具 Claude 默认就可以使用。"
+    },
+    "3": {
+      "en": "by default. This is called the Text Editor tool, and it is built directly into Claude.",
+      "zh_tw": "這叫做 Text Editor 工具，它直接內建在 Claude 中。",
+      "zh_cn": "这叫做 Text Editor 工具，它直接內建在 Claude 中。"
+    },
+    "4": {
+      "en": "This tool gives Claude a wide variety of abilities related to just about everything you can do",
+      "zh_tw": "這個工具給了 Claude 大量與標準文字編輯器中所有功能相關的能力。例如，這個工具讓 Claude 能夠開啟",
+      "zh_cn": "这个工具给了 Claude 大量与标准文字编輯器中所有功能相关的能力。例如，这个工具让 Claude 能够开啟"
+    },
+    "5": {
+      "en": "inside of a standard text editor. So for example, this tool gives Claude the ability to open up",
+      "zh_tw": "檔案或目錄並讀取內容。它可以查看檔案中特定範圍的",
+      "zh_cn": "文件或目录並读取內容。它可以查看文件中特定范圍的"
+    },
+    "6": {
+      "en": "files or directories and read the contents. It can take a look at specific ranges of text inside",
+      "zh_tw": "文字。它可以新增或替換檔案中的文字。它可以建立新檔案。它可以復原，",
+      "zh_cn": "文字。它可以新增或替换文件中的文字。它可以建立新文件。它可以复原，"
+    },
+    "7": {
+      "en": "of a file. It can add or replace text inside of a file. It can make new files. It can do undo,",
+      "zh_tw": "基本上就是你在普通文字編輯器中會做的一切。這大幅擴展了",
+      "zh_cn": "基本上就是你在普通文字编輯器中会做的一切。这大幅扩展了"
+    },
+    "8": {
+      "en": "essentially everything you would do inside of a normal text editor. So this dramatically expands",
+      "zh_tw": "Claude 的能力，幾乎一開始就給了 Claude 作為軟體",
+      "zh_cn": "Claude 的能力，幾乎一开始就给了 Claude 作为软件"
+    },
+    "9": {
+      "en": "Claude's abilities and almost right out of the gate kind of gives Claude the ability to act as a software",
+      "zh_tw": "工程師的能力。理解 Text Editor 工具有點讓人困惑，所以我想帶你",
+      "zh_cn": "工程師的能力。理解 Text Editor 工具有点让人困惑，所以我想帶你"
+    },
+    "10": {
+      "en": "engineer. Now understanding the Text Editor tool is just a little bit confusing, so I want to walk",
+      "zh_tw": "看幾張圖，為你說明這個工具做了什麼以及我們",
+      "zh_cn": "看幾張圖，为你说明这个工具做了什麼以及我们"
+    },
+    "11": {
+      "en": "you through a couple of different diagrams and clarify what this tool does for you and what you",
+      "zh_tw": "要怎麼在專案中使用它。首先要理解的是",
+      "zh_cn": "要怎麼在项目中使用它。首先要理解的是"
+    },
+    "12": {
+      "en": "and I have to do to actually make use of it inside of a project. So the first thing to understand here",
+      "zh_tw": "只有 JSON Schema 部分是真正內建在 Claude 中的。讓我說明是什麼意思。",
+      "zh_cn": "只有 JSON Schema 部分是真正內建在 Claude 中的。让我说明是什麼意思。"
+    },
+    "13": {
+      "en": "is that only the JSON schema part is actually built into Claude. And let me clarify what I mean by that.",
+      "zh_tw": "記住當我們要使用工具時，真的要撰寫兩個不同的東西。",
+      "zh_cn": "记住当我们要使用工具时，真的要撰写兩个不同的東西。"
+    },
+    "14": {
+      "en": "Remember that when we want to make use of tools, we really have to author two separate things.",
+      "zh_tw": "首先在左邊，要寫出 JSON Schema 規格。這會提供給",
+      "zh_cn": "首先在左边，要写出 JSON Schema 规格。这会提供给"
+    },
+    "15": {
+      "en": "First, on the left-hand side, we have to write out that JSON schema spec. This gets provided off to",
+      "zh_tw": "Claude，告訴它可以使用的工具和",
+      "zh_cn": "Claude，告訴它可以使用的工具和"
+    },
+    "16": {
+      "en": "Claude and tells Claude about some tool that it can make use of and all the different arguments that",
+      "zh_tw": "工具需要的不同參數。然後在右邊，你和我要寫出工具函式",
+      "zh_cn": "工具需要的不同参数。然后在右边，你和我要写出工具函数"
+    },
+    "17": {
+      "en": "the tool requires. And then on the right-hand side, you and I had to write out a tool function",
+      "zh_tw": "實作來配對 JSON Schema。這些是在我們",
+      "zh_cn": "实作來配对 JSON Schema。这些是在我们"
+    },
+    "18": {
+      "en": "implementation to pair up with that JSON schema. These were actual functions implemented inside of",
+      "zh_tw": "程式碼庫中實作的實際函式，會在 Claude 想用工具時被呼叫。所以",
+      "zh_cn": "代码庫中实作的实际函数，会在 Claude 想用工具时被调用。所以"
+    },
+    "19": {
+      "en": "our code base that would be called at some point in time when Claude wanted to use our tool. So we",
+      "zh_tw": "真的需要寫兩邊。JSON Schema 和工具函式",
+      "zh_cn": "真的需要写兩边。JSON Schema 和工具函数"
+    },
+    "20": {
+      "en": "really had to write both sides here. We had to do both the JSON schema and the tool function",
+      "zh_tw": "實作。使用 text editor 工具時，唯一",
+      "zh_cn": "实作。使用 text editor 工具时，唯一"
+    },
+    "21": {
+      "en": "implementation. So when we make use of the text editor tool, the only thing that is actually kind",
+      "zh_tw": "已提供或內建在 Claude 中的是 JSON Schema，那組告訴 Claude",
+      "zh_cn": "已提供或內建在 Claude 中的是 JSON Schema，那组告訴 Claude"
+    },
+    "22": {
+      "en": "of provided for us or built into Claude is the JSON schema, that set of instructions that tells Claude",
+      "zh_tw": "如何使用工具的指令。你和我必須提供實際的實作來處理所有",
+      "zh_cn": "如何使用工具的命令。你和我必须提供实际的实作來处理所有"
+    },
+    "23": {
+      "en": "how to make use of this tool. You and I have to provide an actual implementation to handle all of",
+      "zh_tw": "Claude 使用 text editor 工具的請求。那不存在。需要我們",
+      "zh_cn": "Claude 使用 text editor 工具的请求。那不存在。需要我们"
+    },
+    "24": {
+      "en": "Claude's requests to use the text editor tool. That does not exist. It is something that you and I have",
+      "zh_tw": "在程式碼庫中寫出來。換句話說，每當 Claude 決定建立",
+      "zh_cn": "在代码庫中写出來。换句话说，每当 Claude 决定建立"
+    },
+    "25": {
+      "en": "to write out inside of our code base. So in other words, whenever Claude decides to say, maybe create",
+      "zh_tw": "新檔案，送回 tool use 說「我要建立新檔案」時，我們必須",
+      "zh_cn": "新文件，送回 tool use 说「我要建立新文件」时，我们必须"
+    },
+    "26": {
+      "en": "a new file and it sends back a tool use part to us that says, I want to create a new file. We have to",
+      "zh_tw": "提供一個實際函式來在硬碟上建立新檔案。所以使用",
+      "zh_cn": "提供一个实际函数來在硬碟上建立新文件。所以使用"
+    },
+    "27": {
+      "en": "provide an actual function that will actually make a new file somewhere on our hard drive. So using the",
+      "zh_tw": "text editor 工具不是免費的，需要我們這邊付出一點努力，因為必須",
+      "zh_cn": "text editor 工具不是免费的，需要我们这边付出一点努力，因为必须"
+    },
+    "28": {
+      "en": "text editor tool is not free, so to speak. It requires a little bit of effort on our side because we have to",
+      "zh_tw": "寫出幾個不同的函式。現在去 Jupyter 筆記本示範",
+      "zh_cn": "写出幾个不同的函数。现在去 Jupyter 笔记本示范"
+    },
+    "29": {
+      "en": "write out a couple of different functions. Now let's go over to a Jupyter notebook and we're going to demo",
+      "zh_tw": "這個工具的使用，看看怎麼寫這些不同的函式。",
+      "zh_cn": "这个工具的使用，看看怎麼写这些不同的函数。"
+    },
+    "30": {
+      "en": "the use of this tool and take a look at how we would write out some of these different functions.",
+      "zh_tw": "回到這裡，在一個叫 005 text editor tool 的新筆記本裡。照例可以在",
+      "zh_cn": "回到这里，在一个叫 005 text editor tool 的新笔记本里。照例可以在"
+    },
+    "31": {
+      "en": "Back over here, I'm inside of a new notebook called 005 text editor tool. As usual, you can find this",
+      "zh_tw": "附件中找到。筆記本中有很多和之前一樣的輔助",
+      "zh_cn": "附件中找到。笔记本中有很多和之前一样的辅助"
+    },
+    "32": {
+      "en": "notebook attached to this lecture. Inside this notebook, there's a lot of the exact same helper",
+      "zh_tw": "程式碼。但如果看第三個儲存格，有個",
+      "zh_cn": "代码。但如果看第三个存储格，有个"
+    },
+    "33": {
+      "en": "code that we've been working with so far. But if you take a look at the third cell down, which has a",
+      "zh_tw": "「text editor 工具的實作」的註解，會看到裡面有",
+      "zh_cn": "「text editor 工具的实作」的註解，会看到里面有"
+    },
+    "34": {
+      "en": "comment at the top of implementation of the text editor tool, you're going to see that there is a",
+      "zh_tw": "大量的程式碼。這是我事先準備的一個類別。",
+      "zh_cn": "大量的代码。这是我事先准备的一个类別。"
+    },
+    "35": {
+      "en": "tremendous amount of code inside of here. So this is a class that I put together ahead of time.",
+      "zh_tw": "包含了使用 text editor 工具所需的所有不同函式。換句話說，",
+      "zh_cn": "包含了使用 text editor 工具所需的所有不同函数。换句话说，"
+    },
+    "36": {
+      "en": "It contains all the different functions that are required to use the text editor tool. So in other",
+      "zh_tw": "這個類別提供了這塊拼圖。記得剛才說過",
+      "zh_cn": "这个类別提供了这块拼圖。记得剛才说过"
+    },
+    "37": {
+      "en": "words, this class provides this piece of the puzzle over here. Remember, I just told you a moment ago",
+      "zh_tw": "必須寫一些程式碼來處理所有 Claude 的 text editor 工具請求。",
+      "zh_cn": "必须写一些代码來处理所有 Claude 的 text editor 工具请求。"
+    },
+    "38": {
+      "en": "that we have to write out some code to handle all of Claude's requests to use the text editor tool.",
+      "zh_tw": "我已經在這個類別中幫你寫好了。裡面有一些方法，",
+      "zh_cn": "我已经在这个类別中幫你写好了。里面有一些方法，"
+    },
+    "39": {
+      "en": "I wrote out that code for you inside of this particular class. Inside of this class, you'll",
+      "zh_tw": "往下捲會看到像 view，用來查看",
+      "zh_cn": "往下捲会看到像 view，用來查看"
+    },
+    "40": {
+      "en": "notice that there are some methods, if you scroll down a little bit, like view, which can be used to",
+      "zh_tw": "檔案或目錄的內容。還有 string replace 函式，用來",
+      "zh_cn": "文件或目录的內容。还有 string replace 函数，用來"
+    },
+    "41": {
+      "en": "view the contents of a file or a directory. There's also a string replace function, which will",
+      "zh_tw": "替換檔案中的字串。有建立檔案的函式等等。一切",
+      "zh_cn": "替换文件中的字符串。有建立文件的函数等等。一切"
+    },
+    "42": {
+      "en": "replace a string inside of a file. There is a function to create a file and so on. So everything",
+      "zh_tw": "都已經在這個類別中提供了。摺疊這個儲存格。",
+      "zh_cn": "都已经在这个类別中提供了。摺叠这个存储格。"
+    },
+    "43": {
+      "en": "has already been provided for you inside of this class. I'm going to collapse this cell. And the",
+      "zh_tw": "接下來要指出的是標有「根據模型版本建立 text edit schema」的儲存格。",
+      "zh_cn": "接下來要指出的是标有「根据模型版本建立 text edit schema」的存储格。"
+    },
+    "44": {
+      "en": "next thing I want to point out to you is the cell with a comment of make the text edit schema based",
+      "zh_tw": "這裡有點讓人困惑。讓我",
+      "zh_cn": "这里有点让人困惑。让我"
+    },
+    "45": {
+      "en": "upon the model version being used. Now this is where things get just a little bit confusing. So let me",
+      "zh_tw": "快速展示一張圖幫你理解。我重複了好幾次",
+      "zh_cn": "快速展示一張圖幫你理解。我重复了好幾次"
+    },
+    "46": {
+      "en": "very quickly show you a diagram to help you understand what's going on here. Now I've repeated several",
+      "zh_tw": "text editor 工具 schema 已經內建在 Claude 中，不需要包含它。",
+      "zh_cn": "text editor 工具 schema 已经內建在 Claude 中，不需要包含它。"
+    },
+    "47": {
+      "en": "times that this text editor tool schema is already built in Claude and we do not have to include it.",
+      "zh_tw": "這大致上是正確的，但有個小注意事項，讓事情",
+      "zh_cn": "这大致上是正确的，但有个小注意事项，让事情"
+    },
+    "48": {
+      "en": "That's kind of mostly true, but also just a little caveat here, just something to make it",
+      "zh_tw": "稍微複雜了一點。發請求給 Claude 想使用",
+      "zh_cn": "稍微复杂了一点。发请求给 Claude 想使用"
+    },
+    "49": {
+      "en": "slightly confusing. When we make our request off to Claude and we want to make use of this",
+      "zh_tw": "text editor 工具時，需要包含一個非常小的 schema。需要送一個長得",
+      "zh_cn": "text editor 工具时，需要包含一个非常小的 schema。需要送一个长得"
+    },
+    "50": {
+      "en": "text editor tool, we do need to include a very, very small schema. So we need to send along a schema",
+      "zh_tw": "像這樣的 schema。放入的確切 type 字串，注意有",
+      "zh_cn": "像这样的 schema。放入的确切 type 字符串，注意有"
+    },
+    "51": {
+      "en": "that's going to look like this right here. The exact type string that we put in here, notice how it has",
+      "zh_tw": "日期，會根據我們使用的 Claude 版本而不同。",
+      "zh_cn": "日期，会根据我们使用的 Claude 版本而不同。"
+    },
+    "52": {
+      "en": "a date, is going to change depending upon the exact version of Claude that we are making use of.",
+      "zh_tw": "在這個函式中，我檢查是否使用 Claude 3.7。如果是，",
+      "zh_cn": "在这个函数中，我检查是否使用 Claude 3.7。如果是，"
+    },
+    "53": {
+      "en": "So inside this function, I'm checking to see if you are making use of Claude 3.7. And if you are,",
+      "zh_tw": "回傳帶有那個日期的 schema。如果使用",
+      "zh_cn": "返回帶有那个日期的 schema。如果使用"
+    },
+    "54": {
+      "en": "I'm going to return that schema that has a date of that right there. And if you're making use of",
+      "zh_tw": "Claude 3.5，日期會稍有不同。所以根據模型版本會有",
+      "zh_cn": "Claude 3.5，日期会稍有不同。所以根据模型版本会有"
+    },
+    "55": {
+      "en": "Claude 3.5, it's going to have a slightly different date. So you are going to have a slightly different",
+      "zh_tw": "不同的日期。送出這個小 schema 給 Claude 時，",
+      "zh_cn": "不同的日期。送出这个小 schema 给 Claude 时，"
+    },
+    "56": {
+      "en": "date depending upon the exact model version. When we send this very small schema off to Claude,",
+      "zh_tw": "它會自動擴展成一個更大的 schema，大概",
+      "zh_cn": "它会自动扩展成一个更大的 schema，大概"
+    },
+    "57": {
+      "en": "it is going to be automatically expanded into a much, much larger schema that looks a little something",
+      "zh_tw": "長這樣。Claude 看到我們包含了這個帶有",
+      "zh_cn": "长这样。Claude 看到我们包含了这个帶有"
+    },
+    "58": {
+      "en": "like this. So Claude is going to see that we are including this very small stub schema that has a",
+      "zh_tw": "string replace editor 名稱的小 stub schema。它也會注意到我們放的確切 type。",
+      "zh_cn": "string replace editor 名称的小 stub schema。它也会注意到我们放的确切 type。"
+    },
+    "59": {
+      "en": "name of string replace editor. And it's also going to notice the exact type that we are putting right",
+      "zh_tw": "然後在幕後，可以想像這個小 schema 被替換成",
+      "zh_cn": "然后在幕后，可以想像这个小 schema 被替换成"
+    },
+    "60": {
+      "en": "there. Then behind the scenes, we can imagine that this very small schema gets replaced with this much",
+      "zh_tw": "列出大量資訊的更大 schema，告訴 Claude 如何使用 text editor 工具。",
+      "zh_cn": "列出大量资讯的更大 schema，告訴 Claude 如何使用 text editor 工具。"
+    },
+    "61": {
+      "en": "larger one that lists out a ton of information to Claude on exactly how to use the text editor tool.",
+      "zh_tw": "現在稍微了解了，讓我快速示範 text editor 工具能做什麼。在筆記本的",
+      "zh_cn": "现在稍微了解了，让我快速示范 text editor 工具能做什麼。在笔记本的"
+    },
+    "62": {
+      "en": "Now that we have a slightly better idea of what's going on here, I'd like to give you a quick",
+      "zh_tw": "同目錄中建立一個叫 main.py 的新檔案。裡面寫一個簡單的",
+      "zh_cn": "同目录中建立一个叫 main.py 的新文件。里面写一个简单的"
+    },
+    "63": {
+      "en": "demonstration of what the text editor tool can do. Inside of the same directory as my notebook,",
+      "zh_tw": "greeting 函式，印出「hi there」。儲存",
+      "zh_cn": "greeting 函数，印出「hi there」。存储"
+    },
+    "64": {
+      "en": "I'm going to make a new file called main.py. And inside there, I'm going to make a very simple",
+      "zh_tw": "檔案。然後回到筆記本，在最下面加了",
+      "zh_cn": "文件。然后回到笔记本，在最下面加了"
+    },
+    "65": {
+      "en": "function called greeting that will print out hi there, like so. I'll then make sure that I save",
+      "zh_tw": "一個儲存格，加入空的使用者訊息然後送進",
+      "zh_cn": "一个存储格，加入空的使用者信息然后送进"
+    },
+    "66": {
+      "en": "that file. I'm then going to go back over to my notebook and down at the very bottom, I've added",
+      "zh_tw": "run conversation。要求 Claude 開啟 main.py 檔案，告訴我裡面有什麼。",
+      "zh_cn": "run conversation。要求 Claude 开啟 main.py 文件，告訴我里面有什麼。"
+    },
+    "67": {
+      "en": "in a cell that's going to add in a empty user message and then send the list of messages into",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "68": {
+      "en": "run conversation. I'm going to ask Claude to open up the main.py file and just tell me what is inside",
+      "zh_tw": "要求 Claude 開啟 ./main.py 檔案並總結內容。",
+      "zh_cn": "要求 Claude 开啟 ./main.py 文件並总结內容。"
+    },
+    "69": {
+      "en": "this file. So I'll ask Claude to open the .slash main.py file and summarize its contents. I'll then",
+      "zh_tw": "執行。回應中可以看到 Claude 確實取得了",
+      "zh_cn": "执行。回应中可以看到 Claude 确实取得了"
+    },
+    "70": {
+      "en": "run that. And then inside the response, we can see that Claude did in fact get the contents of that",
+      "zh_tw": "檔案內容。給了我裡面的摘要。看看訊息",
+      "zh_cn": "文件內容。给了我里面的摘要。看看信息"
+    },
+    "71": {
+      "en": "file. And it's given me a summary of what's going on inside there. If we take a look at the list of",
+      "zh_tw": "列表，會看到有個 tool use block，Claude 要求查看",
+      "zh_cn": "列表，会看到有个 tool use block，Claude 要求查看"
+    },
+    "72": {
+      "en": "messages, we'll see that we get a tool use block right here, where Claude is asking to view the",
+      "zh_tw": "main.py 檔案的內容。我剛才展示的 text editor 工具類別中的程式碼",
+      "zh_cn": "main.py 文件的內容。我剛才展示的 text editor 工具类別中的代码"
+    },
+    "73": {
+      "en": "contents of the main.py file. The code inside of that text editor tool class that I showed you a",
+      "zh_tw": "會收到指令，自動開啟檔案，",
+      "zh_cn": "会收到命令，自动开啟文件，"
+    },
+    "74": {
+      "en": "moment ago is going to receive that command, it's going to open up the file automatically,",
+      "zh_tw": "然後把內容送回 Claude。可以在這裡看到內容。",
+      "zh_cn": "然后把內容送回 Claude。可以在这里看到內容。"
+    },
+    "75": {
+      "en": "and then send that contents back over to Claude. We can actually see the contents right here. Now,",
+      "zh_tw": "你可能好奇 text edit 工具到底為什麼存在。換句話說，",
+      "zh_cn": "你可能好奇 text edit 工具到底为什麼存在。换句话说，"
+    },
+    "76": {
+      "en": "at this point, you might be kind of curious why the text edit tool exists at all. In other words,",
+      "zh_tw": "除了明顯可以操作檔案系統中的檔案外，",
+      "zh_cn": "除了明显可以操作文件系统中的文件外，"
+    },
+    "77": {
+      "en": "what does it really do for us? What functionality does it really offer besides the obvious fact that",
+      "zh_tw": "它到底給了我們什麼功能？你現在可能正在用一個",
+      "zh_cn": "它到底给了我们什麼功能？你现在可能正在用一个"
+    },
+    "78": {
+      "en": "it can somehow work with files on the file system? Well, chances are right now you are making use of a",
+      "zh_tw": "有很酷 AI 助手的程式碼編輯器。你可以要助手",
+      "zh_cn": "有很酷 AI 助手的代码编輯器。你可以要助手"
+    },
+    "79": {
+      "en": "code editor that has a really fancy AI assistant built into it. And you can ask that assistant to",
+      "zh_tw": "重構檔案、建立檔案或其他操作。其實我們可以大致複製",
+      "zh_cn": "重构文件、建立文件或其他操作。其实我们可以大致复製"
+    },
+    "80": {
+      "en": "refactor files or create files or do whatever else. It turns out that we can largely replicate",
+      "zh_tw": "你的進階程式碼編輯器的所有功能，只要使用 text edit 工具。例如",
+      "zh_cn": "你的进阶代码编輯器的所有功能，只要使用 text edit 工具。例如"
+    },
+    "81": {
+      "en": "all the functionality of your fancy code editor by just making use of this text edit tool. So for",
+      "zh_tw": "我要更新送給 Claude 的提示。要求 Claude",
+      "zh_cn": "我要更新送给 Claude 的提示。要求 Claude"
+    },
+    "82": {
+      "en": "example, I'm going to update the prompt that I'm sending off to Claude. I'm going to ask Claude to",
+      "zh_tw": "開啟檔案並寫一個計算圓周率到第五位的函式。然後",
+      "zh_cn": "开啟文件並写一个计算圓周率到第五位的函数。然后"
+    },
+    "83": {
+      "en": "open up that file and write out a function to calculate pi to the fifth digit. And then after doing so,",
+      "zh_tw": "建立 ./test.py 檔案來測試實作。",
+      "zh_cn": "建立 ./test.py 文件來测试实作。"
+    },
+    "84": {
+      "en": "I'm going to ask Claude to then create a dot slash test dot pi file to test your implementation.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "85": {
+      "en": "I'm then going to run this. After the request is complete, I'm going to scroll down to the list of",
+      "zh_tw": "執行。請求完成後往下看",
+      "zh_cn": "执行。请求完成后往下看"
+    },
+    "86": {
+      "en": "messages that were exchanged. So down here, I've got my initial user message, then our assistant message",
+      "zh_tw": "交換的訊息列表。下面有初始使用者訊息，然後是助手訊息，",
+      "zh_cn": "交换的信息列表。下面有初始使用者信息，然后是助手信息，"
+    },
+    "87": {
+      "en": "in which Claude decides to use the text edit tool. And specifically, it wants to try to view a file,",
+      "zh_tw": "Claude 決定使用 text edit 工具。具體來說它要查看檔案，",
+      "zh_cn": "Claude 决定使用 text edit 工具。具体來说它要查看文件，"
+    },
+    "88": {
+      "en": "we then send back the contents of that file. Claude then says, Okay, great, I know it's inside this file,",
+      "zh_tw": "我們送回檔案內容。Claude 說好的，知道裡面有什麼了，",
+      "zh_cn": "我们送回文件內容。Claude 说好的，知道里面有什麼了，"
+    },
+    "89": {
+      "en": "I'm now going to try to replace its contents by writing in some new content. So we can see right",
+      "zh_tw": "現在要替換內容，寫入新內容。可以看到這裡",
+      "zh_cn": "现在要替换內容，写入新內容。可以看到这里"
+    },
+    "90": {
+      "en": "here is the actual implementation of calculating pi. Then if we go a little bit further down,",
+      "zh_tw": "就是計算圓周率的實際實作。再往下看，",
+      "zh_cn": "就是计算圓周率的实际实作。再往下看，"
+    },
+    "91": {
+      "en": "we respond and say that we did the update to the file successfully. Claude is then going to attempt",
+      "zh_tw": "回應說成功更新了檔案。Claude 接著嘗試",
+      "zh_cn": "回应说成功更新了文件。Claude 接著嘗试"
+    },
+    "92": {
+      "en": "to create the test dot pi file and write some text into it specifically some tests to test out the",
+      "zh_tw": "建立 test.py 檔案並寫入一些文字，特別是測試剛才",
+      "zh_cn": "建立 test.py 文件並写入一些文字，特別是测试剛才"
+    },
+    "93": {
+      "en": "implementation it just put together. We can verify that this all happened by taking a look at the",
+      "zh_tw": "建立的實作。可以查看更新後的 main.py 來驗證。",
+      "zh_cn": "建立的实作。可以查看更新后的 main.py 來验证。"
+    },
+    "94": {
+      "en": "newly updated main dot pi file. So we will now see an implementation for calculating pi,",
+      "zh_tw": "現在能看到計算圓周率的實作，",
+      "zh_cn": "现在能看到计算圓周率的实作，"
+    },
+    "95": {
+      "en": "and then an accompanying test dot pi file as well, where we've got some tests. So once again,",
+      "zh_tw": "還有配套的 test.py 檔案以及測試。再次強調，",
+      "zh_cn": "还有配套的 test.py 文件以及测试。再次強调，"
+    },
+    "96": {
+      "en": "using this tool, we can very easily approximate a rather fancy code editor. And you might be thinking,",
+      "zh_tw": "用這個工具我們可以很容易地近似一個進階程式碼編輯器。你可能在想，",
+      "zh_cn": "用这个工具我们可以很容易地近似一个进阶代码编輯器。你可能在想，"
+    },
+    "97": {
+      "en": "Okay, why don't I just use my code editor? Well, there are probably going to be some scenarios on some",
+      "zh_tw": "那我為什麼不直接用程式碼編輯器？在某些應用場景中你可能想編輯",
+      "zh_cn": "那我为什麼不直接用代码编輯器？在某些应用场景中你可能想编輯"
+    },
+    "98": {
+      "en": "different applications you might work on, where you might want to edit some files inside of some file",
+      "zh_tw": "檔案系統中的檔案，但沒有原生的完整程式碼編輯器可用。",
+      "zh_cn": "文件系统中的文件，但没有原生的完整代码编輯器可用。"
+    },
+    "99": {
+      "en": "system or something similar, where you don't really have access to a native full featured code editor.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "100": {
+      "en": "And this would be a scenario where you would want to make use of the text edit tool.",
+      "zh_tw": "這就是你會想用 text edit 工具的場景。",
+      "zh_cn": "这就是你会想用 text edit 工具的场景。"
+    }
+  }
+}

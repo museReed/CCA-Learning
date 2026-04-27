@@ -1,0 +1,402 @@
+{
+  "srt_file": "Structured_data_eNpA5r39.srt",
+  "video_file": "Structured_data_eNpA5r39.mp4",
+  "max_valid_entry": 79,
+  "entries": {
+    "1": {
+      "en": "Stop sequences and assistant message prefilling can be combined together in a really powerful way.",
+      "zh_tw": "停止序列和助手訊息預填可以結合成一個非常強大的方式。",
+      "zh_cn": "停止序列和助手信息预填可以结合成一个非常強大的方式。"
+    },
+    "2": {
+      "en": "Something that you're probably going to end up doing rather frequently anytime you need to generate some kind of structured data.",
+      "zh_tw": "每當你需要生成某種結構化資料時，你可能會經常這樣做。",
+      "zh_cn": "每当你需要生成某种结构化数据时，你可能会经常这样做。"
+    },
+    "3": {
+      "en": "So to help you understand how these things work together, let me walk you through a really quick example.",
+      "zh_tw": "為了幫你理解這些東西如何搭配使用，讓我帶你看一個非常快速的範例。",
+      "zh_cn": "为了幫你理解这些東西如何搭配使用，让我帶你看一个非常快速的范例。"
+    },
+    "4": {
+      "en": "Let's imagine that we are building a web app like the one you see on the screen.",
+      "zh_tw": "假設你正在建構某種應用程式，需要動態地生成 AWS EventBridge 規則。",
+      "zh_cn": "假设你正在建构某种应用程序，需要动态地生成 AWS EventBridge 规则。"
+    },
+    "5": {
+      "en": "This is a web app that's going to generate event bridge rules based upon some user input.",
+      "zh_tw": "所以你有一個使用者輸入，描述他們想要的某種排程。",
+      "zh_cn": "所以你有一个使用者输入，描述他们想要的某种排程。"
+    },
+    "6": {
+      "en": "If you're not familiar with them, event bridge rules are used in AWS.",
+      "zh_tw": "你想讓 Claude 回覆一個有效的 EventBridge 排程規則。",
+      "zh_cn": "你想让 Claude 回覆一个有效的 EventBridge 排程规则。"
+    },
+    "7": {
+      "en": "They're essentially little JSON snippets.",
+      "zh_tw": "挑戰是我們想要回覆只有那個規則。",
+      "zh_cn": "挑战是我们想要回覆只有那个规则。"
+    },
+    "8": {
+      "en": "So user is going to enter in some prompt like this and then click on generate.",
+      "zh_tw": "不要任何額外的評論或解釋。",
+      "zh_cn": "不要任何额外的评论或解釋。"
+    },
+    "9": {
+      "en": "And chances are the user is going to want to see some generated rule just up here that they can very easily select right away or click on this little copy button and go use somewhere else.",
+      "zh_tw": "就只要規則本身。",
+      "zh_cn": "就只要规则本身。"
+    },
+    "10": {
+      "en": "The point there is that part of the critical user experience here is that we want to show just the JSON for the generated rule and nothing else.",
+      "zh_tw": "為此，我們要使用兩個技術。",
+      "zh_cn": "为此，我们要使用兩个技术。"
+    },
+    "11": {
+      "en": "So if we instead displayed a response that looks like this, it would definitely not be as helpful for our users.",
+      "zh_tw": "首先，訊息預填。",
+      "zh_cn": "首先，信息预填。"
+    },
+    "12": {
+      "en": "We're still generating the rule, but now it also has this header up top and this commentary footer down at the bottom.",
+      "zh_tw": "我們在助手訊息中預填一些東西來引導 Claude。",
+      "zh_cn": "我们在助手信息中预填一些東西來引导 Claude。"
+    },
+    "13": {
+      "en": "So now a user can't really use this copy all button.",
+      "zh_tw": "其次，停止序列。",
+      "zh_cn": "其次，停止序列。"
+    },
+    "14": {
+      "en": "They would have to go in and manually select that JSON right there.",
+      "zh_tw": "我們加入一個停止序列來告訴 Claude 何時停止生成。",
+      "zh_cn": "我们加入一个停止序列來告訴 Claude 何时停止生成。"
+    },
+    "15": {
+      "en": "So this is an example where we really don't want Claude to be that helpful and explain its work.",
+      "zh_tw": "讓我展示這在實際中是什麼樣子。",
+      "zh_cn": "让我展示这在实际中是什麼样子。"
+    },
+    "16": {
+      "en": "We want just some very particular data and nothing else.",
+      "zh_tw": "在我的 create 呼叫中，messages 列表會有兩個訊息。",
+      "zh_cn": "在我的 create 调用中，messages 列表会有兩个信息。"
+    },
+    "17": {
+      "en": "Now, to be clear, this is not a problem that is just limited to generating JSON.",
+      "zh_tw": "一個使用者訊息包含實際的請求。",
+      "zh_cn": "一个使用者信息包含实际的请求。"
+    },
+    "18": {
+      "en": "It turns out that anytime you are using Claude to generate any kind of structured data, so it could be JSON or it could be Python or even just a bulleted list of text items.",
+      "zh_tw": "然後一個助手訊息，預填了規則的開頭。",
+      "zh_cn": "然后一个助手信息，预填了规则的开头。"
+    },
+    "19": {
+      "en": "Claude is very often going to try to insert a header or a footer or some additional kind of commentary.",
+      "zh_tw": "比如我可能預填 { 作為 JSON 物件的開頭。",
+      "zh_cn": "比如我可能预填 { 作为 JSON 对象的开头。"
+    },
+    "20": {
+      "en": "And in many of these scenarios, you don't want that additional commentary.",
+      "zh_tw": "然後我設定 stop_sequences 為 }。",
+      "zh_cn": "然后我设定 stop_sequences 为 }。"
+    },
+    "21": {
+      "en": "You just want the raw content that you asked Claude to create.",
+      "zh_tw": "這樣 Claude 生成完 JSON 物件後就會停下來。",
+      "zh_cn": "这样 Claude 生成完 JSON 对象后就会停下來。"
+    },
+    "22": {
+      "en": "So to help keep Claude on track here and only give us the raw content that we're asking for and no additional header or footer or commentary or anything like that, we can use our stop sequence in combination with a pre-filled assistant message.",
+      "zh_tw": "讓我在筆記本中實際做這個。",
+      "zh_cn": "让我在笔记本中实际做这个。"
+    },
+    "23": {
+      "en": "Let me show you how.",
+      "zh_tw": "我寫出使用者訊息的提示。",
+      "zh_cn": "我写出使用者信息的提示。"
+    },
+    "24": {
+      "en": "I'm going to go back over to my notebook.",
+      "zh_tw": "然後在 messages 列表中，先放使用者訊息。",
+      "zh_cn": "然后在 messages 列表中，先放使用者信息。"
+    },
+    "25": {
+      "en": "I'm going to continue on by making a new cell down here.",
+      "zh_tw": "然後放助手訊息，content 預填為左大括號。",
+      "zh_cn": "然后放助手信息，content 预填为左大括号。"
+    },
+    "26": {
+      "en": "I'm going to again make a list of messages.",
+      "zh_tw": "然後加入 stop_sequences 為右大括號。",
+      "zh_cn": "然后加入 stop_sequences 为右大括号。"
+    },
+    "27": {
+      "en": "I'll add in a user message.",
+      "zh_tw": "讓我執行看看。",
+      "zh_cn": "让我执行看看。"
+    },
+    "28": {
+      "en": "And I'll say something like generate a very short event ridge rule as JSON.",
+      "zh_tw": "太好了。你可以看到 Claude 生成了一個乾淨的 EventBridge 規則。",
+      "zh_cn": "太好了。你可以看到 Claude 生成了一个乾淨的 EventBridge 规则。"
+    },
+    "29": {
+      "en": "I'll then pass that off like so.",
+      "zh_tw": "沒有任何額外的文字。",
+      "zh_cn": "没有任何额外的文字。"
+    },
+    "30": {
+      "en": "And then let's just see what we get with this kind of initial take.",
+      "zh_tw": "就只是 JSON。",
+      "zh_cn": "就只是 JSON。"
+    },
+    "31": {
+      "en": "So right away, we can see that we do get back some JSON, but it has unfortunately that little backtick, backtick, backtick, backtick JSON right there.",
+      "zh_tw": "但等一下。你會注意到輸出缺少了開頭和結尾的大括號。",
+      "zh_cn": "但等一下。你会注意到输出缺少了开头和结尾的大括号。"
+    },
+    "32": {
+      "en": "And then a matching closing one over there.",
+      "zh_tw": "那是因為我們在預填中提供了開頭大括號，",
+      "zh_cn": "那是因为我们在预填中提供了开头大括号，"
+    },
+    "33": {
+      "en": "And just to make sure it's super clear, these backticks are in place to format this all as markdown.",
+      "zh_tw": "而停止序列消耗了結尾的大括號。",
+      "zh_cn": "而停止序列消耗了结尾的大括号。"
+    },
+    "34": {
+      "en": "So it gets formatted very nicely if you were to render it as markdown text.",
+      "zh_tw": "要得到完整的 JSON，我們只需要手動加回它們。",
+      "zh_cn": "要得到完整的 JSON，我们只需要手动加回它们。"
+    },
+    "35": {
+      "en": "But in our case, we don't want any of those additional characters.",
+      "zh_tw": "像這樣：完整的 JSON 等於左大括號加上生成的文字加上右大括號。",
+      "zh_cn": "像这样：完整的 JSON 等於左大括号加上生成的文字加上右大括号。"
+    },
+    "36": {
+      "en": "We want just the raw JSON by itself.",
+      "zh_tw": "然後我們可以用 json.loads 來解析它。",
+      "zh_cn": "然后我们可以用 json.loads 來解析它。"
+    },
+    "37": {
+      "en": "So to do so, we can do two things.",
+      "zh_tw": "讓我展示這個。",
+      "zh_cn": "让我展示这个。"
+    },
+    "38": {
+      "en": "We're going to use both an assistant message and a stop sequence.",
+      "zh_tw": "完美。現在我們有了一個完整的、可以被程式碼解析的 JSON 物件。",
+      "zh_cn": "完美。现在我们有了一个完整的、可以被代码解析的 JSON 对象。"
+    },
+    "39": {
+      "en": "For right now, we're just going to write out the code to do so.",
+      "zh_tw": "這個技術非常適合生成任何類型的結構化資料。",
+      "zh_cn": "这个技术非常适合生成任何类型的结构化数据。"
+    },
+    "40": {
+      "en": "And then I'll show you a diagram that explains how it all works.",
+      "zh_tw": "JSON、Python 程式碼、YAML、XML，什麼都行。",
+      "zh_cn": "JSON、Python 代码、YAML、XML，什麼都行。"
+    },
+    "41": {
+      "en": "First, I'm going to pre-fill an assistant message.",
+      "zh_tw": "技巧就是找到正確的預填和停止序列的組合。",
+      "zh_cn": "技巧就是找到正确的预填和停止序列的组合。"
+    },
+    "42": {
+      "en": "So let's say add assistant message.",
+      "zh_tw": "例如，對於 Python 程式碼，你可能預填 def 然後停止在某個標記。",
+      "zh_cn": "例如，对於 Python 代码，你可能预填 def 然后停止在某个标记。"
+    },
+    "43": {
+      "en": "And my pre-filled message will be backtick, backtick, backtick JSON.",
+      "zh_tw": "對於 Markdown，你可能預填標題然後在特定點停止。",
+      "zh_cn": "对於 Markdown，你可能预填标题然后在特定点停止。"
+    },
+    "44": {
+      "en": "And then on my chat call, I'll add in stop sequences.",
+      "zh_tw": "可能性真的很多。",
+      "zh_cn": "可能性真的很多。"
+    },
+    "45": {
+      "en": "And anytime we see a backtick, backtick, backtick, I want to immediately stop generation.",
+      "zh_tw": "好的，讓我總結這個技術。",
+      "zh_cn": "好的，让我总结这个技术。"
+    },
+    "46": {
+      "en": "So let's now run the cell and see what we get back.",
+      "zh_tw": "訊息預填引導 Claude 以特定格式開始。",
+      "zh_cn": "信息预填引导 Claude 以特定格式开始。"
+    },
+    "47": {
+      "en": "Okay, so now we get just the JSON by itself.",
+      "zh_tw": "停止序列告訴 Claude 何時停止。",
+      "zh_cn": "停止序列告訴 Claude 何时停止。"
+    },
+    "48": {
+      "en": "You will notice that there are some new line characters in here, but that's totally fine.",
+      "zh_tw": "兩者結合讓你能從 Claude 取得乾淨的結構化輸出。",
+      "zh_cn": "兩者结合让你能从 Claude 取得乾淨的结构化输出。"
+    },
+    "49": {
+      "en": "We can very easily remove those extra new lines by just parsing the response as JSON or by doing a strip call.",
+      "zh_tw": "不需要後處理來清除額外的文字。",
+      "zh_cn": "不需要后处理來清除额外的文字。"
+    },
+    "50": {
+      "en": "So I could say text is chat.",
+      "zh_tw": "這個技術在你需要可預測的、機器可讀的輸出時非常有用。",
+      "zh_cn": "这个技术在你需要可预测的、机器可读的输出时非常有用。"
+    },
+    "51": {
+      "en": "I'll print out text.",
+      "zh_tw": "好的，在下一支影片中，我們會做一個這些概念的練習。",
+      "zh_cn": "好的，在下一支视频中，我们会做一个这些概念的练習。"
+    },
+    "52": {
+      "en": "And then on the next cell down, I might import JSON.",
+      "zh_tw": "這樣你可以確保你真的理解了它們是如何運作的。",
+      "zh_cn": "这样你可以确保你真的理解了它们是如何运作的。"
+    },
+    "53": {
+      "en": "And do a JSON loads with text and strip on text as well.",
+      "zh_tw": "讓我們繼續。",
+      "zh_cn": "让我们继续。"
+    },
+    "54": {
+      "en": "And if I run that, yes, we definitely get back some very well-formatted JSON here that we can access in any way that we expect.",
+      "zh_tw": "結構化資料生成是一個你會經常使用的技巧。",
+      "zh_cn": "结构化数据生成是一个你会经常使用的技巧。"
+    },
+    "55": {
+      "en": "All right, so what exactly is going on with the assistant message and the stop sequence?",
+      "zh_tw": "確保你掌握了它。",
+      "zh_cn": "确保你掌握了它。"
+    },
+    "56": {
+      "en": "Well, let me show you a diagram just to break it all down and make sure it is super clear.",
+      "zh_tw": "好的，繼續練習。",
+      "zh_cn": "好的，继续练習。"
+    },
+    "57": {
+      "en": "So once again, we are doing our user message.",
+      "zh_tw": "讓我們確保你對停止序列和預填的理解很紮實。",
+      "zh_cn": "让我们确保你对停止序列和预填的理解很紮实。"
+    },
+    "58": {
+      "en": "We are providing a pre-filled assistant and a stop sequence.",
+      "zh_tw": "這些概念在接下來的課程中會一再出現。",
+      "zh_cn": "这些概念在接下來的课程中会一再出现。"
+    },
+    "59": {
+      "en": "Claude is going to take a look at all the different parts of this request.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "60": {
+      "en": "It's going to initially take a look at that user message content and say,",
+      "zh_tw": "練習時間。",
+      "zh_cn": "练習时间。"
+    },
+    "61": {
+      "en": "all right, it's very clear that I need to write a full rule and I should probably also describe it.",
+      "zh_tw": "讓我們動手做。",
+      "zh_cn": "让我们动手做。"
+    },
+    "62": {
+      "en": "So maybe put on a header and a footer because that's kind of what Claude naturally wants to do.",
+      "zh_tw": "確保你理解了所有東西。",
+      "zh_cn": "确保你理解了所有東西。"
+    },
+    "63": {
+      "en": "It wants to explain the work that it is doing.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "64": {
+      "en": "But then it's going to encounter that assistant message.",
+      "zh_tw": "繼續下一支影片。",
+      "zh_cn": "继续下一支视频。"
+    },
+    "65": {
+      "en": "And just as we learned in the last video, Claude is going to assume that it already wrote that out in its response.",
+      "zh_tw": "我們會做一個關於結構化資料的練習。",
+      "zh_cn": "我们会做一个关於结构化数据的练習。"
+    },
+    "66": {
+      "en": "So it's going to say, oh, I've already started the JSON part.",
+      "zh_tw": "確保你真的掌握了這些概念。",
+      "zh_cn": "确保你真的掌握了这些概念。"
+    },
+    "67": {
+      "en": "So now all I have to do is write out the actual JSON.",
+      "zh_tw": "到時見。",
+      "zh_cn": "到时見。"
+    },
+    "68": {
+      "en": "It's then going to write out all of this JSON in the response.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "69": {
+      "en": "And then as it gets to the very end, it's going to naturally want to close off that markdown code block that it thought it created earlier.",
+      "zh_tw": "讓我們繼續。",
+      "zh_cn": "让我们继续。"
+    },
+    "70": {
+      "en": "So Claude is going to want to put in a closing backtick, backtick, backtick.",
+      "zh_tw": "結構化資料的練習接下來就會開始。",
+      "zh_cn": "结构化数据的练習接下來就会开始。"
+    },
+    "71": {
+      "en": "As soon as it does so, however, it's going to encounter the stop sequence, which stops the generation entirely and immediately sends us back the response.",
+      "zh_tw": "準備好你的筆記本。",
+      "zh_cn": "准备好你的笔记本。"
+    },
+    "72": {
+      "en": "So you can really imagine that what's really going on here is we're kind of saying start with this and with that and just give us everything in between.",
+      "zh_tw": "我們要開始做一些有趣的事。",
+      "zh_cn": "我们要开始做一些有趣的事。"
+    },
+    "73": {
+      "en": "And that results in us just getting back the part we really care about, just the JSON by itself.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "74": {
+      "en": "And like I mentioned, this is a really powerful technique that we're going to use very often.",
+      "zh_tw": "那我們繼續吧。",
+      "zh_cn": "那我们继续吧。"
+    },
+    "75": {
+      "en": "Anytime we want to generate some kind of structured data and get just that data with nothing else besides it.",
+      "zh_tw": "這些技巧真的很強大。",
+      "zh_cn": "这些技巧真的很強大。"
+    },
+    "76": {
+      "en": "And remember, this technique can be used for any kind of structured data.",
+      "zh_tw": "一旦你掌握了它們，你就能做出更好的應用程式。",
+      "zh_cn": "一旦你掌握了它们，你就能做出更好的应用程序。"
+    },
+    "77": {
+      "en": "It is not limited just being used on JSON.",
+      "zh_tw": "好的，下一支影片見。",
+      "zh_cn": "好的，下一支视频見。"
+    },
+    "78": {
+      "en": "So anytime we have any kind of very specific content we want to generate and get just that content with no additional commentary on it,",
+      "zh_tw": "讓我們繼續練習。",
+      "zh_cn": "让我们继续练習。"
+    },
+    "79": {
+      "en": "we're going to take a look at using assistant message prefilling along with stop sequences.",
+      "zh_tw": "結構化資料非常重要，確保你掌握了。",
+      "zh_cn": "结构化数据非常重要，确保你掌握了。"
+    }
+  }
+}

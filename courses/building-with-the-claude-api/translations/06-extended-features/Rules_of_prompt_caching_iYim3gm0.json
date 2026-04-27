@@ -1,0 +1,407 @@
+{
+  "srt_file": "Rules_of_prompt_caching_iYim3gm0.srt",
+  "video_file": "Rules_of_prompt_caching_iYim3gm0.mp4",
+  "max_valid_entry": 80,
+  "entries": {
+    "1": {
+      "en": "Now that we understand the theory, we are going to explore how prompt caching Claude actually works.",
+      "zh_tw": "現在我們理解了理論，我們要探索提示詞快取 Claude 實際上是如何運作的。",
+      "zh_cn": "现在我们理解了理论，我们要探索提示词缓存 Claude 实际上是如何运作的。"
+    },
+    "2": {
+      "en": "The core idea of prompt caching is identical to what we discussed in the last video.",
+      "zh_tw": "提示詞快取的核心概念跟我們在上個影片中討論的完全相同。",
+      "zh_cn": "提示词缓存的核心概念跟我们在上个视频中討论的完全相同。"
+    },
+    "3": {
+      "en": "We will make an initial request off to Claude. Claude is going to do some processing on that",
+      "zh_tw": "我們會發送初始請求給 Claude。Claude 會對",
+      "zh_cn": "我们会发送初始请求给 Claude。Claude 会对"
+    },
+    "4": {
+      "en": "initial message, and then Claude is going to save all that work into a temporary cache.",
+      "zh_tw": "初始訊息做一些處理，然後 Claude 會把所有工作保存到臨時快取中。",
+      "zh_cn": "初始信息做一些处理，然后 Claude 会把所有工作保存到臨时缓存中。"
+    },
+    "5": {
+      "en": "Then if we make a follow-up request at some future point in time and include the identical",
+      "zh_tw": "如果我們在未來某個時間點發送後續請求，並包含完全相同的訊息，",
+      "zh_cn": "如果我们在未來某个时间点发送后续请求，並包含完全相同的信息，"
+    },
+    "6": {
+      "en": "exact same message, rather than processing that message all over again, Claude is going to instead",
+      "zh_tw": "Claude 不會重新處理那個訊息，而是會",
+      "zh_cn": "Claude 不会重新处理那个信息，而是会"
+    },
+    "7": {
+      "en": "look into the cache, find the work that it had already saved, and load it up. Just to be clear,",
+      "zh_tw": "查看快取，找到已經保存的工作，然後載入它。要清楚的是，",
+      "zh_cn": "查看缓存，找到已经保存的工作，然后載入它。要清楚的是，"
+    },
+    "8": {
+      "en": "the work that we saved to the cache does not persist forever. It is only stored there for one hour.",
+      "zh_tw": "保存到快取的工作不會永久保存。它只在那裡儲存一個小時。",
+      "zh_cn": "保存到缓存的工作不会永久保存。它只在那里存储一个小时。"
+    },
+    "9": {
+      "en": "You're going to find prompt caching is most useful anytime that you are repeatedly sending the same",
+      "zh_tw": "你會發現提示詞快取最有用的情況是每當你反覆發送相同的",
+      "zh_cn": "你会发现提示词缓存最有用的情況是每当你反覆发送相同的"
+    },
+    "10": {
+      "en": "content over to Claude again and again and again, because it really is this kind of two-phase process.",
+      "zh_tw": "內容給 Claude，因為它真的是這種兩階段的過程。",
+      "zh_cn": "內容给 Claude，因为它真的是这种兩阶段的过程。"
+    },
+    "11": {
+      "en": "We have to make that initial request to write some data into the cache, and then only the follow-up",
+      "zh_tw": "我們必須發送初始請求把一些資料寫入快取，然後只有後續的",
+      "zh_cn": "我们必须发送初始请求把一些数据写入缓存，然后只有后续的"
+    },
+    "12": {
+      "en": "requests are going to be able to take advantage of that work that was done ahead of time.",
+      "zh_tw": "請求才能利用事先完成的工作。",
+      "zh_cn": "请求才能利用事先完成的工作。"
+    },
+    "13": {
+      "en": "This caching system is not enabled by default with Claude. Instead, to turn on caching, we have to",
+      "zh_tw": "這個快取系統預設不是啟用的。要開啟快取，我們必須",
+      "zh_cn": "这个缓存系统默认不是啟用的。要开啟缓存，我们必须"
+    },
+    "14": {
+      "en": "manually add a cache breakpoint to a block inside of one of our different messages, and I've showed",
+      "zh_tw": "手動在訊息中的某個區塊加入快取中斷點，我在",
+      "zh_cn": "手动在信息中的某个区块加入缓存中断点，我在"
+    },
+    "15": {
+      "en": "an example of that on the right-hand side in this example user message. So all we have to do to turn",
+      "zh_tw": "右邊的這個範例使用者訊息中展示了一個例子。要開啟",
+      "zh_cn": "右边的这个范例使用者信息中展示了一个例子。要开啟"
+    },
+    "16": {
+      "en": "on caching is put in that little cache control field, and there's a lot of rules around what that cache",
+      "zh_tw": "快取，我們只需要放入那個 cache_control 欄位，關於那個 cache",
+      "zh_cn": "缓存，我们只需要放入那个 cache_control 字段，关於那个 cache"
+    },
+    "17": {
+      "en": "control thing actually does, but before we go into those rules and really explain what's going on,",
+      "zh_tw": "control 實際上做什麼有很多規則，但在我們深入那些規則之前，",
+      "zh_cn": "control 实际上做什麼有很多规则，但在我们深入那些规则之前，"
+    },
+    "18": {
+      "en": "I want to give you a little tip here, something that's going to make your life a little bit easier.",
+      "zh_tw": "我想給你一個小技巧，讓你的生活輕鬆一些。",
+      "zh_cn": "我想给你一个小技巧，让你的生活轻鬆一些。"
+    },
+    "19": {
+      "en": "Throughout this course, we've been making use of a little shorthand for writing out text blocks very",
+      "zh_tw": "在整個課程中，我們一直使用一種簡寫來很",
+      "zh_cn": "在整个课程中，我们一直使用一种简写來很"
+    },
+    "20": {
+      "en": "frequently, and I'm showing that on the left-hand side. So this is a user message that is using the",
+      "zh_tw": "頻繁地寫出文字區塊，我在左邊展示了。這是一個使用",
+      "zh_cn": "频繁地写出文字区块，我在左边展示了。这是一个使用"
+    },
+    "21": {
+      "en": "shorthand for defining a text block. If we have a user message that only has a little bit of text",
+      "zh_tw": "定義文字區塊的簡寫的使用者訊息。如果使用者訊息只有一小段文字",
+      "zh_cn": "定义文字区块的简写的使用者信息。如果使用者信息只有一小段文字"
+    },
+    "22": {
+      "en": "assigned to it, we can assign a string directly to that content field. There is another way in which",
+      "zh_tw": "我們可以直接把字串指派給 content 欄位。還有另一種",
+      "zh_cn": "我们可以直接把字符串指派给 content 字段。还有另一种"
+    },
+    "23": {
+      "en": "we can write out a text block, and I'm showing this alternative way of writing out a text block on the",
+      "zh_tw": "寫出文字區塊的方式，我在右邊展示了另一種寫法。",
+      "zh_cn": "写出文字区块的方式，我在右边展示了另一种写法。"
+    },
+    "24": {
+      "en": "right-hand side. So the alternative method is to write out a content field, assign a list to it,",
+      "zh_tw": "替代方法是寫出 content 欄位，指派一個列表，",
+      "zh_cn": "替代方法是写出 content 字段，指派一个列表，"
+    },
+    "25": {
+      "en": "and inside there put a dictionary that has a type of text, and then a text field that contains your",
+      "zh_tw": "裡面放一個字典，有 type 為 text，然後 text 欄位包含你的",
+      "zh_cn": "里面放一个字典，有 type 为 text，然后 text 字段包含你的"
+    },
+    "26": {
+      "en": "actual text. Now we have not really been making use of that longhand form, but if you want to use cache",
+      "zh_tw": "實際文字。我們還沒怎麼使用那個長格式，但如果你想使用 cache",
+      "zh_cn": "实际文字。我们还没怎麼使用那个长格式，但如果你想使用 cache"
+    },
+    "27": {
+      "en": "control, you want to turn on this prompt caching feature, you have to write out these text fields",
+      "zh_tw": "control，你想開啟提示詞快取功能，你必須用長格式寫出這些文字欄位。",
+      "zh_cn": "control，你想开啟提示词缓存功能，你必须用长格式写出这些文字字段。"
+    },
+    "28": {
+      "en": "in long form. So you can actually add on that cache control field. In other words, we have to write",
+      "zh_tw": "這樣你才能加上 cache_control 欄位。換句話說，我們必須在",
+      "zh_cn": "这样你才能加上 cache_control 字段。换句话说，我们必须在"
+    },
+    "29": {
+      "en": "out cache control somewhere, and over here on the right-hand side we have some place to put it. If we",
+      "zh_tw": "某處寫出 cache_control，右邊我們有地方放它。如果我們",
+      "zh_cn": "某处写出 cache_control，右边我们有地方放它。如果我们"
+    },
+    "30": {
+      "en": "use the short form, there's no place for us to put it. When we add a breakpoint into a block, all the",
+      "zh_tw": "用短格式，就沒有地方放它。當我們在區塊中加入中斷點，整個請求中",
+      "zh_cn": "用短格式，就没有地方放它。当我们在区块中加入中断点，整个请求中"
+    },
+    "31": {
+      "en": "content in our entire request is going to be cached up to and including that breakpoint. So in this scenario,",
+      "zh_tw": "到包含那個中斷點為止的所有內容都會被快取。在這個情境中，",
+      "zh_cn": "到包含那个中断点为止的所有內容都会被缓存。在这个情境中，"
+    },
+    "32": {
+      "en": "if we send in a request like this, where the first block has a breakpoint, Claude is going to do some",
+      "zh_tw": "如果我們送入像這樣的請求，第一個區塊有中斷點，Claude 會",
+      "zh_cn": "如果我们送入像这样的请求，第一个区块有中断点，Claude 会"
+    },
+    "33": {
+      "en": "amount of work processing this text right here, and it's going to result in some amount of work done.",
+      "zh_tw": "處理這裡的文字，做一些工作。",
+      "zh_cn": "处理这里的文字，做一些工作。"
+    },
+    "34": {
+      "en": "Because this text block has a breakpoint, this work is going to be stored inside the cache.",
+      "zh_tw": "因為這個文字區塊有中斷點，這些工作會被存入快取。",
+      "zh_cn": "因为这个文字区块有中断点，这些工作会被存入缓存。"
+    },
+    "35": {
+      "en": "But this later work is after the breakpoint, so it's not going to be cache. If we then send a",
+      "zh_tw": "但後面的工作在中斷點之後，所以不會被快取。如果我們之後送",
+      "zh_cn": "但后面的工作在中断点之后，所以不会被缓存。如果我们之后送"
+    },
+    "36": {
+      "en": "follow-up request later on, Claude is going to take a look into the cache and find that some work was",
+      "zh_tw": "後續請求，Claude 會查看快取，發現處理第一個區塊的工作",
+      "zh_cn": "后续请求，Claude 会查看缓存，发现处理第一个区块的工作"
+    },
+    "37": {
+      "en": "already done for processing this very first block. So it's going to retrieve that work and use it to",
+      "zh_tw": "已經完成了。所以它會取回那些工作並使用，",
+      "zh_cn": "已经完成了。所以它会取回那些工作並使用，"
+    },
+    "38": {
+      "en": "save itself a little bit of effort. One thing to keep in mind is that our follow-up request must have",
+      "zh_tw": "節省一些力氣。要記住的一點是，我們的後續請求必須有",
+      "zh_cn": "节省一些力气。要记住的一点是，我们的后续请求必须有"
+    },
+    "39": {
+      "en": "identical content inside of it all the way up to that breakpoint. So for example, if our initial text",
+      "zh_tw": "一直到那個中斷點為止完全相同的內容。例如，如果我們的初始文字",
+      "zh_cn": "一直到那个中断点为止完全相同的內容。例如，如果我们的初始文字"
+    },
+    "40": {
+      "en": "block right here that had the breakpoint, if we added in just the word please to it, no longer is",
+      "zh_tw": "區塊有中斷點，如果我們只是加入 please 這個字，內容就不再",
+      "zh_cn": "区块有中断点，如果我们只是加入 please 这个字，內容就不再"
+    },
+    "41": {
+      "en": "this content identical. And so this work would not have been used as out of the cache. Instead, Claude",
+      "zh_tw": "相同了。所以那些工作就不會從快取中使用。Claude",
+      "zh_cn": "相同了。所以那些工作就不会从缓存中使用。Claude"
+    },
+    "42": {
+      "en": "would reprocess this entire block and all the content before it. Cache breakpoints can span across",
+      "zh_tw": "會重新處理整個區塊和它之前的所有內容。快取中斷點可以跨越",
+      "zh_cn": "会重新处理整个区块和它之前的所有內容。缓存中断点可以跨越"
+    },
+    "43": {
+      "en": "multiple different messages and multiple different blocks. So for example, if we send in a user message",
+      "zh_tw": "多個不同的訊息和多個不同的區塊。例如，如果我們送入使用者訊息",
+      "zh_cn": "多个不同的信息和多个不同的区块。例如，如果我们送入使用者信息"
+    },
+    "44": {
+      "en": "and then an assistant and then another user, and the very last message here has a block with a breakpoint,",
+      "zh_tw": "然後助理然後另一個使用者，最後一個訊息的區塊有中斷點，",
+      "zh_cn": "然后助理然后另一个使用者，最后一个信息的区块有中断点，"
+    },
+    "45": {
+      "en": "everything is going to be cached up to and including this block right here. So we'd imagine that the work",
+      "zh_tw": "到包含這個區塊為止的所有東西都會被快取。所以我們想像處理",
+      "zh_cn": "到包含这个区块为止的所有東西都会被缓存。所以我们想像处理"
+    },
+    "46": {
+      "en": "that is done to process all three of those messages is going to be stored inside the cache.",
+      "zh_tw": "所有三個訊息的工作都會被存入快取。",
+      "zh_cn": "所有三个信息的工作都会被存入缓存。"
+    },
+    "47": {
+      "en": "Then when we make our follow-up request later on, as long as everything up to and including that",
+      "zh_tw": "然後當我們發送後續請求時，只要到包含中斷點為止的一切",
+      "zh_cn": "然后当我们发送后续请求时，只要到包含中断点为止的一切"
+    },
+    "48": {
+      "en": "breakpoint is identical, the work is going to be retrieved out of the cache. And again, we're going",
+      "zh_tw": "都相同，工作就會從快取中取回。同樣，我們",
+      "zh_cn": "都相同，工作就会从缓存中取回。同样，我们"
+    },
+    "49": {
+      "en": "to save ourselves a little bit of effort. We are not restricted to adding cache points onto text blocks.",
+      "zh_tw": "會節省一些力氣。我們不限於只在文字區塊上加快取點。",
+      "zh_cn": "会节省一些力气。我们不限於只在文字区块上加缓存点。"
+    },
+    "50": {
+      "en": "We can also add them onto almost any other type of block, like an image block or a tool use or a tool",
+      "zh_tw": "我們也可以加在幾乎任何其他類型的區塊上，像圖片區塊或 tool use 或 tool",
+      "zh_cn": "我们也可以加在幾乎任何其他类型的区块上，像圖片区块或 tool use 或 tool"
+    },
+    "51": {
+      "en": "result. We can also add these onto tool schemas and onto system prompts as well. And I've shown an",
+      "zh_tw": "result。我們也可以加在工具 schema 和系統提示詞上。我在",
+      "zh_cn": "result。我们也可以加在工具 schema 和系统提示词上。我在"
+    },
+    "52": {
+      "en": "example of both those on the right-hand side. You are very often going to enable caching for your",
+      "zh_tw": "右邊展示了兩者的例子。你會非常常為你的",
+      "zh_cn": "右边展示了兩者的例子。你会非常常为你的"
+    },
+    "53": {
+      "en": "tools and for your system prompt as well, because it turns out that for most applications, not all,",
+      "zh_tw": "工具和系統提示詞啟用快取，因為在大多數應用程式中，不是全部，",
+      "zh_cn": "工具和系统提示词啟用缓存，因为在大多数应用程序中，不是全部，"
+    },
+    "54": {
+      "en": "but for many applications, your system prompt and your list of tools don't end up changing.",
+      "zh_tw": "但在很多應用程式中，你的系統提示詞和工具列表不會改變。",
+      "zh_cn": "但在很多应用程序中，你的系统提示词和工具列表不会改变。"
+    },
+    "55": {
+      "en": "So these are excellent places to place a cache breakpoint. In total, we can apply a breakpoint",
+      "zh_tw": "所以這些是放置快取中斷點的絕佳位置。總共我們可以在",
+      "zh_cn": "所以这些是放置缓存中断点的绝佳位置。总共我们可以在"
+    },
+    "56": {
+      "en": "to tool schemas, system prompts, and message blocks. Now, these are not three separate cache systems.",
+      "zh_tw": "工具 schema、系統提示詞和訊息區塊上設定中斷點。這不是三個獨立的快取系統。",
+      "zh_cn": "工具 schema、系统提示词和信息区块上设定中断点。这不是三个独立的缓存系统。"
+    },
+    "57": {
+      "en": "And let me show you exactly what I mean by that. Whenever you add in tools, a system prompt and",
+      "zh_tw": "讓我準確展示我的意思。當你加入工具、系統提示詞和",
+      "zh_cn": "让我准确展示我的意思。当你加入工具、系统提示词和"
+    },
+    "58": {
+      "en": "messages behind the scenes, these all get joined together when they are fed into clod and they get",
+      "zh_tw": "訊息時，在幕後它們送入 Claude 時會被合在一起，而且以",
+      "zh_cn": "信息时，在幕后它们送入 Claude 时会被合在一起，而且以"
+    },
+    "59": {
+      "en": "joined together in that particular order. It is first the tools, then the system prompt, and then",
+      "zh_tw": "那個特定順序合併。先是工具，然後系統提示詞，然後",
+      "zh_cn": "那个特定顺序合併。先是工具，然后系统提示词，然后"
+    },
+    "60": {
+      "en": "your list of messages. So if you place a cache breakpoint on your very last tool, everything up to",
+      "zh_tw": "訊息列表。如果你在最後一個工具上放快取中斷點，到包含",
+      "zh_cn": "信息列表。如果你在最后一个工具上放缓存中断点，到包含"
+    },
+    "61": {
+      "en": "and including that last tool will be cached, but the system prompt and your list of messages will not",
+      "zh_tw": "那個工具為止的所有東西都會被快取，但系統提示詞和訊息列表不會",
+      "zh_cn": "那个工具为止的所有東西都会被缓存，但系统提示词和信息列表不会"
+    },
+    "62": {
+      "en": "be cached. So if we then make a follow-up request and we change that assistant message right there,",
+      "zh_tw": "被快取。如果我們之後發送後續請求並更改那個助理訊息，",
+      "zh_cn": "被缓存。如果我们之后发送后续请求並更改那个助理信息，"
+    },
+    "63": {
+      "en": "totally fine. We're still going to save ourselves a little bit of work because the list of tools",
+      "zh_tw": "完全沒問題。我們仍然會節省一些工作，因為工具列表",
+      "zh_cn": "完全没问题。我们仍然会节省一些工作，因为工具列表"
+    },
+    "64": {
+      "en": "was cached ahead of time. The last thing I want to mention very quickly is that we can add in",
+      "zh_tw": "已經提前快取了。最後我想快速提到的是我們可以加入",
+      "zh_cn": "已经提前缓存了。最后我想快速提到的是我们可以加入"
+    },
+    "65": {
+      "en": "multiple different cache breakpoints, up to four in total. So I might decide to add in a cache",
+      "zh_tw": "多個不同的快取中斷點，最多四個。我可能決定在最後一個傳入的工具 schema 上加一個快取",
+      "zh_cn": "多个不同的缓存中断点，最多四个。我可能决定在最后一个传入的工具 schema 上加一个缓存"
+    },
+    "66": {
+      "en": "breakpoint at the last tool schema that I pass in, and then maybe I add in a cache breakpoint on this",
+      "zh_tw": "中斷點，然後也許在下面的助理訊息上加一個。如果我之後發送後續請求並更改下面的使用者訊息，",
+      "zh_cn": "中断点，然后也许在下面的助理信息上加一个。如果我之后发送后续请求並更改下面的使用者信息，"
+    },
+    "67": {
+      "en": "assistant message down here. If I then make a follow-up request and I change the user message down here,",
+      "zh_tw": "沒問題。我們會節省重新處理整個工具列表和",
+      "zh_cn": "没问题。我们会节省重新处理整个工具列表和"
+    },
+    "68": {
+      "en": "no problem. We're going to save ourselves the work of having to reprocess the entire list of tools",
+      "zh_tw": "系統提示詞和使用者訊息的工作。同樣，如果我們更改第一個使用者訊息，",
+      "zh_cn": "系统提示词和使用者信息的工作。同样，如果我们更改第一个使用者信息，"
+    },
+    "69": {
+      "en": "and the system prompt and user message as well. Likewise, if we change the first user message,",
+      "zh_tw": "那麼我們會讓下面所有東西的快取失效，但我們仍然有",
+      "zh_cn": "那麼我们会让下面所有東西的缓存失效，但我们仍然有"
+    },
+    "70": {
+      "en": "well, then we're going to invalidate the cache for everything down here, but we'll still have",
+      "zh_tw": "工具列表的快取工作。所以我們會非常常加入多個不同的快取",
+      "zh_cn": "工具列表的缓存工作。所以我们会非常常加入多个不同的缓存"
+    },
+    "71": {
+      "en": "the cache work for our list of tools. So we are very often going to add in multiple different cache",
+      "zh_tw": "中斷點，如果適當的話。我們可能決定快取整個工具列表和系統提示詞，",
+      "zh_cn": "中断点，如果适当的话。我们可能决定缓存整个工具列表和系统提示词，"
+    },
+    "72": {
+      "en": "breakpoints, if appropriate. We might decide to cache our entire list of tools and the system prompt,",
+      "zh_tw": "也許還有一些訊息。你到底把這些中斷點放在哪裡，",
+      "zh_cn": "也许还有一些信息。你到底把这些中断点放在哪里，"
+    },
+    "73": {
+      "en": "and maybe some number of messages as well. Exactly where you place these different breakpoints,",
+      "zh_tw": "真的取決於你的特定應用程式。最後我想",
+      "zh_cn": "真的取决於你的特定应用程序。最后我想"
+    },
+    "74": {
+      "en": "really just comes down to your particular application. The very last thing I want to",
+      "zh_tw": "分享的是快取有最小內容長度。要快取一些",
+      "zh_cn": "分享的是缓存有最小內容长度。要缓存一些"
+    },
+    "75": {
+      "en": "share with you is that there is a minimum content length for caching. So in order to cache some amount",
+      "zh_tw": "內容，我們必須快取至少 1024 個 token。在右上的例子中，我在",
+      "zh_cn": "內容，我们必须缓存至少 1024 个 token。在右上的例子中，我在"
+    },
+    "76": {
+      "en": "of content, we must cache at least 1024 tokens. So on the top right-hand example, I've got a cache",
+      "zh_tw": "只有 hi there 文字的訊息上設了快取中斷點。這絕對不到 1024 個 token，",
+      "zh_cn": "只有 hi there 文字的信息上设了缓存中断点。这绝对不到 1024 个 token，"
+    },
+    "77": {
+      "en": "breakpoint on a message that has only the text, hi there. This is definitely not 1024 tokens long,",
+      "zh_tw": "所以這個內容不會被寫入快取。但如果我把那個文字區塊複製",
+      "zh_cn": "所以这个內容不会被写入缓存。但如果我把那个文字区块复製"
+    },
+    "78": {
+      "en": "so this content would not be written to the cache. But if I took that text block and duplicate it",
+      "zh_tw": "500 次，現在我大概有超過 1024 個 token，所以這整個不同區塊的列表",
+      "zh_cn": "500 次，现在我大概有超过 1024 个 token，所以这整个不同区块的列表"
+    },
+    "79": {
+      "en": "500 times, now I've probably got greater than 1024 tokens, so this entire list of different blocks",
+      "zh_tw": "就會被快取。",
+      "zh_cn": "就会被缓存。"
+    },
+    "80": {
+      "en": "would be cached.",
+      "zh_tw": "就會被快取。",
+      "zh_cn": "就会被缓存。"
+    }
+  }
+}

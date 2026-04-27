@@ -1,0 +1,737 @@
+{
+  "srt_file": "State_and_the_StreamableHTTP_transport_HvW2By5D.srt",
+  "video_file": "State_and_the_StreamableHTTP_transport_HvW2By5D.mp4",
+  "max_valid_entry": 146,
+  "entries": {
+    "1": {
+      "en": "The last thing we need to do is understand what the stateless and JSON response flags are all about.",
+      "zh_tw": "我們最後要理解的是 stateless 和 JSON response 旗標到底是什麼。",
+      "zh_cn": "我们最后要理解的是 stateless 和 JSON response 旗标到底是什麼。"
+    },
+    "2": {
+      "en": "How do they affect our server and when would we ever set them to true?",
+      "zh_tw": "它們如何影響我們的伺服器，什麼時候我們會把它們設為 true？",
+      "zh_cn": "它们如何影响我们的服务器，什麼时候我们会把它们设为 true？"
+    },
+    "3": {
+      "en": "I first want to walk you through a scenario where we might want to set these things to true",
+      "zh_tw": "我先帶你走過一個我們可能想把這些設為 true 的場景，",
+      "zh_cn": "我先帶你走过一个我们可能想把这些设为 true 的场景，"
+    },
+    "4": {
+      "en": "because it really frames why these flags exist and how they affect our server.",
+      "zh_tw": "因為它真正解釋了為什麼這些旗標存在以及它們如何影響伺服器。",
+      "zh_cn": "因为它真正解釋了为什麼这些旗标存在以及它们如何影响服务器。"
+    },
+    "5": {
+      "en": "Let's imagine that you and I build an MCP server and we deploy it somewhere publicly online",
+      "zh_tw": "假設你和我建了一個 MCP 伺服器，然後把它部署到公開的線上環境，",
+      "zh_cn": "假设你和我建了一个 MCP 服务器，然后把它部署到公开的线上环境，"
+    },
+    "6": {
+      "en": "where anyone can connect to it.",
+      "zh_tw": "任何人都可以連接。",
+      "zh_cn": "任何人都可以连接。"
+    },
+    "7": {
+      "en": "So maybe we connect to it with our own client",
+      "zh_tw": "也許我們用自己的客戶端連接，",
+      "zh_cn": "也许我们用自己的客户端连接，"
+    },
+    "8": {
+      "en": "and then some other people connect to it with their own clients as well.",
+      "zh_tw": "然後其他人也用他們的客戶端連接。",
+      "zh_cn": "然后其他人也用他们的客户端连接。"
+    },
+    "9": {
+      "en": "Over time, our server might become really, really popular.",
+      "zh_tw": "隨著時間，我們的伺服器可能變得非常、非常受歡迎。",
+      "zh_cn": "随著时间，我们的服务器可能变得非常、非常受欢迎。"
+    },
+    "10": {
+      "en": "And in addition to the three initial clients we had connected,",
+      "zh_tw": "除了最初連接的三個客戶端，",
+      "zh_cn": "除了最初连接的三个客户端，"
+    },
+    "11": {
+      "en": "maybe many, many other people connect to it as well.",
+      "zh_tw": "可能還有很多很多其他人也連接了。",
+      "zh_cn": "可能还有很多很多其他人也连接了。"
+    },
+    "12": {
+      "en": "At a certain point, running a single instance of our server on a single machine",
+      "zh_tw": "到某個時候，在單一機器上執行單一實例的伺服器",
+      "zh_cn": "到某个时候，在单一机器上执行单一实例的服务器"
+    },
+    "13": {
+      "en": "would probably not scale to the amount of traffic that is incoming.",
+      "zh_tw": "可能無法承受進來的流量。",
+      "zh_cn": "可能无法承受进來的流量。"
+    },
+    "14": {
+      "en": "So one way we might solve this is through a little bit of horizontal scaling.",
+      "zh_tw": "一種解決方式是透過水平擴展。",
+      "zh_cn": "一种解决方式是透过水平扩展。"
+    },
+    "15": {
+      "en": "With horizontal scaling, we might run multiple copies of our server",
+      "zh_tw": "透過水平擴展，我們可能執行多個伺服器副本，",
+      "zh_cn": "透过水平扩展，我们可能执行多个服务器副本，"
+    },
+    "16": {
+      "en": "and then gate access to them with a load balancer.",
+      "zh_tw": "然後用負載平衡器來控制存取。",
+      "zh_cn": "然后用负載平衡器來控制访问。"
+    },
+    "17": {
+      "en": "So any incoming request would be randomly routed to one of these different servers.",
+      "zh_tw": "任何進來的請求會被隨機路由到不同的伺服器之一。",
+      "zh_cn": "任何进來的请求会被随机路由到不同的服务器之一。"
+    },
+    "18": {
+      "en": "This would allow us to scale up to meet higher demands of traffic.",
+      "zh_tw": "這讓我們能擴展以應對更高的流量需求。",
+      "zh_cn": "这让我们能扩展以应对更高的流量需求。"
+    },
+    "19": {
+      "en": "Now let's think about what would happen if we put a load balancer here,",
+      "zh_tw": "現在讓我們想想如果放一個負載平衡器會發生什麼，",
+      "zh_cn": "现在让我们想想如果放一个负載平衡器会发生什麼，"
+    },
+    "20": {
+      "en": "particularly keeping in mind the fact that we want to have",
+      "zh_tw": "特別考慮到我們想要",
+      "zh_cn": "特別考慮到我们想要"
+    },
+    "21": {
+      "en": "really two separate connections to our MCP server from any given client.",
+      "zh_tw": "從任何客戶端到 MCP 伺服器有兩個獨立的連接。",
+      "zh_cn": "从任何客户端到 MCP 服务器有兩个独立的连接。"
+    },
+    "22": {
+      "en": "First, we want to have that running git request running at all times",
+      "zh_tw": "首先，我們要有那個持續運行的 GET 請求，",
+      "zh_cn": "首先，我们要有那个持续运行的 GET 请求，"
+    },
+    "23": {
+      "en": "so we can receive requests from the server to the client.",
+      "zh_tw": "這樣我們才能收到從伺服器到客戶端的請求。",
+      "zh_cn": "这样我们才能收到从服务器到客户端的请求。"
+    },
+    "24": {
+      "en": "And our client also needs to make post requests",
+      "zh_tw": "客戶端也需要發送 POST 請求，",
+      "zh_cn": "客户端也需要发送 POST 请求，"
+    },
+    "25": {
+      "en": "and then receive a SSE response with some number of messages inside of it as well.",
+      "zh_tw": "然後收到一個帶有一些訊息的 SSE 回應。",
+      "zh_cn": "然后收到一个帶有一些信息的 SSE 回应。"
+    },
+    "26": {
+      "en": "So let's consider just one client connecting to maybe two different servers.",
+      "zh_tw": "讓我們只考慮一個客戶端連接到兩個不同的伺服器。",
+      "zh_cn": "让我们只考慮一个客户端连接到兩个不同的服务器。"
+    },
+    "27": {
+      "en": "This client would then make an initial request,",
+      "zh_tw": "這個客戶端會發送一個初始請求，",
+      "zh_cn": "这个客户端会发送一个初始请求，"
+    },
+    "28": {
+      "en": "setting up that initial git SSE response pipeline.",
+      "zh_tw": "建立初始的 GET SSE 回應管道。",
+      "zh_cn": "建立初始的 GET SSE 回应管道。"
+    },
+    "29": {
+      "en": "So we then imagine that we've got this response pending",
+      "zh_tw": "我們可以想像這個回應正在等待中，",
+      "zh_cn": "我们可以想像这个回应正在等待中，"
+    },
+    "30": {
+      "en": "or kind of running continuously down to the client.",
+      "zh_tw": "或者持續地向客戶端串流。",
+      "zh_cn": "或者持续地向客户端流式。"
+    },
+    "31": {
+      "en": "Again, remember, this is all about allowing a server",
+      "zh_tw": "再次記住，這一切都是為了允許伺服器",
+      "zh_cn": "再次记住，这一切都是为了允许服务器"
+    },
+    "32": {
+      "en": "to send a request down to the client.",
+      "zh_tw": "向客戶端發送請求。",
+      "zh_cn": "向客户端发送请求。"
+    },
+    "33": {
+      "en": "Then maybe at some future point in time, the client decides to run a tool.",
+      "zh_tw": "然後也許在未來某個時間點，客戶端決定執行一個工具。",
+      "zh_cn": "然后也许在未來某个时间点，客户端决定执行一个工具。"
+    },
+    "34": {
+      "en": "So it might make a call tool request using a post request.",
+      "zh_tw": "它可能用 POST 請求發送一個 call tool request。",
+      "zh_cn": "它可能用 POST 请求发送一个 call tool request。"
+    },
+    "35": {
+      "en": "And maybe this request gets routed to the second MCP server.",
+      "zh_tw": "也許這個請求被路由到第二個 MCP 伺服器。",
+      "zh_cn": "也许这个请求被路由到第二个 MCP 服务器。"
+    },
+    "36": {
+      "en": "The second server would then respond by setting up its own separate SSE response.",
+      "zh_tw": "第二個伺服器會回應建立自己獨立的 SSE 回應。",
+      "zh_cn": "第二个服务器会回应建立自己独立的 SSE 回应。"
+    },
+    "37": {
+      "en": "Now at this point in time, I'm not going to show the load balancer just for clarity.",
+      "zh_tw": "此時，為了清楚起見，我不會顯示負載平衡器。",
+      "zh_cn": "此时，为了清楚起見，我不会显示负載平衡器。"
+    },
+    "38": {
+      "en": "As the tool runs inside that server,",
+      "zh_tw": "當工具在那個伺服器上執行時，",
+      "zh_cn": "当工具在那个服务器上执行时，"
+    },
+    "39": {
+      "en": "let's imagine for a second that it needs to make use of Claude.",
+      "zh_tw": "讓我們假設它需要使用 Claude。",
+      "zh_cn": "让我们假设它需要使用 Claude。"
+    },
+    "40": {
+      "en": "And it might try to make use of Claude by creating a create message request.",
+      "zh_tw": "它可能透過建立一個 create message request 來使用 Claude。",
+      "zh_cn": "它可能透过建立一个 create message request 來使用 Claude。"
+    },
+    "41": {
+      "en": "Remember that represents a attempt to use sampling.",
+      "zh_tw": "記住那代表嘗試使用取樣。",
+      "zh_cn": "记住那代表嘗试使用取样。"
+    },
+    "42": {
+      "en": "Now sampling requests always need to go through the git SSE response,",
+      "zh_tw": "取樣請求總是需要通過 GET SSE 回應，",
+      "zh_cn": "取样请求总是需要通过 GET SSE 回应，"
+    },
+    "43": {
+      "en": "but that connection has been formed by a completely separate server.",
+      "zh_tw": "但那個連接是由完全不同的伺服器建立的。",
+      "zh_cn": "但那个连接是由完全不同的服务器建立的。"
+    },
+    "44": {
+      "en": "So we would need to figure out some way to get this request right here",
+      "zh_tw": "我們需要想辦法把這裡的請求",
+      "zh_cn": "我们需要想办法把这里的请求"
+    },
+    "45": {
+      "en": "over to this other server and have this server send the request down",
+      "zh_tw": "轉移到另一個伺服器，讓那個伺服器透過",
+      "zh_cn": "转移到另一个服务器，让那个服务器透过"
+    },
+    "46": {
+      "en": "through this git SSE response,",
+      "zh_tw": "GET SSE 回應把請求發送下去，",
+      "zh_cn": "GET SSE 回应把请求发送下去，"
+    },
+    "47": {
+      "en": "have the MCP client run Claude, generate some text,",
+      "zh_tw": "讓 MCP 客戶端執行 Claude、生成一些文字，",
+      "zh_cn": "让 MCP 客户端执行 Claude、生成一些文字，"
+    },
+    "48": {
+      "en": "send it back to this server,",
+      "zh_tw": "發送回這個伺服器，",
+      "zh_cn": "发送回这个服务器，"
+    },
+    "49": {
+      "en": "and then somehow get that generated text back over to this server.",
+      "zh_tw": "然後某種方式把生成的文字傳回那個伺服器。",
+      "zh_cn": "然后某种方式把生成的文字传回那个服务器。"
+    },
+    "50": {
+      "en": "As you can tell right away,",
+      "zh_tw": "你馬上就能看出，",
+      "zh_cn": "你马上就能看出，"
+    },
+    "51": {
+      "en": "coordinating all this would be really, really challenging.",
+      "zh_tw": "協調所有這些會非常、非常困難。",
+      "zh_cn": "协调所有这些会非常、非常困难。"
+    },
+    "52": {
+      "en": "Now it absolutely could be done,",
+      "zh_tw": "確實可以做到，",
+      "zh_cn": "确实可以做到，"
+    },
+    "53": {
+      "en": "but it represents a lot of difficulty",
+      "zh_tw": "但代表了很多困難",
+      "zh_cn": "但代表了很多困难"
+    },
+    "54": {
+      "en": "and a lot of added configuration and infrastructure.",
+      "zh_tw": "和很多額外的配置和基礎設施。",
+      "zh_cn": "和很多额外的配置和基础设施。"
+    },
+    "55": {
+      "en": "So if we are building an MCP server that we expect to scale horizontally,",
+      "zh_tw": "如果我們正在建構一個預期要水平擴展的 MCP 伺服器，",
+      "zh_cn": "如果我们正在建构一个预期要水平扩展的 MCP 服务器，"
+    },
+    "56": {
+      "en": "and we do not want to go through all this extra coordination and infrastructure setup,",
+      "zh_tw": "而且不想經歷所有這些額外的協調和基礎設施設定，",
+      "zh_cn": "而且不想经历所有这些额外的协调和基础设施设定，"
+    },
+    "57": {
+      "en": "we might decide to set that stateless HTTP flag to true.",
+      "zh_tw": "我們可能會決定把 stateless HTTP 旗標設為 true。",
+      "zh_cn": "我们可能会决定把 stateless HTTP 旗标设为 true。"
+    },
+    "58": {
+      "en": "Setting this flag to true has one immediate but very important effect.",
+      "zh_tw": "設定這個旗標為 true 有一個立即但非常重要的效果。",
+      "zh_cn": "设定这个旗标为 true 有一个立即但非常重要的效果。"
+    },
+    "59": {
+      "en": "It means that clients do not get a session ID.",
+      "zh_tw": "它意味著客戶端不會得到 session ID。",
+      "zh_cn": "它意味著客户端不会得到 session ID。"
+    },
+    "60": {
+      "en": "And that means that a server can never keep track of a client.",
+      "zh_tw": "那意味著伺服器永遠無法追蹤客戶端。",
+      "zh_cn": "那意味著服务器永远无法追蹤客户端。"
+    },
+    "61": {
+      "en": "Right away, that has some really big follow-up effects.",
+      "zh_tw": "馬上就有一些很大的連帶效果。",
+      "zh_cn": "马上就有一些很大的连帶效果。"
+    },
+    "62": {
+      "en": "Without a session ID,",
+      "zh_tw": "沒有 session ID，",
+      "zh_cn": "没有 session ID，"
+    },
+    "63": {
+      "en": "the MCP server can no longer make use of the git SSE response pathway",
+      "zh_tw": "MCP 伺服器就不能再使用 GET SSE 回應路徑",
+      "zh_cn": "MCP 服务器就不能再使用 GET SSE 回应路徑"
+    },
+    "64": {
+      "en": "to send requests down to the client.",
+      "zh_tw": "來向客戶端發送請求了。",
+      "zh_cn": "來向客户端发送请求了。"
+    },
+    "65": {
+      "en": "To understand why that response pathway can't be used anymore,",
+      "zh_tw": "要理解為什麼那個回應路徑不能再用，",
+      "zh_cn": "要理解为什麼那个回应路徑不能再用，"
+    },
+    "66": {
+      "en": "I'd encourage you to think of a bank where you don't have any account IDs.",
+      "zh_tw": "我建議你想像一家沒有帳戶 ID 的銀行。",
+      "zh_cn": "我建议你想像一家没有帳戶 ID 的銀行。"
+    },
+    "67": {
+      "en": "So a bank might receive money,",
+      "zh_tw": "銀行可能收到錢，",
+      "zh_cn": "銀行可能收到钱，"
+    },
+    "68": {
+      "en": "but it wouldn't really know who gave them the money.",
+      "zh_tw": "但不知道是誰給的。",
+      "zh_cn": "但不知道是誰给的。"
+    },
+    "69": {
+      "en": "And it wouldn't really know who to give money to,",
+      "zh_tw": "也不知道該把錢給誰，",
+      "zh_cn": "也不知道该把钱给誰，"
+    },
+    "70": {
+      "en": "because it doesn't know who is owed what.",
+      "zh_tw": "因為不知道誰欠誰。",
+      "zh_cn": "因为不知道誰欠誰。"
+    },
+    "71": {
+      "en": "That's the same situation here without any identifying token.",
+      "zh_tw": "沒有任何識別令牌的情況就是這樣。",
+      "zh_cn": "没有任何识別令牌的情況就是这样。"
+    },
+    "72": {
+      "en": "Now, without that git SSE response pathway,",
+      "zh_tw": "沒有那個 GET SSE 回應路徑，",
+      "zh_cn": "没有那个 GET SSE 回应路徑，"
+    },
+    "73": {
+      "en": "that means that because our server can't send any requests on the client,",
+      "zh_tw": "因為伺服器不能向客戶端發送任何請求，",
+      "zh_cn": "因为服务器不能向客户端发送任何请求，"
+    },
+    "74": {
+      "en": "we also can't use features like sampling or progress logging",
+      "zh_tw": "我們也不能使用取樣、進度日誌記錄",
+      "zh_cn": "我们也不能使用取样、进度日志记录"
+    },
+    "75": {
+      "en": "or subscriptions around things like changing resources and so on.",
+      "zh_tw": "或圍繞資源變更等的訂閱功能。",
+      "zh_cn": "或圍繞资源变更等的订阅功能。"
+    },
+    "76": {
+      "en": "There is another upside to this, however.",
+      "zh_tw": "不過這還有另一個好處。",
+      "zh_cn": "不过这还有另一个好处。"
+    },
+    "77": {
+      "en": "In stateless mode,",
+      "zh_tw": "在無狀態模式下，",
+      "zh_cn": "在无状态模式下，"
+    },
+    "78": {
+      "en": "you do not need to go through client initialization anymore.",
+      "zh_tw": "你不再需要經過客戶端初始化。",
+      "zh_cn": "你不再需要经过客户端初始化。"
+    },
+    "79": {
+      "en": "So that means that back over here inside of this application,",
+      "zh_tw": "這意味著回到那個應用程式裡，",
+      "zh_cn": "这意味著回到那个应用程序里，"
+    },
+    "80": {
+      "en": "remember whenever we connect to the server,",
+      "zh_tw": "記住每當我們連接伺服器時，",
+      "zh_cn": "记住每当我们连接服务器时，"
+    },
+    "81": {
+      "en": "we had to make that initial initialized request",
+      "zh_tw": "我們必須發送初始的 initialized request",
+      "zh_cn": "我们必须发送初始的 initialized request"
+    },
+    "82": {
+      "en": "and then the follow-up initialized notification.",
+      "zh_tw": "然後後續的 initialized notification。",
+      "zh_cn": "然后后续的 initialized notification。"
+    },
+    "83": {
+      "en": "When you're in stateless mode,",
+      "zh_tw": "在無狀態模式下，",
+      "zh_cn": "在无状态模式下，"
+    },
+    "84": {
+      "en": "you do not have to make those two requests,",
+      "zh_tw": "你不必發送那兩個請求，",
+      "zh_cn": "你不必发送那兩个请求，"
+    },
+    "85": {
+      "en": "which definitely cuts down on the amount of traffic",
+      "zh_tw": "這確實減少了",
+      "zh_cn": "这确实減少了"
+    },
+    "86": {
+      "en": "that your server is receiving.",
+      "zh_tw": "伺服器收到的流量。",
+      "zh_cn": "服务器收到的流量。"
+    },
+    "87": {
+      "en": "So there is a pretty good trade-off here.",
+      "zh_tw": "所以這裡有一個相當好的權衡。",
+      "zh_cn": "所以这里有一个相当好的权衡。"
+    },
+    "88": {
+      "en": "Now, the other flag that we've been discussing",
+      "zh_tw": "我們一直在討論的另一個旗標",
+      "zh_cn": "我们一直在討论的另一个旗标"
+    },
+    "89": {
+      "en": "has been JSON response.",
+      "zh_tw": "是 JSON response。",
+      "zh_cn": "是 JSON response。"
+    },
+    "90": {
+      "en": "Whenever you set JSON response to true,",
+      "zh_tw": "每當你把 JSON response 設為 true，",
+      "zh_cn": "每当你把 JSON response 设为 true，"
+    },
+    "91": {
+      "en": "that just means that the post requests",
+      "zh_tw": "那只是意味著你發送到客戶端的",
+      "zh_cn": "那只是意味著你发送到客户端的"
+    },
+    "92": {
+      "en": "that you send down to the client",
+      "zh_tw": "POST 請求的回應",
+      "zh_cn": "POST 请求的回应"
+    },
+    "93": {
+      "en": "are not going to have streaming enabled.",
+      "zh_tw": "不會啟用串流。",
+      "zh_cn": "不会啟用流式。"
+    },
+    "94": {
+      "en": "And I can give you a very simple and easy demonstration",
+      "zh_tw": "我可以給你一個非常簡單的示範",
+      "zh_cn": "我可以给你一个非常简单的示范"
+    },
+    "95": {
+      "en": "of what that looks like.",
+      "zh_tw": "來說明那是什麼樣子。",
+      "zh_cn": "來说明那是什麼样子。"
+    },
+    "96": {
+      "en": "So over here, very quickly,",
+      "zh_tw": "這裡很快，",
+      "zh_cn": "这里很快，"
+    },
+    "97": {
+      "en": "let me give you a reminder",
+      "zh_tw": "讓我提醒你",
+      "zh_cn": "让我提醒你"
+    },
+    "98": {
+      "en": "of how this application usually works.",
+      "zh_tw": "這個應用程式通常怎麼運作。",
+      "zh_cn": "这个应用程序通常怎麼运作。"
+    },
+    "99": {
+      "en": "I'll send the initialized request,",
+      "zh_tw": "我會發送 initialized request，",
+      "zh_cn": "我会发送 initialized request，"
+    },
+    "100": {
+      "en": "initialized notification.",
+      "zh_tw": "initialized notification。",
+      "zh_cn": "initialized notification。"
+    },
+    "101": {
+      "en": "And then when I call the add tool function,",
+      "zh_tw": "然後當我呼叫 add 工具函式時，",
+      "zh_cn": "然后当我调用 add 工具函数时，"
+    },
+    "102": {
+      "en": "I'm going to open up that SSE connection",
+      "zh_tw": "會開啟那個 SSE 連接，",
+      "zh_cn": "会开啟那个 SSE 连接，"
+    },
+    "103": {
+      "en": "and I'll first get back a message",
+      "zh_tw": "先收到一條訊息，",
+      "zh_cn": "先收到一条信息，"
+    },
+    "104": {
+      "en": "and then the call tool result.",
+      "zh_tw": "然後 call tool result。",
+      "zh_cn": "然后 call tool result。"
+    },
+    "105": {
+      "en": "Now I'm going to very quickly",
+      "zh_tw": "現在我要很快地",
+      "zh_cn": "现在我要很快地"
+    },
+    "106": {
+      "en": "flip the JSON response flag to true.",
+      "zh_tw": "把 JSON response 旗標改為 true。",
+      "zh_cn": "把 JSON response 旗标改为 true。"
+    },
+    "107": {
+      "en": "And again, that means that all the responses",
+      "zh_tw": "同樣，這意味著所有",
+      "zh_cn": "同样，这意味著所有"
+    },
+    "108": {
+      "en": "that I get back are going to be just the final result",
+      "zh_tw": "我收到的回應只會是最終結果，",
+      "zh_cn": "我收到的回应只会是最终结果，"
+    },
+    "109": {
+      "en": "as plain JSON.",
+      "zh_tw": "以純 JSON 格式。",
+      "zh_cn": "以纯 JSON 格式。"
+    },
+    "110": {
+      "en": "There's no streaming at all.",
+      "zh_tw": "完全沒有串流。",
+      "zh_cn": "完全没有流式。"
+    },
+    "111": {
+      "en": "So I'm going to go through the same process again.",
+      "zh_tw": "我要再走一遍同樣的流程。",
+      "zh_cn": "我要再走一遍同样的流程。"
+    },
+    "112": {
+      "en": "I'm going to run the initialize.",
+      "zh_tw": "我要執行 initialize。",
+      "zh_cn": "我要执行 initialize。"
+    },
+    "113": {
+      "en": "I'm going to run the notification.",
+      "zh_tw": "執行 notification。",
+      "zh_cn": "执行 notification。"
+    },
+    "114": {
+      "en": "And now this time when I call the add function,",
+      "zh_tw": "這次當我呼叫 add 函式時，",
+      "zh_cn": "这次当我调用 add 函数时，"
+    },
+    "115": {
+      "en": "I'm not going to get those intermediate messages",
+      "zh_tw": "不會收到那些中間訊息，",
+      "zh_cn": "不会收到那些中间信息，"
+    },
+    "116": {
+      "en": "about some logging or anything like that.",
+      "zh_tw": "關於日誌之類的。",
+      "zh_cn": "关於日志之类的。"
+    },
+    "117": {
+      "en": "Instead, I'm going to get the final tool call result",
+      "zh_tw": "相反，我會收到最終的 call tool result，",
+      "zh_cn": "相反，我会收到最终的 call tool result，"
+    },
+    "118": {
+      "en": "and nothing else.",
+      "zh_tw": "其他什麼都沒有。",
+      "zh_cn": "其他什麼都没有。"
+    },
+    "119": {
+      "en": "So now if I run this,",
+      "zh_tw": "現在我執行，",
+      "zh_cn": "现在我执行，"
+    },
+    "120": {
+      "en": "we'll see that I'm not streaming response back.",
+      "zh_tw": "我們會看到我沒有串流回應。",
+      "zh_cn": "我们会看到我没有流式回应。"
+    },
+    "121": {
+      "en": "Instead, I'm waiting until the tool call is complete",
+      "zh_tw": "相反，我等到工具呼叫完成，",
+      "zh_cn": "相反，我等到工具调用完成，"
+    },
+    "122": {
+      "en": "and I get just the result and absolutely nothing else.",
+      "zh_tw": "只收到結果，其他什麼都沒有。",
+      "zh_cn": "只收到结果，其他什麼都没有。"
+    },
+    "123": {
+      "en": "No log statements at all.",
+      "zh_tw": "完全沒有日誌語句。",
+      "zh_cn": "完全没有日志语句。"
+    },
+    "124": {
+      "en": "So you can see right away how these two flags",
+      "zh_tw": "你馬上可以看到這兩個旗標",
+      "zh_cn": "你马上可以看到这兩个旗标"
+    },
+    "125": {
+      "en": "have a tremendous impact on how your server behaves.",
+      "zh_tw": "對伺服器的行為有巨大的影響。",
+      "zh_cn": "对服务器的行为有巨大的影响。"
+    },
+    "126": {
+      "en": "But depending upon how you are trying to develop",
+      "zh_tw": "但取決於你如何開發",
+      "zh_cn": "但取决於你如何开发"
+    },
+    "127": {
+      "en": "and deploy your application,",
+      "zh_tw": "和部署你的應用程式，",
+      "zh_cn": "和部署你的应用程序，"
+    },
+    "128": {
+      "en": "setting these flags to true might be entirely appropriate.",
+      "zh_tw": "把這些旗標設為 true 可能完全合適。",
+      "zh_cn": "把这些旗标设为 true 可能完全合适。"
+    },
+    "129": {
+      "en": "All right.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "130": {
+      "en": "Through a lot of patience and many different diagrams,",
+      "zh_tw": "經過很多耐心和許多不同的圖表，",
+      "zh_cn": "经过很多耐心和许多不同的圖表，"
+    },
+    "131": {
+      "en": "I think we finally got a reasonable idea",
+      "zh_tw": "我想我們終於對",
+      "zh_cn": "我想我们终於对"
+    },
+    "132": {
+      "en": "of how the streamable HTTP transport works.",
+      "zh_tw": "Streamable HTTP 傳輸方式的運作有了合理的理解。",
+      "zh_cn": "Streamable HTTP 传输方式的运作有了合理的理解。"
+    },
+    "133": {
+      "en": "So keep in mind these two flags",
+      "zh_tw": "記住這兩個旗標",
+      "zh_cn": "记住这兩个旗标"
+    },
+    "134": {
+      "en": "and exactly how they affect your server.",
+      "zh_tw": "以及它們如何影響你的伺服器。",
+      "zh_cn": "以及它们如何影响你的服务器。"
+    },
+    "135": {
+      "en": "If you are developing your server",
+      "zh_tw": "如果你在本機開發伺服器，",
+      "zh_cn": "如果你在本机开发服务器，"
+    },
+    "136": {
+      "en": "in development on your local machine",
+      "zh_tw": "使用標準 IO 作為傳輸方式，",
+      "zh_cn": "使用标准 IO 作为传输方式，"
+    },
+    "137": {
+      "en": "using a standard IO as your transport,",
+      "zh_tw": "當你部署到生產環境時，",
+      "zh_cn": "当你部署到生产环境时，"
+    },
+    "138": {
+      "en": "when you deploy to production,",
+      "zh_tw": "如果你打算使用 Streamable HTTP 傳輸方式，",
+      "zh_cn": "如果你打算使用 Streamable HTTP 传输方式，"
+    },
+    "139": {
+      "en": "if you are intending to use the streamable HTTP transport,",
+      "zh_tw": "請記住你的伺服器",
+      "zh_cn": "请记住你的服务器"
+    },
+    "140": {
+      "en": "just keep in mind that your server",
+      "zh_tw": "可能會有一些不同的行為。",
+      "zh_cn": "可能会有一些不同的行为。"
+    },
+    "141": {
+      "en": "might behave a little bit differently.",
+      "zh_tw": "所以在開發伺服器時，",
+      "zh_cn": "所以在开发服务器时，"
+    },
+    "142": {
+      "en": "So as you are developing your server,",
+      "zh_tw": "我建議你使用",
+      "zh_cn": "我建议你使用"
+    },
+    "143": {
+      "en": "I would encourage you to use the transport",
+      "zh_tw": "你計畫在生產環境使用的傳輸方式，",
+      "zh_cn": "你计画在生产环境使用的传输方式，"
+    },
+    "144": {
+      "en": "that you plan to use in production",
+      "zh_tw": "因為這會省去",
+      "zh_cn": "因为这会省去"
+    },
+    "145": {
+      "en": "because it's going to save you",
+      "zh_tw": "你後面很多麻煩。",
+      "zh_cn": "你后面很多麻煩。"
+    },
+    "146": {
+      "en": "a lot of trouble down the line.",
+      "zh_tw": "這會省去你後面很多麻煩。",
+      "zh_cn": "这会省去你后面很多麻煩。"
+    }
+  }
+}

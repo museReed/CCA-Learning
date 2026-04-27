@@ -1,0 +1,477 @@
+{
+  "srt_file": "Response_streaming_WyvqnwvX.srt",
+  "video_file": "Response_streaming_WyvqnwvX.mp4",
+  "max_valid_entry": 94,
+  "entries": {
+    "1": {
+      "en": "I want to think back to the original chat interface example that we looked at earlier on inside this",
+      "zh_tw": "我想回想一下我們之前在這個章節中看到的原始聊天介面範例。",
+      "zh_cn": "我想回想一下我们之前在这个章节中看到的原始聊天接口范例。"
+    },
+    "2": {
+      "en": "section. So remember the thought process here is that we've got a chat window running inside of a",
+      "zh_tw": "記住這裡的思路是我們有一個在網頁應用程式或行動應用程式中運行的聊天視窗。",
+      "zh_cn": "记住这里的思路是我们有一个在网页应用程序或行动应用程序中运行的聊天視窗。"
+    },
+    "3": {
+      "en": "web app or a mobile app. A user is going to enter a question that's going to be submitted to our",
+      "zh_tw": "使用者會輸入一個問題，它會被提交到我們的",
+      "zh_cn": "使用者会输入一个问题，它会被提交到我们的"
+    },
+    "4": {
+      "en": "server. We're then going to stuff that into a user message and send it off to Claude. Claude is then",
+      "zh_tw": "伺服器。伺服器會把它轉發給 Claude。Claude 會生成一些文字。",
+      "zh_cn": "服务器。服务器会把它转发给 Claude。Claude 会生成一些文字。"
+    },
+    "5": {
+      "en": "going to send us back an assistant message. We are going to extract the text from it and send it back",
+      "zh_tw": "然後回應會一路傳回來。",
+      "zh_cn": "然后回应会一路传回來。"
+    },
+    "6": {
+      "en": "down to our mobile app or web app. And hopefully that content is going to appear on the screen.",
+      "zh_tw": "但有一個問題。",
+      "zh_cn": "但有一个问题。"
+    },
+    "7": {
+      "en": "Now this all sounds pretty straightforward and easy at this point in time, but there's one little",
+      "zh_tw": "在目前的實作中，使用者必須等到 Claude 完全生成完整個回應後才能看到任何東西。",
+      "zh_cn": "在目前的实作中，使用者必须等到 Claude 完全生成完整个回应后才能看到任何東西。"
+    },
+    "8": {
+      "en": "issue here that we haven't really addressed just yet. You see the time between sending that user",
+      "zh_tw": "對於長回應，這可能意味著幾秒的等待什麼都沒有。",
+      "zh_cn": "对於长回应，这可能意味著幾秒的等待什麼都没有。"
+    },
+    "9": {
+      "en": "message to Claude and then eventually getting an assistant message back can very easily take a lot",
+      "zh_tw": "然後突然整個回應出現。",
+      "zh_cn": "然后突然整个回应出现。"
+    },
+    "10": {
+      "en": "more time than we expect. In some cases it might take 10 seconds or all the way up to 30 seconds",
+      "zh_tw": "這不是一個好的使用者體驗。",
+      "zh_cn": "这不是一个好的使用者体验。"
+    },
+    "11": {
+      "en": "depending upon the size of the input user message and the output assistant message. Now during this",
+      "zh_tw": "使用者可能會以為應用程式卡住了或壞了。",
+      "zh_cn": "使用者可能会以为应用程序卡住了或坏了。"
+    },
+    "12": {
+      "en": "entire time that the user is waiting for a response, we could just show a spinner on the screen, but",
+      "zh_tw": "一個更好的方法是串流回應。",
+      "zh_cn": "一个更好的方法是流式回应。"
+    },
+    "13": {
+      "en": "that's not really a great user experience. Most users expectations are that whenever they enter in",
+      "zh_tw": "有了串流，文字會一片段一片段地顯示給使用者，",
+      "zh_cn": "有了流式，文字会一片段一片段地显示给使用者，"
+    },
+    "14": {
+      "en": "some kind of initial message, like what is quantum computing, they should almost immediately start to",
+      "zh_tw": "就像你在 Claude.ai 或 ChatGPT 上看到的那樣。",
+      "zh_cn": "就像你在 Claude.ai 或 ChatGPT 上看到的那样。"
+    },
+    "15": {
+      "en": "see some response up here on the screen. To get this better user experience, we are going to use a",
+      "zh_tw": "要啟用串流，我們有兩個選項。",
+      "zh_cn": "要啟用流式，我们有兩个选项。"
+    },
+    "16": {
+      "en": "technique known as streaming. So let me tell you a little bit about how streaming works. Our server is",
+      "zh_tw": "第一個是在 create 函式中加入 stream=True。",
+      "zh_cn": "第一个是在 create 函数中加入 stream=True。"
+    },
+    "17": {
+      "en": "still going to send an initial user message off to Claude, but then Claude is going to almost",
+      "zh_tw": "第二個是使用 client.messages.stream 方法。",
+      "zh_cn": "第二个是使用 client.messages.stream 方法。"
+    },
+    "18": {
+      "en": "immediately send back an initial response to us. This initial response doesn't actually contain any",
+      "zh_tw": "讓我先展示 stream=True 的方法。",
+      "zh_cn": "让我先展示 stream=True 的方法。"
+    },
+    "19": {
+      "en": "text content. Instead, it is really just a sign to our server that Claude has received our initial",
+      "zh_tw": "當你設定 stream=True 時，你不再收到單一的完整回應。",
+      "zh_cn": "当你设定 stream=True 时，你不再收到单一的完整回应。"
+    },
+    "20": {
+      "en": "request and that Claude is about to start to generate some amount of text. We are then going to",
+      "zh_tw": "相反，你收到一系列的事件。",
+      "zh_cn": "相反，你收到一系列的事件。"
+    },
+    "21": {
+      "en": "start to receive a stream of events. We're going to go into a lot of detail around exactly what these",
+      "zh_tw": "每個事件包含一小段生成的文字。",
+      "zh_cn": "每个事件包含一小段生成的文字。"
+    },
+    "22": {
+      "en": "events are, but for right now, just understand that they contain pieces of the generated response",
+      "zh_tw": "你可以遍歷這些事件並即時處理每個片段。",
+      "zh_cn": "你可以遍历这些事件並即时处理每个片段。"
+    },
+    "23": {
+      "en": "that we want to send back and eventually display to our users. The number of events that we receive",
+      "zh_tw": "讓我在筆記本中展示。",
+      "zh_cn": "让我在笔记本中展示。"
+    },
+    "24": {
+      "en": "depends upon how much text we are generating. Each event is going to contain just a little bit of the",
+      "zh_tw": "我設定 stream=True 然後用 for 迴圈遍歷事件。",
+      "zh_cn": "我设定 stream=True 然后用 for 循环遍历事件。"
+    },
+    "25": {
+      "en": "overall message that is being generated. So maybe the first event just has the text quantum, and then",
+      "zh_tw": "每個事件都有一個類型。",
+      "zh_cn": "每个事件都有一个类型。"
+    },
+    "26": {
+      "en": "the second one says computing, and the third one is, and so on. Now each event doesn't just contain",
+      "zh_tw": "我們關心的是 content_block_delta 類型的事件。",
+      "zh_cn": "我们关心的是 content_block_delta 类型的事件。"
+    },
+    "27": {
+      "en": "one word, it might contain many words, or even an entire sentence. It really just depends upon how much",
+      "zh_tw": "那些包含實際的文字片段。",
+      "zh_cn": "那些包含实际的文字片段。"
+    },
+    "28": {
+      "en": "time it takes for Claude to generate each little bit of text. Now, as I mentioned, our server is going",
+      "zh_tw": "如果我執行這個，你會看到文字一點一點地出現。",
+      "zh_cn": "如果我执行这个，你会看到文字一点一点地出现。"
+    },
+    "29": {
+      "en": "to receive these events, and our server can optionally take the text out of each event and",
+      "zh_tw": "而不是一次全部出現。",
+      "zh_cn": "而不是一次全部出现。"
+    },
+    "30": {
+      "en": "immediately send it back down to our web app or mobile app or whatever else, where we can display",
+      "zh_tw": "太好了。但這個方法有點低層次。",
+      "zh_cn": "太好了。但这个方法有点低层次。"
+    },
+    "31": {
+      "en": "that little chunk of text on the screen. We can then repeat this process for each additional event",
+      "zh_tw": "有一個更方便的方法使用 client.messages.stream。",
+      "zh_cn": "有一个更方便的方法使用 client.messages.stream。"
+    },
+    "32": {
+      "en": "that we receive on our server. So the net effect is that a user is going to start to see some text",
+      "zh_tw": "使用這個方法，你可以用 with 語句。",
+      "zh_cn": "使用这个方法，你可以用 with 语句。"
+    },
+    "33": {
+      "en": "start to appear chunk by chunk in the chat interface. Let's now go back over to our notebook, and we're going to",
+      "zh_tw": "在 with 區塊裡面，你可以遍歷 stream.text_stream。",
+      "zh_cn": "在 with 区块里面，你可以遍历 stream.text_stream。"
+    },
+    "34": {
+      "en": "write out a little bit of code to better understand how streaming works. All right, so back inside of",
+      "zh_tw": "這會直接給你文字片段，不需要自己過濾事件類型。",
+      "zh_cn": "这会直接给你文字片段，不需要自己过濾事件类型。"
+    },
+    "35": {
+      "en": "my notebook, I still have these three helper functions put together. Now we are going to ignore",
+      "zh_tw": "讓我展示一下。",
+      "zh_cn": "让我展示一下。"
+    },
+    "36": {
+      "en": "the chat function inside of this video, because when we start to use streaming, it doesn't work quite",
+      "zh_tw": "好的，這簡潔多了。",
+      "zh_cn": "好的，这简潔多了。"
+    },
+    "37": {
+      "en": "so well with the chat function as we have implemented it. So I'm going to instead, down here, make a list",
+      "zh_tw": "而且如果你需要在串流完成後取得完整的訊息物件，",
+      "zh_cn": "而且如果你需要在流式完成后取得完整的信息对象，"
+    },
+    "38": {
+      "en": "of messages, and then manually call the client messages.create function. So I'm going to make an empty",
+      "zh_tw": "你可以呼叫 stream.get_final_message()。",
+      "zh_cn": "你可以调用 stream.get_final_message()。"
+    },
+    "39": {
+      "en": "list of messages. I'll add in a user message to messages, and I'm going to ask Claude to maybe write",
+      "zh_tw": "這會給你和使用 create 不帶串流時一樣的完整訊息物件。",
+      "zh_cn": "这会给你和使用 create 不帶流式时一样的完整信息对象。"
+    },
+    "40": {
+      "en": "a one sentence description of a fake database. I'm then going to call client messages create.",
+      "zh_tw": "裡面有完整的文字、使用量和所有其他屬性。",
+      "zh_cn": "里面有完整的文字、使用量和所有其他属性。"
+    },
+    "41": {
+      "en": "I will pass in the name of the model. Still need to provide a max tokens, provide our list of messages,",
+      "zh_tw": "讓我展示那個。",
+      "zh_cn": "让我展示那个。"
+    },
+    "42": {
+      "en": "messages, and then finally, we'll put in an additional keyword argument here of stream is true.",
+      "zh_tw": "你看到了嗎？我們先看到串流的文字，",
+      "zh_cn": "你看到了嗎？我们先看到流式的文字，"
+    },
+    "43": {
+      "en": "This is going to give us back not a final answer, but instead we're going to get a stream of different events.",
+      "zh_tw": "然後最後取得完整的訊息物件。",
+      "zh_cn": "然后最后取得完整的信息对象。"
+    },
+    "44": {
+      "en": "We can iterate through this thing because it is a normal iterator. So we can say for event in stream,",
+      "zh_tw": "這是最好的結合。",
+      "zh_cn": "这是最好的结合。"
+    },
+    "45": {
+      "en": "and then print out event. Now if I run this, we're going to very quickly see a stream of different events",
+      "zh_tw": "你可以串流給使用者看，",
+      "zh_cn": "你可以流式给使用者看，"
+    },
+    "46": {
+      "en": "up here on screen. So each of these represents a different little chunk of data that is being sent",
+      "zh_tw": "同時在最後取得完整的回應來做進一步處理。",
+      "zh_cn": "同时在最后取得完整的回应來做进一步处理。"
+    },
+    "47": {
+      "en": "back to us by Claude. You'll notice that we start off with a event named raw message start event.",
+      "zh_tw": "讓我快速總結串流的重點。",
+      "zh_cn": "让我快速总结流式的重点。"
+    },
+    "48": {
+      "en": "We then get a raw content block start, a raw content block delta. We get several of those as a matter of",
+      "zh_tw": "串流改善了使用者體驗，讓文字隨著生成而出現。",
+      "zh_cn": "流式改善了使用者体验，让文字随著生成而出现。"
+    },
+    "49": {
+      "en": "fact, and then down towards the bottom, we eventually get a content block stop event, a message delta event,",
+      "zh_tw": "你可以用 stream=True 或 client.messages.stream。",
+      "zh_cn": "你可以用 stream=True 或 client.messages.stream。"
+    },
+    "50": {
+      "en": "and a message stop event. So these are all events that are being sent back to us inside of the",
+      "zh_tw": "stream 方法更方便，讓你直接遍歷文字片段。",
+      "zh_cn": "stream 方法更方便，让你直接遍历文字片段。"
+    },
+    "51": {
+      "en": "context of a single request, all coming from Claude. Each of these different events has some meaning in the",
+      "zh_tw": "而且你可以用 get_final_message 來取得完整的回應物件。",
+      "zh_cn": "而且你可以用 get_final_message 來取得完整的回应对象。"
+    },
+    "52": {
+      "en": "context of the overall response that we are getting back from Claude. However, there is one event type that we",
+      "zh_tw": "在真正的應用程式中，你幾乎總是想用串流。",
+      "zh_cn": "在真正的应用程序中，你幾乎总是想用流式。"
+    },
+    "53": {
+      "en": "usually care about a little bit more than all the others, and that is the raw content block delta event.",
+      "zh_tw": "它讓使用者體驗好很多。",
+      "zh_cn": "它让使用者体验好很多。"
+    },
+    "54": {
+      "en": "This event is what contains the actual text that is being generated by Claude and sent back to us chunk by chunk.",
+      "zh_tw": "好的，讓我們繼續下一個主題。",
+      "zh_cn": "好的，让我们继续下一个主题。"
+    },
+    "55": {
+      "en": "In practice, we usually end up getting the same sequence of events over and over. So when we get a response back from",
+      "zh_tw": "接下來我們要看看停止序列和訊息預填。",
+      "zh_cn": "接下來我们要看看停止序列和信息预填。"
+    },
+    "56": {
+      "en": "Claude, we're almost always going to start off with getting a message start, then a content block start,",
+      "zh_tw": "這些功能讓你對 Claude 的輸出有更多控制。",
+      "zh_cn": "这些功能让你对 Claude 的输出有更多控制。"
+    },
+    "57": {
+      "en": "and then we are going to get a sequence of content block deltas. And again, those are what contain the",
+      "zh_tw": "讓我先解釋什麼是停止序列。",
+      "zh_cn": "让我先解釋什麼是停止序列。"
+    },
+    "58": {
+      "en": "actual text. So we usually want to collect all those different events and extract the text from them",
+      "zh_tw": "停止序列是你定義的一個字串，當 Claude 在生成中遇到它時，",
+      "zh_cn": "停止序列是你定义的一个字符串，当 Claude 在生成中遇到它时，"
+    },
+    "59": {
+      "en": "and send that text back down to our web app or mobile app or whatever else we are using.",
+      "zh_tw": "Claude 會立刻停止生成文字。",
+      "zh_cn": "Claude 会立刻停止生成文字。"
+    },
+    "60": {
+      "en": "Now, back inside of our notebook, inside this for loop right here, we could add in a check to take a look",
+      "zh_tw": "例如，如果你設定停止序列為右括號，",
+      "zh_cn": "例如，如果你设定停止序列为右括号，"
+    },
+    "61": {
+      "en": "and figure out what kind of event we are dealing with. And then if it is one of those raw content",
+      "zh_tw": "Claude 會在生成右括號後立刻停下來。",
+      "zh_cn": "Claude 会在生成右括号后立刻停下來。"
+    },
+    "62": {
+      "en": "block delta events, we could reach into it and get the text we actually care about. But that would",
+      "zh_tw": "這對於控制輸出格式非常有用。",
+      "zh_cn": "这对於控制输出格式非常有用。"
+    },
+    "63": {
+      "en": "require a lot of extra code from us. Thankfully, the Anthropic SDK exposes a different way of creating",
+      "zh_tw": "另一個功能是訊息預填。",
+      "zh_cn": "另一个功能是信息预填。"
+    },
+    "64": {
+      "en": "a stream than what I'm showing to you right here. This alternative way of creating a stream, which I'm",
+      "zh_tw": "你可以預先設定助手訊息的開頭。",
+      "zh_cn": "你可以预先设定助手信息的开头。"
+    },
+    "65": {
+      "en": "going to show you in just one moment, makes it a lot easier to just get the text out of the response.",
+      "zh_tw": "這讓你引導 Claude 用特定的格式或風格開始回應。",
+      "zh_cn": "这让你引导 Claude 用特定的格式或风格开始回应。"
+    },
+    "66": {
+      "en": "And again, the text is usually the part of the response that we really care about.",
+      "zh_tw": "例如，如果你在助手訊息中預填 JSON 的開頭大括號，",
+      "zh_cn": "例如，如果你在助手信息中预填 JSON 的开头大括号，"
+    },
+    "67": {
+      "en": "So let me show you an alternative way of streaming a response. I'm going to go down to the next code",
+      "zh_tw": "Claude 會接著生成 JSON 格式的內容。",
+      "zh_cn": "Claude 会接著生成 JSON 格式的內容。"
+    },
+    "68": {
+      "en": "cell. So down here, I'm going to again, make a list of messages, add a user message with a write",
+      "zh_tw": "這兩個功能結合起來非常強大，",
+      "zh_cn": "这兩个功能结合起來非常強大，"
+    },
+    "69": {
+      "en": "a one sentence description of a fake database. And then we're going to call a slightly different",
+      "zh_tw": "特別是當你需要生成結構化資料的時候。",
+      "zh_cn": "特別是当你需要生成结构化数据的时候。"
+    },
+    "70": {
+      "en": "function and wrap it inside of a with block. So we'll say with client messages dot stream.",
+      "zh_tw": "我們在下一支影片中會更詳細地看這個。",
+      "zh_cn": "我们在下一支视频中会更详细地看这个。"
+    },
+    "71": {
+      "en": "And inside of here, we will again put in our model, our max tokens, and our messages.",
+      "zh_tw": "好的，這就是串流的全部內容。",
+      "zh_cn": "好的，这就是流式的全部內容。"
+    },
+    "72": {
+      "en": "But we do not need to add in the stream to true argument. We'll then say as stream colon,",
+      "zh_tw": "讓我們繼續。",
+      "zh_cn": "让我们继续。"
+    },
+    "73": {
+      "en": "I'll then indent and inside of here, it will say for text in stream dot text stream like so.",
+      "zh_tw": "在下一支影片中，我們要看看如何結合停止序列和預填",
+      "zh_cn": "在下一支视频中，我们要看看如何结合停止序列和预填"
+    },
+    "74": {
+      "en": "So now text is going to be just the text part of those different events. So just the text we actually",
+      "zh_tw": "來生成乾淨的結構化資料。",
+      "zh_cn": "來生成乾淨的结构化数据。"
+    },
+    "75": {
+      "en": "care about again, that's almost always the thing that we actually really care about when we are",
+      "zh_tw": "到時見。",
+      "zh_cn": "到时見。"
+    },
+    "76": {
+      "en": "streaming our response from Claude. Now to show you how this actually works, I'm going to add in a",
+      "zh_tw": "好的，我們馬上繼續。",
+      "zh_cn": "好的，我们马上继续。"
+    },
+    "77": {
+      "en": "print statement and log out that text. I'm going to add in a end true of empty string and true of",
+      "zh_tw": "這是串流的快速回顧。",
+      "zh_cn": "这是流式的快速回顧。"
+    },
+    "78": {
+      "en": "empty string. Just make sure that these print statements are not going to add in a new line",
+      "zh_tw": "你應該在你的應用程式中預設使用串流。",
+      "zh_cn": "你应该在你的应用程序中默认使用流式。"
+    },
+    "79": {
+      "en": "character to the end of the print statement. So we'll see each bit of text logged out next to each",
+      "zh_tw": "它讓一切感覺更快更回應性。",
+      "zh_cn": "它让一切感覺更快更回应性。"
+    },
+    "80": {
+      "en": "other. Now I'm going to run this and it's going to occur really quickly, but you'll see that now",
+      "zh_tw": "好的，繼續吧。",
+      "zh_cn": "好的，继续吧。"
+    },
+    "81": {
+      "en": "we are getting a response streamed back to us chunk by chunk. So let me do that again. So run again,",
+      "zh_tw": "讓我們看看結構化資料。",
+      "zh_cn": "让我们看看结构化数据。"
+    },
+    "82": {
+      "en": "I'll see chunk, chunk, chunk. There we go. You'll notice that each chunk contains multiple different",
+      "zh_tw": "這真的是一個非常實用的主題。",
+      "zh_cn": "这真的是一个非常实用的主题。"
+    },
+    "83": {
+      "en": "words. So again, we're not guaranteed to just get back one single word inside of each event,",
+      "zh_tw": "很多應用程式都需要從 Claude 取得 JSON 或其他結構化格式的輸出。",
+      "zh_cn": "很多应用程序都需要从 Claude 取得 JSON 或其他结构化格式的输出。"
+    },
+    "84": {
+      "en": "we might get several. There is one last feature here that I want to show you. Now, as I've mentioned,",
+      "zh_tw": "我們馬上來看怎麼做到。",
+      "zh_cn": "我们马上來看怎麼做到。"
+    },
+    "85": {
+      "en": "we very often want to stream a response back to a mobile app or a web app so that a user can see",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "86": {
+      "en": "each chunk of text appear on the screen as soon as possible. But something else we very often want",
+      "zh_tw": "讓我們看看結構化輸出。",
+      "zh_cn": "让我们看看结构化输出。"
+    },
+    "87": {
+      "en": "to do after completing a stream is take the entire message and maybe store it inside of a database.",
+      "zh_tw": "在很多情況下，你會想從 Claude 取得結構化的資料。",
+      "zh_cn": "在很多情況下，你会想从 Claude 取得结构化的数据。"
+    },
+    "88": {
+      "en": "So we have a record of the entire conversation that was had with a particular user. Let me show you",
+      "zh_tw": "而不只是純文字。",
+      "zh_cn": "而不只是纯文字。"
+    },
+    "89": {
+      "en": "how we can collect all these different events and present them all assembled together inside of one",
+      "zh_tw": "串流讓回應過程對使用者來說更好。",
+      "zh_cn": "流式让回应过程对使用者來说更好。"
+    },
+    "90": {
+      "en": "single final message. I'm going to replace this print statement right here with a pass just so we",
+      "zh_tw": "但結構化資料讓輸出對你的程式碼來說更有用。",
+      "zh_cn": "但结构化数据让输出对你的代码來说更有用。"
+    },
+    "91": {
+      "en": "don't have any printing there. And then after it, I'll do a stream dot get final message. And now if",
+      "zh_tw": "兩者都很重要。",
+      "zh_cn": "兩者都很重要。"
+    },
+    "92": {
+      "en": "I run this again, we are still streaming back a response and we could print it if we wanted to,",
+      "zh_tw": "好的，繼續下一個主題。",
+      "zh_cn": "好的，继续下一个主题。"
+    },
+    "93": {
+      "en": "but we're also going to take all the individual events we get back and assemble them together into",
+      "zh_tw": "結構化資料。",
+      "zh_cn": "结构化数据。"
+    },
+    "94": {
+      "en": "one final message, which we could then store inside of a database or do whatever else we need to do with it.",
+      "zh_tw": "這是很多開發者都需要的一個功能。",
+      "zh_cn": "这是很多开发者都需要的一个功能。"
+    }
+  }
+}

@@ -1,0 +1,322 @@
+{
+  "srt_file": "Accessing_the_API_Ju43Csrd.srt",
+  "video_file": "Accessing_the_API_Ju43Csrd.mp4",
+  "max_valid_entry": 63,
+  "entries": {
+    "1": {
+      "en": "In this module, we are going to examine how we access Claude and use it to generate some text.",
+      "zh_tw": "在這個模組中，我們要來看看如何存取 Claude 並用它來生成一些文字。",
+      "zh_cn": "在这个模组中，我们要來看看如何访问 Claude 並用它來生成一些文字。"
+    },
+    "2": {
+      "en": "To help you understand how this works, I'm going to walk you through the full lifecycle of our",
+      "zh_tw": "為了幫你理解這是怎麼運作的，我要帶你走過我們向",
+      "zh_cn": "为了幫你理解这是怎麼运作的，我要帶你走过我们向"
+    },
+    "3": {
+      "en": "request to the Anthropoc API. We are going to also take a brief look at what is going on behind",
+      "zh_tw": "Anthropic API 發送請求的完整生命週期。我們也會簡單看看 Claude 內部",
+      "zh_cn": "Anthropic API 发送请求的完整生命週期。我们也会简单看看 Claude 內部"
+    },
+    "4": {
+      "en": "the scenes inside of Claude. To get started with this walkthrough, we are going to consider a",
+      "zh_tw": "正在發生什麼。要開始這個介紹，我們來考慮一個",
+      "zh_cn": "正在发生什麼。要开始这个介绍，我们來考慮一个"
+    },
+    "5": {
+      "en": "straightforward standard chatbot app. Let's imagine that you are building a web app and want to show a",
+      "zh_tw": "簡單標準的聊天機器人應用程式。假設你正在建構一個網頁應用程式，想在瀏覽器中對",
+      "zh_cn": "简单标准的聊天机器人应用程序。假设你正在建构一个网页应用程序，想在浏览器中对"
+    },
+    "6": {
+      "en": "chat window to a user in the web browser. When the user enters a message and clicks send, their",
+      "zh_tw": "使用者顯示一個聊天視窗。當使用者輸入訊息並點擊發送，他們的",
+      "zh_cn": "使用者显示一个聊天視窗。当使用者输入信息並点击发送，他们的"
+    },
+    "7": {
+      "en": "expectation is that some response will just magically appear. Now, like I said, I want to",
+      "zh_tw": "期望是某個回應會神奇地出現。就像我說的，我想",
+      "zh_cn": "期望是某个回应会神奇地出现。就像我说的，我想"
+    },
+    "8": {
+      "en": "examine what is going on behind the scenes here to generate this text and display it on the screen.",
+      "zh_tw": "看看幕後到底發生了什麼來生成這段文字並把它顯示在螢幕上。",
+      "zh_cn": "看看幕后到底发生了什麼來生成这段文字並把它显示在屏幕上。"
+    },
+    "9": {
+      "en": "We are going to break this down into five separate steps, which I've outlined at the top of this",
+      "zh_tw": "我們要把這分成五個獨立的步驟，我已經在圖表頂部",
+      "zh_cn": "我们要把这分成五个独立的步驟，我已经在圖表頂部"
+    },
+    "10": {
+      "en": "diagram. And we're going to walk through each step one by one. When a user enters some text and click",
+      "zh_tw": "列出來了。我們會逐步走過每一個。當使用者輸入一些文字並點擊",
+      "zh_cn": "列出來了。我们会逐步走过每一个。当使用者输入一些文字並点击"
+    },
+    "11": {
+      "en": "send, that text is going to be sent off to a server that you, the developer, implement. I mentioned this",
+      "zh_tw": "發送時，那段文字會被送到一個由你這個開發者實作的伺服器。我提到這一步",
+      "zh_cn": "发送时，那段文字会被送到一个由你这个开发者实作的服务器。我提到这一步"
+    },
+    "12": {
+      "en": "step just to make one thing clear. You should not attempt to access the Anthropoc API directly from a",
+      "zh_tw": "只是要說明一件事。你不應該嘗試從網頁或行動應用程式直接存取 Anthropic API。",
+      "zh_cn": "只是要说明一件事。你不应该嘗试从网页或行动应用程序直接访问 Anthropic API。"
+    },
+    "13": {
+      "en": "web or mobile app. Whenever you make a request to the API, you are required to include a secret API key.",
+      "zh_tw": "每當你向 API 發送請求時，你需要包含一個秘密的 API 金鑰。",
+      "zh_cn": "每当你向 API 发送请求时，你需要包含一个秘密的 API 金钥。"
+    },
+    "14": {
+      "en": "And the best way to make sure that this key stays secret is by never including it inside of your",
+      "zh_tw": "確保這個金鑰保持秘密的最佳方式是永遠不要把它放在你的",
+      "zh_cn": "确保这个金钥保持秘密的最佳方式是永远不要把它放在你的"
+    },
+    "15": {
+      "en": "client-side app and only making requests to the API through a server that you implement.",
+      "zh_tw": "客戶端應用程式中，只透過你實作的伺服器來向 API 發送請求。",
+      "zh_cn": "客户端应用程序中，只透过你实作的服务器來向 API 发送请求。"
+    },
+    "16": {
+      "en": "On to step two. Once your server has received a request from the client, the server will make a request",
+      "zh_tw": "進入第二步。一旦你的伺服器收到來自客戶端的請求，伺服器會直接向",
+      "zh_cn": "进入第二步。一旦你的服务器收到來自客户端的请求，服务器会直接向"
+    },
+    "17": {
+      "en": "directly to the Anthropoc API. Usually you'll make this request through one of the SDKs that",
+      "zh_tw": "Anthropic API 發送請求。通常你會透過 Anthropic",
+      "zh_cn": "Anthropic API 发送请求。通常你会透过 Anthropic"
+    },
+    "18": {
+      "en": "Anthropoc has published. There are official SDK implementations for Python, TypeScript, JavaScript,",
+      "zh_tw": "發布的 SDK 來發送這個請求。有 Python、TypeScript、JavaScript、",
+      "zh_cn": "发布的 SDK 來发送这个请求。有 Python、TypeScript、JavaScript、"
+    },
+    "19": {
+      "en": "Go, and Ruby. Now you don't have to use an SDK if you don't want to. You can also make a plain",
+      "zh_tw": "Go 和 Ruby 的官方 SDK 實作。你不一定要用 SDK。你也可以直接發",
+      "zh_cn": "Go 和 Ruby 的官方 SDK 实作。你不一定要用 SDK。你也可以直接发"
+    },
+    "20": {
+      "en": "HTTP request if you wish. When you make this request, you are required to pass along several pieces of",
+      "zh_tw": "HTTP 請求。當你發送這個請求時，你需要傳遞幾項",
+      "zh_cn": "HTTP 请求。当你发送这个请求时，你需要传遞幾项"
+    },
+    "21": {
+      "en": "data. In particular, you need to include an API key, the name of the model you wish to run,",
+      "zh_tw": "資料。特別是你需要包含 API 金鑰、你想執行的模型名稱、",
+      "zh_cn": "数据。特別是你需要包含 API 金钥、你想执行的模型名称、"
+    },
+    "22": {
+      "en": "a list of messages, which will include the text that your user submitted, and a max tokens value,",
+      "zh_tw": "一個訊息列表（包含使用者提交的文字），以及一個 max tokens 值，",
+      "zh_cn": "一个信息列表（包含使用者提交的文字），以及一个 max tokens 值，"
+    },
+    "23": {
+      "en": "which limits the length of the text that Claude will generate. Next up is the Anthropoc API,",
+      "zh_tw": "用來限制 Claude 生成的文字長度。接下來是 Anthropic API，",
+      "zh_cn": "用來限制 Claude 生成的文字长度。接下來是 Anthropic API，"
+    },
+    "24": {
+      "en": "which is where our text will actually be generated. This is where we are going to go",
+      "zh_tw": "這是我們的文字實際被生成的地方。這是我們要",
+      "zh_cn": "这是我们的文字实际被生成的地方。这是我们要"
+    },
+    "25": {
+      "en": "into a little bit of detail on the text generation process within the language model. This process is",
+      "zh_tw": "稍微深入了解語言模型中文字生成過程的地方。這個過程很",
+      "zh_cn": "稍微深入了解语言模型中文字生成过程的地方。这个过程很"
+    },
+    "26": {
+      "en": "complex, so I'm going to give you a simplified high-level overview. We are going to break down",
+      "zh_tw": "複雜，所以我會給你一個簡化的高層次概覽。我們要把",
+      "zh_cn": "复杂，所以我会给你一个简化的高层次概览。我们要把"
+    },
+    "27": {
+      "en": "the text generation process into four separate stages. In the first stage, the user's input will",
+      "zh_tw": "文字生成過程分成四個獨立的階段。在第一階段，使用者的輸入會",
+      "zh_cn": "文字生成过程分成四个独立的阶段。在第一阶段，使用者的输入会"
+    },
+    "28": {
+      "en": "be broken down into smaller strings. Each of these text chunks are referred to as a token.",
+      "zh_tw": "被分解成更小的字串。每個文字片段被稱為一個 token。",
+      "zh_cn": "被分解成更小的字符串。每个文字片段被称为一个 token。"
+    },
+    "29": {
+      "en": "These tokens can be whole words, or a part of word, or even a space or a symbol. To keep things clear,",
+      "zh_tw": "這些 token 可以是完整的詞、詞的一部分，甚至是空格或符號。為了清楚起見，",
+      "zh_cn": "这些 token 可以是完整的词、词的一部分，甚至是空格或符号。为了清楚起見，"
+    },
+    "30": {
+      "en": "we are going to assume that each word forms one single token. Each token is then converted into an",
+      "zh_tw": "我們假設每個詞形成一個 token。每個 token 然後被轉換成一個",
+      "zh_cn": "我们假设每个词形成一个 token。每个 token 然后被转换成一个"
+    },
+    "31": {
+      "en": "embedding. An embedding is a long list of numbers, and you can think of these lists as being like a number",
+      "zh_tw": "嵌入向量。嵌入向量是一長串數字，你可以把這些列表想像成某個詞的",
+      "zh_cn": "嵌入向量。嵌入向量是一长串数字，你可以把这些列表想像成某个词的"
+    },
+    "32": {
+      "en": "based definition of a given word. Now, an interesting aspect of written language is that a single word",
+      "zh_tw": "數字定義。語言有一個有趣的特性，就是一個詞",
+      "zh_cn": "数字定义。语言有一个有趣的特性，就是一个词"
+    },
+    "33": {
+      "en": "can have many possible meanings, and it is only the word's position in a sentence and presence of",
+      "zh_tw": "可以有很多可能的意思，只有透過那個詞在句子中的位置和",
+      "zh_cn": "可以有很多可能的意思，只有透过那个词在句子中的位置和"
+    },
+    "34": {
+      "en": "other words around it that narrows the definition down to one particular meaning. For example,",
+      "zh_tw": "周圍其他詞的存在，才能把定義縮小到一個特定含義。例如，",
+      "zh_cn": "周圍其他词的存在，才能把定义缩小到一个特定含义。例如，"
+    },
+    "35": {
+      "en": "quantum is a word that has many different definitions, and when we see this word, we don't",
+      "zh_tw": "quantum 這個詞有很多不同的定義，當我們看到這個詞時，",
+      "zh_cn": "quantum 这个词有很多不同的定义，当我们看到这个词时，"
+    },
+    "36": {
+      "en": "really know what it means until we see other words around it. Likewise, each embedding can be thought",
+      "zh_tw": "在看到周圍其他詞之前，我們並不真正知道它的意思。同樣，每個嵌入向量可以被認為",
+      "zh_cn": "在看到周圍其他词之前，我们並不真正知道它的意思。同样，每个嵌入向量可以被认为"
+    },
+    "37": {
+      "en": "of as containing all possible meanings of each word. To refine each embedding down to a single",
+      "zh_tw": "包含了每個詞的所有可能意思。為了把每個嵌入向量精煉到一個",
+      "zh_cn": "包含了每个词的所有可能意思。为了把每个嵌入向量精煉到一个"
+    },
+    "38": {
+      "en": "precise definition, a process known as contextualization is used. In contextualization,",
+      "zh_tw": "精確的定義，會使用一個叫做上下文化的過程。在上下文化中，",
+      "zh_cn": "精确的定义，会使用一个叫做上下文化的过程。在上下文化中，"
+    },
+    "39": {
+      "en": "each embedding is adjusted based upon other embeddings around it. This process helps highlight",
+      "zh_tw": "每個嵌入向量會根據周圍的其他嵌入向量來調整。這個過程幫助突顯",
+      "zh_cn": "每个嵌入向量会根据周圍的其他嵌入向量來调整。这个过程幫助突显"
+    },
+    "40": {
+      "en": "the meaning of each embedding that makes the most sense given its neighbors. The last step is",
+      "zh_tw": "在給定鄰居的情況下最合理的每個嵌入向量的含義。最後一步是",
+      "zh_cn": "在给定邻居的情況下最合理的每个嵌入向量的含义。最后一步是"
+    },
+    "41": {
+      "en": "generation, which is where the text actually gets written. By this point, each of the embeddings has",
+      "zh_tw": "生成，這是文字實際被寫出來的地方。到這一步，每個嵌入向量已經",
+      "zh_cn": "生成，这是文字实际被写出來的地方。到这一步，每个嵌入向量已经"
+    },
+    "42": {
+      "en": "absorbed a tremendous amount of information from their neighbors. The final processed embeddings are",
+      "zh_tw": "從鄰居那裡吸收了大量資訊。最終處理過的嵌入向量",
+      "zh_cn": "从邻居那里吸收了大量资讯。最终处理过的嵌入向量"
+    },
+    "43": {
+      "en": "then passed to an output layer, which produces probabilities for each possible next word. Now,",
+      "zh_tw": "然後傳遞到輸出層，產生每個可能下一個詞的機率。",
+      "zh_cn": "然后传遞到输出层，产生每个可能下一个词的机率。"
+    },
+    "44": {
+      "en": "the model doesn't automatically pick the highest probability. Instead, it uses a mix of probability",
+      "zh_tw": "模型不會自動選擇最高機率的。相反，它使用機率和隨機性的混合",
+      "zh_cn": "模型不会自动选择最高机率的。相反，它使用机率和随机性的混合"
+    },
+    "45": {
+      "en": "and randomness to select words, which helps create more natural and varied responses. The selected word",
+      "zh_tw": "來選擇詞，這有助於創造更自然和多樣的回應。被選中的詞",
+      "zh_cn": "來选择词，这有助於创造更自然和多样的回应。被选中的词"
+    },
+    "46": {
+      "en": "is then added on to the end of our list of embeddings, and the entire process repeats itself all over.",
+      "zh_tw": "然後被加到嵌入向量列表的末尾，整個過程重新開始。",
+      "zh_cn": "然后被加到嵌入向量列表的末尾，整个过程重新开始。"
+    },
+    "47": {
+      "en": "After generating each output token, the model will then pause and ask itself several questions to",
+      "zh_tw": "在生成每個輸出 token 後，模型會暫停並問自己幾個問題來",
+      "zh_cn": "在生成每个输出 token 后，模型会暫停並问自己幾个问题來"
+    },
+    "48": {
+      "en": "decide if it is done generating text. First, it will count the number of tokens it has generated",
+      "zh_tw": "決定是否完成了文字生成。首先，它會計算已生成的 token 數量，",
+      "zh_cn": "决定是否完成了文字生成。首先，它会计算已生成的 token 数量，"
+    },
+    "49": {
+      "en": "and see if it is larger than the max tokens parameter that was provided with the input request.",
+      "zh_tw": "看看是否超過了輸入請求中提供的 max tokens 參數。",
+      "zh_cn": "看看是否超过了输入请求中提供的 max tokens 参数。"
+    },
+    "50": {
+      "en": "This max tokens parameter will limit the total number of tokens that the model will generate.",
+      "zh_tw": "這個 max tokens 參數會限制模型生成的總 token 數。",
+      "zh_cn": "这个 max tokens 参数会限制模型生成的总 token 数。"
+    },
+    "51": {
+      "en": "There is also a special end of sequence token that the model can generate. This is not a regular word.",
+      "zh_tw": "還有一個特殊的序列結束 token，模型可以生成它。這不是一般的詞。",
+      "zh_cn": "还有一个特殊的序列结束 token，模型可以生成它。这不是一般的词。"
+    },
+    "52": {
+      "en": "It is a special signal that the model uses to indicate that it has reached what it considers",
+      "zh_tw": "這是模型用來表示它已經到達了它認為的",
+      "zh_cn": "这是模型用來表示它已经到达了它认为的"
+    },
+    "53": {
+      "en": "to be a natural end to its generation and that it should stop. Once the generation is complete,",
+      "zh_tw": "生成自然結束點的特殊信號，應該停止了。一旦生成完成，",
+      "zh_cn": "生成自然结束点的特殊信号，应该停止了。一旦生成完成，"
+    },
+    "54": {
+      "en": "the API will send a response back to your server. The response will contain a message,",
+      "zh_tw": "API 會發送回應給你的伺服器。回應會包含一條訊息，",
+      "zh_cn": "API 会发送回应给你的服务器。回应会包含一条信息，"
+    },
+    "55": {
+      "en": "which has the generated text inside of it, along with usage and stop reason. The usage is a count of",
+      "zh_tw": "裡面有生成的文字，還有使用量和停止原因。使用量是",
+      "zh_cn": "里面有生成的文字，还有使用量和停止原因。使用量是"
+    },
+    "56": {
+      "en": "the number of tokens that you fed into the model and the number of tokens that were generated.",
+      "zh_tw": "你餵入模型的 token 數量和生成的 token 數量的計數。",
+      "zh_cn": "你餵入模型的 token 数量和生成的 token 数量的计数。"
+    },
+    "57": {
+      "en": "The stop reason will tell you exactly why the model decided to stop generating text,",
+      "zh_tw": "停止原因會告訴你模型為什麼決定停止生成文字，",
+      "zh_cn": "停止原因会告訴你模型为什麼决定停止生成文字，"
+    },
+    "58": {
+      "en": "whether it hits a natural end of sequence token, or maybe it exceeded the allotted number of tokens.",
+      "zh_tw": "是遇到了自然的序列結束 token，還是超過了分配的 token 數量。",
+      "zh_cn": "是遇到了自然的序列结束 token，还是超过了分配的 token 数量。"
+    },
+    "59": {
+      "en": "Once your server has received this response, it will send the generated text back to your web or",
+      "zh_tw": "一旦你的伺服器收到回應，它會把生成的文字發送回你的網頁或",
+      "zh_cn": "一旦你的服务器收到回应，它会把生成的文字发送回你的网页或"
+    },
+    "60": {
+      "en": "mobile app, where you will display it on the screen. So that is the entire flow.",
+      "zh_tw": "行動應用程式，在那裡顯示在螢幕上。這就是整個流程。",
+      "zh_cn": "行动应用程序，在那里显示在屏幕上。这就是整个流程。"
+    },
+    "61": {
+      "en": "Now, we covered many topics in this video. I don't expect you to memorize any of this just yet.",
+      "zh_tw": "這支影片涵蓋了很多主題。我不期望你現在就全部記住。",
+      "zh_cn": "这支视频涵蓋了很多主题。我不期望你现在就全部记住。"
+    },
+    "62": {
+      "en": "The only goal is to start to get you familiar with some common terminology around accessing Claude",
+      "zh_tw": "唯一的目標是開始讓你熟悉一些關於透過 API 存取 Claude",
+      "zh_cn": "唯一的目标是开始让你熟悉一些关於透过 API 访问 Claude"
+    },
+    "63": {
+      "en": "through the API.",
+      "zh_tw": "的常見術語。",
+      "zh_cn": "的常見术语。"
+    }
+  }
+}

@@ -1,0 +1,687 @@
+{
+  "srt_file": "The_STDIO_transport_cTx3hRiA.srt",
+  "video_file": "The_STDIO_transport_cTx3hRiA.mp4",
+  "max_valid_entry": 136,
+  "entries": {
+    "1": {
+      "en": "As we discussed a moment ago, clients and servers communicate by exchanging JSON objects that we refer to as messages.",
+      "zh_tw": "如同我們剛才討論的，客戶端和伺服器透過交換我們稱為訊息的 JSON 物件來通訊。",
+      "zh_cn": "如同我们剛才討论的，客户端和服务器透过交换我们称为信息的 JSON 对象來通讯。"
+    },
+    "2": {
+      "en": "Now, JSON in general can be transmitted between a client and a server in a wide variety of different ways.",
+      "zh_tw": "JSON 通常可以用各種不同的方式在客戶端和伺服器之間傳輸。",
+      "zh_cn": "JSON 通常可以用各种不同的方式在客户端和服务器之间传输。"
+    },
+    "3": {
+      "en": "For example, we can make a HTTP request. We could use WebSockets.",
+      "zh_tw": "例如，我們可以發 HTTP 請求。可以用 WebSocket。",
+      "zh_cn": "例如，我们可以发 HTTP 请求。可以用 WebSocket。"
+    },
+    "4": {
+      "en": "We could even write out a postcard with some JSON and then send it to someone else and have them manually type that JSON into a server.",
+      "zh_tw": "我們甚至可以在明信片上寫一些 JSON 然後寄給別人，讓他們手動把 JSON 輸入伺服器。",
+      "zh_cn": "我们甚至可以在明信片上写一些 JSON 然后寄给別人，让他们手动把 JSON 输入服务器。"
+    },
+    "5": {
+      "en": "So there really are a tremendous number of ways to send and receive JSON.",
+      "zh_tw": "所以發送和接收 JSON 真的有非常多種方式。",
+      "zh_cn": "所以发送和接收 JSON 真的有非常多种方式。"
+    },
+    "6": {
+      "en": "In the MCP spec, the thing that we use to actually move JSON between a client and a server is referred to as the transport.",
+      "zh_tw": "在 MCP 規範中，我們用來在客戶端和伺服器之間實際移動 JSON 的東西叫做傳輸方式。",
+      "zh_cn": "在 MCP 规范中，我们用來在客户端和服务器之间实际移动 JSON 的東西叫做传输方式。"
+    },
+    "7": {
+      "en": "When you are initially developing an MCP server or a client, a very commonly used transport is the standard IO transport.",
+      "zh_tw": "當你最初開發 MCP 伺服器或客戶端時，一個非常常用的傳輸方式是標準 IO 傳輸。",
+      "zh_cn": "当你最初开发 MCP 服务器或客户端时，一个非常常用的传输方式是标准 IO 传输。"
+    },
+    "8": {
+      "en": "The idea with this transport is that our client is going to launch a server as a separate process.",
+      "zh_tw": "這個傳輸方式的概念是我們的客戶端會把伺服器作為一個單獨的程序啟動。",
+      "zh_cn": "这个传输方式的概念是我们的客户端会把服务器作为一个单独的程序啟动。"
+    },
+    "9": {
+      "en": "By doing so, the client has a handle on that process.",
+      "zh_tw": "這樣客戶端就擁有了那個程序的控制權。",
+      "zh_cn": "这样客户端就拥有了那个程序的控制权。"
+    },
+    "10": {
+      "en": "And the client can send messages into the server by writing them into the server's standard in-channel.",
+      "zh_tw": "客戶端可以透過寫入伺服器的標準輸入通道來發送訊息。",
+      "zh_cn": "客户端可以透过写入服务器的标准输入通道來发送信息。"
+    },
+    "11": {
+      "en": "And it can receive messages by watching the server's standard out-channel.",
+      "zh_tw": "也可以透過監看伺服器的標準輸出通道來接收訊息。",
+      "zh_cn": "也可以透过监看服务器的标准输出通道來接收信息。"
+    },
+    "12": {
+      "en": "Something that is really nice about the standard IO transport is that communication between the client or the server can be very easily initiated on either side.",
+      "zh_tw": "標準 IO 傳輸方式有一個真的很好的特點，就是客戶端或伺服器都可以非常容易地在任何一方發起通訊。",
+      "zh_cn": "标准 IO 传输方式有一个真的很好的特点，就是客户端或服务器都可以非常容易地在任何一方发起通讯。"
+    },
+    "13": {
+      "en": "So in other words, at any point in time, the client can communicate or send a message off to the server by writing to standard in.",
+      "zh_tw": "換句話說，在任何時間點，客戶端都可以透過寫入標準輸入來發送訊息給伺服器。",
+      "zh_cn": "换句话说，在任何时间点，客户端都可以透过写入标准输入來发送信息给服务器。"
+    },
+    "14": {
+      "en": "And the server can communicate back to the client by writing to standard out.",
+      "zh_tw": "而伺服器可以透過寫入標準輸出來回覆客戶端。",
+      "zh_cn": "而服务器可以透过写入标准输出來回覆客户端。"
+    },
+    "15": {
+      "en": "But the standard IO transport also has one big downside.",
+      "zh_tw": "但標準 IO 傳輸方式也有一個很大的缺點。",
+      "zh_cn": "但标准 IO 传输方式也有一个很大的缺点。"
+    },
+    "16": {
+      "en": "And that is that we can only make use of this transport when the client and the server are running on the same physical machine.",
+      "zh_tw": "那就是我們只能在客戶端和伺服器在同一台實體機器上執行時才能使用這個傳輸方式。",
+      "zh_cn": "那就是我们只能在客户端和服务器在同一台实体机器上执行时才能使用这个传输方式。"
+    },
+    "17": {
+      "en": "To help you better understand the standard IO transport, let me give you a quick demonstration.",
+      "zh_tw": "為了幫你更好地理解標準 IO 傳輸方式，讓我給你一個快速示範。",
+      "zh_cn": "为了幫你更好地理解标准 IO 传输方式，让我给你一个快速示范。"
+    },
+    "18": {
+      "en": "I put together a very small MCP server.",
+      "zh_tw": "我組裝了一個非常小的 MCP 伺服器。",
+      "zh_cn": "我组装了一个非常小的 MCP 服务器。"
+    },
+    "19": {
+      "en": "I've got some print statements up here at the top just to help you understand what's going on.",
+      "zh_tw": "上面有一些 print 語句來幫你理解發生了什麼。",
+      "zh_cn": "上面有一些 print 语句來幫你理解发生了什麼。"
+    },
+    "20": {
+      "en": "But besides those print statements, the server doesn't really have a whole lot to it.",
+      "zh_tw": "但除了那些 print 語句，伺服器其實沒什麼東西。",
+      "zh_cn": "但除了那些 print 语句，服务器其实没什麼東西。"
+    },
+    "21": {
+      "en": "I'm creating a server.",
+      "zh_tw": "我建立了一個伺服器。",
+      "zh_cn": "我建立了一个服务器。"
+    },
+    "22": {
+      "en": "I'm defining one single tool and then starting the server up with a standard IO transport.",
+      "zh_tw": "我定義了一個工具，然後用標準 IO 傳輸方式啟動伺服器。",
+      "zh_cn": "我定义了一个工具，然后用标准 IO 传输方式啟动服务器。"
+    },
+    "23": {
+      "en": "Now, I could create a client to connect to the server using the standard IO transport.",
+      "zh_tw": "我可以建立一個客戶端用標準 IO 傳輸方式連接伺服器。",
+      "zh_cn": "我可以建立一个客户端用标准 IO 传输方式连接服务器。"
+    },
+    "24": {
+      "en": "But I can also just connect to the server directly from my terminal without creating any distinct separate client.",
+      "zh_tw": "但我也可以直接從終端機連接伺服器，不需要建立任何獨立的客戶端。",
+      "zh_cn": "但我也可以直接从终端连接服务器，不需要建立任何独立的客户端。"
+    },
+    "25": {
+      "en": "Let me show you what I mean by that.",
+      "zh_tw": "讓我展示我是什麼意思。",
+      "zh_cn": "让我展示我是什麼意思。"
+    },
+    "26": {
+      "en": "If I run uvrun server.py right here, it's going to start up that server.",
+      "zh_tw": "如果我在這裡執行 uv run server.py，它會啟動那個伺服器。",
+      "zh_cn": "如果我在这里执行 uv run server.py，它会啟动那个服务器。"
+    },
+    "27": {
+      "en": "And now that server is going to be listening to standard in and then writing any outgoing messages to standard out.",
+      "zh_tw": "現在那個伺服器會監聽標準輸入，然後把任何外出的訊息寫到標準輸出。",
+      "zh_cn": "现在那个服务器会监聽标准输入，然后把任何外出的信息写到标准输出。"
+    },
+    "28": {
+      "en": "Well, in my terminal, in case you don't know, whenever I run a program, if I type anything down here, I am writing to standard in of this running program.",
+      "zh_tw": "在我的終端機裡，如果你不知道的話，每當我執行一個程式，如果我在下面輸入任何東西，我就是在寫入這個執行中程式的標準輸入。",
+      "zh_cn": "在我的终端里，如果你不知道的话，每当我执行一个程序，如果我在下面输入任何東西，我就是在写入这个执行中程序的标准输入。"
+    },
+    "29": {
+      "en": "So I can actually paste in JSON messages down here at the bottom, execute them, and they will be received as input to the server.",
+      "zh_tw": "所以我實際上可以在底部貼入 JSON 訊息，執行它們，它們就會被伺服器接收為輸入。",
+      "zh_cn": "所以我实际上可以在底部貼入 JSON 信息，执行它们，它们就会被服务器接收为输入。"
+    },
+    "30": {
+      "en": "So let me give you a quick demonstration of that.",
+      "zh_tw": "讓我給你快速示範一下。",
+      "zh_cn": "让我给你快速示范一下。"
+    },
+    "31": {
+      "en": "I'm going to restart the server really quickly.",
+      "zh_tw": "我要快速重啟伺服器。",
+      "zh_cn": "我要快速重啟服务器。"
+    },
+    "32": {
+      "en": "And then I'm going to copy this first example message up here.",
+      "zh_tw": "然後我要複製上面這第一個範例訊息。",
+      "zh_cn": "然后我要复製上面这第一个范例信息。"
+    },
+    "33": {
+      "en": "I'm going to paste it right here.",
+      "zh_tw": "我要貼在這裡。",
+      "zh_cn": "我要貼在这里。"
+    },
+    "34": {
+      "en": "And it's going to occur almost instantly.",
+      "zh_tw": "幾乎瞬間就會發生。",
+      "zh_cn": "幾乎瞬间就会发生。"
+    },
+    "35": {
+      "en": "When I hit enter, I'm going to immediately get a response back.",
+      "zh_tw": "當我按 Enter，我會立刻收到一個回應。",
+      "zh_cn": "当我按 Enter，我会立刻收到一个回应。"
+    },
+    "36": {
+      "en": "So I've written to standard in right here with a message.",
+      "zh_tw": "我在這裡寫入了一條訊息到標準輸入。",
+      "zh_cn": "我在这里写入了一条信息到标准输入。"
+    },
+    "37": {
+      "en": "And I am seeing a output message on standard out right there.",
+      "zh_tw": "然後我在那裡看到標準輸出上的輸出訊息。",
+      "zh_cn": "然后我在那里看到标准输出上的输出信息。"
+    },
+    "38": {
+      "en": "I'm then going to send another message.",
+      "zh_tw": "然後我要發送另一條訊息。",
+      "zh_cn": "然后我要发送另一条信息。"
+    },
+    "39": {
+      "en": "Here we go.",
+      "zh_tw": "好了。",
+      "zh_cn": "好了。"
+    },
+    "40": {
+      "en": "And this time around, I'm not going to see any response.",
+      "zh_tw": "這次我不會看到任何回應。",
+      "zh_cn": "这次我不会看到任何回应。"
+    },
+    "41": {
+      "en": "And then finally, I'm going to run one more message down here.",
+      "zh_tw": "最後，我要在這裡再執行一條訊息。",
+      "zh_cn": "最后，我要在这里再执行一条信息。"
+    },
+    "42": {
+      "en": "And when I run this one, I'll immediately get back one response and then another response and another response after that.",
+      "zh_tw": "當我執行這個，我會立刻收到一個回應，然後另一個回應，再一個回應。",
+      "zh_cn": "当我执行这个，我会立刻收到一个回应，然后另一个回应，再一个回应。"
+    },
+    "43": {
+      "en": "So three objects in total.",
+      "zh_tw": "總共三個物件。",
+      "zh_cn": "总共三个对象。"
+    },
+    "44": {
+      "en": "There's one, there's two, and there's three.",
+      "zh_tw": "第一個，第二個，第三個。",
+      "zh_cn": "第一个，第二个，第三个。"
+    },
+    "45": {
+      "en": "So let me show you a couple diagrams to help you understand what I'm really doing as I paste these different messages in.",
+      "zh_tw": "讓我展示幾個圖表來幫你理解我貼入這些不同訊息時到底在做什麼。",
+      "zh_cn": "让我展示幾个圖表來幫你理解我貼入这些不同信息时到底在做什麼。"
+    },
+    "46": {
+      "en": "Okay.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "47": {
+      "en": "So back over here on the left-hand side, I've got what I've labeled my MCP clients,",
+      "zh_tw": "回到左邊，我標註了 MCP 客戶端，",
+      "zh_cn": "回到左边，我标註了 MCP 客户端，"
+    },
+    "48": {
+      "en": "but really it's just me at my terminal pasting messages in.",
+      "zh_tw": "但其實只是我在終端機貼入訊息。",
+      "zh_cn": "但其实只是我在终端貼入信息。"
+    },
+    "49": {
+      "en": "By pasting those messages in, I'm writing to standard in of the MCP server.",
+      "zh_tw": "透過貼入那些訊息，我在寫入 MCP 伺服器的標準輸入。",
+      "zh_cn": "透过貼入那些信息，我在写入 MCP 服务器的标准输入。"
+    },
+    "50": {
+      "en": "The server is then going to process these given messages and then possibly send a result back by just printing it to standard out,",
+      "zh_tw": "伺服器接著會處理這些訊息，然後可能透過列印到標準輸出來發回結果，",
+      "zh_cn": "服务器接著会处理这些信息，然后可能透过列印到标准输出來发回结果，"
+    },
+    "51": {
+      "en": "which I see directly printed at my terminal.",
+      "zh_tw": "而我直接在終端機看到那些輸出。",
+      "zh_cn": "而我直接在终端看到那些输出。"
+    },
+    "52": {
+      "en": "The first message that I sent in was something called an initialized request.",
+      "zh_tw": "我發送的第一條訊息叫做 initialized request。",
+      "zh_cn": "我发送的第一条信息叫做 initialized request。"
+    },
+    "53": {
+      "en": "Let me just give you a little bit of backstory here.",
+      "zh_tw": "讓我給你一點背景說明。",
+      "zh_cn": "让我给你一点背景说明。"
+    },
+    "54": {
+      "en": "Whenever a client first connects to the server,",
+      "zh_tw": "每當客戶端首次連接到伺服器時，",
+      "zh_cn": "每当客户端首次连接到服务器时，"
+    },
+    "55": {
+      "en": "the MCP spec says that we must send a sequence of three different messages back and forth.",
+      "zh_tw": "MCP 規範說我們必須來回發送三條不同的訊息。",
+      "zh_cn": "MCP 规范说我们必须來回发送三条不同的信息。"
+    },
+    "56": {
+      "en": "The very first message must always be an initialized request.",
+      "zh_tw": "第一條訊息必須總是 initialized request。",
+      "zh_cn": "第一条信息必须总是 initialized request。"
+    },
+    "57": {
+      "en": "And again, that is what I initially pasted in right here.",
+      "zh_tw": "那就是我最初貼入的。",
+      "zh_cn": "那就是我最初貼入的。"
+    },
+    "58": {
+      "en": "That was an initialized request.",
+      "zh_tw": "那是一個 initialized request。",
+      "zh_cn": "那是一个 initialized request。"
+    },
+    "59": {
+      "en": "Because I sent in a request type message, I would expect to get back a result.",
+      "zh_tw": "因為我發送的是 request 類型的訊息，我會期望收到一個 result。",
+      "zh_cn": "因为我发送的是 request 类型的信息，我会期望收到一个 result。"
+    },
+    "60": {
+      "en": "And that's exactly what happened.",
+      "zh_tw": "而那正是發生的事。",
+      "zh_cn": "而那正是发生的事。"
+    },
+    "61": {
+      "en": "I got back something referred to as a initialized result.",
+      "zh_tw": "我收到了一個叫做 initialized result 的東西。",
+      "zh_cn": "我收到了一个叫做 initialized result 的東西。"
+    },
+    "62": {
+      "en": "So that was that text right there.",
+      "zh_tw": "就是那裡的文字。",
+      "zh_cn": "就是那里的文字。"
+    },
+    "63": {
+      "en": "Then the MCP spec also says that after exchanging these initial messages,",
+      "zh_tw": "MCP 規範還說在交換了這些初始訊息之後，",
+      "zh_cn": "MCP 规范还说在交换了这些初始信息之后，"
+    },
+    "64": {
+      "en": "we must then also send a initialized notification from the client to the server.",
+      "zh_tw": "我們還必須從客戶端向伺服器發送一個 initialized notification。",
+      "zh_cn": "我们还必须从客户端向服务器发送一个 initialized notification。"
+    },
+    "65": {
+      "en": "As a reminder, notifications do not require a response.",
+      "zh_tw": "提醒一下，通知不需要回應。",
+      "zh_cn": "提醒一下，通知不需要回应。"
+    },
+    "66": {
+      "en": "So I did send in that initialized notification right there.",
+      "zh_tw": "我確實發送了那個 initialized notification。",
+      "zh_cn": "我确实发送了那个 initialized notification。"
+    },
+    "67": {
+      "en": "And as we noticed, we didn't get any immediate response back.",
+      "zh_tw": "如同我們注意到的，我們沒有收到任何即時回應。",
+      "zh_cn": "如同我们注意到的，我们没有收到任何即时回应。"
+    },
+    "68": {
+      "en": "Again, that's just because notifications do not require a response.",
+      "zh_tw": "同樣，那只是因為通知不需要回應。",
+      "zh_cn": "同样，那只是因为通知不需要回应。"
+    },
+    "69": {
+      "en": "Once we have exchanged these three messages,",
+      "zh_tw": "一旦我們交換了這三條訊息，",
+      "zh_cn": "一旦我们交换了这三条信息，"
+    },
+    "70": {
+      "en": "our connection to the MCP server is considered to be initialized.",
+      "zh_tw": "我們與 MCP 伺服器的連接就被認為已初始化。",
+      "zh_cn": "我们与 MCP 服务器的连接就被认为已初始化。"
+    },
+    "71": {
+      "en": "And at that point on, we can then run call tool requests or",
+      "zh_tw": "從那時起，我們就可以執行 call tool request 或",
+      "zh_cn": "从那时起，我们就可以执行 call tool request 或"
+    },
+    "72": {
+      "en": "run prompt listing requests, whatever else we want to do.",
+      "zh_tw": "列出提示的請求，或任何我們想做的事。",
+      "zh_cn": "列出提示的请求，或任何我们想做的事。"
+    },
+    "73": {
+      "en": "So in my case, as you saw, I sent in a call tool request.",
+      "zh_tw": "在我的情況下，如你所見，我發送了一個 call tool request。",
+      "zh_cn": "在我的情況下，如你所見，我发送了一个 call tool request。"
+    },
+    "74": {
+      "en": "That was the last one down here.",
+      "zh_tw": "那是最後一個。",
+      "zh_cn": "那是最后一个。"
+    },
+    "75": {
+      "en": "I attempted to call the add tool with arguments of five and three.",
+      "zh_tw": "我嘗試用引數 5 和 3 呼叫 add 工具。",
+      "zh_cn": "我嘗试用引数 5 和 3 调用 add 工具。"
+    },
+    "76": {
+      "en": "Now, the way that I put together the add tool,",
+      "zh_tw": "我組裝 add 工具的方式，",
+      "zh_cn": "我组装 add 工具的方式，"
+    },
+    "77": {
+      "en": "it is set up to send back a couple of different logs and then eventually a call tool result.",
+      "zh_tw": "它設定成會回傳幾條不同的日誌然後最終是 call tool result。",
+      "zh_cn": "它设定成会返回幾条不同的日志然后最终是 call tool result。"
+    },
+    "78": {
+      "en": "So if I look through the logs, I actually changed it from what you see in that diagram.",
+      "zh_tw": "如果我看一下日誌，我其實改了你在圖表中看到的東西。",
+      "zh_cn": "如果我看一下日志，我其实改了你在圖表中看到的東西。"
+    },
+    "79": {
+      "en": "First, I got a message notification.",
+      "zh_tw": "首先，我收到了一個 message notification。",
+      "zh_cn": "首先，我收到了一个 message notification。"
+    },
+    "80": {
+      "en": "So a login statement that's coming from right there.",
+      "zh_tw": "一條來自那裡的日誌語句。",
+      "zh_cn": "一条來自那里的日志语句。"
+    },
+    "81": {
+      "en": "There's my login statement.",
+      "zh_tw": "那是我的日誌語句。",
+      "zh_cn": "那是我的日志语句。"
+    },
+    "82": {
+      "en": "I then got a progress statement.",
+      "zh_tw": "然後我收到了一個 progress 語句。",
+      "zh_cn": "然后我收到了一个 progress 语句。"
+    },
+    "83": {
+      "en": "So there's the progress update right there.",
+      "zh_tw": "那是進度更新。",
+      "zh_cn": "那是进度更新。"
+    },
+    "84": {
+      "en": "Those are both notifications being sent from the server to the client.",
+      "zh_tw": "那兩個都是從伺服器發送到客戶端的通知。",
+      "zh_cn": "那兩个都是从服务器发送到客户端的通知。"
+    },
+    "85": {
+      "en": "And then finally, I got my call tool response right there.",
+      "zh_tw": "最後，我收到了 call tool response。",
+      "zh_cn": "最后，我收到了 call tool response。"
+    },
+    "86": {
+      "en": "And inside of it is the calculated results of adding three plus five.",
+      "zh_tw": "裡面是 3 加 5 的計算結果。",
+      "zh_cn": "里面是 3 加 5 的计算结果。"
+    },
+    "87": {
+      "en": "I see eight.",
+      "zh_tw": "我看到 8。",
+      "zh_cn": "我看到 8。"
+    },
+    "88": {
+      "en": "So now that we have seen an example of the standard IO transport,",
+      "zh_tw": "現在我們已經看了標準 IO 傳輸方式的範例，",
+      "zh_cn": "现在我们已经看了标准 IO 传输方式的范例，"
+    },
+    "89": {
+      "en": "there are some really critical ideas that I want to point out around this transport in particular",
+      "zh_tw": "有一些非常關鍵的概念我想特別指出",
+      "zh_cn": "有一些非常关键的概念我想特別指出"
+    },
+    "90": {
+      "en": "that are going to be very relevant or very important to understand",
+      "zh_tw": "當我們開始看 Streamable HTTP 傳輸方式時",
+      "zh_cn": "当我们开始看 Streamable HTTP 传输方式时"
+    },
+    "91": {
+      "en": "as we start to take a look at the streamable HTTP transport.",
+      "zh_tw": "會非常相關或非常重要。",
+      "zh_cn": "会非常相关或非常重要。"
+    },
+    "92": {
+      "en": "First, I showed you this diagram a little bit ago.",
+      "zh_tw": "首先，我剛才展示了這個圖表。",
+      "zh_cn": "首先，我剛才展示了这个圖表。"
+    },
+    "93": {
+      "en": "And I showed you this diagram to help you understand that there are some message types that are intended to be sent from the client to the server",
+      "zh_tw": "我展示這個圖表是為了幫你理解有一些訊息類型是要從客戶端發送到伺服器的，",
+      "zh_cn": "我展示这个圖表是为了幫你理解有一些信息类型是要从客户端发送到服务器的，"
+    },
+    "94": {
+      "en": "and some types that are meant to be sent from the server to the client.",
+      "zh_tw": "還有一些類型是要從伺服器發送到客戶端的。",
+      "zh_cn": "还有一些类型是要从服务器发送到客户端的。"
+    },
+    "95": {
+      "en": "The other thing that I really wanted you to understand from this diagram is that there are some instances,",
+      "zh_tw": "另一件我真正想讓你從圖表理解的是，有一些情況，",
+      "zh_cn": "另一件我真正想让你从圖表理解的是，有一些情況，"
+    },
+    "96": {
+      "en": "specifically with these messages on the top left-hand side,",
+      "zh_tw": "特別是左上角的這些訊息，",
+      "zh_cn": "特別是左上角的这些信息，"
+    },
+    "97": {
+      "en": "where we can kind of imagine that the client is initiating communication with the server.",
+      "zh_tw": "我們可以想像是客戶端在發起與伺服器的通訊。",
+      "zh_cn": "我们可以想像是客户端在发起与服务器的通讯。"
+    },
+    "98": {
+      "en": "So in other words, the client is saying, I am making a request and I expect to get back a response.",
+      "zh_tw": "換句話說，客戶端在說：我在發送一個請求，我期望收到一個回應。",
+      "zh_cn": "换句话说，客户端在说：我在发送一个请求，我期望收到一个回应。"
+    },
+    "99": {
+      "en": "Likewise, there are some situations where the MCP server is sending the initial request off and expects to get back a response.",
+      "zh_tw": "同樣，有一些情況是 MCP 伺服器發送初始請求並期望收到回應。",
+      "zh_cn": "同样，有一些情況是 MCP 服务器发送初始请求並期望收到回应。"
+    },
+    "100": {
+      "en": "So that would be like the create message request, which is what is used to initiate sampling.",
+      "zh_tw": "那就像 create message request，也就是用來發起取樣的。",
+      "zh_cn": "那就像 create message request，也就是用來发起取样的。"
+    },
+    "101": {
+      "en": "So the server needs to send off this request to the client and expects to get back some kind of result.",
+      "zh_tw": "伺服器需要把這個請求發送到客戶端並期望收到某種結果。",
+      "zh_cn": "服务器需要把这个请求发送到客户端並期望收到某种结果。"
+    },
+    "102": {
+      "en": "Now to put that in slightly more clear terms, here's what I really mean to indicate with that.",
+      "zh_tw": "用更清楚的話來說，這是我真正要表達的。",
+      "zh_cn": "用更清楚的话來说，这是我真正要表达的。"
+    },
+    "103": {
+      "en": "There are really four different scenarios with these different transports, like the standard IO transport,",
+      "zh_tw": "這些不同的傳輸方式，像是標準 IO 傳輸，",
+      "zh_cn": "这些不同的传输方式，像是标准 IO 传输，"
+    },
+    "104": {
+      "en": "that we need to be able to handle.",
+      "zh_tw": "我們需要能處理四種不同的場景。",
+      "zh_cn": "我们需要能处理四种不同的场景。"
+    },
+    "105": {
+      "en": "We need to be able to handle the initiation or kind of a initial request from the client to the server.",
+      "zh_tw": "我們需要能處理從客戶端到伺服器的初始請求。",
+      "zh_cn": "我们需要能处理从客户端到服务器的初始请求。"
+    },
+    "106": {
+      "en": "And the transport needs to be able to handle sending a response from the server to the client.",
+      "zh_tw": "傳輸方式需要能處理從伺服器到客戶端發送回應。",
+      "zh_cn": "传输方式需要能处理从服务器到客户端发送回应。"
+    },
+    "107": {
+      "en": "Also, the server needs to be able to send an initial request to the client.",
+      "zh_tw": "伺服器也需要能向客戶端發送初始請求。",
+      "zh_cn": "服务器也需要能向客户端发送初始请求。"
+    },
+    "108": {
+      "en": "And then likewise, the client needs to be able to respond.",
+      "zh_tw": "然後同樣，客戶端需要能回應。",
+      "zh_cn": "然后同样，客户端需要能回应。"
+    },
+    "109": {
+      "en": "So I want to walk through all these four different scenarios and think about how we would implement them with a standard IO transport.",
+      "zh_tw": "我想走過這四種不同的場景，思考我們如何用標準 IO 傳輸方式來實作。",
+      "zh_cn": "我想走过这四种不同的场景，思考我们如何用标准 IO 传输方式來实作。"
+    },
+    "110": {
+      "en": "So first is an initial request from the client to the server.",
+      "zh_tw": "首先是從客戶端到伺服器的初始請求。",
+      "zh_cn": "首先是从客户端到服务器的初始请求。"
+    },
+    "111": {
+      "en": "So the scenario here would be anytime the client wants to send something off to the server,",
+      "zh_tw": "這裡的場景是每當客戶端想發送東西到伺服器時，",
+      "zh_cn": "这里的场景是每当客户端想发送東西到服务器时，"
+    },
+    "112": {
+      "en": "like maybe a call to a request or something like that.",
+      "zh_tw": "比如一個 call tool request 之類的。",
+      "zh_cn": "比如一个 call tool request 之类的。"
+    },
+    "113": {
+      "en": "To implement this with a standard IO transport, all we have to do is write to standard in.",
+      "zh_tw": "用標準 IO 傳輸方式實作，我們只需要寫入標準輸入。",
+      "zh_cn": "用标准 IO 传输方式实作，我们只需要写入标准输入。"
+    },
+    "114": {
+      "en": "And the NCP server will receive that message, process it, and then hopefully formulate a response.",
+      "zh_tw": "MCP 伺服器會收到訊息、處理它，然後希望能組裝一個回應。",
+      "zh_cn": "MCP 服务器会收到信息、处理它，然后希望能组装一个回应。"
+    },
+    "115": {
+      "en": "Once it has a response, it would respond by just writing a message to standard out.",
+      "zh_tw": "一旦有了回應，它只需把訊息寫到標準輸出就行。",
+      "zh_cn": "一旦有了回应，它只需把信息写到标准输出就行。"
+    },
+    "116": {
+      "en": "Now the third scenario would be where we have an initial request to be sent from the client to the server.",
+      "zh_tw": "第三種場景是需要從伺服器向客戶端發送初始請求。",
+      "zh_cn": "第三种场景是需要从服务器向客户端发送初始请求。"
+    },
+    "117": {
+      "en": "So this would be where maybe the server wants to do some sampling.",
+      "zh_tw": "這可能是伺服器想做取樣的情況。",
+      "zh_cn": "这可能是服务器想做取样的情況。"
+    },
+    "118": {
+      "en": "And that's going to require the server to send some kind of initial message off to the client.",
+      "zh_tw": "那需要伺服器發送某種初始訊息到客戶端。",
+      "zh_cn": "那需要服务器发送某种初始信息到客户端。"
+    },
+    "119": {
+      "en": "Whenever the server needs to send an initial request to the client, all it has to do is write to standard out.",
+      "zh_tw": "每當伺服器需要向客戶端發送初始請求時，只需要寫到標準輸出。",
+      "zh_cn": "每当服务器需要向客户端发送初始请求时，只需要写到标准输出。"
+    },
+    "120": {
+      "en": "And then likewise, to respond, all the client has to do is write to standard in.",
+      "zh_tw": "然後同樣，客戶端只需要寫到標準輸入就能回應。",
+      "zh_cn": "然后同样，客户端只需要写到标准输入就能回应。"
+    },
+    "121": {
+      "en": "All right.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "122": {
+      "en": "Now I know that the last couple of minutes in this video and the sequence of diagrams I just went over are probably a little bit confusing.",
+      "zh_tw": "我知道過去幾分鐘和我剛才過的圖表可能有點令人困惑。",
+      "zh_cn": "我知道过去幾分鐘和我剛才过的圖表可能有点令人困惑。"
+    },
+    "123": {
+      "en": "And you're probably thinking, what is this about initial requests and responses and whatnot?",
+      "zh_tw": "你可能在想，初始請求和回應什麼的是怎麼回事？",
+      "zh_cn": "你可能在想，初始请求和回应什麼的是怎麼回事？"
+    },
+    "124": {
+      "en": "Well, here's the point.",
+      "zh_tw": "重點在這裡。",
+      "zh_cn": "重点在这里。"
+    },
+    "125": {
+      "en": "The whole point of all this is to help you understand that the standard IO transport is really fantastic because at any point in time, the client or the server can initiate communication.",
+      "zh_tw": "所有這些的重點是幫你理解標準 IO 傳輸方式真的很棒，因為在任何時間點，客戶端或伺服器都可以發起通訊。",
+      "zh_cn": "所有这些的重点是幫你理解标准 IO 传输方式真的很棒，因为在任何时间点，客户端或服务器都可以发起通讯。"
+    },
+    "126": {
+      "en": "Either one can send a request at any point in time and expect to get back a response.",
+      "zh_tw": "任何一方都可以在任何時間點發送請求並期望收到回應。",
+      "zh_cn": "任何一方都可以在任何时间点发送请求並期望收到回应。"
+    },
+    "127": {
+      "en": "Here's the key thing.",
+      "zh_tw": "關鍵是這裡。",
+      "zh_cn": "关键是这里。"
+    },
+    "128": {
+      "en": "That is not going to be the case with a streamable HTTP transport.",
+      "zh_tw": "Streamable HTTP 傳輸方式不會是這樣。",
+      "zh_cn": "Streamable HTTP 传输方式不会是这样。"
+    },
+    "129": {
+      "en": "There are some scenarios where the streamable HTTP transport does not allow for this situation.",
+      "zh_tw": "有一些場景 Streamable HTTP 傳輸方式不允許這種情況。",
+      "zh_cn": "有一些场景 Streamable HTTP 传输方式不允许这种情況。"
+    },
+    "130": {
+      "en": "There are some cases where the server cannot send some initial request off to the client.",
+      "zh_tw": "有一些情況伺服器無法向客戶端發送初始請求。",
+      "zh_cn": "有一些情況服务器无法向客户端发送初始请求。"
+    },
+    "131": {
+      "en": "And that's the tricky thing to understand about the streamable HTTP transport.",
+      "zh_tw": "這就是 Streamable HTTP 傳輸方式難以理解的地方。",
+      "zh_cn": "这就是 Streamable HTTP 传输方式难以理解的地方。"
+    },
+    "132": {
+      "en": "So now we're going to take a pause right here.",
+      "zh_tw": "我們先在這裡暫停。",
+      "zh_cn": "我们先在这里暫停。"
+    },
+    "133": {
+      "en": "Come back.",
+      "zh_tw": "回來後。",
+      "zh_cn": "回來后。"
+    },
+    "134": {
+      "en": "We're going to start to take a look at the HTTP transport.",
+      "zh_tw": "我們要開始看 HTTP 傳輸方式。",
+      "zh_cn": "我们要开始看 HTTP 传输方式。"
+    },
+    "135": {
+      "en": "And we're going to see this particular scenario and understand that, yeah, there's something a little bit tricky about this that you definitely need to understand when you are developing your own MCP servers.",
+      "zh_tw": "我們會看到這個特定場景，理解是的，有一些棘手的地方你在開發自己的 MCP 伺服器時一定需要理解。",
+      "zh_cn": "我们会看到这个特定场景，理解是的，有一些棘手的地方你在开发自己的 MCP 服务器时一定需要理解。"
+    },
+    "136": {
+      "en": "So now we're going to start to take a look at the HTTP transport.",
+      "zh_tw": "現在我們要開始看 HTTP 傳輸方式。",
+      "zh_cn": "现在我们要开始看 HTTP 传输方式。"
+    }
+  }
+}

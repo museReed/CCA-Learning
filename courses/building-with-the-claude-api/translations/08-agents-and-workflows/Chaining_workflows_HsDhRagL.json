@@ -1,0 +1,397 @@
+{
+  "srt_file": "Chaining_workflows_HsDhRagL.srt",
+  "video_file": "Chaining_workflows_HsDhRagL.mp4",
+  "max_valid_entry": 78,
+  "entries": {
+    "1": {
+      "en": "The next workflow that we're going to take a look at is going to seem a little bit obvious and simple,",
+      "zh_tw": "我們接下來要看的工作流程可能看起來有點顯而易見和簡單，",
+      "zh_cn": "我们接下來要看的工作流程可能看起來有点显而易見和简单，"
+    },
+    "2": {
+      "en": "but trust me, this actually ends up being one of the most useful workflows around,",
+      "zh_tw": "但相信我，這實際上是最有用的工作流程之一，",
+      "zh_cn": "但相信我，这实际上是最有用的工作流程之一，"
+    },
+    "3": {
+      "en": "specifically in one particular situation that you're going to run into very often.",
+      "zh_tw": "特別是在你經常會遇到的一種特定情況中。",
+      "zh_cn": "特別是在你经常会遇到的一种特定情況中。"
+    },
+    "4": {
+      "en": "So let's get to it.",
+      "zh_tw": "那麼讓我們開始吧。",
+      "zh_cn": "那麼让我们开始吧。"
+    },
+    "5": {
+      "en": "Let's change up our application a little bit once again.",
+      "zh_tw": "讓我們再次稍微改變一下我們的應用程式。",
+      "zh_cn": "让我们再次稍微改变一下我们的应用程序。"
+    },
+    "6": {
+      "en": "We'll imagine that we are building a social media marketing tool.",
+      "zh_tw": "我們想像我們正在建構一個社群媒體行銷工具。",
+      "zh_cn": "我们想像我们正在建构一个社群媒体行銷工具。"
+    },
+    "7": {
+      "en": "Users will be asked to enter a topic for when their social media accounts,",
+      "zh_tw": "使用者會被要求為他們的社群媒體帳號輸入一個主題，",
+      "zh_cn": "使用者会被要求为他们的社群媒体帳号输入一个主题，"
+    },
+    "8": {
+      "en": "kind of what the focus of their account is.",
+      "zh_tw": "也就是他們帳號的重點是什麼。",
+      "zh_cn": "也就是他们帳号的重点是什麼。"
+    },
+    "9": {
+      "en": "Then the goal of our application is to generate and post some videos to their account.",
+      "zh_tw": "然後我們應用程式的目標是生成一些影片並發佈到他們的帳號上。",
+      "zh_cn": "然后我们应用程序的目标是生成一些视频並发佈到他们的帳号上。"
+    },
+    "10": {
+      "en": "So here's how we might actually implement this.",
+      "zh_tw": "這裡是我們可能實際實作這個的方式。",
+      "zh_cn": "这里是我们可能实际实作这个的方式。"
+    },
+    "11": {
+      "en": "We don't really need a fancy agent with a ton of fancy tools to implement this.",
+      "zh_tw": "我們不需要一個帶有大量花哨工具的複雜代理來實作這個。",
+      "zh_cn": "我们不需要一个帶有大量花哨工具的复杂代理來实作这个。"
+    },
+    "12": {
+      "en": "We can build out a workflow that will just go through a series of predefined steps one by one.",
+      "zh_tw": "我們可以建構一個工作流程，逐步執行一系列預定義的步驟。",
+      "zh_cn": "我们可以建构一个工作流程，逐步执行一系列预定义的步驟。"
+    },
+    "13": {
+      "en": "So in step one, we might take whatever topic the user entered into that form",
+      "zh_tw": "在第一步，我們可以拿使用者在表單中輸入的任何主題",
+      "zh_cn": "在第一步，我们可以拿使用者在表单中输入的任何主题"
+    },
+    "14": {
+      "en": "and do a search for trending topics on Twitter.",
+      "zh_tw": "搜尋 Twitter 上的熱門話題。",
+      "zh_cn": "搜尋 Twitter 上的熱门话题。"
+    },
+    "15": {
+      "en": "We could then take the list of topics and feed them all into Claude",
+      "zh_tw": "然後我們可以把主題列表全部傳給 Claude，",
+      "zh_cn": "然后我们可以把主题列表全部传给 Claude，"
+    },
+    "16": {
+      "en": "and ask Claude to select the most interesting topic.",
+      "zh_tw": "要求 Claude 選擇最有趣的主題。",
+      "zh_cn": "要求 Claude 选择最有趣的主题。"
+    },
+    "17": {
+      "en": "But then we could do a follow-up request to Claude,",
+      "zh_tw": "但接著我們可以向 Claude 發出後續請求，",
+      "zh_cn": "但接著我们可以向 Claude 发出后续请求，"
+    },
+    "18": {
+      "en": "asking it to do some web research on the topic.",
+      "zh_tw": "要求它對這個主題進行一些網路研究。",
+      "zh_cn": "要求它对这个主题进行一些网络研究。"
+    },
+    "19": {
+      "en": "Then once the research is complete,",
+      "zh_tw": "然後一旦研究完成，",
+      "zh_cn": "然后一旦研究完成，"
+    },
+    "20": {
+      "en": "we could ask Claude to write a script for a short format video.",
+      "zh_tw": "我們可以要求 Claude 為短影片撰寫腳本。",
+      "zh_cn": "我们可以要求 Claude 为短视频撰写脚本。"
+    },
+    "21": {
+      "en": "Once we have the script, we could then use an AI avatar",
+      "zh_tw": "有了腳本後，我們就可以使用 AI 虛擬人像",
+      "zh_cn": "有了脚本后，我们就可以使用 AI 虛擬人像"
+    },
+    "22": {
+      "en": "and some text-to-speech program to create an actual video",
+      "zh_tw": "和一些文字轉語音程式來製作實際的影片，",
+      "zh_cn": "和一些文字转语音程序來製作实际的视频，"
+    },
+    "23": {
+      "en": "and finally post that video off to social media.",
+      "zh_tw": "最後把那支影片發佈到社群媒體上。",
+      "zh_cn": "最后把那支视频发佈到社群媒体上。"
+    },
+    "24": {
+      "en": "This is an example of a chaining workflow.",
+      "zh_tw": "這是鏈式工作流程的一個範例。",
+      "zh_cn": "这是链式工作流程的一个范例。"
+    },
+    "25": {
+      "en": "In a chaining workflow, we take one large task,",
+      "zh_tw": "在鏈式工作流程中，我們把一個大任務——",
+      "zh_cn": "在链式工作流程中，我们把一个大任务——"
+    },
+    "26": {
+      "en": "which was initially to generate some videos and post them to social media,",
+      "zh_tw": "最初是生成一些影片並發佈到社群媒體——",
+      "zh_cn": "最初是生成一些视频並发佈到社群媒体——"
+    },
+    "27": {
+      "en": "and we break it up into a series of distinct steps.",
+      "zh_tw": "拆分成一系列不同的步驟。",
+      "zh_cn": "拆分成一系列不同的步驟。"
+    },
+    "28": {
+      "en": "In our case, the subtasks were the individual calls that we sent off to Claude.",
+      "zh_tw": "在我們的案例中，子任務就是我們傳給 Claude 的各個呼叫。",
+      "zh_cn": "在我们的案例中，子任务就是我们传给 Claude 的各个调用。"
+    },
+    "29": {
+      "en": "We could have attempted to accomplish all three of these tasks inside of a single call off to Claude.",
+      "zh_tw": "我們原本可以嘗試在對 Claude 的單一呼叫中完成所有三個任務。",
+      "zh_cn": "我们原本可以嘗试在对 Claude 的单一调用中完成所有三个任务。"
+    },
+    "30": {
+      "en": "So we could have just fed in a list of topics to Claude,",
+      "zh_tw": "所以我們可以只把主題列表傳給 Claude，",
+      "zh_cn": "所以我们可以只把主题列表传给 Claude，"
+    },
+    "31": {
+      "en": "asked it to select the most interesting topic,",
+      "zh_tw": "要求它選擇最有趣的主題，",
+      "zh_cn": "要求它选择最有趣的主题，"
+    },
+    "32": {
+      "en": "and research the topic, and write a script inside of a single prompt.",
+      "zh_tw": "研究主題，並在單一提示詞中撰寫腳本。",
+      "zh_cn": "研究主题，並在单一提示词中撰写脚本。"
+    },
+    "33": {
+      "en": "But by breaking this up into three separate calls,",
+      "zh_tw": "但透過把這個拆分成三個單獨的呼叫，",
+      "zh_cn": "但透过把这个拆分成三个单独的调用，"
+    },
+    "34": {
+      "en": "we allow Claude to focus on just one individual task at a time.",
+      "zh_tw": "我們讓 Claude 一次只專注於一個任務。",
+      "zh_cn": "我们让 Claude 一次只專注於一个任务。"
+    },
+    "35": {
+      "en": "Now, like I said, this probably seems like a kind of simple and obvious workflow,",
+      "zh_tw": "現在，就像我說的，這可能看起來像是一個簡單且顯而易見的工作流程，",
+      "zh_cn": "现在，就像我说的，这可能看起來像是一个简单且显而易見的工作流程，"
+    },
+    "36": {
+      "en": "maybe not even worth discussing,",
+      "zh_tw": "甚至可能不值得討論，",
+      "zh_cn": "甚至可能不值得討论，"
+    },
+    "37": {
+      "en": "because it might be something you've already implemented in the past.",
+      "zh_tw": "因為它可能是你過去已經實作過的東西。",
+      "zh_cn": "因为它可能是你过去已经实作过的東西。"
+    },
+    "38": {
+      "en": "But there's one very particular reason that I point out this workflow in particular,",
+      "zh_tw": "但有一個非常特別的原因讓我特別指出這個工作流程，",
+      "zh_cn": "但有一个非常特別的原因让我特別指出这个工作流程，"
+    },
+    "39": {
+      "en": "because it actually ends up being one of the most important workflows to understand",
+      "zh_tw": "因為它實際上是最重要的工作流程之一，要理解如何",
+      "zh_cn": "因为它实际上是最重要的工作流程之一，要理解如何"
+    },
+    "40": {
+      "en": "to get quality outputs out of Claude consistently when using rather large prompts.",
+      "zh_tw": "在使用相當長的提示詞時始終從 Claude 獲得高品質的輸出。",
+      "zh_cn": "在使用相当长的提示词时始终从 Claude 获得高品质的输出。"
+    },
+    "41": {
+      "en": "So let me walk you through a little scenario.",
+      "zh_tw": "讓我帶你了解一個小場景。",
+      "zh_cn": "让我帶你了解一个小场景。"
+    },
+    "42": {
+      "en": "You might not have encountered this before,",
+      "zh_tw": "你以前可能沒遇過這個，",
+      "zh_cn": "你以前可能没遇过这个，"
+    },
+    "43": {
+      "en": "but I can almost guarantee you that you will at some point in time.",
+      "zh_tw": "但我幾乎可以保證你在某個時候會遇到。",
+      "zh_cn": "但我幾乎可以保证你在某个时候会遇到。"
+    },
+    "44": {
+      "en": "Let's imagine that you are making use of Claude to write a article on some given topic.",
+      "zh_tw": "想像你正在使用 Claude 撰寫某個主題的文章。",
+      "zh_cn": "想像你正在使用 Claude 撰写某个主题的文章。"
+    },
+    "45": {
+      "en": "You might initially just send in a very simple prompt to Claude and ask it to write an article,",
+      "zh_tw": "你最初可能只是發送一個非常簡單的提示詞給 Claude，要求它寫一篇文章，",
+      "zh_cn": "你最初可能只是发送一个非常简单的提示词给 Claude，要求它写一篇文章，"
+    },
+    "46": {
+      "en": "and then you might get back some results.",
+      "zh_tw": "然後你可能會得到一些結果。",
+      "zh_cn": "然后你可能会得到一些结果。"
+    },
+    "47": {
+      "en": "And although it might be okay, there might be some aspects to it that you don't like.",
+      "zh_tw": "雖然可能還行，但可能有某些方面你不喜歡。",
+      "zh_cn": "雖然可能还行，但可能有某些方面你不喜欢。"
+    },
+    "48": {
+      "en": "So you might initially find that Claude might be mentioning the fact that it is an AI authoring the article,",
+      "zh_tw": "你最初可能會發現 Claude 可能會提到自己是撰寫文章的 AI，",
+      "zh_cn": "你最初可能会发现 Claude 可能会提到自己是撰写文章的 AI，"
+    },
+    "49": {
+      "en": "which you probably don't want.",
+      "zh_tw": "這可能不是你想要的。",
+      "zh_cn": "这可能不是你想要的。"
+    },
+    "50": {
+      "en": "It might make excessive use of emojis, which you might not want.",
+      "zh_tw": "它可能過度使用表情符號，這可能不是你想要的。",
+      "zh_cn": "它可能过度使用表情符号，这可能不是你想要的。"
+    },
+    "51": {
+      "en": "And it might use a little bit cliched language all over the place, which again, you might not want.",
+      "zh_tw": "它可能到處使用陳腔濫調的語言，這同樣不是你想要的。",
+      "zh_cn": "它可能到处使用陈腔濫调的语言，这同样不是你想要的。"
+    },
+    "52": {
+      "en": "And so over time, as you start to develop this prompt, you might eventually set up a big long list of things that you tell Claude to just not do it all.",
+      "zh_tw": "隨著時間推移，當你開始開發這個提示詞時，你可能最終會列出一大長串告訴 Claude 不要做的事情。",
+      "zh_cn": "随著时间推移，当你开始开发这个提示词时，你可能最终会列出一大长串告訴 Claude 不要做的事情。"
+    },
+    "53": {
+      "en": "But inevitably, Claude might eventually, no matter how many times you repeat these items,",
+      "zh_tw": "但不可避免地，無論你重複這些項目多少次，Claude 最終可能還是會",
+      "zh_cn": "但不可避免地，无论你重复这些项目多少次，Claude 最终可能还是会"
+    },
+    "54": {
+      "en": "Claude might give you back a response that seems to somehow always use emojis,",
+      "zh_tw": "給你回一個似乎總是使用表情符號的回應，",
+      "zh_cn": "给你回一个似乎总是使用表情符号的回应，"
+    },
+    "55": {
+      "en": "mention the fact that it has been written by an AI,",
+      "zh_tw": "提到它是由 AI 撰寫的，",
+      "zh_cn": "提到它是由 AI 撰写的，"
+    },
+    "56": {
+      "en": "and just generally have kind of a cringy, non-professional tone to it.",
+      "zh_tw": "總體上帶有一種尷尬、不專業的語調。",
+      "zh_cn": "总体上帶有一种尷尬、不專業的语调。"
+    },
+    "57": {
+      "en": "And Claude might persist in writing an article like this,",
+      "zh_tw": "Claude 可能會堅持以這種方式寫文章，",
+      "zh_cn": "Claude 可能会堅持以这种方式写文章，"
+    },
+    "58": {
+      "en": "no matter how many times you repeat these constraints or things that Claude should not do.",
+      "zh_tw": "無論你重複這些限制或 Claude 不應該做的事情多少次。",
+      "zh_cn": "无论你重复这些限制或 Claude 不应该做的事情多少次。"
+    },
+    "59": {
+      "en": "So to address this problem, you can use a very simple prompt chaining workflow.",
+      "zh_tw": "為了解決這個問題，你可以使用一個非常簡單的提示詞鏈式工作流程。",
+      "zh_cn": "为了解决这个问题，你可以使用一个非常简单的提示词链式工作流程。"
+    },
+    "60": {
+      "en": "Here's what you might do.",
+      "zh_tw": "以下是你可能的做法。",
+      "zh_cn": "以下是你可能的做法。"
+    },
+    "61": {
+      "en": "You might feed in that initial long prompt that has all these constraints in it,",
+      "zh_tw": "你可以輸入那個包含所有限制的初始長提示詞，",
+      "zh_cn": "你可以输入那个包含所有限制的初始长提示词，"
+    },
+    "62": {
+      "en": "and then just accept that you are going to get back some initial article that doesn't really fit the bill of what you're looking for.",
+      "zh_tw": "然後接受你會得到一篇初始文章，它並不完全符合你的要求。",
+      "zh_cn": "然后接受你会得到一篇初始文章，它並不完全符合你的要求。"
+    },
+    "63": {
+      "en": "Claude might inevitably decide to violate some of those different constraints that you laid out.",
+      "zh_tw": "Claude 可能不可避免地會違反你列出的一些不同限制。",
+      "zh_cn": "Claude 可能不可避免地会違反你列出的一些不同限制。"
+    },
+    "64": {
+      "en": "To fix those issues, you could then make a follow-up request back to Claude,",
+      "zh_tw": "為了修復這些問題，你可以向 Claude 發出後續請求，",
+      "zh_cn": "为了修复这些问题，你可以向 Claude 发出后续请求，"
+    },
+    "65": {
+      "en": "providing the article that Claude just wrote.",
+      "zh_tw": "提供 Claude 剛剛寫的文章。",
+      "zh_cn": "提供 Claude 剛剛写的文章。"
+    },
+    "66": {
+      "en": "And underneath the article, you could ask Claude to rewrite the article in some particular way.",
+      "zh_tw": "在文章下面，你可以要求 Claude 以某種特定方式重寫文章。",
+      "zh_cn": "在文章下面，你可以要求 Claude 以某种特定方式重写文章。"
+    },
+    "67": {
+      "en": "So you could say, find any location where the author identifies as an AI and remove that mention,",
+      "zh_tw": "你可以說，找到任何作者以 AI 身分自我介紹的地方並刪除那些提及，",
+      "zh_cn": "你可以说，找到任何作者以 AI 身分自我介绍的地方並刪除那些提及，"
+    },
+    "68": {
+      "en": "find and remove all emojis,",
+      "zh_tw": "找到並刪除所有表情符號，",
+      "zh_cn": "找到並刪除所有表情符号，"
+    },
+    "69": {
+      "en": "and then write the text in a way that a professional technical writer would do it.",
+      "zh_tw": "然後以專業技術寫作者的方式重寫文字。",
+      "zh_cn": "然后以專業技术写作者的方式重写文字。"
+    },
+    "70": {
+      "en": "By using this chaining workflow and breaking the task up into multiple steps,",
+      "zh_tw": "透過使用這種鏈式工作流程並將任務拆分成多個步驟，",
+      "zh_cn": "透过使用这种链式工作流程並将任务拆分成多个步驟，"
+    },
+    "71": {
+      "en": "you allow Claude to focus much more on each individual task presented to it.",
+      "zh_tw": "你讓 Claude 更加專注於呈現給它的每個任務。",
+      "zh_cn": "你让 Claude 更加專注於呈现给它的每个任务。"
+    },
+    "72": {
+      "en": "So even though it might not really satisfy all the requirements you put into the long prompt originally,",
+      "zh_tw": "所以即使它可能沒有真正滿足你原始長提示詞中的所有要求，",
+      "zh_cn": "所以即使它可能没有真正满足你原始长提示词中的所有要求，"
+    },
+    "73": {
+      "en": "the follow-up prompt allows Claude to focus on just the restrictions that you really care about,",
+      "zh_tw": "後續提示詞讓 Claude 只專注於你真正在意的限制，",
+      "zh_cn": "后续提示词让 Claude 只專注於你真正在意的限制，"
+    },
+    "74": {
+      "en": "and will hopefully rewrite the article in a style that you are really looking for.",
+      "zh_tw": "並希望能以你真正期望的風格重寫文章。",
+      "zh_cn": "並希望能以你真正期望的风格重写文章。"
+    },
+    "75": {
+      "en": "So once again, even though prompt chaining seems like something kind of obvious and simple,",
+      "zh_tw": "再次強調，即使提示詞鏈看起來像是顯而易見且簡單的東西，",
+      "zh_cn": "再次強调，即使提示词链看起來像是显而易見且简单的東西，"
+    },
+    "76": {
+      "en": "this does end up being something that you're going to use rather often,",
+      "zh_tw": "這確實是你會經常使用的，",
+      "zh_cn": "这确实是你会经常使用的，"
+    },
+    "77": {
+      "en": "anytime that you have a task for Claude with many constraints,",
+      "zh_tw": "每當你有一個帶有許多限制的 Claude 任務，",
+      "zh_cn": "每当你有一个帶有许多限制的 Claude 任务，"
+    },
+    "78": {
+      "en": "and Claude doesn't seem to be always following those constraints as much as you might expect.",
+      "zh_tw": "而 Claude 似乎不總是像你期望的那樣遵守這些限制時。",
+      "zh_cn": "而 Claude 似乎不总是像你期望的那样遵守这些限制时。"
+    }
+  }
+}

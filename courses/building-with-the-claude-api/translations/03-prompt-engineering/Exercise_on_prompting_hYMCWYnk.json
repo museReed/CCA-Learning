@@ -1,0 +1,422 @@
+{
+  "srt_file": "Exercise_on_prompting_hYMCWYnk.srt",
+  "video_file": "Exercise_on_prompting_hYMCWYnk.mp4",
+  "max_valid_entry": 83,
+  "entries": {
+    "1": {
+      "en": "Let's test your knowledge of prompt engineering by going through a quick exercise.",
+      "zh_tw": "讓我們透過一個快速練習來測試你的提示工程知識。",
+      "zh_cn": "让我们透过一个快速练習來测试你的提示工程知识。"
+    },
+    "2": {
+      "en": "Now for this exercise, I made a new notebook called 003 underscore exercise.",
+      "zh_tw": "對於這個練習，我做了一個叫 003 underscore exercise 的新筆記本。",
+      "zh_cn": "对於这个练習，我做了一个叫 003 underscore exercise 的新笔记本。"
+    },
+    "3": {
+      "en": "You do not have to download this one.",
+      "zh_tw": "你不需要下載這個。",
+      "zh_cn": "你不需要下載这个。"
+    },
+    "4": {
+      "en": "All I did was replace the task description, the prompt input spec, and then adjusted some",
+      "zh_tw": "我只是替換了任務描述、提示輸入規格，然後調整了下面的一些",
+      "zh_cn": "我只是替换了任务描述、提示输入规格，然后调整了下面的一些"
+    },
+    "5": {
+      "en": "of the extra criteria down here.",
+      "zh_tw": "額外標準。",
+      "zh_cn": "额外标准。"
+    },
+    "6": {
+      "en": "So if you want to, you could manually change all the stuff in the notebook you're working",
+      "zh_tw": "如果你想的話，可以手動修改你正在使用的筆記本中的所有內容，",
+      "zh_cn": "如果你想的话，可以手动修改你正在使用的笔记本中的所有內容，"
+    },
+    "7": {
+      "en": "out of, or alternatively just download this 003 exercise and get caught up with exactly",
+      "zh_tw": "或者直接下載這個 003 exercise，跟上我的進度。",
+      "zh_cn": "或者直接下載这个 003 exercise，跟上我的进度。"
+    },
+    "8": {
+      "en": "where I am.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "9": {
+      "en": "Your goal in this exercise is to improve an existing prompt using all the prompt engineering",
+      "zh_tw": "你在這個練習中的目標是使用我們在這個模組中學到的所有提示工程",
+      "zh_cn": "你在这个练習中的目标是使用我们在这个模组中学到的所有提示工程"
+    },
+    "10": {
+      "en": "topics we've learned about inside this module.",
+      "zh_tw": "主題來改進現有的提示。",
+      "zh_cn": "主题來改进现有的提示。"
+    },
+    "11": {
+      "en": "The dataset you're going to be working with is going to create a series of passages of",
+      "zh_tw": "你要使用的資料集會建立一系列來自學術文章的",
+      "zh_cn": "你要使用的数据集会建立一系列來自学术文章的"
+    },
+    "12": {
+      "en": "text from a scholarly article.",
+      "zh_tw": "文字段落。",
+      "zh_cn": "文字段落。"
+    },
+    "13": {
+      "en": "The goal of your prompt is to take in that passage of text and extract all the topics from it",
+      "zh_tw": "提示的目標是接收那段文字，並從中擷取所有主題，",
+      "zh_cn": "提示的目标是接收那段文字，並从中提取所有主题，"
+    },
+    "14": {
+      "en": "into a JSON array of strings.",
+      "zh_tw": "放入一個 JSON 字串陣列。",
+      "zh_cn": "放入一个 JSON 字符串数组。"
+    },
+    "15": {
+      "en": "And when I say topic, I really just mean, well, what does this article talk about?",
+      "zh_tw": "當我說主題時，我指的就是，這篇文章談論了什麼？",
+      "zh_cn": "当我说主题时，我指的就是，这篇文章谈论了什麼？"
+    },
+    "16": {
+      "en": "So if it's our article about say solar panels, I would want to get back a JSON array of strings",
+      "zh_tw": "如果是一篇關於太陽能板的文章，我會想得到一個包含",
+      "zh_cn": "如果是一篇关於太阳能板的文章，我会想得到一个包含"
+    },
+    "17": {
+      "en": "that contains solar panels inside of it, only with any other topics mentioned inside that",
+      "zh_tw": "太陽能板的 JSON 字串陣列，以及文字中提到的其他主題。",
+      "zh_cn": "太阳能板的 JSON 字符串数组，以及文字中提到的其他主题。"
+    },
+    "18": {
+      "en": "text.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "19": {
+      "en": "The only input to the prompt is going to be a content property.",
+      "zh_tw": "提示唯一的輸入是一個 content 屬性。",
+      "zh_cn": "提示唯一的输入是一个 content 属性。"
+    },
+    "20": {
+      "en": "So that's going to be one paragraph of text.",
+      "zh_tw": "就是一段文字。",
+      "zh_cn": "就是一段文字。"
+    },
+    "21": {
+      "en": "Now in my notebook that I've opened right now, I have already executed the cell and generated",
+      "zh_tw": "在我現在打開的筆記本中，我已經執行過儲存格並生成了",
+      "zh_cn": "在我现在打开的笔记本中，我已经执行过存储格並生成了"
+    },
+    "22": {
+      "en": "a dataset.",
+      "zh_tw": "一個資料集。",
+      "zh_cn": "一个数据集。"
+    },
+    "23": {
+      "en": "I have already put together a starter prompt for you.",
+      "zh_tw": "我已經為你準備了一個起始提示。",
+      "zh_cn": "我已经为你准备了一个起始提示。"
+    },
+    "24": {
+      "en": "And right now it's a very poor prompt that can definitely be improved quite a bit.",
+      "zh_tw": "現在它是一個很差的提示，絕對可以大幅改進。",
+      "zh_cn": "现在它是一个很差的提示，绝对可以大幅改进。"
+    },
+    "25": {
+      "en": "So go ahead and play around with this prompt and use some of the different techniques we",
+      "zh_tw": "去試試調整這個提示，使用我們學過的一些不同技術。",
+      "zh_cn": "去试试调整这个提示，使用我们学过的一些不同技术。"
+    },
+    "26": {
+      "en": "have learned about.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "27": {
+      "en": "In order to evaluate your progress, go ahead and run the cell down here.",
+      "zh_tw": "為了評估進度，執行下面的儲存格。",
+      "zh_cn": "为了评估进度，执行下面的存储格。"
+    },
+    "28": {
+      "en": "I've already included a couple of extra criteria to make sure that you're kind of achieving the",
+      "zh_tw": "我已經包含了一些額外標準，確保你在達成",
+      "zh_cn": "我已经包含了一些额外标准，确保你在达成"
+    },
+    "29": {
+      "en": "correct result.",
+      "zh_tw": "正確的結果。",
+      "zh_cn": "正确的结果。"
+    },
+    "30": {
+      "en": "Remember, whenever you run the evaluation, you can always open up that report.html file",
+      "zh_tw": "記住，每次執行評估時，你都可以打開 report.html 檔案",
+      "zh_cn": "记住，每次执行评估时，你都可以打开 report.html 文件"
+    },
+    "31": {
+      "en": "and get a better understanding of what's going on.",
+      "zh_tw": "來更好地了解情況。",
+      "zh_cn": "來更好地了解情況。"
+    },
+    "32": {
+      "en": "By default, with that really simple prompt, I've got a average score of 2.8.",
+      "zh_tw": "用那個非常簡單的提示，預設的平均分數是 2.8。",
+      "zh_cn": "用那个非常简单的提示，默认的平均分数是 2.8。"
+    },
+    "33": {
+      "en": "And so I'm hoping we can at least get that average score over maybe seven or so.",
+      "zh_tw": "我希望我們至少能把平均分數提到七分左右。",
+      "zh_cn": "我希望我们至少能把平均分数提到七分左右。"
+    },
+    "34": {
+      "en": "So as usual, I would encourage you to pause the video right here and go ahead and give",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "35": {
+      "en": "this exercise a shot.",
+      "zh_tw": "像往常一樣，我鼓勵你在這裡暫停影片，",
+      "zh_cn": "像往常一样，我鼓勵你在这里暫停视频，"
+    },
+    "36": {
+      "en": "Otherwise, if you want to stick around, I'm going to go over a solution right away.",
+      "zh_tw": "試著做這個練習。",
+      "zh_cn": "试著做这个练習。"
+    },
+    "37": {
+      "en": "All right.",
+      "zh_tw": "否則如果你想繼續看，我馬上就要講解答案了。",
+      "zh_cn": "否则如果你想继续看，我马上就要讲解答案了。"
+    },
+    "38": {
+      "en": "So to solve this, we know without a doubt, all the work we're going to be doing is focused",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "39": {
+      "en": "on this variable right here.",
+      "zh_tw": "要解決這個問題，我們毫無疑問知道所有工作都集中",
+      "zh_cn": "要解决这个问题，我们毫无疑问知道所有工作都集中"
+    },
+    "40": {
+      "en": "We need to improve this prompt in some way to get back some better output.",
+      "zh_tw": "在這個變數上。",
+      "zh_cn": "在这个变量上。"
+    },
+    "41": {
+      "en": "The first thing we might do here is make sure you run the evaluation at least one time",
+      "zh_tw": "我們需要以某種方式改進這個提示來獲得更好的輸出。",
+      "zh_cn": "我们需要以某种方式改进这个提示來获得更好的输出。"
+    },
+    "42": {
+      "en": "to generate that output.html file.",
+      "zh_tw": "第一件可能要做的事是確保至少執行一次評估，",
+      "zh_cn": "第一件可能要做的事是确保至少执行一次评估，"
+    },
+    "43": {
+      "en": "And then once you have created that file, I would encourage you to open it up and take",
+      "zh_tw": "生成那個 output.html 檔案。",
+      "zh_cn": "生成那个 output.html 文件。"
+    },
+    "44": {
+      "en": "a look at some of the reasoning on why the output has been graded so poorly.",
+      "zh_tw": "建立檔案後，我鼓勵你打開它，看看",
+      "zh_cn": "建立文件后，我鼓勵你打开它，看看"
+    },
+    "45": {
+      "en": "You'll notice a common theme between each of these.",
+      "zh_tw": "輸出被評分如此低的推理原因。",
+      "zh_cn": "输出被评分如此低的推理原因。"
+    },
+    "46": {
+      "en": "The real common theme right away that we can see is that, well, it doesn't like the fact",
+      "zh_tw": "你會注意到每一個之間有一個共同主題。",
+      "zh_cn": "你会注意到每一个之间有一个共同主题。"
+    },
+    "47": {
+      "en": "that we are not returning a JSON array of strings.",
+      "zh_tw": "我們馬上能看到的真正共同主題是，它不喜歡",
+      "zh_cn": "我们马上能看到的真正共同主题是，它不喜欢"
+    },
+    "48": {
+      "en": "To solve this problem, let's make use of that technique of being simple and direct inside",
+      "zh_tw": "我們沒有回傳 JSON 字串陣列。",
+      "zh_cn": "我们没有返回 JSON 字符串数组。"
+    },
+    "49": {
+      "en": "of our prompts.",
+      "zh_tw": "為了解決這個問題，讓我們運用在提示中保持簡單直接的技術。",
+      "zh_cn": "为了解决这个问题，让我们运用在提示中保持简单直接的技术。"
+    },
+    "50": {
+      "en": "If we expect to get back a JSON array of strings that contains all the topics out of this content,",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "51": {
+      "en": "well, we need to be very simple and direct with Claude and tell it exactly what we want.",
+      "zh_tw": "如果我們期望得到一個包含所有主題的 JSON 字串陣列，",
+      "zh_cn": "如果我们期望得到一个包含所有主题的 JSON 字符串数组，"
+    },
+    "52": {
+      "en": "So I'm going to update the first line of the prompt right here, and I'll say extract key",
+      "zh_tw": "我們需要非常簡單直接地告訴 Claude 我們要什麼。",
+      "zh_cn": "我们需要非常简单直接地告訴 Claude 我们要什麼。"
+    },
+    "53": {
+      "en": "topics mentioned from a passage of text from a scholarly journal into a JSON array of strings.",
+      "zh_tw": "我要更新提示的第一行，說「從一篇學術期刊的文字段落中",
+      "zh_cn": "我要更新提示的第一行，说「从一篇学术期刊的文字段落中"
+    },
+    "54": {
+      "en": "As simple as I can phrase it and as direct as I can possibly make it.",
+      "zh_tw": "擷取關鍵主題到一個 JSON 字串陣列中」。",
+      "zh_cn": "提取关键主题到一个 JSON 字符串数组中」。"
+    },
+    "55": {
+      "en": "And right away, if I rerun the prompt with the evaluation, I will see that I get up to",
+      "zh_tw": "盡可能簡單，盡可能直接。",
+      "zh_cn": "尽可能简单，尽可能直接。"
+    },
+    "56": {
+      "en": "a kind of shocking 9.5 almost immediately.",
+      "zh_tw": "馬上重新執行帶有評估的提示，我會看到",
+      "zh_cn": "马上重新执行帶有评估的提示，我会看到"
+    },
+    "57": {
+      "en": "So I kind of didn't really expect it to go that well because there are still some other",
+      "zh_tw": "一下子就到了令人驚訝的 9.5。",
+      "zh_cn": "一下子就到了令人驚訝的 9.5。"
+    },
+    "58": {
+      "en": "techniques we might want to try out here.",
+      "zh_tw": "我其實沒預料到會這麼好，因為還有其他",
+      "zh_cn": "我其实没预料到会这麼好，因为还有其他"
+    },
+    "59": {
+      "en": "But if we take a look at the report now, I'm definitely getting back this JSON containing",
+      "zh_tw": "技術我們可能想試試。",
+      "zh_cn": "技术我们可能想试试。"
+    },
+    "60": {
+      "en": "all the different topics mentioned.",
+      "zh_tw": "但如果我們看看報告，我確實得到了包含",
+      "zh_cn": "但如果我们看看报告，我确实得到了包含"
+    },
+    "61": {
+      "en": "And it looks like the model grader is extremely happy with this output.",
+      "zh_tw": "所有不同主題的 JSON。",
+      "zh_cn": "所有不同主题的 JSON。"
+    },
+    "62": {
+      "en": "Now, I don't really want to leave it here.",
+      "zh_tw": "看起來模型評分器對這個輸出非常滿意。",
+      "zh_cn": "看起來模型评分器对这个输出非常满意。"
+    },
+    "63": {
+      "en": "Obviously, there are some other techniques we can add in to make sure that we get the",
+      "zh_tw": "不過，我不想就此結束。",
+      "zh_cn": "不过，我不想就此结束。"
+    },
+    "64": {
+      "en": "correct kind of output.",
+      "zh_tw": "顯然還有其他技術可以加入，確保我們得到",
+      "zh_cn": "显然还有其他技术可以加入，确保我们得到"
+    },
+    "65": {
+      "en": "So the next technique we might add in is structuring our prompt a little bit better by using some",
+      "zh_tw": "正確的輸出類型。",
+      "zh_cn": "正确的输出类型。"
+    },
+    "66": {
+      "en": "XML tags.",
+      "zh_tw": "下一個技術是透過使用",
+      "zh_cn": "下一个技术是透过使用"
+    },
+    "67": {
+      "en": "Before and after the content that we're going to interpolate in right here, I'm going to",
+      "zh_tw": "XML 標籤來更好地結構化提示。",
+      "zh_cn": "XML 标籤來更好地结构化提示。"
+    },
+    "68": {
+      "en": "add in some XML tags and I'm going to give them the name of simply text.",
+      "zh_tw": "在我們要插入的內容前後，加入",
+      "zh_cn": "在我们要插入的內容前后，加入"
+    },
+    "69": {
+      "en": "Now, in this case, I'm choosing to call these tags text because I earlier referred to some",
+      "zh_tw": "一些 XML 標籤，名稱就叫 text。",
+      "zh_cn": "一些 XML 标籤，名称就叫 text。"
+    },
+    "70": {
+      "en": "text inside of the first line of the prompt.",
+      "zh_tw": "在這裡我選擇叫這些標籤 text，因為我之前在提示的第一行",
+      "zh_cn": "在这里我选择叫这些标籤 text，因为我之前在提示的第一行"
+    },
+    "71": {
+      "en": "So now we have just a little bit more clear connection between us talking about a passage",
+      "zh_tw": "提到了一些文字。",
+      "zh_cn": "提到了一些文字。"
+    },
+    "72": {
+      "en": "of text right here and us providing the text right here.",
+      "zh_tw": "現在我們在這裡提到的文字段落",
+      "zh_cn": "现在我们在这里提到的文字段落"
+    },
+    "73": {
+      "en": "Another improvement that we might add in is to be very specific in what we want Claude",
+      "zh_tw": "和這裡提供的文字之間有了更清楚的連結。",
+      "zh_cn": "和这里提供的文字之间有了更清楚的连结。"
+    },
+    "74": {
+      "en": "to do.",
+      "zh_tw": "另一個改進是對 Claude 想要的東西非常具體。",
+      "zh_cn": "另一个改进是对 Claude 想要的東西非常具体。"
+    },
+    "75": {
+      "en": "So I could put in a series of steps for Claude to follow.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "76": {
+      "en": "Let's try that out.",
+      "zh_tw": "我可以放入一系列讓 Claude 遵循的步驟。",
+      "zh_cn": "我可以放入一系列让 Claude 遵循的步驟。"
+    },
+    "77": {
+      "en": "I might say, follow these steps and then list out exactly what I want Claude to do step by",
+      "zh_tw": "讓我們試試。",
+      "zh_cn": "让我们试试。"
+    },
+    "78": {
+      "en": "step.",
+      "zh_tw": "我可能會說「遵循以下步驟」，然後列出我確切想要 Claude",
+      "zh_cn": "我可能会说「遵循以下步驟」，然后列出我确切想要 Claude"
+    },
+    "79": {
+      "en": "So I think this is probably enough.",
+      "zh_tw": "一步步做的事情。",
+      "zh_cn": "一步步做的事情。"
+    },
+    "80": {
+      "en": "I'm going to rerun this prompt.",
+      "zh_tw": "我覺得這大概夠了。",
+      "zh_cn": "我覺得这大概够了。"
+    },
+    "81": {
+      "en": "I'll then run the evaluation again, and I end up getting a 9.5 again.",
+      "zh_tw": "重新執行提示。",
+      "zh_cn": "重新执行提示。"
+    },
+    "82": {
+      "en": "So I would say this is a pretty strong prompt and I would definitely trust it to extract a",
+      "zh_tw": "再次執行評估，最後得到 9.5。",
+      "zh_cn": "再次执行评估，最后得到 9.5。"
+    },
+    "83": {
+      "en": "list of topics from an article.",
+      "zh_tw": "我會說這是一個非常強的提示，我絕對信任它能從文章中擷取主題列表。",
+      "zh_cn": "我会说这是一个非常強的提示，我绝对信任它能从文章中提取主题列表。"
+    }
+  }
+}

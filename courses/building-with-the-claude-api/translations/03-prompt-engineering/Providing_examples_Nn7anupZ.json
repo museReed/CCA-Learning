@@ -1,0 +1,537 @@
+{
+  "srt_file": "Providing_examples_Nn7anupZ.srt",
+  "video_file": "Providing_examples_Nn7anupZ.mp4",
+  "max_valid_entry": 106,
+  "entries": {
+    "1": {
+      "en": "I'm really excited about this next prompt engineering technique we're going to discuss",
+      "zh_tw": "我對接下來要討論的提示工程技術非常興奮，",
+      "zh_cn": "我对接下來要討论的提示工程技术非常興奮，"
+    },
+    "2": {
+      "en": "because it is probably one of the most effective that you're going to find.",
+      "zh_tw": "因為它可能是你能找到的最有效的技術之一。",
+      "zh_cn": "因为它可能是你能找到的最有效的技术之一。"
+    },
+    "3": {
+      "en": "It's the idea of providing examples inside of your prompt.",
+      "zh_tw": "就是在提示中提供範例的概念。",
+      "zh_cn": "就是在提示中提供范例的概念。"
+    },
+    "4": {
+      "en": "This is often referred to as one-shot or multi-shot prompting,",
+      "zh_tw": "這通常被稱為 one-shot 或 multi-shot 提示，",
+      "zh_cn": "这通常被称为 one-shot 或 multi-shot 提示，"
+    },
+    "5": {
+      "en": "depending upon whether or not you are providing just one example or multiple examples.",
+      "zh_tw": "取決於你提供的是一個範例還是多個範例。",
+      "zh_cn": "取决於你提供的是一个范例还是多个范例。"
+    },
+    "6": {
+      "en": "Understanding this concept is definitely easiest if you take a look at an example,",
+      "zh_tw": "理解這個概念最簡單的方式是看一個例子，",
+      "zh_cn": "理解这个概念最简单的方式是看一个例子，"
+    },
+    "7": {
+      "en": "so let's do that right away.",
+      "zh_tw": "所以讓我們馬上來看。",
+      "zh_cn": "所以让我们马上來看。"
+    },
+    "8": {
+      "en": "Consider the prompt on the right-hand side.",
+      "zh_tw": "看看右邊的提示。",
+      "zh_cn": "看看右边的提示。"
+    },
+    "9": {
+      "en": "I'm asking Claude to categorize the sentiment of a tweet.",
+      "zh_tw": "我要求 Claude 對一則推文進行情感分類。",
+      "zh_cn": "我要求 Claude 对一则推文进行情感分类。"
+    },
+    "10": {
+      "en": "Just be clear, when we say sentiment, we mean kind of,",
+      "zh_tw": "說清楚一點，情感是指",
+      "zh_cn": "说清楚一点，情感是指"
+    },
+    "11": {
+      "en": "does this tweet seem kind of happy or positive in nature or unhappy or negative?",
+      "zh_tw": "這則推文看起來是高興或正面的，還是不高興或負面的。",
+      "zh_cn": "这则推文看起來是高興或正面的，还是不高興或负面的。"
+    },
+    "12": {
+      "en": "In this particular instance, I provided an input tweet of,",
+      "zh_tw": "在這個例子中，我提供的輸入推文是：",
+      "zh_cn": "在这个例子中，我提供的输入推文是："
+    },
+    "13": {
+      "en": "yeah, sure, that was the best movie I've ever seen since Plan 9 from Outer Space.",
+      "zh_tw": "「是啊，當然，這是我看過最好的電影，自從《外太空九號計畫》以來。」",
+      "zh_cn": "「是啊，当然，这是我看过最好的电影，自从《外太空九号计画》以來。」"
+    },
+    "14": {
+      "en": "Now, if you're not aware, Plan 9 from Outer Space is a famously bad movie.",
+      "zh_tw": "如果你不知道，《外太空九號計畫》是一部出了名的爛片。",
+      "zh_cn": "如果你不知道，《外太空九号计画》是一部出了名的爛片。"
+    },
+    "15": {
+      "en": "So if someone were to tweet something like this,",
+      "zh_tw": "所以如果有人這樣發推文，",
+      "zh_cn": "所以如果有人这样发推文，"
+    },
+    "16": {
+      "en": "they're actually probably being sarcastic,",
+      "zh_tw": "他們其實可能是在諷刺，",
+      "zh_cn": "他们其实可能是在諷刺，"
+    },
+    "17": {
+      "en": "and they probably did not like the movie they just watched at all.",
+      "zh_tw": "他們大概根本不喜歡剛看的電影。",
+      "zh_cn": "他们大概根本不喜欢剛看的电影。"
+    },
+    "18": {
+      "en": "So we would probably want to classify the tweet as being negative.",
+      "zh_tw": "所以我們可能會想把這則推文分類為負面。",
+      "zh_cn": "所以我们可能会想把这则推文分类为负面。"
+    },
+    "19": {
+      "en": "But Claude could potentially have some issue categorizing this.",
+      "zh_tw": "但 Claude 可能在分類時會有困難。",
+      "zh_cn": "但 Claude 可能在分类时会有困难。"
+    },
+    "20": {
+      "en": "One way to solve the problem would be by using multi-shot prompting.",
+      "zh_tw": "解決這個問題的方法之一是使用 multi-shot 提示。",
+      "zh_cn": "解决这个问题的方法之一是使用 multi-shot 提示。"
+    },
+    "21": {
+      "en": "So here's how we would fix this.",
+      "zh_tw": "以下是我們修復的方式。",
+      "zh_cn": "以下是我们修复的方式。"
+    },
+    "22": {
+      "en": "We would take our starting prompt that we have on the left-hand side",
+      "zh_tw": "我們把左邊的起始提示",
+      "zh_cn": "我们把左边的起始提示"
+    },
+    "23": {
+      "en": "and add in some examples,",
+      "zh_tw": "加上一些範例，",
+      "zh_cn": "加上一些范例，"
+    },
+    "24": {
+      "en": "which I've added in on the bottom half of the prompt right here.",
+      "zh_tw": "就是我在提示下半部分加的這些。",
+      "zh_cn": "就是我在提示下半部分加的这些。"
+    },
+    "25": {
+      "en": "To add in an example, we will very directly tell Claude",
+      "zh_tw": "要加入範例，我們會非常直接地告訴 Claude",
+      "zh_cn": "要加入范例，我们会非常直接地告訴 Claude"
+    },
+    "26": {
+      "en": "that we are about to give it some example input",
+      "zh_tw": "我們即將給它一些範例輸入",
+      "zh_cn": "我们即将给它一些范例输入"
+    },
+    "27": {
+      "en": "and an ideal perfect world kind of response.",
+      "zh_tw": "和一個理想的完美回應。",
+      "zh_cn": "和一个理想的完美回应。"
+    },
+    "28": {
+      "en": "We'll almost always wrap these inputs and outputs inside of some XML tags",
+      "zh_tw": "我們幾乎總是用一些 XML 標籤包裹這些輸入和輸出，",
+      "zh_cn": "我们幾乎总是用一些 XML 标籤包裹这些输入和输出，"
+    },
+    "29": {
+      "en": "just to better structure our prompt and make it super clear to Claude",
+      "zh_tw": "以更好地結構化提示，讓 Claude 更清楚",
+      "zh_cn": "以更好地结构化提示，让 Claude 更清楚"
+    },
+    "30": {
+      "en": "what the purpose of the input and output are.",
+      "zh_tw": "輸入和輸出的目的。",
+      "zh_cn": "输入和输出的目的。"
+    },
+    "31": {
+      "en": "So in this particular example,",
+      "zh_tw": "在這個範例中，",
+      "zh_cn": "在这个范例中，"
+    },
+    "32": {
+      "en": "I have given a sample input of great game tonight,",
+      "zh_tw": "我給了一個範例輸入「今晚比賽太棒了」，",
+      "zh_cn": "我给了一个范例输入「今晚比賽太棒了」，"
+    },
+    "33": {
+      "en": "which I would say is definitely positive in nature.",
+      "zh_tw": "我會說這絕對是正面的。",
+      "zh_cn": "我会说这绝对是正面的。"
+    },
+    "34": {
+      "en": "So right after that,",
+      "zh_tw": "接下來，",
+      "zh_cn": "接下來，"
+    },
+    "35": {
+      "en": "I would then put in an ideal output of simply positive.",
+      "zh_tw": "我放入一個理想輸出，就是「正面」。",
+      "zh_cn": "我放入一个理想输出，就是「正面」。"
+    },
+    "36": {
+      "en": "This gives Claude a concrete objective example",
+      "zh_tw": "這給了 Claude 一個具體客觀的範例，",
+      "zh_cn": "这给了 Claude 一个具体客观的范例，"
+    },
+    "37": {
+      "en": "of how to deal with some kind of input.",
+      "zh_tw": "告訴它如何處理某種輸入。",
+      "zh_cn": "告訴它如何处理某种输入。"
+    },
+    "38": {
+      "en": "So now Claude knows that if it ever sees",
+      "zh_tw": "現在 Claude 知道如果未來再遇到",
+      "zh_cn": "现在 Claude 知道如果未來再遇到"
+    },
+    "39": {
+      "en": "some kind of input like this again in the future,",
+      "zh_tw": "類似的輸入，",
+      "zh_cn": "类似的输入，"
+    },
+    "40": {
+      "en": "well, it should probably label it as positive",
+      "zh_tw": "它可能應該標記為正面，",
+      "zh_cn": "它可能应该标记为正面，"
+    },
+    "41": {
+      "en": "because that's how it was done in the past.",
+      "zh_tw": "因為過去就是這樣處理的。",
+      "zh_cn": "因为过去就是这样处理的。"
+    },
+    "42": {
+      "en": "We can make use of multi-shot prompting.",
+      "zh_tw": "我們可以使用 multi-shot 提示。",
+      "zh_cn": "我们可以使用 multi-shot 提示。"
+    },
+    "43": {
+      "en": "That's where we provide multiple different examples",
+      "zh_tw": "也就是提供多個不同的範例，",
+      "zh_cn": "也就是提供多个不同的范例，"
+    },
+    "44": {
+      "en": "whenever we want to handle corner cases.",
+      "zh_tw": "來處理邊界情況。",
+      "zh_cn": "來处理边界情況。"
+    },
+    "45": {
+      "en": "And dealing with sarcastic tweets like this",
+      "zh_tw": "處理諷刺的推文",
+      "zh_cn": "处理諷刺的推文"
+    },
+    "46": {
+      "en": "is definitely a corner case that we kind of want to highlight to Claude.",
+      "zh_tw": "就是我們想要向 Claude 強調的邊界情況。",
+      "zh_cn": "就是我们想要向 Claude 強调的边界情況。"
+    },
+    "47": {
+      "en": "When adding examples that highlight corner cases,",
+      "zh_tw": "加入強調邊界情況的範例時，",
+      "zh_cn": "加入強调边界情況的范例时，"
+    },
+    "48": {
+      "en": "add in some context to Claude",
+      "zh_tw": "要為 Claude 加入一些背景",
+      "zh_cn": "要为 Claude 加入一些背景"
+    },
+    "49": {
+      "en": "and tell it that it should be especially aware of certain scenarios.",
+      "zh_tw": "告訴它應該特別注意某些情境。",
+      "zh_cn": "告訴它应该特別注意某些情境。"
+    },
+    "50": {
+      "en": "So for example, we might say,",
+      "zh_tw": "例如，我們可能會說，",
+      "zh_cn": "例如，我们可能会说，"
+    },
+    "51": {
+      "en": "be especially careful with tweets that contain some sarcasm",
+      "zh_tw": "要特別注意包含諷刺的推文，",
+      "zh_cn": "要特別注意包含諷刺的推文，"
+    },
+    "52": {
+      "en": "and then provide an immediate example of that.",
+      "zh_tw": "然後立即提供一個範例。",
+      "zh_cn": "然后立即提供一个范例。"
+    },
+    "53": {
+      "en": "So now in this case, I've got a example tweet",
+      "zh_tw": "在這個例子中，範例推文",
+      "zh_cn": "在这个例子中，范例推文"
+    },
+    "54": {
+      "en": "or a sample input of,",
+      "zh_tw": "或範例輸入是：",
+      "zh_cn": "或范例输入是："
+    },
+    "55": {
+      "en": "oh yeah, I really needed a flight delayed tonight.",
+      "zh_tw": "「噢是的，我今晚真的很需要班機延誤。」",
+      "zh_cn": "「噢是的，我今晚真的很需要班机延误。」"
+    },
+    "56": {
+      "en": "Excellent.",
+      "zh_tw": "太好了。",
+      "zh_cn": "太好了。"
+    },
+    "57": {
+      "en": "If you didn't understand the concept of sarcasm,",
+      "zh_tw": "如果你不理解諷刺的概念，",
+      "zh_cn": "如果你不理解諷刺的概念，"
+    },
+    "58": {
+      "en": "this would seem like a positive sentiment tweet.",
+      "zh_tw": "這看起來會是一則正面情感的推文。",
+      "zh_cn": "这看起來会是一则正面情感的推文。"
+    },
+    "59": {
+      "en": "But of course, we can probably understand that this is sarcasm",
+      "zh_tw": "但我們大概能理解這是諷刺，",
+      "zh_cn": "但我们大概能理解这是諷刺，"
+    },
+    "60": {
+      "en": "and so it probably is actually negative.",
+      "zh_tw": "所以它實際上可能是負面的。",
+      "zh_cn": "所以它实际上可能是负面的。"
+    },
+    "61": {
+      "en": "Once again, Claude can take a look at this example",
+      "zh_tw": "Claude 再次可以看看這個範例，",
+      "zh_cn": "Claude 再次可以看看这个范例，"
+    },
+    "62": {
+      "en": "when grading our provided input up here, the original input,",
+      "zh_tw": "在評估我們上面提供的原始輸入時，",
+      "zh_cn": "在评估我们上面提供的原始输入时，"
+    },
+    "63": {
+      "en": "and Claude will have a better chance of recognizing that,",
+      "zh_tw": "Claude 會更有機會認出",
+      "zh_cn": "Claude 会更有机会认出"
+    },
+    "64": {
+      "en": "oh yeah, this looks like it's sarcasm too.",
+      "zh_tw": "「噢是的，這看起來也是諷刺。」",
+      "zh_cn": "「噢是的，这看起來也是諷刺。」"
+    },
+    "65": {
+      "en": "This is also probably negative in nature.",
+      "zh_tw": "這也可能是負面的。",
+      "zh_cn": "这也可能是负面的。"
+    },
+    "66": {
+      "en": "Now, multi-shot prompting like this",
+      "zh_tw": "像這樣的 multi-shot 提示",
+      "zh_cn": "像这样的 multi-shot 提示"
+    },
+    "67": {
+      "en": "can be used not only for capturing corner cases",
+      "zh_tw": "不僅可以用來捕捉邊界情況",
+      "zh_cn": "不僅可以用來捕捉边界情況"
+    },
+    "68": {
+      "en": "or giving a little bit more clarity to Claude,",
+      "zh_tw": "或給 Claude 更多清晰度，",
+      "zh_cn": "或给 Claude 更多清晰度，"
+    },
+    "69": {
+      "en": "but also helping Claude understand more complex output formats.",
+      "zh_tw": "還可以幫助 Claude 理解更複雜的輸出格式。",
+      "zh_cn": "还可以幫助 Claude 理解更复杂的输出格式。"
+    },
+    "70": {
+      "en": "So if you ever need to generate a JSON object",
+      "zh_tw": "如果你需要生成一個",
+      "zh_cn": "如果你需要生成一个"
+    },
+    "71": {
+      "en": "that is rather complex in nature,",
+      "zh_tw": "相當複雜的 JSON 物件，",
+      "zh_cn": "相当复杂的 JSON 对象，"
+    },
+    "72": {
+      "en": "you might provide a sample input and an example output",
+      "zh_tw": "你可以提供一個範例輸入和範例輸出，",
+      "zh_cn": "你可以提供一个范例输入和范例输出，"
+    },
+    "73": {
+      "en": "and show that kind of complex JSON structure to Claude.",
+      "zh_tw": "展示那個複雜的 JSON 結構給 Claude。",
+      "zh_cn": "展示那个复杂的 JSON 结构给 Claude。"
+    },
+    "74": {
+      "en": "And now it will have a better idea",
+      "zh_tw": "現在它會更了解",
+      "zh_cn": "现在它会更了解"
+    },
+    "75": {
+      "en": "of the exact structure of output that it is going for.",
+      "zh_tw": "它追求的確切輸出結構。",
+      "zh_cn": "它追求的确切输出结构。"
+    },
+    "76": {
+      "en": "Providing examples is especially effective",
+      "zh_tw": "提供範例在你做提示評估時特別有效，",
+      "zh_cn": "提供范例在你做提示评估时特別有效，"
+    },
+    "77": {
+      "en": "whenever you are doing prompt evals, as we currently are.",
+      "zh_tw": "就像我們目前在做的。",
+      "zh_cn": "就像我们目前在做的。"
+    },
+    "78": {
+      "en": "Remember, whenever you run a prompt eval",
+      "zh_tw": "記住，每次你用我們筆記本裡的小框架執行提示評估時，",
+      "zh_cn": "记住，每次你用我们笔记本里的小框架执行提示评估时，"
+    },
+    "79": {
+      "en": "using our little framework inside the notebook,",
+      "zh_tw": "它會在同一目錄中建立一個 HTML 檔案。",
+      "zh_cn": "它会在同一目录中建立一个 HTML 文件。"
+    },
+    "80": {
+      "en": "it creates an HTML file inside the same directory.",
+      "zh_tw": "我們可以搜尋這個檔案",
+      "zh_cn": "我们可以搜尋这个文件"
+    },
+    "81": {
+      "en": "So we can hunt through this file",
+      "zh_tw": "找到一個完美的十分，",
+      "zh_cn": "找到一个完美的十分，"
+    },
+    "82": {
+      "en": "until we find a perfect 10,",
+      "zh_tw": "或希望只是找到一個分數相當高的測試案例。",
+      "zh_cn": "或希望只是找到一个分数相当高的测试案例。"
+    },
+    "83": {
+      "en": "or hopefully just a test case with a rather high score.",
+      "zh_tw": "如果我捲過去，這裡會找到一個十分。",
+      "zh_cn": "如果我捲过去，这里会找到一个十分。"
+    },
+    "84": {
+      "en": "If I scroll through, I will find a 10 right here.",
+      "zh_tw": "你的輸出中可能沒有任何十分。",
+      "zh_cn": "你的输出中可能没有任何十分。"
+    },
+    "85": {
+      "en": "Now, you might not have any 10s inside of your output.",
+      "zh_tw": "如果沒有也完全沒關係。",
+      "zh_cn": "如果没有也完全没关係。"
+    },
+    "86": {
+      "en": "If you don't, that's totally fine.",
+      "zh_tw": "只要找到分數最高的記錄就好。",
+      "zh_cn": "只要找到分数最高的记录就好。"
+    },
+    "87": {
+      "en": "Just try to find the record with the highest score.",
+      "zh_tw": "這是一個輸入和輸出",
+      "zh_cn": "这是一个输入和输出"
+    },
+    "88": {
+      "en": "So this is an example of where we had some input and output",
+      "zh_tw": "被我們的模型評分器判定為幾乎是最好的範例。",
+      "zh_cn": "被我们的模型评分器判定为幾乎是最好的范例。"
+    },
+    "89": {
+      "en": "that was gauged to be pretty much as good",
+      "zh_tw": "我們可以決定把這個",
+      "zh_cn": "我们可以决定把这个"
+    },
+    "90": {
+      "en": "as we're going to get by our model grader.",
+      "zh_tw": "作為提示中的範例。",
+      "zh_cn": "作为提示中的范例。"
+    },
+    "91": {
+      "en": "So we might decide to provide this",
+      "zh_tw": "希望這能引導 Claude",
+      "zh_cn": "希望这能引导 Claude"
+    },
+    "92": {
+      "en": "as an example inside of our prompt.",
+      "zh_tw": "更頻繁地產出像這樣的輸出。",
+      "zh_cn": "更频繁地产出像这样的输出。"
+    },
+    "93": {
+      "en": "And hopefully that will guide Claude",
+      "zh_tw": "讓我們試試看。",
+      "zh_cn": "让我们试试看。"
+    },
+    "94": {
+      "en": "to producing output that looks like this",
+      "zh_tw": "我要複製這個輸入。",
+      "zh_cn": "我要复製这个输入。"
+    },
+    "95": {
+      "en": "a little bit more often.",
+      "zh_tw": "回到提示。",
+      "zh_cn": "回到提示。"
+    },
+    "96": {
+      "en": "Let's try this out.",
+      "zh_tw": "捲到指導方針部分下面，",
+      "zh_cn": "捲到指导方針部分下面，"
+    },
+    "97": {
+      "en": "I'm going to copy this input right here.",
+      "zh_tw": "明確告訴 Claude",
+      "zh_cn": "明确告訴 Claude"
+    },
+    "98": {
+      "en": "Go back over to my prompt.",
+      "zh_tw": "我即將提供一個範例，",
+      "zh_cn": "我即将提供一个范例，"
+    },
+    "99": {
+      "en": "I'm going to scroll underneath the guidelines section,",
+      "zh_tw": "包含一個範例輸入",
+      "zh_cn": "包含一个范例输入"
+    },
+    "100": {
+      "en": "and I'm going to explicitly tell Claude",
+      "zh_tw": "和一個理想輸出。",
+      "zh_cn": "和一个理想输出。"
+    },
+    "101": {
+      "en": "that I'm about to provide an example",
+      "zh_tw": "我會說「這是一個範例」，",
+      "zh_cn": "我会说「这是一个范例」，"
+    },
+    "102": {
+      "en": "that's going to contain a sample input",
+      "zh_tw": "包含一個範例輸入和理想輸出。",
+      "zh_cn": "包含一个范例输入和理想输出。"
+    },
+    "103": {
+      "en": "and an ideal output.",
+      "zh_tw": "然後用 XML 標籤放入範例輸入。",
+      "zh_cn": "然后用 XML 标籤放入范例输入。"
+    },
+    "104": {
+      "en": "So I'll say here is an example",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "105": {
+      "en": "with a sample input and an ideal output.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "106": {
+      "en": "I'll then put in my sample input inside of XML tags",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    }
+  }
+}

@@ -1,0 +1,297 @@
+{
+  "srt_file": "Parallelization_workflows_vGiRBtXS.srt",
+  "video_file": "Parallelization_workflows_vGiRBtXS.mp4",
+  "max_valid_entry": 58,
+  "entries": {
+    "1": {
+      "en": "Let's take a look at another workflow.",
+      "zh_tw": "讓我們看看另一個工作流程。",
+      "zh_cn": "让我们看看另一个工作流程。"
+    },
+    "2": {
+      "en": "We're going to change up our application a little bit this time around.",
+      "zh_tw": "這次我們要稍微改變一下應用程式。",
+      "zh_cn": "这次我们要稍微改变一下应用程序。"
+    },
+    "3": {
+      "en": "We're still going to ask the user to drag and drop an image of a part onto the screen,",
+      "zh_tw": "我們仍然會要求使用者將一個零件的圖片拖放到螢幕上，",
+      "zh_cn": "我们仍然会要求使用者将一个零件的圖片拖放到屏幕上，"
+    },
+    "4": {
+      "en": "but this time we're going to give the user back an analysis,",
+      "zh_tw": "但這次我們要給使用者一份分析報告，",
+      "zh_cn": "但这次我们要给使用者一份分析报告，"
+    },
+    "5": {
+      "en": "a report that's going to tell the user the best material to build their part out of,",
+      "zh_tw": "告訴使用者根據不同標準，最適合用什麼材料來製作他們的零件。",
+      "zh_cn": "告訴使用者根据不同标准，最适合用什麼材料來製作他们的零件。"
+    },
+    "6": {
+      "en": "depending upon some various criteria.",
+      "zh_tw": "取決於各種不同的標準。",
+      "zh_cn": "取决於各种不同的标准。"
+    },
+    "7": {
+      "en": "To implement this feature, we might take the user's supplied image",
+      "zh_tw": "為了實作這個功能，我們可以把使用者提供的圖片",
+      "zh_cn": "为了实作这个功能，我们可以把使用者提供的圖片"
+    },
+    "8": {
+      "en": "and send it off to Claude along with a short prompt.",
+      "zh_tw": "連同一個簡短的提示詞一起傳給 Claude。",
+      "zh_cn": "连同一个简短的提示词一起传给 Claude。"
+    },
+    "9": {
+      "en": "And in the prompt, we might ask Claude to decide whether it would be best",
+      "zh_tw": "在提示詞中，我們可能會問 Claude 用金屬、聚合物、陶瓷等哪種材料",
+      "zh_cn": "在提示词中，我们可能会问 Claude 用金属、聚合物、陶瓷等哪种材料"
+    },
+    "10": {
+      "en": "to make this part out of metal, polymer, ceramic, and so on.",
+      "zh_tw": "製作這個零件最好。",
+      "zh_cn": "製作这个零件最好。"
+    },
+    "11": {
+      "en": "Now, this would probably work, but we are really asking a lot out of Claude",
+      "zh_tw": "這可能會有效，但我們在這個非常簡單的提示詞中確實要求 Claude 太多了。",
+      "zh_cn": "这可能会有效，但我们在这个非常简单的提示词中确实要求 Claude 太多了。"
+    },
+    "12": {
+      "en": "in this very simple prompt.",
+      "zh_tw": "在這個非常簡單的提示詞中。",
+      "zh_cn": "在这个非常简单的提示词中。"
+    },
+    "13": {
+      "en": "For example, we haven't really told Claude any of the real considerations",
+      "zh_tw": "例如，我們其實沒有告訴 Claude 在決定使用哪種材料時",
+      "zh_cn": "例如，我们其实没有告訴 Claude 在决定使用哪种材料时"
+    },
+    "14": {
+      "en": "that it should take into account when deciding which material to use.",
+      "zh_tw": "應該考慮的真正因素。",
+      "zh_cn": "应该考慮的真正因素。"
+    },
+    "15": {
+      "en": "So even though this might work, we might not get the best results.",
+      "zh_tw": "所以即使這可能有效，我們可能無法得到最好的結果。",
+      "zh_cn": "所以即使这可能有效，我们可能无法得到最好的结果。"
+    },
+    "16": {
+      "en": "So a natural improvement here would be probably to go back to this prompt",
+      "zh_tw": "一個自然的改進可能是回到這個提示詞",
+      "zh_cn": "一个自然的改进可能是回到这个提示词"
+    },
+    "17": {
+      "en": "and add in a lot more detail.",
+      "zh_tw": "加入更多細節。",
+      "zh_cn": "加入更多细节。"
+    },
+    "18": {
+      "en": "Maybe tell Claude some of the different scenarios in which it should recommend",
+      "zh_tw": "也許告訴 Claude 在什麼不同情境下應該推薦",
+      "zh_cn": "也许告訴 Claude 在什麼不同情境下应该推薦"
+    },
+    "19": {
+      "en": "metal or polymer and so on.",
+      "zh_tw": "金屬或聚合物等等。",
+      "zh_cn": "金属或聚合物等等。"
+    },
+    "20": {
+      "en": "So we might end up with a really, really large prompt like this.",
+      "zh_tw": "所以我們可能最終得到一個非常非常長的提示詞。",
+      "zh_cn": "所以我们可能最终得到一个非常非常长的提示词。"
+    },
+    "21": {
+      "en": "We might give some criteria for deciding when to use metal,",
+      "zh_tw": "我們可能會列出一些決定何時使用金屬的標準，",
+      "zh_cn": "我们可能会列出一些决定何时使用金属的标准，"
+    },
+    "22": {
+      "en": "and then some criteria for deciding when to use polymer,",
+      "zh_tw": "然後一些決定何時使用聚合物的標準，",
+      "zh_cn": "然后一些决定何时使用聚合物的标准，"
+    },
+    "23": {
+      "en": "and then repeat with ceramic, composite, elastomere, wood, and so on.",
+      "zh_tw": "然後對陶瓷、複合材料、彈性體、木材等重複。",
+      "zh_cn": "然后对陶瓷、复合材料、彈性体、木材等重复。"
+    },
+    "24": {
+      "en": "We would end up with a really, really large prompt",
+      "zh_tw": "我們最終會得到一個非常非常長的提示詞，",
+      "zh_cn": "我们最终会得到一个非常非常长的提示词，"
+    },
+    "25": {
+      "en": "that might end up being a little bit confusing to Claude",
+      "zh_tw": "可能會讓 Claude 有些困惑，",
+      "zh_cn": "可能会让 Claude 有些困惑，"
+    },
+    "26": {
+      "en": "because it has to do a lot of analysis and a lot of work inside of one single step.",
+      "zh_tw": "因為它必須在一個步驟中進行大量分析和工作。",
+      "zh_cn": "因为它必须在一个步驟中进行大量分析和工作。"
+    },
+    "27": {
+      "en": "So this might not lead to the best results.",
+      "zh_tw": "所以這可能不會帶來最好的結果。",
+      "zh_cn": "所以这可能不会帶來最好的结果。"
+    },
+    "28": {
+      "en": "Let me show you a better way to approach implementing this feature.",
+      "zh_tw": "讓我展示一個更好的方式來實作這個功能。",
+      "zh_cn": "让我展示一个更好的方式來实作这个功能。"
+    },
+    "29": {
+      "en": "We could decide to make a series of different requests in parallel off to Claude",
+      "zh_tw": "我們可以決定在使用者提交圖片時，同時向 Claude 發送一系列不同的並行請求。",
+      "zh_cn": "我们可以决定在使用者提交圖片时，同时向 Claude 发送一系列不同的並行请求。"
+    },
+    "30": {
+      "en": "whenever a user initially submits an image.",
+      "zh_tw": "每個單獨的請求可以包含一個專門的提示詞，詢問 Claude",
+      "zh_cn": "每个单独的请求可以包含一个專门的提示词，询问 Claude"
+    },
+    "31": {
+      "en": "Each individual request could then include a specialized prompt asking Claude",
+      "zh_tw": "用金屬、聚合物、陶瓷或複合材料等製作這個零件是否是個好主意。",
+      "zh_cn": "用金属、聚合物、陶瓷或复合材料等製作这个零件是否是个好主意。"
+    },
+    "32": {
+      "en": "if making this given part would be a good idea using metal or polymer or ceramic or composite and so on.",
+      "zh_tw": "所以在每個單獨的請求中，我們詢問 Claude 用某個特定材料製作這個零件的適合度。",
+      "zh_cn": "所以在每个单独的请求中，我们询问 Claude 用某个特定材料製作这个零件的适合度。"
+    },
+    "33": {
+      "en": "So in each separate request, we are asking Claude for the suitability of building this part in one individual material.",
+      "zh_tw": "用這種方法，我們可以為每種材料客製化各自的提示詞。",
+      "zh_cn": "用这种方法，我们可以为每种材料自定义各自的提示词。"
+    },
+    "34": {
+      "en": "With this approach, we could specialize each individual prompt for the given material.",
+      "zh_tw": "現在 Claude 不需要擔心所有這些不同的材料。",
+      "zh_cn": "现在 Claude 不需要担心所有这些不同的材料。"
+    },
+    "35": {
+      "en": "And now Claude doesn't have to worry about all these different materials.",
+      "zh_tw": "它真的只需要一次專注於一種材料。",
+      "zh_cn": "它真的只需要一次專注於一种材料。"
+    },
+    "36": {
+      "en": "It's really just focused on one individual material at a time.",
+      "zh_tw": "當我們最終從 Claude 得到回應後，我要稍微改變一下這個圖表的結構，",
+      "zh_cn": "当我们最终从 Claude 得到回应后，我要稍微改变一下这个圖表的结构，"
+    },
+    "37": {
+      "en": "Now, when we eventually get some responses back from Claude, I'm going to change the structure of this diagram just a little bit",
+      "zh_tw": "好讓所有東西都顯示在一個畫面上。",
+      "zh_cn": "好让所有東西都显示在一个画面上。"
+    },
+    "38": {
+      "en": "so I can fit everything on one screen.",
+      "zh_tw": "所以我們會從 Claude 得到這些個別的分析結果。",
+      "zh_cn": "所以我们会从 Claude 得到这些个別的分析结果。"
+    },
+    "39": {
+      "en": "So we're going to get back these individual analysis results from Claude.",
+      "zh_tw": "每一個都會告訴我們用金屬、聚合物、陶瓷、複合材料等製作零件的適合度。",
+      "zh_cn": "每一个都会告訴我们用金属、聚合物、陶瓷、复合材料等製作零件的适合度。"
+    },
+    "40": {
+      "en": "Each one is going to tell us the suitability of building out the given part in say metal, polymer, ceramic, composite, and so on.",
+      "zh_tw": "然後我們可以把每一個分析結果回傳給 Claude 作為後續請求，",
+      "zh_cn": "然后我们可以把每一个分析结果返回给 Claude 作为后续请求，"
+    },
+    "41": {
+      "en": "We can then take each of these analysis results and then feed them back into Claude in a follow-up request",
+      "zh_tw": "要求 Claude 考慮每個不同的分析結果，並決定最終使用哪種材料。",
+      "zh_cn": "要求 Claude 考慮每个不同的分析结果，並决定最终使用哪种材料。"
+    },
+    "42": {
+      "en": "and ask Claude to consider each of the different analysis results and decide upon a final material to use.",
+      "zh_tw": "現在 Claude 不需要事先擔心比較所有不同的材料。",
+      "zh_cn": "现在 Claude 不需要事先担心比較所有不同的材料。"
+    },
+    "43": {
+      "en": "Now Claude doesn't really have to worry about comparing all these different materials up front.",
+      "zh_tw": "相反，它只需要看看最有前途的分析結果。",
+      "zh_cn": "相反，它只需要看看最有前途的分析结果。"
+    },
+    "44": {
+      "en": "Instead, it can just take a look at the analysis results that seem to be the most promising.",
+      "zh_tw": "這是並行化工作流程的一個範例。",
+      "zh_cn": "这是並行化工作流程的一个范例。"
+    },
+    "45": {
+      "en": "This is an example of a parallelization workflow.",
+      "zh_tw": "並行化工作流程背後的想法是我們把一個任務拆分成多個不同的子任務。",
+      "zh_cn": "並行化工作流程背后的想法是我们把一个任务拆分成多个不同的子任务。"
+    },
+    "46": {
+      "en": "The idea behind a parallelization workflow is that we're going to take one task and break it up into multiple different subtasks.",
+      "zh_tw": "每個子任務可以並行執行，也就是同時進行。",
+      "zh_cn": "每个子任务可以並行执行，也就是同时进行。"
+    },
+    "47": {
+      "en": "Each of these subtasks can be ran in parallel, so at the same time.",
+      "zh_tw": "然後我們把所有子任務的結果在最終的聚合步驟中合併在一起。",
+      "zh_cn": "然后我们把所有子任务的结果在最终的聚合步驟中合併在一起。"
+    },
+    "48": {
+      "en": "We will then take the results from all those different subtasks and then join them all together in a final aggregator step.",
+      "zh_tw": "在我們的案例中，聚合器就是這裡和 Claude 的最後一步。",
+      "zh_cn": "在我们的案例中，聚合器就是这里和 Claude 的最后一步。"
+    },
+    "49": {
+      "en": "In our case, the aggregator was this final step with Claude right here.",
+      "zh_tw": "所以我們把每個並行任務的結果傳入聚合器，Claude 給了我們最終的推薦。",
+      "zh_cn": "所以我们把每个並行任务的结果传入聚合器，Claude 给了我们最终的推薦。"
+    },
+    "50": {
+      "en": "So we fed the results of each parallel task into the aggregator and Claude gave us this final recommendation.",
+      "zh_tw": "這個工作流程有幾個好處。",
+      "zh_cn": "这个工作流程有幾个好处。"
+    },
+    "51": {
+      "en": "There are several benefits to this workflow.",
+      "zh_tw": "首先，它讓 Claude 一次專注於一個任務。",
+      "zh_cn": "首先，它让 Claude 一次專注於一个任务。"
+    },
+    "52": {
+      "en": "First, it allows Claude to focus on one task at a time.",
+      "zh_tw": "記住剛才我告訴你的，我們可以把原始零件圖片用一個非常長的提示詞傳給 Claude，列出很多不同材料類型的標準。",
+      "zh_cn": "记住剛才我告訴你的，我们可以把原始零件圖片用一个非常长的提示词传给 Claude，列出很多不同材料类型的标准。"
+    },
+    "53": {
+      "en": "So remember just a moment ago, I told you that we could feed the original image part into Claude with a really large prompt that listed out some criteria for many different material types.",
+      "zh_tw": "在那種情境中，Claude 可能會有點困惑或分心，因為它試圖同時考慮每種材料的所有不同利弊。",
+      "zh_cn": "在那种情境中，Claude 可能会有点困惑或分心，因为它试圖同时考慮每种材料的所有不同利弊。"
+    },
+    "54": {
+      "en": "In this scenario, Claude might get a little bit confused or distracted as it tried to consider all the different pros and cons of each material simultaneously.",
+      "zh_tw": "第二個好處是我們可以非常容易地改進和評估每個子任務中使用的提示詞。",
+      "zh_cn": "第二个好处是我们可以非常容易地改进和评估每个子任务中使用的提示词。"
+    },
+    "55": {
+      "en": "The second benefit is that we can very easily improve and evaluate the prompts that are being used inside of each subtask.",
+      "zh_tw": "最後，這個流程通常可以非常好地擴展。",
+      "zh_cn": "最后，这个流程通常可以非常好地扩展。"
+    },
+    "56": {
+      "en": "Finally, this flow can generally scale very well.",
+      "zh_tw": "我們可以隨時加入額外的子任務，而不會真正影響正在執行的其他子任務。",
+      "zh_cn": "我们可以随时加入额外的子任务，而不会真正影响正在执行的其他子任务。"
+    },
+    "57": {
+      "en": "We can add in additional subtasks at any point if we want to without really subtracting from the other subtasks that are being executed.",
+      "zh_tw": "我們可以隨時加入額外的子任務，如果想要使用同樣的方法。",
+      "zh_cn": "我们可以随时加入额外的子任务，如果想要使用同样的方法。"
+    },
+    "58": {
+      "en": "We can add in additional subtasks at any point if we want to use the same method.",
+      "zh_tw": "如果我們想使用同樣的方法，我們可以隨時加入額外的子任務。",
+      "zh_cn": "如果我们想使用同样的方法，我们可以随时加入额外的子任务。"
+    }
+  }
+}

@@ -1,0 +1,292 @@
+{
+  "srt_file": "Prompt_caching_D1OCgJNm.srt",
+  "video_file": "Prompt_caching_D1OCgJNm.mp4",
+  "max_valid_entry": 57,
+  "entries": {
+    "1": {
+      "en": "The next feature that we are going to focus on is prompt caching.",
+      "zh_tw": "我們接下來要關注的功能是提示詞快取。",
+      "zh_cn": "我们接下來要关注的功能是提示词缓存。"
+    },
+    "2": {
+      "en": "Prompt caching is used to speed up Claude's response and decrease the cost of text generation.",
+      "zh_tw": "提示詞快取用於加速 Claude 的回應並降低文字生成的成本。",
+      "zh_cn": "提示词缓存用於加速 Claude 的回应並降低文字生成的成本。"
+    },
+    "3": {
+      "en": "To help you understand how prompt caching works, we're going to walk through what happens inside",
+      "zh_tw": "為了幫你理解提示詞快取的運作方式，我們要走過一個典型請求中 Claude 內部發生的事情，",
+      "zh_cn": "为了幫你理解提示词缓存的运作方式，我们要走过一个典型请求中 Claude 內部发生的事情，"
+    },
+    "4": {
+      "en": "of Claude during a typical request that we make without any kind of prompt caching enabled at all.",
+      "zh_tw": "完全沒有啟用任何提示詞快取。",
+      "zh_cn": "完全没有啟用任何提示词缓存。"
+    },
+    "5": {
+      "en": "So again, this is just a normal request.",
+      "zh_tw": "所以這只是一個正常的請求。",
+      "zh_cn": "所以这只是一个正常的请求。"
+    },
+    "6": {
+      "en": "Now we've already spoken a little bit about normal requests in the entire flow, but don't worry,",
+      "zh_tw": "我們已經談過一些關於正常請求和整個流程的內容，但別擔心，",
+      "zh_cn": "我们已经谈过一些关於正常请求和整个流程的內容，但別担心，"
+    },
+    "7": {
+      "en": "this time I'm going to add in a little bit of detail on what happens inside of Claude itself.",
+      "zh_tw": "這次我會加入一些關於 Claude 內部發生什麼的細節。",
+      "zh_cn": "这次我会加入一些关於 Claude 內部发生什麼的细节。"
+    },
+    "8": {
+      "en": "As usual, everything begins with us sending a message off to Claude.",
+      "zh_tw": "跟往常一樣，一切從我們發送訊息給 Claude 開始。",
+      "zh_cn": "跟往常一样，一切从我们发送信息给 Claude 开始。"
+    },
+    "9": {
+      "en": "And when Claude receives this message before actually generating any output text at all,",
+      "zh_tw": "當 Claude 收到這個訊息時，在實際生成任何輸出文字之前，",
+      "zh_cn": "当 Claude 收到这个信息时，在实际生成任何输出文字之前，"
+    },
+    "10": {
+      "en": "it does a tremendous amount of work on the input message.",
+      "zh_tw": "它對輸入訊息做了大量的工作。",
+      "zh_cn": "它对输入信息做了大量的工作。"
+    },
+    "11": {
+      "en": "In other words, Claude is going to internally create a tremendous number of internal data",
+      "zh_tw": "換句話說，Claude 會在內部建立大量的內部資料",
+      "zh_cn": "换句话说，Claude 会在內部建立大量的內部数据"
+    },
+    "12": {
+      "en": "structures and do a tremendous number of calculations solely on the input text.",
+      "zh_tw": "結構，並對輸入文字做大量的計算。",
+      "zh_cn": "结构，並对输入文字做大量的计算。"
+    },
+    "13": {
+      "en": "It will then eventually generate the output text using all that earlier work it did,",
+      "zh_tw": "然後它最終會用之前的所有工作來生成輸出文字，",
+      "zh_cn": "然后它最终会用之前的所有工作來生成输出文字，"
+    },
+    "14": {
+      "en": "and then send a response back to us in the form of some assistant message.",
+      "zh_tw": "以某種助理訊息的形式回傳給我們。",
+      "zh_cn": "以某种助理信息的形式返回给我们。"
+    },
+    "15": {
+      "en": "After the response is sent off to us, Claude is going to then take the output text and the result",
+      "zh_tw": "回應發送給我們之後，Claude 會把輸出文字和",
+      "zh_cn": "回应发送给我们之后，Claude 会把输出文字和"
+    },
+    "16": {
+      "en": "of all those earlier calculations that were done on the input message and just throw them all into",
+      "zh_tw": "之前對輸入訊息所做的所有計算結果直接",
+      "zh_cn": "之前对输入信息所做的所有计算结果直接"
+    },
+    "17": {
+      "en": "the trash.",
+      "zh_tw": "丟進垃圾桶。",
+      "zh_cn": "丟进垃圾桶。"
+    },
+    "18": {
+      "en": "Away it all goes.",
+      "zh_tw": "全部丟掉了。",
+      "zh_cn": "全部丟掉了。"
+    },
+    "19": {
+      "en": "We see all that work kind of go up in smoke entirely.",
+      "zh_tw": "我們看到所有那些工作完全化為烏有。",
+      "zh_cn": "我们看到所有那些工作完全化为烏有。"
+    },
+    "20": {
+      "en": "Once Claude has gone through all that cleanup, it declares to the world, I am ready to process",
+      "zh_tw": "Claude 完成所有清理後，它向世界宣布，我準備好處理",
+      "zh_cn": "Claude 完成所有清理后，它向世界宣布，我准备好处理"
+    },
+    "21": {
+      "en": "the next request.",
+      "zh_tw": "下一個請求了。",
+      "zh_cn": "下一个请求了。"
+    },
+    "22": {
+      "en": "Now, let's imagine for a moment that after making this initial request, we then make a follow-up request.",
+      "zh_tw": "現在，讓我們想像在發送這個初始請求後，我們發送了一個後續請求。",
+      "zh_cn": "现在，让我们想像在发送这个初始请求后，我们发送了一个后续请求。"
+    },
+    "23": {
+      "en": "And in this follow-up request, let's just imagine that we are continuing this conversation.",
+      "zh_tw": "在這個後續請求中，假設我們在繼續這個對話。",
+      "zh_cn": "在这个后续请求中，假设我们在继续这个对话。"
+    },
+    "24": {
+      "en": "So we're going to attach a list of messages.",
+      "zh_tw": "我們會附上一個訊息列表。",
+      "zh_cn": "我们会附上一个信息列表。"
+    },
+    "25": {
+      "en": "The first one will be the exact same message we had sent in a moment ago, and then the assistant",
+      "zh_tw": "第一個會是我們剛才發送的完全相同的訊息，然後是我們得到的助理訊息回應，然後是一些新的使用者訊息，",
+      "zh_cn": "第一个会是我们剛才发送的完全相同的信息，然后是我们得到的助理信息回应，然后是一些新的使用者信息，"
+    },
+    "26": {
+      "en": "message response we got back, and then some new user message that we're going to attach just to",
+      "zh_tw": "只是為了推進對話。",
+      "zh_cn": "只是为了推进对话。"
+    },
+    "27": {
+      "en": "further the conversation along.",
+      "zh_tw": "只是為了推進對話。",
+      "zh_cn": "只是为了推进对话。"
+    },
+    "28": {
+      "en": "So we're going to take all these messages and send them into Claude.",
+      "zh_tw": "我們要把所有這些訊息送入 Claude。",
+      "zh_cn": "我们要把所有这些信息送入 Claude。"
+    },
+    "29": {
+      "en": "And internally, Claude is probably going to be a little bit frustrated when it sees that first",
+      "zh_tw": "在內部，Claude 看到第一個訊息時可能會有點沮喪。",
+      "zh_cn": "在內部，Claude 看到第一个信息时可能会有点沮喪。"
+    },
+    "30": {
+      "en": "message.",
+      "zh_tw": "在內部，Claude 看到第一個訊息時可能會有點沮喪。",
+      "zh_cn": "在內部，Claude 看到第一个信息时可能会有点沮喪。"
+    },
+    "31": {
+      "en": "Because Claude is going to see that first message and think to itself, of course, this isn't quite",
+      "zh_tw": "因為 Claude 會看到第一個訊息然後自己想，當然，這不完全是",
+      "zh_cn": "因为 Claude 会看到第一个信息然后自己想，当然，这不完全是"
+    },
+    "32": {
+      "en": "what happens.",
+      "zh_tw": "實際發生的事。",
+      "zh_cn": "实际发生的事。"
+    },
+    "33": {
+      "en": "We can imagine this is kind of what's going on behind the scenes.",
+      "zh_tw": "我們可以想像這大概就是幕後發生的事。",
+      "zh_cn": "我们可以想像这大概就是幕后发生的事。"
+    },
+    "34": {
+      "en": "Claude is going to see that first message and say, I just saw this message.",
+      "zh_tw": "Claude 會看到第一個訊息然後說，我剛才才看到這個訊息。",
+      "zh_cn": "Claude 会看到第一个信息然后说，我剛才才看到这个信息。"
+    },
+    "35": {
+      "en": "I just did so much work to process it.",
+      "zh_tw": "我剛才做了那麼多工作來處理它。",
+      "zh_cn": "我剛才做了那麼多工作來处理它。"
+    },
+    "36": {
+      "en": "And then I threw away all those calculations.",
+      "zh_tw": "然後我把所有那些計算丟掉了。",
+      "zh_cn": "然后我把所有那些计算丟掉了。"
+    },
+    "37": {
+      "en": "And Claude is going to think to itself, I really wish I could reuse all that work that I did",
+      "zh_tw": "Claude 會自己想，我真希望能重用我",
+      "zh_cn": "Claude 会自己想，我真希望能重用我"
+    },
+    "38": {
+      "en": "just 10 seconds ago and threw away.",
+      "zh_tw": "10 秒前做的然後丟掉的所有那些工作。",
+      "zh_cn": "10 秒前做的然后丟掉的所有那些工作。"
+    },
+    "39": {
+      "en": "If Claude had saved that work that it threw away just a moment ago, it would probably be",
+      "zh_tw": "如果 Claude 保存了剛才丟掉的工作，它大概能",
+      "zh_cn": "如果 Claude 保存了剛才丟掉的工作，它大概能"
+    },
+    "40": {
+      "en": "able to send us back a response much more quickly because it doesn't have to repeat",
+      "zh_tw": "更快地給我們回應，因為它不需要重複",
+      "zh_cn": "更快地给我们回应，因为它不需要重复"
+    },
+    "41": {
+      "en": "all that work.",
+      "zh_tw": "所有那些工作。",
+      "zh_cn": "所有那些工作。"
+    },
+    "42": {
+      "en": "So now that we have seen this problem, let's think of some possible way to solve it.",
+      "zh_tw": "現在我們看到了這個問題，讓我們想想某種解決方式。",
+      "zh_cn": "现在我们看到了这个问题，让我们想想某种解决方式。"
+    },
+    "43": {
+      "en": "Well, here's one possible way that we could handle this problem.",
+      "zh_tw": "這裡是我們可以處理這個問題的一種可能方式。",
+      "zh_cn": "这里是我们可以处理这个问题的一种可能方式。"
+    },
+    "44": {
+      "en": "Maybe we could say that whenever we make an initial request off to Claude,",
+      "zh_tw": "也許我們可以說，每當我們發送初始請求給 Claude，",
+      "zh_cn": "也许我们可以说，每当我们发送初始请求给 Claude，"
+    },
+    "45": {
+      "en": "and Claude goes through all that initial work on our user message that we are sending in,",
+      "zh_tw": "Claude 對我們發送的使用者訊息做了所有初始工作，",
+      "zh_cn": "Claude 对我们发送的使用者信息做了所有初始工作，"
+    },
+    "46": {
+      "en": "rather than taking the result of all that analysis and throwing it into the trash, maybe",
+      "zh_tw": "與其把所有分析的結果丟進垃圾桶，也許",
+      "zh_cn": "与其把所有分析的结果丟进垃圾桶，也许"
+    },
+    "47": {
+      "en": "we could instead cache all that work or put it into some temporary data store.",
+      "zh_tw": "我們可以把所有工作快取起來，或放入某個臨時資料儲存中。",
+      "zh_cn": "我们可以把所有工作缓存起來，或放入某个臨时数据存储中。"
+    },
+    "48": {
+      "en": "Then if we ever make a follow-up request and we include the exact same input user message,",
+      "zh_tw": "然後如果我們在後續請求中包含完全相同的輸入使用者訊息，",
+      "zh_cn": "然后如果我们在后续请求中包含完全相同的输入使用者信息，"
+    },
+    "49": {
+      "en": "Claude could go into its cache and say, hey, I just saw this exact same message a moment ago,",
+      "zh_tw": "Claude 可以去它的快取中說，嘿，我剛才才看到這個完全相同的訊息，",
+      "zh_cn": "Claude 可以去它的缓存中说，嘿，我剛才才看到这个完全相同的信息，"
+    },
+    "50": {
+      "en": "and I saved the work of all the analysis around that particular message.",
+      "zh_tw": "而且我保存了圍繞那個特定訊息的所有分析工作。",
+      "zh_cn": "而且我保存了圍繞那个特定信息的所有分析工作。"
+    },
+    "51": {
+      "en": "So rather than reanalyze the message again, it could reuse all the work that it did previously.",
+      "zh_tw": "所以與其重新分析訊息，它可以重用之前做的所有工作。",
+      "zh_cn": "所以与其重新分析信息，它可以重用之前做的所有工作。"
+    },
+    "52": {
+      "en": "And hopefully this would dramatically speed up the process of generating some amount of text,",
+      "zh_tw": "希望這會大幅加速生成文字的過程，",
+      "zh_cn": "希望这会大幅加速生成文字的过程，"
+    },
+    "53": {
+      "en": "because again, we are reusing some work that we had already done.",
+      "zh_tw": "因為我們再次重用了已經做過的工作。",
+      "zh_cn": "因为我们再次重用了已经做过的工作。"
+    },
+    "54": {
+      "en": "This idea of saving some work from a request to be used later on is exactly what prompt caching is all about.",
+      "zh_tw": "這個從請求中保存一些工作以供後續使用的概念，正是提示詞快取的核心。",
+      "zh_cn": "这个从请求中保存一些工作以供后续使用的概念，正是提示词缓存的核心。"
+    },
+    "55": {
+      "en": "So let's come back in just a moment, and we're going to walk through some of the implementation details of prompt caching",
+      "zh_tw": "讓我們稍後回來，走過提示詞快取的一些實作細節，",
+      "zh_cn": "让我们稍后回來，走过提示词缓存的一些实作细节，"
+    },
+    "56": {
+      "en": "and really understand how it is implemented by Claude.",
+      "zh_tw": "真正理解 Claude 是如何實作它的。",
+      "zh_cn": "真正理解 Claude 是如何实作它的。"
+    },
+    "57": {
+      "en": "Thank you.",
+      "zh_tw": "謝謝。",
+      "zh_cn": "谢谢。"
+    }
+  }
+}

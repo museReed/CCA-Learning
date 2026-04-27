@@ -1,0 +1,372 @@
+{
+  "srt_file": "System_prompts_9LaPc46s.srt",
+  "video_file": "System_prompts_9LaPc46s.mp4",
+  "max_valid_entry": 73,
+  "entries": {
+    "1": {
+      "en": "In this video, we're going to take a look at how we can customize the tone and style of response",
+      "zh_tw": "在這支影片中，我們要看看如何客製化 Claude 生成回應的語氣和風格。",
+      "zh_cn": "在这支视频中，我们要看看如何自定义 Claude 生成回应的语气和风格。"
+    },
+    "2": {
+      "en": "that Claude generates. To help you understand why this is important, I want you to imagine that we",
+      "zh_tw": "為了幫你理解為什麼這很重要，我希望你想像我們正在",
+      "zh_cn": "为了幫你理解为什麼这很重要，我希望你想像我们正在"
+    },
+    "3": {
+      "en": "are making some kind of math tutor chatbot. So a user will use this chatbot to ask for help in",
+      "zh_tw": "做某種數學家教聊天機器人。使用者會用這個聊天機器人來求助",
+      "zh_cn": "做某种数学家教聊天机器人。使用者会用这个聊天机器人來求助"
+    },
+    "4": {
+      "en": "solving math problems. For example, a user might ask for help in solving 5x plus 2 equals 3.",
+      "zh_tw": "數學或類似的科目。你可能知道，如果你去問 Claude 一個像是",
+      "zh_cn": "数学或类似的科目。你可能知道，如果你去问 Claude 一个像是"
+    },
+    "5": {
+      "en": "Now there's a couple of things that we'd want our math tutor to do, and a couple of things that we",
+      "zh_tw": "「3x 加 5 等於 20，x 等於多少」這樣的數學題，",
+      "zh_cn": "「3x 加 5 等於 20，x 等於多少」这样的数学题，"
+    },
+    "6": {
+      "en": "would definitely not want it to do. So for example, we might want Claude to initially only give the",
+      "zh_tw": "Claude 會很快給你答案加上解題步驟。",
+      "zh_cn": "Claude 会很快给你答案加上解题步驟。"
+    },
+    "7": {
+      "en": "student some hints. Maybe just give them a little tip or two in how they might initially approach",
+      "zh_tw": "但如果我們正在做一個家教應用程式，",
+      "zh_cn": "但如果我们正在做一个家教应用程序，"
+    },
+    "8": {
+      "en": "the problem. And then if the student still doesn't quite understand how to solve the problem, only",
+      "zh_tw": "我們可能不想讓 Claude 直接給出答案。",
+      "zh_cn": "我们可能不想让 Claude 直接给出答案。"
+    },
+    "9": {
+      "en": "then maybe walk the student through a solution step by step. We might also want Claude to show",
+      "zh_tw": "我們可能想要 Claude 引導學生自己找到答案。",
+      "zh_cn": "我们可能想要 Claude 引导学生自己找到答案。"
+    },
+    "10": {
+      "en": "solutions for a similar problem to give the student a little bit of inspiration on how they might",
+      "zh_tw": "為此，我們要使用系統提示。",
+      "zh_cn": "为此，我们要使用系统提示。"
+    },
+    "11": {
+      "en": "approach this particular problem. Likewise, there are some things that we would definitely not want",
+      "zh_tw": "系統提示允許我們設定 Claude 的整體行為和個性。",
+      "zh_cn": "系统提示允许我们设定 Claude 的整体行为和个性。"
+    },
+    "12": {
+      "en": "Claude to do. For example, we would not want Claude to just immediately respond with a complete answer.",
+      "zh_tw": "可以把它想成是你給 Claude 的總體指示，告訴它應該如何運作。",
+      "zh_cn": "可以把它想成是你给 Claude 的总体指示，告訴它应该如何运作。"
+    },
+    "13": {
+      "en": "And we would also not want Claude to tell a student to just go use a calculator to solve the problem or",
+      "zh_tw": "它有點像是你會在員工第一天上班時給他的指示。",
+      "zh_cn": "它有点像是你会在員工第一天上班时给他的指示。"
+    },
+    "14": {
+      "en": "something like that. So to solve this problem, we're going to use a technique known as system",
+      "zh_tw": "要使用系統提示，我們把它作為一個額外的參數傳入 create 函式。",
+      "zh_cn": "要使用系统提示，我们把它作为一个额外的参数传入 create 函数。"
+    },
+    "15": {
+      "en": "prompting. System prompts are used to customize the style and tone that Claude will respond with.",
+      "zh_tw": "所以除了 model、max_tokens 和 messages，我們還會傳入 system。",
+      "zh_cn": "所以除了 model、max_tokens 和 messages，我们还会传入 system。"
+    },
+    "16": {
+      "en": "We define a system prompt as a plain string and then pass it into the create function call.",
+      "zh_tw": "system 的值是一個字串。",
+      "zh_cn": "system 的值是一个字符串。"
+    },
+    "17": {
+      "en": "The first line of a system prompt will usually assign Claude a role, so we might directly tell Claude that",
+      "zh_tw": "讓我給你看一個範例。",
+      "zh_cn": "让我给你看一个范例。"
+    },
+    "18": {
+      "en": "they are a patient math tutor. This will encourage Claude to respond in the same way that a real math",
+      "zh_tw": "我可能會寫一個系統提示說：你是一個有幫助的數學家教。",
+      "zh_cn": "我可能会写一个系统提示说：你是一个有幫助的数学家教。"
+    },
+    "19": {
+      "en": "tutor would respond. He would probably end up being patient, provide a lot of explanation, but probably",
+      "zh_tw": "不要直接給學生答案，而是引導他們自己找到答案。",
+      "zh_cn": "不要直接给学生答案，而是引导他们自己找到答案。"
+    },
+    "20": {
+      "en": "not directly answer a student's question. He'll instead guide them to a solution. Now to see this in",
+      "zh_tw": "問引導性問題來幫助他們理解概念。",
+      "zh_cn": "问引导性问题來幫助他们理解概念。"
+    },
+    "21": {
+      "en": "action, let's go back over to our notebook and see how Claude responds to math questions with and without",
+      "zh_tw": "現在如果我用這個系統提示問同樣的數學問題，",
+      "zh_cn": "现在如果我用这个系统提示问同样的数学问题，"
+    },
+    "22": {
+      "en": "a system prompt. So back inside my notebook, I've made a new notebook and I've carried over just our",
+      "zh_tw": "Claude 的回應會非常不同。",
+      "zh_cn": "Claude 的回应会非常不同。"
+    },
+    "23": {
+      "en": "initial client creation and those three helper functions. You do not have to create a new notebook.",
+      "zh_tw": "它不會直接給你答案。",
+      "zh_cn": "它不会直接给你答案。"
+    },
+    "24": {
+      "en": "I'm just letting you know that I did just to organize my code. Then down here inside the next cell,",
+      "zh_tw": "相反，它可能會說像是「我們來一起解這個。你認為第一步應該是什麼？」",
+      "zh_cn": "相反，它可能会说像是「我们來一起解这个。你认为第一步应该是什麼？」"
+    },
+    "25": {
+      "en": "I'm going to ask Claude a very simple question. I'm going to ask it to solve a simple math problem",
+      "zh_tw": "這就是系統提示的力量。",
+      "zh_cn": "这就是系统提示的力量。"
+    },
+    "26": {
+      "en": "and we'll see how it initially responds. It'll probably just give us a direct answer and then we'll go",
+      "zh_tw": "它讓你基本上改變 Claude 的整個行為，",
+      "zh_cn": "它让你基本上改变 Claude 的整个行为，"
+    },
+    "27": {
+      "en": "back and add in a system prompt to encourage it to give us a little bit more explanation,",
+      "zh_tw": "而不需要改變你的使用者訊息或對話歷史。",
+      "zh_cn": "而不需要改变你的使用者信息或对话历史。"
+    },
+    "28": {
+      "en": "kind of a tutor approach. So let's see how Claude responds to us without a system message at all.",
+      "zh_tw": "讓我展示另一個範例來真正把概念帶回家。",
+      "zh_cn": "让我展示另一个范例來真正把概念帶回家。"
+    },
+    "29": {
+      "en": "I'm going to make a list of messages. I'll add in a user message to my list of messages and I'm",
+      "zh_tw": "假設我想讓 Claude 像海盜一樣說話。",
+      "zh_cn": "假设我想让 Claude 像海盗一样说话。"
+    },
+    "30": {
+      "en": "going to ask it to solve 5x plus 3 equals 2 for x. I'll then get an answer by calling chat with my",
+      "zh_tw": "我可以設定系統提示為：你是一個說話像海盜的助手。",
+      "zh_cn": "我可以设定系统提示为：你是一个说话像海盗的助手。"
+    },
+    "31": {
+      "en": "list of messages and print out the answer. And then if I run the cell, I'm probably going to see an",
+      "zh_tw": "所有回應都用海盜風格。",
+      "zh_cn": "所有回应都用海盗风格。"
+    },
+    "32": {
+      "en": "exact step-by-step solution on how to solve this. Now this probably is going to be useful for a student",
+      "zh_tw": "現在如果我問量子運算的問題，回應會用海盜口吻。",
+      "zh_cn": "现在如果我问量子运算的问题，回应会用海盗口吻。"
+    },
+    "33": {
+      "en": "because it's going to show them a step-by-step solution, but it's not quite what we are going",
+      "zh_tw": "好的，這很有趣但也展示了系統提示有多強大。",
+      "zh_cn": "好的，这很有趣但也展示了系统提示有多強大。"
+    },
+    "34": {
+      "en": "for. We want to make a student think and we want them to arrive at the solution on their own. We just",
+      "zh_tw": "現在讓我們重構 chat 函式來支援系統提示。",
+      "zh_cn": "现在让我们重构 chat 函数來支持系统提示。"
+    },
+    "35": {
+      "en": "want to give them small steps and kind of guide them in the right direction. So we're going to",
+      "zh_tw": "我要把 system 參數加進去，預設為 None。",
+      "zh_cn": "我要把 system 参数加进去，默认为 None。"
+    },
+    "36": {
+      "en": "customize the way in which Claude responds by using a system prompt. Let me show you how we do that.",
+      "zh_tw": "如果提供了系統提示，我們就把它包含在請求中。",
+      "zh_cn": "如果提供了系统提示，我们就把它包含在请求中。"
+    },
+    "37": {
+      "en": "Up inside my chat function, I'm going to make a new variable of system. I'm going to assign to it a",
+      "zh_tw": "如果沒有，我們就不傳它。",
+      "zh_cn": "如果没有，我们就不传它。"
+    },
+    "38": {
+      "en": "multi-line string. And inside there, I'm going to put together a system prompt that I wrote ahead of time.",
+      "zh_tw": "讓我在筆記本中實作這個。",
+      "zh_cn": "让我在笔记本中实作这个。"
+    },
+    "39": {
+      "en": "So I'm going to tell Claude that it is a patient math tutor. It should not directly answer students'",
+      "zh_tw": "我要更新 chat 函式。",
+      "zh_cn": "我要更新 chat 函数。"
+    },
+    "40": {
+      "en": "questions and instead give them a little bit of guidance on how to solve the problem.",
+      "zh_tw": "加入一個 system_prompt 參數，預設為空字串。",
+      "zh_cn": "加入一个 system_prompt 参数，默认为空字符串。"
+    },
+    "41": {
+      "en": "I'm going to make sure that I pass in the system prompt as the system keyword argument to the",
+      "zh_tw": "然後在 create 呼叫中包含 system=system_prompt。",
+      "zh_cn": "然后在 create 调用中包含 system=system_prompt。"
+    },
+    "42": {
+      "en": "create function. I'm then going to rerun the cell. I'll then go back down and let's see how Claude",
+      "zh_tw": "讓我測試一下我們的數學家教範例。",
+      "zh_cn": "让我测试一下我们的数学家教范例。"
+    },
+    "43": {
+      "en": "responds now. All right, this looks like a much better answer. Rather than just directly telling the",
+      "zh_tw": "我先設定系統提示。",
+      "zh_cn": "我先设定系统提示。"
+    },
+    "44": {
+      "en": "student how to solve the problem, Claude is now prompting the user to go through a solution step",
+      "zh_tw": "然後建立一個新的對話歷史。",
+      "zh_cn": "然后建立一个新的对话历史。"
+    },
+    "45": {
+      "en": "by step. Claude is asking the student to first maybe isolate X on one side of the equation and",
+      "zh_tw": "加入使用者訊息。",
+      "zh_cn": "加入使用者信息。"
+    },
+    "46": {
+      "en": "then ask the student how we might go about that. So now we've got a much more interactive experience",
+      "zh_tw": "呼叫 chat 函式並傳入系統提示。",
+      "zh_cn": "调用 chat 函数並传入系统提示。"
+    },
+    "47": {
+      "en": "for the student and this will hopefully help them learn what's going on here a little bit better than",
+      "zh_tw": "我們來看看結果。",
+      "zh_cn": "我们來看看结果。"
+    },
+    "48": {
+      "en": "just giving them a direct answer. All right, so clearly using a system prompt is a powerful tool for",
+      "zh_tw": "太好了。你可以看到 Claude 現在不是直接回答，",
+      "zh_cn": "太好了。你可以看到 Claude 现在不是直接回答，"
+    },
+    "49": {
+      "en": "steering Claude in a particular direction on how it should answer a given user input. Before we move",
+      "zh_tw": "而是在問引導性問題，引導學生找到答案。",
+      "zh_cn": "而是在问引导性问题，引导学生找到答案。"
+    },
+    "50": {
+      "en": "on, I want to do a little bit of a refactor to our chat function. Rather than having a hard-coded",
+      "zh_tw": "這正是我們想要的行為。",
+      "zh_cn": "这正是我们想要的行为。"
+    },
+    "51": {
+      "en": "system prompt inside of here, I want to be able to specify a system prompt whenever we call the chat",
+      "zh_tw": "有一些關於系統提示的重要事項需要知道。",
+      "zh_cn": "有一些关於系统提示的重要事项需要知道。"
+    },
+    "52": {
+      "en": "function. So in other words, I want to cut this right here, put it down inside this cell underneath,",
+      "zh_tw": "首先，系統提示不是訊息列表的一部分。",
+      "zh_cn": "首先，系统提示不是信息列表的一部分。"
+    },
+    "53": {
+      "en": "and then I want to be able to pass in a system prompt like so. So now we have a much more reusable",
+      "zh_tw": "它是一個單獨的參數。",
+      "zh_cn": "它是一个单独的参数。"
+    },
+    "54": {
+      "en": "chat function that we can use on a wide variety of different problems in the future without having",
+      "zh_tw": "而且系統提示不遵循訊息交替的規則。",
+      "zh_cn": "而且系统提示不遵循信息交替的规则。"
+    },
+    "55": {
+      "en": "a hard-coded system prompt inside of it. So now we need to make sure that we take this system argument",
+      "zh_tw": "因為它不是使用者或助手訊息。",
+      "zh_cn": "因为它不是使用者或助手信息。"
+    },
+    "56": {
+      "en": "and pass it into the create function. Now doing so is going to require just a little bit more work",
+      "zh_tw": "它是它自己的東西。",
+      "zh_cn": "它是它自己的東西。"
+    },
+    "57": {
+      "en": "than you might think. Let me show you why. I'm going to very quickly add in a system keyword argument",
+      "zh_tw": "其次，你應該只使用一個系統提示。",
+      "zh_cn": "其次，你应该只使用一个系统提示。"
+    },
+    "58": {
+      "en": "to the chat function and I'll default it to be none. If I now run the cell and then run the cell down",
+      "zh_tw": "你可以隨著時間更新它，但在任何給定的請求中，",
+      "zh_cn": "你可以随著时间更新它，但在任何给定的请求中，"
+    },
+    "59": {
+      "en": "here, everything is going to work fine exactly as expected. However, if I go down to the chat function",
+      "zh_tw": "你只傳入一個系統提示字串。",
+      "zh_cn": "你只传入一个系统提示字符串。"
+    },
+    "60": {
+      "en": "I decide that I do not want to provide a system prompt here at all. So if I delete that and then",
+      "zh_tw": "第三，系統提示會套用到整個對話。",
+      "zh_cn": "第三，系统提示会套用到整个对话。"
+    },
+    "61": {
+      "en": "run the cell, I'll end up getting an error message. So we are not allowed to pass in a system prompt of",
+      "zh_tw": "所以如果你在多輪對話的開始設定了系統提示，",
+      "zh_cn": "所以如果你在多轮对话的开始设定了系统提示，"
+    },
+    "62": {
+      "en": "none. So we need to assemble our parameters. We're going to pass into the create function a little bit",
+      "zh_tw": "它會影響 Claude 在整個對話中的行為。",
+      "zh_cn": "它会影响 Claude 在整个对话中的行为。"
+    },
+    "63": {
+      "en": "more dynamically. And if we have a system of none, we do not want to include this parameter at all.",
+      "zh_tw": "讓我給你幾個使用系統提示的好場景。",
+      "zh_cn": "让我给你幾个使用系统提示的好场景。"
+    },
+    "64": {
+      "en": "So let me show you how we are going to do that with a small refactor. First, I'm going to make a",
+      "zh_tw": "如果你正在做客服聊天機器人，你可能想設定語氣為專業和有幫助的。",
+      "zh_cn": "如果你正在做客服聊天机器人，你可能想设定语气为專業和有幫助的。"
+    },
+    "65": {
+      "en": "params dictionary right above. I'm then going to cut and paste in model max tokens and messages.",
+      "zh_tw": "如果你正在做程式設計助手，你可能想告訴 Claude 總是包含程式碼範例。",
+      "zh_cn": "如果你正在做程序设计助手，你可能想告訴 Claude 总是包含代码范例。"
+    },
+    "66": {
+      "en": "I'm then going to convert this to dictionary syntax. So I'll use double quote, double quote,",
+      "zh_tw": "如果你正在做內容審核工具，你可能想指示 Claude 專注於識別有問題的內容。",
+      "zh_cn": "如果你正在做內容審核工具，你可能想指示 Claude 專注於识別有问题的內容。"
+    },
+    "67": {
+      "en": "colons like so. I'll then check and see if a system prompt was passed in. So if one was passed in,",
+      "zh_tw": "重點是系統提示讓你為你的特定使用場景客製化 Claude 的行為。",
+      "zh_cn": "重点是系统提示让你为你的特定使用场景自定义 Claude 的行为。"
+    },
+    "68": {
+      "en": "then I want to add it in as the system key inside of the params dictionary like so.",
+      "zh_tw": "好的，讓我快速總結這支影片。",
+      "zh_cn": "好的，让我快速总结这支视频。"
+    },
+    "69": {
+      "en": "Then I'm going to update the create call down here to star star params. And that's it. So now I'm going",
+      "zh_tw": "系統提示允許你設定 Claude 的整體行為和個性。",
+      "zh_cn": "系统提示允许你设定 Claude 的整体行为和个性。"
+    },
+    "70": {
+      "en": "to rerun that cell. I'll go back down to the next one. And if I call chat without any system keyword",
+      "zh_tw": "你把它作為單獨的參數傳入 create 函式。",
+      "zh_cn": "你把它作为单独的参数传入 create 函数。"
+    },
+    "71": {
+      "en": "argument being passed in, no problem. Everything is going to work just fine. And if I decide that I",
+      "zh_tw": "它會影響 Claude 在整個對話中生成回應的方式。",
+      "zh_cn": "它会影响 Claude 在整个对话中生成回应的方式。"
+    },
+    "72": {
+      "en": "do want to provide a system prompt, yep, that's going to work just fine as well. Okay, so this looks",
+      "zh_tw": "而且它對於把 Claude 的回應調整到你的特定使用場景來說非常有用。",
+      "zh_cn": "而且它对於把 Claude 的回应调整到你的特定使用场景來说非常有用。"
+    },
+    "73": {
+      "en": "good. So we've now got support for a system prompt inside of our chat function.",
+      "zh_tw": "在接下來的影片中，我們會繼續在這些概念上建構。",
+      "zh_cn": "在接下來的视频中，我们会继续在这些概念上建构。"
+    }
+  }
+}

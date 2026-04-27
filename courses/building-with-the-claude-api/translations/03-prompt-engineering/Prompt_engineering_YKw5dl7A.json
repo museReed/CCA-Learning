@@ -1,0 +1,622 @@
+{
+  "srt_file": "Prompt_engineering_YKw5dl7A.srt",
+  "video_file": "Prompt_engineering_YKw5dl7A.mp4",
+  "max_valid_entry": 123,
+  "entries": {
+    "1": {
+      "en": "Now that we've got a handle on prompt evaluation, we're going to move on to the world of prompt",
+      "zh_tw": "現在我們已經掌握了提示評估，接下來要進入提示工程的世界。記住，提示工程就是把我們寫的提示",
+      "zh_cn": "现在我们已经掌握了提示评估，接下來要进入提示工程的世界。记住，提示工程就是把我们写的提示"
+    },
+    "2": {
+      "en": "engineering. Remember, prompt engineering is all about taking a prompt that we've written",
+      "zh_tw": "以某種方式加以改進，以獲得更可靠和更高品質的輸出。",
+      "zh_cn": "以某种方式加以改进，以获得更可靠和更高品质的输出。"
+    },
+    "3": {
+      "en": "and improving it in some way to get more reliable outputs and higher quality outputs.",
+      "zh_tw": "為了理解提示工程，我們會在這個模組中觀看一系列影片，",
+      "zh_cn": "为了理解提示工程，我们会在这个模组中观看一系列视频，"
+    },
+    "4": {
+      "en": "To understand prompt engineering, we're going to go through a series of videos in this module,",
+      "zh_tw": "我想很快幫你了解這個模組是如何安排的。",
+      "zh_cn": "我想很快幫你了解这个模组是如何安排的。"
+    },
+    "5": {
+      "en": "and I want to very quickly help you understand how the module is set up.",
+      "zh_tw": "在這個影片和下一個影片中，我們會寫出一個初始提示，然後在之後的",
+      "zh_cn": "在这个视频和下一个视频中，我们会写出一个初始提示，然后在之后的"
+    },
+    "6": {
+      "en": "In this video and the next, we're going to write out an initial prompt, and then in the coming",
+      "zh_tw": "影片中，我們會透過在原始提示上實施新的提示工程技術來逐步改進它。簡而言之，在這個影片中我們要設定一個目標，",
+      "zh_cn": "视频中，我们会透过在原始提示上实施新的提示工程技术來逐步改进它。简而言之，在这个视频中我们要设定一个目标，"
+    },
+    "7": {
+      "en": "videos, we're going to try to improve it step-by-step by implementing new prompt engineering",
+      "zh_tw": "也就是我們想讓提示做到什麼。然後寫出該提示的初始版本，",
+      "zh_cn": "也就是我们想让提示做到什麼。然后写出该提示的初始版本，"
+    },
+    "8": {
+      "en": "techniques on that original prompt. So in short, in this video, we're going to set a goal,",
+      "zh_tw": "就像是一個很差的第一次嘗試。然後評估提示，接著我們會",
+      "zh_cn": "就像是一个很差的第一次嘗试。然后评估提示，接著我们会"
+    },
+    "9": {
+      "en": "so something we want our prompt to do. We're then going to write an initial version of that prompt,",
+      "zh_tw": "馬上看到我們得到了很差的評估分數。然後正如我提到的，在之後的",
+      "zh_cn": "马上看到我们得到了很差的评估分数。然后正如我提到的，在之后的"
+    },
+    "10": {
+      "en": "so kind of like a really poor first attempt. We will then eval the prompt, and then we're going",
+      "zh_tw": "影片中，我們會學習並應用一些不同的提示工程技術，",
+      "zh_cn": "视频中，我们会学習並应用一些不同的提示工程技术，"
+    },
+    "11": {
+      "en": "to see right away that we get a very poor evaluation score. And then, as I mentioned in the coming",
+      "zh_tw": "每次應用這些技術後，我們會再次執行評估，看到每一次改進都讓我們獲得",
+      "zh_cn": "每次应用这些技术后，我们会再次执行评估，看到每一次改进都让我们获得"
+    },
+    "12": {
+      "en": "videos, we're going to learn about and apply some different prompt engineering techniques,",
+      "zh_tw": "更好的表現。為了執行這些評估，我們會",
+      "zh_cn": "更好的表现。为了执行这些评估，我们会"
+    },
+    "13": {
+      "en": "and as we apply each of these, we're going to run our evaluation again and see that we are getting",
+      "zh_tw": "使用在前一個模組中建構的那個評估管線。只有一個小小的",
+      "zh_cn": "使用在前一个模组中建构的那个评估管线。只有一个小小的"
+    },
+    "14": {
+      "en": "better performance with every single improvement we make. Now, to run these evals, we're going to",
+      "zh_tw": "不同之處，如果你想要跟著我一起寫程式碼，這是你需要注意的。",
+      "zh_cn": "不同之处，如果你想要跟著我一起写代码，这是你需要注意的。"
+    },
+    "15": {
+      "en": "use that same kind of eval pipeline that we put together in the previous module. Just one little",
+      "zh_tw": "我把之前模組中的原始評估管線做了一些",
+      "zh_cn": "我把之前模组中的原始评估管线做了一些"
+    },
+    "16": {
+      "en": "twist here, something you really need to be aware of if you want to follow along and code with me.",
+      "zh_tw": "改進，確保它可以適用於任何提示，而不是",
+      "zh_cn": "改进，确保它可以适用於任何提示，而不是"
+    },
+    "17": {
+      "en": "I took our original eval pipeline that we put together in the last module, and I made a couple",
+      "zh_tw": "我們之前使用的那個特定提示。為了獲得這個更靈活的評估管線的更新筆記本，",
+      "zh_cn": "我们之前使用的那个特定提示。为了获得这个更灵活的评估管线的更新笔记本，"
+    },
+    "18": {
+      "en": "of different improvements to it to make sure that it can work with just about any prompt, as opposed to",
+      "zh_tw": "請確保下載名為 001 underscore prompting 的隨附筆記本。",
+      "zh_cn": "请确保下載名为 001 underscore prompting 的随附笔记本。"
+    },
+    "19": {
+      "en": "the very specific prompt we were working on previously. So to get this updated notebook",
+      "zh_tw": "在你打開筆記本之前，我想很快告訴",
+      "zh_cn": "在你打开笔记本之前，我想很快告訴"
+    },
+    "20": {
+      "en": "that has this more flexible evaluation pipeline, make sure you download the accompanying notebook",
+      "zh_tw": "你關於我們提示的目標。這個我們要撰寫的初始提示，以及它到底",
+      "zh_cn": "你关於我们提示的目标。这个我们要撰写的初始提示，以及它到底"
+    },
+    "21": {
+      "en": "named 001 underscore prompting. Before you open up that notebook, however, I want to very quickly tell",
+      "zh_tw": "要做什麼。好的，我們要製作一個提示，希望能根據運動員的身高、體重、某種體能目標",
+      "zh_cn": "要做什麼。好的，我们要製作一个提示，希望能根据运动員的身高、体重、某种体能目标"
+    },
+    "22": {
+      "en": "you about the goal of our prompt. So this initial prompt that we're going to write and exactly what",
+      "zh_tw": "和飲食限制來生成",
+      "zh_cn": "和飲食限制來生成"
+    },
+    "23": {
+      "en": "it is intended to do. All right, so we're going to make a prompt that's going to hopefully generate",
+      "zh_tw": "一日餐飲計畫。你可以想像我們要",
+      "zh_cn": "一日餐飲计画。你可以想像我们要"
+    },
+    "24": {
+      "en": "a one-day meal plan for an athlete based upon their height, weight, some kind of physical goal that",
+      "zh_tw": "接收某種描述運動員的範例輸入，可能是身高、體重、目標和飲食",
+      "zh_cn": "接收某种描述运动員的范例输入，可能是身高、体重、目标和飲食"
+    },
+    "25": {
+      "en": "they might have, and any dietary restrictions they might have. So you can imagine that we are going to",
+      "zh_tw": "限制。然後把所有輸入插入我們的提示，接著",
+      "zh_cn": "限制。然后把所有输入插入我们的提示，接著"
+    },
+    "26": {
+      "en": "take in some kind of sample input that describes an athlete, maybe their height, weight, goal, and dietary",
+      "zh_tw": "送給模型，希望能得到類似你在",
+      "zh_cn": "送给模型，希望能得到类似你在"
+    },
+    "27": {
+      "en": "restrictions. We're then going to interpolate all those inputs into our prompt, and then we're going to",
+      "zh_tw": "右邊看到的輸出。這就是我們真正追求的。這是我們理想的輸出。在第一版",
+      "zh_cn": "右边看到的输出。这就是我们真正追求的。这是我们理想的输出。在第一版"
+    },
+    "28": {
+      "en": "send that off to our model, and hopefully we'll get back some kind of output like what you see on the",
+      "zh_tw": "提示中，我們會得到和右邊完全不同的輸出，",
+      "zh_cn": "提示中，我们会得到和右边完全不同的输出，"
+    },
+    "29": {
+      "en": "right-hand side. This is what we're really going for. This is our ideal output. In the first version",
+      "zh_tw": "但透過各種提示工程技術，我們最終會",
+      "zh_cn": "但透过各种提示工程技术，我们最终会"
+    },
+    "30": {
+      "en": "of our prompt, we're going to get some output that looks nothing like what you see here on the right",
+      "zh_tw": "改進提示，最終希望得到幾乎和這個一模一樣的東西。",
+      "zh_cn": "改进提示，最终希望得到幾乎和这个一模一样的東西。"
+    },
+    "31": {
+      "en": "hand side, but through a variety of different prompt engineering techniques, we're going to eventually",
+      "zh_tw": "好的，現在我們了解了目標，讓我們打開那個新筆記本。記住是 001",
+      "zh_cn": "好的，现在我们了解了目标，让我们打开那个新笔记本。记住是 001"
+    },
+    "32": {
+      "en": "refine the prompt and eventually hopefully get something that looks almost exactly like this.",
+      "zh_tw": "prompting。我會很快導覽一下，因為和上個模組相比有些東西變了，",
+      "zh_cn": "prompting。我会很快导览一下，因为和上个模组相比有些東西变了，"
+    },
+    "33": {
+      "en": "All right, so now that we understand our goal, let's open up that new notebook. So remember 001",
+      "zh_tw": "確保裡面的所有東西都很清楚。",
+      "zh_cn": "确保里面的所有東西都很清楚。"
+    },
+    "34": {
+      "en": "prompting. I'm going to give you a very quick tour of it because a couple of things have changed",
+      "zh_tw": "然後我們會用筆記本來生成初始資料集。好的，我打開了筆記本。",
+      "zh_cn": "然后我们会用笔记本來生成初始数据集。好的，我打开了笔记本。"
+    },
+    "35": {
+      "en": "compared to the last module, and just make sure everything inside there is super clear.",
+      "zh_tw": "你會馬上注意到頂部有一些摺疊的儲存格，這是很多",
+      "zh_cn": "你会马上注意到頂部有一些摺叠的存储格，这是很多"
+    },
+    "36": {
+      "en": "We'll then use the notebook to generate our initial data set. All right, so I've opened up that notebook.",
+      "zh_tw": "不同的設定程式碼。確保你至少執行過這些儲存格一次。我可以馬上這樣做。",
+      "zh_cn": "不同的设定代码。确保你至少执行过这些存储格一次。我可以马上这样做。"
+    },
+    "37": {
+      "en": "Right away, you'll notice there are a couple of collapsed cells at the top, so this is a lot of",
+      "zh_tw": "接下來，你會看到我建立了一個叫做 prompt evaluator 的實例。",
+      "zh_cn": "接下來，你会看到我建立了一个叫做 prompt evaluator 的实例。"
+    },
+    "38": {
+      "en": "different setup code. Just make sure you execute those cells at least one time. So I can do so right",
+      "zh_tw": "Prompt evaluator 是我建立的一個類別，它包裝了所有資料集生成、所有模型評分，",
+      "zh_cn": "Prompt evaluator 是我建立的一个类別，它包装了所有数据集生成、所有模型评分，"
+    },
+    "39": {
+      "en": "away. Next up, you'll see that I'm creating an instance of something called a prompt evaluator.",
+      "zh_tw": "幾乎所有東西都在這個類別中。這個類別接受一個參數，",
+      "zh_cn": "幾乎所有東西都在这个类別中。这个类別接受一个参数，"
+    },
+    "40": {
+      "en": "Prompt evaluator is a class I created that wraps up all the data set generation, all the model grading,",
+      "zh_tw": "max concurrent tasks。這個類別支援並行，我們可以同時發出多個 API 呼叫。",
+      "zh_cn": "max concurrent tasks。这个类別支持並行，我们可以同时发出多个 API 调用。"
+    },
+    "41": {
+      "en": "just about everything is wrapped up inside of this class. The class takes one argument,",
+      "zh_tw": "好處是它會大幅加速我們的評估和",
+      "zh_cn": "好处是它会大幅加速我们的评估和"
+    },
+    "42": {
+      "en": "max concurrent tasks. So this class supports concurrency, we can make multiple API calls at",
+      "zh_tw": "資料集生成過程。但我需要你知道，取決於你的服務",
+      "zh_cn": "数据集生成过程。但我需要你知道，取决於你的服务"
+    },
+    "43": {
+      "en": "the same time. The upside to this is that it's going to dramatically speed up our eval process and",
+      "zh_tw": "配額，你可能會很快開始遇到一些速率限制錯誤。如果你在這個模組中看到任何",
+      "zh_cn": "配额，你可能会很快开始遇到一些速率限制错误。如果你在这个模组中看到任何"
+    },
+    "44": {
+      "en": "the data set generation process as well. But I do need you to be aware that depending upon your service",
+      "zh_tw": "速率限制錯誤，我強烈建議你把",
+      "zh_cn": "速率限制错误，我強烈建议你把"
+    },
+    "45": {
+      "en": "quota, you may or may not very quickly start to run into some rate limit errors. So if you see any",
+      "zh_tw": "這個值改到預設的一，也就是完全沒有並行。",
+      "zh_cn": "这个值改到默认的一，也就是完全没有並行。"
+    },
+    "46": {
+      "en": "rate limit errors at all, as you go through this module, I would highly encourage you to change",
+      "zh_tw": "我個人有非常高的速率限制。所以我會把它調到",
+      "zh_cn": "我个人有非常高的速率限制。所以我会把它调到"
+    },
+    "47": {
+      "en": "this value right here, all the way down to the default of one, which means no concurrency at all.",
+      "zh_tw": "並行度 50。你可能沒辦法使用 50。所以不要嘗試 50。我真的",
+      "zh_cn": "並行度 50。你可能没办法使用 50。所以不要嘗试 50。我真的"
+    },
+    "48": {
+      "en": "For me personally, I have super high rate limits. So I'm going to dial this all the way up to a",
+      "zh_tw": "建議你從三開始。如果看到速率限制錯誤，",
+      "zh_cn": "建议你从三开始。如果看到速率限制错误，"
+    },
+    "49": {
+      "en": "concurrency of 50. Chances are you are not going to be able to use 50. So don't try 50. I would",
+      "zh_tw": "就降到二或一。我會用 50 只是為了讓你在",
+      "zh_cn": "就降到二或一。我会用 50 只是为了让你在"
+    },
+    "50": {
+      "en": "really recommend maybe starting off at three. And then if you see any rate limit errors,",
+      "zh_tw": "我執行所有這些步驟時能在螢幕上看到即時回饋。我要確保執行那個儲存格。然後",
+      "zh_cn": "我执行所有这些步驟时能在屏幕上看到即时反馈。我要确保执行那个存储格。然后"
+    },
+    "51": {
+      "en": "start to go down to two or one. Again, I'm going to use 50 just so you can see some immediate feedback",
+      "zh_tw": "開始生成實際的資料集。為了生成資料集，我新增了這個",
+      "zh_cn": "开始生成实际的数据集。为了生成数据集，我新增了这个"
+    },
+    "52": {
+      "en": "on my screen as I run all these different steps. I'm going to make sure I run that cell. And then",
+      "zh_tw": "generate dataset 方法。要使用這個方法，我們要描述提示的整體目的。",
+      "zh_cn": "generate dataset 方法。要使用这个方法，我们要描述提示的整体目的。"
+    },
+    "53": {
+      "en": "let's get started on generating our actual data set. So to generate the data set, I've added this new",
+      "zh_tw": "也就是我們的提示應該做什麼。對你和我來說，我們在嘗試",
+      "zh_cn": "也就是我们的提示应该做什麼。对你和我來说，我们在嘗试"
+    },
+    "54": {
+      "en": "generate data set method for us. To use this method, we're going to describe the overall purpose",
+      "zh_tw": "做的提示是為單一運動員撰寫一個簡潔的一日餐飲計畫。",
+      "zh_cn": "做的提示是为单一运动員撰写一个简潔的一日餐飲计画。"
+    },
+    "55": {
+      "en": "of our prompt. So kind of what our prompt is supposed to do. For you and I, we're trying to",
+      "zh_tw": "在這個 prompt input spec 中，我們會有一個字典，列出",
+      "zh_cn": "在这个 prompt input spec 中，我们会有一个字典，列出"
+    },
+    "56": {
+      "en": "work on a prompt that is going to write a compact, concise, one day meal plan for a single athlete.",
+      "zh_tw": "提示需要的所有不同輸入。正如我們剛才看到的，我們的提示",
+      "zh_cn": "提示需要的所有不同输入。正如我们剛才看到的，我们的提示"
+    },
+    "57": {
+      "en": "And then inside of this prompt input spec, we're going to have a dictionary that's going to list out",
+      "zh_tw": "需要身高、體重、目標和飲食限制。這些額外的",
+      "zh_cn": "需要身高、体重、目标和飲食限制。这些额外的"
+    },
+    "58": {
+      "en": "all the different inputs that our prompt requires. As we saw just a moment ago, our prompt is going",
+      "zh_tw": "屬性會作為資料集的一部分生成。最終我們會",
+      "zh_cn": "属性会作为数据集的一部分生成。最终我们会"
+    },
+    "59": {
+      "en": "to require a height, a weight, a goal, and some dietary restrictions. So these are some extra",
+      "zh_tw": "一個測試案例一個測試案例地把它們插入提示中。我要填寫",
+      "zh_cn": "一个测试案例一个测试案例地把它们插入提示中。我要填写"
+    },
+    "60": {
+      "en": "properties that are going to be generated as a part of the data set. And eventually we're going to",
+      "zh_tw": "所有四個不同的屬性。身高是以公分為單位。為了更清楚，",
+      "zh_cn": "所有四个不同的属性。身高是以公分为单位。为了更清楚，"
+    },
+    "61": {
+      "en": "take them test case by test case and interpolate them into our prompt. So I'm going to fill out all",
+      "zh_tw": "我寫「運動員的身高」。然後複製貼上",
+      "zh_cn": "我写「运动員的身高」。然后复製貼上"
+    },
+    "62": {
+      "en": "four of these different properties. My height is going to be the height in CM. And just to be clear,",
+      "zh_tw": "因為幾乎一樣，更新每一個的鍵。",
+      "zh_cn": "因为幾乎一样，更新每一个的键。"
+    },
+    "63": {
+      "en": "I'll put in athletes height. And I'm going to duplicate that because it's going to be just about the",
+      "zh_tw": "確保先有身高，然後是體重（以公斤為單位），",
+      "zh_cn": "确保先有身高，然后是体重（以公斤为单位），"
+    },
+    "64": {
+      "en": "same. We're going to do our weight in kilograms. My goal is going to be the goal of the athlete.",
+      "zh_tw": "然後是目標（運動員的目標），",
+      "zh_cn": "然后是目标（运动員的目标），"
+    },
+    "65": {
+      "en": "And my restrictions will be dietary restrictions of the athlete.",
+      "zh_tw": "然後是限制（運動員的飲食限制）。",
+      "zh_cn": "然后是限制（运动員的飲食限制）。"
+    },
+    "66": {
+      "en": "Now, last input for you to be aware of is number of test cases to generate. I would really recommend",
+      "zh_tw": "最後一個要注意的輸入是要生成的測試案例數量。我真的建議",
+      "zh_cn": "最后一个要注意的输入是要生成的测试案例数量。我真的建议"
+    },
+    "67": {
+      "en": "that you just leave this at three because it's going to allow you to get through this module",
+      "zh_tw": "你把它保持在三個，因為這會讓你更快完成這個模組，",
+      "zh_cn": "你把它保持在三个，因为这会让你更快完成这个模组，"
+    },
+    "68": {
+      "en": "way faster because the evals are going to run much more quickly. Just remember, as I mentioned many",
+      "zh_tw": "因為評估會跑得更快。記住，正如我多次提到的，",
+      "zh_cn": "因为评估会跑得更快。记住，正如我多次提到的，"
+    },
+    "69": {
+      "en": "times, whenever we do an eval in reality, we want to have a really solid, really large number of test",
+      "zh_tw": "在實際的評估中，我們要有一個很大數量的",
+      "zh_cn": "在实际的评估中，我们要有一个很大数量的"
+    },
+    "70": {
+      "en": "cases. So I'm going to dial mine personally way up. I do not recommend you do this. I recommend you leave",
+      "zh_tw": "測試案例。所以我個人會把數量調得很高。我不建議你這樣做。我建議你保持",
+      "zh_cn": "测试案例。所以我个人会把数量调得很高。我不建议你这样做。我建议你保持"
+    },
+    "71": {
+      "en": "it at like two or three, just to make sure all your evals run very quickly. But again, I'm going to",
+      "zh_tw": "在二或三，確保所有評估都跑得很快。我",
+      "zh_cn": "在二或三，确保所有评估都跑得很快。我"
+    },
+    "72": {
+      "en": "dial mine all the way up to 50. Once I put this all together, I'm going to run the cell and that's",
+      "zh_tw": "會把我的調到 50。一旦組裝好，執行這個儲存格，",
+      "zh_cn": "会把我的调到 50。一旦组装好，执行这个存储格，"
+    },
+    "73": {
+      "en": "going to generate my dataset. Once I have generated my dataset, I can open up the dataset.json file,",
+      "zh_tw": "就會生成我的資料集。生成後，可以打開 dataset.json 檔案，",
+      "zh_cn": "就会生成我的数据集。生成后，可以打开 dataset.json 文件，"
+    },
+    "74": {
+      "en": "which should be created in the same directory. And we're going to see all these different individual",
+      "zh_tw": "它應該在同一個目錄中建立。我們會看到所有不同的",
+      "zh_cn": "它应该在同一个目录中建立。我们会看到所有不同的"
+    },
+    "75": {
+      "en": "datasets have been generated. So they have a pretty similar structure to what we were doing on our",
+      "zh_tw": "資料集都已經生成了。它們的結構和我們之前模組",
+      "zh_cn": "数据集都已经生成了。它们的结构和我们之前模组"
+    },
+    "76": {
+      "en": "previous module when we were talking about prompt evals. I'm going to go back over to my notebook",
+      "zh_tw": "討論提示評估時做的很類似。回到筆記本",
+      "zh_cn": "討论提示评估时做的很类似。回到笔记本"
+    },
+    "77": {
+      "en": "and then scroll down a little bit to the run prompt function. This is where we are going to write out",
+      "zh_tw": "然後往下捲到 run prompt 函式。這是我們要寫出",
+      "zh_cn": "然后往下捲到 run prompt 函数。这是我们要写出"
+    },
+    "78": {
+      "en": "our prompt and then eventually improve it over time. This function gets called one time for every",
+      "zh_tw": "提示然後隨時間改進它的地方。這個函式為你生成的每一個",
+      "zh_cn": "提示然后随时间改进它的地方。这个函数为你生成的每一个"
+    },
+    "79": {
+      "en": "test case that you generated. Whenever this function is called, it's going to receive your test cases",
+      "zh_tw": "測試案例呼叫一次。每當這個函式被呼叫時，它會收到測試案例的",
+      "zh_cn": "测试案例调用一次。每当这个函数被调用时，它会收到测试案例的"
+    },
+    "80": {
+      "en": "prompt inputs as its only argument. So in other words, prompt inputs right there is going to be",
+      "zh_tw": "提示輸入作為唯一參數。換句話說，那裡的 prompt inputs 就是",
+      "zh_cn": "提示输入作为唯一参数。换句话说，那里的 prompt inputs 就是"
+    },
+    "81": {
+      "en": "that dictionary. And then that function is going to be called again, and it will be that dictionary.",
+      "zh_tw": "那個字典。然後函式會再次被呼叫，傳入的是那個字典。",
+      "zh_cn": "那个字典。然后函数会再次被调用，传入的是那个字典。"
+    },
+    "82": {
+      "en": "And then again, and it will be that dictionary and so on. So we're going to take this dictionary",
+      "zh_tw": "然後再一次，傳入的是那個字典，依此類推。所以我們要把這個字典",
+      "zh_cn": "然后再一次，传入的是那个字典，依此类推。所以我们要把这个字典"
+    },
+    "83": {
+      "en": "and we're going to interpolate those inputs into this prompt that we're going to write out right here.",
+      "zh_tw": "中的輸入插入到我們要寫在這裡的提示中。",
+      "zh_cn": "中的输入插入到我们要写在这里的提示中。"
+    },
+    "84": {
+      "en": "Let's immediately write out a first version of our prompt, and it's going to be very simple,",
+      "zh_tw": "讓我們立刻寫出第一版提示，它會很簡單，",
+      "zh_cn": "让我们立刻写出第一版提示，它会很简单，"
+    },
+    "85": {
+      "en": "very naive. We're going to get a very bad eval score, but it will at least get us started.",
+      "zh_tw": "很天真。我們會得到很差的評估分數，但至少能讓我們開始。",
+      "zh_cn": "很天真。我们会得到很差的评估分数，但至少能让我们开始。"
+    },
+    "86": {
+      "en": "So I'm going to write in my initial starting prompt here, and I'm going to use a very bad prompt.",
+      "zh_tw": "我要在這裡寫入初始提示，用一個非常差的提示。",
+      "zh_cn": "我要在这里写入初始提示，用一个非常差的提示。"
+    },
+    "87": {
+      "en": "I'll say, what should this person eat? And then I'm going to list out their height,",
+      "zh_tw": "我會說「這個人應該吃什麼？」然後列出他們的身高、",
+      "zh_cn": "我会说「这个人应该吃什麼？」然后列出他们的身高、"
+    },
+    "88": {
+      "en": "their weight, their goal, and dietary restrictions.",
+      "zh_tw": "體重、目標和飲食限制。",
+      "zh_cn": "体重、目标和飲食限制。"
+    },
+    "89": {
+      "en": "And then for each of these, I'm going to interpolate in a value from prompt inputs.",
+      "zh_tw": "然後對每一個，我會從 prompt inputs 中插入值。",
+      "zh_cn": "然后对每一个，我会从 prompt inputs 中插入值。"
+    },
+    "90": {
+      "en": "So the first one will be the height, and I'm going to copy paste that",
+      "zh_tw": "第一個是身高，然後複製貼上",
+      "zh_cn": "第一个是身高，然后复製貼上"
+    },
+    "91": {
+      "en": "just to save a little bit of time and update the keys on each one.",
+      "zh_tw": "節省時間，更新每一個的鍵。",
+      "zh_cn": "节省时间，更新每一个的键。"
+    },
+    "92": {
+      "en": "So make sure you have first height, and then we want the weight,",
+      "zh_tw": "確保先有身高，然後是體重，",
+      "zh_cn": "确保先有身高，然后是体重，"
+    },
+    "93": {
+      "en": "and then our goal,",
+      "zh_tw": "然後是目標，",
+      "zh_cn": "然后是目标，"
+    },
+    "94": {
+      "en": "and then restrictions.",
+      "zh_tw": "然後是限制。",
+      "zh_cn": "然后是限制。"
+    },
+    "95": {
+      "en": "All right. Once we have our starter prompt in here, I'm going to run that cell.",
+      "zh_tw": "好的。有了起始提示後，執行那個儲存格。",
+      "zh_cn": "好的。有了起始提示后，执行那个存储格。"
+    },
+    "96": {
+      "en": "And then let's do our eval. So we can run our eval down here at the very bottom.",
+      "zh_tw": "然後做我們的評估。我們可以在最下面執行評估。",
+      "zh_cn": "然后做我们的评估。我们可以在最下面执行评估。"
+    },
+    "97": {
+      "en": "Now, before we run our eval, I want you to know that this function that's going to actually kick",
+      "zh_tw": "在執行評估之前，我要讓你知道這個實際啟動",
+      "zh_cn": "在执行评估之前，我要让你知道这个实际啟动"
+    },
+    "98": {
+      "en": "off the evaluation process, it takes in one additional keyword argument that I'm not showing",
+      "zh_tw": "評估過程的函式，它接受一個我這裡沒有顯示的額外關鍵字參數，",
+      "zh_cn": "评估过程的函数，它接受一个我这里没有显示的额外关键字参数，"
+    },
+    "99": {
+      "en": "here. It's called extra criteria. It's going to be a string.",
+      "zh_tw": "叫做 extra criteria。它是一個字串。",
+      "zh_cn": "叫做 extra criteria。它是一个字符串。"
+    },
+    "100": {
+      "en": "This string is going to be used during the model grading process.",
+      "zh_tw": "這個字串會在模型評分過程中使用。",
+      "zh_cn": "这个字符串会在模型评分过程中使用。"
+    },
+    "101": {
+      "en": "This extra criteria thing just allows you and I as developers to put in some extra criteria",
+      "zh_tw": "這個額外標準讓我們開發者可以放入一些額外的標準，",
+      "zh_cn": "这个额外标准让我们开发者可以放入一些额外的标准，"
+    },
+    "102": {
+      "en": "that the model should consider whenever it's doing some grading.",
+      "zh_tw": "讓模型在評分時考慮。",
+      "zh_cn": "让模型在评分时考慮。"
+    },
+    "103": {
+      "en": "So I'm going to say specifically to make sure that the output should include",
+      "zh_tw": "我要特別說明確保輸出應該包含",
+      "zh_cn": "我要特別说明确保输出应该包含"
+    },
+    "104": {
+      "en": "a daily caloric total, a macro nutrient breakdown, and meals with exact foods, portions, and timing.",
+      "zh_tw": "每日卡路里總量、巨量營養素分解，以及有確切食物、份量和時間的餐點。",
+      "zh_cn": "每日卡路里总量、巨量营养素分解，以及有确切食物、份量和时间的餐点。"
+    },
+    "105": {
+      "en": "Again, this is just going to add in a little bit of extra validation or a little bit of extra grading criteria.",
+      "zh_tw": "這只是加入一些額外的驗證或評分標準。",
+      "zh_cn": "这只是加入一些额外的验证或评分标准。"
+    },
+    "106": {
+      "en": "All right. So now let's run our evaluation for the first version of our prompt and see how we're doing.",
+      "zh_tw": "好的。現在執行第一版提示的評估，看看我們的表現如何。",
+      "zh_cn": "好的。现在执行第一版提示的评估，看看我们的表现如何。"
+    },
+    "107": {
+      "en": "All right. We get a absolutely terrible score. I get a 2.32. Now, just, you know, you are probably",
+      "zh_tw": "好的。我們得到了一個非常糟糕的分數。我得到 2.32。你可能",
+      "zh_cn": "好的。我们得到了一个非常糟糕的分数。我得到 2.32。你可能"
+    },
+    "108": {
+      "en": "going to end up getting a much better score than I get. The reason I have a very bad score here is",
+      "zh_tw": "會得到比我好得多的分數。我分數很差的原因是",
+      "zh_cn": "会得到比我好得多的分数。我分数很差的原因是"
+    },
+    "109": {
+      "en": "that I'm using a model behind the scenes that is not super smart. So it's going to tend to give me",
+      "zh_tw": "我在幕後使用的模型不太聰明。所以除非我在提示中非常具體，否則",
+      "zh_cn": "我在幕后使用的模型不太聰明。所以除非我在提示中非常具体，否则"
+    },
+    "110": {
+      "en": "a really bad output unless I'm very specific in how I prompt it. I am using this very bad model",
+      "zh_tw": "它往往會給出很差的輸出。我使用這個很差的模型",
+      "zh_cn": "它往往会给出很差的输出。我使用这个很差的模型"
+    },
+    "111": {
+      "en": "just so you can see the increase in score over time as we go throughout this module and add in all",
+      "zh_tw": "是為了讓你看到在整個模組中加入所有",
+      "zh_cn": "是为了让你看到在整个模组中加入所有"
+    },
+    "112": {
+      "en": "these different prompt engineering techniques. So again, you are probably going to get a better score.",
+      "zh_tw": "提示工程技術後，分數隨時間的增長。所以你可能會得到更好的分數。",
+      "zh_cn": "提示工程技术后，分数随时间的增长。所以你可能会得到更好的分数。"
+    },
+    "113": {
+      "en": "That's totally fine. Now, before we move on, there's one last thing I want to mention really quickly.",
+      "zh_tw": "那完全沒問題。在我們繼續之前，我想快速提最後一件事。",
+      "zh_cn": "那完全没问题。在我们继续之前，我想快速提最后一件事。"
+    },
+    "114": {
+      "en": "Whenever you run an evaluation, a file will be created in the same directory as your notebook",
+      "zh_tw": "每當你執行評估時，在筆記本的同一目錄中會建立一個",
+      "zh_cn": "每当你执行评估时，在笔记本的同一目录中会建立一个"
+    },
+    "115": {
+      "en": "called output.html. If you open up that file inside of your browser with a simple drag and drop,",
+      "zh_tw": "叫做 output.html 的檔案。如果你用瀏覽器打開它，",
+      "zh_cn": "叫做 output.html 的文件。如果你用浏览器打开它，"
+    },
+    "116": {
+      "en": "you're going to see a really nicely formatted report that gives you output on every single test case that",
+      "zh_tw": "你會看到一個格式精美的報告，給你每一個執行的測試案例的輸出，",
+      "zh_cn": "你会看到一个格式精美的报告，给你每一个执行的测试案例的输出，"
+    },
+    "117": {
+      "en": "was executed along with the score, the reasoning solution criteria, and so on. You could also see",
+      "zh_tw": "連同分數、推理、解決方案標準等等。你也可以看到",
+      "zh_cn": "连同分数、推理、解决方案标准等等。你也可以看到"
+    },
+    "118": {
+      "en": "the actual output too. So I'm going to use this little dashboard quite a bit in order to take a look",
+      "zh_tw": "實際輸出。我會經常使用這個小儀表板來檢視",
+      "zh_cn": "实际输出。我会经常使用这个小儀表板來检視"
+    },
+    "119": {
+      "en": "at the output of the eval and understand how I actually need to improve my prompt.",
+      "zh_tw": "評估的輸出，了解我到底需要如何改進提示。",
+      "zh_cn": "评估的输出，了解我到底需要如何改进提示。"
+    },
+    "120": {
+      "en": "All right. I apologize for the long video here, but now hopefully you have an idea of some of the",
+      "zh_tw": "好的。抱歉這個影片有點長，但現在希望你了解了我們在",
+      "zh_cn": "好的。抱歉这个视频有点长，但现在希望你了解了我们在"
+    },
+    "121": {
+      "en": "setup that we're doing inside of this module. So now all we really have to do, as you can see,",
+      "zh_tw": "這個模組中做的一些設定。所以現在我們真正要做的就是，如你所見，",
+      "zh_cn": "这个模组中做的一些设定。所以现在我们真正要做的就是，如你所見，"
+    },
+    "122": {
+      "en": "we have really bad score right now. All we have to do is start to improve our prompt.",
+      "zh_tw": "我們目前的分數很差。我們要做的就是開始改進提示。",
+      "zh_cn": "我们目前的分数很差。我们要做的就是开始改进提示。"
+    },
+    "123": {
+      "en": "So let's start to take a look at our first prompt engineering technique in the next video.",
+      "zh_tw": "讓我們在下一個影片中看看第一個提示工程技術。",
+      "zh_cn": "让我们在下一个视频中看看第一个提示工程技术。"
+    }
+  }
+}

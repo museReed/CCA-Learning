@@ -1,0 +1,337 @@
+{
+  "srt_file": "Implementing_the_RAG_flow_T9PBheNV.srt",
+  "video_file": "Implementing_the_RAG_flow_T9PBheNV.mp4",
+  "max_valid_entry": 66,
+  "entries": {
+    "1": {
+      "en": "Now that we understand the entire rag flow, we're going to walk through an",
+      "zh_tw": "現在我們理解了整個 RAG 流程，我們要在另一個筆記本中走過一個範例，叫做 003 vector DB。",
+      "zh_cn": "现在我们理解了整个 RAG 流程，我们要在另一个笔记本中走过一个范例，叫做 003 vector DB。"
+    },
+    "2": {
+      "en": "example inside of another notebook called zero zero three vector DB.",
+      "zh_tw": "在這個筆記本中，我提供了一個向量資料庫的範例實作，",
+      "zh_cn": "在这个笔记本中，我提供了一个向量数据库的范例实作，"
+    },
+    "3": {
+      "en": "So in this notebook, I provided a sample implementation of a vector database,",
+      "zh_tw": "我把它叫做 class vector index，就在這裡。",
+      "zh_cn": "我把它叫做 class vector index，就在这里。"
+    },
+    "4": {
+      "en": "and I've called it class vector index right here.",
+      "zh_tw": "如果你想的話可以看一下，但我會帶你走過",
+      "zh_cn": "如果你想的话可以看一下，但我会帶你走过"
+    },
+    "5": {
+      "en": "If you want to feel free to take a glance at it, but I'll walk through",
+      "zh_tw": "你需要理解的所有東西。",
+      "zh_cn": "你需要理解的所有東西。"
+    },
+    "6": {
+      "en": "everything you need to understand about it.",
+      "zh_tw": "在這個筆記本中，我們會走過整個 RAG 流程，",
+      "zh_cn": "在这个笔记本中，我们会走过整个 RAG 流程，"
+    },
+    "7": {
+      "en": "Now in this notebook, we're going to walk through the entire rag flow by",
+      "zh_tw": "實作五個不同的步驟。",
+      "zh_cn": "实作五个不同的步驟。"
+    },
+    "8": {
+      "en": "implementing five different steps.",
+      "zh_tw": "跟我們在上一個影片中剛說的五個步驟一樣。",
+      "zh_cn": "跟我们在上一个视频中剛说的五个步驟一样。"
+    },
+    "9": {
+      "en": "The same five steps we just spoke about in the last video.",
+      "zh_tw": "好，開始吧。",
+      "zh_cn": "好，开始吧。"
+    },
+    "10": {
+      "en": "So let's get to it.",
+      "zh_tw": "步驟一，我已經開啟了檔案並從中讀取文字，",
+      "zh_cn": "步驟一，我已经开啟了文件並从中读取文字，"
+    },
+    "11": {
+      "en": "Step number one, I have already opened up the file and read the text from it,",
+      "zh_tw": "特別是我們的 report.md 檔案，它應該在跟這個筆記本相同的目錄中。",
+      "zh_cn": "特別是我们的 report.md 文件，它应该在跟这个笔记本相同的目录中。"
+    },
+    "12": {
+      "en": "specifically our report.md file, which should be in the same directory as this notebook.",
+      "zh_tw": "在步驟一中，我們要按章節分塊文字。",
+      "zh_cn": "在步驟一中，我们要按章节分块文字。"
+    },
+    "13": {
+      "en": "So in step one, we're going to chunk the text by section.",
+      "zh_tw": "我已經加入了一個函式來幫助處理這個。",
+      "zh_cn": "我已经加入了一个函数來幫助处理这个。"
+    },
+    "14": {
+      "en": "I've already added in a function to help with that.",
+      "zh_tw": "就是我們之前有的同樣的 chunk by section 函式。",
+      "zh_cn": "就是我们之前有的同样的 chunk by section 函数。"
+    },
+    "15": {
+      "en": "So the same chunk by section function we had previously.",
+      "zh_tw": "所以要做我們的分塊過程，我會寫 chunks = chunk_by_section，然後傳入所有文字。",
+      "zh_cn": "所以要做我们的分块过程，我会写 chunks = chunk_by_section，然后传入所有文字。"
+    },
+    "16": {
+      "en": "So to do our chunking process, I'll say chunks is chunk by section and pass in all that text.",
+      "zh_tw": "現在只是測試一下，確保一切運作正常。",
+      "zh_cn": "现在只是测试一下，确保一切运作正常。"
+    },
+    "17": {
+      "en": "And now just to test things out and make sure I've got everything working correctly.",
+      "zh_tw": "我試著印出 chunks[2]。",
+      "zh_cn": "我试著印出 chunks[2]。"
+    },
+    "18": {
+      "en": "I'll try printing out chunks at how about two.",
+      "zh_tw": "我應該會看到 table of contents 的印出。",
+      "zh_cn": "我应该会看到 table of contents 的印出。"
+    },
+    "19": {
+      "en": "And I should see a printout of the table of contents.",
+      "zh_tw": "然後如果我換成 3，我應該會看到下一個章節，然後下一個，以此類推。",
+      "zh_cn": "然后如果我换成 3，我应该会看到下一个章节，然后下一个，以此类推。"
+    },
+    "20": {
+      "en": "And then if I go to three, I should see the next section down and then the next section and so on.",
+      "zh_tw": "然後進入步驟二。",
+      "zh_cn": "然后进入步驟二。"
+    },
+    "21": {
+      "en": "Then onto step two.",
+      "zh_tw": "在步驟二中，我們要為每個區塊建立嵌入。",
+      "zh_cn": "在步驟二中，我们要为每个区块建立嵌入。"
+    },
+    "22": {
+      "en": "In step two, we're going to create an embedding for each chunk.",
+      "zh_tw": "讓你知道一下，我稍微改寫了嵌入函式，現在我們可以傳入一個字串或一串字串。",
+      "zh_cn": "让你知道一下，我稍微改写了嵌入函数，现在我们可以传入一个字符串或一串字符串。"
+    },
+    "23": {
+      "en": "Now, just so you know, I rewrote the embedding function slightly so that now we can pass in either a single string or a list of strings.",
+      "zh_tw": "如果我們傳入一串字串，它會為每一個建立嵌入，然後以嵌入列表的形式回傳。",
+      "zh_cn": "如果我们传入一串字符串，它会为每一个建立嵌入，然后以嵌入列表的形式返回。"
+    },
+    "24": {
+      "en": "And if we pass in a list of strings, it will create an embedding for each of them and then return that as a list of embeddings.",
+      "zh_tw": "所以要實作步驟二，我們會呼叫 generate_embedding，傳入所有區塊，然後把結果指派給 embeddings。",
+      "zh_cn": "所以要实作步驟二，我们会调用 generate_embedding，传入所有区块，然后把结果指派给 embeddings。"
+    },
+    "25": {
+      "en": "So to implement step number two, we will call generate embedding and pass in all the chunks and then assign the result to embeddings.",
+      "zh_tw": "接下來在步驟三，我們要建立向量儲存庫的實例。",
+      "zh_cn": "接下來在步驟三，我们要建立向量仓库的实例。"
+    },
+    "26": {
+      "en": "Next up in step three, we are going to create an instance of the vector store.",
+      "zh_tw": "儲存庫建立好之後，我們就要遍歷所有不同的區塊和嵌入配對。",
+      "zh_cn": "仓库建立好之后，我们就要遍历所有不同的区块和嵌入配对。"
+    },
+    "27": {
+      "en": "Once the store has been created, we will then loop over all the different pairs of chunks and embeddings.",
+      "zh_tw": "我們要把它們 zip 在一起。",
+      "zh_cn": "我们要把它们 zip 在一起。"
+    },
+    "28": {
+      "en": "We're going to zip them together.",
+      "zh_tw": "然後對每一對，我們要把它們插入儲存庫。",
+      "zh_cn": "然后对每一对，我们要把它们插入仓库。"
+    },
+    "29": {
+      "en": "And then as we take each pair, we're going to insert them into the store.",
+      "zh_tw": "我們會用 for embedding, chunk in zip(embeddings, chunks) 來做。",
+      "zh_cn": "我们会用 for embedding, chunk in zip(embeddings, chunks) 來做。"
+    },
+    "30": {
+      "en": "We'll do that with a for embedding and chunk in zip embeddings and chunks.",
+      "zh_tw": "再次，對於每一對嵌入和區塊，我們會做 store.add_vector，放入嵌入。",
+      "zh_cn": "再次，对於每一对嵌入和区块，我们会做 store.add_vector，放入嵌入。"
+    },
+    "31": {
+      "en": "And again, for each of those different pairs of embeddings and chunks, we'll do a store add vector, put the embedding in.",
+      "zh_tw": "然後作為第二個參數，我們放入一個字典，content 為 chunk。",
+      "zh_cn": "然后作为第二个参数，我们放入一个字典，content 为 chunk。"
+    },
+    "32": {
+      "en": "And then as the second argument, we'll put in a dictionary with content of chunk.",
+      "zh_tw": "我剛才講得比較快。",
+      "zh_cn": "我剛才讲得比較快。"
+    },
+    "33": {
+      "en": "Now, I went over this step rather quickly.",
+      "zh_tw": "所以讓我們做個簡短的插話，解釋為什麼我們要遍歷所有這些東西，為什麼要分塊，以及為什麼要加入這個額外的 content: chunk 字典。",
+      "zh_cn": "所以让我们做个简短的插话，解釋为什麼我们要遍历所有这些東西，为什麼要分块，以及为什麼要加入这个额外的 content: chunk 字典。"
+    },
+    "34": {
+      "en": "So let's do a quick aside and explain why we are looping over all these things, why we are chunking it, and why we are adding in this extra dictionary with the content of chunk.",
+      "zh_tw": "正如我們剛討論的，最終在某個時間點，我們會去我們的向量資料庫，取回所有與輸入相關的嵌入列表。",
+      "zh_cn": "正如我们剛討论的，最终在某个时间点，我们会去我们的向量数据库，取回所有与输入相关的嵌入列表。"
+    },
+    "35": {
+      "en": "As we just discussed, eventually at some point in time, we're going to reach out to our vector database and get back a list of all the different related embeddings to the input.",
+      "zh_tw": "當我們取回這個列表時，只拿到數字本身，只拿到嵌入對我們來說並不真的有用，因為嵌入對你我開發者來說並沒有太多意義。",
+      "zh_cn": "当我们取回这个列表时，只拿到数字本身，只拿到嵌入对我们來说並不真的有用，因为嵌入对你我开发者來说並没有太多意义。"
+    },
+    "36": {
+      "en": "Now, when we get back this list right here, just getting the number by itself, just getting the embedding is not really useful to us because the embedding, it doesn't really have a lot of meaning to you and I as developers.",
+      "zh_tw": "我們真正在意的是與那個嵌入相關聯的文字。",
+      "zh_cn": "我们真正在意的是与那个嵌入相关聯的文字。"
+    },
+    "37": {
+      "en": "What we really care about is the text associated with that embedding.",
+      "zh_tw": "所以通常當你在向量資料庫中儲存這些不同的嵌入時，你也會包含嵌入所生成的區塊文字，或至少是區塊的 ID。",
+      "zh_cn": "所以通常当你在向量数据库中存储这些不同的嵌入时，你也会包含嵌入所生成的区块文字，或至少是区块的 ID。"
+    },
+    "38": {
+      "en": "So usually whenever you store these different embeddings inside of your vector database, you're also going to include either the text from the chunk that the embedding was generated from, or at least the ID of the chunk.",
+      "zh_tw": "至少要有某些東西指回原始區塊文字。",
+      "zh_cn": "至少要有某些東西指回原始区块文字。"
+    },
+    "39": {
+      "en": "Something to at least point you back to the original chunk text.",
+      "zh_tw": "所以在這種情況下，我要把原始區塊文字跟每個嵌入一起包含進去。",
+      "zh_cn": "所以在这种情況下，我要把原始区块文字跟每个嵌入一起包含进去。"
+    },
+    "40": {
+      "en": "So in this case, I'm going to include the original chunk text along with each embedding.",
+      "zh_tw": "同樣地，只是為了當我們稍後做查找時，取回最相似的區塊，我有我要找的實際文字。",
+      "zh_cn": "同样地，只是为了当我们稍后做查找时，取回最相似的区块，我有我要找的实际文字。"
+    },
+    "41": {
+      "en": "Again, just so when we do the lookup later on and I get back the most similar chunks, I've got the actual text that I'm looking for.",
+      "zh_tw": "現在進入步驟四。",
+      "zh_cn": "现在进入步驟四。"
+    },
+    "42": {
+      "en": "Now on to step four.",
+      "zh_tw": "在步驟四中，在未來的某個時間點，使用者會問我們一個問題。",
+      "zh_cn": "在步驟四中，在未來的某个时间点，使用者会问我们一个问题。"
+    },
+    "43": {
+      "en": "So in step four, at some point in time in the future, a user is going to ask us a question.",
+      "zh_tw": "我們需要拿那個問題為它生成一個嵌入。",
+      "zh_cn": "我们需要拿那个问题为它生成一个嵌入。"
+    },
+    "44": {
+      "en": "We need to take that question and generate an embedding for it.",
+      "zh_tw": "所以我會呼叫 generate_embedding 建立一個 user_embedding。",
+      "zh_cn": "所以我会调用 generate_embedding 建立一个 user_embedding。"
+    },
+    "45": {
+      "en": "So I'll make a user embedding by calling generate embedding.",
+      "zh_tw": "然後我這裡的問題會是，軟體工程部門去年做了什麼？",
+      "zh_cn": "然后我这里的问题会是，软件工程部门去年做了什麼？"
+    },
+    "46": {
+      "en": "And then my question here is going to be, what did the software engineering department do last year?",
+      "zh_tw": "最後，進入步驟五，我們要嘗試找到一些相關的文件。",
+      "zh_cn": "最后，进入步驟五，我们要嘗试找到一些相关的文件。"
+    },
+    "47": {
+      "en": "Finally, onto step five, where we are going to try to find some relevant documents.",
+      "zh_tw": "所以我要用嵌入搜尋儲存庫，我要找到兩個最相關的區塊，不只是最相關的那個。",
+      "zh_cn": "所以我要用嵌入搜尋仓库，我要找到兩个最相关的区块，不只是最相关的那个。"
+    },
+    "48": {
+      "en": "So I want to search the store with the embedding and I want to find the two most relevant chunks, not just the most relevant.",
+      "zh_tw": "我要得到看起來與這裡的問題最相關的兩個區塊。",
+      "zh_cn": "我要得到看起來与这里的问题最相关的兩个区块。"
+    },
+    "49": {
+      "en": "I want to get the two chunks that seem to be most relevant to this question right here.",
+      "zh_tw": "所以我會做 results = store.search。",
+      "zh_cn": "所以我会做 results = store.search。"
+    },
+    "50": {
+      "en": "So for that, I'll do a results store dot search.",
+      "zh_tw": "我要傳入 user_embedding。",
+      "zh_cn": "我要传入 user_embedding。"
+    },
+    "51": {
+      "en": "I'm going to pass in the user embedding.",
+      "zh_tw": "然後我要傳入另一個參數 2，因為我要找到兩個最相關的區塊。",
+      "zh_cn": "然后我要传入另一个参数 2，因为我要找到兩个最相关的区块。"
+    },
+    "52": {
+      "en": "And I'm going to pass in another argument here of two, because I want to find the two most relevant chunks.",
+      "zh_tw": "然後我會印出，for doc, distance in results。",
+      "zh_cn": "然后我会印出，for doc, distance in results。"
+    },
+    "53": {
+      "en": "And then I will print out for doc and distance in results.",
+      "zh_tw": "我要印出 distance，換行，然後文件的 content。",
+      "zh_cn": "我要印出 distance，换行，然后文件的 content。"
+    },
+    "54": {
+      "en": "I'm going to print out the distance, a new line, and then the documents content.",
+      "zh_tw": "因為每個區塊真的非常大，我只印出前 200 個字元，然後再換行。",
+      "zh_cn": "因为每个区块真的非常大，我只印出前 200 个字元，然后再换行。"
+    },
+    "55": {
+      "en": "And because each chunk here is really, really large, I'm going to print out just the first 200 characters and then another new line like so.",
+      "zh_tw": "我執行這個，這就是我們的結果。",
+      "zh_cn": "我执行这个，这就是我们的结果。"
+    },
+    "56": {
+      "en": "And I'll run this and there's our result.",
+      "zh_tw": "所以我們得到 section two 作為最佳結果。",
+      "zh_cn": "所以我们得到 section two 作为最佳结果。"
+    },
+    "57": {
+      "en": "So we get back section two as our best result.",
+      "zh_tw": "我們也可以看到這裡的餘弦距離。",
+      "zh_cn": "我们也可以看到这里的余弦距离。"
+    },
+    "58": {
+      "en": "We also see the cosine distance here.",
+      "zh_tw": "是 0.71，而下一個最接近的區塊是 0.72。",
+      "zh_cn": "是 0.71，而下一个最接近的区块是 0.72。"
+    },
+    "59": {
+      "en": "So it's 0.71 and the next closest chunk is at 0.72.",
+      "zh_tw": "那是 methodology 章節。",
+      "zh_cn": "那是 methodology 章节。"
+    },
+    "60": {
+      "en": "And that was the methodology section.",
+      "zh_tw": "所以這是與我們剛提交的使用者查詢最相關的兩個區塊。",
+      "zh_cn": "所以这是与我们剛提交的使用者查询最相关的兩个区块。"
+    },
+    "61": {
+      "en": "So these were the two chunks that were found most relevant for the user query that we just submitted.",
+      "zh_tw": "好的。",
+      "zh_cn": "好的。"
+    },
+    "62": {
+      "en": "All right.",
+      "zh_tw": "這就是我們整個 RAG 工作流程。",
+      "zh_cn": "这就是我们整个 RAG 工作流程。"
+    },
+    "63": {
+      "en": "So that is our entire rag workflow.",
+      "zh_tw": "現在這一切都能運作，但有一兩個情境中事情不太如預期。",
+      "zh_cn": "现在这一切都能运作，但有一兩个情境中事情不太如预期。"
+    },
+    "64": {
+      "en": "Now all this works, but there is one or two scenarios where everything doesn't quite work as expected.",
+      "zh_tw": "所以我們的工作流程仍然可以加入一些改進。",
+      "zh_cn": "所以我们的工作流程仍然可以加入一些改进。"
+    },
+    "65": {
+      "en": "So there are still a couple of improvements that we could add into our workflow.",
+      "zh_tw": "讓我們馬上開始討論那些。",
+      "zh_cn": "让我们马上开始討论那些。"
+    },
+    "66": {
+      "en": "And let's start to discuss those in just a moment.",
+      "zh_tw": "讓我們馬上開始討論那些。",
+      "zh_cn": "让我们马上开始討论那些。"
+    }
+  }
+}

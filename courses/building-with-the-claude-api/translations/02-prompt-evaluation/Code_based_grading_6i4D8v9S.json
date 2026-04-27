@@ -1,0 +1,137 @@
+{
+  "srt_file": "Code_based_grading_6i4D8v9S.srt",
+  "video_file": "Code_based_grading_6i4D8v9S.mp4",
+  "max_valid_entry": 26,
+  "entries": {
+    "1": {
+      "en": "Next up, we need to implement our code grader.",
+      "zh_tw": "接下來，我們需要實作程式碼評分器。",
+      "zh_cn": "接下來，我们需要实作代码评分器。"
+    },
+    "2": {
+      "en": "So our code grader is going to take in some output from the model and make sure",
+      "zh_tw": "我們的程式碼評分器會接收模型的輸出，並確保",
+      "zh_cn": "我们的代码评分器会接收模型的输出，並确保"
+    },
+    "3": {
+      "en": "that we get back just plain Python, JSON, or regular expression without any",
+      "zh_tw": "我們得到的只是純粹的 Python、JSON 或正則表達式，不帶任何",
+      "zh_cn": "我们得到的只是纯粹的 Python、JSON 或正则表达式，不帶任何"
+    },
+    "4": {
+      "en": "kind of explanation.",
+      "zh_tw": "解釋。",
+      "zh_cn": "解釋。"
+    },
+    "5": {
+      "en": "In addition, we should also make sure that we have valid syntax for whatever",
+      "zh_tw": "此外，我們還應該確保不管我們得到什麼",
+      "zh_cn": "此外，我们还应该确保不管我们得到什麼"
+    },
+    "6": {
+      "en": "type of code we actually got.",
+      "zh_tw": "類型的程式碼，它都有正確的語法。",
+      "zh_cn": "类型的代码，它都有正确的语法。"
+    },
+    "7": {
+      "en": "You might be kind of curious, how are we going to validate the syntax of",
+      "zh_tw": "你可能好奇，我們到底要怎麼驗證",
+      "zh_cn": "你可能好奇，我们到底要怎麼验证"
+    },
+    "8": {
+      "en": "say Python at all?",
+      "zh_tw": "比如說 Python 的語法呢？",
+      "zh_cn": "比如说 Python 的语法呢？"
+    },
+    "9": {
+      "en": "Well, we use a little trick for this.",
+      "zh_tw": "嗯，我們用一個小技巧來做這件事。",
+      "zh_cn": "嗯，我们用一个小技巧來做这件事。"
+    },
+    "10": {
+      "en": "We're going to define three helper functions.",
+      "zh_tw": "我們會定義三個輔助函式。",
+      "zh_cn": "我们会定义三个辅助函数。"
+    },
+    "11": {
+      "en": "One will be called validate JSON, another validate Python, and another validate",
+      "zh_tw": "一個叫 validate JSON，另一個 validate Python，還有一個 validate",
+      "zh_cn": "一个叫 validate JSON，另一个 validate Python，还有一个 validate"
+    },
+    "12": {
+      "en": "regex.",
+      "zh_tw": "regex。",
+      "zh_cn": "regex。"
+    },
+    "13": {
+      "en": "Then inside of each of those, we're going to take whatever output we got from",
+      "zh_tw": "在每一個函式中，我們會把模型的輸出",
+      "zh_cn": "在每一个函数中，我们会把模型的输出"
+    },
+    "14": {
+      "en": "the model and try to either parse it as JSON.",
+      "zh_tw": "嘗試解析為 JSON。",
+      "zh_cn": "嘗试解析为 JSON。"
+    },
+    "15": {
+      "en": "We'll try to parse it as a Python abstract syntax tree or AST, or we'll try to",
+      "zh_tw": "我們會嘗試將它解析為 Python 抽象語法樹（AST），或嘗試",
+      "zh_cn": "我们会嘗试将它解析为 Python 抽象语法樹（AST），或嘗试"
+    },
+    "16": {
+      "en": "compile it as a regular expression.",
+      "zh_tw": "將它編譯為正則表達式。",
+      "zh_cn": "将它编译为正则表达式。"
+    },
+    "17": {
+      "en": "And then for each of these, if we successfully parse or load or whatever",
+      "zh_tw": "然後對於每一個，如果我們成功解析或載入或其他",
+      "zh_cn": "然后对於每一个，如果我们成功解析或載入或其他"
+    },
+    "18": {
+      "en": "else, we'll return a full score of 10.",
+      "zh_tw": "操作，我們會回傳滿分 10 分。",
+      "zh_cn": "操作，我们会返回满分 10 分。"
+    },
+    "19": {
+      "en": "Otherwise, if we get an error during this parsing operation, we'll assume",
+      "zh_tw": "否則，如果在解析過程中出現錯誤，我們會假設",
+      "zh_cn": "否则，如果在解析过程中出现错误，我们会假设"
+    },
+    "20": {
+      "en": "that we completely failed the syntax check and return a zero.",
+      "zh_tw": "語法檢查完全失敗，回傳零分。",
+      "zh_cn": "语法检查完全失敗，返回零分。"
+    },
+    "21": {
+      "en": "There is one other thing to be aware of here.",
+      "zh_tw": "這裡還有一件事要注意。",
+      "zh_cn": "这里还有一件事要注意。"
+    },
+    "22": {
+      "en": "In order to know which of these different validators or these kind of grading",
+      "zh_tw": "為了知道應該執行哪一個驗證器或評分",
+      "zh_cn": "为了知道应该执行哪一个验证器或评分"
+    },
+    "23": {
+      "en": "functions to run, we need our test case data set to include the expected format",
+      "zh_tw": "函式，我們需要測試案例資料集包含每個輸出的預期格式。",
+      "zh_cn": "函数，我们需要测试案例数据集包含每个输出的预期格式。"
+    },
+    "24": {
+      "en": "that we're going to get back for each output.",
+      "zh_tw": "換句話說，回到資料集中，第一個任務，至少對我來說",
+      "zh_cn": "换句话说，回到数据集中，第一个任务，至少对我來说"
+    },
+    "25": {
+      "en": "So in other words, back here inside of our data set on our first task, for me, at",
+      "zh_tw": "我預期得到一個 Python 函式，然後是 JSON，然後是",
+      "zh_cn": "我预期得到一个 Python 函数，然后是 JSON，然后是"
+    },
+    "26": {
+      "en": "least I was expecting to get back a Python function and then JSON and then a",
+      "zh_tw": "正則表達式。",
+      "zh_cn": "正则表达式。"
+    }
+  }
+}
