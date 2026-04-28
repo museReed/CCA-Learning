@@ -26,13 +26,13 @@ COURSE_META = {
 }
 
 COURSE_ORDER = [
-    "claude-code-in-action",
-    "introduction-to-model-context-protocol",
-    "model-context-protocol-advanced-topics",
-    "building-with-the-claude-api",
-    "claude-101",
-    "introduction-to-agent-skills",
-    "introduction-to-subagents",
+    "claude-101",                                # 1. 入門概覽 — Claude 是什麼、能做什麼
+    "claude-code-in-action",                     # 2. 主課程 — D1+D3+D4，佔考試 62%
+    "introduction-to-model-context-protocol",    # 3. MCP 入門 — D2 核心
+    "model-context-protocol-advanced-topics",    # 4. MCP 進階 — D2 深入 + 部署
+    "building-with-the-claude-api",              # 5. API 大課 — D1+D2+D4+D5 綜合
+    "introduction-to-agent-skills",              # 6. Skills — D3 補充
+    "introduction-to-subagents",                 # 7. Subagents — D3 補充
 ]
 
 CSS_PAGE = """
