@@ -16,13 +16,13 @@ COURSES = ROOT / "courses"
 HTML = ROOT / "html"
 
 COURSE_META = {
-    "claude-code-in-action": {"tag": "CCA", "title": "Claude Code in Action"},
-    "introduction-to-model-context-protocol": {"tag": "CCA", "title": "Introduction to MCP"},
-    "model-context-protocol-advanced-topics": {"tag": "CCA", "title": "MCP Advanced Topics"},
-    "building-with-the-claude-api": {"tag": "CCA", "title": "Building with the Claude API"},
-    "claude-101": {"tag": "Intro", "title": "Claude 101"},
-    "introduction-to-agent-skills": {"tag": "CCA", "title": "Introduction to Agent Skills"},
-    "introduction-to-subagents": {"tag": "CCA", "title": "Introduction to Subagents"},
+    "claude-code-in-action": {"tag": "CCA", "title": "Claude Code in Action", "url": "https://anthropic.skilljar.com/claude-code-in-action"},
+    "introduction-to-model-context-protocol": {"tag": "CCA", "title": "Introduction to MCP", "url": "https://anthropic.skilljar.com/introduction-to-model-context-protocol"},
+    "model-context-protocol-advanced-topics": {"tag": "CCA", "title": "MCP Advanced Topics", "url": "https://anthropic.skilljar.com/model-context-protocol-advanced-topics"},
+    "building-with-the-claude-api": {"tag": "CCA", "title": "Building with the Claude API", "url": "https://anthropic.skilljar.com/claude-with-the-anthropic-api"},
+    "claude-101": {"tag": "Intro", "title": "Claude 101", "url": "https://anthropic.skilljar.com/claude-101"},
+    "introduction-to-agent-skills": {"tag": "CCA", "title": "Introduction to Agent Skills", "url": "https://anthropic.skilljar.com/introduction-to-agent-skills"},
+    "introduction-to-subagents": {"tag": "CCA", "title": "Introduction to Subagents", "url": "https://anthropic.skilljar.com/introduction-to-subagents"},
 }
 
 COURSE_ORDER = [
@@ -51,8 +51,10 @@ img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border
 em { color: #64748b; }
 a { color: #3b82f6; }
 hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
-.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link { display: inline-block; margin-bottom: 0.3rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
 .back-link:hover { text-decoration: underline; }
+.official-link { display: inline-block; margin-bottom: 1rem; margin-left: 1.5rem; color: #059669; text-decoration: none; font-size: 0.82em; background: #ecfdf5; padding: 2px 10px; border-radius: 4px; }
+.official-link:hover { text-decoration: underline; background: #d1fae5; }
 """
 
 PAGE_TEMPLATE = """<!DOCTYPE html>
@@ -65,6 +67,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 </head>
 <body>
 <a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html?aud={audience}&lang={lang_code}&from={from_path}&lesson={lesson_slug}" class="back-link">\u2190 Back to Index</a>
+<a href="{course_url}" target="_blank" class="official-link">Official Course \u2197</a>
 {body}
 </body>
 </html>
@@ -128,6 +131,7 @@ def build_page(md_path: Path, course: str) -> Path:
     body = md_to_html_body(md_text)
     title = titleize(md_path.stem)
 
+    course_url = COURSE_META.get(course, {}).get("url", "")
     html_content = PAGE_TEMPLATE.format(
         lang_attr=lang_attr,
         title=htmllib.escape(title),
@@ -137,6 +141,7 @@ def build_page(md_path: Path, course: str) -> Path:
         lang_code=lang_code,
         from_path=from_path,
         lesson_slug=lesson_slug,
+        course_url=course_url,
     )
     html_path.write_text(html_content, encoding="utf-8")
     return html_path
