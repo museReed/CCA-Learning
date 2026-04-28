@@ -205,8 +205,7 @@ INDEX_HEAD = """<!DOCTYPE html>
   <style>
     :root {
       --bg: #f8f9fa; --card-bg: #fff; --text: #1a1a2e; --text-secondary: #6b7280;
-      --border: #e5e7eb; --accent-eng: #6366f1; --accent-pm: #ec4899;
-      --accent-active: #4f46e5; --hover: #f3f4f6; --radius: 10px;
+      --border: #e5e7eb; --accent-active: #4f46e5; --hover: #f3f4f6; --radius: 10px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); }
@@ -217,34 +216,26 @@ INDEX_HEAD = """<!DOCTYPE html>
     .stat-num { font-size: 1.4em; font-weight: 700; }
     .stat-label { font-size: 0.75em; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
     .tabs-container { background: white; border-bottom: 1px solid var(--border); padding: 0 32px; position: sticky; top: 0; z-index: 10; }
-    .tab-row { display: flex; align-items: center; gap: 4px; padding: 12px 0 0; }
-    .tab-row-label { font-size: 0.75em; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 12px; min-width: 70px; }
-    .tab-btn { background: none; border: none; padding: 10px 18px; font-size: 0.9em; font-weight: 500; color: var(--text-secondary); cursor: pointer; border-radius: 6px 6px 0 0; position: relative; transition: all 0.15s; }
+    .tab-row { display: flex; align-items: center; gap: 4px; padding: 10px 0 0; flex-wrap: wrap; }
+    .tab-row-label { font-size: 0.72em; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 8px; min-width: 60px; }
+    .tab-btn { background: none; border: none; padding: 8px 14px; font-size: 0.85em; font-weight: 500; color: var(--text-secondary); cursor: pointer; border-radius: 6px 6px 0 0; position: relative; transition: all 0.15s; white-space: nowrap; }
     .tab-btn:hover { background: var(--hover); color: var(--text); }
     .tab-btn.active { color: var(--accent-active); background: #eef2ff; }
-    .tab-btn.active::after { content: ""; position: absolute; bottom: -1px; left: 8px; right: 8px; height: 3px; background: var(--accent-active); border-radius: 3px 3px 0 0; }
-    .tab-count { font-size: 0.75em; opacity: 0.7; margin-left: 4px; }
+    .tab-btn.active::after { content: ""; position: absolute; bottom: -1px; left: 6px; right: 6px; height: 3px; background: var(--accent-active); border-radius: 3px 3px 0 0; }
+    .tab-count { font-size: 0.75em; opacity: 0.7; margin-left: 3px; }
     .content { padding: 24px 32px 48px; max-width: 900px; margin: 0 auto; }
     .panel { display: none; }
     .panel.active { display: block; }
 
-    /* Course accordion */
-    .course-section { margin-bottom: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card-bg); overflow: hidden; }
-    .course-toggle { display: flex; align-items: center; gap: 10px; width: 100%; padding: 14px 20px; background: none; border: none; cursor: pointer; text-align: left; transition: background 0.12s; }
-    .course-toggle:hover { background: var(--hover); }
-    .course-arrow { font-size: 0.7em; color: var(--text-secondary); transition: transform 0.2s; width: 16px; text-align: center; }
-    .course-section.open > .course-toggle .course-arrow { transform: rotate(90deg); }
-    .course-tag { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; font-size: 0.65em; font-weight: 600; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.3px; }
-    .course-title { font-weight: 700; font-size: 1em; flex: 1; color: var(--text); }
-    .course-count { font-size: 0.8em; color: var(--text-secondary); }
-    .course-body { display: none; border-top: 1px solid var(--border); }
-    .course-section.open > .course-body { display: block; }
+    /* Course sections — shown/hidden by JS based on course tab */
+    .course-section { display: none; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card-bg); overflow: hidden; }
+    .course-section.active { display: block; }
 
     /* Chapter inside course */
     .chapter-card { border-bottom: 1px solid var(--border); transition: background 0.3s; }
     .chapter-card:last-child { border-bottom: none; }
     .chapter-card.highlight { background: #eef2ff; }
-    .chapter-toggle { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 20px 10px 28px; background: none; border: none; cursor: pointer; text-align: left; transition: background 0.12s; }
+    .chapter-toggle { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 20px; background: none; border: none; cursor: pointer; text-align: left; transition: background 0.12s; }
     .chapter-toggle:hover { background: var(--hover); }
     .chapter-arrow { font-size: 0.6em; color: var(--text-secondary); transition: transform 0.2s; width: 14px; text-align: center; }
     .chapter-card.open > .chapter-toggle .chapter-arrow { transform: rotate(90deg); }
@@ -255,7 +246,7 @@ INDEX_HEAD = """<!DOCTYPE html>
     /* Lesson list inside chapter */
     .units { display: none; padding: 0; }
     .chapter-card.open > .units { display: block; }
-    .unit-link { display: flex; align-items: center; gap: 8px; padding: 8px 20px 8px 52px; font-size: 0.85em; color: var(--text); text-decoration: none; transition: background 0.1s, box-shadow 0.3s; border-left: 3px solid transparent; }
+    .unit-link { display: flex; align-items: center; gap: 8px; padding: 8px 20px 8px 44px; font-size: 0.85em; color: var(--text); text-decoration: none; transition: background 0.1s, box-shadow 0.3s; border-left: 3px solid transparent; }
     .unit-link:hover { background: var(--hover); color: var(--accent-active); border-left-color: var(--accent-active); }
     .unit-link.highlight { background: #eef2ff; border-left-color: #6366f1; color: var(--accent-active); font-weight: 600; }
     .unit-num { font-size: 0.75em; color: var(--text-secondary); font-weight: 600; min-width: 20px; }
@@ -268,6 +259,7 @@ INDEX_SCRIPT = """
 <script>
   const audTabs = document.querySelectorAll('.aud-tab');
   const langTabs = document.querySelectorAll('.lang-tab');
+  const courseTabs = document.querySelectorAll('.course-tab');
   const panels = document.querySelectorAll('.panel');
 
   // Read query params from back-link
@@ -277,19 +269,35 @@ INDEX_SCRIPT = """
   const fromChapter = params.get('from') || '';
   const fromLesson = params.get('lesson') || '';
 
+  // Determine initial course: from back-link or first available
+  let currentCourse = '';
+  if (fromChapter) {
+    currentCourse = fromChapter.split('/')[0];
+  }
+  if (!currentCourse && courseTabs.length > 0) {
+    currentCourse = courseTabs[0].dataset.course;
+  }
+
   function update() {
+    // Audience + language tabs
     audTabs.forEach(t => t.classList.toggle('active', t.dataset.audience === currentAud));
     langTabs.forEach(t => t.classList.toggle('active', t.dataset.lang === currentLang));
     panels.forEach(p => p.classList.toggle('active', p.dataset.audience === currentAud && p.dataset.lang === currentLang));
+
+    // Course tabs — show/hide course sections within the active panel
+    courseTabs.forEach(t => t.classList.toggle('active', t.dataset.course === currentCourse));
+    const activePanel = document.querySelector('.panel.active');
+    if (activePanel) {
+      activePanel.querySelectorAll('.course-section').forEach(s => {
+        s.classList.toggle('active', s.dataset.course === currentCourse);
+      });
+    }
   }
+
   audTabs.forEach(t => t.addEventListener('click', () => { currentAud = t.dataset.audience; update(); }));
   langTabs.forEach(t => t.addEventListener('click', () => { currentLang = t.dataset.lang; update(); }));
+  courseTabs.forEach(t => t.addEventListener('click', () => { currentCourse = t.dataset.course; update(); }));
   update();
-
-  // Course accordion toggle
-  document.querySelectorAll('.course-toggle').forEach(btn => {
-    btn.addEventListener('click', () => btn.parentElement.classList.toggle('open'));
-  });
 
   // Chapter accordion toggle
   document.querySelectorAll('.chapter-toggle').forEach(btn => {
@@ -302,9 +310,6 @@ INDEX_SCRIPT = """
     if (activePanel) {
       const card = activePanel.querySelector('.chapter-card[data-chapter="' + fromChapter + '"]');
       if (card) {
-        // Expand the parent course
-        const courseSection = card.closest('.course-section');
-        if (courseSection) courseSection.classList.add('open');
         // Expand the chapter
         card.classList.add('open');
 
@@ -424,6 +429,12 @@ def build_index():
     aud_counts = {k: v // 3 for k, v in aud_counts.items()}
     lang_counts = {k: v // 2 for k, v in lang_counts.items()}
 
+    # Build course tab buttons
+    course_tab_html = ""
+    for course in COURSE_ORDER:
+        meta = COURSE_META[course]
+        course_tab_html += f'<button class="tab-btn course-tab" data-course="{course}">{htmllib.escape(meta["title"])}</button>'
+
     parts.append(f"""
   <div class="tabs-container">
     <div class="tab-row"><span class="tab-row-label">Audience</span>
@@ -431,6 +442,9 @@ def build_index():
     </div>
     <div class="tab-row"><span class="tab-row-label">Language</span>
       <button class="tab-btn lang-tab" data-lang="zh-TW">繁體中文 <span class="tab-count">{lang_counts['zh-TW']}</span></button><button class="tab-btn lang-tab" data-lang="en">English <span class="tab-count">{lang_counts['en']}</span></button><button class="tab-btn lang-tab" data-lang="zh-CN">简体中文 <span class="tab-count">{lang_counts['zh-CN']}</span></button>
+    </div>
+    <div class="tab-row"><span class="tab-row-label">Course</span>
+      {course_tab_html}
     </div>
   </div>
   <div class="content">
@@ -448,8 +462,6 @@ def build_index():
                 # Count total lessons in this course for this variant
                 course_lesson_count = sum(len([l for l in lessons if (aud, lang) in l[1]]) for lessons in course_data.values())
                 parts.append(f'      <div class="course-section" data-course="{course}">\n')
-                parts.append(f'        <button class="course-toggle"><span class="course-arrow">\u25B6</span><span class="course-tag">{meta["tag"]}</span><span class="course-title">{htmllib.escape(meta["title"])}</span><span class="course-count">{course_lesson_count} lessons</span></button>\n')
-                parts.append(f'        <div class="course-body">\n')
                 for chapter_slug in sorted(course_data.keys()):
                     lessons = course_data[chapter_slug]
                     # Filter lessons that have this variant
@@ -457,18 +469,17 @@ def build_index():
                     if not filtered:
                         continue
                     ch_badge, ch_title = CHAPTER_LABEL.get(chapter_slug, ("", titleize(chapter_slug)))
-                    parts.append(f'          <div class="chapter-card" data-chapter="{course}/{chapter_slug}">\n')
-                    parts.append(f'            <button class="chapter-toggle"><span class="chapter-arrow">\u25B6</span><span class="chapter-badge">{ch_badge}</span><span class="chapter-title">{htmllib.escape(ch_title)}</span><span class="chapter-count">{len(filtered)} lessons</span></button>\n')
-                    parts.append('            <div class="units">\n')
+                    parts.append(f'        <div class="chapter-card" data-chapter="{course}/{chapter_slug}">\n')
+                    parts.append(f'          <button class="chapter-toggle"><span class="chapter-arrow">\u25B6</span><span class="chapter-badge">{ch_badge}</span><span class="chapter-title">{htmllib.escape(ch_title)}</span><span class="chapter-count">{len(filtered)} lessons</span></button>\n')
+                    parts.append('          <div class="units">\n')
                     for lesson_slug, _variants in filtered:
                         unit_num_m = re.match(r"^(\d+)", lesson_slug)
                         unit_num = unit_num_m.group(1) if unit_num_m else ""
                         unit_title = titleize(lesson_slug)
                         href = f"{course}/{chapter_slug}/{lesson_slug}/{lesson_slug}-{aud}-{lang}.html"
-                        parts.append(f'              <a href="{href}" class="unit-link" data-lesson="{lesson_slug}"><span class="unit-num">{unit_num}</span>{htmllib.escape(unit_title)}</a>\n')
-                    parts.append('            </div>\n')
+                        parts.append(f'            <a href="{href}" class="unit-link" data-lesson="{lesson_slug}"><span class="unit-num">{unit_num}</span>{htmllib.escape(unit_title)}</a>\n')
                     parts.append('          </div>\n')
-                parts.append('        </div>\n')
+                    parts.append('        </div>\n')
                 parts.append('      </div>\n')
             parts.append('    </div>\n')
 
