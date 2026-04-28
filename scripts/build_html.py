@@ -6,7 +6,7 @@ CCA Learning HTML builder.
 - Copies visuals/ alongside
 - Regenerates html/index.html
 """
-import os, re, shutil, html as htmllib
+import json, os, re, shutil, html as htmllib
 from pathlib import Path
 import markdown
 
@@ -34,6 +34,38 @@ COURSE_ORDER = [
     "introduction-to-agent-skills",              # 6. Skills — D3 補充
     "introduction-to-subagents",                 # 7. Subagents — D3 補充
 ]
+
+
+def _normalize_title(title: str) -> str:
+    """Normalize outline title to match lesson directory slug (without leading number)."""
+    t = title.lower().strip()
+    t = re.sub(r"[^a-z0-9\s]", "", t)       # remove punctuation
+    t = re.sub(r"\s+", "-", t.strip())       # spaces → hyphens
+    return t
+
+
+def build_lesson_url_map() -> dict:
+    """Load 00-outline.json for each course → {course_slug: {lesson_slug_without_num: url}}."""
+    result = {}
+    for course in COURSE_ORDER:
+        outline_path = COURSES / course / "00-outline.json"
+        if not outline_path.exists():
+            continue
+        with open(outline_path, encoding="utf-8") as f:
+            outline = json.load(f)
+        mapping = {}
+        for lesson in outline.get("lessons", []):
+            url = lesson.get("url", "")
+            if not url:
+                continue
+            norm = _normalize_title(lesson["title"])
+            mapping[norm] = url
+        result[course] = mapping
+    return result
+
+
+LESSON_URL_MAP = build_lesson_url_map()
+
 
 CSS_PAGE = """
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
@@ -131,7 +163,10 @@ def build_page(md_path: Path, course: str) -> Path:
     body = md_to_html_body(md_text)
     title = titleize(md_path.stem)
 
-    course_url = COURSE_META.get(course, {}).get("url", "")
+    # Look up lesson-specific Skilljar URL; fall back to course URL
+    lesson_norm = re.sub(r"^\d+-", "", lesson_slug)  # strip leading number
+    course_mapping = LESSON_URL_MAP.get(course, {})
+    course_url = course_mapping.get(lesson_norm, COURSE_META.get(course, {}).get("url", ""))
     html_content = PAGE_TEMPLATE.format(
         lang_attr=lang_attr,
         title=htmllib.escape(title),
