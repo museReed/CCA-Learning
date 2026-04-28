@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roots Walkthrough Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Roots Walkthrough — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Model Context Protocol (23%), D4 — Security &amp; Guardrails (15%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (MCP primitives — roots), 4.3 (access control)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / Lesson 08</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Roots are client-defined <code>file://</code> URIs that tell an MCP server which directories it is allowed to access. The client provides them via a callback, and the server must implement its own authorization logic to enforce access boundaries.</p>
+<hr />
+<h2>What Are Roots?</h2>
+<p>Roots are the MCP mechanism for <strong>file system access control</strong>. They answer the question: "Which directories should this server be able to see?"</p>
+<p>Key characteristics:<br />
+- Roots are <strong>defined by the client</strong> (typically from user input)<br />
+- They use <code>file://</code> URI format<br />
+- The server <strong>requests</strong> roots from the client at runtime (not hardcoded)<br />
+- The MCP SDK does <strong>NOT</strong> automatically enforce root boundaries -- you must implement that yourself</p>
+<hr />
+<h2>Step 1: Defining Roots from User Input</h2>
+<pre><code class="language-python"># main.py
+import sys
+
+async def main():
+    # Get root directories from command line arguments
+    root_paths = sys.argv[1:]
+    if not root_paths:
+        print(&quot;Usage: uv run main.py &lt;root1&gt; [root2] ...&quot;)
+        sys.exit(1)
+
+    # Pass roots to the MCP client
+    doc_client = await stack.enter_async_context(
+        MCPClient(
+            command=&quot;uv&quot;, args=[&quot;run&quot;, &quot;mcp_server.py&quot;], roots=root_paths
+        )
+    )
+</code></pre>
+<p>Ideally, the user dictates which directories the server can access. The program accepts CLI arguments as paths and passes them to the <code>MCPClient</code>.</p>
+<hr />
+<h2>Step 2: Creating Root Objects</h2>
+<pre><code class="language-python"># mcp_client.py
+from mcp.types import Root, ListRootsResult
+from pydantic import FileUrl
+from pathlib import Path
+
+def _create_roots(self, root_paths: list[str]) -&gt; list[Root]:
+    &quot;&quot;&quot;Convert path strings to Root objects.&quot;&quot;&quot;
+    roots = []
+    for path in root_paths:
+        p = Path(path).resolve()
+        file_url = FileUrl(f&quot;file://{p}&quot;)
+        roots.append(Root(uri=file_url, name=p.name or &quot;Root&quot;))
+    return roots
+</code></pre>
+<p>According to the MCP spec, all roots must have a URI beginning with <code>file://</code>. This function converts user-provided paths into proper <code>Root</code> objects.</p>
+<hr />
+<h2>Step 3: Roots Callback</h2>
+<pre><code class="language-python"># mcp_client.py
+async def _handle_list_roots(
+    self, context: RequestContext[&quot;ClientSession&quot;, None]
+) -&gt; ListRootsResult | ErrorData:
+    &quot;&quot;&quot;Callback for when server requests roots.&quot;&quot;&quot;
+    return ListRootsResult(roots=self._roots)
+</code></pre>
+<p>The client does not immediately send roots to the server. Instead, the server requests them at a future point. The callback returns roots inside a <code>ListRootsResult</code> object.</p>
+<p>This callback is passed to <code>ClientSession</code>:</p>
+<pre><code class="language-python">self._session = await self._exit_stack.enter_async_context(
+    ClientSession(
+        _stdio,
+        _write,
+        list_roots_callback=self._handle_list_roots
+        if self._roots
+        else None,
+    )
+)
+</code></pre>
+<hr />
+<h2>Step 4: Server Accessing Roots</h2>
+<pre><code class="language-python"># mcp_server.py
+@mcp.tool()
+async def list_roots(ctx: Context):
+    &quot;&quot;&quot;List all accessible root directories.&quot;&quot;&quot;
+    roots_result = await ctx.session.list_roots()
+    client_roots = roots_result.roots
+    return [file_url_to_path(root.uri) for root in client_roots]
+</code></pre>
+<p>Roots are accessed by calling <code>ctx.session.list_roots()</code>. This sends a request back to the client, which triggers the root-listing callback.</p>
+<p>The server uses roots in two scenarios:<br />
+1. <strong>Authorizing file access</strong> -- Before a tool reads or writes a file<br />
+2. <strong>Resolving paths for the LLM</strong> -- When Claude needs to find where a file lives (e.g., "read todos.txt")</p>
+<hr />
+<h2>Step 5: Implementing Access Control</h2>
+<p><strong>Critical</strong>: The MCP SDK does NOT enforce root boundaries. You must implement that check yourself.</p>
+<pre><code class="language-python"># mcp_server.py
+async def is_path_allowed(requested_path: Path, ctx: Context) -&gt; bool:
+    roots_result = await ctx.session.list_roots()
+    client_roots = roots_result.roots
+
+    if not requested_path.exists():
+        return False
+
+    if requested_path.is_file():
+        requested_path = requested_path.parent
+
+    for root in client_roots:
+        root_path = file_url_to_path(root.uri)
+        try:
+            requested_path.relative_to(root_path)
+            return True
+        except ValueError:
+            continue
+
+    return False
+</code></pre>
+<p>The authorization function:<br />
+1. Gets the list of roots from the client<br />
+2. Checks if the requested path exists<br />
+3. For files, checks the parent directory<br />
+4. Uses <code>relative_to()</code> to verify the path is within an allowed root<br />
+5. Returns <code>False</code> if no root matches</p>
+<hr />
+<h2>Step 6: Using Authorization in Tools</h2>
+<pre><code class="language-python">@mcp.tool()
+async def convert_video(input_path: str, format: str, *, ctx: Context):
+    &quot;&quot;&quot;Convert an MP4 video file to another format.&quot;&quot;&quot;
+    input_file = VideoConverter.validate_input(input_path)
+
+    # Ensure the input file is contained in a root
+    if not await is_path_allowed(input_file, ctx):
+        raise ValueError(f&quot;Access to path is not allowed: {input_path}&quot;)
+
+    return await VideoConverter.convert(input_path, format)
+</code></pre>
+<p>Every tool that accesses the file system should call <code>is_path_allowed()</code> before proceeding.</p>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li>Roots are a <strong>D2 primitive</strong> (Task 2.2) and a <strong>D4 security concern</strong> (Task 4.3)</li>
+<li>The most critical exam point: <strong>MCP SDK does NOT enforce root boundaries</strong> -- you must implement authorization yourself</li>
+<li>The callback pattern (client provides roots on-demand via <code>list_roots_callback</code>) is frequently tested</li>
+<li>Root URIs must use the <code>file://</code> scheme</li>
+<li>Expect scenario questions where access control is missing and you must identify the vulnerability</li>
+<li>The <code>relative_to()</code> pattern for path validation is a common implementation detail tested in D4</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Who defines the roots in MCP?</td>
+<td>The <strong>client</strong> defines roots, typically based on user input</td>
+</tr>
+<tr>
+<td>2</td>
+<td>What URI scheme must roots use?</td>
+<td><code>file://</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Does the MCP SDK automatically enforce root boundaries?</td>
+<td><strong>No</strong> -- you must implement authorization logic yourself</td>
+</tr>
+<tr>
+<td>4</td>
+<td>How does the server request roots from the client?</td>
+<td>By calling <code>ctx.session.list_roots()</code>, which triggers the client's <code>list_roots_callback</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>What does the roots callback return?</td>
+<td>A <code>ListRootsResult</code> object containing the list of <code>Root</code> objects</td>
+</tr>
+<tr>
+<td>6</td>
+<td>What Python method is used to check if a path is within a root?</td>
+<td><code>Path.relative_to()</code> -- raises <code>ValueError</code> if the path is outside the root</td>
+</tr>
+<tr>
+<td>7</td>
+<td>In what two scenarios does the server use roots?</td>
+<td>1) Authorizing file/folder access, 2) Resolving paths for the LLM</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Where is the <code>list_roots_callback</code> registered?</td>
+<td>In the <code>ClientSession</code> constructor</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sampling Walkthrough Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Sampling 實作演練 — PM 快速掃描</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>詳情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — 模型上下文協議 (23%)</td>
+</tr>
+<tr>
+<td>任務說明</td>
+<td>2.2 (MCP 基本要素), 2.3 (取樣)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>model-context-protocol-advanced-topics / 01-sampling-and-notifications / 第 04 課</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>Sampling 是讓 MCP 伺服器代替自己向客戶端請求 AI 文字生成的機制——把它想成「向總部回報」，外勤人員（伺服器）在任務中向指揮中心（客戶端）請求情報。</p>
+<hr />
+<h2>PM 為何需要了解 Sampling</h2>
+<p>Sampling 改變了 MCP 的一般流程。通常是客戶端要求伺服器做事（執行工具、讀取資源）。有了 Sampling，方向反轉：伺服器要求客戶端生成文字。這對產品設計很重要，因為：</p>
+<ol>
+<li><strong>伺服器端智慧</strong> — 你的伺服器工具可以在執行過程中融入 AI 推理</li>
+<li><strong>客戶端控制 LLM</strong> — 客戶端決定使用哪個模型以及如何呼叫</li>
+<li><strong>人機協作潛力</strong> — 客戶端可以在生成文字之前插入人工審核步驟</li>
+</ol>
+<hr />
+<h2>心智模型：餐廳廚房</h2>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>MCP 對應</th>
+<th>發生的事</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>廚房（伺服器）</td>
+<td>MCP 伺服器工具</td>
+<td>發現需要一個餐酒搭配建議</td>
+</tr>
+<tr>
+<td>服務員跑回去找侍酒師</td>
+<td>Sampling 請求</td>
+<td>伺服器發送訊息請求文字生成</td>
+</tr>
+<tr>
+<td>侍酒師（客戶端 + LLM）</td>
+<td>客戶端的 sampling 回呼</td>
+<td>運用專業知識生成紅酒建議</td>
+</tr>
+<tr>
+<td>服務員帶著答案回來</td>
+<td><code>CreateMessageResult</code></td>
+<td>伺服器收到生成的文字並繼續工作</td>
+</tr>
+</tbody>
+</table>
+<p>關鍵洞察：廚房（伺服器）永遠不會直接和侍酒師（LLM）對話。它一定是透過服務員（客戶端回呼）。</p>
+<hr />
+<h2>六步流程</h2>
+<ol>
+<li><strong>伺服器需要 AI 文字</strong> — 在工具呼叫期間，伺服器決定它需要 LLM 生成的內容</li>
+<li><strong>伺服器發送請求</strong> — 提供描述需求的訊息</li>
+<li><strong>客戶端接收請求</strong> — 其預先註冊的回呼函數啟動</li>
+<li><strong>客戶端生成文字</strong> — 使用它偏好的任何 AI 模型和 SDK</li>
+<li><strong>客戶端回傳結果</strong> — 格式化為標準 MCP 結果</li>
+<li><strong>伺服器繼續工作</strong> — 使用生成的文字完成其任務</li>
+</ol>
+<hr />
+<h2>產品設計影響</h2>
+<table>
+<thead>
+<tr>
+<th>考量面向</th>
+<th>影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>模型選擇權在客戶端</strong></td>
+<td>你的伺服器不需要知道使用哪個 LLM——它只需要請求文字</td>
+</tr>
+<tr>
+<td><strong>成本控制</strong></td>
+<td>客戶端可以強制限制 token 數量、選擇較便宜的模型或快取回應</td>
+</tr>
+<tr>
+<td><strong>安全性</strong></td>
+<td>API 金鑰保留在客戶端；伺服器永遠看不到</td>
+</tr>
+<tr>
+<td><strong>多步驟工作流程</strong></td>
+<td>單次工具呼叫可以發起多次 sampling 請求，實現複雜推理鏈</td>
+</tr>
+<tr>
+<td><strong>需要格式轉換</strong></td>
+<td>MCP 訊息格式與 LLM SDK 格式不同——工程團隊必須處理這個轉換</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>何時在產品中使用 Sampling</h2>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>為何用 Sampling</th>
+<th>替代方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>伺服器工具需要摘要檢索的資料</td>
+<td>伺服器可以在工具執行中請求摘要</td>
+<td>回傳原始資料讓客戶端摘要（較不優雅）</td>
+</tr>
+<tr>
+<td>多代理編排</td>
+<td>子代理（伺服器）可以向主代理（客戶端）請求推理</td>
+<td>將所有邏輯建構在一個龐大的客戶端中</td>
+</tr>
+<tr>
+<td>內容生成管線</td>
+<td>伺服器處理工作流程步驟，透過客戶端委派寫作給 LLM</td>
+<td>硬編碼範本替代 AI 生成</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>常見誤解</h2>
+<table>
+<thead>
+<tr>
+<th>誤解</th>
+<th>事實</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「伺服器直接呼叫 LLM」</td>
+<td>不是——伺服器向客戶端請求，由客戶端呼叫 LLM</td>
+</tr>
+<tr>
+<td>「Sampling 使用與 Anthropic API 相同的訊息格式」</td>
+<td>不是——MCP 有自己的訊息型別，需要轉換</td>
+</tr>
+<tr>
+<td>「伺服器選擇模型」</td>
+<td>不是——客戶端的回呼函數決定模型</td>
+</tr>
+<tr>
+<td>「Sampling 是自動的」</td>
+<td>不是——客戶端必須明確註冊回呼函數</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li>D2 經常測試 <strong>sampling 流程方向</strong>（伺服器發起，客戶端執行）</li>
+<li>預期會有情境題，伺服器工具需要智慧——正確答案涉及 sampling</li>
+<li>考試測試對客戶端控制模型選擇和 API 金鑰的理解</li>
+<li>考題可能呈現 sampling 缺失的情境，要求你找出根本原因（缺少回呼註冊）</li>
+</ul>
+<hr />
+<h2>記憶卡</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>問題</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>在 MCP sampling 中，哪個元件發起文字生成請求？</td>
+<td>伺服器在工具執行期間發起</td>
+</tr>
+<tr>
+<td>2</td>
+<td>在 sampling 中，哪個元件實際呼叫 LLM？</td>
+<td>客戶端，透過其 sampling 回呼函數</td>
+</tr>
+<tr>
+<td>3</td>
+<td>伺服器知道客戶端使用哪個 LLM 模型嗎？</td>
+<td>不知道——模型選擇完全是客戶端的責任</td>
+</tr>
+<tr>
+<td>4</td>
+<td>為什麼 sampling 期間需要格式轉換？</td>
+<td>MCP 使用自己的訊息型別，與 LLM SDK 格式（如 Anthropic）不同</td>
+</tr>
+<tr>
+<td>5</td>
+<td>LLM 的 API 金鑰在 sampling 流程中位於哪裡？</td>
+<td>僅在客戶端——伺服器永遠看不到</td>
+</tr>
+<tr>
+<td>6</td>
+<td>如果客戶端未註冊 sampling 回呼會怎樣？</td>
+<td>伺服器的 sampling 請求將會失敗</td>
+</tr>
+<tr>
+<td>7</td>
+<td>伺服器能否在一次工具執行中發起多次 sampling 呼叫？</td>
+<td>可以——它可以為複雜的工作流程串連多次請求</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Sampling 如何影響成本控制？</td>
+<td>客戶端控制 token 限制、模型選擇和快取，擁有完整的成本控制權</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

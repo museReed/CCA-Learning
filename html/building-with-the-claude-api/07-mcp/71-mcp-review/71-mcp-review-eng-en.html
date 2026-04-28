@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mcp Review Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>MCP Review — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Tool Design &amp; MCP Integration (18%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.1 (MCP architecture), 2.2 (primitives), 2.3 (tool vs resource vs prompt)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 07-mcp / Lesson 71</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>MCP's three server primitives — tools, resources, and prompts — are each controlled by a different part of your application: <strong>tools</strong> are model-controlled, <strong>resources</strong> are app-controlled, and <strong>prompts</strong> are user-controlled, and this mapping tells you which primitive to reach for when adding new capabilities.</p>
+<hr />
+<h2>The Three Primitives and Their Controllers</h2>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>Controlled By</th>
+<th>Purpose</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>Model (Claude)</td>
+<td>Extend Claude's capabilities</td>
+<td>Claude decides to run JavaScript to calculate √3</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>Application code</td>
+<td>Provide data to the app/UI</td>
+<td>Fetching Google Drive docs for autocomplete or context augmentation</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>User</td>
+<td>Predefined workflows</td>
+<td>User clicks a button or types a slash command to start a workflow</td>
+</tr>
+</tbody>
+</table>
+<h3>Tools — Model Controlled</h3>
+<p>Claude alone decides when to invoke a tool. Your code defines the tool and its schema, but the model makes the runtime decision. If you need to <strong>add capabilities to Claude</strong> (execute code, query a database, call an API), implement a tool on your MCP server or consume tools from an existing server through your MCP client.</p>
+<h3>Resources — App Controlled</h3>
+<p>Application code decides when to fetch a resource. Resources provide data — they don't perform actions. Two common patterns from the course project:</p>
+<ol>
+<li><strong>UI enrichment</strong> — fetch a resource to populate autocomplete suggestions</li>
+<li><strong>Prompt augmentation</strong> — fetch a resource to inject context into a prompt before sending to Claude</li>
+</ol>
+<p>If you need to <strong>get data into your app</strong> for display or context, use a resource.</p>
+<h3>Prompts — User Controlled</h3>
+<p>A user initiates a prompt by clicking a UI element or typing a slash command. Prompts are predefined, optimized workflows — think of the button row at the bottom of Claude.ai's chat input. Each button triggers a pre-authored prompt template.</p>
+<p>If you need to <strong>implement a predefined workflow</strong> that the user starts, use a prompt.</p>
+<hr />
+<h2>Decision Framework</h2>
+<pre><code>Need to add capabilities to Claude?     → Tool
+Need to get data into your app/UI?      → Resource
+Need a predefined user-triggered flow?  → Prompt
+</code></pre>
+<p>These are high-level guidelines, not rigid rules. The key insight is that each primitive serves a different <strong>audience</strong>: the model, the application, or the user.</p>
+<hr />
+<h2>Real-World Mapping: Claude.ai</h2>
+<p>The course maps all three primitives to features visible in Claude.ai:</p>
+<ul>
+<li><strong>Prompts</strong> → The pre-built conversation starters (buttons below chat input)</li>
+<li><strong>Resources</strong> → "Add from Google Drive" button (app fetches document list, injects content)</li>
+<li><strong>Tools</strong> → Claude deciding to execute JavaScript when asked to calculate something</li>
+</ul>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D2 (MCP Integration)</strong>: Expect questions like "Which MCP primitive should you use when…?" — the answer maps directly to who controls the action (model/app/user).</li>
+<li>Watch for: "Tools are model-controlled" is the most-tested fact. Resources and prompts are commonly confused — remember resources are for data retrieval by app code, prompts are for user-initiated workflows.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three MCP server primitives?</td>
+<td>Tools, Resources, and Prompts.</td>
+</tr>
+<tr>
+<td>Who controls MCP tools at runtime?</td>
+<td>The model (Claude) — it decides when to invoke a tool.</td>
+</tr>
+<tr>
+<td>Who controls MCP resources at runtime?</td>
+<td>Application code — your app decides when to fetch data.</td>
+</tr>
+<tr>
+<td>Who controls MCP prompts at runtime?</td>
+<td>The user — they trigger prompts via UI elements or slash commands.</td>
+</tr>
+<tr>
+<td>When should you use a tool vs a resource?</td>
+<td>Tool: add capabilities to Claude. Resource: get data into your app/UI.</td>
+</tr>
+<tr>
+<td>What is an example of a resource in Claude.ai?</td>
+<td>The "Add from Google Drive" button — app fetches and displays document list.</td>
+</tr>
+<tr>
+<td>What is an example of a prompt in Claude.ai?</td>
+<td>The pre-built conversation starter buttons below the chat input.</td>
+</tr>
+<tr>
+<td>Are these primitive-controller mappings strict rules?</td>
+<td>No — they are high-level guidelines that indicate the primary intended audience of each primitive.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

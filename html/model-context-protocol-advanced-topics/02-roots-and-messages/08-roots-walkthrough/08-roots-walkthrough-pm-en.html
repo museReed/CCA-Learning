@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roots Walkthrough Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Roots Walkthrough — PM Quick-Scan</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Model Context Protocol (23%), D4 — Security &amp; Guardrails (15%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (MCP primitives — roots), 4.3 (access control)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / Lesson 08</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Roots are MCP's file system access control mechanism -- the user tells the client which directories a server can access, and the server must actively check those boundaries before touching any file. Think of it as a "visitor badge" system that limits which rooms a guest can enter.</p>
+<hr />
+<h2>Why PMs Need to Know Roots</h2>
+<p>Roots directly impact <strong>security requirements</strong> and <strong>user trust</strong>:</p>
+<ol>
+<li><strong>Access control is NOT automatic</strong> -- The MCP SDK does not enforce boundaries. If your engineering team forgets to implement checks, the server can access any file.</li>
+<li><strong>User-defined permissions</strong> -- Users decide what directories to share. Your UX needs to communicate what they are granting access to.</li>
+<li><strong>Compliance implications</strong> -- If your product handles sensitive data, root validation is a security requirement, not a nice-to-have.</li>
+</ol>
+<hr />
+<h2>Mental Model: Building Access Cards</h2>
+<table>
+<thead>
+<tr>
+<th>Building Security</th>
+<th>MCP Roots</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Visitor requests a badge</td>
+<td>User specifies allowed directories via CLI</td>
+</tr>
+<tr>
+<td>Reception creates the badge</td>
+<td>Client creates <code>Root</code> objects with <code>file://</code> URIs</td>
+</tr>
+<tr>
+<td>Guard checks badge at each door</td>
+<td>Server calls <code>is_path_allowed()</code> before file access</td>
+</tr>
+<tr>
+<td>Badge only works for specific floors</td>
+<td>Root boundaries limit which directories are accessible</td>
+</tr>
+<tr>
+<td><strong>No guard = anyone walks in</strong></td>
+<td><strong>No authorization check = server accesses anything</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The last row is the most important lesson: the badge (root) by itself does nothing. Without a guard (authorization check), it is just a piece of plastic.</p>
+<hr />
+<h2>The Seven-Step Architecture</h2>
+<ol>
+<li><strong>User specifies directories</strong> -- Via CLI arguments, config file, or UI</li>
+<li><strong>Client creates Root objects</strong> -- Converts paths to <code>file://</code> URIs</li>
+<li><strong>Client registers a callback</strong> -- Will return roots when asked</li>
+<li><strong>Server requests roots</strong> -- Calls back to the client when it needs to know allowed paths</li>
+<li><strong>Server implements authorization</strong> -- Checks every file access against roots</li>
+<li><strong>Server provides roots to LLM</strong> -- Via a tool or prompt so the AI knows what is available</li>
+<li><strong>Server enforces boundaries</strong> -- Blocks access to paths outside roots</li>
+</ol>
+<hr />
+<h2>Product Design Implications</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>User awareness</strong></td>
+<td>Users must understand what directories they are granting access to. Clear UX is critical.</td>
+</tr>
+<tr>
+<td><strong>Default behavior</strong></td>
+<td>Without roots, the server has no declared boundaries. Decide: deny-all-by-default, or require explicit configuration?</td>
+</tr>
+<tr>
+<td><strong>Granularity</strong></td>
+<td>Roots are directory-level. You cannot grant access to individual files via roots.</td>
+</tr>
+<tr>
+<td><strong>Dynamic updates</strong></td>
+<td>Roots can change during a session. Consider: should your product support adding/removing directories mid-session?</td>
+</tr>
+<tr>
+<td><strong>Security is developer-enforced</strong></td>
+<td>The MCP SDK provides no built-in enforcement. This MUST be in your engineering requirements.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Security Risk Matrix for PMs</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Likelihood without Roots</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Server reads sensitive files (<code>.env</code>, credentials)</td>
+<td>High</td>
+<td>Critical</td>
+<td>Mandatory root checks before all file reads</td>
+</tr>
+<tr>
+<td>Server writes to system directories</td>
+<td>Medium</td>
+<td>Critical</td>
+<td>Root validation on all write operations</td>
+</tr>
+<tr>
+<td>User unknowingly grants broad access</td>
+<td>Medium</td>
+<td>High</td>
+<td>Clear UX showing exactly which paths are shared</td>
+</tr>
+<tr>
+<td>Developer forgets authorization check in new tool</td>
+<td>High</td>
+<td>Critical</td>
+<td>Code review checklist, automated testing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Acceptance Criteria Template</h2>
+<p>For any feature involving MCP file access, your PRD should include:</p>
+<ul>
+<li>[ ] Server must validate all file paths against client-provided roots before access</li>
+<li>[ ] Access denied errors must return clear messages explaining the restriction</li>
+<li>[ ] UI must display which directories the user has granted access to</li>
+<li>[ ] New tools must include root validation (add to code review checklist)</li>
+<li>[ ] Test cases must verify that paths outside roots are rejected</li>
+</ul>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li>Roots span <strong>D2</strong> (MCP primitives) and <strong>D4</strong> (security/access control) -- expect cross-domain questions</li>
+<li>The most tested point: <strong>MCP SDK does NOT auto-enforce roots</strong>. If a question describes a security vulnerability in an MCP app, check whether authorization is missing.</li>
+<li>The callback pattern (on-demand root listing) is a D2 concept</li>
+<li>Path validation as a security requirement is a D4 concept</li>
+<li>Exam philosophy: <strong>Validation &gt; Trust</strong> -- never assume the server will respect boundaries without explicit checks</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Who defines the roots in MCP?</td>
+<td>The user/client -- not the server</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Does the MCP SDK automatically prevent a server from accessing files outside roots?</td>
+<td>No -- developers must implement authorization checks themselves</td>
+</tr>
+<tr>
+<td>3</td>
+<td>What URI scheme do roots use?</td>
+<td><code>file://</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>At what granularity do roots operate?</td>
+<td>Directory level -- not individual files</td>
+</tr>
+<tr>
+<td>5</td>
+<td>How does the server get the list of roots?</td>
+<td>By making a request back to the client via a callback</td>
+</tr>
+<tr>
+<td>6</td>
+<td>What exam philosophy applies to root enforcement?</td>
+<td>Validation &gt; Trust -- always verify, never assume</td>
+</tr>
+<tr>
+<td>7</td>
+<td>What should a PM include in PRD acceptance criteria for file access features?</td>
+<td>Mandatory root validation before all file operations</td>
+</tr>
+<tr>
+<td>8</td>
+<td>What is the biggest security risk if root validation is missing?</td>
+<td>The server can read or write any file on the system, including credentials and sensitive data</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

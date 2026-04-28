@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications Walkthrough Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Notifications 實作演練 — PM 快速掃描</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>詳情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — 模型上下文協議 (23%)</td>
+</tr>
+<tr>
+<td>任務說明</td>
+<td>2.2 (MCP 基本要素 — 通知)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>model-context-protocol-advanced-topics / 01-sampling-and-notifications / 第 06 課</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>MCP 通知讓伺服器工具在長時間操作期間向客戶端傳達即時狀態（日誌）和進度更新——就像外送員在完成你的訂單時發送即時 GPS 更新和狀態訊息。</p>
+<hr />
+<h2>PM 為何需要了解通知</h2>
+<p>通知解決了一個根本的使用者體驗問題：<strong>長時間 AI 操作期間會發生什麼？</strong> 沒有通知，使用者只能盯著轉圈圈。有了通知，你可以建構：</p>
+<ul>
+<li>顯示任務完成百分比的進度條</li>
+<li>解釋 AI 目前正在做什麼的狀態訊息</li>
+<li>操作遇到問題時的警告指示器</li>
+<li>用於故障排除的除錯日誌</li>
+</ul>
+<hr />
+<h2>心智模型：快遞追蹤</h2>
+<table>
+<thead>
+<tr>
+<th>配送階段</th>
+<th>MCP 通知</th>
+<th>使用者看到什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「訂單已收到，準備中...」</td>
+<td><code>ctx.info("Preparing to process...")</code></td>
+<td>UI 中的狀態訊息</td>
+</tr>
+<tr>
+<td>「包裹已完成 40%」</td>
+<td><code>ctx.report_progress(40, 100)</code></td>
+<td>進度條在 40%</td>
+</tr>
+<tr>
+<td>「路線上有交通延誤」</td>
+<td><code>ctx.warning("Processing slower than expected")</code></td>
+<td>警告橫幅</td>
+</tr>
+<tr>
+<td>「已送達！」</td>
+<td>工具回傳結果</td>
+<td>完成狀態</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>兩種通知類型</h2>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>傳達的內容</th>
+<th>PM 使用情境</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>日誌記錄</strong></td>
+<td>不同嚴重等級的文字狀態訊息（info、warning、debug、error）</td>
+<td>建構活動動態、狀態指示器、錯誤警報</td>
+</tr>
+<tr>
+<td><strong>進度報告</strong></td>
+<td>數值完成度（例如 20/100、80/100）</td>
+<td>建構進度條、預估剩餘時間</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>架構：各元件如何連接</h2>
+<p>這對撰寫需求的 PM 很重要，因為它影響工程師如何組織程式碼：</p>
+<table>
+<thead>
+<tr>
+<th>元件</th>
+<th>職責</th>
+<th>PM 影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>伺服器工具</td>
+<td>在執行期間發送日誌和進度</td>
+<td>伺服器團隊決定要報告什麼</td>
+</tr>
+<tr>
+<td>日誌回呼（在會話上）</td>
+<td>處理整個連線的所有日誌訊息</td>
+<td>會話層級功能——始終啟用</td>
+</tr>
+<tr>
+<td>進度回呼（在工具呼叫上）</td>
+<td>處理特定工具呼叫的進度</td>
+<td>每次操作的功能——每次都必須明確附加</td>
+</tr>
+</tbody>
+</table>
+<p>關鍵要點：如果你的需求寫「顯示檔案轉換的進度」，進度回呼必須在呼叫該特定工具時明確傳入。它不是自動的。</p>
+<hr />
+<h2>產品場景</h2>
+<h3>場景 1：影片處理儀表板</h3>
+<p><strong>需求</strong>：在影片轉換時向使用者顯示進度條。</p>
+<p><strong>實作方式</strong>：伺服器上的影片轉換工具在里程碑處呼叫 <code>ctx.report_progress()</code>（編碼開始、完成 50%、最終處理）。客戶端透過進度回呼接收這些更新並更新 UI。</p>
+<h3>場景 2：多步驟研究代理</h3>
+<p><strong>需求</strong>：向使用者顯示代理在研究任務每個階段正在做什麼。</p>
+<p><strong>實作方式</strong>：伺服器工具呼叫 <code>ctx.info("Searching academic databases...")</code>、<code>ctx.info("Found 12 relevant papers...")</code>、<code>ctx.info("Generating summary...")</code>。每條訊息都出現在客戶端的活動動態中。</p>
+<h3>場景 3：錯誤監控</h3>
+<p><strong>需求</strong>：當工具執行遇到問題時警告營運團隊。</p>
+<p><strong>實作方式</strong>：伺服器工具在效能降低時呼叫 <code>ctx.warning()</code> 或 <code>ctx.error()</code>。日誌回呼將警告導向監控儀表板。</p>
+<hr />
+<h2>通知 vs 其他方法</h2>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>何時使用</th>
+<th>何時不使用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 通知</td>
+<td>長時間工具執行期間的即時狀態</td>
+<td>瞬間完成的快速操作</td>
+</tr>
+<tr>
+<td>工具回傳值</td>
+<td>僅最終結果</td>
+<td>使用者需要中間回饋時</td>
+</tr>
+<tr>
+<td>客戶端輪詢</td>
+<td>伺服器無法推送更新時</td>
+<td>伺服器支援通知時（MCP 支援）</td>
+</tr>
+<tr>
+<td>WebSocket 串流</td>
+<td>MCP 之外的即時雙向通訊</td>
+<td>已使用 MCP 時（改用通知）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li>D2 測試對<strong>回呼連接位置</strong>的理解（日誌在會話上，進度在工具呼叫上）</li>
+<li>通知基本要素是<strong>發射即忘</strong>——伺服器不等待客戶端確認</li>
+<li>考題可能提出一個使用者體驗場景，詢問哪種通知類型適合（日誌用於訊息，進度用於數值追蹤）</li>
+<li><code>Context</code> 物件會自動注入到工具函數中——不是手動建構的</li>
+</ul>
+<hr />
+<h2>記憶卡</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>問題</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>MCP 支援哪兩種類型的通知？</td>
+<td>日誌記錄（文字訊息）和進度報告（數值完成度更新）</td>
+</tr>
+<tr>
+<td>2</td>
+<td>客戶端程式碼中日誌回呼連接在哪裡？</td>
+<td><code>ClientSession</code> 建構函數上</td>
+</tr>
+<tr>
+<td>3</td>
+<td>進度回呼連接在哪裡？</td>
+<td>特定的 <code>call_tool()</code> 呼叫上</td>
+</tr>
+<tr>
+<td>4</td>
+<td>為什麼它們連接在不同的層級？</td>
+<td>日誌記錄適用於整個會話；進度針對每次工具呼叫</td>
+</tr>
+<tr>
+<td>5</td>
+<td>MCP 通知是阻塞式還是發射即忘？</td>
+<td>發射即忘——伺服器不等待客戶端</td>
+</tr>
+<tr>
+<td>6</td>
+<td>有哪些可用的日誌嚴重等級？</td>
+<td>info、warning、debug、error</td>
+</tr>
+<tr>
+<td>7</td>
+<td>伺服器如何存取通知方法？</td>
+<td>透過 <code>Context</code> 物件，自動作為工具函數的最後一個參數提供</td>
+</tr>
+<tr>
+<td>8</td>
+<td>通知解決了什麼產品問題？</td>
+<td>長時間操作期間的使用者體驗——用即時狀態取代空白轉圈圈</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

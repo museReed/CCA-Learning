@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sampling Walkthrough Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Sampling Walkthrough — PM Quick-Scan</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Model Context Protocol (23%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (MCP primitives), 2.3 (sampling)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 01-sampling-and-notifications / Lesson 04</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Sampling is the mechanism that lets an MCP server ask the client to generate AI text on its behalf -- think of it as a "callback to headquarters" where the field agent (server) requests intelligence from command (client) during a mission.</p>
+<hr />
+<h2>Why PMs Need to Know Sampling</h2>
+<p>Sampling changes the usual flow of MCP. Normally, clients ask servers to do things (run tools, read resources). With sampling, the direction reverses: the server asks the client to generate text. This matters for product design because:</p>
+<ol>
+<li><strong>Server-side intelligence</strong> -- Your server tools can incorporate AI reasoning mid-execution</li>
+<li><strong>Client controls the LLM</strong> -- The client decides which model to use and how to call it</li>
+<li><strong>Human-in-the-loop potential</strong> -- The client could insert approval steps before generating text</li>
+</ol>
+<hr />
+<h2>Mental Model: Restaurant Kitchen</h2>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>MCP Equivalent</th>
+<th>What Happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kitchen (server)</td>
+<td>MCP Server tool</td>
+<td>Realizes it needs a recommendation for a dish pairing</td>
+</tr>
+<tr>
+<td>Waiter running back to sommelier</td>
+<td>Sampling request</td>
+<td>Server sends a message asking for text generation</td>
+</tr>
+<tr>
+<td>Sommelier (client + LLM)</td>
+<td>Client's sampling callback</td>
+<td>Generates the wine recommendation using expertise</td>
+</tr>
+<tr>
+<td>Waiter returns with answer</td>
+<td><code>CreateMessageResult</code></td>
+<td>Server receives the generated text and continues</td>
+</tr>
+</tbody>
+</table>
+<p>The key insight: the kitchen (server) never talks to the sommelier (LLM) directly. It always goes through the waiter (client callback).</p>
+<hr />
+<h2>The Six-Step Flow</h2>
+<ol>
+<li><strong>Server needs AI text</strong> -- During a tool call, the server decides it needs LLM-generated content</li>
+<li><strong>Server sends a request</strong> -- Provides messages describing what it needs</li>
+<li><strong>Client receives the request</strong> -- Its pre-registered callback activates</li>
+<li><strong>Client generates text</strong> -- Uses whatever AI model and SDK it prefers</li>
+<li><strong>Client sends back the result</strong> -- Formatted as a standard MCP result</li>
+<li><strong>Server continues</strong> -- Uses the generated text to complete its task</li>
+</ol>
+<hr />
+<h2>Product Design Implications</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Model choice stays with the client</strong></td>
+<td>Your server does not need to know which LLM is being used -- it just asks for text</td>
+</tr>
+<tr>
+<td><strong>Cost control</strong></td>
+<td>The client can enforce token limits, choose cheaper models, or cache responses</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>API keys stay on the client side; the server never sees them</td>
+</tr>
+<tr>
+<td><strong>Multi-step workflows</strong></td>
+<td>A single tool call can make multiple sampling requests, enabling complex reasoning chains</td>
+</tr>
+<tr>
+<td><strong>Format conversion required</strong></td>
+<td>MCP message formats differ from LLM SDK formats -- engineering must handle this translation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>When to Use Sampling in Your Product</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Why Sampling</th>
+<th>Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Server tool needs to summarize retrieved data</td>
+<td>Server can request summarization mid-tool-execution</td>
+<td>Return raw data and let client summarize (less elegant)</td>
+</tr>
+<tr>
+<td>Multi-agent orchestration</td>
+<td>Sub-agent (server) can ask for reasoning from the main agent (client)</td>
+<td>Build all logic into one monolithic client</td>
+</tr>
+<tr>
+<td>Content generation pipeline</td>
+<td>Server handles workflow steps, delegates writing to LLM via client</td>
+<td>Hard-code templates instead of AI generation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common Misconceptions</h2>
+<table>
+<thead>
+<tr>
+<th>Misconception</th>
+<th>Reality</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"The server calls the LLM directly"</td>
+<td>No -- the server asks the client, which calls the LLM</td>
+</tr>
+<tr>
+<td>"Sampling uses the same message format as Anthropic's API"</td>
+<td>No -- MCP has its own message types that need conversion</td>
+</tr>
+<tr>
+<td>"The server chooses the model"</td>
+<td>No -- the client's callback determines the model</td>
+</tr>
+<tr>
+<td>"Sampling is automatic"</td>
+<td>No -- the client must explicitly register a callback</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li>D2 frequently tests the <strong>direction of the sampling flow</strong> (server initiates, client executes)</li>
+<li>Expect scenario questions where a server tool needs intelligence -- the correct answer involves sampling</li>
+<li>The exam tests understanding that the client controls model selection and API keys</li>
+<li>Questions may present a scenario where sampling is missing and ask you to identify the root cause (missing callback registration)</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>In MCP sampling, which component initiates the text generation request?</td>
+<td>The server initiates it during a tool execution</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Which component actually calls the LLM in sampling?</td>
+<td>The client, via its sampling callback</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Does the server know which LLM model the client uses?</td>
+<td>No -- model selection is entirely the client's responsibility</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Why is format conversion needed during sampling?</td>
+<td>MCP uses its own message types that differ from LLM SDK formats (e.g., Anthropic)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Where do API keys for the LLM reside in the sampling flow?</td>
+<td>On the client side only -- the server never sees them</td>
+</tr>
+<tr>
+<td>6</td>
+<td>What happens if the client does not register a sampling callback?</td>
+<td>Sampling requests from the server will fail</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Can a server make multiple sampling calls in one tool execution?</td>
+<td>Yes -- it can chain multiple requests for complex workflows</td>
+</tr>
+<tr>
+<td>8</td>
+<td>How does sampling affect cost control?</td>
+<td>The client controls token limits, model choice, and caching, giving full cost control</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

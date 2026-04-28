@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Wrap Up Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Course Wrap Up — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 (22%) + D2 (18%) + D4 (20%) + D5 (20%) — Cross-cutting review</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>All — comprehensive course recap</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 09-assessment / Lesson 86</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>This wrap-up recaps every major topic covered in the course — from model selection and API parameters through prompt evaluation, tool use, MCP, and agent architectures — and highlights the follow-up topics you should research independently: agent orchestration, agent evaluation, agentic RAG, and tool evaluation.</p>
+<hr />
+<h2>Course Recap</h2>
+<h3>Models and API Access (D5)</h3>
+<p>Anthropic offers multiple models with different trade-offs:<br />
+- <strong>Haiku</strong> — fast, cost-efficient, best for smaller requests<br />
+- <strong>Sonnet</strong> — higher intelligence, best for complex tasks</p>
+<p>The API accepts parameters that shape Claude's behavior: <strong>temperature</strong> (creativity control), <strong>stop sequences</strong> (output termination), and <strong>message prefilling</strong> (guiding response format).</p>
+<h3>Prompt Evaluation (D5)</h3>
+<p>The instructor emphasizes this as <strong>the single most important practice</strong> for production applications. Running a prompt 10 times locally may look fine, but production users will surface edge cases. Key principles:</p>
+<ul>
+<li>Evaluations don't require fancy frameworks — Claude can generate eval frameworks</li>
+<li>Systematic evaluation catches failures that manual testing misses</li>
+<li>The course's own eval framework was largely Claude-authored</li>
+</ul>
+<h3>Prompt Engineering (D4, D5)</h3>
+<p>Core technique: <strong>be clear and direct</strong>. Tell Claude exactly what you expect. Additional techniques covered in the course build on this foundation but clarity is always the primary lever.</p>
+<h3>Tool Use (D2)</h3>
+<p>Tool use dramatically expands Claude's capabilities. It was one of the most complex sections because it involves:<br />
+- Tool schema definition<br />
+- Handling message blocks (tool_use, tool_result)<br />
+- Multi-turn tool conversations<br />
+- Multiple simultaneous tools</p>
+<h3>Claude Code and Computer Use (D3)</h3>
+<p>Two Anthropic applications with hands-on coverage. The instructor specifically notes he uses Claude Code at the terminal as his primary coding workflow — not an in-editor assistant.</p>
+<h3>Workflows vs Agents (D1)</h3>
+<p>Critical distinction: <strong>workflows often deliver better results and higher accuracy than agents</strong>. Agents are exciting but workflows should be your default choice for structured, predictable tasks.</p>
+<hr />
+<h2>Recommended Follow-Up Topics</h2>
+<p>The instructor identifies these as important topics not fully covered:</p>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Why It Matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Agent Orchestration</strong></td>
+<td>Getting multiple agents to work together</td>
+</tr>
+<tr>
+<td><strong>Agent Evaluation &amp; Monitoring</strong></td>
+<td>Measuring agent performance in production</td>
+</tr>
+<tr>
+<td><strong>Agentic RAG</strong></td>
+<td>RAG variation where agents actively search and reason</td>
+</tr>
+<tr>
+<td><strong>RAG Evaluation</strong></td>
+<td>Measuring retrieval quality systematically</td>
+</tr>
+<tr>
+<td><strong>Tool Evaluation</strong></td>
+<td>Ensuring tool descriptions help Claude correctly (analogous to prompt evals)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<p>This lesson is a meta-review — it maps the entire course to exam domains. Use it as a checklist:<br />
+- D1: Agents vs workflows distinction, agentic loop<br />
+- D2: Tool use, MCP primitives<br />
+- D4: Prompt engineering, safety<br />
+- D5: Model selection, prompt evaluation, production patterns</p>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which model is best for fast, cost-efficient requests?</td>
+<td>Haiku.</td>
+</tr>
+<tr>
+<td>What does the instructor call the most important practice for production AI apps?</td>
+<td>Prompt evaluation.</td>
+</tr>
+<tr>
+<td>What is the primary prompt engineering technique?</td>
+<td>Being clear and direct — tell Claude exactly what you expect.</td>
+</tr>
+<tr>
+<td>Should you default to agents or workflows for structured tasks?</td>
+<td>Workflows — they often deliver better results and higher accuracy than agents.</td>
+</tr>
+<tr>
+<td>What is tool evaluation?</td>
+<td>Ensuring tool descriptions help Claude use tools correctly — analogous to prompt evals.</td>
+</tr>
+<tr>
+<td>What is agentic RAG?</td>
+<td>A RAG variation where agents actively search and reason, rather than simple retrieve-then-generate.</td>
+</tr>
+<tr>
+<td>What follow-up topics does the instructor recommend?</td>
+<td>Agent orchestration, agent evaluation/monitoring, agentic RAG, RAG evaluation, tool evaluation.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

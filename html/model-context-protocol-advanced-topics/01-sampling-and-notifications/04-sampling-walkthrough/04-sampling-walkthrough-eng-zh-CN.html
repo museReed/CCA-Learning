@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sampling Walkthrough Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Sampling 实操演练 — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考试领域</td>
+<td>D2 — 模型上下文协议 (23%)</td>
+</tr>
+<tr>
+<td>任务说明</td>
+<td>2.2 (MCP 基本要素), 2.3 (采样)</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>model-context-protocol-advanced-topics / 01-sampling-and-notifications / 第 04 课</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句话摘要</h2>
+<p>Sampling 允许 MCP 服务器通过 <code>create_message()</code> 向客户端请求 LLM 文本生成，客户端需实现一个回调函数，将 MCP 消息格式转换为其 LLM SDK 格式，并返回 <code>CreateMessageResult</code>。</p>
+<hr />
+<h2>Sampling 的运作原理</h2>
+<p>Sampling 是一种让服务器要求客户端使用 LLM 生成文本的机制。服务器永远不会直接与 LLM 通信——它通过客户端来委派。</p>
+<h3>完整流程</h3>
+<ol>
+<li><strong>服务器发起请求</strong> — 在工具函数内，调用 <code>ctx.session.create_message()</code>，传入一组 <code>SamplingMessage</code> 对象</li>
+<li><strong>客户端回调触发</strong> — 客户端的 <code>sampling_callback</code> 接收到消息</li>
+<li><strong>客户端转换格式</strong> — MCP 消息不保证与任何特定 LLM SDK 兼容；你必须自行转换</li>
+<li><strong>客户端调用 LLM</strong> — 使用任何 SDK（Anthropic、OpenAI 等）</li>
+<li><strong>客户端返回结果</strong> — 将生成的文本包装在 <code>CreateMessageResult</code> 中</li>
+<li><strong>服务器接收文本</strong> — 服务器可以使用、串联或返回该结果</li>
+</ol>
+<hr />
+<h2>服务器端：发起 Sampling 请求</h2>
+<pre><code class="language-python">from mcp.server.fastmcp import FastMCP, Context
+from mcp.types import SamplingMessage, TextContent
+
+mcp = FastMCP(name=&quot;Demo Server&quot;)
+
+@mcp.tool()
+async def summarize(text_to_summarize: str, ctx: Context):
+    prompt = f&quot;&quot;&quot;
+        Please summarize the following text:
+        {text_to_summarize}
+    &quot;&quot;&quot;
+
+    result = await ctx.session.create_message(
+        messages=[
+            SamplingMessage(
+                role=&quot;user&quot;, content=TextContent(type=&quot;text&quot;, text=prompt)
+            )
+        ],
+        max_tokens=4000,
+        system_prompt=&quot;You are a helpful research assistant.&quot;,
+    )
+
+    if result.content.type == &quot;text&quot;:
+        return result.content.text
+    else:
+        raise ValueError(&quot;Sampling failed&quot;)
+</code></pre>
+<p>关键重点：<br />
+- <code>create_message()</code> 是在 <code>ctx.session</code> 上调用的（服务器到客户端的会话）<br />
+- 消息使用 MCP 类型（<code>SamplingMessage</code>、<code>TextContent</code>），而非 Anthropic SDK 类型<br />
+- 你可以传入 <code>system_prompt</code> 和 <code>max_tokens</code><br />
+- 结果可能包含不同的内容类型；需检查 <code>.content.type</code></p>
+<hr />
+<h2>客户端：实现回调函数</h2>
+<pre><code class="language-python">from mcp.client.session import RequestContext
+from mcp.types import (
+    CreateMessageRequestParams,
+    CreateMessageResult,
+    TextContent,
+    SamplingMessage,
+)
+
+async def chat(input_messages: list[SamplingMessage], max_tokens=4000):
+    messages = []
+    for msg in input_messages:
+        if msg.role == &quot;user&quot; and msg.content.type == &quot;text&quot;:
+            content = (
+                msg.content.text
+                if hasattr(msg.content, &quot;text&quot;)
+                else str(msg.content)
+            )
+            messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: content})
+        elif msg.role == &quot;assistant&quot; and msg.content.type == &quot;text&quot;:
+            content = (
+                msg.content.text
+                if hasattr(msg.content, &quot;text&quot;)
+                else str(msg.content)
+            )
+            messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: content})
+
+    response = await anthropic_client.messages.create(
+        model=model,
+        messages=messages,
+        max_tokens=max_tokens,
+    )
+    text = &quot;&quot;.join([p.text for p in response.content if p.type == &quot;text&quot;])
+    return text
+
+
+async def sampling_callback(
+    context: RequestContext, params: CreateMessageRequestParams
+):
+    text = await chat(params.messages)
+    return CreateMessageResult(
+        role=&quot;assistant&quot;,
+        model=model,
+        content=TextContent(type=&quot;text&quot;, text=text),
+    )
+</code></pre>
+<p>关键细节：<strong>MCP 消息并非 Anthropic SDK 消息</strong>。你必须编写转换逻辑，将 <code>SamplingMessage</code> 对象转换为你的 LLM SDK 所期望的格式。</p>
+<hr />
+<h2>连接回调函数</h2>
+<pre><code class="language-python">async with ClientSession(
+    read, write, sampling_callback=sampling_callback
+) as session:
+    await session.initialize()
+    result = await session.call_tool(
+        name=&quot;summarize&quot;,
+        arguments={&quot;text_to_summarize&quot;: &quot;lots of text&quot;},
+    )
+</code></pre>
+<p><code>ClientSession</code> 上的 <code>sampling_callback</code> 参数是将客户端的 LLM 逻辑连接到服务器 sampling 请求的关键。如果忘记传入，服务器的 <code>create_message()</code> 调用将会失败。</p>
+<hr />
+<h2>服务器获取结果后</h2>
+<p>客户端返回文本后，服务器可以：<br />
+- <strong>在工作流程中使用</strong> — 作为多步骤工具执行的一部分<br />
+- <strong>再次发起 sampling 调用</strong> — 串联多次 LLM 生成<br />
+- <strong>直接返回</strong> — 将文本作为工具结果传回</p>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li>Sampling 是 <strong>D2 核心基本要素</strong>（任务 2.2、2.3）。预期考题会涉及流程方向（服务器发起，客户端执行）。</li>
+<li>消息格式转换是常见的考试陷阱——MCP 类型与 Anthropic SDK 类型不同。</li>
+<li>回调函数必须传入 <code>ClientSession</code>——忘记这个连接是考试中常见的错误情境。</li>
+<li>Sampling 实现了「服务器请求智能」的模式，这与一般的「客户端调用服务器工具」流程不同。</li>
+</ul>
+<hr />
+<h2>记忆卡</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>问题</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>在 MCP 中，哪一方发起 sampling 请求？</td>
+<td><strong>服务器</strong>通过调用 <code>ctx.session.create_message()</code> 发起</td>
+</tr>
+<tr>
+<td>2</td>
+<td>服务器调用什么方法来请求文本生成？</td>
+<td><code>ctx.session.create_message()</code>，传入一组 <code>SamplingMessage</code> 对象</td>
+</tr>
+<tr>
+<td>3</td>
+<td>为什么 sampling 回调中需要消息格式转换？</td>
+<td>MCP 的 <code>SamplingMessage</code> 对象不保证与任何特定 LLM SDK（如 Anthropic）兼容，必须手动转换。</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Sampling 回调必须返回什么？</td>
+<td>一个 <code>CreateMessageResult</code>，包含角色、模型和生成的内容（<code>TextContent</code>）</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Sampling 回调在哪里连接？</td>
+<td>作为 <code>ClientSession</code> 构造函数的 <code>sampling_callback</code> 参数</td>
+</tr>
+<tr>
+<td>6</td>
+<td>服务器能否在单次工具执行中发起多次 sampling 调用？</td>
+<td>可以——服务器可以串联多次 <code>create_message()</code> 调用</td>
+</tr>
+<tr>
+<td>7</td>
+<td>如果客户端未提供 sampling 回调会怎样？</td>
+<td>服务器的 <code>create_message()</code> 调用将会失败，因为没有注册处理程序</td>
+</tr>
+<tr>
+<td>8</td>
+<td>用来构建 sampling 请求的 MCP 类型有哪些？</td>
+<td><code>SamplingMessage</code> 用于消息，<code>TextContent</code> 用于文本内容</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

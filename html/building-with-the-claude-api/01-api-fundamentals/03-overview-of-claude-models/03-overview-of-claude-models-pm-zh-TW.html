@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overview Of Claude Models Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Overview of Claude Models — PM Quick-Scan（繁體中文）</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) 主要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（生產工作負載的模型選擇）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 03</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude 提供三個模型層級——Opus（最聰明）、Sonnet（平衡）、Haiku（最快/最便宜）——為每個功能選擇正確的模型是 PM 對 AI 成本和使用者體驗影響最大的槓桿。</p>
+<hr />
+<h2>心智模型：顧問公司</h2>
+<p>把三個模型想成三個等級的顧問：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>顧問類比</th>
+<th>什麼時候聘用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Opus</td>
+<td>資深合夥人——深度專業、價格昂貴、需要時間</td>
+<td>複雜策略工作、高風險決策</td>
+</tr>
+<tr>
+<td>Sonnet</td>
+<td>中階經理——能力強、價格合理、速度穩定</td>
+<td>大多數日常客戶工作</td>
+</tr>
+<tr>
+<td>Haiku</td>
+<td>初級分析師——快速、便宜、擅長例行任務</td>
+<td>大量例行工作、快速周轉</td>
+</tr>
+</tbody>
+</table>
+<p>你不會派資深合夥人去回覆例行郵件。同理，你不該把簡單分類任務路由到 Opus。</p>
+<hr />
+<h2>三個模型一覽</h2>
+<table>
+<thead>
+<tr>
+<th>維度</th>
+<th>Opus</th>
+<th>Sonnet</th>
+<th>Haiku</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>智能</td>
+<td>最高</td>
+<td>高</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>速度</td>
+<td>較慢</td>
+<td>中等</td>
+<td>最快</td>
+</tr>
+<tr>
+<td>成本</td>
+<td>最高</td>
+<td>中等</td>
+<td>最低</td>
+</tr>
+<tr>
+<td>延伸思考</td>
+<td>支援</td>
+<td>支援</td>
+<td>不支援</td>
+</tr>
+<tr>
+<td>最適合</td>
+<td>複雜推理、多小時自主任務</td>
+<td>通用、編碼、大多數功能</td>
+<td>即時聊天、分類、大量處理</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>為什麼模型選擇是 PM 的決策</h2>
+<p>模型選擇不純粹是技術問題。它直接控制：</p>
+<table>
+<thead>
+<tr>
+<th>商業槓桿</th>
+<th>影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>每次互動成本</td>
+<td>同一段對話，Opus 可能比 Haiku 貴 5-10 倍</td>
+</tr>
+<tr>
+<td>使用者感知延遲</td>
+<td>Haiku 不到一秒回應；Opus 可能需要幾秒鐘</td>
+</tr>
+<tr>
+<td>功能品質天花板</td>
+<td>Haiku 不能做延伸思考；某些功能沒有 Opus/Sonnet 根本不可能</td>
+</tr>
+<tr>
+<td>可擴展性預算</td>
+<td>大量功能跑 Opus 幾小時就能燒完預算</td>
+</tr>
+</tbody>
+</table>
+<p><strong>PM 的工作</strong>：定義哪些功能需要哪個品質層級，然後與工程團隊合作做相應路由。</p>
+<hr />
+<h2>產品使用場景</h2>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>建議模型</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>客服聊天機器人（大量）</td>
+<td>Haiku</td>
+<td>速度 + 成本；大多數客服查詢都是例行的</td>
+</tr>
+<tr>
+<td>法律審查的文件分析</td>
+<td>Opus</td>
+<td>對長文件的複雜推理</td>
+</tr>
+<tr>
+<td>應用內寫作助手</td>
+<td>Sonnet</td>
+<td>品質好、延遲可接受</td>
+</tr>
+<tr>
+<td>即時自動完成建議</td>
+<td>Haiku</td>
+<td>亞秒級延遲不可妥協</td>
+</tr>
+<tr>
+<td>多步驟研究代理</td>
+<td>Opus</td>
+<td>需要延伸思考和自主性</td>
+</tr>
+<tr>
+<td>程式碼審查工具</td>
+<td>Sonnet</td>
+<td>強大的編碼能力、精準編輯</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 決策框架</h2>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>答案決定什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>我們的功能需要多複雜的推理？</td>
+<td>Opus vs Sonnet vs Haiku</td>
+</tr>
+<tr>
+<td>回應對使用者來說必須多快？</td>
+<td>即時用 Haiku，非同步用 Sonnet/Opus</td>
+</tr>
+<tr>
+<td>每個使用者每月的成本上限是多少？</td>
+<td>模型混合比例</td>
+</tr>
+<tr>
+<td>我們能對不同功能使用不同模型嗎？</td>
+<td>幾乎總是可以——這是建議的模式</td>
+</tr>
+<tr>
+<td>有任何功能需要延伸思考嗎？</td>
+<td>如果是，Haiku 在該功能上就被排除</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>多模型架構</h2>
+<p>最具成本效益的生產模式是使用多個模型：</p>
+<table>
+<thead>
+<tr>
+<th>應用層級</th>
+<th>模型</th>
+<th>PM 理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>問候 / 路由 / 分類</td>
+<td>Haiku</td>
+<td>即時、便宜；使用者在這裡不需要智能</td>
+</tr>
+<tr>
+<td>主要功能邏輯</td>
+<td>Sonnet</td>
+<td>品質重要，回應時間也重要</td>
+</tr>
+<tr>
+<td>升級 / 複雜邊緣案例</td>
+<td>Opus</td>
+<td>把昂貴的模型留給高價值時刻</td>
+</tr>
+</tbody>
+</table>
+<p>與所有事情都用單一高階模型相比，這種模式可以減少 60-80% 的 AI 成本。</p>
+<hr />
+<h2>常見 PM 錯誤</h2>
+<ol>
+<li><strong>預設使用「最好的」模型</strong> —— 所有事情都用 Opus 就像請資深合夥人來歸檔。大多數功能不需要最高智能。</li>
+<li><strong>忽視每次互動的成本計算</strong> —— 承諾之前先算數字。一個每天服務 10 萬使用者的功能，用 Opus 和用 Haiku 的成本天差地別。</li>
+<li><strong>PRD 中沒有為每個功能指定模型</strong> —— 如果把模型選擇丟給工程團隊而不給脈絡，他們要麼超支（為安全起見用 Opus）、要麼交付不足（為預算用 Haiku）。</li>
+<li><strong>忘記 Haiku 的限制</strong> —— 它不能做延伸思考。如果你的功能規格寫「AI 應該逐步推理」，Haiku 就出局了。</li>
+<li><strong>把模型選擇當成永久決定</strong> —— 你可以隨著品質或預算需求演變而更換每個功能的模型。從第一天就建好路由彈性。</li>
+</ol>
+<blockquote>
+<p><strong>核心洞察</strong></p>
+<p>模型選擇是 PM 在 Claude 驅動產品上做的最高槓桿成本決策。它不是可以委派的技術細節——而是同時決定你的單位經濟學和使用者體驗的商業架構選擇。正確答案幾乎總是「使用多個模型，按任務複雜度路由」。</p>
+</blockquote>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li><strong>D5（企業部署）</strong>：模型選擇題幾乎必考。預期會描述一個工作負載的情境，要求你選擇合適的模型。</li>
+<li>記住三方取捨：智能 vs 速度 vs 成本。</li>
+<li>記住：Haiku 不支援延伸思考。這是最容易出題的差異點。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude 的三個模型家族是什麼？</td>
+<td>Opus（最聰明）、Sonnet（平衡）、Haiku（最快/最便宜）</td>
+</tr>
+<tr>
+<td>即時面向使用者的功能該用哪個模型？</td>
+<td>Haiku——最低延遲和成本</td>
+</tr>
+<tr>
+<td>為什麼模型選擇是 PM 的決策而非僅是工程的？</td>
+<td>它直接控制每次互動成本、感知延遲和功能品質天花板</td>
+</tr>
+<tr>
+<td>生產環境的建議模型選擇模式是什麼？</td>
+<td>使用多個模型——Haiku 處理簡單任務、Sonnet 處理核心邏輯、Opus 處理複雜推理</td>
+</tr>
+<tr>
+<td>哪個模型缺少延伸思考支援？</td>
+<td>Haiku——它無法做逐步推理</td>
+</tr>
+<tr>
+<td>多模型路由能減少多少成本？</td>
+<td>與所有事情用單一高階模型相比，可減少 60-80%</td>
+</tr>
+<tr>
+<td>PM 什麼時候該堅持用 Opus？</td>
+<td>當功能需要深度推理、多步驟規劃或長時間自主運作時</td>
+</tr>
+<tr>
+<td>本課程使用什麼模型作為預設？</td>
+<td>Sonnet——品質、速度和成本的最佳平衡</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

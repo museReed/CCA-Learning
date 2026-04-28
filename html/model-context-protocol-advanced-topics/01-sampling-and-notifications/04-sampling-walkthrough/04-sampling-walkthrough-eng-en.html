@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sampling Walkthrough Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Sampling Walkthrough — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D2 — Model Context Protocol (23%)</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>2.2 (MCP primitives), 2.3 (sampling)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>model-context-protocol-advanced-topics / 01-sampling-and-notifications / Lesson 04</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Sampling allows an MCP server to request LLM text generation from the client via <code>create_message()</code>, with the client implementing a callback that converts MCP message formats to its LLM SDK and returns a <code>CreateMessageResult</code>.</p>
+<hr />
+<h2>How Sampling Works</h2>
+<p>Sampling is the mechanism that lets a server ask the client to generate text using an LLM. The server never talks to the LLM directly -- it delegates through the client.</p>
+<h3>The Flow</h3>
+<ol>
+<li><strong>Server initiates</strong> -- Inside a tool function, call <code>ctx.session.create_message()</code> with a list of <code>SamplingMessage</code> objects</li>
+<li><strong>Client callback fires</strong> -- The client's <code>sampling_callback</code> receives the messages</li>
+<li><strong>Client converts formats</strong> -- MCP messages are not guaranteed to be compatible with any specific LLM SDK; you must convert them</li>
+<li><strong>Client calls LLM</strong> -- Using whatever SDK (Anthropic, OpenAI, etc.)</li>
+<li><strong>Client returns result</strong> -- Wrap the generated text in a <code>CreateMessageResult</code></li>
+<li><strong>Server receives text</strong> -- The server can use, chain, or return the result</li>
+</ol>
+<hr />
+<h2>Server Side: Initiating a Sampling Request</h2>
+<pre><code class="language-python">from mcp.server.fastmcp import FastMCP, Context
+from mcp.types import SamplingMessage, TextContent
+
+mcp = FastMCP(name=&quot;Demo Server&quot;)
+
+@mcp.tool()
+async def summarize(text_to_summarize: str, ctx: Context):
+    prompt = f&quot;&quot;&quot;
+        Please summarize the following text:
+        {text_to_summarize}
+    &quot;&quot;&quot;
+
+    result = await ctx.session.create_message(
+        messages=[
+            SamplingMessage(
+                role=&quot;user&quot;, content=TextContent(type=&quot;text&quot;, text=prompt)
+            )
+        ],
+        max_tokens=4000,
+        system_prompt=&quot;You are a helpful research assistant.&quot;,
+    )
+
+    if result.content.type == &quot;text&quot;:
+        return result.content.text
+    else:
+        raise ValueError(&quot;Sampling failed&quot;)
+</code></pre>
+<p>Key points:<br />
+- <code>create_message()</code> is called on <code>ctx.session</code> (the server's session to the client)<br />
+- Messages use MCP types (<code>SamplingMessage</code>, <code>TextContent</code>), not Anthropic SDK types<br />
+- You can pass a <code>system_prompt</code> and <code>max_tokens</code><br />
+- The result may contain different content types; check <code>.content.type</code></p>
+<hr />
+<h2>Client Side: Implementing the Callback</h2>
+<pre><code class="language-python">from mcp.client.session import RequestContext
+from mcp.types import (
+    CreateMessageRequestParams,
+    CreateMessageResult,
+    TextContent,
+    SamplingMessage,
+)
+
+async def chat(input_messages: list[SamplingMessage], max_tokens=4000):
+    messages = []
+    for msg in input_messages:
+        if msg.role == &quot;user&quot; and msg.content.type == &quot;text&quot;:
+            content = (
+                msg.content.text
+                if hasattr(msg.content, &quot;text&quot;)
+                else str(msg.content)
+            )
+            messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: content})
+        elif msg.role == &quot;assistant&quot; and msg.content.type == &quot;text&quot;:
+            content = (
+                msg.content.text
+                if hasattr(msg.content, &quot;text&quot;)
+                else str(msg.content)
+            )
+            messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: content})
+
+    response = await anthropic_client.messages.create(
+        model=model,
+        messages=messages,
+        max_tokens=max_tokens,
+    )
+    text = &quot;&quot;.join([p.text for p in response.content if p.type == &quot;text&quot;])
+    return text
+
+
+async def sampling_callback(
+    context: RequestContext, params: CreateMessageRequestParams
+):
+    text = await chat(params.messages)
+    return CreateMessageResult(
+        role=&quot;assistant&quot;,
+        model=model,
+        content=TextContent(type=&quot;text&quot;, text=text),
+    )
+</code></pre>
+<p>Critical detail: <strong>MCP messages are not Anthropic SDK messages</strong>. You must write conversion logic to transform <code>SamplingMessage</code> objects into the format your LLM SDK expects.</p>
+<hr />
+<h2>Wiring the Callback</h2>
+<pre><code class="language-python">async with ClientSession(
+    read, write, sampling_callback=sampling_callback
+) as session:
+    await session.initialize()
+    result = await session.call_tool(
+        name=&quot;summarize&quot;,
+        arguments={&quot;text_to_summarize&quot;: &quot;lots of text&quot;},
+    )
+</code></pre>
+<p>The <code>sampling_callback</code> parameter on <code>ClientSession</code> is what connects the client's LLM logic to the server's sampling requests. If you forget this, the server's <code>create_message()</code> calls will fail.</p>
+<hr />
+<h2>After the Server Gets the Result</h2>
+<p>Once the client returns text, the server can:<br />
+- <strong>Use it in a workflow</strong> -- as part of a multi-step tool execution<br />
+- <strong>Make another sampling call</strong> -- chain multiple LLM generations<br />
+- <strong>Return it directly</strong> -- pass the text back as the tool result</p>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li>Sampling is a <strong>D2 core primitive</strong> (Task 2.2, 2.3). Expect questions about the flow direction (server initiates, client executes).</li>
+<li>The message format conversion requirement is a common exam trap -- MCP types are NOT the same as Anthropic SDK types.</li>
+<li>The callback must be passed to <code>ClientSession</code> -- forgetting this wiring is a frequent error scenario in exam questions.</li>
+<li>Sampling enables the "server asks for intelligence" pattern, which is different from the normal "client calls tools on server" flow.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Which side initiates a sampling request in MCP?</td>
+<td>The <strong>server</strong> initiates by calling <code>ctx.session.create_message()</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>What method does the server call to request text generation?</td>
+<td><code>ctx.session.create_message()</code> with a list of <code>SamplingMessage</code> objects</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Why is message format conversion needed in the sampling callback?</td>
+<td>MCP <code>SamplingMessage</code> objects are not guaranteed to be compatible with any specific LLM SDK (e.g., Anthropic). You must convert them manually.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>What must the sampling callback return?</td>
+<td>A <code>CreateMessageResult</code> containing the role, model, and generated content as a <code>TextContent</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Where is the sampling callback wired in?</td>
+<td>As the <code>sampling_callback</code> parameter in the <code>ClientSession</code> constructor</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Can a server make multiple sampling calls within a single tool execution?</td>
+<td>Yes -- the server can chain multiple <code>create_message()</code> calls</td>
+</tr>
+<tr>
+<td>7</td>
+<td>What happens if the client does not provide a sampling callback?</td>
+<td>The server's <code>create_message()</code> calls will fail because there is no handler registered</td>
+</tr>
+<tr>
+<td>8</td>
+<td>What MCP types are used to construct a sampling request?</td>
+<td><code>SamplingMessage</code> for messages and <code>TextContent</code> for text content</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

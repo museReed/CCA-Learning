@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome To The Course Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Welcome to the Course — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D1 — Agentic Coding Fundamentals (22%) — primary; D5 — Enterprise Deployment (20%) — secondary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>1.1 (foundational understanding of Claude capabilities), 5.1 (model selection and deployment readiness)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 02</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>This orientation lesson maps the full course arc — API access, prompt engineering, tool use, RAG, MCP, Claude Code, and agentic workflows — and sets the prerequisites: Python, notebooks, and an Anthropic API key.</p>
+<hr />
+<h2>Course Topology</h2>
+<p>The course follows a deliberate dependency chain. Each module builds on the previous one:</p>
+<pre><code>API Basics → Prompt Evaluation → Prompt Engineering → Tool Use → RAG → MCP → Claude Code / Computer Use → Workflows &amp; Agents
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>What You Build</th>
+<th>Why It Matters for CCA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Fundamentals</td>
+<td>First request, multi-turn, streaming</td>
+<td>D5: every production app starts here</td>
+</tr>
+<tr>
+<td>Prompt Evaluation</td>
+<td>Eval framework, test datasets</td>
+<td>D1: you can't improve what you can't measure</td>
+</tr>
+<tr>
+<td>Prompt Engineering</td>
+<td>Clarity, specificity, XML structure</td>
+<td>D1: prompt design is the core agentic skill</td>
+</tr>
+<tr>
+<td>Tool Use</td>
+<td>Tool schemas, multi-tool orchestration</td>
+<td>D2: MCP and tool design live here</td>
+</tr>
+<tr>
+<td>RAG</td>
+<td>Chunking, embeddings, retrieval</td>
+<td>D5: enterprise knowledge grounding</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>Servers, clients, resources, prompts</td>
+<td>D2: the protocol that connects Claude to the world</td>
+</tr>
+<tr>
+<td>Claude Code + Computer Use</td>
+<td>Terminal agent, browser agent</td>
+<td>D1/D3: agentic coding in practice</td>
+</tr>
+<tr>
+<td>Workflows &amp; Agents</td>
+<td>Parallelization, chaining, routing</td>
+<td>D1: agentic architecture patterns</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Prerequisites Checklist</h2>
+<p>Before writing any code, confirm these are in place:</p>
+<pre><code class="language-bash"># 1. Python environment with notebook support
+python3 --version          # 3.10+ recommended
+pip install jupyter anthropic
+
+# 2. Anthropic API key
+export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;
+
+# 3. Verify access
+python3 -c &quot;from anthropic import Anthropic; print(Anthropic().messages.create(model='claude-sonnet-4-5', max_tokens=50, messages=[{'role':'user','content':'ping'}]).content[0].text)&quot;
+</code></pre>
+<p>If any of these fail, fix them before proceeding. The entire course runs through notebooks, so a broken environment means zero learning velocity.</p>
+<hr />
+<h2>Success Strategies (Engineering Lens)</h2>
+<table>
+<thead>
+<tr>
+<th>Tip from Instructor</th>
+<th>Engineering Translation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Write code alongside me</td>
+<td>Type every snippet; muscle memory cements API patterns</td>
+</tr>
+<tr>
+<td>Speed up playback</td>
+<td>1.5x–2x lets you scan for concepts, then pause for implementation</td>
+</tr>
+<tr>
+<td>Expand / alter notebooks</td>
+<td>The best learning happens when you break things on purpose</td>
+</tr>
+<tr>
+<td>Ask Claude for help</td>
+<td>Use Claude itself as a debugging partner — meta-learning</td>
+</tr>
+</tbody>
+</table>
+<p>The last tip is underrated: using Claude to debug Claude API code is a tight feedback loop that mirrors real agentic coding workflows.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Skipping environment setup</strong> — half of all "stuck" moments in API courses are import errors and missing keys, not conceptual gaps.</li>
+<li><strong>Watching without coding</strong> — passive video consumption has near-zero retention for API patterns.</li>
+<li><strong>Jumping ahead to agents</strong> — the dependency chain is real; tool use without prompt engineering knowledge leads to fragile schemas.</li>
+<li><strong>Ignoring prompt evaluation</strong> — the instructor calls it "the most important practice." Engineers who skip evals build prompts that work on their machine but fail in production.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>This is not a "watch and learn" course — it is a "build and break" course. The dependency chain means each module produces artifacts (notebooks, prompts, tool schemas) that feed the next module. Skipping a module means missing a dependency, not just missing content.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D1 (Agentic Coding Fundamentals)</strong>: the course topology IS the CCA skill map — API → prompts → tools → agents mirrors the exam's expected progression.</li>
+<li><strong>D5 (Enterprise Deployment)</strong>: prerequisites (API key management, environment setup) are day-one enterprise concerns.</li>
+<li>Expect the exam to assume you have hands-on experience with every module listed here; this lesson is the roadmap.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are the three prerequisites for this course?</td>
+<td>Basic Python, a notebook environment, and an Anthropic API key</td>
+</tr>
+<tr>
+<td>What is the course module order?</td>
+<td>API Basics → Prompt Eval → Prompt Engineering → Tool Use → RAG → MCP → Claude Code/Computer Use → Workflows &amp; Agents</td>
+</tr>
+<tr>
+<td>Why does the instructor emphasize writing code alongside him?</td>
+<td>Passive watching has near-zero retention for API patterns; typing cements muscle memory</td>
+</tr>
+<tr>
+<td>Which module does the instructor call "the most important practice"?</td>
+<td>Prompt evaluation — the only way to verify prompts work at scale</td>
+</tr>
+<tr>
+<td>What two Anthropic-built agents does the course cover?</td>
+<td>Claude Code (terminal agent) and Computer Use (browser agent)</td>
+</tr>
+<tr>
+<td>Why is the module order a dependency chain?</td>
+<td>Each module's output (notebooks, schemas, prompts) is input to the next module</td>
+</tr>
+<tr>
+<td>What is the recommended strategy when stuck?</td>
+<td>Ask Claude for help — using Claude to debug Claude API code is a meta-learning loop</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

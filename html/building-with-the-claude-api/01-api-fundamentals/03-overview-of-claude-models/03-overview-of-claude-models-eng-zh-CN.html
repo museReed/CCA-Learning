@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overview Of Claude Models Eng Zh Cn</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Overview of Claude Models — Engineering Deep Dive（简体中文）</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) 主要</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1（生产工作负载的模型选择）</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 03</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude 提供三个模型家族——Opus（最高智能）、Sonnet（平衡）、Haiku（最快/最便宜）——为每个功能选择正确的模型是任何 Claude 驱动系统的首要架构决策。</p>
+<hr />
+<h2>三大模型家族</h2>
+<p>三者共享相同的核心能力（文本生成、代码编写、图片分析）。差异在于优化目标：</p>
+<pre><code>智能 ◀─────────────────────────────────────▶ 速度 / 成本
+
+   Opus              Sonnet               Haiku
+   ├── 最高智能      ├── 平衡              ├── 最快
+   ├── 推理能力      ├── 强大编码能力      ├── 最低成本
+   ├── 多小时        ├── 精准的代码        ├── 不支持扩展思考
+   │   自主运行      │   库编辑            │
+   ├── 较高成本      ├── 中等成本          ├── 实时 UX
+   └── 较高延迟      └── 中等延迟          └── 最低延迟
+</code></pre>
+<h3>Opus —— 最大智能</h3>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>优化方向</td>
+<td>最高智能 / 推理能力</td>
+</tr>
+<tr>
+<td>最适合</td>
+<td>复杂的多步骤任务、长时间自主工作会话（数小时）、深度规划</td>
+</tr>
+<tr>
+<td>推理</td>
+<td>支持扩展思考——可以在困难问题上花时间思考</td>
+</tr>
+<tr>
+<td>取舍</td>
+<td>较高延迟、较高每次请求成本</td>
+</tr>
+<tr>
+<td>使用时机</td>
+<td>质量比速度重要；复杂需求需要深度推理</td>
+</tr>
+</tbody>
+</table>
+<h3>Sonnet —— 甜蜜点</h3>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>优化方向</td>
+<td>智能、速度与成本的平衡</td>
+</tr>
+<tr>
+<td>最适合</td>
+<td>大多数实用场景、编码任务、精准的代码库编辑</td>
+</tr>
+<tr>
+<td>推理</td>
+<td>支持扩展思考</td>
+</tr>
+<tr>
+<td>取舍</td>
+<td>既不是最聪明也不是最快，但是最好的默认选择</td>
+</tr>
+<tr>
+<td>使用时机</td>
+<td>通用工作；本课程的默认模型</td>
+</tr>
+</tbody>
+</table>
+<h3>Haiku —— 速度冠军</h3>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>细节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>优化方向</td>
+<td>最快响应时间、最低成本</td>
+</tr>
+<tr>
+<td>最适合</td>
+<td>面向用户的实时交互、大批量处理</td>
+</tr>
+<tr>
+<td>推理</td>
+<td>不支持扩展思考</td>
+</tr>
+<tr>
+<td>取舍</td>
+<td>与 Opus/Sonnet 相比智能较低</td>
+</tr>
+<tr>
+<td>使用时机</td>
+<td>延迟敏感的功能、分类、简单提取</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>模型选择框架</h2>
+<p>决策树很简单：</p>
+<pre><code class="language-python">def select_model(task):
+    if task.requires_deep_reasoning or task.is_multi_step_complex:
+        return &quot;opus&quot;
+    elif task.requires_real_time or task.is_high_volume:
+        return &quot;haiku&quot;
+    else:
+        return &quot;sonnet&quot;  # 大多数应用的默认值
+</code></pre>
+<p><strong>关键洞察</strong>：生产系统通常同时使用多个模型：</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>模型</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>面向用户的聊天</td>
+<td>Haiku</td>
+<td>速度对 UX 至关重要</td>
+</tr>
+<tr>
+<td>核心业务逻辑</td>
+<td>Sonnet</td>
+<td>质量与成本的平衡</td>
+</tr>
+<tr>
+<td>复杂推理任务</td>
+<td>Opus</td>
+<td>质量优先于一切</td>
+</tr>
+</tbody>
+</table>
+<p>这不是过早优化——而是成本架构。全部走 Opus 的系统成本会比用 Haiku 处理简单任务的系统高 5-10 倍。</p>
+<hr />
+<h2>推理能力比较</h2>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>Opus</th>
+<th>Sonnet</th>
+<th>Haiku</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>标准响应</td>
+<td>是</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td>扩展思考</td>
+<td>是</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td>自适应（简单→快速，复杂→思考）</td>
+<td>是</td>
+<td>是</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+<p>Haiku 不支持扩展思考是最重要的技术差异点。如果你的功能需要链式推理，Haiku 不是选项。</p>
+<hr />
+<h2>常见错误</h2>
+<ol>
+<li><strong>所有事情都用 Opus</strong> —— 浪费钱又增加延迟；大多数任务不需要顶尖智能。</li>
+<li><strong>用 Haiku 做复杂推理</strong> —— Haiku 不支持扩展思考；在困难问题上只会给出肤浅的回答。</li>
+<li><strong>选一个模型就不再改变</strong> —— 模型选择应该是每个功能独立决定的，不是整个应用统一的。</li>
+<li><strong>忽视成本倍数差异</strong> —— Haiku 和 Opus 的定价差距意味着模型选择是预算决策，不只是技术决策。</li>
+<li><strong>假设模型名称是固定的</strong> —— 永远使用具体的模型字符串（如 <code>claude-sonnet-4-5</code>），不要假设"Sonnet"永远代表同一个版本。</li>
+</ol>
+<blockquote>
+<p><strong>核心洞察</strong></p>
+<p>模型选择不是一次性的决策——它是一种路由策略。最好的生产系统把模型选择当作参数而非常量。它们把简单任务路由到 Haiku、标准任务路由到 Sonnet、复杂任务路由到 Opus。这是你做的第一个架构决策，直接控制你的成本和延迟预算。</p>
+</blockquote>
+<hr />
+<h2>CCA 考试相关性</h2>
+<ul>
+<li><strong>D5（企业部署）</strong>：预期会出情境题，例如"大量客服机器人该用哪个模型？"（Haiku）或"多步骤研究代理该用哪个？"（Opus）。</li>
+<li>模型选择题目可能会呈现取舍情境，要求你选择合适的模型家族。</li>
+<li>记住 Haiku 不支持扩展思考——这是考试很可能考的差异点。</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>正面</th>
+<th>背面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude 的三个模型家族是什么？</td>
+<td>Opus（最高智能）、Sonnet（平衡）、Haiku（最快/最便宜）</td>
+</tr>
+<tr>
+<td>面向用户的实时聊天该用哪个模型？</td>
+<td>Haiku——针对速度和成本优化</td>
+</tr>
+<tr>
+<td>哪些模型支持扩展思考？</td>
+<td>Opus 和 Sonnet——Haiku 不支持</td>
+</tr>
+<tr>
+<td>大多数应用的建议默认模型是？</td>
+<td>Sonnet——智能、速度和成本的最佳平衡</td>
+</tr>
+<tr>
+<td>为什么生产系统使用多个模型？</td>
+<td>不同功能有不同的取舍；路由能在不牺牲质量的情况下节省成本</td>
+</tr>
+<tr>
+<td>什么时候该选 Opus 而非 Sonnet？</td>
+<td>当任务需要深度推理、多步骤规划或长时间自主运行时</td>
+</tr>
+<tr>
+<td>Haiku 的关键限制是什么？</td>
+<td>不支持扩展思考/推理；在复杂问题上只能给出肤浅的回答</td>
+</tr>
+<tr>
+<td>本课程主要使用哪个模型？</td>
+<td>Sonnet——质量、速度和成本的平衡</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

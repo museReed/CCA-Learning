@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roots Walkthrough Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Roots 實作演練 — PM 快速掃描</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>詳情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — 模型上下文協議 (23%), D4 — 安全與防護機制 (15%)</td>
+</tr>
+<tr>
+<td>任務說明</td>
+<td>2.2 (MCP 基本要素 — roots), 4.3 (存取控制)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / 第 08 課</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>Roots 是 MCP 的檔案系統存取控制機制——使用者告訴客戶端伺服器可以存取哪些目錄，而伺服器必須在觸碰任何檔案之前主動檢查這些邊界。把它想成一個「訪客證」系統，限制訪客可以進入哪些房間。</p>
+<hr />
+<h2>PM 為何需要了解 Roots</h2>
+<p>Roots 直接影響<strong>安全需求</strong>和<strong>使用者信任</strong>：</p>
+<ol>
+<li><strong>存取控制不是自動的</strong> — MCP SDK 不會自動執行邊界。如果工程團隊忘記實作檢查，伺服器可以存取任何檔案。</li>
+<li><strong>使用者定義的權限</strong> — 使用者決定分享哪些目錄。你的使用者體驗需要清楚傳達他們授予了什麼存取權。</li>
+<li><strong>合規影響</strong> — 如果你的產品處理敏感資料，root 驗證是安全需求，不是「有更好」。</li>
+</ol>
+<hr />
+<h2>心智模型：大樓門禁卡</h2>
+<table>
+<thead>
+<tr>
+<th>大樓安全</th>
+<th>MCP Roots</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>訪客請求一張門禁卡</td>
+<td>使用者透過 CLI 指定允許的目錄</td>
+</tr>
+<tr>
+<td>櫃台製作門禁卡</td>
+<td>客戶端用 <code>file://</code> URI 建立 <code>Root</code> 物件</td>
+</tr>
+<tr>
+<td>警衛在每道門檢查門禁卡</td>
+<td>伺服器在檔案存取前呼叫 <code>is_path_allowed()</code></td>
+</tr>
+<tr>
+<td>門禁卡只能進特定樓層</td>
+<td>Root 邊界限制可存取的目錄</td>
+</tr>
+<tr>
+<td><strong>沒有警衛 = 任何人可以進入</strong></td>
+<td><strong>沒有授權檢查 = 伺服器可以存取任何東西</strong></td>
+</tr>
+</tbody>
+</table>
+<p>最後一行是最重要的教訓：門禁卡（root）本身什麼都不做。沒有警衛（授權檢查），它只是一張塑膠卡。</p>
+<hr />
+<h2>七步架構</h2>
+<ol>
+<li><strong>使用者指定目錄</strong> — 透過 CLI 參數、設定檔或 UI</li>
+<li><strong>客戶端建立 Root 物件</strong> — 將路徑轉換為 <code>file://</code> URI</li>
+<li><strong>客戶端註冊回呼</strong> — 被詢問時會回傳 roots</li>
+<li><strong>伺服器請求 roots</strong> — 需要知道允許的路徑時回呼客戶端</li>
+<li><strong>伺服器實作授權</strong> — 檢查每次檔案存取是否在 roots 內</li>
+<li><strong>伺服器將 roots 提供給 LLM</strong> — 透過工具或提示，讓 AI 知道有什麼可用</li>
+<li><strong>伺服器執行邊界</strong> — 阻止存取 roots 外的路徑</li>
+</ol>
+<hr />
+<h2>產品設計影響</h2>
+<table>
+<thead>
+<tr>
+<th>考量面向</th>
+<th>影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>使用者意識</strong></td>
+<td>使用者必須了解他們授予了哪些目錄的存取權。清晰的使用者體驗至關重要。</td>
+</tr>
+<tr>
+<td><strong>預設行為</strong></td>
+<td>沒有 roots 時，伺服器沒有宣告的邊界。決定：預設拒絕全部，還是需要明確設定？</td>
+</tr>
+<tr>
+<td><strong>粒度</strong></td>
+<td>Roots 是目錄層級的。你無法透過 roots 授予單一檔案的存取權。</td>
+</tr>
+<tr>
+<td><strong>動態更新</strong></td>
+<td>Roots 可以在會話期間改變。考慮：你的產品應否支援在會話中新增/移除目錄？</td>
+</tr>
+<tr>
+<td><strong>安全由開發者執行</strong></td>
+<td>MCP SDK 不提供內建的執行機制。這必須寫在工程需求中。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM 安全風險矩陣</h2>
+<table>
+<thead>
+<tr>
+<th>風險</th>
+<th>無 Roots 時的可能性</th>
+<th>影響</th>
+<th>緩解措施</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>伺服器讀取敏感檔案（<code>.env</code>、憑證）</td>
+<td>高</td>
+<td>重大</td>
+<td>所有檔案讀取前強制 root 檢查</td>
+</tr>
+<tr>
+<td>伺服器寫入系統目錄</td>
+<td>中</td>
+<td>重大</td>
+<td>所有寫入操作都進行 root 驗證</td>
+</tr>
+<tr>
+<td>使用者不知不覺授予廣泛存取權</td>
+<td>中</td>
+<td>高</td>
+<td>清晰的 UX 顯示確切分享的路徑</td>
+</tr>
+<tr>
+<td>開發者在新工具中忘記授權檢查</td>
+<td>高</td>
+<td>重大</td>
+<td>程式碼審查清單、自動化測試</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>驗收標準範本</h2>
+<p>對於任何涉及 MCP 檔案存取的功能，你的 PRD 應包含：</p>
+<ul>
+<li>[ ] 伺服器在存取前必須驗證所有檔案路徑是否在客戶端提供的 roots 內</li>
+<li>[ ] 拒絕存取的錯誤必須回傳清楚說明限制的訊息</li>
+<li>[ ] UI 必須顯示使用者授予了哪些目錄的存取權</li>
+<li>[ ] 新工具必須包含 root 驗證（加入程式碼審查清單）</li>
+<li>[ ] 測試案例必須驗證 roots 外的路徑被拒絕</li>
+</ul>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li>Roots 跨越 <strong>D2</strong>（MCP 基本要素）和 <strong>D4</strong>（安全/存取控制）——預期跨領域考題</li>
+<li>最常考的重點：<strong>MCP SDK 不會自動執行 roots</strong>。如果考題描述 MCP 應用的安全漏洞，檢查授權是否缺失。</li>
+<li>回呼模式（按需列出 roots）是 D2 概念</li>
+<li>路徑驗證作為安全需求是 D4 概念</li>
+<li>考試哲學：<strong>驗證 &gt; 信任</strong>——永遠不要假設伺服器會在沒有明確檢查的情況下遵守邊界</li>
+</ul>
+<hr />
+<h2>記憶卡</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>問題</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>在 MCP 中，誰定義 roots？</td>
+<td>使用者/客戶端——不是伺服器</td>
+</tr>
+<tr>
+<td>2</td>
+<td>MCP SDK 會自動防止伺服器存取 roots 外的檔案嗎？</td>
+<td>不會——開發者必須自行實作授權檢查</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Roots 使用什麼 URI 協議？</td>
+<td><code>file://</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Roots 的操作粒度是什麼？</td>
+<td>目錄層級——不是單一檔案</td>
+</tr>
+<tr>
+<td>5</td>
+<td>伺服器如何取得 roots 清單？</td>
+<td>透過回呼向客戶端發送請求</td>
+</tr>
+<tr>
+<td>6</td>
+<td>哪個考試哲學適用於 root 執行？</td>
+<td>驗證 &gt; 信任——始終驗證，永不假設</td>
+</tr>
+<tr>
+<td>7</td>
+<td>PM 在 PRD 驗收標準中應包含什麼？</td>
+<td>所有檔案操作前的強制 root 驗證</td>
+</tr>
+<tr>
+<td>8</td>
+<td>如果 root 驗證缺失，最大的安全風險是什麼？</td>
+<td>伺服器可以讀寫系統上的任何檔案，包括憑證和敏感資料</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

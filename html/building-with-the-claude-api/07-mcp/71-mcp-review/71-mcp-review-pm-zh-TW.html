@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mcp Review Pm Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>MCP 複習 — PM 快速掃描</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>細節</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — 工具設計與 MCP 整合 (18%)</td>
+</tr>
+<tr>
+<td>任務陳述</td>
+<td>2.1 (MCP 架構)、2.2 (基本元素)、2.3 (tool vs resource vs prompt)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>building-with-the-claude-api / 07-mcp / 第 71 課</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>MCP 的三個建構模組 — tools、resources 和 prompts — 各服務產品中的不同利害關係人：AI 模型、應用程式本身或終端使用者，知道每個模組服務誰是做出正確架構選擇的關鍵。</p>
+<hr />
+<h2>利害關係人對應表</h2>
+<p>把建構產品想像成有三個部門，各自需要不同的東西：</p>
+<table>
+<thead>
+<tr>
+<th>建構模組</th>
+<th>利害關係人</th>
+<th>商業類比</th>
+<th>何時使用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>AI 模型</td>
+<td>賦予員工新技能</td>
+<td>Claude 需要做新事情（計算、搜尋、查詢）</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>應用程式</td>
+<td>存取公司資料庫</td>
+<td>你的應用程式需要資料來顯示或作為上下文</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>終端使用者</td>
+<td>預建報表模板</td>
+<td>使用者需要一鍵存取常用工作流程</td>
+</tr>
+</tbody>
+</table>
+<h3>Tools = AI 的新技能</h3>
+<p>當產品需要 Claude 做文字生成以外的事情時 — 執行程式碼、搜尋資料庫、呼叫外部 API — 你提供工具。關鍵區別：<strong>Claude 決定何時使用它</strong>，不是你的程式碼也不是使用者。</p>
+<p><strong>產品決策</strong>：「我們的 AI 需要新能力嗎？」→ 新增工具。</p>
+<h3>Resources = 按需資料</h3>
+<p>當應用程式碼需要資料來顯示在 UI 中或豐富提示詞時，使用 resource。應用程式拉取資料 — 就像產品訂閱的資料源。</p>
+<p><strong>產品決策</strong>：「我們的應用程式需要拉取外部資料嗎？」→ 新增 resource。</p>
+<h3>Prompts = 使用者工作流程</h3>
+<p>當使用者需要一鍵觸發的預建、最佳化工作流程時，建立 prompts。把它們想成使用者啟動的模板。</p>
+<p><strong>產品決策</strong>：「使用者需要常見任務的捷徑嗎？」→ 新增 prompt。</p>
+<hr />
+<h2>PRD 決策清單</h2>
+<p>在 PRD 中指定新的 MCP 整合時：</p>
+<ul>
+<li>[ ] <strong>誰啟動操作？</strong> AI → Tool、應用程式 → Resource、使用者 → Prompt</li>
+<li>[ ] <strong>結果是什麼？</strong> 新能力 → Tool、資料擷取 → Resource、工作流程 → Prompt</li>
+<li>[ ] <strong>是重複性還是一次性？</strong> 考慮哪個基本元素最易於維護</li>
+</ul>
+<hr />
+<h2>CCA 考試關聯</h2>
+<ul>
+<li><strong>D2 (MCP 整合)</strong>：tool/resource/prompt 決策框架是重點考試內容。記住控制者對應關係。</li>
+<li>關鍵公式：<strong>Tools = 模型控制、Resources = 應用程式控制、Prompts = 使用者控制</strong></li>
+</ul>
+<hr />
+<h2>記憶卡</h2>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 伺服器的三大基本元素是什麼？</td>
+<td>Tools、Resources 和 Prompts。</td>
+</tr>
+<tr>
+<td>MCP tools 服務哪個利害關係人？</td>
+<td>AI 模型 — Claude 決定何時呼叫工具。</td>
+</tr>
+<tr>
+<td>MCP resources 服務哪個利害關係人？</td>
+<td>應用程式 — 應用程式碼決定何時取得資料。</td>
+</tr>
+<tr>
+<td>MCP prompts 服務哪個利害關係人？</td>
+<td>終端使用者 — 使用者透過 UI 或指令觸發 prompts。</td>
+</tr>
+<tr>
+<td>如果產品需要 Claude 搜尋資料庫，該用哪個基本元素？</td>
+<td>Tool — 它新增 Claude 可以決定使用的新能力。</td>
+</tr>
+<tr>
+<td>如果 UI 需要顯示文件列表，該用哪個基本元素？</td>
+<td>Resource — 你的應用程式碼取得資料來顯示。</td>
+</tr>
+<tr>
+<td>如果使用者需要一鍵「生成報告」按鈕，該用哪個基本元素？</td>
+<td>Prompt — 它是使用者觸發的預定義工作流程。</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

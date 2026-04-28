@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overview Of Claude Models Pm En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Overview of Claude Models — PM Quick-Scan</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) — primary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (model selection for production workloads)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 03</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude offers three model tiers — Opus (smartest), Sonnet (balanced), Haiku (fastest/cheapest) — and choosing the right model per feature is the single biggest lever PMs have over AI cost and user experience.</p>
+<hr />
+<h2>Mental Model: The Consulting Firm</h2>
+<p>Think of the three models as three tiers of consultants:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Consultant Analogy</th>
+<th>When to Hire</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Opus</td>
+<td>Senior partner — deep expertise, expensive, takes time</td>
+<td>Complex strategy work, high-stakes decisions</td>
+</tr>
+<tr>
+<td>Sonnet</td>
+<td>Mid-level associate — capable, reasonably priced, solid speed</td>
+<td>Most day-to-day client work</td>
+</tr>
+<tr>
+<td>Haiku</td>
+<td>Junior analyst — fast, cheap, good for routine tasks</td>
+<td>High-volume grunt work, quick turnaround</td>
+</tr>
+</tbody>
+</table>
+<p>You would never assign a senior partner to answer routine emails. Likewise, you should not route simple classification tasks to Opus.</p>
+<hr />
+<h2>The Three Models at a Glance</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Opus</th>
+<th>Sonnet</th>
+<th>Haiku</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Intelligence</td>
+<td>Highest</td>
+<td>High</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>Speed</td>
+<td>Slower</td>
+<td>Moderate</td>
+<td>Fastest</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>Highest</td>
+<td>Moderate</td>
+<td>Lowest</td>
+</tr>
+<tr>
+<td>Extended thinking</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Complex reasoning, multi-hour autonomous tasks</td>
+<td>General-purpose, coding, most features</td>
+<td>Real-time chat, classification, high-volume</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Why Model Selection Is a PM Decision</h2>
+<p>Model selection is not purely technical. It directly controls:</p>
+<table>
+<thead>
+<tr>
+<th>Business Lever</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cost per interaction</td>
+<td>Opus can cost 5-10x more than Haiku for the same conversation</td>
+</tr>
+<tr>
+<td>User-perceived latency</td>
+<td>Haiku responds in under a second; Opus may take several seconds</td>
+</tr>
+<tr>
+<td>Feature quality ceiling</td>
+<td>Haiku cannot do extended thinking; some features are impossible without Opus/Sonnet</td>
+</tr>
+<tr>
+<td>Scalability budget</td>
+<td>High-volume features on Opus can blow through budget in hours</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The PM job</strong>: define which features need which quality tier, then work with engineering to route accordingly.</p>
+<hr />
+<h2>Product Use Cases</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Recommended Model</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Customer support chatbot (high volume)</td>
+<td>Haiku</td>
+<td>Speed + cost; most support queries are routine</td>
+</tr>
+<tr>
+<td>Document analysis for legal review</td>
+<td>Opus</td>
+<td>Complex reasoning over long documents</td>
+</tr>
+<tr>
+<td>In-app writing assistant</td>
+<td>Sonnet</td>
+<td>Good quality, acceptable latency</td>
+</tr>
+<tr>
+<td>Real-time autocomplete suggestions</td>
+<td>Haiku</td>
+<td>Sub-second latency is non-negotiable</td>
+</tr>
+<tr>
+<td>Multi-step research agent</td>
+<td>Opus</td>
+<td>Needs extended thinking and autonomy</td>
+</tr>
+<tr>
+<td>Code review tool</td>
+<td>Sonnet</td>
+<td>Strong coding ability, precise edits</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>PM Decision Framework</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer Drives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>How complex is the reasoning our feature needs?</td>
+<td>Opus vs Sonnet vs Haiku</td>
+</tr>
+<tr>
+<td>How fast must the response feel to users?</td>
+<td>Haiku for real-time, Sonnet/Opus for async</td>
+</tr>
+<tr>
+<td>What is our cost ceiling per user per month?</td>
+<td>Model mix ratio</td>
+</tr>
+<tr>
+<td>Can we use different models for different features?</td>
+<td>Almost always yes — this is the recommended pattern</td>
+</tr>
+<tr>
+<td>Does any feature need extended thinking?</td>
+<td>If yes, Haiku is ruled out for that feature</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>The Multi-Model Architecture</h2>
+<p>The most cost-effective production pattern is to use multiple models:</p>
+<table>
+<thead>
+<tr>
+<th>Application Layer</th>
+<th>Model</th>
+<th>PM Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Greeting / routing / classification</td>
+<td>Haiku</td>
+<td>Instant, cheap; users don't need intelligence here</td>
+</tr>
+<tr>
+<td>Main feature logic</td>
+<td>Sonnet</td>
+<td>Quality matters but so does response time</td>
+</tr>
+<tr>
+<td>Escalation / complex edge cases</td>
+<td>Opus</td>
+<td>Reserve the expensive model for high-value moments</td>
+</tr>
+</tbody>
+</table>
+<p>This pattern can reduce AI costs by 60-80% compared to using a single high-end model for everything.</p>
+<hr />
+<h2>Common PM Mistakes</h2>
+<ol>
+<li><strong>Defaulting to the "best" model</strong> — Opus everywhere is like hiring senior partners for filing. Most features don't need maximum intelligence.</li>
+<li><strong>Ignoring the cost-per-interaction math</strong> — run the numbers before committing. A feature serving 100K users/day on Opus costs very differently than on Haiku.</li>
+<li><strong>Not specifying model per feature in the PRD</strong> — if you leave model selection to engineering without context, they will either over-spend (Opus for safety) or under-deliver (Haiku for budget).</li>
+<li><strong>Forgetting Haiku's limitation</strong> — it cannot do extended thinking. If your feature spec says "the AI should reason step by step," Haiku is out.</li>
+<li><strong>Treating model selection as permanent</strong> — you can change models per feature as quality or budget needs evolve. Build the routing flexibility from day one.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Model selection is the highest-leverage cost decision a PM makes on a Claude-powered product. It is not a technical detail to delegate — it is a business architecture choice that determines your unit economics and user experience simultaneously. The right answer is almost always "use multiple models, routed by task complexity."</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong>: model selection questions are a near-certainty. Expect scenarios describing a workload and asking which model fits.</li>
+<li>Know the three-way trade-off: intelligence vs speed vs cost.</li>
+<li>Remember: Haiku does NOT support extended thinking. This is the most testable differentiator.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are Claude's three model families?</td>
+<td>Opus (smartest), Sonnet (balanced), Haiku (fastest/cheapest)</td>
+</tr>
+<tr>
+<td>Which model is best for real-time user-facing features?</td>
+<td>Haiku — lowest latency and cost</td>
+</tr>
+<tr>
+<td>Why is model selection a PM decision, not just engineering?</td>
+<td>It directly controls cost per interaction, perceived latency, and feature quality ceiling</td>
+</tr>
+<tr>
+<td>What is the recommended production pattern for model selection?</td>
+<td>Use multiple models — Haiku for simple tasks, Sonnet for core logic, Opus for complex reasoning</td>
+</tr>
+<tr>
+<td>Which model lacks extended thinking support?</td>
+<td>Haiku — it cannot do step-by-step reasoning</td>
+</tr>
+<tr>
+<td>How much can multi-model routing reduce costs?</td>
+<td>60-80% compared to using a single high-end model for everything</td>
+</tr>
+<tr>
+<td>When should a PM insist on Opus?</td>
+<td>When the feature requires deep reasoning, multi-step planning, or long autonomous operation</td>
+</tr>
+<tr>
+<td>What model does this course use as its default?</td>
+<td>Sonnet — best balance of quality, speed, and cost</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

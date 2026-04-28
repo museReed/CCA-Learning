@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roots Walkthrough Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Roots 實作演練 — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>詳情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — 模型上下文協議 (23%), D4 — 安全與防護機制 (15%)</td>
+</tr>
+<tr>
+<td>任務說明</td>
+<td>2.2 (MCP 基本要素 — roots), 4.3 (存取控制)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>model-context-protocol-advanced-topics / 02-roots-and-messages / 第 08 課</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>Roots 是客戶端定義的 <code>file://</code> URI，告訴 MCP 伺服器它被允許存取哪些目錄。客戶端透過回呼提供它們，而伺服器必須自行實作授權邏輯來執行存取邊界。</p>
+<hr />
+<h2>什麼是 Roots？</h2>
+<p>Roots 是 MCP 的<strong>檔案系統存取控制</strong>機制。它們回答了一個問題：「這個伺服器應該能看到哪些目錄？」</p>
+<p>關鍵特性：<br />
+- Roots 由<strong>客戶端定義</strong>（通常來自使用者輸入）<br />
+- 它們使用 <code>file://</code> URI 格式<br />
+- 伺服器在執行時<strong>請求</strong>客戶端提供 roots（非寫死）<br />
+- MCP SDK <strong>不會</strong>自動執行 root 邊界——你必須自己實作</p>
+<hr />
+<h2>步驟 1：從使用者輸入定義 Roots</h2>
+<pre><code class="language-python"># main.py
+import sys
+
+async def main():
+    # 從命令列參數取得根目錄
+    root_paths = sys.argv[1:]
+    if not root_paths:
+        print(&quot;Usage: uv run main.py &lt;root1&gt; [root2] ...&quot;)
+        sys.exit(1)
+
+    # 將 roots 傳給 MCP 客戶端
+    doc_client = await stack.enter_async_context(
+        MCPClient(
+            command=&quot;uv&quot;, args=[&quot;run&quot;, &quot;mcp_server.py&quot;], roots=root_paths
+        )
+    )
+</code></pre>
+<p>理想情況下，使用者指定伺服器可以存取哪些目錄。程式接受 CLI 參數作為路徑，並傳給 <code>MCPClient</code>。</p>
+<hr />
+<h2>步驟 2：建立 Root 物件</h2>
+<pre><code class="language-python"># mcp_client.py
+from mcp.types import Root, ListRootsResult
+from pydantic import FileUrl
+from pathlib import Path
+
+def _create_roots(self, root_paths: list[str]) -&gt; list[Root]:
+    &quot;&quot;&quot;將路徑字串轉換為 Root 物件。&quot;&quot;&quot;
+    roots = []
+    for path in root_paths:
+        p = Path(path).resolve()
+        file_url = FileUrl(f&quot;file://{p}&quot;)
+        roots.append(Root(uri=file_url, name=p.name or &quot;Root&quot;))
+    return roots
+</code></pre>
+<p>根據 MCP 規範，所有 roots 必須有以 <code>file://</code> 開頭的 URI。此函數將使用者提供的路徑轉換為正確的 <code>Root</code> 物件。</p>
+<hr />
+<h2>步驟 3：Roots 回呼</h2>
+<pre><code class="language-python"># mcp_client.py
+async def _handle_list_roots(
+    self, context: RequestContext[&quot;ClientSession&quot;, None]
+) -&gt; ListRootsResult | ErrorData:
+    &quot;&quot;&quot;伺服器請求 roots 時的回呼。&quot;&quot;&quot;
+    return ListRootsResult(roots=self._roots)
+</code></pre>
+<p>客戶端不會立即將 roots 發送給伺服器。相反，伺服器在未來某個時間點請求它們。回呼在 <code>ListRootsResult</code> 物件內回傳 roots。</p>
+<p>此回呼傳入 <code>ClientSession</code>：</p>
+<pre><code class="language-python">self._session = await self._exit_stack.enter_async_context(
+    ClientSession(
+        _stdio,
+        _write,
+        list_roots_callback=self._handle_list_roots
+        if self._roots
+        else None,
+    )
+)
+</code></pre>
+<hr />
+<h2>步驟 4：伺服器存取 Roots</h2>
+<pre><code class="language-python"># mcp_server.py
+@mcp.tool()
+async def list_roots(ctx: Context):
+    &quot;&quot;&quot;列出所有可存取的根目錄。&quot;&quot;&quot;
+    roots_result = await ctx.session.list_roots()
+    client_roots = roots_result.roots
+    return [file_url_to_path(root.uri) for root in client_roots]
+</code></pre>
+<p>Roots 透過呼叫 <code>ctx.session.list_roots()</code> 來存取。這會向客戶端發送請求，觸發根目錄列表回呼。</p>
+<p>伺服器在兩種情境中使用 roots：<br />
+1. <strong>授權檔案存取</strong> — 在工具讀取或寫入檔案之前<br />
+2. <strong>為 LLM 解析路徑</strong> — 當 Claude 需要找到檔案位置時（例如「讀取 todos.txt」）</p>
+<hr />
+<h2>步驟 5：實作存取控制</h2>
+<p><strong>重要</strong>：MCP SDK 不會執行 root 邊界。你必須自己實作該檢查。</p>
+<pre><code class="language-python"># mcp_server.py
+async def is_path_allowed(requested_path: Path, ctx: Context) -&gt; bool:
+    roots_result = await ctx.session.list_roots()
+    client_roots = roots_result.roots
+
+    if not requested_path.exists():
+        return False
+
+    if requested_path.is_file():
+        requested_path = requested_path.parent
+
+    for root in client_roots:
+        root_path = file_url_to_path(root.uri)
+        try:
+            requested_path.relative_to(root_path)
+            return True
+        except ValueError:
+            continue
+
+    return False
+</code></pre>
+<p>授權函數的運作方式：<br />
+1. 從客戶端取得 roots 清單<br />
+2. 檢查請求的路徑是否存在<br />
+3. 對於檔案，檢查其父目錄<br />
+4. 使用 <code>relative_to()</code> 驗證路徑是否在允許的 root 內<br />
+5. 如果沒有匹配的 root，回傳 <code>False</code></p>
+<hr />
+<h2>步驟 6：在工具中使用授權</h2>
+<pre><code class="language-python">@mcp.tool()
+async def convert_video(input_path: str, format: str, *, ctx: Context):
+    &quot;&quot;&quot;將 MP4 影片檔轉換為其他格式。&quot;&quot;&quot;
+    input_file = VideoConverter.validate_input(input_path)
+
+    # 確保輸入檔案在某個 root 內
+    if not await is_path_allowed(input_file, ctx):
+        raise ValueError(f&quot;Access to path is not allowed: {input_path}&quot;)
+
+    return await VideoConverter.convert(input_path, format)
+</code></pre>
+<p>每個存取檔案系統的工具都應在繼續之前呼叫 <code>is_path_allowed()</code>。</p>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li>Roots 是 <strong>D2 基本要素</strong>（任務 2.2）也是 <strong>D4 安全關注點</strong>（任務 4.3）</li>
+<li>最關鍵的考試重點：<strong>MCP SDK 不會自動執行 root 邊界</strong>——你必須自己實作授權</li>
+<li>回呼模式（客戶端透過 <code>list_roots_callback</code> 按需提供 roots）是常考重點</li>
+<li>Root URI 必須使用 <code>file://</code> 協議</li>
+<li>預期會有情境題，存取控制缺失，你需要找出漏洞</li>
+<li><code>relative_to()</code> 路徑驗證模式是 D4 中常見的實作細節考點</li>
+</ul>
+<hr />
+<h2>記憶卡</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>問題</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>在 MCP 中，誰定義 roots？</td>
+<td><strong>客戶端</strong>定義 roots，通常基於使用者輸入</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Roots 必須使用什麼 URI 協議？</td>
+<td><code>file://</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>MCP SDK 會自動執行 root 邊界嗎？</td>
+<td><strong>不會</strong>——你必須自己實作授權邏輯</td>
+</tr>
+<tr>
+<td>4</td>
+<td>伺服器如何向客戶端請求 roots？</td>
+<td>呼叫 <code>ctx.session.list_roots()</code>，觸發客戶端的 <code>list_roots_callback</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Roots 回呼回傳什麼？</td>
+<td>一個包含 <code>Root</code> 物件清單的 <code>ListRootsResult</code> 物件</td>
+</tr>
+<tr>
+<td>6</td>
+<td>用什麼 Python 方法檢查路徑是否在 root 內？</td>
+<td><code>Path.relative_to()</code>——如果路徑在 root 外會拋出 <code>ValueError</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>伺服器在哪兩種情境中使用 roots？</td>
+<td>1) 授權檔案/資料夾存取，2) 為 LLM 解析路徑</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>list_roots_callback</code> 在哪裡註冊？</td>
+<td>在 <code>ClientSession</code> 建構函數中</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

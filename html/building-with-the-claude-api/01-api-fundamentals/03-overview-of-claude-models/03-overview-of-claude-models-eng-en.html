@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overview Of Claude Models Eng En</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Overview of Claude Models — Engineering Deep Dive</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exam Domain</td>
+<td>D5 — Enterprise Deployment (20%) — primary</td>
+</tr>
+<tr>
+<td>Task Statements</td>
+<td>5.1 (model selection for production workloads)</td>
+</tr>
+<tr>
+<td>Source</td>
+<td>building-with-the-claude-api / 01-api-fundamentals / Lesson 03</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>One-Liner</h2>
+<p>Claude ships three model families — Opus (max intelligence), Sonnet (balanced), Haiku (fastest/cheapest) — and picking the right one per feature is the first architecture decision in any Claude-powered system.</p>
+<hr />
+<h2>The Three Model Families</h2>
+<p>All three share the same core capabilities (text generation, coding, image analysis). The difference is optimization target:</p>
+<pre><code>Intelligence ◀─────────────────────────────────────▶ Speed / Cost
+
+   Opus              Sonnet               Haiku
+   ├── highest IQ    ├── balanced          ├── fastest
+   ├── reasoning     ├── strong coding     ├── lowest cost
+   ├── multi-hour    ├── precise edits     ├── no extended thinking
+   │   autonomy      │   to codebases      │
+   ├── higher cost   ├── moderate cost     ├── real-time UX
+   └── higher latency└── moderate latency  └── lowest latency
+</code></pre>
+<h3>Opus — Maximum Intelligence</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Optimization</td>
+<td>Highest intelligence / reasoning</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Complex multi-step tasks, long autonomous sessions (hours), deep planning</td>
+</tr>
+<tr>
+<td>Reasoning</td>
+<td>Supports extended thinking — can spend time on hard problems</td>
+</tr>
+<tr>
+<td>Trade-off</td>
+<td>Higher latency, higher cost per request</td>
+</tr>
+<tr>
+<td>Use when</td>
+<td>Quality matters more than speed; complex requirements need deep reasoning</td>
+</tr>
+</tbody>
+</table>
+<h3>Sonnet — The Sweet Spot</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Optimization</td>
+<td>Balance of intelligence, speed, and cost</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Most practical use cases, coding tasks, precise codebase edits</td>
+</tr>
+<tr>
+<td>Reasoning</td>
+<td>Supports extended thinking</td>
+</tr>
+<tr>
+<td>Trade-off</td>
+<td>Neither the smartest nor the fastest, but the best default</td>
+</tr>
+<tr>
+<td>Use when</td>
+<td>General-purpose work; the course default model</td>
+</tr>
+</tbody>
+</table>
+<h3>Haiku — Speed Champion</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Optimization</td>
+<td>Fastest response time, lowest cost</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>User-facing real-time interactions, high-volume processing</td>
+</tr>
+<tr>
+<td>Reasoning</td>
+<td>Does NOT support extended thinking</td>
+</tr>
+<tr>
+<td>Trade-off</td>
+<td>Moderate intelligence compared to Opus/Sonnet</td>
+</tr>
+<tr>
+<td>Use when</td>
+<td>Latency-sensitive features, classification, simple extraction</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Model Selection Framework</h2>
+<p>The decision tree is simple:</p>
+<pre><code class="language-python">def select_model(task):
+    if task.requires_deep_reasoning or task.is_multi_step_complex:
+        return &quot;opus&quot;
+    elif task.requires_real_time or task.is_high_volume:
+        return &quot;haiku&quot;
+    else:
+        return &quot;sonnet&quot;  # the default for most applications
+</code></pre>
+<p><strong>Critical insight</strong>: production systems often use multiple models simultaneously:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Model</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User-facing chat</td>
+<td>Haiku</td>
+<td>Speed matters for UX</td>
+</tr>
+<tr>
+<td>Core business logic</td>
+<td>Sonnet</td>
+<td>Balance of quality and cost</td>
+</tr>
+<tr>
+<td>Complex reasoning tasks</td>
+<td>Opus</td>
+<td>Quality over everything else</td>
+</tr>
+</tbody>
+</table>
+<p>This is not premature optimization — it is cost architecture. A system that routes everything through Opus will cost 5-10x more than one that uses Haiku for simple tasks.</p>
+<hr />
+<h2>Reasoning Support Comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Opus</th>
+<th>Sonnet</th>
+<th>Haiku</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Standard responses</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Extended thinking</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Adaptive (simple → fast, complex → think)</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>Haiku's lack of extended thinking is the most important technical differentiator. If your feature needs chain-of-thought reasoning, Haiku is not an option.</p>
+<hr />
+<h2>Common Mistakes</h2>
+<ol>
+<li><strong>Using Opus for everything</strong> — wastes money and adds latency; most tasks don't need peak intelligence.</li>
+<li><strong>Using Haiku for complex reasoning</strong> — Haiku doesn't support extended thinking; it will give shallow answers on hard problems.</li>
+<li><strong>Picking one model and never changing</strong> — model selection should be per-feature, not per-application.</li>
+<li><strong>Ignoring the cost multiplier</strong> — the gap between Haiku and Opus pricing means model selection is a budget decision, not just a technical one.</li>
+<li><strong>Assuming model names are stable</strong> — always use the specific model string (e.g., <code>claude-sonnet-4-5</code>) rather than assuming "Sonnet" means the same version forever.</li>
+</ol>
+<blockquote>
+<p><strong>Key Insight</strong></p>
+<p>Model selection is not a one-time decision — it is a routing strategy. The best production systems treat model selection as a parameter, not a constant. They route simple tasks to Haiku, standard tasks to Sonnet, and complex tasks to Opus. This is the first architecture decision you make, and it directly controls your cost and latency budgets.</p>
+</blockquote>
+<hr />
+<h2>CCA Exam Relevance</h2>
+<ul>
+<li><strong>D5 (Enterprise Deployment)</strong>: expect scenario questions like "which model should you use for a high-volume customer support bot?" (Haiku) or "which model for a multi-step research agent?" (Opus).</li>
+<li>Model selection questions will likely present trade-off scenarios and ask you to pick the appropriate model family.</li>
+<li>Know that Haiku does NOT support extended thinking — this is a likely exam differentiator.</li>
+</ul>
+<hr />
+<h2>Flashcards</h2>
+<table>
+<thead>
+<tr>
+<th>Front</th>
+<th>Back</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What are Claude's three model families?</td>
+<td>Opus (max intelligence), Sonnet (balanced), Haiku (fastest/cheapest)</td>
+</tr>
+<tr>
+<td>Which model should you use for real-time user-facing chat?</td>
+<td>Haiku — optimized for speed and cost</td>
+</tr>
+<tr>
+<td>Which model supports extended thinking?</td>
+<td>Opus and Sonnet — Haiku does NOT</td>
+</tr>
+<tr>
+<td>What is the recommended default model for most applications?</td>
+<td>Sonnet — best balance of intelligence, speed, and cost</td>
+</tr>
+<tr>
+<td>Why do production systems use multiple models?</td>
+<td>Different features have different trade-offs; routing saves cost without sacrificing quality</td>
+</tr>
+<tr>
+<td>When should you choose Opus over Sonnet?</td>
+<td>When the task requires deep reasoning, multi-step planning, or long autonomous operation</td>
+</tr>
+<tr>
+<td>What is the key limitation of Haiku?</td>
+<td>No extended thinking / reasoning support; it gives shallow answers on complex problems</td>
+</tr>
+<tr>
+<td>Which model does this course primarily use?</td>
+<td>Sonnet — for its balance of quality, speed, and cost</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

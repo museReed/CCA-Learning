@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications Walkthrough Eng Zh Tw</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; background: #fafafa; }
+h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+h2 { color: #334155; margin-top: 2rem; }
+h3 { color: #475569; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 600; }
+code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+pre code { background: none; color: inherit; padding: 0; }
+blockquote { border-left: 4px solid #3b82f6; margin: 1rem 0; padding: 0.5rem 1rem; background: #eff6ff; }
+img { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+em { color: #64748b; }
+a { color: #3b82f6; }
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.back-link { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9em; }
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">← Back to Index</a>
+<h1>Notifications 實作演練 — 工程深度解析</h1>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>詳情</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>考試領域</td>
+<td>D2 — 模型上下文協議 (23%)</td>
+</tr>
+<tr>
+<td>任務說明</td>
+<td>2.2 (MCP 基本要素 — 通知)</td>
+</tr>
+<tr>
+<td>來源</td>
+<td>model-context-protocol-advanced-topics / 01-sampling-and-notifications / 第 06 課</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一句話摘要</h2>
+<p>MCP 通知讓伺服器在工具執行期間透過 <code>Context</code> 物件發送日誌訊息和進度更新，而客戶端則定義日誌和進度回呼函數來向使用者顯示這些資訊。</p>
+<hr />
+<h2>兩種通知類型</h2>
+<p>MCP 支援兩種通知機制，兩者都是「發射即忘」（伺服器不等待回應）：</p>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>伺服器 API</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>日誌記錄</strong></td>
+<td><code>ctx.info()</code>、<code>ctx.warning()</code>、<code>ctx.debug()</code>、<code>ctx.error()</code></td>
+<td>以不同嚴重等級發送結構化日誌訊息</td>
+</tr>
+<tr>
+<td><strong>進度報告</strong></td>
+<td><code>ctx.report_progress(current, total)</code></td>
+<td>回報任務完成百分比</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>伺服器端：使用 Context 發送通知</h2>
+<pre><code class="language-python">from mcp.server.fastmcp import FastMCP, Context
+import asyncio
+
+mcp = FastMCP(name=&quot;Demo Server&quot;)
+
+@mcp.tool()
+async def add(a: int, b: int, ctx: Context) -&gt; int:
+    await ctx.info(&quot;Preparing to add...&quot;)
+    await ctx.report_progress(20, 100)
+
+    await asyncio.sleep(2)
+
+    await ctx.info(&quot;OK, adding...&quot;)
+    await ctx.report_progress(80, 100)
+
+    return a + b
+</code></pre>
+<p>關鍵重點：<br />
+- <strong><code>Context</code> 是最後一個參數</strong> — 工具函數自動接收它作為最後一個參數<br />
+- <strong>日誌方法</strong> — <code>ctx.info()</code>、<code>ctx.warning()</code>、<code>ctx.debug()</code>、<code>ctx.error()</code> 對應標準日誌等級<br />
+- <strong>進度報告</strong> — <code>ctx.report_progress(current, total)</code>，其中 <code>current</code> 是已完成的工作量，<code>total</code> 是總量<br />
+- 兩者都是<strong>非同步</strong>呼叫，會將訊息發送給客戶端</p>
+<hr />
+<h2>客戶端：定義回呼函數</h2>
+<pre><code class="language-python">from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+from mcp.types import LoggingMessageNotificationParams
+
+server_params = StdioServerParameters(
+    command=&quot;uv&quot;,
+    args=[&quot;run&quot;, &quot;server.py&quot;],
+)
+
+async def logging_callback(params: LoggingMessageNotificationParams):
+    print(params.data)
+
+async def print_progress_callback(
+    progress: float, total: float | None, message: str | None
+):
+    if total is not None:
+        percentage = (progress / total) * 100
+        print(f&quot;Progress: {progress}/{total} ({percentage:.1f}%)&quot;)
+    else:
+        print(f&quot;Progress: {progress}&quot;)
+</code></pre>
+<p>日誌回呼接收 <code>LoggingMessageNotificationParams</code>，其 <code>.data</code> 欄位包含日誌訊息。進度回呼接收 <code>progress</code>、<code>total</code>（可選）和 <code>message</code>（可選）。</p>
+<hr />
+<h2>將回呼連接到會話</h2>
+<pre><code class="language-python">async def run():
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(
+            read, write, logging_callback=logging_callback
+        ) as session:
+            await session.initialize()
+
+            await session.call_tool(
+                name=&quot;add&quot;,
+                arguments={&quot;a&quot;: 1, &quot;b&quot;: 3},
+                progress_callback=print_progress_callback,
+            )
+</code></pre>
+<p>關鍵連接細節：<br />
+- <strong>日誌回呼</strong>透過 <code>logging_callback=</code> 傳入 <code>ClientSession</code> 建構函數<br />
+- <strong>進度回呼</strong>透過 <code>progress_callback=</code> 傳入 <code>call_tool()</code></p>
+<p>這是不同的連接點，因為日誌記錄適用於整個會話，而進度追蹤是針對每次工具呼叫的。</p>
+<hr />
+<h2>日誌 vs 進度：何時使用哪個</h2>
+<table>
+<thead>
+<tr>
+<th>使用情境</th>
+<th>機制</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>告知使用者目前步驟</td>
+<td><code>ctx.info()</code></td>
+<td>人類可讀的狀態訊息</td>
+</tr>
+<tr>
+<td>警告效能降低</td>
+<td><code>ctx.warning()</code></td>
+<td>嚴重等級對過濾很重要</td>
+</tr>
+<tr>
+<td>顯示完成百分比</td>
+<td><code>ctx.report_progress()</code></td>
+<td>用於 UI 進度條的數值進度</td>
+</tr>
+<tr>
+<td>除錯工具內部</td>
+<td><code>ctx.debug()</code></td>
+<td>可在生產環境中過濾掉</td>
+</tr>
+<tr>
+<td>回報可恢復的錯誤</td>
+<td><code>ctx.error()</code></td>
+<td>發出問題信號但不中斷</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>CCA 考試相關性</h2>
+<ul>
+<li>通知是 <strong>D2 基本要素</strong>（任務 2.2）。預期考題會涉及每個回呼的連接位置。</li>
+<li>關鍵區別是：<code>logging_callback</code> 在 <code>ClientSession</code> 上，<code>progress_callback</code> 在 <code>call_tool()</code> 上。</li>
+<li><code>Context</code> 會自動作為最後一個參數提供給工具函數——你不需要手動建構它。</li>
+<li>通知是<strong>發射即忘</strong>——伺服器不等待確認。</li>
+<li>日誌等級（<code>info</code>、<code>warning</code>、<code>debug</code>、<code>error</code>）可能出現在測試適當嚴重等級選擇的考試情境中。</li>
+</ul>
+<hr />
+<h2>記憶卡</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>問題</th>
+<th>答案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>伺服器工具函數如何接收 Context 物件？</td>
+<td>自動作為最後一個參數——不需要手動建構</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Context 物件上有哪四個日誌方法？</td>
+<td><code>ctx.info()</code>、<code>ctx.warning()</code>、<code>ctx.debug()</code>、<code>ctx.error()</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>ctx.report_progress()</code> 的參數是什麼？</td>
+<td><code>current</code>（已完成的工作量）和 <code>total</code>（總工作量）</td>
+</tr>
+<tr>
+<td>4</td>
+<td>日誌回呼連接在哪裡？</td>
+<td><code>ClientSession</code> 建構函數，透過 <code>logging_callback=</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>進度回呼連接在哪裡？</td>
+<td><code>call_tool()</code> 方法，透過 <code>progress_callback=</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>為什麼日誌和進度回呼連接在不同的位置？</td>
+<td>日誌記錄適用於整個會話；進度追蹤是針對每次工具呼叫的</td>
+</tr>
+<tr>
+<td>7</td>
+<td>MCP 通知是同步的還是發射即忘的？</td>
+<td>發射即忘——伺服器不等待確認</td>
+</tr>
+<tr>
+<td>8</td>
+<td>日誌回呼接收什麼型別？</td>
+<td><code>LoggingMessageNotificationParams</code>，帶有 <code>.data</code> 欄位</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
