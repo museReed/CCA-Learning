@@ -1,16 +1,16 @@
-# Creating a subagent — Engineering Deep Dive
+# Creating a subagent — 工程師深度解析
 
 | 項目 | 細節 |
-|------|--------|
-| 考試領域 | D3 — Claude Code Configuration & Workflows (20%), D1 — Agentic Architecture (27%) |
-| 任務陳述 | 3.4 (context management), 1.1 (agentic loops), 1.3 (multi-agent orchestration) |
-| 來源 | introduction-to-subagents / Lesson 02 |
+|------|------|
+| 考試領域 | D3 — Claude Code 配置與工作流程 (20%)、D1 — Agentic 架構 (27%) |
+| 任務陳述 | 3.4（context 管理）、1.1（agentic 迴圈）、1.3（多代理協作） |
+| 來源 | introduction-to-subagents / 第 02 課 |
 
 ---
 
 ## 一句話摘要
 
-Claude Code comes with built-in subagents, but you can also create your own. Custom subagents specialize in specific tasks -- like reviewing code, writing tests, or checking documentation.
+Claude Code 內建了 subagent，但你也可以自行建立。自訂 subagent 專門處理特定任務——例如審查程式碼、撰寫測試或檢查文件。
 
 ---
 
@@ -22,4 +22,4 @@ Claude Code comes with built-in subagents, but you can also create your own. Cus
 
 ---
 
-*Source: introduction-to-subagents — Creating a subagent*
+*來源：introduction-to-subagents — Creating a subagent*

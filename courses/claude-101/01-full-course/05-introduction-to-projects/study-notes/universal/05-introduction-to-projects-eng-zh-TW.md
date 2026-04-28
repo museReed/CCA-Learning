@@ -1,16 +1,16 @@
-# Introduction to projects — Engineering Deep Dive
+# Introduction to projects — 工程師深度解析
 
 | 項目 | 細節 |
-|------|--------|
-| 考試領域 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 來源 | claude-101 / Lesson 05 |
+|------|------|
+| 考試領域 | 通識 — Claude 基礎 |
+| 任務陳述 | 一般產品知識（非 CCA 直接考試範圍，但為基礎） |
+| 來源 | claude-101 / 第 05 課 |
 
 ---
 
 ## 一句話摘要
 
-Create a new project with a name, description, and visibility settings
+建立一個具有名稱、描述和可見性設定的新 Projects
 
 ---
 
@@ -18,23 +18,23 @@ Create a new project with a name, description, and visibility settings
 
 ### 學習目標
 
-- Explain what projects are and when to use them
-- Create a new project with a name, description, and visibility settings
-- Add documents and files to your project's knowledge base
-- Write effective project instructions to guide Claude's behavior
-- Share projects with teammates (for Claude for Work (Team and Enterprise plan) users)
+- 說明 Projects 是什麼以及何時使用它們
+- 建立一個具有名稱、描述和可見性設定的新 Projects
+- 將文件和檔案加入你的 Projects 知識庫
+- 撰寫有效的 Projects 指令來引導 Claude 的行為
+- 與團隊成員分享 Projects（適用於 Claude for Work（Team 和 Enterprise 方案）使用者）
 
 ### 重點摘要
 
-Projects are self-contained workspaces with their own memory, chat histories, knowledge bases, and customized instructions. Think of them as dedicated environments for specific work streams.
+Projects 是獨立的工作區，擁有自己的記憶、聊天歷史、知識庫和自訂指令。可以把它們想成針對特定工作流程的專用環境。
 
 ---
 
 ## 記憶卡
 
-**Q1:** Projects are self-contained workspaces with their own memory, chat histories,...?
-**A1:** Projects are self-contained workspaces with their own memory, chat histories, knowledge bases, and customized instructions. Think of them as dedicated environments for specific work streams.
+**Q1：** Projects 是獨立的工作區，擁有自己的記憶、聊天歷史……？
+**A1：** Projects 是獨立的工作區，擁有自己的記憶、聊天歷史、知識庫和自訂指令。可以把它們想成針對特定工作流程的專用環境。
 
 ---
 
-*Source: claude-101 — Introduction to projects*
+*來源：claude-101 — Introduction to projects*

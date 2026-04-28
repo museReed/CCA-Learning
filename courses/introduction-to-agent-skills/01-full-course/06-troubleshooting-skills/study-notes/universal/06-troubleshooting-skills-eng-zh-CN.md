@@ -1,16 +1,16 @@
-# Troubleshooting skills — Engineering Deep Dive
+# Troubleshooting skills — 工程师深度解析
 
-| 项目 | 細节 |
+| 项目 | 细节 |
 |------|--------|
-| 考试領域 | D3 — Claude Code Configuration & Workflows (20%) |
-| 任務陳述 | 3.1 (CLAUDE.md), 3.3 (custom commands/skills), 3.5 (permission model) |
-| 来源 | introduction-to-agent-skills / Lesson 06 |
+| 考试领域 | D3 — Claude Code 设定与工作流程 (20%) |
+| 任务陈述 | 3.1 (CLAUDE.md)、3.3 (自订指令/skill)、3.5 (权限模型) |
+| 来源 | introduction-to-agent-skills / 第 06 课 |
 
 ---
 
 ## 一句话摘要
 
-When skills don't work as expected, the problem usually falls into a few predictable categories. This video walks through each one — from skills that don't trigger to priority conflicts to runtime failures — and gives you a systematic troubleshooting approach.
+当 skill 无法如预期运作时，问题通常落在几个可预测的类別中。本影片逐一講解 — 从 skill 未触发、优先顺序冲突到執行时错误 — 並提供系统化的疑难排解方法。
 
 ---
 
@@ -18,22 +18,22 @@ When skills don't work as expected, the problem usually falls into a few predict
 
 ### 学习目标
 
-- Use the skills validator to catch structural issues before debugging
-- Diagnose and fix common skill triggering and loading problems
-- Resolve skill priority conflicts between enterprise, personal, project, and plugin skills
-- Debug runtime errors including missing dependencies, permissions, and path issues
+- 使用 skill 验证器在除错前捕捉结构性问题
+- 诊断並修復常见的 skill 触发和载入问题
+- 解決 Enterprise、个人、專案和 plugin skill 之间的优先顺序冲突
+- 除错執行时错误，包括缺少依賴项、权限和路徑问题
 
 ### 重点摘要
 
-Start with the skills validator tool — it catches structural problems before you spend time debugging other things
+从 skill 验证器工具开始 — 它能在你花时间除错其他问题之前捕捉结构性问题。
 
 ---
 
-## 记憶卡
+## 记忆卡
 
-**Q1:** Start with the skills validator tool — it catches structural?
-**A1:** Start with the skills validator tool — it catches structural problems before you spend time debugging other things
+**Q1：** 从 skill 验证器工具开始 — 它能捕捉结构性…？
+**A1：** 从 skill 验证器工具开始 — 它能在你花时间除错其他问题之前捕捉结构性问题。
 
 ---
 
-*Source: introduction-to-agent-skills — Troubleshooting skills*
+*来源：introduction-to-agent-skills — Troubleshooting skills*

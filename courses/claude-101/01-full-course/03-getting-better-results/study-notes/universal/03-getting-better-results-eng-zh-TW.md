@@ -1,16 +1,16 @@
-# Getting better results — Engineering Deep Dive
+# Getting better results — 工程師深度解析
 
 | 項目 | 細節 |
-|------|--------|
-| 考試領域 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 來源 | claude-101 / Lesson 03 |
+|------|------|
+| 考試領域 | 通識 — Claude 基礎 |
+| 任務陳述 | 一般產品知識（非 CCA 直接考試範圍，但為基礎） |
+| 來源 | claude-101 / 第 03 課 |
 
 ---
 
 ## 一句話摘要
 
-Recognize common challenges when starting out with AI and use troubleshooting techniques to overcome them
+辨識使用 AI 時常見的挑戰，並運用除錯技巧來克服它們
 
 ---
 
@@ -18,9 +18,9 @@ Recognize common challenges when starting out with AI and use troubleshooting te
 
 ### 學習目標
 
-- Recognize common challenges when starting out with AI and use troubleshooting techniques to overcome them
-- Define AI Fluency and know where to go to learn more about working with AI in a fluent way
-- Explain how you might set up evals to better understand how Claude might perform with your unique workflows
+- 辨識使用 AI 初期常見的挑戰，並運用除錯技巧來克服它們
+- 定義「AI 流暢度」，並知道去哪裡學習更多關於流暢使用 AI 的方法
+- 說明如何設置評估（evals）以更好地了解 Claude 在你獨特工作流程中的表現
 
 ---
 
@@ -28,4 +28,4 @@ Recognize common challenges when starting out with AI and use troubleshooting te
 
 ---
 
-*Source: claude-101 — Getting better results*
+*來源：claude-101 — Getting better results*

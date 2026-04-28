@@ -1,16 +1,16 @@
-# Claude desktop app: Chat, Cowork, Code — Engineering Deep Dive
+# Claude desktop app: Chat, Cowork, Code — 工程師深度解析
 
 | 項目 | 細節 |
-|------|--------|
-| 考試領域 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 來源 | claude-101 / Lesson 04 |
+|------|------|
+| 考試領域 | 通識 — Claude 基礎 |
+| 任務陳述 | 一般產品知識（非 CCA 直接考試範圍，但為基礎） |
+| 來源 | claude-101 / 第 04 課 |
 
 ---
 
 ## 一句話摘要
 
-Navigating the Claude desktop app: Chat, Cowork, Code
+瀏覽 Claude 桌面應用程式：Chat、Cowork、Code
 
 ---
 
@@ -18,9 +18,9 @@ Navigating the Claude desktop app: Chat, Cowork, Code
 
 ### 學習目標
 
-- Identify the three modes in the Claude desktop app — Chat, Cowork, and Code — and what each is designed for
-- Explain key features unique to each mode, including quick entry, scheduled tasks, and local vs. remote development
-- Choose the right mode based on the type of work you need to accomplish
+- 識別 Claude 桌面應用程式中的三種模式 — Chat、Cowork 和 Code — 以及每種模式的用途
+- 說明每種模式獨有的關鍵功能，包括快速輸入、排程任務，以及本地端與遠端開發
+- 根據你需要完成的工作類型選擇正確的模式
 
 ---
 
@@ -28,4 +28,4 @@ Navigating the Claude desktop app: Chat, Cowork, Code
 
 ---
 
-*Source: claude-101 — Claude desktop app: Chat, Cowork, Code*
+*來源：claude-101 — Claude desktop app: Chat, Cowork, Code*

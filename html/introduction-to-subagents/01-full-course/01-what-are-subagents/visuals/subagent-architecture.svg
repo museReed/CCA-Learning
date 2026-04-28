@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 560" width="560" height="560">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F172A"/>
+      <stop offset="100%" style="stop-color:#1E293B"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6"/>
+      <stop offset="100%" style="stop-color:#2563EB"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#22C55E"/>
+      <stop offset="100%" style="stop-color:#16A34A"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F97316"/>
+      <stop offset="100%" style="stop-color:#EA580C"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#3B82F6"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#22C55E"/>
+    </marker>
+  </defs>
+
+  <rect width="560" height="560" rx="16" fill="url(#bgGrad)"/>
+
+  <!-- Title -->
+  <text x="280" y="40" text-anchor="middle" fill="#F8FAFC" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="20" font-weight="700">Subagent Architecture</text>
+  <text x="280" y="62" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="12">How Claude Code delegates work to specialized subagents</text>
+
+  <!-- Main Agent Card -->
+  <rect x="180" y="85" width="200" height="80" rx="12" fill="url(#blueGrad)" filter="url(#shadow)"/>
+  <text x="280" y="115" text-anchor="middle" fill="#FFF" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="700">Main Claude Code Agent</text>
+  <text x="280" y="135" text-anchor="middle" fill="#DBEAFE" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="11">Orchestrator &amp; Decision Maker</text>
+  <text x="280" y="152" text-anchor="middle" fill="#BFDBFE" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Full context window</text>
+
+  <!-- Task Tool Label -->
+  <rect x="215" y="182" width="130" height="26" rx="13" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5"/>
+  <text x="280" y="199" text-anchor="middle" fill="#3B82F6" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600">Task Tool</text>
+
+  <!-- Arrows down from main agent -->
+  <line x1="140" y1="208" x2="140" y2="280" stroke="#3B82F6" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrowBlue)"/>
+  <line x1="280" y1="208" x2="280" y2="280" stroke="#3B82F6" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrowBlue)"/>
+  <line x1="420" y1="208" x2="420" y2="280" stroke="#3B82F6" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrowBlue)"/>
+
+  <!-- Delegate labels -->
+  <text x="115" y="250" fill="#60A5FA" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9" transform="rotate(-90,115,250)">delegate</text>
+  <text x="255" y="250" fill="#60A5FA" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9" transform="rotate(-90,255,250)">delegate</text>
+  <text x="395" y="250" fill="#60A5FA" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9" transform="rotate(-90,395,250)">delegate</text>
+
+  <!-- Subagent 1 -->
+  <rect x="50" y="288" width="180" height="120" rx="12" fill="#1E293B" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="50" y="288" width="180" height="30" rx="12" fill="url(#greenGrad)"/>
+  <rect x="50" y="305" width="180" height="13" fill="url(#greenGrad)"/>
+  <text x="140" y="308" text-anchor="middle" fill="#FFF" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="12" font-weight="700">Subagent A</text>
+  <text x="140" y="338" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Own context window</text>
+  <text x="140" y="356" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Own tools access</text>
+  <text x="140" y="374" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Own system prompt</text>
+  <rect x="68" y="388" width="144" height="14" rx="4" fill="#0F2A1A"/>
+  <text x="140" y="399" text-anchor="middle" fill="#4ADE80" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600">Code Search</text>
+
+  <!-- Subagent 2 -->
+  <rect x="190" y="288" width="180" height="120" rx="12" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="190" y="288" width="180" height="30" rx="12" fill="url(#purpleGrad)"/>
+  <rect x="190" y="305" width="180" height="13" fill="url(#purpleGrad)"/>
+  <text x="280" y="308" text-anchor="middle" fill="#FFF" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="12" font-weight="700">Subagent B</text>
+  <text x="280" y="338" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Own context window</text>
+  <text x="280" y="356" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Own tools access</text>
+  <text x="280" y="374" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Own system prompt</text>
+  <rect x="208" y="388" width="144" height="14" rx="4" fill="#1A0F2E"/>
+  <text x="280" y="399" text-anchor="middle" fill="#A78BFA" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600">Code Review</text>
+
+  <!-- Subagent 3 -->
+  <rect x="330" y="288" width="180" height="120" rx="12" fill="#1E293B" stroke="#F97316" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="330" y="288" width="180" height="30" rx="12" fill="url(#orangeGrad)"/>
+  <rect x="330" y="305" width="180" height="13" fill="url(#orangeGrad)"/>
+  <text x="420" y="308" text-anchor="middle" fill="#FFF" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="12" font-weight="700">Subagent C</text>
+  <text x="420" y="338" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Own context window</text>
+  <text x="420" y="356" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Own tools access</text>
+  <text x="420" y="374" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Own system prompt</text>
+  <rect x="348" y="388" width="144" height="14" rx="4" fill="#2A1A0F"/>
+  <text x="420" y="399" text-anchor="middle" fill="#FB923C" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9" font-weight="600">File Editing</text>
+
+  <!-- Return arrows -->
+  <line x1="160" y1="408" x2="160" y2="445" stroke="#22C55E" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="300" y1="408" x2="300" y2="445" stroke="#8B5CF6" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="440" y1="408" x2="440" y2="445" stroke="#F97316" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <!-- Results merge box -->
+  <rect x="100" y="445" width="360" height="40" rx="10" fill="#1E293B" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="280" y="462" text-anchor="middle" fill="#22C55E" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600">Results Return to Main Agent</text>
+  <text x="280" y="478" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Subagent output merged into orchestrator context</text>
+
+  <!-- Return arrow to top -->
+  <path d="M480,465 L510,465 L510,125 L388,125" stroke="#22C55E" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#arrowGreen)"/>
+  <text x="516" y="300" fill="#4ADE80" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9" transform="rotate(90,516,300)">results flow back</text>
+
+  <!-- Key points -->
+  <rect x="50" y="500" width="460" height="44" rx="8" fill="#0F172A" stroke="#334155" stroke-width="1"/>
+  <circle cx="75" cy="522" r="6" fill="#3B82F6"/>
+  <text x="88" y="526" fill="#CBD5E1" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Isolated contexts</text>
+  <circle cx="210" cy="522" r="6" fill="#22C55E"/>
+  <text x="223" y="526" fill="#CBD5E1" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Parallel execution</text>
+  <circle cx="355" cy="522" r="6" fill="#8B5CF6"/>
+  <text x="368" y="526" fill="#CBD5E1" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">Specialized tasks</text>
+</svg>

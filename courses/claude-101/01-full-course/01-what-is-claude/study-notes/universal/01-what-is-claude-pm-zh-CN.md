@@ -1,41 +1,41 @@
-# What is Claude? — PM Perspective
+# What is Claude? — PM 观点
 
-| 项目 | 細节 |
-|------|---------|
-| 考试覆蓋 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 課程来源 | claude-101 / Lesson 01 |
+| 项目 | 细节 |
+|------|------|
+| 考试领域 | 通识 — Claude 基础 |
+| 任务陈述 | 一般产品知识（非 CCA 直接考试范围，但为基础） |
+| 来源 | claude-101 / 第 01 课 |
 
 ---
 
 ## 一句话摘要
 
-Turning Claude into your thinking partner
+让 Claude 成为你的思考伙伴
 
-This video introduces Claude as more than a chatbot—it's an AI assistant designed to be your thinking partner. You'll learn what makes Claude different from other AI tools and see how it can help with a wide variety of work tasks.
+这段影片介绍 Claude 不仅仅是一个聊天机器人——它是一个被设计为你的思考伙伴的 AI 助手。你将学到 Claude 与其他 AI 工具的不同之处，以及它如何帮助你处理各种工作任务。
 
 ---
 
-## 为什麼 PM 需要知道
+## 为什么 PM 需要知道
 
-### 課後你会理解
+### 学完本课你将理解
 
-- Explain what Claude is and the principles that guide its design
-- Describe Claude's core capabilities and how it differs from a simple chatbot
-- Identify the different ways to access Claude (web, desktop, and mobile)
+- 解释 Claude 是什么，以及指导其设计的原则
+- 描述 Claude 的核心能力，以及它与简单聊天机器人的区别
+- 识别存取 Claude 的不同方式（网页版、桌面版和移动版）
 
-### 重点摘要 (Business Impact)
+### 重点摘要（商业影响）
 
-Claude is built to be helpful, harmless, and honest: At a high level, Claude is guided by principles that help it avoid toxic or discriminatory outputs, avoid helping humans engage in illegal or unethical activities, and broadly behave as a helpful, honest, and harmless AI system. This approach, called Constitutional AI, means Claude is trained to align with human values and operate transparently.
+Claude 的设计原则是「有帮助的、无害的、诚实的」：概括来说，Claude 遵循的原则帮助它避免产生有毒或歧视性的输出，避免帮助人类从事非法或不道德的活动，并广泛地作为一个有帮助的、诚实的、无害的 AI 系统运作。这种方法称为「Constitutional AI」，意味着 Claude 被训练为与人类价值观一致并以透明的方式运作。
 
 ---
 
 ## PRD 检查清单
 
-- [ ] Does the team understand what is claude??
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 团队是否理解 Claude 是什么？
+- [ ] 相关功能是否已记录？
+- [ ] 是否已考虑边界情况？
 
 ---
 
-*Source: claude-101 — What is Claude?*
+*来源：claude-101 — What is Claude?*

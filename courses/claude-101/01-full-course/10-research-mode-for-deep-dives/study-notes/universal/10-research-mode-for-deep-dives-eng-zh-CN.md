@@ -1,16 +1,16 @@
-# Research mode for deep dives — Engineering Deep Dive
+# Research mode for deep dives — 工程师深度解析
 
-| 项目 | 細节 |
-|------|--------|
-| 考试領域 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 来源 | claude-101 / Lesson 10 |
+| 项目 | 细节 |
+|------|------|
+| 考试领域 | 通识 — Claude 基础 |
+| 任务陈述 | 一般产品知识（非 CCA 直接考试范围，但为基础） |
+| 来源 | claude-101 / 第 10 课 |
 
 ---
 
 ## 一句话摘要
 
-Explain what Research does: systematic, multi-source investigation
+说明 Research 的功能：系统性的多来源调查
 
 ---
 
@@ -18,22 +18,22 @@ Explain what Research does: systematic, multi-source investigation
 
 ### 学习目标
 
-- Explain what Research does: systematic, multi-source investigation
-- Identify when to use Research for comprehensive information gathering
-- Understand how Research works with extended thinking to deliver thorough reports
-- Write effective Research prompts for complex investigations
+- 说明 Research 的功能：系统性的多来源调查
+- 识别何时使用 Research 进行全面的资讯收集
+- 了解 Research 如何与延伸思考配合以提供深入的报告
+- 针对复杂调查撰写有效的 Research prompt
 
 ### 重点摘要
 
-Research transforms how Claude finds and analyzes information. Instead of a single search, Claude operates agentically—conducting multiple searches that build on each other while determining exactly what to investigate next. It explores different angles of your question automatically and works through open questions systematically.
+Research 改变了 Claude 寻找和分析资讯的方式。不同于单次搜寻，Claude 以代理方式运作——进行多次相互建构的搜寻，同时决定接下来要调查什么。它会自动从不同角度探索你的问题，并系统性地处理待解决的问题。
 
 ---
 
-## 记憶卡
+## 记忆卡
 
-**Q1:** Research transforms how Claude finds and analyzes information?
-**A1:** Research transforms how Claude finds and analyzes information. Instead of a single search, Claude operates agentically—conducting multiple searches that build on each other while determining exactly what to investigate next. It explores different angles of your question automatically and works through open questions systematically.
+**Q1：** Research 如何改变 Claude 寻找和分析资讯的方式？
+**A1：** Research 改变了 Claude 寻找和分析资讯的方式。不同于单次搜寻，Claude 以代理方式运作——进行多次相互建构的搜寻，同时决定接下来要调查什么。它会自动从不同角度探索你的问题，并系统性地处理待解决的问题。
 
 ---
 
-*Source: claude-101 — Research mode for deep dives*
+*来源：claude-101 — Research mode for deep dives*

@@ -1,29 +1,29 @@
-# What are subagents? — PM Perspective
+# What are subagents? — PM 观点
 
-| 项目 | 細节 |
-|------|---------|
-| 考试覆蓋 | D3 — Claude Code Configuration & Workflows (20%), D1 — Agentic Architecture (27%) |
-| 任務陳述 | 3.4 (context management), 1.1 (agentic loops), 1.3 (multi-agent orchestration) |
-| 課程来源 | introduction-to-subagents / Lesson 01 |
+| 项目 | 细节 |
+|------|------|
+| 考试涵盖范围 | D3 — Claude Code 配置与工作流程 (20%)、D1 — Agentic 架构 (27%) |
+| 任务陈述 | 3.4（context 管理）、1.1（agentic 迴圈）、1.3（多代理协作） |
+| 课程来源 | introduction-to-subagents / 第 01 课 |
 
 ---
 
 ## 一句话摘要
 
-Subagents are specialized assistants that Claude Code can delegate tasks to. Think of them as focused helpers: each one runs in its own conversation context window, does its work, and returns a summary to the main thread.
+Subagent 是 Claude Code 可以将任务委派给的专门助手。可以把它们想成专注的帮手：每个 subagent 在自己的 context window 中运行、完成工作，然后将摘要回传给主执行绪。
 
 ---
 
-## 为什麼 PM 需要知道
+## 为什么 PM 需要知道
 
 ---
 
 ## PRD 检查清单
 
-- [ ] Does the team understand what are subagents??
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 团队是否理解什么是 subagent？
+- [ ] 相关功能是否已记录？
+- [ ] 是否已考虑边界情况？
 
 ---
 
-*Source: introduction-to-subagents — What are subagents?*
+*来源：introduction-to-subagents — What are subagents?*

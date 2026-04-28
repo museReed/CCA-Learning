@@ -1,35 +1,35 @@
-# Claude desktop app: Chat, Cowork, Code — PM Perspective
+# Claude desktop app: Chat, Cowork, Code — PM 观点
 
-| 项目 | 細节 |
-|------|---------|
-| 考试覆蓋 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 課程来源 | claude-101 / Lesson 04 |
+| 项目 | 细节 |
+|------|------|
+| 考试领域 | 通识 — Claude 基础 |
+| 任务陈述 | 一般产品知识（非 CCA 直接考试范围，但为基础） |
+| 来源 | claude-101 / 第 04 课 |
 
 ---
 
 ## 一句话摘要
 
-Navigating the Claude desktop app: Chat, Cowork, Code
+浏览 Claude 桌面应用程式：Chat、Cowork、Code
 
 ---
 
-## 为什麼 PM 需要知道
+## 为什么 PM 需要知道
 
-### 課後你会理解
+### 学完本课你将理解
 
-- Identify the three modes in the Claude desktop app — Chat, Cowork, and Code — and what each is designed for
-- Explain key features unique to each mode, including quick entry, scheduled tasks, and local vs. remote development
-- Choose the right mode based on the type of work you need to accomplish
+- 识别 Claude 桌面应用程式中的三种模式 — Chat、Cowork 和 Code — 以及每种模式的用途
+- 说明每种模式独有的关键功能，包括快速输入、排程任务，以及本地端与远端开发
+- 根据你需要完成的工作类型选择正确的模式
 
 ---
 
 ## PRD 检查清单
 
-- [ ] Does the team understand claude desktop app: chat, cowork, code?
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 团队是否理解 Claude 桌面应用程式：Chat、Cowork、Code？
+- [ ] 相关功能是否已记录？
+- [ ] 是否已考虑边界情况？
 
 ---
 
-*Source: claude-101 — Claude desktop app: Chat, Cowork, Code*
+*来源：claude-101 — Claude desktop app: Chat, Cowork, Code*

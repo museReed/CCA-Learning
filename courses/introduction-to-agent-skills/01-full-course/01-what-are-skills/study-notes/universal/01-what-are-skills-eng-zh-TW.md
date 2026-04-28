@@ -1,16 +1,16 @@
-# What are skills? — Engineering Deep Dive
+# What are skills? — 工程師深度解析
 
 | 項目 | 細節 |
 |------|--------|
-| 考試領域 | D3 — Claude Code Configuration & Workflows (20%) |
-| 任務陳述 | 3.1 (CLAUDE.md), 3.3 (custom commands/skills), 3.5 (permission model) |
-| 來源 | introduction-to-agent-skills / Lesson 01 |
+| 考試領域 | D3 — Claude Code 設定與工作流程 (20%) |
+| 任務陳述 | 3.1 (CLAUDE.md)、3.3 (自訂指令/skill)、3.5 (權限模型) |
+| 來源 | introduction-to-agent-skills / 第 01 課 |
 
 ---
 
 ## 一句話摘要
 
-This video introduces skills — reusable markdown files that teach Claude Code how to handle specific tasks automatically. Instead of repeating instructions every time you ask Claude to review a PR or write a commit message, you write a skill once and Claude applies it whenever the task comes up.
+本影片介紹 skill — 可重複使用的 markdown 檔案，用來教導 Claude Code 如何自動處理特定任務。你不需要每次請 Claude 審查 PR 或撰寫 commit 訊息時都重複給出指示，只要撰寫一次 skill，Claude 就會在該任務出現時自動套用。
 
 ---
 
@@ -18,22 +18,22 @@ This video introduces skills — reusable markdown files that teach Claude Code 
 
 ### 學習目標
 
-- Define what Claude Code skills are and how they work
-- Explain where skills live (personal vs. project directories)
-- Distinguish between skills, CLAUDE.md, and slash commands
-- Identify scenarios where skills are the right customization tool
+- 定義 Claude Code skill 是什麼以及它們如何運作
+- 說明 skill 存放的位置（個人目錄 vs. 專案目錄）
+- 區分 skill、CLAUDE.md 和 slash command 之間的差異
+- 辨識適合使用 skill 作為自訂工具的情境
 
 ### 重點摘要
 
-Skills are folders of instructions that Claude Code can discover and use to handle tasks more accurately. Each skill lives in a SKILL.md file with a name and description in its frontmatter
+skill 是一組指令資料夾，Claude Code 可以自動發現並使用它們來更準確地處理任務。每個 skill 都存放在一個 SKILL.md 檔案中，其 frontmatter 包含名稱和描述。
 
 ---
 
 ## 記憶卡
 
-**Q1:** Skills are folders of instructions that Claude Code can discover and use to h...?
-**A1:** Skills are folders of instructions that Claude Code can discover and use to handle tasks more accurately. Each skill lives in a SKILL.md file with a name and description in its frontmatter
+**Q1：** skill 是一組指令資料夾，Claude Code 可以自動發現並使用它們來…？
+**A1：** skill 是一組指令資料夾，Claude Code 可以自動發現並使用它們來更準確地處理任務。每個 skill 都存放在一個 SKILL.md 檔案中，其 frontmatter 包含名稱和描述。
 
 ---
 
-*Source: introduction-to-agent-skills — What are skills?*
+*來源：introduction-to-agent-skills — What are skills?*

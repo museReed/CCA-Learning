@@ -1,16 +1,16 @@
-# Designing effective subagents — PM Perspective
+# Designing effective subagents — PM 觀點
 
 | 項目 | 細節 |
-|------|---------|
-| 考試覆蓋 | D3 — Claude Code Configuration & Workflows (20%), D1 — Agentic Architecture (27%) |
-| 任務陳述 | 3.4 (context management), 1.1 (agentic loops), 1.3 (multi-agent orchestration) |
-| 課程來源 | introduction-to-subagents / Lesson 03 |
+|------|------|
+| 考試涵蓋範圍 | D3 — Claude Code 配置與工作流程 (20%)、D1 — Agentic 架構 (27%) |
+| 任務陳述 | 3.4（context 管理）、1.1（agentic 迴圈）、1.3（多代理協作） |
+| 課程來源 | introduction-to-subagents / 第 03 課 |
 
 ---
 
 ## 一句話摘要
 
-Now that you know how to create subagents, let's look at the patterns that make them actually effective. A subagent that's poorly configured will wander, run too long, or produce output the main agent can't use.
+既然你已經知道如何建立 subagent，接下來讓我們看看哪些模式能讓它們真正發揮效用。配置不當的 subagent 會漫無目的地運行、執行時間過長，或產生主代理無法使用的輸出。
 
 ---
 
@@ -20,10 +20,10 @@ Now that you know how to create subagents, let's look at the patterns that make 
 
 ## PRD 檢查清單
 
-- [ ] Does the team understand designing effective subagents?
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 團隊是否理解如何設計有效的 subagent？
+- [ ] 相關功能是否已記錄？
+- [ ] 是否已考慮邊界情況？
 
 ---
 
-*Source: introduction-to-subagents — Designing effective subagents*
+*來源：introduction-to-subagents — Designing effective subagents*

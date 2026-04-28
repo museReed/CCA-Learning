@@ -1,16 +1,16 @@
-# Sharing skills — Engineering Deep Dive
+# Sharing skills — 工程師深度解析
 
 | 項目 | 細節 |
 |------|--------|
-| 考試領域 | D3 — Claude Code Configuration & Workflows (20%) |
-| 任務陳述 | 3.1 (CLAUDE.md), 3.3 (custom commands/skills), 3.5 (permission model) |
-| 來源 | introduction-to-agent-skills / Lesson 05 |
+| 考試領域 | D3 — Claude Code 設定與工作流程 (20%) |
+| 任務陳述 | 3.1 (CLAUDE.md)、3.3 (自訂指令/skill)、3.5 (權限模型) |
+| 來源 | introduction-to-agent-skills / 第 05 課 |
 
 ---
 
 ## 一句話摘要
 
-Skills become much more valuable when they're shared across a team or organization. This video covers the three main distribution methods — repository commits, plugins, and enterprise managed settings — and explains how to configure custom subagents to use skills.
+當 skill 能在團隊或組織中共享時，它們會變得更有價值。本影片涵蓋三種主要的發布方式 — 儲存庫 commit、plugin 和企業管理設定 — 並說明如何設定自訂 subagent 來使用 skill。
 
 ---
 
@@ -18,22 +18,22 @@ Skills become much more valuable when they're shared across a team or organizati
 
 ### 學習目標
 
-- Share skills with your team by committing them to a Git repository
-- Distribute skills across projects through plugins and marketplaces
-- Deploy skills organization-wide using enterprise managed settings
-- Configure custom subagents to use specific skills
+- 透過將 skill commit 到 Git 儲存庫來與團隊共享
+- 透過 plugin 和市場跨專案發布 skill
+- 使用企業管理設定在全組織範圍部署 skill
+- 設定自訂 subagent 來使用特定的 skill
 
 ### 重點摘要
 
-Project skills in .claude/skills are shared automatically through Git — anyone who clones the repo gets them
+專案 skill 放在 .claude/skills 中，會透過 Git 自動共享 — 任何 clone 該儲存庫的人都會自動取得。
 
 ---
 
 ## 記憶卡
 
-**Q1:** Project skills in ?
-**A1:** Project skills in .claude/skills are shared automatically through Git — anyone who clones the repo gets them
+**Q1：** 專案 skill 放在 .claude/skills 中…？
+**A1：** 專案 skill 放在 .claude/skills 中，會透過 Git 自動共享 — 任何 clone 該儲存庫的人都會自動取得。
 
 ---
 
-*Source: introduction-to-agent-skills — Sharing skills*
+*來源：introduction-to-agent-skills — Sharing skills*

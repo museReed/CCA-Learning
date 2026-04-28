@@ -1,35 +1,35 @@
-# Enterprise search — PM Perspective
+# Enterprise search — PM 观点
 
-| 项目 | 細节 |
-|------|---------|
-| 考试覆蓋 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 課程来源 | claude-101 / Lesson 09 |
+| 项目 | 细节 |
+|------|------|
+| 考试领域 | 通识 — Claude 基础 |
+| 任务陈述 | 一般产品知识（非 CCA 直接考试范围，但为基础） |
+| 来源 | claude-101 / 第 09 课 |
 
 ---
 
 ## 一句话摘要
 
-Explain what Enterprise Search is and the types of questions Enterprise Search can answer
+说明 Enterprise Search 是什么，以及 Enterprise Search 能回答哪些类型的问题
 
 ---
 
-## 为什麼 PM 需要知道
+## 为什么 PM 需要知道
 
-### 課後你会理解
+### 学完本课你将理解
 
-- Explain what Enterprise Search is and the types of questions Enterprise Search can answer
-- Understand how the setup process works for both admins and users
-- Recognize how security and permissions protect organizational data
+- 说明 Enterprise Search 是什么，以及 Enterprise Search 能回答哪些类型的问题
+- 了解管理员和使用者的设定流程如何运作
+- 认识安全性和权限如何保护组织资料
 
 ---
 
 ## PRD 检查清单
 
-- [ ] Does the team understand enterprise search?
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 团队是否理解 Enterprise Search？
+- [ ] 相关功能是否已记录？
+- [ ] 是否已考虑边界情况？
 
 ---
 
-*Source: claude-101 — Enterprise search*
+*来源：claude-101 — Enterprise search*

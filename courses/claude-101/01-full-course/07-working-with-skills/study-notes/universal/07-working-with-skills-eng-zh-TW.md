@@ -1,16 +1,16 @@
-# Working with skills — Engineering Deep Dive
+# Working with skills — 工程師深度解析
 
 | 項目 | 細節 |
-|------|--------|
-| 考試領域 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 來源 | claude-101 / Lesson 07 |
+|------|------|
+| 考試領域 | 通識 — Claude 基礎 |
+| 任務陳述 | 一般產品知識（非 CCA 直接考試範圍，但為基礎） |
+| 來源 | claude-101 / 第 07 課 |
 
 ---
 
 ## 一句話摘要
 
-Identify Anthropic's built-in Skills for document creation
+識別 Anthropic 內建的文件建立 Skills
 
 ---
 
@@ -18,9 +18,9 @@ Identify Anthropic's built-in Skills for document creation
 
 ### 學習目標
 
-- Explain what Skills are and how Claude uses them
-- Identify Anthropic's built-in Skills for document creation
-- Enable and manage Skills in your settings
+- 說明 Skills 是什麼以及 Claude 如何使用它們
+- 識別 Anthropic 內建的文件建立 Skills
+- 在你的設定中啟用和管理 Skills
 
 ---
 
@@ -28,4 +28,4 @@ Identify Anthropic's built-in Skills for document creation
 
 ---
 
-*Source: claude-101 — Working with skills*
+*來源：claude-101 — Working with skills*

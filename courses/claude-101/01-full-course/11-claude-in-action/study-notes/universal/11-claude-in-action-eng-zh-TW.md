@@ -1,16 +1,16 @@
-# Claude in action: use-cases by role — Engineering Deep Dive
+# Claude in action: use-cases by role — 工程師深度解析
 
 | 項目 | 細節 |
-|------|--------|
-| 考試領域 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 來源 | claude-101 / Lesson 11 |
+|------|------|
+| 考試領域 | 通識 — Claude 基礎 |
+| 任務陳述 | 一般產品知識（非 CCA 直接考試範圍，但為基礎） |
+| 來源 | claude-101 / 第 11 課 |
 
 ---
 
 ## 一句話摘要
 
-Describe 2-3 use-cases for claude.ai that you can try right away
+描述 2-3 個你可以立即嘗試的 Claude.ai 使用案例
 
 ---
 
@@ -18,8 +18,8 @@ Describe 2-3 use-cases for claude.ai that you can try right away
 
 ### 學習目標
 
-- Describe 2-3 use-cases for claude.ai that you can try right away
-- Know where to go to find additional use-case inspiration
+- 描述 2-3 個你可以立即嘗試的 Claude.ai 使用案例
+- 知道去哪裡尋找更多使用案例的靈感
 
 ---
 
@@ -27,4 +27,4 @@ Describe 2-3 use-cases for claude.ai that you can try right away
 
 ---
 
-*Source: claude-101 — Claude in action: use-cases by role*
+*來源：claude-101 — Claude in action: use-cases by role*

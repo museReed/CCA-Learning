@@ -1,16 +1,16 @@
-# Other ways to work with Claude — Engineering Deep Dive
+# Other ways to work with Claude — 工程師深度解析
 
 | 項目 | 細節 |
-|------|--------|
-| 考試領域 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 來源 | claude-101 / Lesson 12 |
+|------|------|
+| 考試領域 | 通識 — Claude 基礎 |
+| 任務陳述 | 一般產品知識（非 CCA 直接考試範圍，但為基礎） |
+| 來源 | claude-101 / 第 12 課 |
 
 ---
 
 ## 一句話摘要
 
-Understand when to use additional Claude products including Claude Code, Claude for Slack, Claude for Excel, and Claude for Chrome
+了解何時使用其他 Claude 產品，包括 Claude Code、Claude for Slack、Claude for Excel 和 Claude for Chrome
 
 ---
 
@@ -18,7 +18,7 @@ Understand when to use additional Claude products including Claude Code, Claude 
 
 ### 學習目標
 
-- Understand when to use additional Claude products including Claude Code, Claude for Slack, Claude for Excel, and Claude for Chrome
+- 了解何時使用其他 Claude 產品，包括 Claude Code、Claude for Slack、Claude for Excel 和 Claude for Chrome
 
 ---
 
@@ -26,4 +26,4 @@ Understand when to use additional Claude products including Claude Code, Claude 
 
 ---
 
-*Source: claude-101 — Other ways to work with Claude*
+*來源：claude-101 — Other ways to work with Claude*

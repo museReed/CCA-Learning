@@ -1,39 +1,39 @@
-# Connecting your tools — PM Perspective
+# Connecting your tools — PM 观点
 
-| 项目 | 細节 |
-|------|---------|
-| 考试覆蓋 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 課程来源 | claude-101 / Lesson 08 |
+| 项目 | 细节 |
+|------|------|
+| 考试领域 | 通识 — Claude 基础 |
+| 任务陈述 | 一般产品知识（非 CCA 直接考试范围，但为基础） |
+| 来源 | claude-101 / 第 08 课 |
 
 ---
 
 ## 一句话摘要
 
-Explain what connectors are and why they matter for your work with Claude
+说明 Connectors 是什么，以及它们为什么对你与 Claude 的工作很重要
 
 ---
 
-## 为什麼 PM 需要知道
+## 为什么 PM 需要知道
 
-### 課後你会理解
+### 学完本课你将理解
 
-- Explain what connectors are and why they matter for your work with Claude
-- Navigate the connectors directory and set up your first connection
-- Use connected tools effectively in your conversations with Claude
+- 说明 Connectors 是什么，以及它们为什么对你与 Claude 的工作很重要
+- 浏览 Connectors 目录并设定你的第一个连线
+- 在与 Claude 的对话中有效地使用已连线的工具
 
-### 重点摘要 (Business Impact)
+### 重点摘要（商业影响）
 
-Connectors transform Claude from an assistant into an informed collaborator by giving Claude access to the same tools, data, and context that you use every day. Instead of starting every conversation from scratch, Claude can work directly with your actual information.
+Connectors 将 Claude 从一个助手转变为一个见多识广的协作者，让 Claude 能存取你每天使用的相同工具、资料和上下文。你不再需要每次对话都从头开始，Claude 可以直接使用你的实际资讯进行工作。
 
 ---
 
 ## PRD 检查清单
 
-- [ ] Does the team understand connecting your tools?
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 团队是否理解连接你的工具？
+- [ ] 相关功能是否已记录？
+- [ ] 是否已考虑边界情况？
 
 ---
 
-*Source: claude-101 — Connecting your tools*
+*来源：claude-101 — Connecting your tools*

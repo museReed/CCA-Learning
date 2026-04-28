@@ -1,18 +1,18 @@
-# What is Claude? — Engineering Deep Dive
+# What is Claude? — 工程師深度解析
 
 | 項目 | 細節 |
-|------|--------|
-| 考試領域 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 來源 | claude-101 / Lesson 01 |
+|------|------|
+| 考試領域 | 通識 — Claude 基礎 |
+| 任務陳述 | 一般產品知識（非 CCA 直接考試範圍，但為基礎） |
+| 來源 | claude-101 / 第 01 課 |
 
 ---
 
 ## 一句話摘要
 
-Turning Claude into your thinking partner
+讓 Claude 成為你的思考夥伴
 
-This video introduces Claude as more than a chatbot—it's an AI assistant designed to be your thinking partner. You'll learn what makes Claude different from other AI tools and see how it can help with a wide variety of work tasks.
+這段影片介紹 Claude 不僅僅是一個聊天機器人——它是一個被設計為你的思考夥伴的 AI 助手。你將學到 Claude 與其他 AI 工具的不同之處，以及它如何幫助你處理各種工作任務。
 
 ---
 
@@ -20,21 +20,21 @@ This video introduces Claude as more than a chatbot—it's an AI assistant desig
 
 ### 學習目標
 
-- Explain what Claude is and the principles that guide its design
-- Describe Claude's core capabilities and how it differs from a simple chatbot
-- Identify the different ways to access Claude (web, desktop, and mobile)
+- 解釋 Claude 是什麼，以及指導其設計的原則
+- 描述 Claude 的核心能力，以及它與簡單聊天機器人的區別
+- 識別存取 Claude 的不同方式（網頁版、桌面版和行動版）
 
 ### 重點摘要
 
-Claude is built to be helpful, harmless, and honest: At a high level, Claude is guided by principles that help it avoid toxic or discriminatory outputs, avoid helping humans engage in illegal or unethical activities, and broadly behave as a helpful, honest, and harmless AI system. This approach, called Constitutional AI, means Claude is trained to align with human values and operate transparently.
+Claude 的設計原則是「有幫助的、無害的、誠實的」：概括來說，Claude 遵循的原則幫助它避免產生有毒或歧視性的輸出，避免幫助人類從事非法或不道德的活動，並廣泛地作為一個有幫助的、誠實的、無害的 AI 系統運作。這種方法稱為「Constitutional AI」，意味著 Claude 被訓練為與人類價值觀一致並以透明的方式運作。
 
 ---
 
 ## 記憶卡
 
-**Q1:** Claude is built to be helpful, harmless, and honest: At a high level, Claude ...?
-**A1:** Claude is built to be helpful, harmless, and honest: At a high level, Claude is guided by principles that help it avoid toxic or discriminatory outputs, avoid helping humans engage in illegal or unethical activities, and broadly behave as a helpful, honest, and harmless AI system. This approach, called Constitutional AI, means Claude is trained to align with human values and operate transparently.
+**Q1：** Claude 的設計原則是「有幫助的、無害的、誠實的」：概括來說，Claude ……？
+**A1：** Claude 的設計原則是「有幫助的、無害的、誠實的」：概括來說，Claude 遵循的原則幫助它避免產生有毒或歧視性的輸出，避免幫助人類從事非法或不道德的活動，並廣泛地作為一個有幫助的、誠實的、無害的 AI 系統運作。這種方法稱為「Constitutional AI」，意味著 Claude 被訓練為與人類價值觀一致並以透明的方式運作。
 
 ---
 
-*Source: claude-101 — What is Claude?*
+*來源：claude-101 — What is Claude?*

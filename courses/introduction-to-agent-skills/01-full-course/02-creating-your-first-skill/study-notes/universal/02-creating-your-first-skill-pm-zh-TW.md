@@ -1,46 +1,46 @@
-# Creating your first skill — PM Perspective
+# Creating your first skill — PM 觀點
 
 | 項目 | 細節 |
 |------|---------|
-| 考試覆蓋 | D3 — Claude Code Configuration & Workflows (20%) |
-| 任務陳述 | 3.1 (CLAUDE.md), 3.3 (custom commands/skills), 3.5 (permission model) |
-| 課程來源 | introduction-to-agent-skills / Lesson 02 |
+| 考試範圍 | D3 — Claude Code 設定與工作流程 (20%) |
+| 任務陳述 | 3.1 (CLAUDE.md)、3.3 (自訂指令/skill)、3.5 (權限模型) |
+| 課程來源 | introduction-to-agent-skills / 第 02 課 |
 
 ---
 
 ## 一句話摘要
 
-This video walks through building a skill from scratch — a personal PR description skill that works across all your projects. You'll see exactly how to structure the SKILL.md file, test it, and understand how Claude Code discovers and matches skills to your requests.
+本影片帶你從零開始建立一個 skill — 一個可跨所有專案使用的個人 PR 描述 skill。你將看到如何建構 SKILL.md 檔案的結構、測試它，並了解 Claude Code 如何發現並將 skill 與你的請求進行匹配。
 
 ---
 
 ## 為什麼 PM 需要知道
 
-### 課後你會理解
+### 學完本課你將理解
 
-- Create a skill from scratch with proper frontmatter structure
-- Test and verify that a skill loads correctly in Claude Code
-- Explain how Claude Code matches incoming requests to available skills
-- Describe the skill priority hierarchy (Enterprise, Personal, Project, Plugins)
+- 從零開始建立一個具有正確 frontmatter 結構的 skill
+- 測試並驗證 skill 在 Claude Code 中是否正確載入
+- 說明 Claude Code 如何將傳入的請求與可用的 skill 進行匹配
+- 描述 skill 的優先順序層級（Enterprise、個人、專案、plugin）
 
-### 重點摘要 (Business Impact)
+### 重點摘要（商業影響）
 
-A skill is a directory containing a SKILL.md file with metadata (name, description) in frontmatter and instructions below
+一個 skill 就是一個包含 SKILL.md 檔案的目錄，其中有 frontmatter 格式的 metadata（名稱、描述）和下方的指令內容。
 
-### 需要了解的概念
+### 需要了解的關鍵概念
 
-- Bullet points of specific changes made
-- Group related changes together
-- Mention any files deleted or renamed
+- 具體變更的要點列表
+- 將相關變更分組
+- 提及任何被刪除或重新命名的檔案
 
 ---
 
 ## PRD 檢查清單
 
-- [ ] Does the team understand creating your first skill?
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 團隊是否理解如何建立第一個 skill？
+- [ ] 相關功能是否已記錄在文件中？
+- [ ] 是否已考慮邊界情況？
 
 ---
 
-*Source: introduction-to-agent-skills — Creating your first skill*
+*來源：introduction-to-agent-skills — Creating your first skill*

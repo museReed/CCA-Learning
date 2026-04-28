@@ -1,16 +1,16 @@
-# What's next? — PM Perspective
+# What's next? — PM 觀點
 
 | 項目 | 細節 |
-|------|---------|
-| 考試覆蓋 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 課程來源 | claude-101 / Lesson 13 |
+|------|------|
+| 考試領域 | 通識 — Claude 基礎 |
+| 任務陳述 | 一般產品知識（非 CCA 直接考試範圍，但為基礎） |
+| 來源 | claude-101 / 第 13 課 |
 
 ---
 
 ## 一句話摘要
 
-Congratulations on completing Claude 101! You've built a solid foundation for working with Claude effectively.
+恭喜你完成 Claude 101！你已經為有效使用 Claude 打下了堅實的基礎。
 
 ---
 
@@ -20,10 +20,10 @@ Congratulations on completing Claude 101! You've built a solid foundation for wo
 
 ## PRD 檢查清單
 
-- [ ] Does the team understand what's next??
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 團隊是否理解接下來要做什麼？
+- [ ] 相關功能是否已記錄？
+- [ ] 是否已考慮邊界情況？
 
 ---
 
-*Source: claude-101 — What's next?*
+*來源：claude-101 — What's next?*

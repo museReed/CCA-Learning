@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 560" font-family="'SF Pro Display', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+    <filter id="shadow4">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect width="560" height="560" fill="url(#bg4)" rx="12"/>
+  <text x="280" y="36" text-anchor="middle" fill="#F8FAFC" font-size="18" font-weight="700">技能 vs 其他 Claude Code 功能</text>
+  <text x="280" y="56" text-anchor="middle" fill="#94A3B8" font-size="12">各自訂機制的使用時機</text>
+
+  <!-- Table header -->
+  <rect x="24" y="74" width="512" height="36" rx="8" fill="#1E3A5F"/>
+  <text x="104" y="96" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="700">功能</text>
+  <text x="230" y="96" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="700">觸發方式</text>
+  <text x="360" y="96" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="700">載入時機</text>
+  <text x="480" y="96" text-anchor="middle" fill="#93C5FD" font-size="11" font-weight="700">最適用於</text>
+
+  <!-- Row 1: Skills -->
+  <rect x="24" y="116" width="512" height="72" rx="8" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow4)"/>
+  <rect x="32" y="124" width="8" height="56" rx="4" fill="#3B82F6"/>
+  <text x="104" y="140" text-anchor="middle" fill="#3B82F6" font-size="12" font-weight="700">技能 Skills</text>
+  <text x="104" y="156" text-anchor="middle" fill="#64748B" font-size="9">SKILL.md</text>
+  <text x="104" y="170" text-anchor="middle" fill="#64748B" font-size="9">~/.claude/skills/</text>
+  <text x="230" y="144" text-anchor="middle" fill="#CBD5E1" font-size="10">自動匹配</text>
+  <text x="230" y="160" text-anchor="middle" fill="#94A3B8" font-size="9">依據描述</text>
+  <text x="360" y="144" text-anchor="middle" fill="#CBD5E1" font-size="10">按需載入</text>
+  <text x="360" y="160" text-anchor="middle" fill="#94A3B8" font-size="9">匹配時才載入</text>
+  <text x="480" y="144" text-anchor="middle" fill="#CBD5E1" font-size="10">特定任務</text>
+  <text x="480" y="160" text-anchor="middle" fill="#94A3B8" font-size="9">可重用工作流</text>
+
+  <!-- Row 2: CLAUDE.md -->
+  <rect x="24" y="196" width="512" height="72" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5" filter="url(#shadow4)"/>
+  <rect x="32" y="204" width="8" height="56" rx="4" fill="#8B5CF6"/>
+  <text x="104" y="220" text-anchor="middle" fill="#8B5CF6" font-size="12" font-weight="700">CLAUDE.md</text>
+  <text x="104" y="236" text-anchor="middle" fill="#64748B" font-size="9">專案設定</text>
+  <text x="104" y="250" text-anchor="middle" fill="#64748B" font-size="9">倉庫根目錄</text>
+  <text x="230" y="224" text-anchor="middle" fill="#CBD5E1" font-size="10">始終載入</text>
+  <text x="230" y="240" text-anchor="middle" fill="#94A3B8" font-size="9">自動載入</text>
+  <text x="360" y="224" text-anchor="middle" fill="#CBD5E1" font-size="10">每次對話</text>
+  <text x="360" y="240" text-anchor="middle" fill="#94A3B8" font-size="9">皆會載入</text>
+  <text x="480" y="224" text-anchor="middle" fill="#CBD5E1" font-size="10">專案規則</text>
+  <text x="480" y="240" text-anchor="middle" fill="#94A3B8" font-size="9">全域慣例</text>
+
+  <!-- Row 3: Slash Commands -->
+  <rect x="24" y="276" width="512" height="72" rx="8" fill="#1E293B" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow4)"/>
+  <rect x="32" y="284" width="8" height="56" rx="4" fill="#22C55E"/>
+  <text x="104" y="300" text-anchor="middle" fill="#22C55E" font-size="12" font-weight="700">斜線指令</text>
+  <text x="104" y="316" text-anchor="middle" fill="#64748B" font-size="9">/command-name</text>
+  <text x="104" y="330" text-anchor="middle" fill="#64748B" font-size="9">.claude/commands/</text>
+  <text x="230" y="304" text-anchor="middle" fill="#CBD5E1" font-size="10">明確觸發</text>
+  <text x="230" y="320" text-anchor="middle" fill="#94A3B8" font-size="9">使用者輸入 /cmd</text>
+  <text x="360" y="304" text-anchor="middle" fill="#CBD5E1" font-size="10">呼叫時載入</text>
+  <text x="360" y="320" text-anchor="middle" fill="#94A3B8" font-size="9">使用者發起</text>
+  <text x="480" y="304" text-anchor="middle" fill="#CBD5E1" font-size="10">快速操作</text>
+  <text x="480" y="320" text-anchor="middle" fill="#94A3B8" font-size="9">一次性任務</text>
+
+  <!-- Row 4: Hooks -->
+  <rect x="24" y="356" width="512" height="72" rx="8" fill="#1E293B" stroke="#F59E0B" stroke-width="1.5" filter="url(#shadow4)"/>
+  <rect x="32" y="364" width="8" height="56" rx="4" fill="#F59E0B"/>
+  <text x="104" y="380" text-anchor="middle" fill="#F59E0B" font-size="12" font-weight="700">掛鉤 Hooks</text>
+  <text x="104" y="396" text-anchor="middle" fill="#64748B" font-size="9">事件監聽器</text>
+  <text x="104" y="410" text-anchor="middle" fill="#64748B" font-size="9">.claude/hooks/</text>
+  <text x="230" y="384" text-anchor="middle" fill="#CBD5E1" font-size="10">事件驅動</text>
+  <text x="230" y="400" text-anchor="middle" fill="#94A3B8" font-size="9">生命週期事件</text>
+  <text x="360" y="384" text-anchor="middle" fill="#CBD5E1" font-size="10">自動觸發</text>
+  <text x="360" y="400" text-anchor="middle" fill="#94A3B8" font-size="9">事件發生時</text>
+  <text x="480" y="384" text-anchor="middle" fill="#CBD5E1" font-size="10">自動化</text>
+  <text x="480" y="400" text-anchor="middle" fill="#94A3B8" font-size="9">檢查、格式化</text>
+
+  <!-- Row 5: MCP -->
+  <rect x="24" y="436" width="512" height="72" rx="8" fill="#1E293B" stroke="#EF4444" stroke-width="1.5" filter="url(#shadow4)"/>
+  <rect x="32" y="444" width="8" height="56" rx="4" fill="#EF4444"/>
+  <text x="104" y="460" text-anchor="middle" fill="#EF4444" font-size="12" font-weight="700">MCP 伺服器</text>
+  <text x="104" y="476" text-anchor="middle" fill="#64748B" font-size="9">外部工具</text>
+  <text x="104" y="490" text-anchor="middle" fill="#64748B" font-size="9">透過協議</text>
+  <text x="230" y="464" text-anchor="middle" fill="#CBD5E1" font-size="10">工具呼叫</text>
+  <text x="230" y="480" text-anchor="middle" fill="#94A3B8" font-size="9">Claude 決定</text>
+  <text x="360" y="464" text-anchor="middle" fill="#CBD5E1" font-size="10">連線中</text>
+  <text x="360" y="480" text-anchor="middle" fill="#94A3B8" font-size="9">伺服器運行中</text>
+  <text x="480" y="464" text-anchor="middle" fill="#CBD5E1" font-size="10">外部 API</text>
+  <text x="480" y="480" text-anchor="middle" fill="#94A3B8" font-size="9">資料庫、服務</text>
+
+  <rect x="24" y="520" width="512" height="28" rx="8" fill="#0F172A" stroke="#475569" stroke-width="1"/>
+  <text x="280" y="539" text-anchor="middle" fill="#94A3B8" font-size="10">技能 = 智慧自動匹配指令 | CLAUDE.md = 常駐規則 | 斜線指令 = 明確觸發</text>
+</svg>

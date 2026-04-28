@@ -1,29 +1,29 @@
-# What's next? — PM Perspective
+# What's next? — PM 观点
 
-| 项目 | 細节 |
-|------|---------|
-| 考试覆蓋 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 課程来源 | claude-101 / Lesson 13 |
+| 项目 | 细节 |
+|------|------|
+| 考试领域 | 通识 — Claude 基础 |
+| 任务陈述 | 一般产品知识（非 CCA 直接考试范围，但为基础） |
+| 来源 | claude-101 / 第 13 课 |
 
 ---
 
 ## 一句话摘要
 
-Congratulations on completing Claude 101! You've built a solid foundation for working with Claude effectively.
+恭喜你完成 Claude 101！你已经为有效使用 Claude 打下了坚实的基础。
 
 ---
 
-## 为什麼 PM 需要知道
+## 为什么 PM 需要知道
 
 ---
 
 ## PRD 检查清单
 
-- [ ] Does the team understand what's next??
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 团队是否理解接下来要做什么？
+- [ ] 相关功能是否已记录？
+- [ ] 是否已考虑边界情况？
 
 ---
 
-*Source: claude-101 — What's next?*
+*来源：claude-101 — What's next?*

@@ -1,16 +1,16 @@
-# Skills vs. other Claude Code features — Engineering Deep Dive
+# Skills vs. other Claude Code features — 工程師深度解析
 
 | 項目 | 細節 |
 |------|--------|
-| 考試領域 | D3 — Claude Code Configuration & Workflows (20%) |
-| 任務陳述 | 3.1 (CLAUDE.md), 3.3 (custom commands/skills), 3.5 (permission model) |
-| 來源 | introduction-to-agent-skills / Lesson 04 |
+| 考試領域 | D3 — Claude Code 設定與工作流程 (20%) |
+| 任務陳述 | 3.1 (CLAUDE.md)、3.3 (自訂指令/skill)、3.5 (權限模型) |
+| 來源 | introduction-to-agent-skills / 第 04 課 |
 
 ---
 
 ## 一句話摘要
 
-Claude Code offers several customization options, and choosing the wrong one can lead to unnecessary complexity. This video breaks down when to use skills versus CLAUDE.md, subagents, hooks, and MCP servers.
+Claude Code 提供多種自訂選項，選錯可能導致不必要的複雜度。本影片拆解何時應使用 skill，而非 CLAUDE.md、subagent、hook 和 MCP server。
 
 ---
 
@@ -18,21 +18,21 @@ Claude Code offers several customization options, and choosing the wrong one can
 
 ### 學習目標
 
-- Compare skills to CLAUDE.md, subagents, hooks, and MCP servers
-- Choose the right Claude Code customization feature for a given use case
-- Design a complementary setup that combines multiple features effectively
+- 比較 skill 與 CLAUDE.md、subagent、hook 和 MCP server 的差異
+- 針對特定使用情境選擇正確的 Claude Code 自訂功能
+- 設計一個結合多種功能的互補配置
 
 ### 重點摘要
 
-CLAUDE.md loads into every conversation and is best for always-on project standards. Skills load on demand and are best for task-specific expertise
+CLAUDE.md 會載入每一次對話，最適合用於「始終開啟」的專案標準。skill 則按需載入，最適合用於特定任務的專業知識。
 
 ---
 
 ## 記憶卡
 
-**Q1:** CLAUDE?
-**A1:** CLAUDE.md loads into every conversation and is best for always-on project standards. Skills load on demand and are best for task-specific expertise
+**Q1：** CLAUDE.md 會載入每一次對話，最適合用於…？
+**A1：** CLAUDE.md 會載入每一次對話，最適合用於「始終開啟」的專案標準。skill 則按需載入，最適合用於特定任務的專業知識。
 
 ---
 
-*Source: introduction-to-agent-skills — Skills vs. other Claude Code features*
+*來源：introduction-to-agent-skills — Skills vs. other Claude Code features*

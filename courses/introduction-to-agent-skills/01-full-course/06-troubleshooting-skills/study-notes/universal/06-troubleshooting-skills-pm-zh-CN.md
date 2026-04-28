@@ -1,40 +1,40 @@
-# Troubleshooting skills — PM Perspective
+# Troubleshooting skills — PM 观点
 
-| 项目 | 細节 |
+| 项目 | 细节 |
 |------|---------|
-| 考试覆蓋 | D3 — Claude Code Configuration & Workflows (20%) |
-| 任務陳述 | 3.1 (CLAUDE.md), 3.3 (custom commands/skills), 3.5 (permission model) |
-| 課程来源 | introduction-to-agent-skills / Lesson 06 |
+| 考试范围 | D3 — Claude Code 设定与工作流程 (20%) |
+| 任务陈述 | 3.1 (CLAUDE.md)、3.3 (自订指令/skill)、3.5 (权限模型) |
+| 课程来源 | introduction-to-agent-skills / 第 06 课 |
 
 ---
 
 ## 一句话摘要
 
-When skills don't work as expected, the problem usually falls into a few predictable categories. This video walks through each one — from skills that don't trigger to priority conflicts to runtime failures — and gives you a systematic troubleshooting approach.
+当 skill 无法如预期运作时，问题通常落在几个可预测的类別中。本影片逐一講解 — 从 skill 未触发、优先顺序冲突到執行时错误 — 並提供系统化的疑难排解方法。
 
 ---
 
-## 为什麼 PM 需要知道
+## 为什么 PM 需要知道
 
-### 課後你会理解
+### 学完本课你将理解
 
-- Use the skills validator to catch structural issues before debugging
-- Diagnose and fix common skill triggering and loading problems
-- Resolve skill priority conflicts between enterprise, personal, project, and plugin skills
-- Debug runtime errors including missing dependencies, permissions, and path issues
+- 使用 skill 验证器在除错前捕捉结构性问题
+- 诊断並修復常见的 skill 触发和载入问题
+- 解決 Enterprise、个人、專案和 plugin skill 之间的优先顺序冲突
+- 除错執行时错误，包括缺少依賴项、权限和路徑问题
 
-### 重点摘要 (Business Impact)
+### 重点摘要（商業影响）
 
-Start with the skills validator tool — it catches structural problems before you spend time debugging other things
-
----
-
-## PRD 检查清单
-
-- [ ] Does the team understand troubleshooting skills?
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+从 skill 验证器工具开始 — 它能在你花时间除错其他问题之前捕捉结构性问题。
 
 ---
 
-*Source: introduction-to-agent-skills — Troubleshooting skills*
+## PRD 檢查清单
+
+- [ ] 團隊是否理解如何疑难排解 skill？
+- [ ] 相关功能是否已记录在文件中？
+- [ ] 是否已考慮邊界情況？
+
+---
+
+*来源：introduction-to-agent-skills — Troubleshooting skills*

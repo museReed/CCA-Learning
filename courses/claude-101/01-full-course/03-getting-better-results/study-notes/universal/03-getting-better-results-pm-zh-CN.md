@@ -1,35 +1,35 @@
-# Getting better results — PM Perspective
+# Getting better results — PM 观点
 
-| 项目 | 細节 |
-|------|---------|
-| 考试覆蓋 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 課程来源 | claude-101 / Lesson 03 |
+| 项目 | 细节 |
+|------|------|
+| 考试领域 | 通识 — Claude 基础 |
+| 任务陈述 | 一般产品知识（非 CCA 直接考试范围，但为基础） |
+| 来源 | claude-101 / 第 03 课 |
 
 ---
 
 ## 一句话摘要
 
-Recognize common challenges when starting out with AI and use troubleshooting techniques to overcome them
+辨识使用 AI 时常见的挑战，并运用除错技巧来克服它们
 
 ---
 
-## 为什麼 PM 需要知道
+## 为什么 PM 需要知道
 
-### 課後你会理解
+### 学完本课你将理解
 
-- Recognize common challenges when starting out with AI and use troubleshooting techniques to overcome them
-- Define AI Fluency and know where to go to learn more about working with AI in a fluent way
-- Explain how you might set up evals to better understand how Claude might perform with your unique workflows
+- 辨识使用 AI 初期常见的挑战，并运用除错技巧来克服它们
+- 定义「AI 流畅度」，并知道去哪里学习更多关于流畅使用 AI 的方法
+- 说明如何设置评估（evals）以更好地了解 Claude 在你独特工作流程中的表现
 
 ---
 
 ## PRD 检查清单
 
-- [ ] Does the team understand getting better results?
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 团队是否理解如何取得更好的结果？
+- [ ] 相关功能是否已记录？
+- [ ] 是否已考虑边界情况？
 
 ---
 
-*Source: claude-101 — Getting better results*
+*来源：claude-101 — Getting better results*

@@ -1,42 +1,42 @@
-# Configuration and multi-file skills — PM Perspective
+# Configuration and multi-file skills — PM 觀點
 
 | 項目 | 細節 |
 |------|---------|
-| 考試覆蓋 | D3 — Claude Code Configuration & Workflows (20%) |
-| 任務陳述 | 3.1 (CLAUDE.md), 3.3 (custom commands/skills), 3.5 (permission model) |
-| 課程來源 | introduction-to-agent-skills / Lesson 03 |
+| 考試範圍 | D3 — Claude Code 設定與工作流程 (20%) |
+| 任務陳述 | 3.1 (CLAUDE.md)、3.3 (自訂指令/skill)、3.5 (權限模型) |
+| 課程來源 | introduction-to-agent-skills / 第 03 課 |
 
 ---
 
 ## 一句話摘要
 
-This video covers the advanced techniques that make skills more powerful: the full set of metadata fields, how to write descriptions that trigger reliably, restricting tool access for security-sensitive workflows, and organizing larger skills across multiple files using progressive disclosure. You'll learn how to keep your skills efficient while still supporting complex use cases.
+本影片涵蓋讓 skill 更強大的進階技巧：完整的 metadata 欄位集、如何撰寫能可靠觸發的描述、為安全敏感的工作流程限制工具存取權限，以及使用漸進式揭露（progressive disclosure）跨多個檔案組織較大的 skill。你將學會如何在支援複雜使用情境的同時保持 skill 的效率。
 
 ---
 
 ## 為什麼 PM 需要知道
 
-### 課後你會理解
+### 學完本課你將理解
 
-- Configure advanced skill metadata fields including allowed-tools and model
-- Write effective skill descriptions that reliably trigger on the right requests
-- Use allowed-tools to restrict what Claude can do when a skill is active
-- Organize complex skills using progressive disclosure and multi-file structures
+- 設定進階 skill metadata 欄位，包括 allowed-tools 和 model
+- 撰寫能在正確請求時可靠觸發的有效 skill 描述
+- 使用 allowed-tools 來限制 skill 啟用時 Claude 可以使用的工具
+- 使用漸進式揭露和多檔案結構來組織複雜的 skill
 
-### 重點摘要 (Business Impact)
+### 重點摘要（商業影響）
 
-name and description are required — allowed-tools and model are optional but powerful additions
-A good description answers two questions: What does the skill do? When should Claude use it?
-allowed-tools restricts which tools Claude can use when the skill is active — useful for read-only or security-sensitive workflows
+name 和 description 是必填欄位 — allowed-tools 和 model 是選填但功能強大的附加項目。
+好的 description 要回答兩個問題：這個 skill 做什麼？Claude 應該在什麼時候使用它？
+allowed-tools 限制 skill 啟用時 Claude 可以使用的工具 — 適用於唯讀或安全敏感的工作流程。
 
 ---
 
 ## PRD 檢查清單
 
-- [ ] Does the team understand configuration and multi-file skills?
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 團隊是否理解設定與多檔案 skill？
+- [ ] 相關功能是否已記錄在文件中？
+- [ ] 是否已考慮邊界情況？
 
 ---
 
-*Source: introduction-to-agent-skills — Configuration and multi-file skills*
+*來源：introduction-to-agent-skills — Configuration and multi-file skills*

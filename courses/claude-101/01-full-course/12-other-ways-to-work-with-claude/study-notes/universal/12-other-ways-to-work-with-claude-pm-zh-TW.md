@@ -1,33 +1,33 @@
-# Other ways to work with Claude — PM Perspective
+# Other ways to work with Claude — PM 觀點
 
 | 項目 | 細節 |
-|------|---------|
-| 考試覆蓋 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 課程來源 | claude-101 / Lesson 12 |
+|------|------|
+| 考試領域 | 通識 — Claude 基礎 |
+| 任務陳述 | 一般產品知識（非 CCA 直接考試範圍，但為基礎） |
+| 來源 | claude-101 / 第 12 課 |
 
 ---
 
 ## 一句話摘要
 
-Understand when to use additional Claude products including Claude Code, Claude for Slack, Claude for Excel, and Claude for Chrome
+了解何時使用其他 Claude 產品，包括 Claude Code、Claude for Slack、Claude for Excel 和 Claude for Chrome
 
 ---
 
 ## 為什麼 PM 需要知道
 
-### 課後你會理解
+### 學完本課你將理解
 
-- Understand when to use additional Claude products including Claude Code, Claude for Slack, Claude for Excel, and Claude for Chrome
+- 了解何時使用其他 Claude 產品，包括 Claude Code、Claude for Slack、Claude for Excel 和 Claude for Chrome
 
 ---
 
 ## PRD 檢查清單
 
-- [ ] Does the team understand other ways to work with claude?
-- [ ] Are the relevant features documented?
-- [ ] Have edge cases been considered?
+- [ ] 團隊是否理解使用 Claude 的其他方式？
+- [ ] 相關功能是否已記錄？
+- [ ] 是否已考慮邊界情況？
 
 ---
 
-*Source: claude-101 — Other ways to work with Claude*
+*來源：claude-101 — Other ways to work with Claude*

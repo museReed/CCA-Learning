@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 560" width="560" height="560">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F172A"/>
+      <stop offset="100%" style="stop-color:#1E293B"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6"/>
+      <stop offset="100%" style="stop-color:#2563EB"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#22C55E"/>
+      <stop offset="100%" style="stop-color:#16A34A"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F97316"/>
+      <stop offset="100%" style="stop-color:#EA580C"/>
+    </linearGradient>
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#EF4444"/>
+      <stop offset="100%" style="stop-color:#DC2626"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#3B82F6"/>
+    </marker>
+  </defs>
+
+  <rect width="560" height="560" rx="16" fill="url(#bgGrad)"/>
+
+  <!-- Title -->
+  <text x="280" y="38" text-anchor="middle" fill="#F8FAFC" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="20" font-weight="700">Anatomy of the Task Tool</text>
+  <text x="280" y="58" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="12">Configuration parameters that define a subagent</text>
+
+  <!-- Main config card -->
+  <rect x="30" y="75" width="310" height="460" rx="12" fill="#1E293B" stroke="#334155" stroke-width="1" filter="url(#shadow)"/>
+
+  <!-- Header bar -->
+  <rect x="30" y="75" width="310" height="36" rx="12" fill="url(#blueGrad)"/>
+  <rect x="30" y="99" width="310" height="12" fill="url(#blueGrad)"/>
+  <text x="185" y="98" text-anchor="middle" fill="#FFF" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="14" font-weight="700">Task Tool Configuration</text>
+
+  <!-- Code-like structure -->
+  <text x="48" y="136" fill="#64748B" font-family="'SF Mono','Fira Code',monospace" font-size="11">{</text>
+
+  <!-- subagent_type -->
+  <text x="60" y="160" fill="#F97316" font-family="'SF Mono','Fira Code',monospace" font-size="11" font-weight="600">"description"</text>
+  <text x="164" y="160" fill="#64748B" font-family="'SF Mono','Fira Code',monospace" font-size="11">:</text>
+  <text x="174" y="160" fill="#22C55E" font-family="'SF Mono','Fira Code',monospace" font-size="10">"Search codebase for</text>
+  <text x="74" y="176" fill="#22C55E" font-family="'SF Mono','Fira Code',monospace" font-size="10">auth-related files"</text>
+
+  <!-- prompt -->
+  <text x="60" y="206" fill="#F97316" font-family="'SF Mono','Fira Code',monospace" font-size="11" font-weight="600">"prompt"</text>
+  <text x="134" y="206" fill="#64748B" font-family="'SF Mono','Fira Code',monospace" font-size="11">:</text>
+  <text x="144" y="206" fill="#22C55E" font-family="'SF Mono','Fira Code',monospace" font-size="10">"Find all files</text>
+  <text x="74" y="222" fill="#22C55E" font-family="'SF Mono','Fira Code',monospace" font-size="10">related to auth..."</text>
+
+  <!-- model -->
+  <text x="60" y="252" fill="#F97316" font-family="'SF Mono','Fira Code',monospace" font-size="11" font-weight="600">"model"</text>
+  <text x="124" y="252" fill="#64748B" font-family="'SF Mono','Fira Code',monospace" font-size="11">:</text>
+  <text x="134" y="252" fill="#22C55E" font-family="'SF Mono','Fira Code',monospace" font-size="10">"claude-sonnet-4-20250514"</text>
+
+  <!-- allowed_tools -->
+  <text x="60" y="282" fill="#F97316" font-family="'SF Mono','Fira Code',monospace" font-size="11" font-weight="600">"allowed_tools"</text>
+  <text x="178" y="282" fill="#64748B" font-family="'SF Mono','Fira Code',monospace" font-size="11">: [</text>
+  <text x="74" y="298" fill="#22C55E" font-family="'SF Mono','Fira Code',monospace" font-size="10">"Bash", "Glob", "Grep",</text>
+  <text x="74" y="314" fill="#22C55E" font-family="'SF Mono','Fira Code',monospace" font-size="10">"Read"</text>
+  <text x="60" y="330" fill="#64748B" font-family="'SF Mono','Fira Code',monospace" font-size="11">]</text>
+
+  <!-- isolation -->
+  <text x="60" y="360" fill="#F97316" font-family="'SF Mono','Fira Code',monospace" font-size="11" font-weight="600">"context"</text>
+  <text x="140" y="360" fill="#64748B" font-family="'SF Mono','Fira Code',monospace" font-size="11">:</text>
+  <text x="150" y="360" fill="#8B5CF6" font-family="'SF Mono','Fira Code',monospace" font-size="10">"isolated"</text>
+
+  <!-- max_turns -->
+  <text x="60" y="390" fill="#F97316" font-family="'SF Mono','Fira Code',monospace" font-size="11" font-weight="600">"max_turns"</text>
+  <text x="152" y="390" fill="#64748B" font-family="'SF Mono','Fira Code',monospace" font-size="11">:</text>
+  <text x="162" y="390" fill="#60A5FA" font-family="'SF Mono','Fira Code',monospace" font-size="10">10</text>
+
+  <text x="48" y="420" fill="#64748B" font-family="'SF Mono','Fira Code',monospace" font-size="11">}</text>
+
+  <!-- Annotations / Right side cards -->
+
+  <!-- Description annotation -->
+  <line x1="340" y1="165" x2="370" y2="165" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <rect x="375" y="80" width="160" height="54" rx="8" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="455" y="100" text-anchor="middle" fill="#3B82F6" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="700">Description</text>
+  <text x="455" y="116" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9">What the subagent does</text>
+  <text x="455" y="128" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9">(shown in tool list)</text>
+
+  <!-- Prompt annotation -->
+  <line x1="340" y1="212" x2="370" y2="212" stroke="#22C55E" stroke-width="1.5"/>
+  <rect x="375" y="148" width="160" height="54" rx="8" fill="#1E293B" stroke="#22C55E" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="455" y="168" text-anchor="middle" fill="#22C55E" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="700">Prompt</text>
+  <text x="455" y="184" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9">Detailed instructions</text>
+  <text x="455" y="196" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9">for the subagent task</text>
+
+  <!-- Model annotation -->
+  <line x1="340" y1="252" x2="370" y2="252" stroke="#8B5CF6" stroke-width="1.5"/>
+  <rect x="375" y="216" width="160" height="54" rx="8" fill="#1E293B" stroke="#8B5CF6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="455" y="236" text-anchor="middle" fill="#8B5CF6" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="700">Model</text>
+  <text x="455" y="252" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9">Which Claude model</text>
+  <text x="455" y="264" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9">powers the subagent</text>
+
+  <!-- Tools annotation -->
+  <line x1="340" y1="300" x2="370" y2="320" stroke="#F97316" stroke-width="1.5"/>
+  <rect x="375" y="284" width="160" height="54" rx="8" fill="#1E293B" stroke="#F97316" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="455" y="304" text-anchor="middle" fill="#F97316" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="700">Allowed Tools</text>
+  <text x="455" y="320" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9">Restricted tool set</text>
+  <text x="455" y="332" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9">for safety &amp; focus</text>
+
+  <!-- Isolation annotation -->
+  <line x1="340" y1="360" x2="370" y2="375" stroke="#EF4444" stroke-width="1.5"/>
+  <rect x="375" y="352" width="160" height="54" rx="8" fill="#1E293B" stroke="#EF4444" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="455" y="372" text-anchor="middle" fill="#EF4444" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="700">Context Isolation</text>
+  <text x="455" y="388" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9">Separate context window</text>
+  <text x="455" y="400" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="9">prevents pollution</text>
+
+  <!-- Bottom summary -->
+  <rect x="30" y="500" width="500" height="44" rx="8" fill="#0F172A" stroke="#334155" stroke-width="1"/>
+  <text x="280" y="518" text-anchor="middle" fill="#60A5FA" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="11" font-weight="600">Each parameter shapes subagent behavior, capability, and safety boundaries</text>
+  <text x="280" y="535" text-anchor="middle" fill="#94A3B8" font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="10">The Task tool creates a new Claude instance with these constraints</text>
+</svg>

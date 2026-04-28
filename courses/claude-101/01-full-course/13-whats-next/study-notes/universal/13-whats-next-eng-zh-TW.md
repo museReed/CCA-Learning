@@ -1,16 +1,16 @@
-# What's next? — Engineering Deep Dive
+# What's next? — 工程師深度解析
 
 | 項目 | 細節 |
-|------|--------|
-| 考試領域 | General — Claude Fundamentals |
-| 任務陳述 | General product knowledge (not directly CCA-tested, but foundational) |
-| 來源 | claude-101 / Lesson 13 |
+|------|------|
+| 考試領域 | 通識 — Claude 基礎 |
+| 任務陳述 | 一般產品知識（非 CCA 直接考試範圍，但為基礎） |
+| 來源 | claude-101 / 第 13 課 |
 
 ---
 
 ## 一句話摘要
 
-Congratulations on completing Claude 101! You've built a solid foundation for working with Claude effectively.
+恭喜你完成 Claude 101！你已經為有效使用 Claude 打下了堅實的基礎。
 
 ---
 
@@ -22,4 +22,4 @@ Congratulations on completing Claude 101! You've built a solid foundation for wo
 
 ---
 
-*Source: claude-101 — What's next?*
+*來源：claude-101 — What's next?*

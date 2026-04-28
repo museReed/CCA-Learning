@@ -1,16 +1,16 @@
-# Designing effective subagents — Engineering Deep Dive
+# Designing effective subagents — 工程師深度解析
 
 | 項目 | 細節 |
-|------|--------|
-| 考試領域 | D3 — Claude Code Configuration & Workflows (20%), D1 — Agentic Architecture (27%) |
-| 任務陳述 | 3.4 (context management), 1.1 (agentic loops), 1.3 (multi-agent orchestration) |
-| 來源 | introduction-to-subagents / Lesson 03 |
+|------|------|
+| 考試領域 | D3 — Claude Code 配置與工作流程 (20%)、D1 — Agentic 架構 (27%) |
+| 任務陳述 | 3.4（context 管理）、1.1（agentic 迴圈）、1.3（多代理協作） |
+| 來源 | introduction-to-subagents / 第 03 課 |
 
 ---
 
 ## 一句話摘要
 
-Now that you know how to create subagents, let's look at the patterns that make them actually effective. A subagent that's poorly configured will wander, run too long, or produce output the main agent can't use.
+既然你已經知道如何建立 subagent，接下來讓我們看看哪些模式能讓它們真正發揮效用。配置不當的 subagent 會漫無目的地運行、執行時間過長，或產生主代理無法使用的輸出。
 
 ---
 
@@ -22,4 +22,4 @@ Now that you know how to create subagents, let's look at the patterns that make 
 
 ---
 
-*Source: introduction-to-subagents — Designing effective subagents*
+*來源：introduction-to-subagents — Designing effective subagents*
