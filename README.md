@@ -160,13 +160,15 @@ CCA 考試涵蓋五大領域：
 ### 找到你的筆記
 
 ```
-courses/{課程名}/{章節}/{課堂}/study-notes/universal/
-├── {lesson}-eng-en.md      ← 工程師版・英文
-├── {lesson}-eng-zh-TW.md   ← 工程師版・繁中
-├── {lesson}-eng-zh-CN.md   ← 工程師版・簡中
-├── {lesson}-pm-en.md       ← PM 版・英文
-├── {lesson}-pm-zh-TW.md    ← PM 版・繁中
-└── {lesson}-pm-zh-CN.md    ← PM 版・簡中
+courses/{課程名}/{章節}/{課堂}/study-notes/
+├── eng/                        ← 工程師版
+│   ├── {lesson}-eng-en.md      ← 英文
+│   ├── {lesson}-eng-zh-TW.md   ← 繁中
+│   └── {lesson}-eng-zh-CN.md   ← 簡中
+└── pm/                         ← PM 版
+    ├── {lesson}-pm-en.md       ← 英文
+    ├── {lesson}-pm-zh-TW.md    ← 繁中
+    └── {lesson}-pm-zh-CN.md    ← 簡中
 ```
 
 ### 每份筆記的結構
@@ -220,7 +222,7 @@ CCA-Learning/
 │   │           ├── source/                ← 課程文字稿 + 截圖
 │   │           │   ├── 06-making-a-request.md
 │   │           │   └── images/            ← 講師截圖
-│   │           ├── study-notes/universal/ ← 6 個學習筆記
+│   │           ├── study-notes/           ← 6 個學習筆記（eng/ + pm/）
 │   │           ├── visuals/               ← SVG 圖表
 │   │           ├── srt/                   ← 英文 + 雙語字幕
 │   │           │   └── bilingual/
@@ -249,7 +251,9 @@ CCA-Learning/
 ```
 06-making-a-request/           ← 一堂課 = 一個目錄
 ├── source/                    ← 📄 原始教材（文字稿 + 截圖）
-├── study-notes/universal/     ← 📝 6 個學習筆記（eng/pm × en/zh-TW/zh-CN）
+├── study-notes/               ← 📝 6 個學習筆記
+│   ├── eng/                   ←    工程師版（en/zh-TW/zh-CN）
+│   └── pm/                    ←    PM 版（en/zh-TW/zh-CN）
 ├── visuals/                   ← 🎨 SVG 圖表（EN + zh-TW）
 ├── srt/bilingual/             ← 🗣️ 雙語字幕（EN+繁中 / EN+簡中）
 ├── videos/                    ← 🎬 教學影片

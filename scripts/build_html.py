@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 CCA Learning HTML builder.
-- Walks courses/*/**/study-notes/universal/*.md
+- Walks courses/*/**/study-notes/{eng,pm}/*.md
 - Converts each to HTML with standard CSS
 - Copies visuals/ alongside
 - Regenerates html/index.html
@@ -92,9 +92,9 @@ def md_to_html_body(md_text: str) -> str:
 def build_page(md_path: Path, course: str) -> Path:
     """Convert one md file to html in the html/ tree. Returns html path."""
     rel = md_path.relative_to(COURSES)
-    # rel example: building-with-the-claude-api/04-tool-use/32-introducing-tool-use/study-notes/universal/32-introducing-tool-use-eng-en.md
+    # rel example: building-with-the-claude-api/04-tool-use/32-introducing-tool-use/study-notes/eng/32-introducing-tool-use-eng-en.md
     parts = list(rel.parts)
-    # Remove study-notes/universal/ from middle
+    # Remove study-notes/{eng,pm}/ from middle
     try:
         idx = parts.index("study-notes")
         parts = parts[:idx] + parts[idx + 2 :]
@@ -144,19 +144,20 @@ def copy_visuals(lesson_dir: Path):
 
 
 def scan_course(course: str):
-    """Yield (chapter_dir, lesson_dir, md_files) for a course."""
+    """Yield md_paths for a course from study-notes/eng/ and study-notes/pm/."""
     course_root = COURSES / course
     if not course_root.is_dir():
         return
-    for md_path in sorted(course_root.rglob("study-notes/universal/*.md")):
-        yield md_path
+    for subdir in ("eng", "pm"):
+        for md_path in sorted(course_root.rglob(f"study-notes/{subdir}/*.md")):
+            yield md_path
 
 
 def scan_lessons_by_chapter(course: str):
     """Return {chapter_dir: {lesson_dir: set_of_variants}}"""
     chapters = {}
     for md_path in scan_course(course):
-        lesson_dir = md_path.parent.parent.parent  # strip study-notes/universal/file
+        lesson_dir = md_path.parent.parent.parent  # strip study-notes/{eng,pm}/file
         chapter_dir = lesson_dir.parent
         variants = chapters.setdefault(str(chapter_dir), {}).setdefault(str(lesson_dir), set())
         parsed = parse_filename(md_path)

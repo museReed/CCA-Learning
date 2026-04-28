@@ -333,33 +333,35 @@ def process_course(course_name, chapter_name):
         title_match = re.match(r'^# (.+)', transcript)
         title = title_match.group(1) if title_match else slug.split('-', 1)[1].replace('-', ' ').title()
 
-        notes_dir = lesson_dir / "study-notes" / "universal"
-        notes_dir.mkdir(parents=True, exist_ok=True)
+        eng_dir = lesson_dir / "study-notes" / "eng"
+        pm_dir = lesson_dir / "study-notes" / "pm"
+        eng_dir.mkdir(parents=True, exist_ok=True)
+        pm_dir.mkdir(parents=True, exist_ok=True)
 
         # Generate 6 versions
         # 1. eng-en
         eng_en = gen_eng_en(slug, title, transcript, course_name)
-        (notes_dir / f"{slug}-eng-en.md").write_text(eng_en, encoding='utf-8')
+        (eng_dir / f"{slug}-eng-en.md").write_text(eng_en, encoding='utf-8')
 
         # 2. eng-zh-TW (Chinese headers, English content)
         eng_zhtw = translate_to_zh_tw(eng_en)
-        (notes_dir / f"{slug}-eng-zh-TW.md").write_text(eng_zhtw, encoding='utf-8')
+        (eng_dir / f"{slug}-eng-zh-TW.md").write_text(eng_zhtw, encoding='utf-8')
 
         # 3. eng-zh-CN
         eng_zhcn = tw_to_cn(eng_zhtw)
-        (notes_dir / f"{slug}-eng-zh-CN.md").write_text(eng_zhcn, encoding='utf-8')
+        (eng_dir / f"{slug}-eng-zh-CN.md").write_text(eng_zhcn, encoding='utf-8')
 
         # 4. pm-en
         pm_en = gen_pm_en(slug, title, transcript, course_name)
-        (notes_dir / f"{slug}-pm-en.md").write_text(pm_en, encoding='utf-8')
+        (pm_dir / f"{slug}-pm-en.md").write_text(pm_en, encoding='utf-8')
 
         # 5. pm-zh-TW
         pm_zhtw = translate_to_zh_tw(pm_en)
-        (notes_dir / f"{slug}-pm-zh-TW.md").write_text(pm_zhtw, encoding='utf-8')
+        (pm_dir / f"{slug}-pm-zh-TW.md").write_text(pm_zhtw, encoding='utf-8')
 
         # 6. pm-zh-CN
         pm_zhcn = tw_to_cn(pm_zhtw)
-        (notes_dir / f"{slug}-pm-zh-CN.md").write_text(pm_zhcn, encoding='utf-8')
+        (pm_dir / f"{slug}-pm-zh-CN.md").write_text(pm_zhcn, encoding='utf-8')
 
         count += 6
         print(f"   ✅ {slug} — 6 notes ({len(eng_en)} + {len(pm_en)} bytes)")
