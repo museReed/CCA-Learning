@@ -149,9 +149,9 @@ CCA 考試涵蓋五大領域：
 | Introduction to MCP | [Skilljar](https://anthropic.skilljar.com/introduction-to-model-context-protocol) | `courses/introduction-to-model-context-protocol/` | ✅ 完整 |
 | MCP Advanced Topics | [Skilljar](https://anthropic.skilljar.com/model-context-protocol-advanced-topics) | `courses/model-context-protocol-advanced-topics/` | ✅ 完整 |
 | Building with the Claude API | [Skilljar](https://anthropic.skilljar.com/claude-with-the-anthropic-api) | `courses/building-with-the-claude-api/` | ✅ 完整 |
-| Claude 101 | [Skilljar](https://anthropic.skilljar.com/claude-101) | `courses/claude-101/` | ⏭️ 入門（可跳過） |
-| Introduction to Agent Skills | [Skilljar](https://anthropic.skilljar.com/introduction-to-agent-skills) | `courses/introduction-to-agent-skills/` | ⏭️ 簡介 |
-| Introduction to Subagents | [Skilljar](https://anthropic.skilljar.com/introduction-to-subagents) | `courses/introduction-to-subagents/` | ⏭️ 簡介 |
+| Claude 101 | [Skilljar](https://anthropic.skilljar.com/claude-101) | `courses/claude-101/` | ✅ 13 課（文字稿 + 8 影片） |
+| Introduction to Agent Skills | [Skilljar](https://anthropic.skilljar.com/introduction-to-agent-skills) | `courses/introduction-to-agent-skills/` | ✅ 6 課（文字稿 + 影片） |
+| Introduction to Subagents | [Skilljar](https://anthropic.skilljar.com/introduction-to-subagents) | `courses/introduction-to-subagents/` | ✅ 4 課（文字稿 + 影片） |
 
 ---
 
@@ -262,22 +262,22 @@ CCA-Learning/
 
 | 項目 | 數量 |
 |------|------|
-| 課程 | 7 門（4 門完整，3 門大綱） |
-| 已完成課堂 | 106 堂 |
+| 課程 | 7 門（全部完整） |
+| 已完成課堂 | 129 堂（106 + 23 新課程） |
 | 學習筆記 | 636 份（106 課 × eng/pm × en/zh-TW/zh-CN） |
 | SVG 圖表 | 187 個（含 EN 原版 + zh-TW 版） |
 | 翻譯 JSON | 108 個（108 支影片 × 逐句 EN/zh-TW/zh-CN） |
 | 雙語 SRT | 216 個（108 × zh-TW/zh-CN） |
 | 逐幀學習指南 | 7,658 幀 + 108 個 Markdown 導覽 |
 | HTML 頁面 | 637 頁 |
-| 原始課程文字稿 | 125 份 |
-| 教學影片 | 108 支（1.7 GB，見 Release） |
+| 原始課程文字稿 | 148 份（125 + 23 新課程） |
+| 教學影片 | 128 支（2.0 GB） |
 
 ---
 
 ## ⚠️ 注意事項
 
-- 影片檔（108 支 MP4，共 1.7 GB）存放於 [GitHub Release](https://github.com/museReed/CCA-Learning/releases/tag/v1.0.0)，按課程分 4 個 zip
+- 影片檔（128 支 MP4，共 2.0 GB）— 原 4 課程見 [GitHub Release v1.0.0](https://github.com/museReed/CCA-Learning/releases/tag/v1.0.0)，新 3 課程為 YouTube 來源
 - 學習筆記為 AI 輔助產出，建議搭配官方教材交叉驗證
 - 本 repo 為**個人學習用途**，課程內容版權屬 Anthropic
 

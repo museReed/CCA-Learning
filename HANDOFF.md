@@ -1,7 +1,7 @@
 # CCA-Learning Session Handoff
 
 **Date**: 2026-04-28
-**Last commit**: `09cfed3` — fix(pipeline): improve bilingual subtitle overlay layout
+**Last commit**: `3b362b9` — refactor: restructure 3 courses to lesson-self-contained layout
 
 ---
 
@@ -39,44 +39,53 @@ Skilljar 線上課程學習筆記庫，涵蓋 Anthropic 官方 7 門課程。包
 
 ---
 
+## File Structure — Unified Lesson-Self-Contained
+
+All 4 courses now use the same **lesson-self-contained** layout:
+
+```
+courses/<course>/<chapter>/<lesson>/
+├── source/                    ← 課程文字稿 + 截圖 + images/
+├── study-notes/universal/     ← 6 個學習筆記（eng/pm × en/zh-TW/zh-CN）
+├── visuals/                   ← SVG 圖表（EN + zh-TW）
+├── srt/                       ← 英文 SRT
+│   └── bilingual/             ← 雙語 SRT（EN+繁中 / EN+簡中）
+├── videos/                    ← MP4 教學影片
+└── visual-guide/              ← 逐幀雙語截圖指南
+```
+
+### Restructure Details (commit 3b362b9)
+
+- Converted 3 courses from chapter-shared → lesson-self-contained:
+  - building-with-the-claude-api (68 lessons, 9 chapters)
+  - introduction-to-model-context-protocol (11 lessons, 4 chapters)
+  - model-context-protocol-advanced-topics (8 lessons, 4 chapters)
+- All 93 video lessons matched SRT/video/visual-guide successfully
+- claude-code-in-action was already lesson-self-contained (no change needed)
+
+---
+
 ## Completed Work (This Session)
 
-1. **Bilingual SRT generation** — 216 雙語字幕檔（from translation JSONs via `bilingual_pipeline.py`）
-2. **Visual guide generation** — 6,710 逐幀截圖（3 courses with chapter-level visual-guides）
-3. **Subtitle overlay fix** — 修正中文字幕佈局（overlay 120→140px，中/英雙行正確顯示）
-4. **Claude-code-in-action translation JSONs** — 從已有雙語 SRT 反向生成 15 個 JSON
-5. **Cleanup (88 items):**
-   - 7 個 study-notes-v2 重複目錄
-   - 3 個重複 lesson 目錄（05-hooks 新舊版衝突）
-   - 2 個重複 SRT 檔
-   - 6 個 chapter-level scripts 目錄
-   - 15 個 raw frame 目錄（948 原始幀）
-   - 10 個空 source/images 目錄
-   - 45 個空目錄
-6. **README.md update** — 反映最新統計和資源
-7. **INDEX.md** — 4 門主力課程各自的課堂導覽目錄
+1. **Bilingual SRT generation** — 216 雙語字幕檔
+2. **Visual guide generation** — 6,710 逐幀截圖
+3. **Subtitle overlay fix** — 中文字幕佈局修正
+4. **Claude-code-in-action translation JSONs** — 15 個 JSON（從雙語 SRT 反向生成）
+5. **Cleanup (88 items)** — 重複目錄/檔案/空目錄清理
+6. **README.md + INDEX.md** — 更新反映統一結構
+7. **Restructure** — 3 門課程統一為 lesson-self-contained 結構（593 files）
 
 ---
 
 ## Remaining Work (Low Priority)
 
-1. **3 門輕量課程** — claude-101, introduction-to-agent-skills, introduction-to-subagents 只有大綱和 placeholder，無官方內容可供充實
-2. **HTML rebuild** — `python3 scripts/build_html.py` 可能需要重跑以反映最新筆記
-3. **Visual guides for claude-code-in-action** — 此課程的 visual-guide 已在之前 session 完成（lesson-level），格式與其他 3 門課不同（chapter-level visual-guides）
+1. **3 門輕量課程** — claude-101, introduction-to-agent-skills, introduction-to-subagents 只有大綱和 placeholder
+2. **HTML rebuild** — `python3 scripts/build_html.py` 需重跑以反映新目錄結構
+3. **Git push** — 本地 commits 尚未推送至 remote
 
 ---
 
-## Key Technical Details
-
-### File Structure Patterns
-
-| 課程 | 原始文字稿 | SRT 位置 | 雙語 SRT | 逐幀截圖 |
-|------|-----------|---------|---------|---------|
-| building-with-the-claude-api | `<chapter>/NN-slug.md` | `<chapter>/` (loose) | `<chapter>/srt/bilingual/` | `<chapter>/visual-guides/` |
-| claude-code-in-action | `<chapter>/<lesson>/source/` | `<chapter>/<lesson>/srt/` | `<chapter>/<lesson>/srt/bilingual/` | `<chapter>/<lesson>/visual-guide/` |
-| intro-mcp / mcp-advanced | `<chapter>/NN-slug/` | `<chapter>/` (loose) | `<chapter>/srt/bilingual/` | `<chapter>/visual-guides/` |
-
-### Key Scripts
+## Key Scripts
 
 | Script | Purpose |
 |--------|---------|
@@ -84,8 +93,6 @@ Skilljar 線上課程學習筆記庫，涵蓋 Anthropic 官方 7 門課程。包
 | `fill_translations.py` | 翻譯核心：`fill_template_from_dict()` + `tw_to_cn()` |
 | `build_html.py` | Markdown → HTML 建置 |
 | `translate_*.py` | 各課程翻譯腳本（13 支） |
-
----
 
 ## Environment
 
