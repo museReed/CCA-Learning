@@ -224,24 +224,41 @@ INDEX_HEAD = """<!DOCTYPE html>
     .tab-btn.active { color: var(--accent-active); background: #eef2ff; }
     .tab-btn.active::after { content: ""; position: absolute; bottom: -1px; left: 8px; right: 8px; height: 3px; background: var(--accent-active); border-radius: 3px 3px 0 0; }
     .tab-count { font-size: 0.75em; opacity: 0.7; margin-left: 4px; }
-    .content { padding: 24px 32px 48px; max-width: 1200px; margin: 0 auto; }
+    .content { padding: 24px 32px 48px; max-width: 900px; margin: 0 auto; }
     .panel { display: none; }
     .panel.active { display: block; }
-    .course-section { margin-bottom: 32px; }
-    .course-heading { font-size: 1.1em; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-    .course-tag { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; font-size: 0.7em; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.3px; }
-    .chapter-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 12px; transition: box-shadow 0.15s, border-color 0.3s, background 0.3s; }
-    .chapter-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .chapter-card.highlight { background: #eef2ff; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
-    .chapter-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .chapter-badge { background: #eef2ff; color: var(--accent-active); font-size: 0.75em; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
-    .chapter-title { font-weight: 600; font-size: 0.95em; flex: 1; }
-    .chapter-count { font-size: 0.8em; color: var(--text-secondary); }
-    .units { display: flex; flex-wrap: wrap; gap: 6px 0; }
-    .unit-link { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; font-size: 0.85em; color: var(--text); text-decoration: none; border-radius: 6px; transition: background 0.12s, box-shadow 0.3s; }
-    .unit-link:hover { background: var(--hover); color: var(--accent-active); }
-    .unit-link.highlight { background: #eef2ff; border: 1.5px solid #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.15); color: var(--accent-active); font-weight: 600; }
-    .unit-num { font-size: 0.75em; color: var(--text-secondary); font-weight: 600; min-width: 18px; }
+
+    /* Course accordion */
+    .course-section { margin-bottom: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card-bg); overflow: hidden; }
+    .course-toggle { display: flex; align-items: center; gap: 10px; width: 100%; padding: 14px 20px; background: none; border: none; cursor: pointer; text-align: left; transition: background 0.12s; }
+    .course-toggle:hover { background: var(--hover); }
+    .course-arrow { font-size: 0.7em; color: var(--text-secondary); transition: transform 0.2s; width: 16px; text-align: center; }
+    .course-section.open > .course-toggle .course-arrow { transform: rotate(90deg); }
+    .course-tag { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; font-size: 0.65em; font-weight: 600; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.3px; }
+    .course-title { font-weight: 700; font-size: 1em; flex: 1; color: var(--text); }
+    .course-count { font-size: 0.8em; color: var(--text-secondary); }
+    .course-body { display: none; border-top: 1px solid var(--border); }
+    .course-section.open > .course-body { display: block; }
+
+    /* Chapter inside course */
+    .chapter-card { border-bottom: 1px solid var(--border); transition: background 0.3s; }
+    .chapter-card:last-child { border-bottom: none; }
+    .chapter-card.highlight { background: #eef2ff; }
+    .chapter-toggle { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 20px 10px 28px; background: none; border: none; cursor: pointer; text-align: left; transition: background 0.12s; }
+    .chapter-toggle:hover { background: var(--hover); }
+    .chapter-arrow { font-size: 0.6em; color: var(--text-secondary); transition: transform 0.2s; width: 14px; text-align: center; }
+    .chapter-card.open > .chapter-toggle .chapter-arrow { transform: rotate(90deg); }
+    .chapter-badge { background: #eef2ff; color: var(--accent-active); font-size: 0.7em; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+    .chapter-title { font-weight: 600; font-size: 0.9em; flex: 1; color: var(--text); }
+    .chapter-count { font-size: 0.75em; color: var(--text-secondary); }
+
+    /* Lesson list inside chapter */
+    .units { display: none; padding: 0; }
+    .chapter-card.open > .units { display: block; }
+    .unit-link { display: flex; align-items: center; gap: 8px; padding: 8px 20px 8px 52px; font-size: 0.85em; color: var(--text); text-decoration: none; transition: background 0.1s, box-shadow 0.3s; border-left: 3px solid transparent; }
+    .unit-link:hover { background: var(--hover); color: var(--accent-active); border-left-color: var(--accent-active); }
+    .unit-link.highlight { background: #eef2ff; border-left-color: #6366f1; color: var(--accent-active); font-weight: 600; }
+    .unit-num { font-size: 0.75em; color: var(--text-secondary); font-weight: 600; min-width: 20px; }
   </style>
 </head>
 <body>
@@ -258,6 +275,7 @@ INDEX_SCRIPT = """
   let currentAud = params.get('aud') || 'eng';
   let currentLang = params.get('lang') || 'zh-TW';
   const fromChapter = params.get('from') || '';
+  const fromLesson = params.get('lesson') || '';
 
   function update() {
     audTabs.forEach(t => t.classList.toggle('active', t.dataset.audience === currentAud));
@@ -268,23 +286,37 @@ INDEX_SCRIPT = """
   langTabs.forEach(t => t.addEventListener('click', () => { currentLang = t.dataset.lang; update(); }));
   update();
 
-  // Highlight and scroll to the specific lesson the user came from
-  const fromLesson = params.get('lesson') || '';
+  // Course accordion toggle
+  document.querySelectorAll('.course-toggle').forEach(btn => {
+    btn.addEventListener('click', () => btn.parentElement.classList.toggle('open'));
+  });
+
+  // Chapter accordion toggle
+  document.querySelectorAll('.chapter-toggle').forEach(btn => {
+    btn.addEventListener('click', () => btn.parentElement.classList.toggle('open'));
+  });
+
+  // Auto-expand and highlight when returning from a lesson
   if (fromChapter) {
     const activePanel = document.querySelector('.panel.active');
     if (activePanel) {
       const card = activePanel.querySelector('.chapter-card[data-chapter="' + fromChapter + '"]');
       if (card) {
-        // Highlight the specific lesson link within the chapter
+        // Expand the parent course
+        const courseSection = card.closest('.course-section');
+        if (courseSection) courseSection.classList.add('open');
+        // Expand the chapter
+        card.classList.add('open');
+
+        // Highlight the specific lesson
         const link = fromLesson ? card.querySelector('.unit-link[data-lesson="' + fromLesson + '"]') : null;
         if (link) {
           link.classList.add('highlight');
-          setTimeout(() => link.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+          setTimeout(() => link.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
           setTimeout(() => link.classList.remove('highlight'), 4000);
         } else {
-          // Fallback: highlight the whole chapter card
           card.classList.add('highlight');
-          setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+          setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
           setTimeout(() => card.classList.remove('highlight'), 4000);
         }
       }
@@ -413,8 +445,11 @@ def build_index():
                 if not course_data:
                     continue
                 meta = COURSE_META[course]
-                parts.append(f'      <div class="course-section">\n')
-                parts.append(f'        <h2 class="course-heading"><span class="course-tag">{meta["tag"]}</span> {htmllib.escape(meta["title"])}</h2>\n')
+                # Count total lessons in this course for this variant
+                course_lesson_count = sum(len([l for l in lessons if (aud, lang) in l[1]]) for lessons in course_data.values())
+                parts.append(f'      <div class="course-section" data-course="{course}">\n')
+                parts.append(f'        <button class="course-toggle"><span class="course-arrow">\u25B6</span><span class="course-tag">{meta["tag"]}</span><span class="course-title">{htmllib.escape(meta["title"])}</span><span class="course-count">{course_lesson_count} lessons</span></button>\n')
+                parts.append(f'        <div class="course-body">\n')
                 for chapter_slug in sorted(course_data.keys()):
                     lessons = course_data[chapter_slug]
                     # Filter lessons that have this variant
@@ -422,21 +457,18 @@ def build_index():
                     if not filtered:
                         continue
                     ch_badge, ch_title = CHAPTER_LABEL.get(chapter_slug, ("", titleize(chapter_slug)))
-                    parts.append(f'        <div class="chapter-card" data-chapter="{course}/{chapter_slug}">\n')
-                    parts.append('          <div class="chapter-header">\n')
-                    parts.append(f'            <span class="chapter-badge">{ch_badge}</span>\n')
-                    parts.append(f'            <span class="chapter-title">{htmllib.escape(ch_title)}</span>\n')
-                    parts.append(f'            <span class="chapter-count">{len(filtered)} lessons</span>\n')
-                    parts.append('          </div>\n')
-                    parts.append('          <div class="units">\n')
+                    parts.append(f'          <div class="chapter-card" data-chapter="{course}/{chapter_slug}">\n')
+                    parts.append(f'            <button class="chapter-toggle"><span class="chapter-arrow">\u25B6</span><span class="chapter-badge">{ch_badge}</span><span class="chapter-title">{htmllib.escape(ch_title)}</span><span class="chapter-count">{len(filtered)} lessons</span></button>\n')
+                    parts.append('            <div class="units">\n')
                     for lesson_slug, _variants in filtered:
                         unit_num_m = re.match(r"^(\d+)", lesson_slug)
                         unit_num = unit_num_m.group(1) if unit_num_m else ""
                         unit_title = titleize(lesson_slug)
                         href = f"{course}/{chapter_slug}/{lesson_slug}/{lesson_slug}-{aud}-{lang}.html"
-                        parts.append(f'            <a href="{href}" class="unit-link" data-lesson="{lesson_slug}"><span class="unit-num">{unit_num}</span>{htmllib.escape(unit_title)}</a>\n')
+                        parts.append(f'              <a href="{href}" class="unit-link" data-lesson="{lesson_slug}"><span class="unit-num">{unit_num}</span>{htmllib.escape(unit_title)}</a>\n')
+                    parts.append('            </div>\n')
                     parts.append('          </div>\n')
-                    parts.append('        </div>\n')
+                parts.append('        </div>\n')
                 parts.append('      </div>\n')
             parts.append('    </div>\n')
 
