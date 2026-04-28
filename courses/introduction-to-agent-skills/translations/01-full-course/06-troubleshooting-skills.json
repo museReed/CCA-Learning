@@ -1,0 +1,168 @@
+{
+  "srt_file": "Troubleshooting skills.srt",
+  "video_file": "Troubleshooting skills.mp4",
+  "lesson": "06-troubleshooting-skills",
+  "max_valid_entry": 32,
+  "entries": {
+    "1": {
+      "en": "usually falls into one of a few categories.",
+      "zh_tw": "通常會落在幾個類別之中。",
+      "zh_cn": "通常会落在几个类别之中。"
+    },
+    "2": {
+      "en": "The skill doesn't trigger, doesn't load, has conflicts, or fails at runtime. But good news, most fixes are pretty",
+      "zh_tw": "Skill 沒有觸發、沒有載入、有衝突、或是在執行時失敗。但好消息是，大部分的修復方式都蠻",
+      "zh_cn": "Skill 没有触发、没有载入、有冲突、或是在执行时失败。但好消息是，大部分的修复方式都蛮"
+    },
+    "3": {
+      "en": "straightforward. Here are some of them.",
+      "zh_tw": "簡單直接的。以下是其中一些。",
+      "zh_cn": "简单直接的。以下是其中一些。"
+    },
+    "4": {
+      "en": "First thing we can do is try the agent skills verifier command. Depending on your operating system, installation",
+      "zh_tw": "我們可以先試試 agent skills verifier 命令。根據你的作業系統，安裝",
+      "zh_cn": "我们可以先试试 agent skills verifier 命令。根据你的作业系统，安装"
+    },
+    "5": {
+      "en": "steps will differ, but we recommend using UV as it's the easiest way to get it installed fast. Once installed,",
+      "zh_tw": "步驟會不同，但我們推薦使用 UV，因為這是最快安裝的方式。安裝好之後，",
+      "zh_cn": "步骤会不同，但我们推荐使用 UV，因为这是最快安装的方式。安装好之后，"
+    },
+    "6": {
+      "en": "either navigate to your skill directory or run this command from anywhere.",
+      "zh_tw": "你可以切換到 skill 目錄，或是從任何位置執行這個命令。",
+      "zh_cn": "你可以切换到 skill 目录，或是从任何位置执行这个命令。"
+    },
+    "7": {
+      "en": "validator, but Claude isn't using it when expected. H well, the cause is almost always the description. Cloud",
+      "zh_tw": "驗證器通過了，但 Claude 在預期的時候沒有使用它。原因幾乎都是描述的問題。Claude",
+      "zh_cn": "验证器通过了，但 Claude 在预期的时候没有使用它。原因几乎都是描述的问题。Claude"
+    },
+    "8": {
+      "en": "uses semantic matching, so your request needs to overlap with the description's meaning. If there's not enough overlap,",
+      "zh_tw": "使用語意匹配，所以你的請求需要和描述的含義有重疊。如果重疊不夠，",
+      "zh_cn": "使用语意匹配，所以你的请求需要和描述的含义有重叠。如果重叠不够，"
+    },
+    "9": {
+      "en": "no match. Check your description against how you're phrasing requests. Add trigger phrases users would actually",
+      "zh_tw": "就不會匹配到。把你的描述和你平常的措辭方式做比較。加入使用者實際會",
+      "zh_cn": "就不会匹配到。把你的描述和你平常的措辞方式做比较。加入使用者实际会"
+    },
+    "10": {
+      "en": "say, test with variations. Help me profile this. Why is this slow? Make this faster. If any fail to trigger, add",
+      "zh_tw": "說的觸發用語，用不同的說法來測試。「Help me profile this.」「Why is this slow?」「Make this faster.」如果有任何一個沒能觸發，就把",
+      "zh_cn": "说的触发用语，用不同的说法来测试。「Help me profile this.」「Why is this slow?」「Make this faster.」如果有任何一个没能触发，就把"
+    },
+    "11": {
+      "en": "those keywords to your description. If your skill doesn't appear when you ask Claude what skills are available, well,",
+      "zh_tw": "那些關鍵字加到你的描述裡。如果你問 Claude 有哪些 skill 可用時，你的 skill 沒有出現，那就",
+      "zh_cn": "那些关键字加到你的描述里。如果你问 Claude 有哪些 skill 可用时，你的 skill 没有出现，那就"
+    },
+    "12": {
+      "en": "check these things. Skills must be in the right location with the right structure. The skill.md file must be",
+      "zh_tw": "檢查這些東西。Skill 必須在正確的位置，有正確的結構。SKILL.MD 檔案必須",
+      "zh_cn": "检查这些东西。Skill 必须在正确的位置，有正确的结构。SKILL.MD 档案必须"
+    },
+    "13": {
+      "en": "inside of a name directory, not at a skills root. The file name must be exactly skill.md.",
+      "zh_tw": "在以名稱命名的目錄裡面，不是在 skills 根目錄下。檔案名稱必須剛好是 SKILL.MD。",
+      "zh_cn": "在以名称命名的目录里面，不是在 skills 根目录下。档案名称必须刚好是 SKILL.MD。"
+    },
+    "14": {
+      "en": "All caps on the skill lowerase MD. Just crossing things off the list here. Okay,",
+      "zh_tw": "SKILL 全大寫，MD 小寫。就是逐一確認清單上的項目。好的，",
+      "zh_cn": "SKILL 全大写，MD 小写。就是逐一确认清单上的项目。好的，"
+    },
+    "15": {
+      "en": "just crossing them off. Run claude-debug to see loading errors. Look for messages mentioning your skill name. Sometimes",
+      "zh_tw": "繼續確認。執行 claude-debug 來查看載入錯誤。尋找提到你 skill 名稱的訊息。有時候",
+      "zh_cn": "继续确认。执行 claude-debug 来查看载入错误。寻找提到你 skill 名称的讯息。有时候"
+    },
+    "16": {
+      "en": "this will just solve the problem for you. If Claude uses the wrong skill or seems confused, your descriptions are",
+      "zh_tw": "這就能幫你解決問題了。如果 Claude 使用了錯誤的 skill 或看起來搞混了，你的描述",
+      "zh_cn": "这就能帮你解决问题了。如果 Claude 使用了错误的 skill 或看起来搞混了，你的描述"
+    },
+    "17": {
+      "en": "probably too similar. Make them distinct. Remember, being as specific as possible doesn't just help with Claude",
+      "zh_tw": "可能太相似了。把它們區分開來。記住，盡可能具體不只是幫助 Claude",
+      "zh_cn": "可能太相似了。把它们区分开来。记住，尽可能具体不只是帮助 Claude"
+    },
+    "18": {
+      "en": "deciding when to use your skill, but not conflicting with other similar sounding skills.",
+      "zh_tw": "決定什麼時候使用你的 skill，還能避免和其他聽起來類似的 skill 產生衝突。",
+      "zh_cn": "决定什么时候使用你的 skill，还能避免和其他听起来类似的 skill 产生冲突。"
+    },
+    "19": {
+      "en": "If your personal skill is being ignored, an enterprise or higher priority skill might have the same name. So investigate",
+      "zh_tw": "如果你的個人 skill 被忽略了，可能是有一個 enterprise 或更高優先權的 skill 同名。所以去調查一下，",
+      "zh_cn": "如果你的个人 skill 被忽略了，可能是有一个 enterprise 或更高优先权的 skill 同名。所以去调查一下，"
+    },
+    "20": {
+      "en": "that. If you see an enterprise code review and you also have a personal code review, well the enterprise one will win",
+      "zh_tw": "如果你看到一個 enterprise code review 而你也有一個個人的 code review，enterprise 那個每次都會",
+      "zh_cn": "如果你看到一个 enterprise code review 而你也有一个个人的 code review，enterprise 那个每次都会"
+    },
+    "21": {
+      "en": "every time. So your solutions is to rename your skill to something a little bit more distinct. Talk to your admin",
+      "zh_tw": "勝出。所以你的解決方案是把 skill 重新命名為更獨特的名稱。你也可以跟管理員",
+      "zh_cn": "胜出。所以你的解决方案是把 skill 重新命名为更独特的名称。你也可以跟管理员"
+    },
+    "22": {
+      "en": "about the enterprise skill, but you'll have a better chance with number one.",
+      "zh_tw": "聊聊那個 enterprise skill，但第一個方法成功的機會比較大。",
+      "zh_cn": "聊聊那个 enterprise skill，但第一个方法成功的机会比较大。"
+    },
+    "23": {
+      "en": "Probably install the plugin but can't see it.",
+      "zh_tw": "可能你安裝了 plugin 但看不到它。",
+      "zh_cn": "可能你安装了 plugin 但看不到它。"
+    },
+    "24": {
+      "en": "Skills? Well, clear the cache. Restart claw code and reinstall. If skills still don't appear, the plug-in structure just",
+      "zh_tw": "Skill 不見了？清除快取、重新啟動 Claude Code 然後重新安裝。如果 skill 還是沒有出現，plugin 的結構可能",
+      "zh_cn": "Skill 不见了？清除快取、重新启动 Claude Code 然后重新安装。如果 skill 还是没有出现，plugin 的结构可能"
+    },
+    "25": {
+      "en": "might be wrong. This is when the validator tool makes sense.",
+      "zh_tw": "有問題。這時候驗證器工具就派上用場了。",
+      "zh_cn": "有问题。这时候验证器工具就派上用场了。"
+    },
+    "26": {
+      "en": "The skill loads but fails during execution. If your skill uses external packages, they must be installed. Add",
+      "zh_tw": "Skill 載入了但在執行時失敗。如果你的 skill 使用外部套件，那些套件必須先安裝好。把",
+      "zh_cn": "Skill 载入了但在执行时失败。如果你的 skill 使用外部套件，那些套件必须先安装好。把"
+    },
+    "27": {
+      "en": "this info to your description.",
+      "zh_tw": "這些資訊加到你的描述裡。",
+      "zh_cn": "这些资讯加到你的描述里。"
+    },
+    "28": {
+      "en": "Scripts need execute permission. Use for slashes everywhere, even on Windows.",
+      "zh_tw": "腳本需要執行權限。路徑一律使用斜線，即使在 Windows 上也是。",
+      "zh_cn": "脚本需要执行权限。路径一律使用斜线，即使在 Windows 上也是。"
+    },
+    "29": {
+      "en": "triggering? Well, improve your description and trigger phrases. Not loading? Check your path, file name,",
+      "zh_tw": "沒有觸發？改善你的描述和觸發用語。沒有載入？檢查路徑、檔案名稱、",
+      "zh_cn": "没有触发？改善你的描述和触发用语。没有载入？检查路径、档案名称、"
+    },
+    "30": {
+      "en": "YAML syntax. Wrong skill used?",
+      "zh_tw": "YAML 語法。用錯 skill 了？",
+      "zh_cn": "YAML 语法。用错 skill 了？"
+    },
+    "31": {
+      "en": "Make your descriptions a little bit more distinct. Are you being shadowed? Check the priority and rename if needed.",
+      "zh_tw": "把你的描述寫得更有區別。被覆蓋了嗎？檢查優先順序，必要時重新命名。",
+      "zh_cn": "把你的描述写得更有区别。被覆盖了吗？检查优先顺序，必要时重新命名。"
+    },
+    "32": {
+      "en": "Plugins are missing. Clear your cache and reinstall. Runtime failure? Check dependencies, permissions, and pass.",
+      "zh_tw": "Plugin 不見了？清除快取然後重新安裝。執行時失敗？檢查依賴套件、權限和路徑。",
+      "zh_cn": "Plugin 不见了？清除快取然后重新安装。执行时失败？检查依赖套件、权限和路径。"
+    }
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "srt_file": "Creating your first skill.srt",
+  "video_file": "Creating your first skill.mp4",
+  "lesson": "02-creating-your-first-skill",
+  "max_valid_entry": 35,
+  "entries": {
+    "1": {
+      "en": "will teach Claude how we would like it to explain code using visual diagrams and analogies.",
+      "zh_tw": "我們會教 Claude 如何用視覺化圖表和類比的方式來解釋程式碼。",
+      "zh_cn": "我们会教 Claude 如何用视觉化图表和类比的方式来解释程式码。"
+    },
+    "2": {
+      "en": "Then, we'll look at what happens under the hood when Claude uses it.",
+      "zh_tw": "接下來，我們會看看 Claude 在使用 skill 時，底層到底發生了什麼事。",
+      "zh_cn": "接下来，我们会看看 Claude 在使用 skill 时，底层到底发生了什么事。"
+    },
+    "3": {
+      "en": "First, let's create a directory for your skill. We're going to be making a personal skill, so it'll live in many",
+      "zh_tw": "首先，讓我們為你的 skill 建立一個目錄。我們要做的是個人 skill，所以它會存在於很多",
+      "zh_cn": "首先，让我们为你的 skill 建立一个目录。我们要做的是个人 skill，所以它会存在于很多"
+    },
+    "4": {
+      "en": "projects, so it will go in your home directory. Take into consideration that we're creating a directory with the",
+      "zh_tw": "專案中，所以它會放在你的家目錄下。注意我們是在 skills 目錄裡面建立一個以",
+      "zh_cn": "专案中，所以它会放在你的家目录下。注意我们是在 skills 目录里面建立一个以"
+    },
+    "5": {
+      "en": "skill name inside of the skills directory.",
+      "zh_tw": "skill 名稱命名的目錄。",
+      "zh_cn": "skill 名称命名的目录。"
+    },
+    "6": {
+      "en": "Now create the skill.",
+      "zh_tw": "現在來建立這個 skill。",
+      "zh_cn": "现在来建立这个 skill。"
+    },
+    "7": {
+      "en": "description tells Claude when to use it.",
+      "zh_tw": "描述告訴 Claude 什麼時候該使用這個 skill。",
+      "zh_cn": "描述告诉 Claude 什么时候该使用这个 skill。"
+    },
+    "8": {
+      "en": "This is the matching criteria. And then everything after the second dashes is the instructions that Claude follows.",
+      "zh_tw": "這就是匹配條件。而第二組分隔線之後的所有內容，就是 Claude 要遵循的指示。",
+      "zh_cn": "这就是匹配条件。而第二组分隔线之后的所有内容，就是 Claude 要遵循的指示。"
+    },
+    "9": {
+      "en": "Cloud code loads skills at startup. So restart your session. Then verify it's available.",
+      "zh_tw": "Claude Code 在啟動時載入 skill。所以請重新啟動你的 session，然後確認它可以使用了。",
+      "zh_cn": "Claude Code 在启动时载入 skill。所以请重新启动你的 session，然后确认它可以使用了。"
+    },
+    "10": {
+      "en": "You should see PR description in the list.",
+      "zh_tw": "你應該能在清單中看到 PR description。",
+      "zh_cn": "你应该能在清单中看到 PR description。"
+    },
+    "11": {
+      "en": "Now test it. Make some changes on a branch and say, \"Write a PR description for my changes.\"",
+      "zh_tw": "現在來測試一下。在一個 branch 上做一些修改，然後說「Write a PR description for my changes.」",
+      "zh_cn": "现在来测试一下。在一个 branch 上做一些修改，然后说「Write a PR description for my changes.」"
+    },
+    "12": {
+      "en": "Claude will then show you that it's using the PR description skill.",
+      "zh_tw": "Claude 就會顯示它正在使用 PR description skill。",
+      "zh_cn": "Claude 就会显示它正在使用 PR description skill。"
+    },
+    "13": {
+      "en": "After that, it'll check your diff and write a description following your template. Same format every single time.",
+      "zh_tw": "接著，它會檢查你的 diff 並按照你的範本撰寫描述。每次都是一樣的格式。",
+      "zh_cn": "接着，它会检查你的 diff 并按照你的范本撰写描述。每次都是一样的格式。"
+    },
+    "14": {
+      "en": "When Cloud Code starts, it scans four locations for skills. Enterprise paths, your personal Claude skills, the",
+      "zh_tw": "當 Claude Code 啟動時，它會掃描四個位置來尋找 skill：企業路徑、你的個人 Claude skill、",
+      "zh_cn": "当 Claude Code 启动时，它会扫描四个位置来寻找 skill：企业路径、你的个人 Claude skill、"
+    },
+    "15": {
+      "en": "project's Claude skills, and installed plugins. It loads only the name and description of each skill, not the full",
+      "zh_tw": "專案的 Claude skill，以及已安裝的 plugin。它只載入每個 skill 的名稱和描述，而不是完整的",
+      "zh_cn": "专案的 Claude skill，以及已安装的 plugin。它只载入每个 skill 的名称和描述，而不是完整的"
+    },
+    "16": {
+      "en": "content. This is important later. When you send a request, Claude compares it to the descriptions of your skills.",
+      "zh_tw": "內容。這個稍後會很重要。當你發送請求時，Claude 會把它和你的 skill 描述進行比對。",
+      "zh_cn": "内容。这个稍后会很重要。当你发送请求时，Claude 会把它和你的 skill 描述进行比对。"
+    },
+    "17": {
+      "en": "Explain what this function does matches a skill described as explain code with visual diagrams because the intent",
+      "zh_tw": "「解釋這個函式做了什麼」會匹配到描述為「用視覺化圖表解釋程式碼」的 skill，因為意圖",
+      "zh_cn": "「解释这个函式做了什么」会匹配到描述为「用视觉化图表解释程式码」的 skill，因为意图"
+    },
+    "18": {
+      "en": "overlaps. It will then ask you to confirm loading up the skill. This confirmation step keeps you aware of",
+      "zh_tw": "是重疊的。接著它會請你確認是否要載入這個 skill。這個確認步驟讓你隨時知道",
+      "zh_cn": "是重叠的。接着它会请你确认是否要载入这个 skill。这个确认步骤让你随时知道"
+    },
+    "19": {
+      "en": "what context Claude is using. After you confirm, Claude reads the complete file and follows its instructions. Now, let's",
+      "zh_tw": "Claude 正在使用什麼 context。確認之後，Claude 會讀取完整檔案並遵循其指示。現在，讓我們",
+      "zh_cn": "Claude 正在使用什么 context。确认之后，Claude 会读取完整档案并遵循其指示。现在，让我们"
+    },
+    "20": {
+      "en": "say you clone a Git repository and have an overlapping skill name. Well, which one wins? Here's the priority list. The",
+      "zh_tw": "假設你 clone 了一個 Git repository，而且有一個同名的 skill。那到底哪個會生效呢？這裡是優先順序清單。",
+      "zh_cn": "假设你 clone 了一个 Git repository，而且有一个同名的 skill。那到底哪个会生效呢？这里是优先顺序清单。"
+    },
+    "21": {
+      "en": "highest is enterprise, which lives in the manage settings. Two is the personal, which lives in your root",
+      "zh_tw": "最高優先的是 enterprise，在管理設定中。第二是個人 skill，在你的根",
+      "zh_cn": "最高优先的是 enterprise，在管理设定中。第二是个人 skill，在你的根"
+    },
+    "22": {
+      "en": "directory configuration like we're doing right now. Three is the project which is the claw directory inside of your",
+      "zh_tw": "目錄設定中，就像我們現在在做的。第三是專案 skill，在你的",
+      "zh_cn": "目录设定中，就像我们现在在做的。第三是专案 skill，在你的"
+    },
+    "23": {
+      "en": "repository. And the lowest is the plugins where you store your plugins that you got online. This lets",
+      "zh_tw": "repository 的 .claude 目錄裡。最低的是 plugin，也就是你從線上取得的 plugin。這讓",
+      "zh_cn": "repository 的 .claude 目录里。最低的是 plugin，也就是你从线上取得的 plugin。这让"
+    },
+    "24": {
+      "en": "organizations enforce standards while allowing individual customization through differently named skills. If",
+      "zh_tw": "組織可以強制執行標準，同時允許個人透過不同名稱的 skill 進行客製化。如果",
+      "zh_cn": "组织可以强制执行标准，同时允许个人透过不同名称的 skill 进行客制化。如果"
+    },
+    "25": {
+      "en": "your company has an enterprise code review skill and you create a personal code review skill, the enterprise",
+      "zh_tw": "你的公司有一個 enterprise code review skill，而你建立了一個個人的 code review skill，enterprise",
+      "zh_cn": "你的公司有一个 enterprise code review skill，而你建立了一个个人的 code review skill，enterprise"
+    },
+    "26": {
+      "en": "version of that takes precedence. To avoid conflicts, use descriptive names.",
+      "zh_tw": "版本會優先使用。為了避免衝突，請使用具有描述性的名稱。",
+      "zh_cn": "版本会优先使用。为了避免冲突，请使用具有描述性的名称。"
+    },
+    "27": {
+      "en": "Instead of review, use front-end PR review or security review. To update a skill, edit it skill.md file. Simple. To",
+      "zh_tw": "不要只叫 review，改用 front-end PR review 或 security review。要更新一個 skill，編輯它的 SKILL.MD 檔案就好。很簡單。要",
+      "zh_cn": "不要只叫 review，改用 front-end PR review 或 security review。要更新一个 skill，编辑它的 SKILL.MD 档案就好。很简单。要"
+    },
+    "28": {
+      "en": "remove one, delete its directory.",
+      "zh_tw": "移除一個 skill，刪除它的目錄就好。",
+      "zh_cn": "移除一个 skill，删除它的目录就好。"
+    },
+    "29": {
+      "en": "Restart clock code after changes for them to take effect.",
+      "zh_tw": "修改之後記得重新啟動 Claude Code，讓變更生效。",
+      "zh_cn": "修改之后记得重新启动 Claude Code，让变更生效。"
+    },
+    "30": {
+      "en": "Creating a skill means making a directory with a skill.md file containing metadata and instructions.",
+      "zh_tw": "建立一個 skill 就是建一個目錄，裡面放一個包含 metadata 和指示的 SKILL.MD 檔案。",
+      "zh_cn": "建立一个 skill 就是建一个目录，里面放一个包含 metadata 和指示的 SKILL.MD 档案。"
+    },
+    "31": {
+      "en": "Claude loads skill names and descriptions at startup. matches incoming requests against those",
+      "zh_tw": "Claude 在啟動時載入 skill 名稱和描述，把收到的請求和那些",
+      "zh_cn": "Claude 在启动时载入 skill 名称和描述，把收到的请求和那些"
+    },
+    "32": {
+      "en": "descriptions and asks for confirmation before loading the full content.",
+      "zh_tw": "描述進行比對，並在載入完整內容之前請你確認。",
+      "zh_cn": "描述进行比对，并在载入完整内容之前请你确认。"
+    },
+    "33": {
+      "en": "Priority rules handling name conflicts.",
+      "zh_tw": "優先順序規則用來處理名稱衝突。",
+      "zh_cn": "优先顺序规则用来处理名称冲突。"
+    },
+    "34": {
+      "en": "Enterprise overrides personal personal overrides project overrides plugins.",
+      "zh_tw": "Enterprise 覆蓋個人，個人覆蓋專案，專案覆蓋 plugin。",
+      "zh_cn": "Enterprise 覆盖个人，个人覆盖专案，专案覆盖 plugin。"
+    },
+    "35": {
+      "en": "Edit the skill.md file to update a skill and restart cloud code for changes to take effect.",
+      "zh_tw": "編輯 SKILL.MD 檔案來更新 skill，重新啟動 Claude Code 讓變更生效。",
+      "zh_cn": "编辑 SKILL.MD 档案来更新 skill，重新启动 Claude Code 让变更生效。"
+    }
+  }
+}

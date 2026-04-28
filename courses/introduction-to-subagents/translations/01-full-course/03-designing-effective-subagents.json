@@ -1,0 +1,168 @@
+{
+  "srt_file": "Designing effective subagents.srt",
+  "video_file": "Designing effective subagents.mp4",
+  "lesson": "03-designing-effective-subagents",
+  "max_valid_entry": 32,
+  "entries": {
+    "1": {
+      "en": "aents, let's look at patterns that lead to effective sub aents.",
+      "zh_tw": "既然我們已經了解了 subagent，讓我們來看看哪些模式能打造出有效的 subagent。",
+      "zh_cn": "既然我们已经了解了 subagent，让我们来看看哪些模式能打造出有效的 subagent。"
+    },
+    "2": {
+      "en": "subit data in the sub aent config file is used.",
+      "zh_tw": "讓我們先了解 subagent 設定檔中的資料是如何被使用的。",
+      "zh_cn": "让我们先了解 subagent 设定档中的资料是如何被使用的。"
+    },
+    "3": {
+      "en": "Whenever you send a message to the main context window agent, the name and description of each sub aent is included",
+      "zh_tw": "每當你向主 context window 的 agent 發送訊息時，每個 subagent 的名稱和描述都會被包含在",
+      "zh_cn": "每当你向主 context window 的 agent 发送讯息时，每个 subagent 的名称和描述都会被包含在"
+    },
+    "4": {
+      "en": "in the system prompt. So, if you want to better control when the main agent launches a sub agent automatically, you",
+      "zh_tw": "system prompt 中。所以，如果你想更好地控制主 agent 何時自動啟動 subagent，你",
+      "zh_cn": "system prompt 中。所以，如果你想更好地控制主 agent 何时自动启动 subagent，你"
+    },
+    "5": {
+      "en": "should modify the name and description.",
+      "zh_tw": "應該修改名稱和描述。",
+      "zh_cn": "应该修改名称和描述。"
+    },
+    "6": {
+      "en": "Next, remember that when a sub agent is launched, the main agent writes an input prompt. When writing this input prompt,",
+      "zh_tw": "接下來，記住當 subagent 被啟動時，主 agent 會撰寫一個輸入 prompt。在撰寫這個輸入 prompt 時，",
+      "zh_cn": "接下来，记住当 subagent 被启动时，主 agent 会撰写一个输入 prompt。在撰写这个输入 prompt 时，"
+    },
+    "7": {
+      "en": "it uses the description as guidance. So, if you want to better control when the main agent launches a sub agent",
+      "zh_tw": "它會以 description 作為指引。所以，如果你想更好地控制主 agent 何時啟動 subagent，",
+      "zh_cn": "它会以 description 作为指引。所以，如果你想更好地控制主 agent 何时启动 subagent，"
+    },
+    "8": {
+      "en": "automatically, you should modify the name and description.",
+      "zh_tw": "你應該修改名稱和描述。",
+      "zh_cn": "你应该修改名称和描述。"
+    },
+    "9": {
+      "en": "Let's consider our review sub aent again. Right now, when the main agent runs this sub agent, the sub aent is",
+      "zh_tw": "讓我們再看一下我們的 review subagent。目前，當主 agent 執行這個 subagent 時，subagent 會",
+      "zh_cn": "让我们再看一下我们的 review subagent。目前，当主 agent 执行这个 subagent 时，subagent 会"
+    },
+    "10": {
+      "en": "given an input prompt telling it to use get diff to find the current changes.",
+      "zh_tw": "收到一個輸入 prompt，告訴它使用 git diff 來找出目前的變更。",
+      "zh_cn": "收到一个输入 prompt，告诉它使用 git diff 来找出目前的变更。"
+    },
+    "11": {
+      "en": "If we wanted the main agent to more reliably tell the sub agent exactly which files to review, we would update",
+      "zh_tw": "如果我們希望主 agent 能更可靠地告訴 subagent 確切要審查哪些檔案，我們就需要更新",
+      "zh_cn": "如果我们希望主 agent 能更可靠地告诉 subagent 确切要审查哪些档案，我们就需要更新"
+    },
+    "12": {
+      "en": "the description.",
+      "zh_tw": "description。",
+      "zh_cn": "description。"
+    },
+    "13": {
+      "en": "You must tell the agent precisely which files you want it to review.",
+      "zh_tw": "你必須精確地告訴 agent 你想要它審查哪些檔案。",
+      "zh_cn": "你必须精确地告诉 agent 你想要它审查哪些档案。"
+    },
+    "14": {
+      "en": "reviewer agent, we'll see a different input.",
+      "zh_tw": "當我們再次執行 reviewer agent 時，我們會看到不同的輸入。",
+      "zh_cn": "当我们再次执行 reviewer agent 时，我们会看到不同的输入。"
+    },
+    "15": {
+      "en": "thread tells a sub agent through the description. So adding return sources that can be cited to a web search sub",
+      "zh_tw": "主執行緒透過 description 來告訴 subagent 該做什麼。所以在 web search subagent 的描述中加入「return sources that can be cited」，",
+      "zh_cn": "主执行绪透过 description 来告诉 subagent 该做什么。所以在 web search subagent 的描述中加入「return sources that can be cited」，"
+    },
+    "16": {
+      "en": "aents description causes the main thread to include that instruction when delegating the task.",
+      "zh_tw": "會讓主執行緒在委派任務時包含那個指示。",
+      "zh_cn": "会让主执行绪在委派任务时包含那个指示。"
+    },
+    "17": {
+      "en": "can make is defining an output format in the system prompt. This creates natural stopping points for the sub aent.",
+      "zh_tw": "一個很重要的做法是在 system prompt 中定義輸出格式。這為 subagent 建立了自然的停止點。",
+      "zh_cn": "一个很重要的做法是在 system prompt 中定义输出格式。这为 subagent 建立了自然的停止点。"
+    },
+    "18": {
+      "en": "Without a defined output format, sub aents struggle to decide when enough research has been done and they tend to",
+      "zh_tw": "如果沒有定義輸出格式，subagent 會難以判斷何時研究已經足夠，而且它們往往會",
+      "zh_cn": "如果没有定义输出格式，subagent 会难以判断何时研究已经足够，而且它们往往会"
+    },
+    "19": {
+      "en": "run much much longer than sub agents that are given an output format.",
+      "zh_tw": "比有輸出格式的 subagent 執行時間長得多。",
+      "zh_cn": "比有输出格式的 subagent 执行时间长得多。"
+    },
+    "20": {
+      "en": "to some issue like solving a dependency issue or finding that a certain command needs particular flags, these details",
+      "zh_tw": "遇到某些問題時，像是解決依賴問題或發現某個指令需要特定的 flag，這些細節",
+      "zh_cn": "遇到某些问题时，像是解决依赖问题或发现某个指令需要特定的 flag，这些细节"
+    },
+    "21": {
+      "en": "should appear in the summary. Otherwise, the main thread has to rediscover the same solutions, obstacles encountered,",
+      "zh_tw": "應該出現在摘要中。否則，主執行緒就得重新發現相同的解決方案。遇到的障礙、",
+      "zh_cn": "应该出现在摘要中。否则，主执行绪就得重新发现相同的解决方案。遇到的障碍、"
+    },
+    "22": {
+      "en": "any setup issues, workarounds discovered or environment quirks, commands that needed special flags or configuration,",
+      "zh_tw": "任何設定問題、發現的變通方法或環境特性、需要特殊 flag 或設定的指令、",
+      "zh_cn": "任何设定问题、发现的变通方法或环境特性、需要特殊 flag 或设定的指令、"
+    },
+    "23": {
+      "en": "dependencies or imports that cause problems.",
+      "zh_tw": "以及造成問題的依賴或 import。",
+      "zh_cn": "以及造成问题的依赖或 import。"
+    },
+    "24": {
+      "en": "in the output format surfaces this information.",
+      "zh_tw": "在輸出格式中包含這些資訊就能讓它們浮出水面。",
+      "zh_cn": "在输出格式中包含这些资讯就能让它们浮出水面。"
+    },
+    "25": {
+      "en": "A readonly sub aent using just glob grap read cannot accidentally modify files.",
+      "zh_tw": "一個只使用 Glob、Grep、Read 的唯讀 subagent 不會意外修改檔案。",
+      "zh_cn": "一个只使用 Glob、Grep、Read 的唯读 subagent 不会意外修改档案。"
+    },
+    "26": {
+      "en": "This constraint clarifies that the sub aents role and prevents unintended side effects.",
+      "zh_tw": "這個限制釐清了 subagent 的角色，並防止了意外的副作用。",
+      "zh_cn": "这个限制厘清了 subagent 的角色，并防止了意外的副作用。"
+    },
+    "27": {
+      "en": "So think about what sub aents actually needs to do. If it's just researching it only needs to read files. So keep it",
+      "zh_tw": "所以想想 subagent 實際上需要做什麼。如果只是研究，它只需要讀取檔案。所以讓它保持",
+      "zh_cn": "所以想想 subagent 实际上需要做什么。如果只是研究，它只需要读取档案。所以让它保持"
+    },
+    "28": {
+      "en": "read only. That way it can't accidentally modify anything while exploring. A reviewer needs to run get",
+      "zh_tw": "唯讀。這樣它在探索時就不會意外修改任何東西。reviewer 需要執行 git",
+      "zh_cn": "唯读。这样它在探索时就不会意外修改任何东西。reviewer 需要执行 git"
+    },
+    "29": {
+      "en": "diff to see what changed. So give it bash access, but it still doesn't need to edit files. Only give edit and write",
+      "zh_tw": "diff 來查看變更內容。所以給它 Bash 存取權，但它仍然不需要編輯檔案。只有真正需要修改程式碼的 subagent 才給予 Edit 和 Write",
+      "zh_cn": "diff 来查看变更内容。所以给它 Bash 存取权，但它仍然不需要编辑档案。只有真正需要修改程式码的 subagent 才给予 Edit 和 Write"
+    },
+    "30": {
+      "en": "to sub aents that should actually change your code, like a styling agent applying CSS updates. This also helps clarify",
+      "zh_tw": "工具，像是一個套用 CSS 更新的 styling agent。這也有助於釐清",
+      "zh_cn": "工具，像是一个套用 CSS 更新的 styling agent。这也有助于厘清"
+    },
+    "31": {
+      "en": "what each sub aent is for when you have several of them.",
+      "zh_tw": "當你有多個 subagent 時，每個的用途是什麼。",
+      "zh_cn": "当你有多个 subagent 时，每个的用途是什么。"
+    },
+    "32": {
+      "en": "output report obstacles have specific descriptions and limit tool access.",
+      "zh_tw": "總結：定義輸出格式、回報障礙、撰寫具體描述，並限制工具存取權限。",
+      "zh_cn": "总结：定义输出格式、回报障碍、撰写具体描述，并限制工具存取权限。"
+    }
+  }
+}

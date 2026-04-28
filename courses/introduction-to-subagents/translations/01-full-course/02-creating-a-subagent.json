@@ -1,0 +1,178 @@
+{
+  "srt_file": "Creating a subagent.srt",
+  "video_file": "Creating a subagent.mp4",
+  "lesson": "02-creating-a-subagent",
+  "max_valid_entry": 34,
+  "entries": {
+    "1": {
+      "en": "sub aents are and how they work. Cloud code includes built-in sub aents, but you can also create your own sub aents",
+      "zh_tw": "我們已經了解 subagent 是什麼以及它們如何運作。Claude Code 內建了 subagent，但你也可以建立自己的 subagent，",
+      "zh_cn": "我们已经了解 subagent 是什么以及它们如何运作。Claude Code 内建了 subagent，但你也可以建立自己的 subagent，"
+    },
+    "2": {
+      "en": "that specialize in certain tasks. Custom sub aents are markdown files with YAML front matter. These markdown files",
+      "zh_tw": "專門處理特定任務。自訂 subagent 是帶有 YAML front matter 的 markdown 檔案。這些 markdown 檔案",
+      "zh_cn": "专门处理特定任务。自订 subagent 是带有 YAML front matter 的 markdown 档案。这些 markdown 档案"
+    },
+    "3": {
+      "en": "contain configuration that helps claude understand when to use the sub aent and provides directions to the sub aent",
+      "zh_tw": "包含設定資訊，幫助 Claude 了解何時使用該 subagent，並為 subagent 提供指引，",
+      "zh_cn": "包含设定资讯，帮助 Claude 了解何时使用该 subagent，并为 subagent 提供指引，"
+    },
+    "4": {
+      "en": "itself.",
+      "zh_tw": "指導它如何完成任務。",
+      "zh_cn": "指导它如何完成任务。"
+    },
+    "5": {
+      "en": "agent is with the / agents command.",
+      "zh_tw": "建立 subagent 最簡單的方式是使用 /agents 指令。",
+      "zh_cn": "建立 subagent 最简单的方式是使用 /agents 指令。"
+    },
+    "6": {
+      "en": "This panel is the main interface for managing your sub aents. Once here, select create new agent. You'll then be",
+      "zh_tw": "這個面板是管理 subagent 的主要介面。進入後，選擇「create new agent」。接著你會被",
+      "zh_cn": "这个面板是管理 subagent 的主要介面。进入后，选择「create new agent」。接着你会被"
+    },
+    "7": {
+      "en": "asked if you want to create a sub aent for the current project or a sub aent that will be shared between all the",
+      "zh_tw": "問到你要為目前的專案建立 subagent，還是建立一個在你機器上所有",
+      "zh_cn": "问到你要为目前的专案建立 subagent，还是建立一个在你机器上所有"
+    },
+    "8": {
+      "en": "projects on your machine. Next, you can create a sub aent manually, but we recommend using claw code to",
+      "zh_tw": "專案之間共享的 subagent。接下來，你可以手動建立 subagent，但我們建議使用 Claude Code 來",
+      "zh_cn": "专案之间共享的 subagent。接下来，你可以手动建立 subagent，但我们建议使用 Claude Code 来"
+    },
+    "9": {
+      "en": "automatically generate it for you. Our first sub aent will be a code reviewer.",
+      "zh_tw": "自動幫你產生。我們的第一個 subagent 將會是一個 code reviewer。",
+      "zh_cn": "自动帮你产生。我们的第一个 subagent 将会是一个 code reviewer。"
+    },
+    "10": {
+      "en": "I'll ask Claude to make a sub agent that reviews code quality and security issues.",
+      "zh_tw": "我會請 Claude 建立一個審查程式碼品質和安全性問題的 subagent。",
+      "zh_cn": "我会请 Claude 建立一个审查程式码品质和安全性问题的 subagent。"
+    },
+    "11": {
+      "en": "Claude will use your input to generate a name, description, and system prompt for the sub agent. We'll see those in a",
+      "zh_tw": "Claude 會用你的輸入來產生 subagent 的名稱、描述和 system prompt。我們等下就會看到這些，",
+      "zh_cn": "Claude 会用你的输入来产生 subagent 的名称、描述和 system prompt。我们等下就会看到这些，"
+    },
+    "12": {
+      "en": "moment, but before we do, we get the opportunity to customize the tools that this sub agent has access to. Now, given",
+      "zh_tw": "但在那之前，我們可以自訂這個 subagent 能存取的工具。考慮到",
+      "zh_cn": "但在那之前，我们可以自订这个 subagent 能存取的工具。考虑到"
+    },
+    "13": {
+      "en": "that our sub agent is only responsible for reviewing code, you might decide to disallow tools for editing, but I'll",
+      "zh_tw": "我們的 subagent 只負責審查程式碼，你可能會決定不允許編輯工具，但我會",
+      "zh_cn": "我们的 subagent 只负责审查程式码，你可能会决定不允许编辑工具，但我会"
+    },
+    "14": {
+      "en": "leave an execution to allow the sub agent to more easily identify pending changes.",
+      "zh_tw": "保留執行權限，讓 subagent 能更容易地識別待處理的變更。",
+      "zh_cn": "保留执行权限，让 subagent 能更容易地识别待处理的变更。"
+    },
+    "15": {
+      "en": "Next, you'll be prompted to select the model that powers this sub agent. And finally, a color. This color is used in",
+      "zh_tw": "接下來，你會被提示選擇驅動這個 subagent 的模型。最後是顏色。這個顏色在",
+      "zh_cn": "接下来，你会被提示选择驱动这个 subagent 的模型。最后是颜色。这个颜色在"
+    },
+    "16": {
+      "en": "the UI to help you better identify the sub agent. And it also just adds a little bit of personal flare. Now at the",
+      "zh_tw": "UI 中用來幫你更容易辨認 subagent，同時也增添一點個人風格。現在在",
+      "zh_cn": "UI 中用来帮你更容易辨认 subagent，同时也增添一点个人风格。现在在"
+    },
+    "17": {
+      "en": "summary window, we see that the sub aent config file will be saved into my current project at this path. Now let's",
+      "zh_tw": "摘要視窗中，我們可以看到 subagent 的設定檔會被儲存到目前專案的這個路徑。現在讓我們",
+      "zh_cn": "摘要视窗中，我们可以看到 subagent 的设定档会被储存到目前专案的这个路径。现在让我们"
+    },
+    "18": {
+      "en": "open up that file to get a better idea of what's going on.",
+      "zh_tw": "打開那個檔案，更好地了解裡面的內容。",
+      "zh_cn": "打开那个档案，更好地了解里面的内容。"
+    },
+    "19": {
+      "en": "The name field is a unique identifier.",
+      "zh_tw": "name 欄位是一個唯一識別碼。",
+      "zh_cn": "name 栏位是一个唯一识别码。"
+    },
+    "20": {
+      "en": "This is how you reference the sub agent either by asking claw directly or using at agent code quality reviewer in your",
+      "zh_tw": "你可以透過直接詢問 Claude，或在訊息中使用 @agent code-quality-reviewer 來引用這個 subagent。",
+      "zh_cn": "你可以透过直接询问 Claude，或在讯息中使用 @agent code-quality-reviewer 来引用这个 subagent。"
+    },
+    "21": {
+      "en": "message. The description controls when cla decides to use the sub aent. The description must be on a single line.",
+      "zh_tw": "description 控制 Claude 何時決定使用該 subagent。描述必須寫在單獨一行上。",
+      "zh_cn": "description 控制 Claude 何时决定使用该 subagent。描述必须写在单独一行上。"
+    },
+    "22": {
+      "en": "Notice that there are escaped new line characters in there. If you want Claude to use the sub agent automatically more",
+      "zh_tw": "注意裡面有跳脫的換行字元。如果你希望 Claude 更頻繁地自動使用 subagent，",
+      "zh_cn": "注意里面有跳脱的换行字元。如果你希望 Claude 更频繁地自动使用 subagent，"
+    },
+    "23": {
+      "en": "often, add in the word proactively to the description.",
+      "zh_tw": "可以在描述中加入「proactively」這個詞。",
+      "zh_cn": "可以在描述中加入「proactively」这个词。"
+    },
+    "24": {
+      "en": "You can also add example conversations to help Claude understand when it should be using the sub agent.",
+      "zh_tw": "你也可以加入範例對話，幫助 Claude 理解何時應該使用這個 subagent。",
+      "zh_cn": "你也可以加入范例对话，帮助 Claude 理解何时应该使用这个 subagent。"
+    },
+    "25": {
+      "en": "The tools field lists which tools the sub agent can access. The list of tools will match the tools we granted access",
+      "zh_tw": "tools 欄位列出 subagent 可以存取哪些工具。工具清單會與我們在產生 agent 時授權的工具一致，",
+      "zh_cn": "tools 栏位列出 subagent 可以存取哪些工具。工具清单会与我们在产生 agent 时授权的工具一致，"
+    },
+    "26": {
+      "en": "to during the agent generation, but you can further edit the list of tools in this file if you want.",
+      "zh_tw": "但你也可以在這個檔案中進一步編輯工具清單。",
+      "zh_cn": "但你也可以在这个档案中进一步编辑工具清单。"
+    },
+    "27": {
+      "en": "The model field specifies which claw model to use. Sonnet, opus, haiku or inherit. Use haiku for fast tasks. Opus",
+      "zh_tw": "model 欄位指定使用哪個 Claude 模型。Sonnet、Opus、Haiku 或 inherit。Haiku 用於快速任務。Opus",
+      "zh_cn": "model 栏位指定使用哪个 Claude 模型。Sonnet、Opus、Haiku 或 inherit。Haiku 用于快速任务。Opus"
+    },
+    "28": {
+      "en": "for complex analysis and sonnet if you need something between the two. Inherit will use the same model as your main",
+      "zh_tw": "用於複雜分析，Sonnet 則介於兩者之間。inherit 會使用與你主對話相同的模型。",
+      "zh_cn": "用于复杂分析，Sonnet 则介于两者之间。inherit 会使用与你主对话相同的模型。"
+    },
+    "29": {
+      "en": "conversation. The body of the file contains the system prompt that is given to the sub aent. The system prompt will",
+      "zh_tw": "檔案的主體包含給予 subagent 的 system prompt。這個 system prompt 會",
+      "zh_cn": "档案的主体包含给予 subagent 的 system prompt。这个 system prompt 会"
+    },
+    "30": {
+      "en": "provide guidance to the sub agent, helping it understand how to complete its task and how it should return",
+      "zh_tw": "為 subagent 提供指引，幫助它理解如何完成任務，以及如何將",
+      "zh_cn": "为 subagent 提供指引，帮助它理解如何完成任务，以及如何将"
+    },
+    "31": {
+      "en": "information back to the main agent.",
+      "zh_tw": "資訊回傳給主 agent。",
+      "zh_cn": "资讯回传给主 agent。"
+    },
+    "32": {
+      "en": "your sub agent, test it by making some code changes and asking claw to review them.",
+      "zh_tw": "建立好 subagent 後，試著做一些程式碼變更，然後請 Claude 來審查。",
+      "zh_cn": "建立好 subagent 后，试着做一些程式码变更，然后请 Claude 来审查。"
+    },
+    "33": {
+      "en": "you expect, check your description.",
+      "zh_tw": "如果結果不如預期，檢查你的 description。",
+      "zh_cn": "如果结果不如预期，检查你的 description。"
+    },
+    "34": {
+      "en": "Adding more specific examples helps Claude understand when to delegate.",
+      "zh_tw": "加入更具體的範例可以幫助 Claude 理解何時該委派任務。",
+      "zh_cn": "加入更具体的范例可以帮助 Claude 理解何时该委派任务。"
+    }
+  }
+}

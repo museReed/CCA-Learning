@@ -20,6 +20,9 @@ COURSE_META = {
     "introduction-to-model-context-protocol": {"tag": "CCA", "title": "Introduction to MCP"},
     "model-context-protocol-advanced-topics": {"tag": "CCA", "title": "MCP Advanced Topics"},
     "building-with-the-claude-api": {"tag": "CCA", "title": "Building with the Claude API"},
+    "claude-101": {"tag": "Intro", "title": "Claude 101"},
+    "introduction-to-agent-skills": {"tag": "CCA", "title": "Introduction to Agent Skills"},
+    "introduction-to-subagents": {"tag": "CCA", "title": "Introduction to Subagents"},
 }
 
 COURSE_ORDER = [
@@ -27,6 +30,9 @@ COURSE_ORDER = [
     "introduction-to-model-context-protocol",
     "model-context-protocol-advanced-topics",
     "building-with-the-claude-api",
+    "claude-101",
+    "introduction-to-agent-skills",
+    "introduction-to-subagents",
 ]
 
 CSS_PAGE = """

@@ -1,0 +1,203 @@
+{
+  "srt_file": "Using subagents effectively.srt",
+  "video_file": "Using subagents effectively.mp4",
+  "lesson": "04-using-subagents-effectively",
+  "max_valid_entry": 39,
+  "entries": {
+    "1": {
+      "en": "design them. Well, now let's cover when they actually help and when they get in the way.",
+      "zh_tw": "我們已經學會如何設計 subagent。現在讓我們來討論它們什麼時候真的有幫助，什麼時候反而會礙事。",
+      "zh_cn": "我们已经学会如何设计 subagent。现在让我们来讨论它们什么时候真的有帮助，什么时候反而会碍事。"
+    },
+    "2": {
+      "en": "Simply put, the difference comes down to whether the intermediate work matters to your main thread. When exploration is",
+      "zh_tw": "簡單來說，差別在於中間的工作過程是否對你的主執行緒重要。當探索和",
+      "zh_cn": "简单来说，差别在于中间的工作过程是否对你的主执行绪重要。当探索和"
+    },
+    "3": {
+      "en": "separate from execution, sub agents shine. When each step depends on what the previous step discovered, well,",
+      "zh_tw": "執行是分開的，subagent 就能大放異彩。當每一步都依賴上一步的發現時，",
+      "zh_cn": "执行是分开的，subagent 就能大放异彩。当每一步都依赖上一步的发现时，"
+    },
+    "4": {
+      "en": "information gets lost in the handoff process.",
+      "zh_tw": "資訊就會在交接過程中遺失。",
+      "zh_cn": "资讯就会在交接过程中遗失。"
+    },
+    "5": {
+      "en": "you just need an answer, not the journey. Consider investigating how authentication works in an unfamiliar",
+      "zh_tw": "你只需要答案，不需要過程。想像一下在一個不熟悉的",
+      "zh_cn": "你只需要答案，不需要过程。想像一下在一个不熟悉的"
+    },
+    "6": {
+      "en": "codebase. Well, the main thread might need to know where is the JWT validated, but doesn't need to see every file that",
+      "zh_tw": "程式碼庫中調查身分驗證的運作方式。主執行緒可能需要知道 JWT 在哪裡被驗證，但不需要看到每個被",
+      "zh_cn": "程式码库中调查身分验证的运作方式。主执行绪可能需要知道 JWT 在哪里被验证，但不需要看到每个被"
+    },
+    "7": {
+      "en": "was searched.",
+      "zh_tw": "搜尋過的檔案。",
+      "zh_cn": "搜寻过的档案。"
+    },
+    "8": {
+      "en": "A research sub agent can read dozens of files, trace through function calls, and explore different code paths. All that",
+      "zh_tw": "一個 research subagent 可以讀取數十個檔案、追蹤函式呼叫、探索不同的程式碼路徑。所有這些",
+      "zh_cn": "一个 research subagent 可以读取数十个档案、追踪函式呼叫、探索不同的程式码路径。所有这些"
+    },
+    "9": {
+      "en": "exploration stays in the sub agents context. Your main thread receives JWT validation happens in middleware/offJS",
+      "zh_tw": "探索都留在 subagent 的 context 中。你的主執行緒收到的是「JWT 驗證發生在 middleware/auth.js",
+      "zh_cn": "探索都留在 subagent 的 context 中。你的主执行绪收到的是「JWT 验证发生在 middleware/auth.js"
+    },
+    "10": {
+      "en": "at line 42 called from the express router and route/ API.js or something like that.",
+      "zh_tw": "第 42 行，由 Express router 在 routes/api.js 呼叫」之類的精簡摘要。",
+      "zh_cn": "第 42 行，由 Express router 在 routes/api.js 呼叫」之类的精简摘要。"
+    },
+    "11": {
+      "en": "Cloud reviews work more effectively when the code is presented as being authored by someone else. If you build a feature",
+      "zh_tw": "當程式碼被呈現為別人寫的時候，Claude 的審查會更有效。如果你在主執行緒中經過多次對話",
+      "zh_cn": "当程式码被呈现为别人写的时候，Claude 的审查会更有效。如果你在主执行绪中经过多次对话"
+    },
+    "12": {
+      "en": "over many turns with your main thread, asking the main thread to then review it often doesn't give the best feedback.",
+      "zh_tw": "建構了一個功能，再請主執行緒審查，通常不會得到最好的回饋。",
+      "zh_cn": "建构了一个功能，再请主执行绪审查，通常不会得到最好的回馈。"
+    },
+    "13": {
+      "en": "Claude was involved in creating it, so it has trouble seeing it with fresh eyes. A reviewer sub agent sees the",
+      "zh_tw": "因為 Claude 參與了建立過程，所以它很難用全新的眼光來看。reviewer subagent 在獨立的 context 中看到",
+      "zh_cn": "因为 Claude 参与了建立过程，所以它很难用全新的眼光来看。reviewer subagent 在独立的 context 中看到"
+    },
+    "14": {
+      "en": "changes in a separate context. It runs git diff, reads the modified files, and applies it specialized review criteria",
+      "zh_tw": "這些變更。它執行 git diff、讀取修改過的檔案，並套用它專門的審查標準，",
+      "zh_cn": "这些变更。它执行 git diff、读取修改过的档案，并套用它专门的审查标准，"
+    },
+    "15": {
+      "en": "without the history of how the code was written. And this separation also lets you encode project specific review",
+      "zh_tw": "而不帶有程式碼撰寫歷史的包袱。這種分離也讓你可以在 subagent 的 system prompt 中編碼專案特定的審查",
+      "zh_cn": "而不带有程式码撰写历史的包袱。这种分离也让你可以在 subagent 的 system prompt 中编码专案特定的审查"
+    },
+    "16": {
+      "en": "standards in the sub aent system prompt ensuring consistent review criteria across the team.",
+      "zh_tw": "標準，確保整個團隊的審查標準一致。",
+      "zh_cn": "标准，确保整个团队的审查标准一致。"
+    },
+    "17": {
+      "en": "Cloud code's default system prompt emphasizes concise code focused response and this works great for coding but not",
+      "zh_tw": "Claude Code 的預設 system prompt 強調簡潔、以程式碼為中心的回應，這對寫程式很好，但不適用於",
+      "zh_cn": "Claude Code 的预设 system prompt 强调简洁、以程式码为中心的回应，这对写程式很好，但不适用于"
+    },
+    "18": {
+      "en": "for everything. So one is a copywriting sub aent with instructions about tone, audience and style. This will produce",
+      "zh_tw": "所有情境。比如一個有關於語調、受眾和風格指示的 copywriting subagent，它會產出",
+      "zh_cn": "所有情境。比如一个有关于语调、受众和风格指示的 copywriting subagent，它会产出"
+    },
+    "19": {
+      "en": "better marketing text than the main thread would. Claude Code's default prompt tends towards concise technical",
+      "zh_tw": "比主執行緒更好的行銷文案。Claude Code 的預設 prompt 傾向於簡潔的技術性",
+      "zh_cn": "比主执行绪更好的行销文案。Claude Code 的预设 prompt 倾向于简洁的技术性"
+    },
+    "20": {
+      "en": "writing, which really isn't what you want for a landing page or email campaign, unless you want to put your",
+      "zh_tw": "寫作，這真的不是你在做 landing page 或 email 行銷活動時想要的風格，除非你想讓你的",
+      "zh_cn": "写作，这真的不是你在做 landing page 或 email 行销活动时想要的风格，除非你想让你的"
+    },
+    "21": {
+      "en": "customers to sleep. A copywriting sub agent can have completely different instructions about voice and structure.",
+      "zh_tw": "客戶睡著。copywriting subagent 可以有完全不同的語調和結構指示。",
+      "zh_cn": "客户睡着。copywriting subagent 可以有完全不同的语调和结构指示。"
+    },
+    "22": {
+      "en": "A styling sub agent that app mentions your design system files will apply consistent CSS patterns. When the sub",
+      "zh_tw": "一個在 @ 提及中引用你的 design system 檔案的 styling subagent 會套用一致的 CSS 模式。當 subagent",
+      "zh_cn": "一个在 @ 提及中引用你的 design system 档案的 styling subagent 会套用一致的 CSS 模式。当 subagent"
+    },
+    "23": {
+      "en": "aent runs, those files load into the context automatically. So, it knows your color variables, spacing conventions,",
+      "zh_tw": "執行時，那些檔案會自動載入 context。所以它會知道你的色彩變數、間距慣例、",
+      "zh_cn": "执行时，那些档案会自动载入 context。所以它会知道你的色彩变数、间距惯例、"
+    },
+    "24": {
+      "en": "and component patterns before it even starts writing any CSS.",
+      "zh_tw": "以及元件模式，甚至在它開始撰寫任何 CSS 之前。",
+      "zh_cn": "以及元件模式，甚至在它开始撰写任何 CSS 之前。"
+    },
+    "25": {
+      "en": "Sub aents that claim expertise rarely help. Prompts like you are a Python expert or you are a Kubernetes",
+      "zh_tw": "聲稱具有專業知識的 subagent 很少有幫助。像是「你是 Python 專家」或「你是 Kubernetes",
+      "zh_cn": "声称具有专业知识的 subagent 很少有帮助。像是「你是 Python 专家」或「你是 Kubernetes"
+    },
+    "26": {
+      "en": "specialist add no value because Claude already has that knowledge. The overhead of launching a sub agent, losing",
+      "zh_tw": "專家」這類 prompt 不會增加任何價值，因為 Claude 本身就有這些知識。啟動 subagent、失去對其工作的",
+      "zh_cn": "专家」这类 prompt 不会增加任何价值，因为 Claude 本身就有这些知识。启动 subagent、失去对其工作的"
+    },
+    "27": {
+      "en": "visibility into its work, and compressing its findings into a summary only makes sense when the sub agent does",
+      "zh_tw": "可見性、將結果壓縮為摘要——這些開銷只有在 subagent 做了",
+      "zh_cn": "可见性、将结果压缩为摘要——这些开销只有在 subagent 做了"
+    },
+    "28": {
+      "en": "something that the main thread can't, like applying a custom system prompt or keeping exploratory work isolated.",
+      "zh_tw": "主執行緒做不到的事情時才有意義，像是套用自訂 system prompt 或隔離探索性工作。",
+      "zh_cn": "主执行绪做不到的事情时才有意义，像是套用自订 system prompt 或隔离探索性工作。"
+    },
+    "29": {
+      "en": "Sequential sub agent pipelines create problems. Consider a three agent flow.",
+      "zh_tw": "循序的 subagent pipeline 會造成問題。考慮一個三個 agent 的流程。",
+      "zh_cn": "循序的 subagent pipeline 会造成问题。考虑一个三个 agent 的流程。"
+    },
+    "30": {
+      "en": "One to reproduce a bug, one to debug it, and one to fix it. Pipelines work when tasks are truly independent. They fail",
+      "zh_tw": "一個重現 bug、一個除錯、一個修復。pipeline 在任務真正獨立時有效。當",
+      "zh_cn": "一个重现 bug、一个除错、一个修复。pipeline 在任务真正独立时有效。当"
+    },
+    "31": {
+      "en": "when each step depends on discoveries from the previous step.",
+      "zh_tw": "每一步都依賴前一步的發現時就會失敗。",
+      "zh_cn": "每一步都依赖前一步的发现时就会失败。"
+    },
+    "32": {
+      "en": "Testr runner sub aents tend to hide information you need. When tests fail, you want the full output to diagnose",
+      "zh_tw": "test runner subagent 往往會隱藏你需要的資訊。當測試失敗時，你需要完整輸出來診斷",
+      "zh_cn": "test runner subagent 往往会隐藏你需要的资讯。当测试失败时，你需要完整输出来诊断"
+    },
+    "33": {
+      "en": "issues. A sub aent that returns a test failed forces you to create additional debug scripts to get details that would",
+      "zh_tw": "問題。一個只回傳「測試失敗」的 subagent 會迫使你建立額外的除錯腳本，去取得本來在",
+      "zh_cn": "问题。一个只回传「测试失败」的 subagent 会迫使你建立额外的除错脚本，去取得本来在"
+    },
+    "34": {
+      "en": "have been visible in direct output.",
+      "zh_tw": "直接輸出中就能看到的細節。",
+      "zh_cn": "直接输出中就能看到的细节。"
+    },
+    "35": {
+      "en": "testing has showed that the testr runner pattern performed worse among all configurations.",
+      "zh_tw": "測試結果顯示，test runner 模式在所有設定中表現最差。",
+      "zh_cn": "测试结果显示，test runner 模式在所有设定中表现最差。"
+    },
+    "36": {
+      "en": "aents work as isolated threads that return summaries, how to create them with the / aents command, and how to",
+      "zh_tw": "subagent 作為隔離的執行緒運作並回傳摘要、如何使用 /agents 指令建立它們、以及如何",
+      "zh_cn": "subagent 作为隔离的执行绪运作并回传摘要、如何使用 /agents 指令建立它们、以及如何"
+    },
+    "37": {
+      "en": "design them with structured outputs and specific descriptions. Use them for research, reviews, and tasks needing",
+      "zh_tw": "用結構化輸出和具體描述來設計它們。把它們用於研究、審查，以及需要",
+      "zh_cn": "用结构化输出和具体描述来设计它们。把它们用于研究、审查，以及需要"
+    },
+    "38": {
+      "en": "custom system prompts, but avoid them for expert claims, multi-step pipelines, and test runners. The key question, does",
+      "zh_tw": "自訂 system prompt 的任務，但避免用於專家聲稱、多步驟 pipeline 和 test runner。關鍵問題是：",
+      "zh_cn": "自订 system prompt 的任务，但避免用于专家声称、多步骤 pipeline 和 test runner。关键问题是："
+    },
+    "39": {
+      "en": "the intermediate work matter? If not, then delegate it.",
+      "zh_tw": "中間的工作過程重要嗎？如果不重要，就委派出去吧。",
+      "zh_cn": "中间的工作过程重要吗？如果不重要，就委派出去吧。"
+    }
+  }
+}
