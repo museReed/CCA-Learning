@@ -64,7 +64,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <style>{css}</style>
 </head>
 <body>
-<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html" class="back-link">\u2190 Back to Index</a>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html?aud={audience}&lang={lang_code}&from={from_path}" class="back-link">\u2190 Back to Index</a>
 {body}
 </body>
 </html>
@@ -106,9 +106,16 @@ def build_page(md_path: Path, course: str) -> Path:
 
     parsed = parse_filename(md_path)
     lang_attr = "en"
+    audience = "eng"
+    lang_code = "zh-TW"
     if parsed:
-        _, _, lang = parsed
-        lang_attr = {"en": "en", "zh-TW": "zh-TW", "zh-CN": "zh-CN"}[lang]
+        _, audience, lang_code = parsed
+        lang_attr = {"en": "en", "zh-TW": "zh-TW", "zh-CN": "zh-CN"}[lang_code]
+
+    # Build from_path = "course/chapter" for back-link highlighting
+    lesson_dir = md_path.parent.parent.parent
+    chapter_slug = lesson_dir.parent.name
+    from_path = f"{course}/{chapter_slug}"
 
     md_text = md_path.read_text(encoding="utf-8")
     # Fix image refs: ../../visuals/foo.svg or visuals/foo.svg → visuals/foo.svg (alongside html)
@@ -125,6 +132,9 @@ def build_page(md_path: Path, course: str) -> Path:
         title=htmllib.escape(title),
         css=CSS_PAGE,
         body=body,
+        audience=audience,
+        lang_code=lang_code,
+        from_path=from_path,
     )
     html_path.write_text(html_content, encoding="utf-8")
     return html_path
@@ -218,8 +228,9 @@ INDEX_HEAD = """<!DOCTYPE html>
     .course-section { margin-bottom: 32px; }
     .course-heading { font-size: 1.1em; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
     .course-tag { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; font-size: 0.7em; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.3px; }
-    .chapter-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 12px; transition: box-shadow 0.15s; }
+    .chapter-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 12px; transition: box-shadow 0.15s, border-color 0.3s, background 0.3s; }
     .chapter-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .chapter-card.highlight { background: #eef2ff; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
     .chapter-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
     .chapter-badge { background: #eef2ff; color: var(--accent-active); font-size: 0.75em; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
     .chapter-title { font-weight: 600; font-size: 0.95em; flex: 1; }
@@ -238,7 +249,13 @@ INDEX_SCRIPT = """
   const audTabs = document.querySelectorAll('.aud-tab');
   const langTabs = document.querySelectorAll('.lang-tab');
   const panels = document.querySelectorAll('.panel');
-  let currentAud = 'eng'; let currentLang = 'zh-TW';
+
+  // Read query params from back-link
+  const params = new URLSearchParams(window.location.search);
+  let currentAud = params.get('aud') || 'eng';
+  let currentLang = params.get('lang') || 'zh-TW';
+  const fromChapter = params.get('from') || '';
+
   function update() {
     audTabs.forEach(t => t.classList.toggle('active', t.dataset.audience === currentAud));
     langTabs.forEach(t => t.classList.toggle('active', t.dataset.lang === currentLang));
@@ -247,6 +264,20 @@ INDEX_SCRIPT = """
   audTabs.forEach(t => t.addEventListener('click', () => { currentAud = t.dataset.audience; update(); }));
   langTabs.forEach(t => t.addEventListener('click', () => { currentLang = t.dataset.lang; update(); }));
   update();
+
+  // Highlight and scroll to the chapter the user came from
+  if (fromChapter) {
+    const activePanel = document.querySelector('.panel.active');
+    if (activePanel) {
+      const card = activePanel.querySelector('.chapter-card[data-chapter="' + fromChapter + '"]');
+      if (card) {
+        card.classList.add('highlight');
+        setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+        // Fade out highlight after 3 seconds
+        setTimeout(() => card.classList.remove('highlight'), 4000);
+      }
+    }
+  }
 </script>
 </body>
 </html>
@@ -379,7 +410,7 @@ def build_index():
                     if not filtered:
                         continue
                     ch_badge, ch_title = CHAPTER_LABEL.get(chapter_slug, ("", titleize(chapter_slug)))
-                    parts.append('        <div class="chapter-card">\n')
+                    parts.append(f'        <div class="chapter-card" data-chapter="{course}/{chapter_slug}">\n')
                     parts.append('          <div class="chapter-header">\n')
                     parts.append(f'            <span class="chapter-badge">{ch_badge}</span>\n')
                     parts.append(f'            <span class="chapter-title">{htmllib.escape(ch_title)}</span>\n')

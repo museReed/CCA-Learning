@@ -32,8 +32,9 @@
     .course-section { margin-bottom: 32px; }
     .course-heading { font-size: 1.1em; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
     .course-tag { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; font-size: 0.7em; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.3px; }
-    .chapter-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 12px; transition: box-shadow 0.15s; }
+    .chapter-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 12px; transition: box-shadow 0.15s, border-color 0.3s, background 0.3s; }
     .chapter-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .chapter-card.highlight { background: #eef2ff; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
     .chapter-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
     .chapter-badge { background: #eef2ff; color: var(--accent-active); font-size: 0.75em; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
     .chapter-title { font-weight: 600; font-size: 0.95em; flex: 1; }
@@ -69,7 +70,7 @@
     <div class="panel" data-audience="eng" data-lang="zh-TW">
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Claude Code in Action</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/01-intro">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Intro</span>
@@ -81,7 +82,7 @@
             <a href="claude-code-in-action/01-intro/04-claude-code-in-action/04-claude-code-in-action-eng-zh-TW.html" class="unit-link"><span class="unit-num">04</span>Claude Code In Action</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/02-getting-started">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Getting Started</span>
@@ -94,7 +95,7 @@
             <a href="claude-code-in-action/02-getting-started/08-making-changes/08-making-changes-eng-zh-TW.html" class="unit-link"><span class="unit-num">08</span>Making Changes</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/03-context-and-commands">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Context And Commands</span>
@@ -105,7 +106,7 @@
             <a href="claude-code-in-action/03-context-and-commands/11-custom-commands/11-custom-commands-eng-zh-TW.html" class="unit-link"><span class="unit-num">11</span>Custom Commands</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/04-integrations">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Integrations</span>
@@ -116,7 +117,7 @@
             <a href="claude-code-in-action/04-integrations/13-github-integration/13-github-integration-eng-zh-TW.html" class="unit-link"><span class="unit-num">13</span>Github Integration</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/05-hooks">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 05</span>
             <span class="chapter-title">Hooks</span>
@@ -131,7 +132,7 @@
             <a href="claude-code-in-action/05-hooks/19-another-useful-hook/19-another-useful-hook-eng-zh-TW.html" class="unit-link"><span class="unit-num">19</span>Another Useful Hook</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/06-sdk-and-wrap-up">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">SDK And Wrap Up</span>
@@ -145,7 +146,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to MCP</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/01-mcp-basics">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">MCP Basics</span>
@@ -157,7 +158,7 @@
             <a href="introduction-to-model-context-protocol/01-mcp-basics/05-project-setup/05-project-setup-eng-zh-TW.html" class="unit-link"><span class="unit-num">05</span>Project Setup</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/02-tools-and-inspector">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Tools And Inspector</span>
@@ -169,7 +170,7 @@
             <a href="introduction-to-model-context-protocol/02-tools-and-inspector/09-implementing-a-client/09-implementing-a-client-eng-zh-TW.html" class="unit-link"><span class="unit-num">09</span>Implementing A Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/03-resources-and-prompts">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Resources And Prompts</span>
@@ -182,7 +183,7 @@
             <a href="introduction-to-model-context-protocol/03-resources-and-prompts/13-prompts-in-the-client/13-prompts-in-the-client-eng-zh-TW.html" class="unit-link"><span class="unit-num">13</span>Prompts In The Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/04-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Assessment</span>
@@ -195,7 +196,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> MCP Advanced Topics</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/01-sampling-and-notifications">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Sampling And Notifications</span>
@@ -208,7 +209,7 @@
             <a href="model-context-protocol-advanced-topics/01-sampling-and-notifications/06-notifications-walkthrough/06-notifications-walkthrough-eng-zh-TW.html" class="unit-link"><span class="unit-num">06</span>Notifications Walkthrough</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/02-roots-and-messages">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Roots And Messages</span>
@@ -220,7 +221,7 @@
             <a href="model-context-protocol-advanced-topics/02-roots-and-messages/10-json-message-types/10-json-message-types-eng-zh-TW.html" class="unit-link"><span class="unit-num">10</span>Json Message Types</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/03-transports">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Transports</span>
@@ -236,7 +237,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Building with the Claude API</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/01-api-fundamentals">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">API Fundamentals</span>
@@ -256,7 +257,7 @@
             <a href="building-with-the-claude-api/01-api-fundamentals/38-multi-turn-conversations-with-tools/38-multi-turn-conversations-with-tools-eng-zh-TW.html" class="unit-link"><span class="unit-num">38</span>Multi Turn Conversations With Tools</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/02-prompt-evaluation">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Prompt Evaluation</span>
@@ -271,7 +272,7 @@
             <a href="building-with-the-claude-api/02-prompt-evaluation/22-code-based-grading/22-code-based-grading-eng-zh-TW.html" class="unit-link"><span class="unit-num">22</span>Code Based Grading</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/03-prompt-engineering">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Prompt Engineering</span>
@@ -285,7 +286,7 @@
             <a href="building-with-the-claude-api/03-prompt-engineering/29-providing-examples/29-providing-examples-eng-zh-TW.html" class="unit-link"><span class="unit-num">29</span>Providing Examples</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/04-tool-use">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Tool Use</span>
@@ -306,7 +307,7 @@
             <a href="building-with-the-claude-api/04-tool-use/supplementary-tool-choice/supplementary-tool-choice-eng-zh-TW.html" class="unit-link"><span class="unit-num"></span>Supplementary Tool Choice</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/05-rag">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Rag</span>
@@ -322,7 +323,7 @@
             <a href="building-with-the-claude-api/05-rag/51-a-multi-index-rag-pipeline/51-a-multi-index-rag-pipeline-eng-zh-TW.html" class="unit-link"><span class="unit-num">51</span>A Multi Index Rag Pipeline</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/06-extended-features">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">Extended Features</span>
@@ -339,7 +340,7 @@
             <a href="building-with-the-claude-api/06-extended-features/59-code-execution-and-the-files-api/59-code-execution-and-the-files-api-eng-zh-TW.html" class="unit-link"><span class="unit-num">59</span>Code Execution And The Files Api</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/07-mcp">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 07</span>
             <span class="chapter-title">MCP</span>
@@ -359,7 +360,7 @@
             <a href="building-with-the-claude-api/07-mcp/71-mcp-review/71-mcp-review-eng-zh-TW.html" class="unit-link"><span class="unit-num">71</span>Mcp Review</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/08-agents-and-workflows">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 08</span>
             <span class="chapter-title">Agents And Workflows</span>
@@ -379,7 +380,7 @@
             <a href="building-with-the-claude-api/08-agents-and-workflows/83-workflows-vs-agents/83-workflows-vs-agents-eng-zh-TW.html" class="unit-link"><span class="unit-num">83</span>Workflows Vs Agents</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/09-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 09</span>
             <span class="chapter-title">Assessment</span>
@@ -393,7 +394,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">Intro</span> Claude 101</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-101/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -418,7 +419,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Agent Skills</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-agent-skills/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -436,7 +437,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Subagents</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-subagents/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -454,7 +455,7 @@
     <div class="panel" data-audience="eng" data-lang="en">
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Claude Code in Action</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/01-intro">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Intro</span>
@@ -466,7 +467,7 @@
             <a href="claude-code-in-action/01-intro/04-claude-code-in-action/04-claude-code-in-action-eng-en.html" class="unit-link"><span class="unit-num">04</span>Claude Code In Action</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/02-getting-started">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Getting Started</span>
@@ -479,7 +480,7 @@
             <a href="claude-code-in-action/02-getting-started/08-making-changes/08-making-changes-eng-en.html" class="unit-link"><span class="unit-num">08</span>Making Changes</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/03-context-and-commands">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Context And Commands</span>
@@ -490,7 +491,7 @@
             <a href="claude-code-in-action/03-context-and-commands/11-custom-commands/11-custom-commands-eng-en.html" class="unit-link"><span class="unit-num">11</span>Custom Commands</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/04-integrations">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Integrations</span>
@@ -501,7 +502,7 @@
             <a href="claude-code-in-action/04-integrations/13-github-integration/13-github-integration-eng-en.html" class="unit-link"><span class="unit-num">13</span>Github Integration</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/05-hooks">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 05</span>
             <span class="chapter-title">Hooks</span>
@@ -516,7 +517,7 @@
             <a href="claude-code-in-action/05-hooks/19-another-useful-hook/19-another-useful-hook-eng-en.html" class="unit-link"><span class="unit-num">19</span>Another Useful Hook</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/06-sdk-and-wrap-up">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">SDK And Wrap Up</span>
@@ -530,7 +531,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to MCP</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/01-mcp-basics">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">MCP Basics</span>
@@ -542,7 +543,7 @@
             <a href="introduction-to-model-context-protocol/01-mcp-basics/05-project-setup/05-project-setup-eng-en.html" class="unit-link"><span class="unit-num">05</span>Project Setup</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/02-tools-and-inspector">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Tools And Inspector</span>
@@ -554,7 +555,7 @@
             <a href="introduction-to-model-context-protocol/02-tools-and-inspector/09-implementing-a-client/09-implementing-a-client-eng-en.html" class="unit-link"><span class="unit-num">09</span>Implementing A Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/03-resources-and-prompts">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Resources And Prompts</span>
@@ -567,7 +568,7 @@
             <a href="introduction-to-model-context-protocol/03-resources-and-prompts/13-prompts-in-the-client/13-prompts-in-the-client-eng-en.html" class="unit-link"><span class="unit-num">13</span>Prompts In The Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/04-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Assessment</span>
@@ -580,7 +581,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> MCP Advanced Topics</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/01-sampling-and-notifications">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Sampling And Notifications</span>
@@ -593,7 +594,7 @@
             <a href="model-context-protocol-advanced-topics/01-sampling-and-notifications/06-notifications-walkthrough/06-notifications-walkthrough-eng-en.html" class="unit-link"><span class="unit-num">06</span>Notifications Walkthrough</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/02-roots-and-messages">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Roots And Messages</span>
@@ -605,7 +606,7 @@
             <a href="model-context-protocol-advanced-topics/02-roots-and-messages/10-json-message-types/10-json-message-types-eng-en.html" class="unit-link"><span class="unit-num">10</span>Json Message Types</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/03-transports">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Transports</span>
@@ -621,7 +622,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Building with the Claude API</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/01-api-fundamentals">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">API Fundamentals</span>
@@ -641,7 +642,7 @@
             <a href="building-with-the-claude-api/01-api-fundamentals/38-multi-turn-conversations-with-tools/38-multi-turn-conversations-with-tools-eng-en.html" class="unit-link"><span class="unit-num">38</span>Multi Turn Conversations With Tools</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/02-prompt-evaluation">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Prompt Evaluation</span>
@@ -656,7 +657,7 @@
             <a href="building-with-the-claude-api/02-prompt-evaluation/22-code-based-grading/22-code-based-grading-eng-en.html" class="unit-link"><span class="unit-num">22</span>Code Based Grading</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/03-prompt-engineering">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Prompt Engineering</span>
@@ -670,7 +671,7 @@
             <a href="building-with-the-claude-api/03-prompt-engineering/29-providing-examples/29-providing-examples-eng-en.html" class="unit-link"><span class="unit-num">29</span>Providing Examples</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/04-tool-use">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Tool Use</span>
@@ -691,7 +692,7 @@
             <a href="building-with-the-claude-api/04-tool-use/supplementary-tool-choice/supplementary-tool-choice-eng-en.html" class="unit-link"><span class="unit-num"></span>Supplementary Tool Choice</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/05-rag">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Rag</span>
@@ -707,7 +708,7 @@
             <a href="building-with-the-claude-api/05-rag/51-a-multi-index-rag-pipeline/51-a-multi-index-rag-pipeline-eng-en.html" class="unit-link"><span class="unit-num">51</span>A Multi Index Rag Pipeline</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/06-extended-features">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">Extended Features</span>
@@ -724,7 +725,7 @@
             <a href="building-with-the-claude-api/06-extended-features/59-code-execution-and-the-files-api/59-code-execution-and-the-files-api-eng-en.html" class="unit-link"><span class="unit-num">59</span>Code Execution And The Files Api</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/07-mcp">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 07</span>
             <span class="chapter-title">MCP</span>
@@ -744,7 +745,7 @@
             <a href="building-with-the-claude-api/07-mcp/71-mcp-review/71-mcp-review-eng-en.html" class="unit-link"><span class="unit-num">71</span>Mcp Review</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/08-agents-and-workflows">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 08</span>
             <span class="chapter-title">Agents And Workflows</span>
@@ -764,7 +765,7 @@
             <a href="building-with-the-claude-api/08-agents-and-workflows/83-workflows-vs-agents/83-workflows-vs-agents-eng-en.html" class="unit-link"><span class="unit-num">83</span>Workflows Vs Agents</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/09-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 09</span>
             <span class="chapter-title">Assessment</span>
@@ -778,7 +779,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">Intro</span> Claude 101</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-101/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -803,7 +804,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Agent Skills</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-agent-skills/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -821,7 +822,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Subagents</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-subagents/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -839,7 +840,7 @@
     <div class="panel" data-audience="eng" data-lang="zh-CN">
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Claude Code in Action</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/01-intro">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Intro</span>
@@ -851,7 +852,7 @@
             <a href="claude-code-in-action/01-intro/04-claude-code-in-action/04-claude-code-in-action-eng-zh-CN.html" class="unit-link"><span class="unit-num">04</span>Claude Code In Action</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/02-getting-started">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Getting Started</span>
@@ -864,7 +865,7 @@
             <a href="claude-code-in-action/02-getting-started/08-making-changes/08-making-changes-eng-zh-CN.html" class="unit-link"><span class="unit-num">08</span>Making Changes</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/03-context-and-commands">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Context And Commands</span>
@@ -875,7 +876,7 @@
             <a href="claude-code-in-action/03-context-and-commands/11-custom-commands/11-custom-commands-eng-zh-CN.html" class="unit-link"><span class="unit-num">11</span>Custom Commands</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/04-integrations">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Integrations</span>
@@ -886,7 +887,7 @@
             <a href="claude-code-in-action/04-integrations/13-github-integration/13-github-integration-eng-zh-CN.html" class="unit-link"><span class="unit-num">13</span>Github Integration</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/05-hooks">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 05</span>
             <span class="chapter-title">Hooks</span>
@@ -901,7 +902,7 @@
             <a href="claude-code-in-action/05-hooks/19-another-useful-hook/19-another-useful-hook-eng-zh-CN.html" class="unit-link"><span class="unit-num">19</span>Another Useful Hook</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/06-sdk-and-wrap-up">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">SDK And Wrap Up</span>
@@ -915,7 +916,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to MCP</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/01-mcp-basics">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">MCP Basics</span>
@@ -927,7 +928,7 @@
             <a href="introduction-to-model-context-protocol/01-mcp-basics/05-project-setup/05-project-setup-eng-zh-CN.html" class="unit-link"><span class="unit-num">05</span>Project Setup</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/02-tools-and-inspector">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Tools And Inspector</span>
@@ -939,7 +940,7 @@
             <a href="introduction-to-model-context-protocol/02-tools-and-inspector/09-implementing-a-client/09-implementing-a-client-eng-zh-CN.html" class="unit-link"><span class="unit-num">09</span>Implementing A Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/03-resources-and-prompts">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Resources And Prompts</span>
@@ -952,7 +953,7 @@
             <a href="introduction-to-model-context-protocol/03-resources-and-prompts/13-prompts-in-the-client/13-prompts-in-the-client-eng-zh-CN.html" class="unit-link"><span class="unit-num">13</span>Prompts In The Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/04-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Assessment</span>
@@ -965,7 +966,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> MCP Advanced Topics</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/01-sampling-and-notifications">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Sampling And Notifications</span>
@@ -978,7 +979,7 @@
             <a href="model-context-protocol-advanced-topics/01-sampling-and-notifications/06-notifications-walkthrough/06-notifications-walkthrough-eng-zh-CN.html" class="unit-link"><span class="unit-num">06</span>Notifications Walkthrough</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/02-roots-and-messages">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Roots And Messages</span>
@@ -990,7 +991,7 @@
             <a href="model-context-protocol-advanced-topics/02-roots-and-messages/10-json-message-types/10-json-message-types-eng-zh-CN.html" class="unit-link"><span class="unit-num">10</span>Json Message Types</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/03-transports">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Transports</span>
@@ -1006,7 +1007,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Building with the Claude API</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/01-api-fundamentals">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">API Fundamentals</span>
@@ -1026,7 +1027,7 @@
             <a href="building-with-the-claude-api/01-api-fundamentals/38-multi-turn-conversations-with-tools/38-multi-turn-conversations-with-tools-eng-zh-CN.html" class="unit-link"><span class="unit-num">38</span>Multi Turn Conversations With Tools</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/02-prompt-evaluation">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Prompt Evaluation</span>
@@ -1041,7 +1042,7 @@
             <a href="building-with-the-claude-api/02-prompt-evaluation/22-code-based-grading/22-code-based-grading-eng-zh-CN.html" class="unit-link"><span class="unit-num">22</span>Code Based Grading</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/03-prompt-engineering">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Prompt Engineering</span>
@@ -1055,7 +1056,7 @@
             <a href="building-with-the-claude-api/03-prompt-engineering/29-providing-examples/29-providing-examples-eng-zh-CN.html" class="unit-link"><span class="unit-num">29</span>Providing Examples</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/04-tool-use">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Tool Use</span>
@@ -1076,7 +1077,7 @@
             <a href="building-with-the-claude-api/04-tool-use/supplementary-tool-choice/supplementary-tool-choice-eng-zh-CN.html" class="unit-link"><span class="unit-num"></span>Supplementary Tool Choice</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/05-rag">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Rag</span>
@@ -1092,7 +1093,7 @@
             <a href="building-with-the-claude-api/05-rag/51-a-multi-index-rag-pipeline/51-a-multi-index-rag-pipeline-eng-zh-CN.html" class="unit-link"><span class="unit-num">51</span>A Multi Index Rag Pipeline</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/06-extended-features">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">Extended Features</span>
@@ -1109,7 +1110,7 @@
             <a href="building-with-the-claude-api/06-extended-features/59-code-execution-and-the-files-api/59-code-execution-and-the-files-api-eng-zh-CN.html" class="unit-link"><span class="unit-num">59</span>Code Execution And The Files Api</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/07-mcp">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 07</span>
             <span class="chapter-title">MCP</span>
@@ -1129,7 +1130,7 @@
             <a href="building-with-the-claude-api/07-mcp/71-mcp-review/71-mcp-review-eng-zh-CN.html" class="unit-link"><span class="unit-num">71</span>Mcp Review</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/08-agents-and-workflows">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 08</span>
             <span class="chapter-title">Agents And Workflows</span>
@@ -1149,7 +1150,7 @@
             <a href="building-with-the-claude-api/08-agents-and-workflows/83-workflows-vs-agents/83-workflows-vs-agents-eng-zh-CN.html" class="unit-link"><span class="unit-num">83</span>Workflows Vs Agents</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/09-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 09</span>
             <span class="chapter-title">Assessment</span>
@@ -1163,7 +1164,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">Intro</span> Claude 101</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-101/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -1188,7 +1189,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Agent Skills</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-agent-skills/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -1206,7 +1207,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Subagents</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-subagents/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -1224,7 +1225,7 @@
     <div class="panel" data-audience="pm" data-lang="zh-TW">
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Claude Code in Action</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/01-intro">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Intro</span>
@@ -1236,7 +1237,7 @@
             <a href="claude-code-in-action/01-intro/04-claude-code-in-action/04-claude-code-in-action-pm-zh-TW.html" class="unit-link"><span class="unit-num">04</span>Claude Code In Action</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/02-getting-started">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Getting Started</span>
@@ -1249,7 +1250,7 @@
             <a href="claude-code-in-action/02-getting-started/08-making-changes/08-making-changes-pm-zh-TW.html" class="unit-link"><span class="unit-num">08</span>Making Changes</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/03-context-and-commands">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Context And Commands</span>
@@ -1260,7 +1261,7 @@
             <a href="claude-code-in-action/03-context-and-commands/11-custom-commands/11-custom-commands-pm-zh-TW.html" class="unit-link"><span class="unit-num">11</span>Custom Commands</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/04-integrations">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Integrations</span>
@@ -1271,7 +1272,7 @@
             <a href="claude-code-in-action/04-integrations/13-github-integration/13-github-integration-pm-zh-TW.html" class="unit-link"><span class="unit-num">13</span>Github Integration</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/05-hooks">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 05</span>
             <span class="chapter-title">Hooks</span>
@@ -1286,7 +1287,7 @@
             <a href="claude-code-in-action/05-hooks/19-another-useful-hook/19-another-useful-hook-pm-zh-TW.html" class="unit-link"><span class="unit-num">19</span>Another Useful Hook</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/06-sdk-and-wrap-up">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">SDK And Wrap Up</span>
@@ -1300,7 +1301,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to MCP</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/01-mcp-basics">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">MCP Basics</span>
@@ -1312,7 +1313,7 @@
             <a href="introduction-to-model-context-protocol/01-mcp-basics/05-project-setup/05-project-setup-pm-zh-TW.html" class="unit-link"><span class="unit-num">05</span>Project Setup</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/02-tools-and-inspector">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Tools And Inspector</span>
@@ -1324,7 +1325,7 @@
             <a href="introduction-to-model-context-protocol/02-tools-and-inspector/09-implementing-a-client/09-implementing-a-client-pm-zh-TW.html" class="unit-link"><span class="unit-num">09</span>Implementing A Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/03-resources-and-prompts">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Resources And Prompts</span>
@@ -1337,7 +1338,7 @@
             <a href="introduction-to-model-context-protocol/03-resources-and-prompts/13-prompts-in-the-client/13-prompts-in-the-client-pm-zh-TW.html" class="unit-link"><span class="unit-num">13</span>Prompts In The Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/04-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Assessment</span>
@@ -1350,7 +1351,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> MCP Advanced Topics</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/01-sampling-and-notifications">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Sampling And Notifications</span>
@@ -1363,7 +1364,7 @@
             <a href="model-context-protocol-advanced-topics/01-sampling-and-notifications/06-notifications-walkthrough/06-notifications-walkthrough-pm-zh-TW.html" class="unit-link"><span class="unit-num">06</span>Notifications Walkthrough</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/02-roots-and-messages">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Roots And Messages</span>
@@ -1375,7 +1376,7 @@
             <a href="model-context-protocol-advanced-topics/02-roots-and-messages/10-json-message-types/10-json-message-types-pm-zh-TW.html" class="unit-link"><span class="unit-num">10</span>Json Message Types</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/03-transports">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Transports</span>
@@ -1391,7 +1392,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Building with the Claude API</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/01-api-fundamentals">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">API Fundamentals</span>
@@ -1411,7 +1412,7 @@
             <a href="building-with-the-claude-api/01-api-fundamentals/38-multi-turn-conversations-with-tools/38-multi-turn-conversations-with-tools-pm-zh-TW.html" class="unit-link"><span class="unit-num">38</span>Multi Turn Conversations With Tools</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/02-prompt-evaluation">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Prompt Evaluation</span>
@@ -1426,7 +1427,7 @@
             <a href="building-with-the-claude-api/02-prompt-evaluation/22-code-based-grading/22-code-based-grading-pm-zh-TW.html" class="unit-link"><span class="unit-num">22</span>Code Based Grading</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/03-prompt-engineering">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Prompt Engineering</span>
@@ -1440,7 +1441,7 @@
             <a href="building-with-the-claude-api/03-prompt-engineering/29-providing-examples/29-providing-examples-pm-zh-TW.html" class="unit-link"><span class="unit-num">29</span>Providing Examples</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/04-tool-use">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Tool Use</span>
@@ -1461,7 +1462,7 @@
             <a href="building-with-the-claude-api/04-tool-use/supplementary-tool-choice/supplementary-tool-choice-pm-zh-TW.html" class="unit-link"><span class="unit-num"></span>Supplementary Tool Choice</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/05-rag">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Rag</span>
@@ -1477,7 +1478,7 @@
             <a href="building-with-the-claude-api/05-rag/51-a-multi-index-rag-pipeline/51-a-multi-index-rag-pipeline-pm-zh-TW.html" class="unit-link"><span class="unit-num">51</span>A Multi Index Rag Pipeline</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/06-extended-features">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">Extended Features</span>
@@ -1494,7 +1495,7 @@
             <a href="building-with-the-claude-api/06-extended-features/59-code-execution-and-the-files-api/59-code-execution-and-the-files-api-pm-zh-TW.html" class="unit-link"><span class="unit-num">59</span>Code Execution And The Files Api</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/07-mcp">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 07</span>
             <span class="chapter-title">MCP</span>
@@ -1514,7 +1515,7 @@
             <a href="building-with-the-claude-api/07-mcp/71-mcp-review/71-mcp-review-pm-zh-TW.html" class="unit-link"><span class="unit-num">71</span>Mcp Review</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/08-agents-and-workflows">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 08</span>
             <span class="chapter-title">Agents And Workflows</span>
@@ -1534,7 +1535,7 @@
             <a href="building-with-the-claude-api/08-agents-and-workflows/83-workflows-vs-agents/83-workflows-vs-agents-pm-zh-TW.html" class="unit-link"><span class="unit-num">83</span>Workflows Vs Agents</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/09-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 09</span>
             <span class="chapter-title">Assessment</span>
@@ -1548,7 +1549,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">Intro</span> Claude 101</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-101/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -1573,7 +1574,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Agent Skills</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-agent-skills/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -1591,7 +1592,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Subagents</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-subagents/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -1609,7 +1610,7 @@
     <div class="panel" data-audience="pm" data-lang="en">
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Claude Code in Action</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/01-intro">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Intro</span>
@@ -1621,7 +1622,7 @@
             <a href="claude-code-in-action/01-intro/04-claude-code-in-action/04-claude-code-in-action-pm-en.html" class="unit-link"><span class="unit-num">04</span>Claude Code In Action</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/02-getting-started">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Getting Started</span>
@@ -1634,7 +1635,7 @@
             <a href="claude-code-in-action/02-getting-started/08-making-changes/08-making-changes-pm-en.html" class="unit-link"><span class="unit-num">08</span>Making Changes</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/03-context-and-commands">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Context And Commands</span>
@@ -1645,7 +1646,7 @@
             <a href="claude-code-in-action/03-context-and-commands/11-custom-commands/11-custom-commands-pm-en.html" class="unit-link"><span class="unit-num">11</span>Custom Commands</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/04-integrations">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Integrations</span>
@@ -1656,7 +1657,7 @@
             <a href="claude-code-in-action/04-integrations/13-github-integration/13-github-integration-pm-en.html" class="unit-link"><span class="unit-num">13</span>Github Integration</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/05-hooks">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 05</span>
             <span class="chapter-title">Hooks</span>
@@ -1671,7 +1672,7 @@
             <a href="claude-code-in-action/05-hooks/19-another-useful-hook/19-another-useful-hook-pm-en.html" class="unit-link"><span class="unit-num">19</span>Another Useful Hook</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/06-sdk-and-wrap-up">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">SDK And Wrap Up</span>
@@ -1685,7 +1686,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to MCP</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/01-mcp-basics">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">MCP Basics</span>
@@ -1697,7 +1698,7 @@
             <a href="introduction-to-model-context-protocol/01-mcp-basics/05-project-setup/05-project-setup-pm-en.html" class="unit-link"><span class="unit-num">05</span>Project Setup</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/02-tools-and-inspector">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Tools And Inspector</span>
@@ -1709,7 +1710,7 @@
             <a href="introduction-to-model-context-protocol/02-tools-and-inspector/09-implementing-a-client/09-implementing-a-client-pm-en.html" class="unit-link"><span class="unit-num">09</span>Implementing A Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/03-resources-and-prompts">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Resources And Prompts</span>
@@ -1722,7 +1723,7 @@
             <a href="introduction-to-model-context-protocol/03-resources-and-prompts/13-prompts-in-the-client/13-prompts-in-the-client-pm-en.html" class="unit-link"><span class="unit-num">13</span>Prompts In The Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/04-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Assessment</span>
@@ -1735,7 +1736,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> MCP Advanced Topics</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/01-sampling-and-notifications">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Sampling And Notifications</span>
@@ -1748,7 +1749,7 @@
             <a href="model-context-protocol-advanced-topics/01-sampling-and-notifications/06-notifications-walkthrough/06-notifications-walkthrough-pm-en.html" class="unit-link"><span class="unit-num">06</span>Notifications Walkthrough</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/02-roots-and-messages">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Roots And Messages</span>
@@ -1760,7 +1761,7 @@
             <a href="model-context-protocol-advanced-topics/02-roots-and-messages/10-json-message-types/10-json-message-types-pm-en.html" class="unit-link"><span class="unit-num">10</span>Json Message Types</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/03-transports">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Transports</span>
@@ -1776,7 +1777,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Building with the Claude API</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/01-api-fundamentals">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">API Fundamentals</span>
@@ -1796,7 +1797,7 @@
             <a href="building-with-the-claude-api/01-api-fundamentals/38-multi-turn-conversations-with-tools/38-multi-turn-conversations-with-tools-pm-en.html" class="unit-link"><span class="unit-num">38</span>Multi Turn Conversations With Tools</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/02-prompt-evaluation">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Prompt Evaluation</span>
@@ -1811,7 +1812,7 @@
             <a href="building-with-the-claude-api/02-prompt-evaluation/22-code-based-grading/22-code-based-grading-pm-en.html" class="unit-link"><span class="unit-num">22</span>Code Based Grading</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/03-prompt-engineering">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Prompt Engineering</span>
@@ -1825,7 +1826,7 @@
             <a href="building-with-the-claude-api/03-prompt-engineering/29-providing-examples/29-providing-examples-pm-en.html" class="unit-link"><span class="unit-num">29</span>Providing Examples</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/04-tool-use">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Tool Use</span>
@@ -1846,7 +1847,7 @@
             <a href="building-with-the-claude-api/04-tool-use/supplementary-tool-choice/supplementary-tool-choice-pm-en.html" class="unit-link"><span class="unit-num"></span>Supplementary Tool Choice</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/05-rag">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Rag</span>
@@ -1862,7 +1863,7 @@
             <a href="building-with-the-claude-api/05-rag/51-a-multi-index-rag-pipeline/51-a-multi-index-rag-pipeline-pm-en.html" class="unit-link"><span class="unit-num">51</span>A Multi Index Rag Pipeline</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/06-extended-features">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">Extended Features</span>
@@ -1879,7 +1880,7 @@
             <a href="building-with-the-claude-api/06-extended-features/59-code-execution-and-the-files-api/59-code-execution-and-the-files-api-pm-en.html" class="unit-link"><span class="unit-num">59</span>Code Execution And The Files Api</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/07-mcp">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 07</span>
             <span class="chapter-title">MCP</span>
@@ -1899,7 +1900,7 @@
             <a href="building-with-the-claude-api/07-mcp/71-mcp-review/71-mcp-review-pm-en.html" class="unit-link"><span class="unit-num">71</span>Mcp Review</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/08-agents-and-workflows">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 08</span>
             <span class="chapter-title">Agents And Workflows</span>
@@ -1919,7 +1920,7 @@
             <a href="building-with-the-claude-api/08-agents-and-workflows/83-workflows-vs-agents/83-workflows-vs-agents-pm-en.html" class="unit-link"><span class="unit-num">83</span>Workflows Vs Agents</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/09-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 09</span>
             <span class="chapter-title">Assessment</span>
@@ -1933,7 +1934,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">Intro</span> Claude 101</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-101/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -1958,7 +1959,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Agent Skills</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-agent-skills/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -1976,7 +1977,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Subagents</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-subagents/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -1994,7 +1995,7 @@
     <div class="panel" data-audience="pm" data-lang="zh-CN">
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Claude Code in Action</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/01-intro">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Intro</span>
@@ -2006,7 +2007,7 @@
             <a href="claude-code-in-action/01-intro/04-claude-code-in-action/04-claude-code-in-action-pm-zh-CN.html" class="unit-link"><span class="unit-num">04</span>Claude Code In Action</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/02-getting-started">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Getting Started</span>
@@ -2019,7 +2020,7 @@
             <a href="claude-code-in-action/02-getting-started/08-making-changes/08-making-changes-pm-zh-CN.html" class="unit-link"><span class="unit-num">08</span>Making Changes</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/03-context-and-commands">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Context And Commands</span>
@@ -2030,7 +2031,7 @@
             <a href="claude-code-in-action/03-context-and-commands/11-custom-commands/11-custom-commands-pm-zh-CN.html" class="unit-link"><span class="unit-num">11</span>Custom Commands</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/04-integrations">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Integrations</span>
@@ -2041,7 +2042,7 @@
             <a href="claude-code-in-action/04-integrations/13-github-integration/13-github-integration-pm-zh-CN.html" class="unit-link"><span class="unit-num">13</span>Github Integration</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/05-hooks">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 05</span>
             <span class="chapter-title">Hooks</span>
@@ -2056,7 +2057,7 @@
             <a href="claude-code-in-action/05-hooks/19-another-useful-hook/19-another-useful-hook-pm-zh-CN.html" class="unit-link"><span class="unit-num">19</span>Another Useful Hook</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-code-in-action/06-sdk-and-wrap-up">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">SDK And Wrap Up</span>
@@ -2070,7 +2071,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to MCP</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/01-mcp-basics">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">MCP Basics</span>
@@ -2082,7 +2083,7 @@
             <a href="introduction-to-model-context-protocol/01-mcp-basics/05-project-setup/05-project-setup-pm-zh-CN.html" class="unit-link"><span class="unit-num">05</span>Project Setup</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/02-tools-and-inspector">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Tools And Inspector</span>
@@ -2094,7 +2095,7 @@
             <a href="introduction-to-model-context-protocol/02-tools-and-inspector/09-implementing-a-client/09-implementing-a-client-pm-zh-CN.html" class="unit-link"><span class="unit-num">09</span>Implementing A Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/03-resources-and-prompts">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Resources And Prompts</span>
@@ -2107,7 +2108,7 @@
             <a href="introduction-to-model-context-protocol/03-resources-and-prompts/13-prompts-in-the-client/13-prompts-in-the-client-pm-zh-CN.html" class="unit-link"><span class="unit-num">13</span>Prompts In The Client</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-model-context-protocol/04-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Assessment</span>
@@ -2120,7 +2121,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> MCP Advanced Topics</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/01-sampling-and-notifications">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">Sampling And Notifications</span>
@@ -2133,7 +2134,7 @@
             <a href="model-context-protocol-advanced-topics/01-sampling-and-notifications/06-notifications-walkthrough/06-notifications-walkthrough-pm-zh-CN.html" class="unit-link"><span class="unit-num">06</span>Notifications Walkthrough</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/02-roots-and-messages">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Roots And Messages</span>
@@ -2145,7 +2146,7 @@
             <a href="model-context-protocol-advanced-topics/02-roots-and-messages/10-json-message-types/10-json-message-types-pm-zh-CN.html" class="unit-link"><span class="unit-num">10</span>Json Message Types</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="model-context-protocol-advanced-topics/03-transports">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Transports</span>
@@ -2161,7 +2162,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Building with the Claude API</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/01-api-fundamentals">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 01</span>
             <span class="chapter-title">API Fundamentals</span>
@@ -2181,7 +2182,7 @@
             <a href="building-with-the-claude-api/01-api-fundamentals/38-multi-turn-conversations-with-tools/38-multi-turn-conversations-with-tools-pm-zh-CN.html" class="unit-link"><span class="unit-num">38</span>Multi Turn Conversations With Tools</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/02-prompt-evaluation">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 02</span>
             <span class="chapter-title">Prompt Evaluation</span>
@@ -2196,7 +2197,7 @@
             <a href="building-with-the-claude-api/02-prompt-evaluation/22-code-based-grading/22-code-based-grading-pm-zh-CN.html" class="unit-link"><span class="unit-num">22</span>Code Based Grading</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/03-prompt-engineering">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 03</span>
             <span class="chapter-title">Prompt Engineering</span>
@@ -2210,7 +2211,7 @@
             <a href="building-with-the-claude-api/03-prompt-engineering/29-providing-examples/29-providing-examples-pm-zh-CN.html" class="unit-link"><span class="unit-num">29</span>Providing Examples</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/04-tool-use">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 04</span>
             <span class="chapter-title">Tool Use</span>
@@ -2231,7 +2232,7 @@
             <a href="building-with-the-claude-api/04-tool-use/supplementary-tool-choice/supplementary-tool-choice-pm-zh-CN.html" class="unit-link"><span class="unit-num"></span>Supplementary Tool Choice</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/05-rag">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Rag</span>
@@ -2247,7 +2248,7 @@
             <a href="building-with-the-claude-api/05-rag/51-a-multi-index-rag-pipeline/51-a-multi-index-rag-pipeline-pm-zh-CN.html" class="unit-link"><span class="unit-num">51</span>A Multi Index Rag Pipeline</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/06-extended-features">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 06</span>
             <span class="chapter-title">Extended Features</span>
@@ -2264,7 +2265,7 @@
             <a href="building-with-the-claude-api/06-extended-features/59-code-execution-and-the-files-api/59-code-execution-and-the-files-api-pm-zh-CN.html" class="unit-link"><span class="unit-num">59</span>Code Execution And The Files Api</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/07-mcp">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 07</span>
             <span class="chapter-title">MCP</span>
@@ -2284,7 +2285,7 @@
             <a href="building-with-the-claude-api/07-mcp/71-mcp-review/71-mcp-review-pm-zh-CN.html" class="unit-link"><span class="unit-num">71</span>Mcp Review</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/08-agents-and-workflows">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 08</span>
             <span class="chapter-title">Agents And Workflows</span>
@@ -2304,7 +2305,7 @@
             <a href="building-with-the-claude-api/08-agents-and-workflows/83-workflows-vs-agents/83-workflows-vs-agents-pm-zh-CN.html" class="unit-link"><span class="unit-num">83</span>Workflows Vs Agents</a>
           </div>
         </div>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="building-with-the-claude-api/09-assessment">
           <div class="chapter-header">
             <span class="chapter-badge">Ch 09</span>
             <span class="chapter-title">Assessment</span>
@@ -2318,7 +2319,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">Intro</span> Claude 101</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="claude-101/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -2343,7 +2344,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Agent Skills</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-agent-skills/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -2361,7 +2362,7 @@
       </div>
       <div class="course-section">
         <h2 class="course-heading"><span class="course-tag">CCA</span> Introduction to Subagents</h2>
-        <div class="chapter-card">
+        <div class="chapter-card" data-chapter="introduction-to-subagents/01-full-course">
           <div class="chapter-header">
             <span class="chapter-badge"></span>
             <span class="chapter-title">Full Course</span>
@@ -2382,7 +2383,13 @@
   const audTabs = document.querySelectorAll('.aud-tab');
   const langTabs = document.querySelectorAll('.lang-tab');
   const panels = document.querySelectorAll('.panel');
-  let currentAud = 'eng'; let currentLang = 'zh-TW';
+
+  // Read query params from back-link
+  const params = new URLSearchParams(window.location.search);
+  let currentAud = params.get('aud') || 'eng';
+  let currentLang = params.get('lang') || 'zh-TW';
+  const fromChapter = params.get('from') || '';
+
   function update() {
     audTabs.forEach(t => t.classList.toggle('active', t.dataset.audience === currentAud));
     langTabs.forEach(t => t.classList.toggle('active', t.dataset.lang === currentLang));
@@ -2391,6 +2398,20 @@
   audTabs.forEach(t => t.addEventListener('click', () => { currentAud = t.dataset.audience; update(); }));
   langTabs.forEach(t => t.addEventListener('click', () => { currentLang = t.dataset.lang; update(); }));
   update();
+
+  // Highlight and scroll to the chapter the user came from
+  if (fromChapter) {
+    const activePanel = document.querySelector('.panel.active');
+    if (activePanel) {
+      const card = activePanel.querySelector('.chapter-card[data-chapter="' + fromChapter + '"]');
+      if (card) {
+        card.classList.add('highlight');
+        setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+        // Fade out highlight after 3 seconds
+        setTimeout(() => card.classList.remove('highlight'), 4000);
+      }
+    }
+  }
 </script>
 </body>
 </html>
