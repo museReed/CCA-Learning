@@ -64,7 +64,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <style>{css}</style>
 </head>
 <body>
-<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html?aud={audience}&lang={lang_code}&from={from_path}" class="back-link">\u2190 Back to Index</a>
+<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html?aud={audience}&lang={lang_code}&from={from_path}&lesson={lesson_slug}" class="back-link">\u2190 Back to Index</a>
 {body}
 </body>
 </html>
@@ -112,9 +112,10 @@ def build_page(md_path: Path, course: str) -> Path:
         _, audience, lang_code = parsed
         lang_attr = {"en": "en", "zh-TW": "zh-TW", "zh-CN": "zh-CN"}[lang_code]
 
-    # Build from_path = "course/chapter" for back-link highlighting
+    # Build from_path = "course/chapter" and lesson_slug for back-link highlighting
     lesson_dir = md_path.parent.parent.parent
     chapter_slug = lesson_dir.parent.name
+    lesson_slug = lesson_dir.name
     from_path = f"{course}/{chapter_slug}"
 
     md_text = md_path.read_text(encoding="utf-8")
@@ -135,6 +136,7 @@ def build_page(md_path: Path, course: str) -> Path:
         audience=audience,
         lang_code=lang_code,
         from_path=from_path,
+        lesson_slug=lesson_slug,
     )
     html_path.write_text(html_content, encoding="utf-8")
     return html_path
@@ -236,8 +238,9 @@ INDEX_HEAD = """<!DOCTYPE html>
     .chapter-title { font-weight: 600; font-size: 0.95em; flex: 1; }
     .chapter-count { font-size: 0.8em; color: var(--text-secondary); }
     .units { display: flex; flex-wrap: wrap; gap: 6px 0; }
-    .unit-link { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; font-size: 0.85em; color: var(--text); text-decoration: none; border-radius: 6px; transition: background 0.12s; }
+    .unit-link { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; font-size: 0.85em; color: var(--text); text-decoration: none; border-radius: 6px; transition: background 0.12s, box-shadow 0.3s; }
     .unit-link:hover { background: var(--hover); color: var(--accent-active); }
+    .unit-link.highlight { background: #eef2ff; border: 1.5px solid #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.15); color: var(--accent-active); font-weight: 600; }
     .unit-num { font-size: 0.75em; color: var(--text-secondary); font-weight: 600; min-width: 18px; }
   </style>
 </head>
@@ -265,16 +268,25 @@ INDEX_SCRIPT = """
   langTabs.forEach(t => t.addEventListener('click', () => { currentLang = t.dataset.lang; update(); }));
   update();
 
-  // Highlight and scroll to the chapter the user came from
+  // Highlight and scroll to the specific lesson the user came from
+  const fromLesson = params.get('lesson') || '';
   if (fromChapter) {
     const activePanel = document.querySelector('.panel.active');
     if (activePanel) {
       const card = activePanel.querySelector('.chapter-card[data-chapter="' + fromChapter + '"]');
       if (card) {
-        card.classList.add('highlight');
-        setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-        // Fade out highlight after 3 seconds
-        setTimeout(() => card.classList.remove('highlight'), 4000);
+        // Highlight the specific lesson link within the chapter
+        const link = fromLesson ? card.querySelector('.unit-link[data-lesson="' + fromLesson + '"]') : null;
+        if (link) {
+          link.classList.add('highlight');
+          setTimeout(() => link.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+          setTimeout(() => link.classList.remove('highlight'), 4000);
+        } else {
+          // Fallback: highlight the whole chapter card
+          card.classList.add('highlight');
+          setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+          setTimeout(() => card.classList.remove('highlight'), 4000);
+        }
       }
     }
   }
@@ -422,7 +434,7 @@ def build_index():
                         unit_num = unit_num_m.group(1) if unit_num_m else ""
                         unit_title = titleize(lesson_slug)
                         href = f"{course}/{chapter_slug}/{lesson_slug}/{lesson_slug}-{aud}-{lang}.html"
-                        parts.append(f'            <a href="{href}" class="unit-link"><span class="unit-num">{unit_num}</span>{htmllib.escape(unit_title)}</a>\n')
+                        parts.append(f'            <a href="{href}" class="unit-link" data-lesson="{lesson_slug}"><span class="unit-num">{unit_num}</span>{htmllib.escape(unit_title)}</a>\n')
                     parts.append('          </div>\n')
                     parts.append('        </div>\n')
                 parts.append('      </div>\n')
