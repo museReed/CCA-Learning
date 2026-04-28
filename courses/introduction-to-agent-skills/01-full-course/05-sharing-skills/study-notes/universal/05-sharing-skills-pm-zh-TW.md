@@ -10,7 +10,7 @@
 
 ## 一句話摘要
 
-What you'll learn Estimated time: 20 minutes By the end of this lesson you'll be able to: Share skills with your team by committing them to a Git repository Distribute skills across projects through plugins and marketplaces Deploy skills organization-wide using enterprise managed settings Configure custom subagents to use specific skills (4 minutes) Skills become much more valuable when they're shared across a team or organization. This video covers the three main distribution methods — repository commits, plugins, and enterprise managed settings — and explains how to configure custom subagents to use skills. You'll learn which approach fits which scenario and how to handle an important gotcha: subagents don't inherit skills automatically.
+Skills become much more valuable when they're shared across a team or organization. This video covers the three main distribution methods — repository commits, plugins, and enterprise managed settings — and explains how to configure custom subagents to use skills.
 
 ---
 
@@ -18,8 +18,14 @@ What you'll learn Estimated time: 20 minutes By the end of this lesson you'll be
 
 ### 課後你會理解
 
-Estimated time: 20 minutes
-By the end of this lesson you'll be able to:
+- Share skills with your team by committing them to a Git repository
+- Distribute skills across projects through plugins and marketplaces
+- Deploy skills organization-wide using enterprise managed settings
+- Configure custom subagents to use specific skills
+
+### 重點摘要 (Business Impact)
+
+Project skills in .claude/skills are shared automatically through Git — anyone who clones the repo gets them
 
 ---
 

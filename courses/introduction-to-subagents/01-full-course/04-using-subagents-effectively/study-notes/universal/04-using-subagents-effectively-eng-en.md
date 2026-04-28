@@ -10,7 +10,7 @@
 
 ## One-Liner
 
-You know how to create subagents and design them well. Now the question is: when do they actually help, and when do they get in the way? The difference comes down to one thing -- whether the intermediate work matters to your main thread.
+You know how to create subagents and design them well. Now the question is: when do they actually help, and when do they get in the way?
 
 ---
 

@@ -49,29 +49,66 @@ def extract_sections(text):
         content_lines.append(line)
     text = '\n'.join(content_lines)
 
-    # Extract "What you'll learn" section
-    learn_match = re.search(r"(?:What you'll learn|By the end.*?:)\s*\n(.*?)(?:\n\n|\n(?:Key|##|Try it))", text, re.DOTALL)
-    learning_objectives = learn_match.group(1).strip() if learn_match else ""
+    # Extract learning objectives (bullet points after "By the end...")
+    obj_match = re.search(r"(?:By the end.*?:|you'll be able to:)\s*\n(.*?)(?:\n\n|\n\(\d)", text, re.DOTALL)
+    learning_objectives = ""
+    if obj_match:
+        raw = obj_match.group(1).strip()
+        # Format as proper bullet list
+        obj_lines = [l.strip() for l in raw.split('\n') if l.strip()]
+        learning_objectives = '\n'.join(f"- {l}" if not l.startswith('-') else l for l in obj_lines)
+
+    # Extract video description (paragraph after "(X minutes)" time marker)
+    desc_match = re.search(r'\(\d+ minutes?\)\s*\n+(.*?)(?:\nKey takeaway|\n\n\n)', text, re.DOTALL)
+    video_description = desc_match.group(1).strip() if desc_match else ""
 
     # Extract key takeaways
-    takeaway_match = re.search(r"Key takeaways?\s*\n(.*?)(?:\n\n\n|\n(?:##|Try it|Every time))", text, re.DOTALL)
-    takeaways = takeaway_match.group(1).strip() if takeaway_match else ""
+    takeaway_match = re.search(r'Key takeaways?\s*\n(.*?)(?:\n\n\n|\n[A-Z][a-z]+ [a-z])', text, re.DOTALL)
+    takeaways = ""
+    if takeaway_match:
+        raw = takeaway_match.group(1).strip()
+        # Each takeaway is a paragraph — split on blank lines or sentence boundaries
+        takeaway_lines = [l.strip() for l in raw.split('\n') if l.strip()]
+        takeaways = '\n'.join(takeaway_lines)
 
     return {
         "objectives": learning_objectives,
+        "description": video_description,
         "takeaways": takeaways,
         "full_text": text,
     }
 
 
-def summarize_text(text, max_sentences=3):
-    """Extract first N meaningful sentences as summary."""
-    # Remove headers and blank lines
-    lines = [l.strip() for l in text.split('\n') if l.strip() and not l.startswith('#') and not l.startswith('>') and not l.startswith('|')]
-    combined = ' '.join(lines)
-    sentences = re.split(r'(?<=[.!?])\s+', combined)
-    meaningful = [s for s in sentences if len(s) > 30]
-    return ' '.join(meaningful[:max_sentences])
+def summarize_text(text):
+    """Extract the video description paragraph as the one-liner summary."""
+    # Look for description after time marker "(X minutes)"
+    desc_match = re.search(r'\(\d+ minutes?\)\s*\n+(.*?)(?:\nKey takeaway|\n\n\n)', text, re.DOTALL)
+    if desc_match:
+        desc = desc_match.group(1).strip()
+        # Take first 1-2 sentences
+        sentences = re.split(r'(?<=[.!?])\s+', desc)
+        meaningful = [s for s in sentences if len(s) > 20]
+        if meaningful:
+            return ' '.join(meaningful[:2])
+
+    # Fallback: find first real paragraph (skip metadata, headers, bullets)
+    lines = text.split('\n')
+    in_metadata = True
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith('#') or stripped.startswith('>'):
+            continue
+        if in_metadata and re.match(r'(What you|Estimated|By the end|Define |Explain |Describe |Identify |Compare |Choose |Create |Use |Configure |Diagnose |Resolve |Debug |\(\d)', stripped):
+            continue
+        if stripped.startswith('Key takeaway'):
+            continue
+        in_metadata = False
+        if len(stripped) > 50:
+            sentences = re.split(r'(?<=[.!?])\s+', stripped)
+            meaningful = [s for s in sentences if len(s) > 20]
+            if meaningful:
+                return ' '.join(meaningful[:2])
+    return ""
 
 
 def extract_key_concepts(text):
@@ -91,18 +128,19 @@ def extract_key_concepts(text):
     return concepts[:10]
 
 
-def generate_flashcards(title, concepts, takeaways):
-    """Generate Q&A flashcards from concepts."""
+def generate_flashcards(title, takeaways):
+    """Generate Q&A flashcards from key takeaways."""
     cards = []
-    if concepts:
-        for i, c in enumerate(concepts[:5]):
-            cards.append(f"**Q{i+1}:** What is {c.split('.')[0].lower() if '.' in c else c[:50]}?\n**A{i+1}:** {c}")
     if takeaways:
         lines = [l.strip() for l in takeaways.split('\n') if l.strip()]
-        for i, t in enumerate(lines[:3]):
-            idx = len(cards) + 1
-            cards.append(f"**Q{idx}:** Explain: {t[:60]}...\n**A{idx}:** {t}")
-    return cards[:8]
+        for i, t in enumerate(lines[:6]):
+            # Create a question from the first clause
+            first_clause = t.split('.')[0] if '.' in t else t[:60]
+            # Truncate question if too long
+            if len(first_clause) > 80:
+                first_clause = first_clause[:77] + "..."
+            cards.append(f"**Q{i+1}:** {first_clause}?\n**A{i+1}:** {t}")
+    return cards[:6]
 
 
 def gen_eng_en(lesson_slug, title, transcript, course_name):
@@ -111,7 +149,7 @@ def gen_eng_en(lesson_slug, title, transcript, course_name):
     domain = DOMAIN_MAP.get(course_name, {})
     summary = summarize_text(transcript)
     concepts = extract_key_concepts(transcript)
-    flashcards = generate_flashcards(title, concepts, sections["takeaways"])
+    flashcards = generate_flashcards(title, sections["takeaways"])
 
     lines = [
         f"# {title} — Engineering Deep Dive",

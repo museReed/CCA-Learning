@@ -51,33 +51,18 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
 </table>
 <hr />
 <h2>一句话摘要</h2>
-<p>What you'll learn Estimated time: 20 minutes By the end of this lesson you'll be able to: Create a skill from scratch with proper frontmatter structure Test and verify that a skill loads correctly in Claude Code Explain how Claude Code matches incoming requests to available skills Describe the skill priority hierarchy (Enterprise, Personal, Project, Plugins) (4 minutes) This video walks through building a skill from scratch — a personal PR description skill that works across all your projects. You'll see exactly how to structure the SKILL.md file, test it, and understand how Claude Code discovers and matches skills to your requests. The video also covers the priority hierarchy that determines which skill wins when names conflict.</p>
+<p>This video walks through building a skill from scratch — a personal PR description skill that works across all your projects. You'll see exactly how to structure the SKILL.md file, test it, and understand how Claude Code discovers and matches skills to your requests.</p>
 <hr />
 <h2>核心概念</h2>
 <h3>学习目标</h3>
-<p>Estimated time: 20 minutes<br />
-By the end of this lesson you'll be able to:</p>
+<ul>
+<li>Create a skill from scratch with proper frontmatter structure</li>
+<li>Test and verify that a skill loads correctly in Claude Code</li>
+<li>Explain how Claude Code matches incoming requests to available skills</li>
+<li>Describe the skill priority hierarchy (Enterprise, Personal, Project, Plugins)</li>
+</ul>
 <h3>重点摘要</h3>
-<p>A skill is a directory containing a SKILL.md file with metadata (name, description) in frontmatter and instructions below<br />
-Claude loads only skill names and descriptions at startup, then matches incoming requests against those descriptions using semantic matching<br />
-You get a confirmation prompt before Claude loads the full skill content into context<br />
-Priority for name conflicts: Enterprise → Personal → Project → Plugins<br />
-To update a skill, edit its SKILL.md. To remove one, delete its directory. Always restart Claude Code for changes to take effect</p>
-<p>Let's walk through creating a skill from scratch, then look at how Claude Code actually loads and matches skills behind the scenes.<br />
-Creating a Skill<br />
-We'll build a personal skill that teaches Claude how to write PR descriptions in a consistent format. Since it's a personal skill, it lives in your home directory and works across all your projects.<br />
-First, create a directory for your skill inside the skills folder. The directory name should match your skill name:<br />
-mkdir -p ~/.claude/skills/pr-description<br />
-Then create a SKILL.md file inside that directory. The file has two parts separated by frontmatter dashes:</p>
-<hr />
-<p>name: pr-description<br />
-description: Writes pull request descriptions. Use when creating a PR, writing a PR, or when the user asks to summarize changes for a pull request.</p>
-<hr />
-<p>When writing a PR description:</p>
-<ol>
-<li>Run <code>git diff main...HEAD</code> to see all changes on this branch</li>
-<li>Write a description following this format:</li>
-</ol>
+<p>A skill is a directory containing a SKILL.md file with metadata (name, description) in frontmatter and instructions below</p>
 <h3>关鍵要点</h3>
 <ul>
 <li>Bullet points of specific changes made</li>
@@ -86,18 +71,8 @@ description: Writes pull request descriptions. Use when creating a PR, writing a
 </ul>
 <hr />
 <h2>记憶卡</h2>
-<p><strong>Q1:</strong> What is Bullet points of specific changes made?<br />
-<strong>A1:</strong> Bullet points of specific changes made</p>
-<p><strong>Q2:</strong> What is Group related changes together?<br />
-<strong>A2:</strong> Group related changes together</p>
-<p><strong>Q3:</strong> What is Mention any files deleted or renamed?<br />
-<strong>A3:</strong> Mention any files deleted or renamed</p>
-<p><strong>Q4:</strong> Explain: A skill is a directory containing a SKILL.md file with metad...<br />
-<strong>A4:</strong> A skill is a directory containing a SKILL.md file with metadata (name, description) in frontmatter and instructions below</p>
-<p><strong>Q5:</strong> Explain: Claude loads only skill names and descriptions at startup, t...<br />
-<strong>A5:</strong> Claude loads only skill names and descriptions at startup, then matches incoming requests against those descriptions using semantic matching</p>
-<p><strong>Q6:</strong> Explain: You get a confirmation prompt before Claude loads the full s...<br />
-<strong>A6:</strong> You get a confirmation prompt before Claude loads the full skill content into context</p>
+<p><strong>Q1:</strong> A skill is a directory containing a SKILL?<br />
+<strong>A1:</strong> A skill is a directory containing a SKILL.md file with metadata (name, description) in frontmatter and instructions below</p>
 <hr />
 <p><em>Source: introduction-to-agent-skills — Creating your first skill</em></p>
 </body>

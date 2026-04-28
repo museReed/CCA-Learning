@@ -10,7 +10,7 @@
 
 ## TL;DR
 
-What you'll learn Estimated time: 20 minutes By the end of this lesson you'll be able to: Create a skill from scratch with proper frontmatter structure Test and verify that a skill loads correctly in Claude Code Explain how Claude Code matches incoming requests to available skills Describe the skill priority hierarchy (Enterprise, Personal, Project, Plugins) (4 minutes) This video walks through building a skill from scratch — a personal PR description skill that works across all your projects. You'll see exactly how to structure the SKILL.md file, test it, and understand how Claude Code discovers and matches skills to your requests. The video also covers the priority hierarchy that determines which skill wins when names conflict.
+This video walks through building a skill from scratch — a personal PR description skill that works across all your projects. You'll see exactly how to structure the SKILL.md file, test it, and understand how Claude Code discovers and matches skills to your requests.
 
 ---
 
@@ -18,32 +18,14 @@ What you'll learn Estimated time: 20 minutes By the end of this lesson you'll be
 
 ### What You'll Understand After This Lesson
 
-Estimated time: 20 minutes
-By the end of this lesson you'll be able to:
+- Create a skill from scratch with proper frontmatter structure
+- Test and verify that a skill loads correctly in Claude Code
+- Explain how Claude Code matches incoming requests to available skills
+- Describe the skill priority hierarchy (Enterprise, Personal, Project, Plugins)
 
 ### Key Takeaways (Business Impact)
 
 A skill is a directory containing a SKILL.md file with metadata (name, description) in frontmatter and instructions below
-Claude loads only skill names and descriptions at startup, then matches incoming requests against those descriptions using semantic matching
-You get a confirmation prompt before Claude loads the full skill content into context
-Priority for name conflicts: Enterprise → Personal → Project → Plugins
-To update a skill, edit its SKILL.md. To remove one, delete its directory. Always restart Claude Code for changes to take effect
-
-Let's walk through creating a skill from scratch, then look at how Claude Code actually loads and matches skills behind the scenes.
-Creating a Skill
-We'll build a personal skill that teaches Claude how to write PR descriptions in a consistent format. Since it's a personal skill, it lives in your home directory and works across all your projects.
-First, create a directory for your skill inside the skills folder. The directory name should match your skill name:
-mkdir -p ~/.claude/skills/pr-description
-Then create a SKILL.md file inside that directory. The file has two parts separated by frontmatter dashes:
----
-name: pr-description
-description: Writes pull request descriptions. Use when creating a PR, writing a PR, or when the user asks to summarize changes for a pull request.
----
-
-When writing a PR description:
-
-1. Run `git diff main...HEAD` to see all changes on this branch
-2. Write a description following this format:
 
 ### Key Concepts to Know
 

@@ -10,7 +10,7 @@
 
 ## One-Liner
 
-Estimated time: 15 minutes Learning objectives By the end of this lesson, you will be able to: Explain what Skills are and how Claude uses them Identify Anthropic's built-in Skills for document creation Enable and manage Skills in your settings What are Skills? Skills are folders of instructions, scripts, and resources that Claude loads dynamically to improve performance on specialized tasks. Think of them as expertise packages—they teach Claude how to complete specific tasks in a repeatable way.
+Identify Anthropic's built-in Skills for document creation
 
 ---
 
@@ -18,9 +18,9 @@ Estimated time: 15 minutes Learning objectives By the end of this lesson, you wi
 
 ### Learning Objectives
 
-Explain what Skills are and how Claude uses them
-Identify Anthropic's built-in Skills for document creation
-Enable and manage Skills in your settings
+- Explain what Skills are and how Claude uses them
+- Identify Anthropic's built-in Skills for document creation
+- Enable and manage Skills in your settings
 
 ---
 

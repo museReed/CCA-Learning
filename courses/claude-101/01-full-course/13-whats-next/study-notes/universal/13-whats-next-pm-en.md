@@ -10,7 +10,7 @@
 
 ## TL;DR
 
-Estimated time: 5 minutes Congratulations on completing Claude 101! You've built a solid foundation for working with Claude effectively. Let's recap what you've learned and point you toward resources for continued growth.
+Congratulations on completing Claude 101! You've built a solid foundation for working with Claude effectively.
 
 ---
 

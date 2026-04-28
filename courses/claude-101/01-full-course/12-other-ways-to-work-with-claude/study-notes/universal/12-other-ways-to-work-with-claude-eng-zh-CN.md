@@ -10,7 +10,7 @@
 
 ## 一句话摘要
 
-Estimated time: 10 minutes Learning objectives By the end of this lesson, you will be able to: Understand when to use additional Claude products including Claude Code, Claude for Slack, Claude for Excel, and Claude for Chrome As we mentioned at the start of this course, Claude is an intelligence. Claude.ai is just one way of working with it. Claude is also available in several specialized tools designed to meet you where you already work.
+Understand when to use additional Claude products including Claude Code, Claude for Slack, Claude for Excel, and Claude for Chrome
 
 ---
 
@@ -18,7 +18,7 @@ Estimated time: 10 minutes Learning objectives By the end of this lesson, you wi
 
 ### 学习目标
 
-Understand when to use additional Claude products including Claude Code, Claude for Slack, Claude for Excel, and Claude for Chrome
+- Understand when to use additional Claude products including Claude Code, Claude for Slack, Claude for Excel, and Claude for Chrome
 
 ---
 

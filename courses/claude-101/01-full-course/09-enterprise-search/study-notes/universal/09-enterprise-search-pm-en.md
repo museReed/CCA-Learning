@@ -10,7 +10,7 @@
 
 ## TL;DR
 
-Estimated time: 15 minutes Learning objectives By the end of this lesson, you will be able to: Explain what Enterprise Search is and the types of questions Enterprise Search can answer Understand how the setup process works for both admins and users Recognize how security and permissions protect organizational data What is Enterprise Search? Enterprise Search adds a dedicated "Ask {Your Org Name}" option to your sidebar. This is designed specifically for finding and synthesizing knowledge buried across your company's tools and data sources.
+Explain what Enterprise Search is and the types of questions Enterprise Search can answer
 
 ---
 
@@ -18,9 +18,9 @@ Estimated time: 15 minutes Learning objectives By the end of this lesson, you wi
 
 ### What You'll Understand After This Lesson
 
-Explain what Enterprise Search is and the types of questions Enterprise Search can answer
-Understand how the setup process works for both admins and users
-Recognize how security and permissions protect organizational data
+- Explain what Enterprise Search is and the types of questions Enterprise Search can answer
+- Understand how the setup process works for both admins and users
+- Recognize how security and permissions protect organizational data
 
 ---
 

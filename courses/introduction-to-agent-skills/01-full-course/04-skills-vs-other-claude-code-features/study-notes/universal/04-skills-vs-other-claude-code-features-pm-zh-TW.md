@@ -10,7 +10,7 @@
 
 ## 一句話摘要
 
-What you'll learn Estimated time: 15 minutes By the end of this lesson you'll be able to: Compare skills to CLAUDE.md, subagents, hooks, and MCP servers Choose the right Claude Code customization feature for a given use case Design a complementary setup that combines multiple features effectively (3 minutes) Claude Code offers several customization options, and choosing the wrong one can lead to unnecessary complexity. This video breaks down when to use skills versus CLAUDE.md, subagents, hooks, and MCP servers. You'll learn the key differences between each option and how they complement each other in a typical development setup.
+Claude Code offers several customization options, and choosing the wrong one can lead to unnecessary complexity. This video breaks down when to use skills versus CLAUDE.md, subagents, hooks, and MCP servers.
 
 ---
 
@@ -18,8 +18,13 @@ What you'll learn Estimated time: 15 minutes By the end of this lesson you'll be
 
 ### 課後你會理解
 
-Estimated time: 15 minutes
-By the end of this lesson you'll be able to:
+- Compare skills to CLAUDE.md, subagents, hooks, and MCP servers
+- Choose the right Claude Code customization feature for a given use case
+- Design a complementary setup that combines multiple features effectively
+
+### 重點摘要 (Business Impact)
+
+CLAUDE.md loads into every conversation and is best for always-on project standards. Skills load on demand and are best for task-specific expertise
 
 ---
 

@@ -10,7 +10,7 @@
 
 ## 一句话摘要
 
-What you'll learn Estimated time: 15 minutes By the end of this lesson you'll be able to: Use the skills validator to catch structural issues before debugging Diagnose and fix common skill triggering and loading problems Resolve skill priority conflicts between enterprise, personal, project, and plugin skills Debug runtime errors including missing dependencies, permissions, and path issues (4 minutes) When skills don't work as expected, the problem usually falls into a few predictable categories. This video walks through each one — from skills that don't trigger to priority conflicts to runtime failures — and gives you a systematic troubleshooting approach. You'll also learn about the skills validator tool and how to use claude --debug to diagnose loading issues.
+When skills don't work as expected, the problem usually falls into a few predictable categories. This video walks through each one — from skills that don't trigger to priority conflicts to runtime failures — and gives you a systematic troubleshooting approach.
 
 ---
 
@@ -18,12 +18,21 @@ What you'll learn Estimated time: 15 minutes By the end of this lesson you'll be
 
 ### 学习目标
 
-Estimated time: 15 minutes
-By the end of this lesson you'll be able to:
+- Use the skills validator to catch structural issues before debugging
+- Diagnose and fix common skill triggering and loading problems
+- Resolve skill priority conflicts between enterprise, personal, project, and plugin skills
+- Debug runtime errors including missing dependencies, permissions, and path issues
+
+### 重点摘要
+
+Start with the skills validator tool — it catches structural problems before you spend time debugging other things
 
 ---
 
 ## 记憶卡
+
+**Q1:** Start with the skills validator tool — it catches structural?
+**A1:** Start with the skills validator tool — it catches structural problems before you spend time debugging other things
 
 ---
 
