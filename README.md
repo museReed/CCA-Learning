@@ -206,36 +206,28 @@ python3 scripts/build_html.py
 
 ## 📁 檔案結構
 
+所有 4 門課程採用**課堂獨立制**——每堂課是完全自包含的目錄：
+
 ```
 CCA-Learning/
 ├── README.md                              ← 你在這裡
 ├── courses/
 │   ├── building-with-the-claude-api/      ✅ 9 章 68 課
-│   │   ├── INDEX.md                       ← 課程目錄（每門課都有）
+│   │   ├── INDEX.md                       ← 課程導覽目錄
 │   │   ├── translations/                  ← 74 翻譯 JSON
-│   │   └── 01-api-fundamentals/           ← 章節目錄
-│   │       ├── 04-accessing-the-api.md    ← 原始課程文字稿
-│   │       ├── 04-accessing-the-api/      ← 課堂目錄
-│   │       │   ├── study-notes/universal/ ← 6 個學習筆記
-│   │       │   └── visuals/               ← SVG 圖表
-│   │       ├── images/                    ← 講師截圖（文字稿引用）
-│   │       ├── screenshots/               ← Skilljar 頁面截圖
-│   │       ├── srt/                       ← 英文 + 雙語字幕
-│   │       │   └── bilingual/             ← EN+ZH 雙語 SRT
-│   │       ├── videos/                    ← MP4 教學影片
-│   │       └── visual-guides/             ← 逐幀截圖+雙語字幕疊加
-│   │
-│   ├── claude-code-in-action/             ✅ 6 章 15 課
-│   │   ├── INDEX.md
-│   │   ├── translations/                  ← 15 翻譯 JSON
-│   │   └── 01-intro/
-│   │       └── 02-introduction/           ← 每堂課獨立目錄
-│   │           ├── source/                ← 課程文字稿+截圖
+│   │   └── 01-api-fundamentals/           ← 章節
+│   │       └── 06-making-a-request/       ← ★ 課堂（自包含）
+│   │           ├── source/                ← 課程文字稿 + 截圖
+│   │           │   ├── 06-making-a-request.md
+│   │           │   └── images/            ← 講師截圖
 │   │           ├── study-notes/universal/ ← 6 個學習筆記
-│   │           ├── srt/bilingual/         ← 雙語 SRT
-│   │           ├── visual-guide/          ← 逐幀截圖
-│   │           └── visuals/               ← SVG 圖表
+│   │           ├── visuals/               ← SVG 圖表
+│   │           ├── srt/                   ← 英文 + 雙語字幕
+│   │           │   └── bilingual/
+│   │           ├── videos/                ← MP4 教學影片
+│   │           └── visual-guide/          ← 逐幀截圖+雙語字幕
 │   │
+│   ├── claude-code-in-action/             ✅ 6 章 15 課（同上結構）
 │   ├── introduction-to-model-context-protocol/  ✅ 4 章 11 課
 │   ├── model-context-protocol-advanced-topics/  ✅ 4 章 8 課
 │   ├── claude-101/                        ⏭️ 單堂入門
@@ -250,6 +242,18 @@ CCA-Learning/
 │   ├── translate_*.py                    ← 各課程翻譯腳本
 │   └── internal/                         ← 內部工具（非讀者用）
 └── references/                            📚 CCA 考試參考資料
+```
+
+每個課堂目錄內容一目了然：
+
+```
+06-making-a-request/           ← 一堂課 = 一個目錄
+├── source/                    ← 📄 原始教材（文字稿 + 截圖）
+├── study-notes/universal/     ← 📝 6 個學習筆記（eng/pm × en/zh-TW/zh-CN）
+├── visuals/                   ← 🎨 SVG 圖表（EN + zh-TW）
+├── srt/bilingual/             ← 🗣️ 雙語字幕（EN+繁中 / EN+簡中）
+├── videos/                    ← 🎬 教學影片
+└── visual-guide/              ← 🖼️ 逐幀雙語截圖指南
 ```
 
 ---
