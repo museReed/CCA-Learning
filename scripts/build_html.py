@@ -98,7 +98,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <style>{css}</style>
 </head>
 <body>
-<a href="/Volumes/Muse_AI_Core/CCA-Learning/html/index.html?aud={audience}&lang={lang_code}&from={from_path}&lesson={lesson_slug}" class="back-link">\u2190 Back to Index</a>
+<a href="{back_link_href}" class="back-link">\u2190 Back to Index</a>
 <a href="{course_url}" target="_blank" class="official-link">Official Course \u2197</a>
 {body}
 </body>
@@ -167,15 +167,19 @@ def build_page(md_path: Path, course: str) -> Path:
     lesson_norm = re.sub(r"^\d+-", "", lesson_slug)  # strip leading number
     course_mapping = LESSON_URL_MAP.get(course, {})
     course_url = course_mapping.get(lesson_norm, COURSE_META.get(course, {}).get("url", ""))
+    # Compute relative path from this HTML file back to html/index.html
+    depth = len(html_rel.parts) - 1  # e.g. course/chapter/lesson/file.html → 3
+    back_link_href = (
+        "../" * depth
+        + f"index.html?aud={audience}&lang={lang_code}&from={from_path}&lesson={lesson_slug}"
+    )
+
     html_content = PAGE_TEMPLATE.format(
         lang_attr=lang_attr,
         title=htmllib.escape(title),
         css=CSS_PAGE,
         body=body,
-        audience=audience,
-        lang_code=lang_code,
-        from_path=from_path,
-        lesson_slug=lesson_slug,
+        back_link_href=back_link_href,
         course_url=course_url,
     )
     html_path.write_text(html_content, encoding="utf-8")
